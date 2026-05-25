@@ -18,16 +18,18 @@ later, the nested file may only tighten these rules, not weaken them.
 4. Keep `packages/zerct` dependency-free unless a dependency removes real
    complexity and is maintained, small, and necessary.
 5. CLI errors must include a direct `agent_instruction` when possible.
-6. Public docs live in `Zerct/docs`; do not add Mintlify docs here.
-7. Do not add GitHub Actions unless explicitly requested. Existing GitHub
-   Actions are for package publishing only and must run on Blacksmith runners.
+6. Public Mintlify docs live in `docs/` in this repository. Configure Mintlify
+   as a monorepo with documentation path `/docs`.
+7. Do not add GitHub Actions unless explicitly requested. Allowed workflows are
+   package publishing and Mintlify docs validation, deployment, and score
+   checks. Every workflow must run on Blacksmith runners.
 8. Run local verification before publishing.
 9. Public package names should stay aligned: npm `zerct`, PyPI `zerct`,
    crates.io `zerct`, and Homebrew `Zerct/tap/zerct`.
-10. GitHub Actions may publish packages only. Do not add push/PR check, lint,
-    test, or CI workflows unless explicitly requested.
-11. Use `blacksmith-2vcpu-ubuntu-2404` for lightweight package publishing jobs.
-    Increase runner size only when a measured publish job needs more CPU,
+10. GitHub Actions may publish packages or run explicit docs workflows only. Do
+    not add general lint, test, or CI workflows unless explicitly requested.
+11. Use `blacksmith-2vcpu-ubuntu-2404` for lightweight package publishing and
+    docs jobs. Increase runner size only when a measured job needs more CPU,
     memory, or disk.
 12. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
     SDKs, and skills must stay thin or share a generated contract instead of
@@ -54,6 +56,8 @@ later, the nested file may only tighten these rules, not weaken them.
     untracked files, and state whether publishing was performed.
 22. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
     this repository.
+23. Do not add a separate docs repository for public docs. Keep docs changes
+    co-located with SDK, package, and example changes.
 
 ## Package Commands
 
@@ -71,6 +75,14 @@ Current Homebrew command:
 ```sh
 brew tap Zerct/tap
 brew install zerct
+```
+
+Current Mintlify settings:
+
+```txt
+Repository: Zerct/zerct
+Branch: main
+Documentation path: /docs
 ```
 
 ## Required Local Checks

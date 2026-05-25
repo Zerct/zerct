@@ -1,0 +1,108 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Zerct",
+  "description": "Deploy Rust backends as APIs for frontends hosted anywhere.",
+  "colors": {
+    "primary": "#000000",
+    "light": "#000000",
+    "dark": "#FFFFFF"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/favicon.svg",
+    "dark": "/favicon.svg"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Start",
+            "pages": [
+              "index",
+              "quickstart",
+              "deploy"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/project-contract",
+              "reference/packages",
+              "reference/limits"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Website",
+          "href": "https://zerct.com",
+          "icon": "globe"
+        },
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/Zerct/zerct",
+          "icon": "github"
+        }
+      ]
+    }
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "X",
+        "href": "https://x.com/zerctcloud"
+      },
+      {
+        "label": "GitHub",
+        "href": "https://github.com/Zerct/zerct"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://zerct.com"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "metadata": {
+    "timestamp": true
+  },
+  "seo": {
+    "indexing": "all",
+    "metatags": {
+      "canonical": "https://docs.zerct.com"
+    }
+  },
+  "api": {
+    "openapi": "openapi.json",
+    "playground": {
+      "display": "none"
+    }
+  },
+  "search": {
+    "prompt": "Search Zerct docs"
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/zerctcloud",
+      "github": "https://github.com/Zerct/zerct"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+---
+title: "Project contract"
+description: "The minimum files and runtime behavior a Zerct deployment needs."
+---
+
+Zerct deploys projects that are explicit and reproducible.
+
+## Required files
+
+```txt
+Cargo.toml
+Cargo.lock
+zerct.toml
+```
+
+`Cargo.lock` is required so builds are deterministic.
+
+## Example zerct.toml
+
+```toml
+name = "hello-rust"
+health_path = "/health"
+```
+
+## Required runtime behavior
+
+- Bind to `0.0.0.0:$PORT`
+- Return success from the configured health path
+- Keep secrets in server-side environment variables
+- Avoid build steps that require interactive input

@@ -1,8 +1,9 @@
 # Publishing
 
-Package publishing is manual and environment-gated. Local checks remain local;
-GitHub Actions are only for release publishing. Run `./scripts/check-all.sh`
-before dispatching any publish workflow.
+Package publishing is manual and environment-gated. Local checks remain local.
+GitHub Actions are limited to release publishing and explicit Mintlify docs
+automation. Run `./scripts/check-all.sh` before dispatching any publish
+workflow.
 
 All publish workflows use Blacksmith runners. Keep lightweight publish jobs on
 `blacksmith-2vcpu-ubuntu-2404`; move to a larger Blacksmith runner only after a
@@ -112,3 +113,34 @@ brew install --build-from-source Zerct/tap/zerct
 brew test Zerct/tap/zerct
 brew audit --strict --online --new Zerct/tap/zerct
 ```
+
+## Mintlify docs
+
+Docs source: `docs/`
+
+Domain: `docs.zerct.com`
+
+Mintlify dashboard settings:
+
+- Repository: `Zerct/zerct`
+- Branch: `main`
+- Documentation path: `/docs`
+
+Zerct uses Mintlify Hobby, so do not rely on Mintlify's paid CI checks. The
+repository owns validation through Blacksmith workflows:
+
+- `.github/workflows/docs-validate.yml`: validates PR docs changes.
+- `.github/workflows/docs-deploy.yml`: validates and triggers a Mintlify deploy.
+- `.github/workflows/docs-score.yml`: checks public agent-readiness endpoints
+  and optionally runs authenticated `mint score`.
+
+Required GitHub configuration:
+
+- Secret: `MINTLIFY_ADMIN_API_KEY`
+- Variable: `MINTLIFY_PROJECT_ID`
+- Optional secret: `MINTLIFY_CLI_CONFIG_JSON`
+
+Mintlify deploys from the configured branch after the GitHub App is installed
+on this repository. The deploy workflow can also trigger deployment through the
+Admin API. The old `Zerct/docs` repository should be left read-only or archived
+after the dashboard is switched.

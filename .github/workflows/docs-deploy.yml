@@ -1,0 +1,37 @@
+name: Deploy Mintlify docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "scripts/check-docs.mjs"
+      - "scripts/trigger-mintlify-deploy.mjs"
+      - ".github/workflows/docs-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy docs
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: node scripts/check-docs.mjs
+      - name: Validate Mintlify build
+        run: npx --yes mint@latest validate
+        working-directory: docs
+        env:
+          MINTLIFY_TELEMETRY_DISABLED: "1"
+      - name: Trigger Mintlify deployment
+        run: node scripts/trigger-mintlify-deploy.mjs
+        env:
+          MINTLIFY_PROJECT_ID: ${{ vars.MINTLIFY_PROJECT_ID }}
+          MINTLIFY_ADMIN_API_KEY: ${{ secrets.MINTLIFY_ADMIN_API_KEY }}
