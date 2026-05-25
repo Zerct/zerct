@@ -20,36 +20,39 @@ later, the nested file may only tighten these rules, not weaken them.
 5. CLI errors must include a direct `agent_instruction` when possible.
 6. Public docs live in `Zerct/docs`; do not add Mintlify docs here.
 7. Do not add GitHub Actions unless explicitly requested. Existing GitHub
-   Actions are for package publishing only.
+   Actions are for package publishing only and must run on Blacksmith runners.
 8. Run local verification before publishing.
 9. Public package names should stay aligned: npm `zerct`, PyPI `zerct`,
    crates.io `zerct`, and Homebrew `Zerct/tap/zerct`.
 10. GitHub Actions may publish packages only. Do not add push/PR check, lint,
     test, or CI workflows unless explicitly requested.
-11. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
+11. Use `blacksmith-2vcpu-ubuntu-2404` for lightweight package publishing jobs.
+    Increase runner size only when a measured publish job needs more CPU,
+    memory, or disk.
+12. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
     SDKs, and skills must stay thin or share a generated contract instead of
     growing independent deploy behavior.
-12. On every change, remove redundant code, duplicate instructions, stale
+13. On every change, remove redundant code, duplicate instructions, stale
     placeholders, and unused package surface before adding new abstractions.
-13. Never publish with a dirty working tree. Commit and push the exact package
+14. Never publish with a dirty working tree. Commit and push the exact package
     source before triggering a package publishing workflow.
-14. Bump only the packages whose published contents changed. Do not republish an
+15. Bump only the packages whose published contents changed. Do not republish an
     existing version.
-15. Prefer trusted publishing/OIDC for registries. Use long-lived npm tokens
+16. Prefer trusted publishing/OIDC for registries. Use long-lived npm tokens
     only as a fallback for flows that cannot use trusted publishing.
-16. Source archive creation must exclude local secrets, VCS metadata, build
+17. Source archive creation must exclude local secrets, VCS metadata, build
     outputs, databases, logs, cloud credentials, SSH material, and private key
     files. Do not add another deploy archive path without equivalent excludes.
-17. Package CLIs must not print tokens, env values, database URLs, provider
+18. Package CLIs must not print tokens, env values, database URLs, provider
     tokens, or Stripe/Cloudflare values. Print presence, status, ids, and URLs
     only when they are safe for users and agents.
-18. Keep examples minimal, buildable, and safe to copy. Examples must include
+19. Keep examples minimal, buildable, and safe to copy. Examples must include
     `Cargo.lock`, `zerct.toml`, a health endpoint, and no secrets.
-19. Keep skill files agent-ready: direct commands, expected files, deploy
+20. Keep skill files agent-ready: direct commands, expected files, deploy
     contract, and common failure fixes. Do not put marketing copy in skills.
-20. Before finishing, run `./scripts/check-all.sh`, confirm no accidental
+21. Before finishing, run `./scripts/check-all.sh`, confirm no accidental
     untracked files, and state whether publishing was performed.
-21. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
+22. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
     this repository.
 
 ## Package Commands

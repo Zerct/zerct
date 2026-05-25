@@ -4,6 +4,12 @@ Package publishing is manual and environment-gated. Local checks remain local;
 GitHub Actions are only for release publishing. Run `./scripts/check-all.sh`
 before dispatching any publish workflow.
 
+All publish workflows use Blacksmith runners. Keep lightweight publish jobs on
+`blacksmith-2vcpu-ubuntu-2404`; move to a larger Blacksmith runner only after a
+measured publish run needs more CPU, memory, or disk. The Blacksmith GitHub App
+must stay installed on every Zerct repository that uses a `blacksmith-*`
+runner.
+
 ## npm
 
 Package: `zerct`
