@@ -10,8 +10,8 @@ In the Mintlify dashboard, configure the docs project as a monorepo:
 
 Do not include a trailing slash in the path.
 
-Zerct is on Mintlify Hobby. Do not depend on Mintlify's paid CI checks. Use the
-Blacksmith workflows in this repository for validation, deployment triggers, and
+Zerct is on Mintlify Hobby. The Mintlify GitHub App deploys from `main`.
+Blacksmith workflows in this repository are only for validation and
 agent-readiness scoring.
 
 Local preview:

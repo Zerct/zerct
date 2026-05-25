@@ -14,8 +14,8 @@ tighten these rules.
 2. Do not use em dashes or double hyphen prose in Markdown, MDX, or text files.
    Wrap CLI flags such as `--json` in inline code or fenced code.
 3. Do not add general lint, test, or CI workflows. GitHub Actions are allowed
-   only for package publishing, Mintlify docs validation/deployment/score, and
-   explicit CodeRabbit push review.
+   only for package publishing, Mintlify docs validation/score, and explicit
+   CodeRabbit push review.
 4. Every workflow must run on a Blacksmith runner. Use
    `blacksmith-2vcpu-ubuntu-2404` unless measured runtime, memory, or disk
    pressure proves a larger runner is needed.
@@ -73,14 +73,14 @@ tighten these rules.
    Documentation path: /docs
    ```
 
-3. Zerct is on Mintlify Hobby. Rely on repository-owned Blacksmith workflows,
-   not paid Mintlify CI features.
+3. Zerct is on Mintlify Hobby. Let the Mintlify GitHub App deploy docs from
+   `main`; do not add a duplicate deployment workflow.
 4. Do not document unlaunched behavior as available. Mark it as planned or omit
    it.
 5. Docs must be short, direct, copy-pasteable, and agent-readable.
-6. Every OpenAPI file must pass `scripts/check-openapi.sh`. Keep vacuum pinned,
-   use the all-rules ruleset with hard mode, fail at hint severity, and require
-   score `100/100`.
+6. Every OpenAPI file must pass `scripts/check-openapi.sh` locally through
+   `./scripts/check-all.sh`. Keep vacuum pinned, use the all-rules ruleset with
+   hard mode, fail at hint severity, and require score `100/100`.
 7. If `docs/docs.json` references an OpenAPI file, that file must exist and be
    included in the vacuum check.
 
