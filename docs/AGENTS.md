@@ -1,6 +1,7 @@
 # AGENTS.md
 
-This directory is the Mintlify documentation source for Zerct.
+This directory is the Mintlify documentation source for Zerct. These rules
+tighten the repository root rules.
 
 ## Rules
 
@@ -11,16 +12,17 @@ This directory is the Mintlify documentation source for Zerct.
 3. Zerct is on Mintlify Hobby. Use repository-owned Blacksmith workflows for
    docs validation, optional deployment triggers, and score checks. Do not
    depend on paid Mintlify CI features.
-4. Use sentence case headings and short, direct paragraphs.
+4. Use sentence case headings, short paragraphs, and concrete commands.
 5. Keep examples copy-pasteable and agent-readable.
 6. Do not document unlaunched product behavior as available. Mark it as planned
    or omit it.
-7. Do not commit secrets, API keys, customer data, private URLs, or screenshots
-   that expose accounts.
-8. After editing navigation, run `node scripts/check-docs.mjs` from the repo
-   root.
-9. Do not use em dashes or double hyphen prose. Wrap CLI flags in inline code
+7. Do not commit secrets, API keys, customer data, private URLs, screenshots
+   that expose accounts, or generated files that contain private state.
+8. Do not use em dashes or double hyphen prose. Wrap CLI flags in inline code
    or fenced code blocks.
-10. OpenAPI changes must keep `docs/openapi.json` valid and pass
-    `scripts/check-openapi.sh` from the repo root with a vacuum score of
-    `100/100`.
+9. OpenAPI changes must keep `docs/openapi.json` valid and pass
+   `scripts/check-openapi.sh` from the repo root with a vacuum score of
+   `100/100`.
+10. After editing navigation, run `node scripts/check-docs.mjs` from the repo
+    root.
+11. Before finishing docs work, run `./scripts/check-all.sh` from the repo root.
