@@ -507,6 +507,7 @@ def should_exclude(relative: pathlib.Path) -> bool:
         bool(set(parts) & EXCLUDED_PARTS)
         or (".config", "gcloud") in zip(parts, parts[1:])
         or relative.name.startswith(".env")
+        or relative.name.startswith("._")
         or relative.name in EXCLUDED_NAMES
         or relative.name.endswith(EXCLUDED_SUFFIXES)
     )

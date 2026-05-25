@@ -39,6 +39,7 @@ const ARCHIVE_EXCLUDES = [
   '*.sqlite3',
   '*.db',
   '*.log',
+  '._*',
   '.DS_Store'
 ]
 
@@ -505,6 +506,7 @@ function createArchiveBase64(projectDir) {
   const excludeArgs = ARCHIVE_EXCLUDES.map((pattern) => `--exclude=${pattern}`)
   const tar = spawnSync('tar', [...excludeArgs, '-czf', '-', '-C', projectDir, '.'], {
     encoding: 'buffer',
+    env: { ...process.env, COPYFILE_DISABLE: '1' },
     maxBuffer: ARCHIVE_LIMIT_BYTES + 1024 * 1024
   })
 
