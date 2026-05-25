@@ -31,7 +31,13 @@ jobs:
         env:
           MINTLIFY_TELEMETRY_DISABLED: "1"
       - name: Trigger Mintlify deployment
-        run: node scripts/trigger-mintlify-deploy.mjs
+        run: |
+          if [ -z "${MINTLIFY_PROJECT_ID:-}" ] || [ -z "${MINTLIFY_ADMIN_API_KEY:-}" ]; then
+            echo "Mintlify Admin API is not configured; the Mintlify GitHub App will deploy from main."
+            exit 0
+          fi
+
+          node scripts/trigger-mintlify-deploy.mjs
         env:
           MINTLIFY_PROJECT_ID: ${{ vars.MINTLIFY_PROJECT_ID }}
           MINTLIFY_ADMIN_API_KEY: ${{ secrets.MINTLIFY_ADMIN_API_KEY }}
