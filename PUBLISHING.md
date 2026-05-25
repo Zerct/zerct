@@ -37,7 +37,7 @@ source stays single-owner.
 Unscoped package request:
 
 - Requested package: `zerct`
-- npm/GitHub Community request: https://github.com/orgs/community/discussions/196900
+- npm/GitHub Community request: https://github.com/orgs/community/discussions/196901
 - Current npm block: package name is considered too similar to `react`
 
 If npm approves the unscoped package, publish `packages/zerct` directly with
