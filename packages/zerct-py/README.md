@@ -12,5 +12,5 @@ zerct deploy
 The npm package remains the primary first install path:
 
 ```sh
-npx zerct deploy
+npx @zerct/zerct deploy
 ```

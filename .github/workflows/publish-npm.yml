@@ -23,7 +23,7 @@ jobs:
         working-directory: packages/zerct
       - run: npm pack --dry-run
         working-directory: packages/zerct
-      - run: npm publish --access public
+      - run: npm publish --access public --provenance
         working-directory: packages/zerct
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -7,10 +7,37 @@ use std::{
     process::{Command, ExitCode, Stdio},
 };
 
-const VERSION: &str = "0.1.0";
+const VERSION: &str = "0.1.1";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const ARCHIVE_EXCLUDES: &[&str] = &[
+    ".git",
+    "target",
+    "node_modules",
+    ".zerct",
+    ".env",
+    ".env.*",
+    ".npmrc",
+    ".pypirc",
+    ".netrc",
+    ".ssh",
+    ".aws",
+    ".azure",
+    ".kube",
+    ".config/gcloud",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "id_rsa",
+    "id_ed25519",
+    "*.sqlite",
+    "*.sqlite3",
+    "*.db",
+    "*.log",
+    ".DS_Store",
+];
 
 fn main() -> ExitCode {
     match run() {
@@ -692,18 +719,12 @@ fn api_request(
 }
 
 fn archive_base64(project_dir: &Path) -> Result<String, AgentError> {
-    let output = Command::new("tar")
-        .args([
-            "--exclude=.git",
-            "--exclude=target",
-            "--exclude=node_modules",
-            "--exclude=.zerct",
-            "--exclude=.env",
-            "--exclude=.env.*",
-            "-czf",
-            "-",
-            "-C",
-        ])
+    let mut command = Command::new("tar");
+    for pattern in ARCHIVE_EXCLUDES {
+        command.arg(format!("--exclude={pattern}"));
+    }
+    let output = command
+        .args(["-czf", "-", "-C"])
         .arg(project_dir)
         .arg(".")
         .stdout(Stdio::piped())
@@ -793,13 +814,52 @@ fn write_session_token(project_dir: &Path, token: &str) -> Result<(), AgentError
             "Check directory permissions and retry.",
         )
     })?;
-    fs::write(dir.join("session-token"), format!("{}\n", token.trim())).map_err(|error| {
+    set_private_dir_permissions(&dir)?;
+    let token_path = dir.join("session-token");
+    fs::write(&token_path, format!("{}\n", token.trim())).map_err(|error| {
         AgentError::new(
             "write_failed",
             format!("Could not write Zerct token: {error}"),
             "Check directory permissions and retry.",
         )
-    })
+    })?;
+    set_private_file_permissions(&token_path)
+}
+
+#[cfg(unix)]
+fn set_private_dir_permissions(path: &Path) -> Result<(), AgentError> {
+    use std::os::unix::fs::PermissionsExt;
+
+    let mut permissions = fs::metadata(path).map_err(permission_error)?.permissions();
+    permissions.set_mode(0o700);
+    fs::set_permissions(path, permissions).map_err(permission_error)
+}
+
+#[cfg(not(unix))]
+fn set_private_dir_permissions(_path: &Path) -> Result<(), AgentError> {
+    Ok(())
+}
+
+#[cfg(unix)]
+fn set_private_file_permissions(path: &Path) -> Result<(), AgentError> {
+    use std::os::unix::fs::PermissionsExt;
+
+    let mut permissions = fs::metadata(path).map_err(permission_error)?.permissions();
+    permissions.set_mode(0o600);
+    fs::set_permissions(path, permissions).map_err(permission_error)
+}
+
+#[cfg(not(unix))]
+fn set_private_file_permissions(_path: &Path) -> Result<(), AgentError> {
+    Ok(())
+}
+
+fn permission_error(error: std::io::Error) -> AgentError {
+    AgentError::new(
+        "write_failed",
+        format!("Could not restrict Zerct token permissions: {error}"),
+        "Check directory permissions and retry.",
+    )
 }
 
 fn scan_unsafe(project_dir: &Path) -> Vec<PathBuf> {

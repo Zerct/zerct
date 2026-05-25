@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -22,3 +23,4 @@ jobs:
       - run: ./scripts/publish-npm-scoped.sh
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_PUBLISH_PROVENANCE: "1"

@@ -25,6 +25,25 @@ DEFAULT_API_URL = "https://api.zerct.com"
 ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 SESSION_DIR = ".zerct"
 SESSION_FILE = "session-token"
+EXCLUDED_PARTS = {
+    ".git",
+    "target",
+    "node_modules",
+    ".zerct",
+    ".ssh",
+    ".aws",
+    ".azure",
+    ".kube",
+}
+EXCLUDED_NAMES = {
+    ".npmrc",
+    ".pypirc",
+    ".netrc",
+    "id_rsa",
+    "id_ed25519",
+    ".DS_Store",
+}
+EXCLUDED_SUFFIXES = (".pem", ".key", ".p12", ".pfx", ".sqlite", ".sqlite3", ".db", ".log")
 
 
 @dataclass(frozen=True)
@@ -410,8 +429,14 @@ def archive_base64(project_dir: pathlib.Path) -> str:
 
 
 def should_exclude(relative: pathlib.Path) -> bool:
-    parts = set(relative.parts)
-    return bool(parts & {".git", "target", "node_modules", ".zerct"}) or relative.name.startswith(".env")
+    parts = relative.parts
+    return (
+        bool(set(parts) & EXCLUDED_PARTS)
+        or (".config", "gcloud") in zip(parts, parts[1:])
+        or relative.name.startswith(".env")
+        or relative.name in EXCLUDED_NAMES
+        or relative.name.endswith(EXCLUDED_SUFFIXES)
+    )
 
 
 def scan_unsafe(project_dir: pathlib.Path) -> list[str]:
