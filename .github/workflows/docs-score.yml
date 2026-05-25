@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
+      - name: Check prose style
+        run: node scripts/check-prose-style.mjs
       - name: Check public agent readiness
         run: node scripts/check-mintlify-agent-readiness.mjs https://docs.zerct.com
       - name: Run authenticated Mintlify score when configured

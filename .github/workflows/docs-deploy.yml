@@ -7,6 +7,7 @@ on:
     paths:
       - "docs/**"
       - "scripts/check-docs.mjs"
+      - "scripts/check-prose-style.mjs"
       - "scripts/trigger-mintlify-deploy.mjs"
       - ".github/workflows/docs-deploy.yml"
   workflow_dispatch:
@@ -25,6 +26,7 @@ jobs:
           node-version: "24"
           package-manager-cache: false
       - run: node scripts/check-docs.mjs
+      - run: node scripts/check-prose-style.mjs
       - name: Validate Mintlify build
         run: npx --yes mint@latest validate
         working-directory: docs

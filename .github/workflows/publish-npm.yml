@@ -19,6 +19,7 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
+      - run: node scripts/check-prose-style.mjs
       - run: node --check bin/zerct.js
         working-directory: packages/zerct
       - run: npm pack --dry-run
