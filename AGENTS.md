@@ -61,7 +61,10 @@ tighten these rules.
    outputs, databases, logs, cloud credentials, SSH material, and private key
    files.
 8. Rust backend and static frontend deploy behavior must stay aligned across
-   npm, PyPI, Cargo, skills, docs, and examples.
+   npm, PyPI, Cargo, skills, docs, and examples. Any custom Rust
+   `[build].check` must include locked `cargo check` and locked all-target,
+   all-feature Clippy with `-D warnings`; any custom static frontend
+   `[build].check` must run both typechecking and linting.
 
 ## Docs And OpenAPI
 
@@ -95,7 +98,7 @@ tighten these rules.
    no secrets.
 3. Static frontend examples must include `zerct.toml` with
    `kind = "static_frontend"`, `package.json`, `typecheck` and `lint` scripts,
-   a package lockfile, and no secrets.
+   a package lockfile, strict `[build].check`, and no secrets.
 4. Skills must be operational, not marketing. Include direct commands, expected
    files, deploy contract, and common failure fixes.
 5. Skills that describe user deployments must keep the no-direct-unsafe policy

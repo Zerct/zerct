@@ -9,6 +9,9 @@ ambiguous to run.
 ## Current guardrails
 
 - `Cargo.lock` is required.
+- Rust backends run locked `cargo check` and locked all-target, all-feature
+  Clippy with `-D warnings`.
+- Static frontends run typechecking and linting before build work starts.
 - A health endpoint is required.
 - Apps must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
@@ -18,5 +21,4 @@ ambiguous to run.
 
 - Resource limits per deployment
 - Idle cold starts for free deployments
-- Rust lint and unsafe-code policy checks
 - Database connection and migration safety checks

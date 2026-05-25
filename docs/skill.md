@@ -25,6 +25,7 @@ For Rust backends, require:
 - `Cargo.lock`
 - passing `cargo check --locked`
 - passing `cargo clippy --locked --all-targets --all-features -- -D warnings`
+- a `[build].check` command that includes those locked Rust checks
 
 The server must listen on `0.0.0.0:$PORT` and expose the configured health path.
 
@@ -34,6 +35,7 @@ For static frontends, require:
 - one package lockfile
 - `kind = "static_frontend"` in `zerct.toml`
 - `typecheck` and `lint` scripts in `package.json`
+- a `[build].check` command that runs typechecking and linting
 
 ## Commands
 
