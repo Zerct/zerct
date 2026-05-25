@@ -71,6 +71,11 @@ tighten these rules.
    `[build].check` must run both typechecking and linting. Static frontend
    browser source must be TypeScript under `src`, `app`, `pages`, `routes`, or
    `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
+10. Prefer native frontend tooling. New static frontend docs, examples, skills,
+    and agent guidance should use Go-based `tsgo` for TypeScript checking and
+    Rust-based linters such as `oxlint`, `biome`, or `deno lint`. Do not add
+    JavaScript-based linters such as ESLint to new examples unless there is no
+    native equivalent for a required rule, and document the exception.
 
 ## Docs And OpenAPI
 
@@ -107,9 +112,8 @@ tighten these rules.
    TypeScript browser source, a package lockfile, strict `[build].check`, and
    no secrets.
 4. New TanStack or Vite frontend examples should prefer `tsgo --noEmit` for
-   `typecheck` and source-scoped `oxlint` for `lint`. Do not require those tools
-   for every user project because the deploy contract is the scripts, not a
-   specific frontend stack.
+   `typecheck` and source-scoped `oxlint` for `lint`. Avoid JavaScript-based
+   linters unless no native equivalent exists for a required rule.
 5. Skills must be operational, not marketing. Include direct commands, expected
    files, deploy contract, and common failure fixes.
 6. Skills that describe user deployments must keep the no-direct-unsafe policy

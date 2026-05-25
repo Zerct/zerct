@@ -40,9 +40,10 @@ For static frontends, require:
 - a `[build].check` command that runs typechecking and linting
 
 For new TanStack or Vite frontends, prefer `tsgo --noEmit` for `typecheck` and
-`oxlint src vite.config.ts --deny-warnings` for `lint`. Keep the generic Zerct
-contract script-based so existing strict TypeScript and linter setups still
-deploy.
+`oxlint src vite.config.ts --deny-warnings` for `lint`. Avoid JavaScript-based
+linters unless no native equivalent exists for a required rule. Keep the generic
+Zerct contract script-based so existing strict TypeScript and linter setups
+still deploy.
 
 ## Commands
 

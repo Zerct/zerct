@@ -27,7 +27,8 @@ command = "npm run build"
 output = "dist"
 ```
 
-For new TanStack or Vite frontends, prefer fast native checks:
+For new TanStack or Vite frontends, prefer fast native checks and avoid
+JavaScript-based linters:
 
 ```sh
 npm install -D @typescript/native-preview oxlint
