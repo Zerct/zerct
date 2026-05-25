@@ -4,7 +4,7 @@
   "description": "Deploy Rust backends to Zerct.",
   "type": "module",
   "bin": {
-    "zerct": "./bin/zerct.js"
+    "zerct": "bin/zerct.js"
   },
   "files": [
     "bin",
