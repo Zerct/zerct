@@ -22,7 +22,7 @@ name = "dashboard"
 kind = "static_frontend"
 
 [build]
-check = "npm ci && npm run typecheck && npm run lint"
+check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 command = "npm run build"
 output = "dist"
 ```
