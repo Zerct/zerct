@@ -106,9 +106,13 @@ tighten these rules.
    `kind = "static_frontend"`, `package.json`, `typecheck` and `lint` scripts,
    TypeScript browser source, a package lockfile, strict `[build].check`, and
    no secrets.
-4. Skills must be operational, not marketing. Include direct commands, expected
+4. New TanStack or Vite frontend examples should prefer `tsgo --noEmit` for
+   `typecheck` and source-scoped `oxlint` for `lint`. Do not require those tools
+   for every user project because the deploy contract is the scripts, not a
+   specific frontend stack.
+5. Skills must be operational, not marketing. Include direct commands, expected
    files, deploy contract, and common failure fixes.
-5. Skills that describe user deployments must keep the no-direct-unsafe policy
+6. Skills that describe user deployments must keep the no-direct-unsafe policy
    visible.
 
 ## Publishing
