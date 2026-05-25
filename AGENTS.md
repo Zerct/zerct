@@ -22,8 +22,8 @@ later, the nested file may only tighten these rules, not weaken them.
 7. Do not add GitHub Actions unless explicitly requested. Existing GitHub
    Actions are for package publishing only.
 8. Run local verification before publishing.
-9. Public package names should stay aligned: npm `zerct`, PyPI `zerct`, and
-   crates.io `zerct`.
+9. Public package names should stay aligned: npm `zerct`, PyPI `zerct`,
+   crates.io `zerct`, and Homebrew `Zerct/tap/zerct`.
 10. GitHub Actions may publish packages only. Do not add push/PR check, lint,
     test, or CI workflows unless explicitly requested.
 11. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
@@ -49,6 +49,8 @@ later, the nested file may only tighten these rules, not weaken them.
     contract, and common failure fixes. Do not put marketing copy in skills.
 20. Before finishing, run `./scripts/check-all.sh`, confirm no accidental
     untracked files, and state whether publishing was performed.
+21. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
+    this repository.
 
 ## Package Commands
 
@@ -60,6 +62,13 @@ npx @zerct/zerct deploy
 
 Use unscoped `npx zerct ...` only after npm approves and the unscoped package is
 published from this repository.
+
+Current Homebrew command:
+
+```sh
+brew tap Zerct/tap
+brew install zerct
+```
 
 ## Required Local Checks
 

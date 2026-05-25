@@ -83,3 +83,26 @@ Required secret:
 
 If crates.io trusted publishing is enabled for the crate later, replace the
 long-lived token path with the registry-supported OIDC flow.
+
+## Homebrew
+
+Tap repository: `Zerct/homebrew-tap`
+
+Formula: `Formula/zerct.rb`
+
+User command:
+
+```sh
+brew tap Zerct/tap
+brew install zerct
+```
+
+The formula should point at the published crates.io archive for the matching
+CLI version. Before pushing a formula change, run:
+
+```sh
+brew style Formula/zerct.rb
+brew install --build-from-source Zerct/tap/zerct
+brew test Zerct/tap/zerct
+brew audit --strict --online --new Zerct/tap/zerct
+```

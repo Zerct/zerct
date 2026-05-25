@@ -7,8 +7,7 @@ anywhere.
 
 ## Install
 
-The target npm package is the unscoped package `zerct`, so agents and humans can
-run:
+Use npm for the lowest-friction agent path:
 
 ```sh
 npx @zerct/zerct init
@@ -16,17 +15,21 @@ npx @zerct/zerct doctor
 npx @zerct/zerct deploy
 ```
 
-Until npm approves the unscoped name, use the scoped fallback:
+Use Homebrew for a persistent developer CLI:
 
 ```sh
-npx @zerct/zerct deploy
+brew tap Zerct/tap
+brew install zerct
+zerct deploy
 ```
 
-Other package surfaces use the same public name:
+The target npm package is the unscoped package `zerct`. Until npm approves that
+name, `@zerct/zerct` is the public npm package.
 
-- npm: `zerct`
+- npm: `@zerct/zerct`, pending `zerct`
 - PyPI: `zerct`
 - crates.io: `zerct`
+- Homebrew: `Zerct/tap/zerct`
 
 ## Repository
 
@@ -38,6 +41,7 @@ Other package surfaces use the same public name:
 - `examples/`: deployable examples.
 
 Mintlify docs live in the separate public `Zerct/docs` repository.
+Homebrew formulae live in the separate public `Zerct/homebrew-tap` repository.
 
 `packages/zerct` is the CLI behavior source of truth. Other package surfaces
 must stay thin or share the same contract so deploy UX does not drift.

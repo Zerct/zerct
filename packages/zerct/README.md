@@ -9,9 +9,9 @@ npx @zerct/zerct deploy
 Target unscoped command, pending npm approval:
 
 ```sh
-npx @zerct/zerct init
-npx @zerct/zerct doctor
-npx @zerct/zerct deploy
+npx zerct init
+npx zerct doctor
+npx zerct deploy
 ```
 
 Zerct expects `Cargo.toml`, `Cargo.lock`, and `zerct.toml`. The app must listen
