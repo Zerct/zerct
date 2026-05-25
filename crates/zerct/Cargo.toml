@@ -1,0 +1,25 @@
+[package]
+name = "zerct"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Deploy Rust backends to Zerct."
+license = "MIT"
+repository = "https://github.com/Zerct/zerct"
+homepage = "https://zerct.com"
+readme = "README.md"
+keywords = ["zerct", "rust", "deploy", "hosting"]
+categories = ["command-line-utilities", "development-tools"]
+include = ["src/**", "README.md", "Cargo.toml"]
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+warnings = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"

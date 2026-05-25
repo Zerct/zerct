@@ -1,0 +1,17 @@
+node_modules/
+dist/
+build/
+target/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+.turbo/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+*.tgz
+.zerct/

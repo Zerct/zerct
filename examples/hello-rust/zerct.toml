@@ -1,0 +1,14 @@
+name = "hello-rust"
+
+[build]
+command = "cargo build --release"
+
+[run]
+command = "./target/release/hello-rust"
+port = 3000
+health = "/healthz"
+
+[resources]
+memory = "256mb"
+cpu = "0.25"
+idle_timeout_minutes = 15
