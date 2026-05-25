@@ -22,7 +22,7 @@ name = "dashboard"
 kind = "static_frontend"
 
 [build]
-check = "npm run typecheck && npm run lint"
+check = "npm ci && npm run typecheck && npm run lint"
 command = "npm ci && npm run build"
 output = "dist"
 ```
