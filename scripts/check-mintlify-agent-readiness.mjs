@@ -1,6 +1,8 @@
 const target = process.argv[2] ?? "https://docs.zerct.com";
 const normalizedTarget = target.startsWith("http") ? target : `https://${target}`;
 const baseUrl = normalizedTarget.replace(/\/$/, "");
+const fetchRetries = Number.parseInt(process.env.ZERCT_DOCS_CHECK_RETRIES ?? "8", 10);
+const fetchRetryDelayMs = Number.parseInt(process.env.ZERCT_DOCS_CHECK_RETRY_DELAY_MS ?? "5000", 10);
 
 const requiredPaths = [
   "/llms.txt",
@@ -14,15 +16,58 @@ const requiredPaths = [
   "/openapi.json"
 ];
 
-async function fetchText(path, headers = {}) {
+const retryableErrorCodes = new Set([
+  "EAI_AGAIN",
+  "ECONNRESET",
+  "ENOTFOUND",
+  "ETIMEDOUT",
+  "UND_ERR_CONNECT_TIMEOUT"
+]);
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function isRetryableFetchError(error) {
+  const code = error?.cause?.code ?? error?.code;
+  return retryableErrorCodes.has(code);
+}
+
+async function requestText(path, headers = {}) {
   const response = await fetch(`${baseUrl}${path}`, { headers });
   const text = await response.text();
 
   if (!response.ok) {
-    throw new Error(`${path} returned ${response.status}`);
+    const error = new Error(`${path} returned ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
 
   return { response, text };
+}
+
+async function fetchText(path, headers = {}) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= fetchRetries; attempt += 1) {
+    try {
+      return await requestText(path, headers);
+    } catch (error) {
+      lastError = error;
+      const retryableStatus = error.status === 429 || error.status >= 500;
+      const shouldRetry = attempt < fetchRetries && (retryableStatus || isRetryableFetchError(error));
+
+      if (!shouldRetry) {
+        throw error;
+      }
+
+      await sleep(fetchRetryDelayMs);
+    }
+  }
+
+  throw lastError;
 }
 
 function assertIncludes(name, text, pattern) {
