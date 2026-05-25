@@ -131,27 +131,17 @@ repository owns validation through Blacksmith workflows and lets the Mintlify
 GitHub App deploy from `main`:
 
 - `.github/workflows/docs-validate.yml`: validates PR docs changes.
-- `.github/workflows/docs-deploy.yml`: validates, then optionally triggers a
-  Mintlify deploy through the Admin API when configured.
 - `.github/workflows/docs-score.yml`: checks public agent-readiness endpoints
   and optionally runs authenticated `mint score` with an A-grade floor.
 
-While `docs.zerct.com` is still in TXT verification, Mintlify can update and
-index the docs but fail domain revalidation. The deploy script treats that as a
-non-fatal pending-domain state only when the update and indexing already
-succeeded.
-
 Optional GitHub configuration:
 
-- Secret: `MINTLIFY_ADMIN_API_KEY`
-- Variable: `MINTLIFY_PROJECT_ID`
 - Optional secret: `MINTLIFY_CLI_CONFIG_JSON`
 - Optional variable: `MINTLIFY_SCORE_MIN` (defaults to `90`)
 
 Mintlify deploys from the configured branch after the GitHub App is installed
-on this repository. The deploy workflow can also trigger deployment through the
-Admin API. The old `Zerct/docs` repository should be left read-only or archived
-after the dashboard is switched.
+on this repository. The old `Zerct/docs` repository should be left read-only or
+archived after the dashboard is switched.
 
 As of May 25, 2026, `mint score https://docs.zerct.com` reports `92/100`.
 Hosted Mintlify pages currently lose points on platform-level HTML size/parity

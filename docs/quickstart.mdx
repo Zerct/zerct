@@ -34,4 +34,6 @@ read the `agent_instruction` field and retry.
 npx @zerct/zerct deploy
 ```
 
-Zerct builds the backend, verifies health, and returns the deployment URL.
+On first deploy, the CLI opens browser login for GitHub or Google, stores the
+Zerct session, then continues automatically. Zerct builds the backend, verifies
+health, and returns the deployment URL.

@@ -53,3 +53,7 @@ cd examples/hello-rust
 npx @zerct/zerct doctor
 npx @zerct/zerct deploy
 ```
+
+On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
+the Zerct session in the user's credential store when available, and continues
+the deploy. Later commands reuse that session.

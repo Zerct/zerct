@@ -14,3 +14,7 @@ The npm package remains the primary first install path:
 ```sh
 npx @zerct/zerct deploy
 ```
+
+On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
+the Zerct session in the OS credential store when available, and continues the
+deploy. Later commands reuse that session.
