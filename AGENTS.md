@@ -72,10 +72,14 @@ tighten these rules.
    browser source must be TypeScript under `src`, `app`, `pages`, `routes`, or
    `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
 10. Prefer native frontend tooling. New static frontend docs, examples, skills,
-    and agent guidance should use Go-based `tsgo` for TypeScript checking and
-    Rust-based linters such as `oxlint`, `biome`, or `deno lint`. Do not add
-    JavaScript-based linters such as ESLint to new examples unless there is no
-    native equivalent for a required rule, and document the exception.
+    and agent guidance should use Bun with committed `bun.lock`, Go-based
+    `tsgo` for TypeScript checking, and Rust-based linters such as `oxlint`,
+    `biome`, or `deno lint`. Do not add JavaScript-based linters such as ESLint
+    to new examples.
+11. Static frontend SDK behavior must be lockfile-aware: use Bun defaults when
+    `bun.lock` or `bun.lockb` exists, otherwise keep npm compatibility for
+    existing projects. The doctor command must reject JavaScript-based
+    frontend lint scripts before upload.
 
 ## Docs And OpenAPI
 

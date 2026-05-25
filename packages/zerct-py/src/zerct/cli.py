@@ -33,7 +33,8 @@ SESSION_LABEL = "Zerct session"
 DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 DEFAULT_RUST_CHECK_COMMAND = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
-DEFAULT_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+DEFAULT_NPM_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+DEFAULT_BUN_FRONTEND_CHECK_COMMAND = "bun ci && bun run typecheck && bun run lint"
 EXCLUDED_PARTS = {
     ".git",
     "target",
@@ -346,13 +347,14 @@ def parse_config(path: pathlib.Path) -> dict[str, Any]:
     config.setdefault("run", {})
     config.setdefault("resources", {})
     config.setdefault("kind", "rust_backend")
+    project_dir = path.parent
     config["build"].setdefault(
         "check",
-        DEFAULT_FRONTEND_CHECK_COMMAND if config["kind"] == "static_frontend" else DEFAULT_RUST_CHECK_COMMAND,
+        frontend_check_command(project_dir) if config["kind"] == "static_frontend" else DEFAULT_RUST_CHECK_COMMAND,
     )
     config["build"].setdefault(
         "command",
-        "npm run build" if config["kind"] == "static_frontend" else "cargo build --release",
+        frontend_build_command(project_dir) if config["kind"] == "static_frontend" else "cargo build --release",
     )
     if config["kind"] == "static_frontend":
         config["build"].setdefault("output", "dist")
@@ -421,6 +423,12 @@ def validate_config(config: dict[str, Any]) -> None:
 
 
 def validate_check_command(kind: str, command: str) -> None:
+    if kind == "static_frontend" and uses_javascript_linter(command):
+        raise AgentError(
+            "policy_rejected",
+            "Check command uses a JavaScript-based linter.",
+            "Use native frontend linting such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
+        )
     required = (
         ("typecheck", "lint")
         if kind == "static_frontend"
@@ -448,6 +456,24 @@ def frontend_lockfile_exists(project_dir: pathlib.Path) -> bool:
     )
 
 
+def frontend_package_manager(project_dir: pathlib.Path) -> str:
+    if (project_dir / "bun.lock").exists() or (project_dir / "bun.lockb").exists():
+        return "bun"
+    return "npm"
+
+
+def frontend_check_command(project_dir: pathlib.Path) -> str:
+    if frontend_package_manager(project_dir) == "bun":
+        return DEFAULT_BUN_FRONTEND_CHECK_COMMAND
+    return DEFAULT_NPM_FRONTEND_CHECK_COMMAND
+
+
+def frontend_build_command(project_dir: pathlib.Path) -> str:
+    if frontend_package_manager(project_dir) == "bun":
+        return "bun run build"
+    return "npm run build"
+
+
 def frontend_script_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
     manifest = read_package_json(project_dir)
 
@@ -457,16 +483,29 @@ def frontend_script_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
 
     checks = [
         {
-            "name": f"npm script {script}",
+            "name": f"package script {script}",
             "ok": has_script(script),
             "message": "found" if has_script(script) else "missing",
             "agent_instruction": f'Add a non-empty "{script}" script to package.json, then retry.',
         }
         for script in ("typecheck", "lint")
     ]
+    lint_script = ""
+    if isinstance(manifest, dict) and isinstance(manifest.get("scripts"), dict):
+        raw_lint_script = manifest["scripts"].get("lint")
+        lint_script = raw_lint_script if isinstance(raw_lint_script, str) else ""
+    native_lint = not lint_script or not uses_javascript_linter(lint_script)
+    checks.append(
+        {
+            "name": "native frontend lint",
+            "ok": native_lint,
+            "message": "accepted" if native_lint else "JavaScript linter found",
+            "agent_instruction": "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.",
+        }
+    )
     if all(check["ok"] for check in checks):
-        checks.append(npm_script_check(project_dir, "typecheck"))
-        checks.append(npm_script_check(project_dir, "lint"))
+        checks.append(package_script_check(project_dir, "typecheck"))
+        checks.append(package_script_check(project_dir, "lint"))
     return checks
 
 
@@ -522,10 +561,27 @@ def read_package_json(project_dir: pathlib.Path) -> dict[str, Any] | None:
     return parsed if isinstance(parsed, dict) else None
 
 
-def npm_script_check(project_dir: pathlib.Path, script: str) -> dict[str, Any]:
+def uses_javascript_linter(command: str) -> bool:
+    tokens = [
+        token.strip("\"'")
+        for token in re.split(r"[\s&|;()]+", command)
+        if token.strip("\"'")
+    ]
+    for index, token in enumerate(tokens):
+        command_name = token.rsplit("/", 1)[-1]
+        if command_name in {"eslint", "eslint_d", "standard", "xo"}:
+            return True
+        if command_name == "next" and index + 1 < len(tokens) and tokens[index + 1] == "lint":
+            return True
+    return False
+
+
+def package_script_check(project_dir: pathlib.Path, script: str) -> dict[str, Any]:
+    manager = frontend_package_manager(project_dir)
+    command = [manager, "run", script] if manager == "bun" else [manager, "run", "--silent", script]
     try:
         result = subprocess.run(
-            ["npm", "run", "--silent", script],
+            command,
             cwd=project_dir,
             capture_output=True,
             text=True,
@@ -533,17 +589,17 @@ def npm_script_check(project_dir: pathlib.Path, script: str) -> dict[str, Any]:
         )
     except OSError as error:
         return {
-            "name": f"npm run {script}",
+            "name": f"{manager} run {script}",
             "ok": False,
             "message": str(error),
-            "agent_instruction": f"Install Node.js and npm, then run `npm run {script}` before deploying.",
+            "agent_instruction": f"Install {'Bun' if manager == 'bun' else 'Node.js and npm'}, then run `{manager} run {script}` before deploying.",
         }
-    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or f"npm run {script} failed").strip()[:240]
+    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or f"{manager} run {script} failed").strip()[:240]
     return {
-        "name": f"npm run {script}",
+        "name": f"{manager} run {script}",
         "ok": result.returncode == 0,
         "message": message,
-        "agent_instruction": f"Run `npm run {script}`, fix every error, then redeploy.",
+        "agent_instruction": f"Run `{manager} run {script}`, fix every error, then redeploy.",
     }
 
 

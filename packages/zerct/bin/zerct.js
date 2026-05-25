@@ -15,7 +15,8 @@ const SESSION_LABEL = 'Zerct session'
 const DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 const DEFAULT_RUST_CHECK_COMMAND = 'cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
-const DEFAULT_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
+const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
+const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
 const ARCHIVE_EXCLUDES = [
   '.git',
   'target',
@@ -241,7 +242,7 @@ function runDoctor(projectDir) {
   const configPath = path.join(projectDir, 'zerct.toml')
   if (existsSync(configPath)) {
     try {
-      config = parseZerctToml(readFileSync(configPath, 'utf8'))
+      config = parseZerctToml(readFileSync(configPath, 'utf8'), projectDir)
       validateConfig(config)
       checks.push({ name: 'zerct.toml', ok: true, message: 'valid' })
     } catch (error) {
@@ -726,7 +727,7 @@ function hasCommand(command) {
     .some((directory) => existsSync(path.join(directory, command)))
 }
 
-function parseZerctToml(source) {
+function parseZerctToml(source, projectDir) {
   const config = {
     build: {},
     run: {},
@@ -759,8 +760,8 @@ function parseZerctToml(source) {
   }
 
   config.kind ||= 'rust_backend'
-  config.build.check ||= config.kind === 'static_frontend' ? DEFAULT_FRONTEND_CHECK_COMMAND : DEFAULT_RUST_CHECK_COMMAND
-  config.build.command ||= config.kind === 'static_frontend' ? 'npm run build' : 'cargo build --release'
+  config.build.check ||= config.kind === 'static_frontend' ? frontendCheckCommand(projectDir) : DEFAULT_RUST_CHECK_COMMAND
+  config.build.command ||= config.kind === 'static_frontend' ? frontendBuildCommand(projectDir) : 'cargo build --release'
   if (config.kind === 'static_frontend') {
     config.build.output ||= 'dist'
   }
@@ -827,6 +828,9 @@ function validateConfig(config) {
 }
 
 function validateCheckCommand(kind, command) {
+  if (kind === 'static_frontend' && usesJavascriptLinter(command)) {
+    throw new Error('[build].check must not run JavaScript-based linters; use oxlint, biome, or deno lint')
+  }
   const required = kind === 'static_frontend'
     ? ['typecheck', 'lint']
     : ['cargo check --locked', 'cargo clippy --locked', '--all-targets', '--all-features', '-D warnings']
@@ -843,19 +847,45 @@ function frontendLockfileExists(projectDir) {
     .some((file) => existsSync(path.join(projectDir, file)))
 }
 
+function frontendPackageManager(projectDir) {
+  return existsSync(path.join(projectDir, 'bun.lock')) || existsSync(path.join(projectDir, 'bun.lockb'))
+    ? 'bun'
+    : 'npm'
+}
+
+function frontendCheckCommand(projectDir) {
+  return frontendPackageManager(projectDir) === 'bun'
+    ? DEFAULT_BUN_FRONTEND_CHECK_COMMAND
+    : DEFAULT_NPM_FRONTEND_CHECK_COMMAND
+}
+
+function frontendBuildCommand(projectDir) {
+  return frontendPackageManager(projectDir) === 'bun'
+    ? 'bun run build'
+    : 'npm run build'
+}
+
 function frontendScriptChecks(projectDir) {
   const manifest = readPackageJson(projectDir)
   const missing = (script) => !manifest?.scripts || typeof manifest.scripts[script] !== 'string' || !manifest.scripts[script].trim()
   const checks = ['typecheck', 'lint'].map((script) => ({
-    name: `npm script ${script}`,
+    name: `package script ${script}`,
     ok: !missing(script),
     message: missing(script) ? 'missing' : 'found',
     agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
   }))
+  const lintScript = manifest?.scripts?.lint || ''
+  const nativeLint = !lintScript || !usesJavascriptLinter(lintScript)
+  checks.push({
+    name: 'native frontend lint',
+    ok: nativeLint,
+    message: nativeLint ? 'accepted' : 'JavaScript linter found',
+    agent_instruction: 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.'
+  })
 
   if (checks.every((check) => check.ok)) {
-    checks.push(npmScriptCheck(projectDir, 'typecheck'))
-    checks.push(npmScriptCheck(projectDir, 'lint'))
+    checks.push(packageScriptCheck(projectDir, 'typecheck'))
+    checks.push(packageScriptCheck(projectDir, 'lint'))
   }
 
   return checks
@@ -915,26 +945,41 @@ function readPackageJson(projectDir) {
   }
 }
 
-function npmScriptCheck(projectDir, script) {
-  const npm = spawnSync('npm', ['run', '--silent', script], {
+function usesJavascriptLinter(command) {
+  const tokens = command
+    .replace(/[&|;()]/gu, ' ')
+    .split(/\s+/u)
+    .map((token) => token.trim().replace(/^["']|["']$/gu, ''))
+    .filter(Boolean)
+  return tokens.some((token, index) => {
+    const commandName = token.split('/').pop()
+    return ['eslint', 'eslint_d', 'standard', 'xo'].includes(commandName)
+      || (commandName === 'next' && tokens[index + 1] === 'lint')
+  })
+}
+
+function packageScriptCheck(projectDir, script) {
+  const manager = frontendPackageManager(projectDir)
+  const args = manager === 'bun' ? ['run', script] : ['run', '--silent', script]
+  const result = spawnSync(manager, args, {
     cwd: projectDir,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe']
   })
-  if (npm.error) {
+  if (result.error) {
     return {
-      name: `npm run ${script}`,
+      name: `${manager} run ${script}`,
       ok: false,
-      message: npm.error.message,
-      agent_instruction: `Install Node.js and npm, then run \`npm run ${script}\` before deploying.`
+      message: result.error.message,
+      agent_instruction: `Install ${manager === 'bun' ? 'Bun' : 'Node.js and npm'}, then run \`${manager} run ${script}\` before deploying.`
     }
   }
 
   return {
-    name: `npm run ${script}`,
-    ok: npm.status === 0,
-    message: npm.status === 0 ? 'passed' : (npm.stderr || npm.stdout || `npm run ${script} failed`).trim().slice(0, 240),
-    agent_instruction: `Run \`npm run ${script}\`, fix every error, then redeploy.`
+    name: `${manager} run ${script}`,
+    ok: result.status === 0,
+    message: result.status === 0 ? 'passed' : (result.stderr || result.stdout || `${manager} run ${script} failed`).trim().slice(0, 240),
+    agent_instruction: `Run \`${manager} run ${script}\`, fix every error, then redeploy.`
   }
 }
 

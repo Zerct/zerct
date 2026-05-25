@@ -22,8 +22,8 @@ name = "dashboard"
 kind = "static_frontend"
 
 [build]
-check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
-command = "npm run build"
+check = "bun ci && bun run typecheck && bun run lint"
+command = "bun run build"
 output = "dist"
 ```
 
@@ -31,7 +31,7 @@ For new TanStack or Vite frontends, prefer fast native checks and avoid
 JavaScript-based linters:
 
 ```sh
-npm install -D @typescript/native-preview oxlint
+bun add -d @typescript/native-preview oxlint
 ```
 
 ```json
@@ -48,7 +48,10 @@ Rust backend checks must include locked `cargo check` and locked all-target,
 all-feature Clippy with `-D warnings`. Static frontend checks must run both
 typechecking and linting before build work is queued. Static frontend browser
 source must be `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
-`components`; browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected.
+`components`; browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected. Bun
+projects should commit `bun.lock` for the fastest Zerct build path. Existing npm
+projects can still deploy with a committed npm lockfile and npm-based build
+commands.
 
 Use Homebrew for a persistent developer CLI:
 
