@@ -1,0 +1,39 @@
+name: Validate Mintlify docs
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "scripts/check-docs.mjs"
+      - ".github/workflows/docs-validate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate docs
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: node scripts/check-docs.mjs
+      - name: Validate Mintlify build
+        run: npx --yes mint@latest validate
+        working-directory: docs
+        env:
+          MINTLIFY_TELEMETRY_DISABLED: "1"
+      - name: Check Mintlify links
+        run: npx --yes mint@latest broken-links --check-anchors --check-redirects --check-snippets
+        working-directory: docs
+        env:
+          MINTLIFY_TELEMETRY_DISABLED: "1"
+      - name: Check Mintlify accessibility
+        run: npx --yes mint@latest a11y --skip-contrast
+        working-directory: docs
+        env:
+          MINTLIFY_TELEMETRY_DISABLED: "1"

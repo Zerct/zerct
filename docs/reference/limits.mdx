@@ -1,0 +1,22 @@
+---
+title: "Limits"
+description: "Current deployment limits and guardrails."
+---
+
+Zerct keeps deploys predictable by rejecting projects that are expensive or
+ambiguous to run.
+
+## Current guardrails
+
+- `Cargo.lock` is required.
+- A health endpoint is required.
+- Apps must bind to `0.0.0.0:$PORT`.
+- Secrets must stay in server-side environment variables.
+- Builds may be queued when capacity is busy.
+
+## Planned guardrails
+
+- Resource limits per deployment
+- Idle cold starts for free deployments
+- Rust lint and unsafe-code policy checks
+- Database connection and migration safety checks

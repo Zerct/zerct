@@ -39,8 +39,8 @@ name, `@zerct/zerct` is the public npm package.
 - `sdks/`: public SDKs.
 - `skills/`: agent skill files.
 - `examples/`: deployable examples.
+- `docs/`: Mintlify documentation.
 
-Mintlify docs live in the separate public `Zerct/docs` repository.
 Homebrew formulae live in the separate public `Zerct/homebrew-tap` repository.
 
 `packages/zerct` is the CLI behavior source of truth. Other package surfaces

@@ -1,0 +1,37 @@
+---
+title: "Deploy"
+description: "How Zerct deploys Rust backends."
+---
+
+Zerct uses a small project contract so humans and agents can deploy without
+guessing.
+
+## Flow
+
+1. Login with GitHub or Google.
+2. Run `zerct doctor`.
+3. Run `zerct deploy`.
+4. Zerct queues the build, compiles the backend, and verifies the health route.
+5. Zerct exposes the app on a `zerct.app` deployment hostname.
+
+## Runtime contract
+
+Your app must listen on:
+
+```sh
+0.0.0.0:$PORT
+```
+
+Do not hardcode the port. Zerct injects it at runtime.
+
+## Agent-ready errors
+
+CLI and API errors should be machine-readable:
+
+```json
+{
+  "code": "missing_cargo_lock",
+  "message": "Cargo.lock is required for reproducible deploys.",
+  "agent_instruction": "Run cargo generate-lockfile, commit Cargo.lock, then retry."
+}
+```

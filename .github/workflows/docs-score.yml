@@ -1,0 +1,45 @@
+name: Score Mintlify docs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  score:
+    name: score docs
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Check public agent readiness
+        run: node scripts/check-mintlify-agent-readiness.mjs https://docs.zerct.com
+      - name: Run authenticated Mintlify score when configured
+        run: |
+          if [ -z "${MINTLIFY_CLI_CONFIG_JSON:-}" ]; then
+            echo "MINTLIFY_CLI_CONFIG_JSON is not configured; public readiness checks already passed."
+            exit 0
+          fi
+
+          mkdir -p "$HOME/.config/mintlify"
+          printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
+          npx --yes mint@latest score https://docs.zerct.com --format json > mint-score.json
+          node -e '
+            const fs = require("node:fs");
+            const score = JSON.parse(fs.readFileSync("mint-score.json", "utf8"));
+            const value = Number(score.score ?? score.overallScore ?? 0);
+            if (value < 100) {
+              console.error(`Mintlify score is ${value}/100`);
+              process.exit(1);
+            }
+            console.log(`Mintlify score is ${value}/100`);
+          '
+        env:
+          MINTLIFY_CLI_CONFIG_JSON: ${{ secrets.MINTLIFY_CLI_CONFIG_JSON }}
+          MINTLIFY_TELEMETRY_DISABLED: "1"

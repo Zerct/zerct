@@ -1,0 +1,36 @@
+---
+title: "Zerct"
+description: "Deploy Rust backends as APIs for frontends hosted anywhere."
+---
+
+Zerct deploys Rust backends and exposes them as HTTPS APIs.
+
+```sh
+npx @zerct/zerct deploy
+```
+
+The package checks your project, explains what to fix, and starts a deployment
+when the project contract is valid.
+
+## What Zerct expects
+
+- A Rust backend with `Cargo.toml` and `Cargo.lock`
+- A `zerct.toml` project contract
+- A server that listens on `0.0.0.0:$PORT`
+- A health endpoint for deploy verification
+
+## Package surfaces
+
+Use npm for the agent-first flow:
+
+```sh
+npx @zerct/zerct deploy
+```
+
+Use Homebrew for a persistent developer CLI:
+
+```sh
+brew tap Zerct/tap
+brew install zerct
+zerct deploy
+```

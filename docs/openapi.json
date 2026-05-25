@@ -1,0 +1,175 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Zerct API",
+    "version": "0.1.0",
+    "description": "Control-plane API for Zerct deployments."
+  },
+  "servers": [
+    {
+      "url": "https://api.zerct.com",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Health check",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "The API is healthy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/login/device": {
+      "post": {
+        "summary": "Start device login",
+        "operationId": "startDeviceLogin",
+        "responses": {
+          "200": {
+            "description": "Device login information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginStartResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/deployments": {
+      "post": {
+        "summary": "Create deployment",
+        "operationId": "createDeployment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeployRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deployment accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeployResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "service"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "service": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginStartResponse": {
+        "type": "object",
+        "required": [
+          "login_url",
+          "device_code",
+          "interval_seconds"
+        ],
+        "properties": {
+          "login_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "device_code": {
+            "type": "string"
+          },
+          "interval_seconds": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "DeployRequest": {
+        "type": "object",
+        "required": [
+          "app_name",
+          "health_path",
+          "archive_base64"
+        ],
+        "properties": {
+          "app_name": {
+            "type": "string"
+          },
+          "health_path": {
+            "type": "string",
+            "example": "/health"
+          },
+          "archive_base64": {
+            "type": "string",
+            "description": "Base64 encoded source archive."
+          }
+        }
+      },
+      "DeployResponse": {
+        "type": "object",
+        "required": [
+          "deploy_id",
+          "app_id",
+          "status"
+        ],
+        "properties": {
+          "deploy_id": {
+            "type": "string"
+          },
+          "app_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    }
+  }
+}

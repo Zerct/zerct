@@ -1,0 +1,37 @@
+---
+title: "Quickstart"
+description: "Deploy a Rust backend with Zerct."
+---
+
+## Requirements
+
+- A GitHub or Google login
+- A Rust backend with a committed `Cargo.lock`
+- A server that reads the `PORT` environment variable
+
+## Create the project contract
+
+From your backend directory:
+
+```sh
+npx @zerct/zerct init
+```
+
+This creates `zerct.toml`.
+
+## Check locally
+
+```sh
+npx @zerct/zerct doctor
+```
+
+Fix any reported issue before deploying. Zerct errors are written so agents can
+read the `agent_instruction` field and retry.
+
+## Deploy
+
+```sh
+npx @zerct/zerct deploy
+```
+
+Zerct builds the backend, verifies health, and returns the deployment URL.
