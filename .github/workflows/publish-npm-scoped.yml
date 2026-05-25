@@ -2,6 +2,11 @@ name: Publish scoped npm package
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/zerct/package.json"
 
 permissions:
   contents: read
@@ -19,5 +24,19 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
-      - run: ./scripts/check-all.sh
-      - run: ./scripts/publish-npm-scoped.sh
+      - name: Check registry version
+        id: version
+        run: |
+          version="$(node -p "require('./packages/zerct/package.json').version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if npm view "@zerct/zerct@$version" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::@zerct/zerct@$version already exists; skipping publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.version.outputs.exists == 'false'
+        run: ./scripts/check-all.sh
+      - if: steps.version.outputs.exists == 'false'
+        run: ./scripts/publish-npm-scoped.sh

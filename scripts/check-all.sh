@@ -6,6 +6,7 @@ cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
 
 node --check packages/zerct/bin/zerct.js
+node scripts/check-package-versions.mjs
 node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
 scripts/check-openapi.sh
