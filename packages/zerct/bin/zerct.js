@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.1'
+const VERSION = '0.1.2'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
@@ -119,7 +119,7 @@ async function main() {
       await billing(cli)
       break
     default:
-      throw agentError('unknown_command', 'Unknown Zerct command.', 'Run `npx zerct --help` and retry with a supported command.', cli.json)
+      throw agentError('unknown_command', 'Unknown Zerct command.', 'Run `npx @zerct/zerct --help` and retry with a supported command.', cli.json)
   }
 }
 
@@ -234,7 +234,7 @@ function doctorProject(projectDir, json) {
 
   if (!report.ok) {
     const firstFailure = report.checks.find((check) => !check.ok)
-    throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry `npx zerct doctor`.', json)
+    throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry `npx @zerct/zerct doctor`.', json)
   }
 }
 
@@ -294,7 +294,7 @@ async function login(cli) {
   const response = await apiRequest(cli, 'POST', '/v1/login/device', null, null)
   openUrl(response.login_url)
   console.log(`opened ${response.login_url}`)
-  console.log('After login, retry your deploy. If the CLI cannot finish automatically yet, set ZERCT_TOKEN or run `npx zerct login --token <token>`.')
+  console.log('After login, retry your deploy. If the CLI cannot finish automatically yet, set ZERCT_TOKEN or run `npx @zerct/zerct login --token <token>`.')
 }
 
 async function deploy(projectDir, cli) {
@@ -323,7 +323,7 @@ async function deploy(projectDir, cli) {
   console.log(`queued ${response.build_job.id}`)
   console.log(`app ${response.app.id}`)
   console.log(`url ${response.app.url}`)
-  console.log(`next npx zerct logs --app ${response.app.id}`)
+  console.log(`next npx @zerct/zerct logs --app ${response.app.id}`)
 }
 
 async function logs(cli) {
@@ -354,7 +354,7 @@ async function database(cli) {
 
 async function envCommand(cli) {
   if (cli.args[0] !== 'set') {
-    throw agentError('unknown_command', 'Unknown env command.', 'Use `npx zerct env set --app <app_id> KEY=value`.', cli.json)
+    throw agentError('unknown_command', 'Unknown env command.', 'Use `npx @zerct/zerct env set --app <app_id> KEY=value`.', cli.json)
   }
 
   const assignment = cli.args[1] || ''
@@ -393,7 +393,7 @@ async function appGet(cli, kind) {
 
 function requireApp(cli) {
   if (!cli.app) {
-    throw agentError('missing_app', 'App id is required.', 'Pass `--app <app_id>`. Use the app id printed by `npx zerct deploy`.', cli.json)
+    throw agentError('missing_app', 'App id is required.', 'Pass `--app <app_id>`. Use the app id printed by `npx @zerct/zerct deploy`.', cli.json)
   }
   return cli.app
 }
@@ -450,7 +450,7 @@ function createArchiveBase64(projectDir) {
   })
 
   if (tar.error) {
-    throw agentError('archive_failed', 'Could not create source archive.', 'Install `tar`, remove local build outputs, then retry `npx zerct deploy`.', false)
+    throw agentError('archive_failed', 'Could not create source archive.', 'Install `tar`, remove local build outputs, then retry `npx @zerct/zerct deploy`.', false)
   }
   if (tar.status !== 0) {
     throw agentError('archive_failed', 'Could not create source archive.', String(tar.stderr || 'Check project files and retry.'), false)
@@ -489,7 +489,7 @@ function readToken(projectDir, cli) {
     return readFileSync(homeToken, 'utf8').trim()
   }
 
-  throw agentError('login_required', 'Zerct login is required.', 'Run `npx zerct login`, set `ZERCT_TOKEN`, or run `npx zerct login --token <token>`, then retry.', cli.json)
+  throw agentError('login_required', 'Zerct login is required.', 'Run `npx @zerct/zerct login`, set `ZERCT_TOKEN`, or run `npx @zerct/zerct login --token <token>`, then retry.', cli.json)
 }
 
 function writeSessionToken(projectDir, token) {

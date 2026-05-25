@@ -11,9 +11,9 @@ The target npm package is the unscoped package `zerct`, so agents and humans can
 run:
 
 ```sh
-npx zerct init
-npx zerct doctor
-npx zerct deploy
+npx @zerct/zerct init
+npx @zerct/zerct doctor
+npx @zerct/zerct deploy
 ```
 
 Until npm approves the unscoped name, use the scoped fallback:
@@ -46,6 +46,6 @@ must stay thin or share the same contract so deploy UX does not drift.
 
 ```sh
 cd examples/hello-rust
-npx zerct doctor
-npx zerct deploy
+npx @zerct/zerct doctor
+npx @zerct/zerct deploy
 ```
