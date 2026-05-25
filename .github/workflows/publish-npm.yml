@@ -10,7 +10,7 @@ permissions:
 jobs:
   publish:
     name: publish zerct to npm
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     environment: npm
     steps:
       - uses: actions/checkout@v6
