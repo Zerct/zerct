@@ -60,6 +60,9 @@ later, the nested file may only tighten these rules, not weaken them.
     co-located with SDK, package, and example changes.
 24. Do not use em dashes or double hyphen prose in Markdown, MDX, or text
     files. Wrap CLI flags such as `--json` in inline code or fenced code.
+25. Keep `.coderabbit.yaml` strict and concise. CodeRabbit must use Blacksmith
+    for push workflows, and push review must never run without an Agentic API
+    key stored as `CODERABBIT_API_KEY`.
 
 ## Package Commands
 
