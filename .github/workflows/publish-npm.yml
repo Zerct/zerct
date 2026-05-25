@@ -1,0 +1,29 @@
+name: Publish npm package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: publish zerct to npm
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - run: node --check bin/zerct.js
+        working-directory: packages/zerct
+      - run: npm pack --dry-run
+        working-directory: packages/zerct
+      - run: npm publish --access public
+        working-directory: packages/zerct
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

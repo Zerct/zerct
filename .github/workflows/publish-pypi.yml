@@ -1,0 +1,25 @@
+name: Publish PyPI package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: publish zerct to PyPI
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: python -m pip install --upgrade build
+      - run: python -m build
+        working-directory: packages/zerct-py
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/zerct-py/dist

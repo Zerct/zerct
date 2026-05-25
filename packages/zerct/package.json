@@ -1,0 +1,37 @@
+{
+  "name": "zerct",
+  "version": "0.1.0",
+  "description": "Deploy Rust backends to Zerct.",
+  "type": "module",
+  "bin": {
+    "zerct": "./bin/zerct.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": [
+    "zerct",
+    "rust",
+    "deploy",
+    "backend",
+    "hosting"
+  ],
+  "homepage": "https://zerct.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zerct/zerct.git",
+    "directory": "packages/zerct"
+  },
+  "bugs": {
+    "url": "https://github.com/Zerct/zerct/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "check": "node --check bin/zerct.js",
+    "pack:dry": "npm pack --dry-run"
+  }
+}
