@@ -12,5 +12,5 @@ zerct deploy
 The primary first-run path remains:
 
 ```sh
-npx zerct deploy
+npx @zerct/zerct deploy
 ```

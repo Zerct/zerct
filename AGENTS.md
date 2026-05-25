@@ -4,7 +4,8 @@ This is the public Zerct packages, SDKs, skills, and examples repository.
 
 ## Rules
 
-1. Keep public UX simple: prefer `npx zerct deploy`.
+1. Keep public UX simple: use `npx @zerct/zerct deploy` until npm approves the
+   unscoped `zerct` package name.
 2. Do not commit secrets, npm tokens, Stripe keys, OAuth secrets, or customer
    data.
 3. The npm package name must stay unscoped as `zerct`.
