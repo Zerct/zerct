@@ -428,12 +428,48 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
         agent_instruction:
             "Remove direct unsafe usage from workspace Rust source before deploying.".to_owned(),
     });
+    checks.push(cargo_check(project_dir));
 
     DoctorReport {
         project: project_dir.to_path_buf(),
         config,
         checks,
     }
+}
+
+fn cargo_check(project_dir: &Path) -> Check {
+    let output = Command::new("cargo")
+        .args(["check", "--locked", "--quiet"])
+        .env("CARGO_TERM_COLOR", "never")
+        .current_dir(project_dir)
+        .output();
+
+    match output {
+        Ok(output) => Check {
+            name: "cargo check".to_owned(),
+            ok: output.status.success(),
+            message: if output.status.success() {
+                "passed".to_owned()
+            } else {
+                truncate_check_message(&String::from_utf8_lossy(&output.stderr))
+            },
+            agent_instruction:
+                "Run `cargo check --locked`, fix every compiler error and warning, then redeploy."
+                    .to_owned(),
+        },
+        Err(error) => Check {
+            name: "cargo check".to_owned(),
+            ok: false,
+            message: error.to_string(),
+            agent_instruction:
+                "Install Rust and Cargo, then run `cargo check --locked` locally before deploying."
+                    .to_owned(),
+        },
+    }
+}
+
+fn truncate_check_message(message: &str) -> String {
+    message.chars().take(240).collect()
 }
 
 fn parse_config(path: &Path) -> Result<Config, AgentError> {

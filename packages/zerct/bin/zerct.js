@@ -270,12 +270,38 @@ function runDoctor(projectDir) {
     message: unsafeHits.length === 0 ? 'no direct unsafe found' : unsafeHits.slice(0, 5).join(', '),
     agent_instruction: 'Remove direct unsafe usage from workspace Rust source before deploying.'
   })
+  checks.push(cargoCheck(projectDir))
 
   return {
     ok: checks.every((check) => check.ok),
     project: projectDir,
     config,
     checks
+  }
+}
+
+function cargoCheck(projectDir) {
+  const cargo = spawnSync('cargo', ['check', '--locked', '--quiet'], {
+    cwd: projectDir,
+    encoding: 'utf8',
+    env: { ...process.env, CARGO_TERM_COLOR: 'never' },
+    stdio: ['ignore', 'pipe', 'pipe']
+  })
+
+  if (cargo.error) {
+    return {
+      name: 'cargo check',
+      ok: false,
+      message: cargo.error.message,
+      agent_instruction: 'Install Rust and Cargo, then run `cargo check --locked` locally before deploying.'
+    }
+  }
+
+  return {
+    name: 'cargo check',
+    ok: cargo.status === 0,
+    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo check failed').trim().slice(0, 240),
+    agent_instruction: 'Run `cargo check --locked`, fix every compiler error and warning, then redeploy.'
   }
 }
 

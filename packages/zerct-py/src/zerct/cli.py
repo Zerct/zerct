@@ -244,12 +244,39 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
             "agent_instruction": "Remove direct unsafe usage from workspace Rust source before deploying.",
         }
     )
+    checks.append(cargo_check(project_dir))
 
     return {
         "ok": all(check["ok"] for check in checks),
         "project": str(project_dir),
         "config": config,
         "checks": checks,
+    }
+
+
+def cargo_check(project_dir: pathlib.Path) -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            ["cargo", "check", "--locked", "--quiet"],
+            cwd=project_dir,
+            env={**os.environ, "CARGO_TERM_COLOR": "never"},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        return {
+            "name": "cargo check",
+            "ok": False,
+            "message": str(error),
+            "agent_instruction": "Install Rust and Cargo, then run `cargo check --locked` locally before deploying.",
+        }
+    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or "cargo check failed").strip()[:240]
+    return {
+        "name": "cargo check",
+        "ok": result.returncode == 0,
+        "message": message,
+        "agent_instruction": "Run `cargo check --locked`, fix every compiler error and warning, then redeploy.",
     }
 
 
