@@ -23,7 +23,7 @@ kind = "static_frontend"
 
 [build]
 check = "npm ci && npm run typecheck && npm run lint"
-command = "npm ci && npm run build"
+command = "npm run build"
 output = "dist"
 ```
 

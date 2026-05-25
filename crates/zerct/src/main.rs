@@ -637,7 +637,7 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
     }
     if build_command.is_empty() {
         build_command = if kind == "static_frontend" {
-            "npm ci && npm run build".to_owned()
+            "npm run build".to_owned()
         } else {
             "cargo build --release".to_owned()
         };

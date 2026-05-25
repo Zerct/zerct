@@ -352,7 +352,7 @@ def parse_config(path: pathlib.Path) -> dict[str, Any]:
     )
     config["build"].setdefault(
         "command",
-        "npm ci && npm run build" if config["kind"] == "static_frontend" else "cargo build --release",
+        "npm run build" if config["kind"] == "static_frontend" else "cargo build --release",
     )
     if config["kind"] == "static_frontend":
         config["build"].setdefault("output", "dist")
