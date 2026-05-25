@@ -29,9 +29,20 @@ Temporary scoped fallback:
 - Package: `@zerct/zerct`
 - Workflow: `.github/workflows/publish-npm-scoped.yml`
 - Local command: `./scripts/publish-npm-scoped.sh`
+- Verified command: `npx @zerct/zerct deploy`
 
 The scoped package is generated from `packages/zerct` during publish so the CLI
 source stays single-owner.
+
+Unscoped package request:
+
+- Requested package: `zerct`
+- npm/GitHub Community request: https://github.com/orgs/community/discussions/196900
+- Current npm block: package name is considered too similar to `react`
+
+If npm approves the unscoped package, publish `packages/zerct` directly with
+`npm publish --access public` or `.github/workflows/publish-npm.yml`. Keep
+`@zerct/zerct` published as the stable fallback.
 
 ## PyPI
 

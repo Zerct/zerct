@@ -1,5 +1,8 @@
 # npm Support Request: Allow Unscoped `zerct`
 
+Opened as GitHub Community npm discussion:
+https://github.com/orgs/community/discussions/196900
+
 Subject: Please allow publishing unscoped package `zerct`
 
 Hello npm support,
