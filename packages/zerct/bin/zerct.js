@@ -760,7 +760,7 @@ function parseZerctToml(source) {
 
   config.kind ||= 'rust_backend'
   config.build.check ||= config.kind === 'static_frontend' ? DEFAULT_FRONTEND_CHECK_COMMAND : DEFAULT_RUST_CHECK_COMMAND
-  config.build.command ||= config.kind === 'static_frontend' ? 'npm ci && npm run build' : 'cargo build --release'
+  config.build.command ||= config.kind === 'static_frontend' ? 'npm run build' : 'cargo build --release'
   if (config.kind === 'static_frontend') {
     config.build.output ||= 'dist'
   }
