@@ -2,8 +2,8 @@
 
 Public Zerct workspace for packages, SDKs, agent skills, and examples.
 
-Zerct hosts Rust backends and exposes them as APIs for frontends hosted
-anywhere.
+Zerct hosts Rust backends and static frontends. Frontends call Rust backend
+deployments for APIs and managed Postgres.
 
 ## Install
 
@@ -13,6 +13,18 @@ Use npm for the lowest-friction agent path:
 npx @zerct/zerct init
 npx @zerct/zerct doctor
 npx @zerct/zerct deploy
+```
+
+Static frontend deploys use the same command with this `zerct.toml`:
+
+```toml
+name = "dashboard"
+kind = "static_frontend"
+
+[build]
+check = "npm run typecheck && npm run lint"
+command = "npm ci && npm run build"
+output = "dist"
 ```
 
 Use Homebrew for a persistent developer CLI:

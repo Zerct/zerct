@@ -32,6 +32,8 @@ SESSION_ACCOUNT = "session-token"
 SESSION_LABEL = "Zerct session"
 DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 DEFAULT_LOGIN_INTERVAL_SECONDS = 5
+DEFAULT_RUST_CHECK_COMMAND = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+DEFAULT_FRONTEND_CHECK_COMMAND = "npm run typecheck && npm run lint"
 EXCLUDED_PARTS = {
     ".git",
     "target",
@@ -207,17 +209,6 @@ def doctor_project(project_dir: pathlib.Path, json_output: bool) -> None:
 
 def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
-    for filename in ("Cargo.toml", "Cargo.lock", "zerct.toml"):
-        exists = (project_dir / filename).exists()
-        checks.append(
-            {
-                "name": filename,
-                "ok": exists,
-                "message": "found" if exists else "missing",
-                "agent_instruction": f"Create and commit {filename}, then retry.",
-            }
-        )
-
     config: dict[str, Any] | None = None
     config_path = project_dir / "zerct.toml"
     if config_path.exists():
@@ -234,6 +225,40 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
                     "agent_instruction": "Fix zerct.toml so it matches the Zerct deploy contract.",
                 }
             )
+    else:
+        checks.append(
+            {
+                "name": "zerct.toml",
+                "ok": False,
+                "message": "missing",
+                "agent_instruction": "Create and commit zerct.toml, then retry.",
+            }
+        )
+
+    kind = str(config.get("kind", "rust_backend")) if config else "rust_backend"
+    required_files = ("package.json",) if kind == "static_frontend" else ("Cargo.toml", "Cargo.lock")
+    for filename in required_files:
+        exists = (project_dir / filename).exists()
+        checks.append(
+            {
+                "name": filename,
+                "ok": exists,
+                "message": "found" if exists else "missing",
+                "agent_instruction": f"Create and commit {filename}, then retry.",
+            }
+        )
+
+    if kind == "static_frontend":
+        has_lockfile = frontend_lockfile_exists(project_dir)
+        checks.append(
+            {
+                "name": "frontend lockfile",
+                "ok": has_lockfile,
+                "message": "found" if has_lockfile else "missing",
+                "agent_instruction": "Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.",
+            }
+        )
+        checks.extend(frontend_script_checks(project_dir))
 
     unsafe_hits = scan_unsafe(project_dir)
     checks.append(
@@ -244,7 +269,9 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
             "agent_instruction": "Remove direct unsafe usage from workspace Rust source before deploying.",
         }
     )
-    checks.append(cargo_check(project_dir))
+    if kind == "rust_backend":
+        checks.append(cargo_check(project_dir))
+        checks.append(cargo_clippy(project_dir))
 
     return {
         "ok": all(check["ok"] for check in checks),
@@ -280,12 +307,48 @@ def cargo_check(project_dir: pathlib.Path) -> dict[str, Any]:
     }
 
 
+def cargo_clippy(project_dir: pathlib.Path) -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            ["cargo", "clippy", "--locked", "--all-targets", "--all-features", "--quiet", "--", "-D", "warnings"],
+            cwd=project_dir,
+            env={**os.environ, "CARGO_TERM_COLOR": "never"},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        return {
+            "name": "cargo clippy",
+            "ok": False,
+            "message": str(error),
+            "agent_instruction": "Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.",
+        }
+    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or "cargo clippy failed").strip()[:240]
+    return {
+        "name": "cargo clippy",
+        "ok": result.returncode == 0,
+        "message": message,
+        "agent_instruction": "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.",
+    }
+
+
 def parse_config(path: pathlib.Path) -> dict[str, Any]:
     config = tomllib.loads(path.read_text(encoding="utf-8"))
     config.setdefault("build", {})
     config.setdefault("run", {})
     config.setdefault("resources", {})
-    config["build"].setdefault("command", "cargo build --release")
+    config.setdefault("kind", "rust_backend")
+    config["build"].setdefault(
+        "check",
+        DEFAULT_FRONTEND_CHECK_COMMAND if config["kind"] == "static_frontend" else DEFAULT_RUST_CHECK_COMMAND,
+    )
+    config["build"].setdefault(
+        "command",
+        "npm ci && npm run build" if config["kind"] == "static_frontend" else "cargo build --release",
+    )
+    if config["kind"] == "static_frontend":
+        config["build"].setdefault("output", "dist")
     config["run"].setdefault("port", 3000)
     config["run"].setdefault("health", "/healthz")
     config["resources"].setdefault("memory", "512mb")
@@ -301,6 +364,33 @@ def validate_config(config: dict[str, Any]) -> None:
             "Service name must be lowercase DNS-safe text.",
             "Set `name` in zerct.toml to lowercase letters, numbers, and hyphens only.",
         )
+    if config.get("kind") not in ("rust_backend", "static_frontend"):
+        raise AgentError(
+            "invalid_project_kind",
+            "Project kind must be rust_backend or static_frontend.",
+            "Set kind in zerct.toml to rust_backend or static_frontend.",
+        )
+    if not isinstance(config["build"].get("command"), str) or not config["build"]["command"].strip():
+        raise AgentError(
+            "missing_command",
+            "Build command is missing.",
+            "Set [build].command in zerct.toml, then redeploy.",
+        )
+    if not isinstance(config["build"].get("check"), str) or not config["build"]["check"].strip():
+        raise AgentError(
+            "missing_command",
+            "Check command is missing.",
+            "Set [build].check in zerct.toml to a command that typechecks and lints before the release build.",
+        )
+    if config["kind"] == "static_frontend":
+        output = config["build"].get("output")
+        if not isinstance(output, str) or not safe_relative_path(output):
+            raise AgentError(
+                "invalid_build_output",
+                "Static frontend output must be a safe relative directory.",
+                "Set [build].output to a relative directory like dist.",
+            )
+        return
     if not config["run"].get("command"):
         raise AgentError(
             "missing_command",
@@ -322,6 +412,78 @@ def validate_config(config: dict[str, Any]) -> None:
         )
 
 
+def frontend_lockfile_exists(project_dir: pathlib.Path) -> bool:
+    return any(
+        (project_dir / filename).exists()
+        for filename in ("package-lock.json", "npm-shrinkwrap.json", "pnpm-lock.yaml", "yarn.lock", "bun.lock", "bun.lockb")
+    )
+
+
+def frontend_script_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
+    manifest = read_package_json(project_dir)
+
+    def has_script(name: str) -> bool:
+        scripts = manifest.get("scripts") if isinstance(manifest, dict) else None
+        return isinstance(scripts, dict) and isinstance(scripts.get(name), str) and bool(scripts[name].strip())
+
+    checks = [
+        {
+            "name": f"npm script {script}",
+            "ok": has_script(script),
+            "message": "found" if has_script(script) else "missing",
+            "agent_instruction": f'Add a non-empty "{script}" script to package.json, then retry.',
+        }
+        for script in ("typecheck", "lint")
+    ]
+    if all(check["ok"] for check in checks):
+        checks.append(npm_script_check(project_dir, "typecheck"))
+        checks.append(npm_script_check(project_dir, "lint"))
+    return checks
+
+
+def read_package_json(project_dir: pathlib.Path) -> dict[str, Any] | None:
+    try:
+        raw = (project_dir / "package.json").read_text(encoding="utf-8")
+        parsed = json.loads(raw)
+    except (OSError, json.JSONDecodeError):
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def npm_script_check(project_dir: pathlib.Path, script: str) -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            ["npm", "run", "--silent", script],
+            cwd=project_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        return {
+            "name": f"npm run {script}",
+            "ok": False,
+            "message": str(error),
+            "agent_instruction": f"Install Node.js and npm, then run `npm run {script}` before deploying.",
+        }
+    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or f"npm run {script} failed").strip()[:240]
+    return {
+        "name": f"npm run {script}",
+        "ok": result.returncode == 0,
+        "message": message,
+        "agent_instruction": f"Run `npm run {script}`, fix every error, then redeploy.",
+    }
+
+
+def safe_relative_path(value: str) -> bool:
+    return (
+        bool(value)
+        and not pathlib.PurePosixPath(value).is_absolute()
+        and "\\" not in value
+        and all(part and part not in (".", "..") for part in value.split("/"))
+    )
+
+
 def login(args: argparse.Namespace) -> None:
     token = args.token
     if token:
@@ -337,6 +499,12 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
     if not report["ok"]:
         failure = next(check for check in report["checks"] if not check["ok"])
         raise AgentError("doctor_failed", "Zerct doctor failed.", failure["agent_instruction"])
+    if report["config"] and report["config"].get("kind") == "static_frontend" and args.database:
+        raise AgentError(
+            "invalid_database_target",
+            "Static frontends cannot attach managed Postgres directly.",
+            "Deploy a Rust backend with managed Postgres and call it from the frontend.",
+        )
 
     token = read_or_login_token(project_dir, args)
     response = api_request(

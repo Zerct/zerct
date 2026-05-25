@@ -1,8 +1,8 @@
 ---
 name: zerct
-description: Deploy Rust backends to Zerct and expose them as HTTPS APIs.
+description: Deploy Rust backends and static frontends to Zerct.
 license: MIT
-compatibility: Requires a Rust backend with Cargo.toml, Cargo.lock, zerct.toml, and a server that listens on 0.0.0.0:$PORT.
+compatibility: Requires zerct.toml. Rust backends require Cargo.toml and Cargo.lock. Static frontends require package.json, typecheck/lint scripts, and a package lockfile.
 metadata:
   author: Zerct
   version: "0.1"
@@ -10,18 +10,30 @@ metadata:
 
 # Zerct
 
-Use this skill when a user wants to deploy a Rust backend to Zerct, inspect a
-deployment, read logs, or prepare a project for deployment.
+Use this skill when a user wants to deploy a Rust backend or static frontend to
+Zerct, inspect a deployment, read logs, or prepare a project for deployment.
 
 ## Project contract
 
-Require these files before deploying:
+Always require:
+
+- `zerct.toml`
+
+For Rust backends, require:
 
 - `Cargo.toml`
 - `Cargo.lock`
-- `zerct.toml`
+- passing `cargo check --locked`
+- passing `cargo clippy --locked --all-targets --all-features -- -D warnings`
 
 The server must listen on `0.0.0.0:$PORT` and expose the configured health path.
+
+For static frontends, require:
+
+- `package.json`
+- one package lockfile
+- `kind = "static_frontend"` in `zerct.toml`
+- `typecheck` and `lint` scripts in `package.json`
 
 ## Commands
 

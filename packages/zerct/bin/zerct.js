@@ -14,6 +14,8 @@ const SESSION_ACCOUNT = 'session-token'
 const SESSION_LABEL = 'Zerct session'
 const DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
+const DEFAULT_RUST_CHECK_COMMAND = 'cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
+const DEFAULT_FRONTEND_CHECK_COMMAND = 'npm run typecheck && npm run lint'
 const ARCHIVE_EXCLUDES = [
   '.git',
   'target',
@@ -59,10 +61,9 @@ Usage:
   zerct billing [--api <url>] [--json]
 
 Agent contract:
-  - Keep Cargo.lock committed.
-  - Keep direct unsafe out of workspace source.
-  - Listen on 0.0.0.0:$PORT.
-  - Return HTTP 200 from the configured health endpoint.
+  - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
+  - Static frontends set kind = "static_frontend", keep a package lockfile, and expose typecheck + lint scripts.
+  - Keep direct unsafe out of Rust source.
 `
 
 async function main() {
@@ -235,17 +236,6 @@ function doctorProject(projectDir, json) {
 
 function runDoctor(projectDir) {
   const checks = []
-  const requiredFiles = ['Cargo.toml', 'Cargo.lock', 'zerct.toml']
-  for (const file of requiredFiles) {
-    const ok = existsSync(path.join(projectDir, file))
-    checks.push({
-      name: file,
-      ok,
-      message: ok ? 'found' : 'missing',
-      agent_instruction: `Create and commit ${file}, then retry.`
-    })
-  }
-
   let config = null
   const configPath = path.join(projectDir, 'zerct.toml')
   if (existsSync(configPath)) {
@@ -261,6 +251,38 @@ function runDoctor(projectDir) {
         agent_instruction: 'Fix zerct.toml so it matches the Zerct deploy contract.'
       })
     }
+  } else {
+    checks.push({
+      name: 'zerct.toml',
+      ok: false,
+      message: 'missing',
+      agent_instruction: 'Create and commit zerct.toml, then retry.'
+    })
+  }
+
+  const kind = config?.kind || 'rust_backend'
+  const requiredFiles = kind === 'static_frontend'
+    ? ['package.json']
+    : ['Cargo.toml', 'Cargo.lock']
+  for (const file of requiredFiles) {
+    const ok = existsSync(path.join(projectDir, file))
+    checks.push({
+      name: file,
+      ok,
+      message: ok ? 'found' : 'missing',
+      agent_instruction: `Create and commit ${file}, then retry.`
+    })
+  }
+
+  if (kind === 'static_frontend') {
+    const hasLockfile = frontendLockfileExists(projectDir)
+    checks.push({
+      name: 'frontend lockfile',
+      ok: hasLockfile,
+      message: hasLockfile ? 'found' : 'missing',
+      agent_instruction: 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.'
+    })
+    checks.push(...frontendScriptChecks(projectDir))
   }
 
   const unsafeHits = scanUnsafe(projectDir)
@@ -270,7 +292,10 @@ function runDoctor(projectDir) {
     message: unsafeHits.length === 0 ? 'no direct unsafe found' : unsafeHits.slice(0, 5).join(', '),
     agent_instruction: 'Remove direct unsafe usage from workspace Rust source before deploying.'
   })
-  checks.push(cargoCheck(projectDir))
+  if (kind === 'rust_backend') {
+    checks.push(cargoCheck(projectDir))
+    checks.push(cargoClippy(projectDir))
+  }
 
   return {
     ok: checks.every((check) => check.ok),
@@ -305,6 +330,31 @@ function cargoCheck(projectDir) {
   }
 }
 
+function cargoClippy(projectDir) {
+  const cargo = spawnSync('cargo', ['clippy', '--locked', '--all-targets', '--all-features', '--quiet', '--', '-D', 'warnings'], {
+    cwd: projectDir,
+    encoding: 'utf8',
+    env: { ...process.env, CARGO_TERM_COLOR: 'never' },
+    stdio: ['ignore', 'pipe', 'pipe']
+  })
+
+  if (cargo.error) {
+    return {
+      name: 'cargo clippy',
+      ok: false,
+      message: cargo.error.message,
+      agent_instruction: 'Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.'
+    }
+  }
+
+  return {
+    name: 'cargo clippy',
+    ok: cargo.status === 0,
+    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo clippy failed').trim().slice(0, 240),
+    agent_instruction: 'Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.'
+  }
+}
+
 async function login(cli) {
   if (cli.token) {
     writeSessionToken(cli.token)
@@ -320,6 +370,9 @@ async function deploy(projectDir, cli) {
   if (!report.ok) {
     const firstFailure = report.checks.find((check) => !check.ok)
     throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry.', cli.json)
+  }
+  if (report.config?.kind === 'static_frontend' && cli.database) {
+    throw agentError('invalid_database_target', 'Static frontends cannot attach managed Postgres directly.', 'Deploy a Rust backend with managed Postgres and call it from the frontend.', cli.json)
   }
 
   const token = await readOrLoginToken(projectDir, cli)
@@ -703,7 +756,12 @@ function parseZerctToml(source) {
     section[assignment[1]] = parseTomlValue(assignment[2])
   }
 
-  config.build.command ||= 'cargo build --release'
+  config.kind ||= 'rust_backend'
+  config.build.check ||= config.kind === 'static_frontend' ? DEFAULT_FRONTEND_CHECK_COMMAND : DEFAULT_RUST_CHECK_COMMAND
+  config.build.command ||= config.kind === 'static_frontend' ? 'npm ci && npm run build' : 'cargo build --release'
+  if (config.kind === 'static_frontend') {
+    config.build.output ||= 'dist'
+  }
   config.run.port ||= 3000
   config.run.health ||= '/healthz'
   config.resources.memory ||= '512mb'
@@ -733,6 +791,21 @@ function validateConfig(config) {
   if (!/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/u.test(config.name || '')) {
     throw new Error('name must be lowercase DNS-safe text up to 48 characters')
   }
+  if (!['rust_backend', 'static_frontend'].includes(config.kind)) {
+    throw new Error('kind must be rust_backend or static_frontend')
+  }
+  if (typeof config.build.command !== 'string' || !config.build.command.trim()) {
+    throw new Error('[build].command is required')
+  }
+  if (typeof config.build.check !== 'string' || !config.build.check.trim()) {
+    throw new Error('[build].check is required')
+  }
+  if (config.kind === 'static_frontend') {
+    if (typeof config.build.output !== 'string' || !isSafeRelativePath(config.build.output)) {
+      throw new Error('[build].output must be a safe relative directory like dist')
+    }
+    return
+  }
   if (!config.run.command || typeof config.run.command !== 'string') {
     throw new Error('[run].command is required')
   }
@@ -748,6 +821,67 @@ function validateConfig(config) {
   if (!/^\d+(?:\.\d{1,3})?$/u.test(config.resources.cpu)) {
     throw new Error('[resources].cpu must look like 0.25, 0.5, 1, or 2')
   }
+}
+
+function frontendLockfileExists(projectDir) {
+  return ['package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb']
+    .some((file) => existsSync(path.join(projectDir, file)))
+}
+
+function frontendScriptChecks(projectDir) {
+  const manifest = readPackageJson(projectDir)
+  const missing = (script) => !manifest?.scripts || typeof manifest.scripts[script] !== 'string' || !manifest.scripts[script].trim()
+  const checks = ['typecheck', 'lint'].map((script) => ({
+    name: `npm script ${script}`,
+    ok: !missing(script),
+    message: missing(script) ? 'missing' : 'found',
+    agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
+  }))
+
+  if (checks.every((check) => check.ok)) {
+    checks.push(npmScriptCheck(projectDir, 'typecheck'))
+    checks.push(npmScriptCheck(projectDir, 'lint'))
+  }
+
+  return checks
+}
+
+function readPackageJson(projectDir) {
+  try {
+    return JSON.parse(readFileSync(path.join(projectDir, 'package.json'), 'utf8'))
+  } catch (_error) {
+    return null
+  }
+}
+
+function npmScriptCheck(projectDir, script) {
+  const npm = spawnSync('npm', ['run', '--silent', script], {
+    cwd: projectDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  })
+  if (npm.error) {
+    return {
+      name: `npm run ${script}`,
+      ok: false,
+      message: npm.error.message,
+      agent_instruction: `Install Node.js and npm, then run \`npm run ${script}\` before deploying.`
+    }
+  }
+
+  return {
+    name: `npm run ${script}`,
+    ok: npm.status === 0,
+    message: npm.status === 0 ? 'passed' : (npm.stderr || npm.stdout || `npm run ${script} failed`).trim().slice(0, 240),
+    agent_instruction: `Run \`npm run ${script}\`, fix every error, then redeploy.`
+  }
+}
+
+function isSafeRelativePath(value) {
+  return value
+    && !path.isAbsolute(value)
+    && !value.includes('\\')
+    && value.split('/').every((part) => part && part !== '.' && part !== '..')
 }
 
 function scanUnsafe(projectDir) {
