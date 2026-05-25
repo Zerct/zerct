@@ -3,6 +3,12 @@
 Deploy Rust backends to Zerct.
 
 ```sh
+npx @zerct/zerct deploy
+```
+
+Target unscoped command, pending npm approval:
+
+```sh
 npx zerct init
 npx zerct doctor
 npx zerct deploy

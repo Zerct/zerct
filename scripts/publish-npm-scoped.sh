@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+source_dir="packages/zerct"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/zerct-npm-scoped.XXXXXX")"
+
+cleanup() {
+  rm -rf "$work_dir"
+}
+trap cleanup EXIT
+
+mkdir -p "$work_dir/bin"
+cp "$source_dir/README.md" "$work_dir/README.md"
+cp "$source_dir/package.json" "$work_dir/package.json"
+cp "$source_dir/bin/zerct.js" "$work_dir/bin/zerct.js"
+
+node --input-type=module - "$work_dir/package.json" <<'NODE'
+import { readFileSync, writeFileSync } from 'node:fs'
+
+const path = process.argv[2]
+const pkg = JSON.parse(readFileSync(path, 'utf8'))
+pkg.name = '@zerct/zerct'
+pkg.publishConfig = { access: 'public' }
+writeFileSync(path, `${JSON.stringify(pkg, null, 2)}\n`)
+NODE
+
+chmod +x "$work_dir/bin/zerct.js"
+
+(
+  cd "$work_dir"
+  npm publish --access public --registry=https://registry.npmjs.org/
+)

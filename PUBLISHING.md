@@ -24,6 +24,15 @@ For the very first publish, npm may require either an existing package trusted
 publisher configuration or a valid `NPM_TOKEN` repository environment secret.
 After trusted publishing works, remove long-lived publish tokens.
 
+Temporary scoped fallback:
+
+- Package: `@zerct/zerct`
+- Workflow: `.github/workflows/publish-npm-scoped.yml`
+- Local command: `./scripts/publish-npm-scoped.sh`
+
+The scoped package is generated from `packages/zerct` during publish so the CLI
+source stays single-owner.
+
 ## PyPI
 
 Project: `zerct`
