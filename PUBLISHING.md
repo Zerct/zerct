@@ -1,9 +1,13 @@
 # Publishing
 
-Package publishing is manual and environment-gated. Local checks remain local.
-GitHub Actions are limited to release publishing and explicit Mintlify docs
+Package publishing is version-file gated. Local checks remain local. GitHub
+Actions are limited to release publishing and explicit Mintlify docs
 automation. Run `./scripts/check-all.sh` before dispatching any publish
 workflow.
+
+Publish workflows also run on pushes to the relevant package version files.
+Every publish workflow must check the target registry first and skip when the
+exact version already exists.
 
 All publish workflows use Blacksmith runners. Keep lightweight publish jobs on
 `blacksmith-2vcpu-ubuntu-2404`; move to a larger Blacksmith runner only after a
@@ -27,10 +31,18 @@ Recommended npm trusted publisher values:
 - Environment name: `npm`
 - Allowed action: `npm publish`
 
-The workflow publishes with npm provenance. For the first publish, npm may
-require either an existing package trusted publisher configuration or a valid
-`NPM_TOKEN` repository environment secret. After trusted publishing works,
-remove long-lived publish tokens.
+The workflow publishes from Blacksmith with `NPM_TOKEN`. npm provenance is not
+enabled on Blacksmith because npm currently accepts provenance only from
+GitHub-hosted runners.
+
+Required `NPM_TOKEN` shape:
+
+- Token type: granular access token.
+- Packages and scopes: `zerct` for unscoped publishing or `@zerct/zerct` for
+  scoped publishing.
+- Permission: read and write for packages and scopes.
+- Two-factor bypass: enabled for automation.
+- CIDR restriction: empty unless the full runner egress range is known.
 
 Temporary scoped fallback:
 
