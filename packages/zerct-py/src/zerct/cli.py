@@ -217,12 +217,18 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
             validate_config(config)
             checks.append({"name": "zerct.toml", "ok": True, "message": "valid", "agent_instruction": ""})
         except (OSError, tomllib.TOMLDecodeError, AgentError) as error:
+            instruction = (
+                error.agent_instruction
+                if isinstance(error, AgentError)
+                else "Fix zerct.toml so it matches the Zerct deploy contract."
+            )
+            message = error.message if isinstance(error, AgentError) else str(error)
             checks.append(
                 {
                     "name": "zerct.toml",
                     "ok": False,
-                    "message": str(error),
-                    "agent_instruction": "Fix zerct.toml so it matches the Zerct deploy contract.",
+                    "message": message,
+                    "agent_instruction": instruction,
                 }
             )
     else:
@@ -382,6 +388,7 @@ def validate_config(config: dict[str, Any]) -> None:
             "Check command is missing.",
             "Set [build].check in zerct.toml to a command that typechecks and lints before the release build.",
         )
+    validate_check_command(str(config["kind"]), config["build"]["check"])
     if config["kind"] == "static_frontend":
         output = config["build"].get("output")
         if not isinstance(output, str) or not safe_relative_path(output):
@@ -410,6 +417,27 @@ def validate_config(config: dict[str, Any]) -> None:
             "Health endpoint must be an absolute path.",
             "Set [run].health to a short absolute path such as `/healthz`.",
         )
+
+
+def validate_check_command(kind: str, command: str) -> None:
+    required = (
+        ("typecheck", "lint")
+        if kind == "static_frontend"
+        else ("cargo check --locked", "cargo clippy --locked", "--all-targets", "--all-features", "-D warnings")
+    )
+    if all(fragment in command for fragment in required):
+        return
+    if kind == "static_frontend":
+        raise AgentError(
+            "policy_rejected",
+            "Check command is too weak for Zerct deploys.",
+            "Set [build].check to run both frontend typechecking and linting, for example `npm run typecheck && npm run lint`, then redeploy.",
+        )
+    raise AgentError(
+        "policy_rejected",
+        "Check command is too weak for Zerct deploys.",
+        "Set [build].check to include `cargo check --locked` and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy.",
+    )
 
 
 def frontend_lockfile_exists(project_dir: pathlib.Path) -> bool:

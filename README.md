@@ -27,6 +27,10 @@ command = "npm ci && npm run build"
 output = "dist"
 ```
 
+Rust backend checks must include locked `cargo check` and locked all-target,
+all-feature Clippy with `-D warnings`. Static frontend checks must run both
+typechecking and linting before build work is queued.
+
 Use Homebrew for a persistent developer CLI:
 
 ```sh

@@ -248,7 +248,7 @@ function runDoctor(projectDir) {
         name: 'zerct.toml',
         ok: false,
         message: error.message,
-        agent_instruction: 'Fix zerct.toml so it matches the Zerct deploy contract.'
+        agent_instruction: `Fix zerct.toml: ${error.message}.`
       })
     }
   } else {
@@ -800,6 +800,7 @@ function validateConfig(config) {
   if (typeof config.build.check !== 'string' || !config.build.check.trim()) {
     throw new Error('[build].check is required')
   }
+  validateCheckCommand(config.kind, config.build.check)
   if (config.kind === 'static_frontend') {
     if (typeof config.build.output !== 'string' || !isSafeRelativePath(config.build.output)) {
       throw new Error('[build].output must be a safe relative directory like dist')
@@ -821,6 +822,18 @@ function validateConfig(config) {
   if (!/^\d+(?:\.\d{1,3})?$/u.test(config.resources.cpu)) {
     throw new Error('[resources].cpu must look like 0.25, 0.5, 1, or 2')
   }
+}
+
+function validateCheckCommand(kind, command) {
+  const required = kind === 'static_frontend'
+    ? ['typecheck', 'lint']
+    : ['cargo check --locked', 'cargo clippy --locked', '--all-targets', '--all-features', '-D warnings']
+  if (required.every((fragment) => command.includes(fragment))) {
+    return
+  }
+  throw new Error(kind === 'static_frontend'
+    ? '[build].check must run frontend typecheck and lint'
+    : '[build].check must include cargo check --locked and cargo clippy --locked --all-targets --all-features -- -D warnings')
 }
 
 function frontendLockfileExists(projectDir) {

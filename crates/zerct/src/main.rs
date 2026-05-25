@@ -697,6 +697,7 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
             "Set [build].check in zerct.toml to a command that typechecks and lints before the release build.",
         ));
     }
+    validate_check_command(&config.kind, &config.check_command)?;
     if config.kind == "static_frontend" {
         let Some(output_dir) = &config.build_output_dir else {
             return Err(AgentError::new(
@@ -729,6 +730,32 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
         ));
     }
     Ok(())
+}
+
+fn validate_check_command(kind: &str, command: &str) -> Result<(), AgentError> {
+    let required = if kind == "static_frontend" {
+        &["typecheck", "lint"][..]
+    } else {
+        &[
+            "cargo check --locked",
+            "cargo clippy --locked",
+            "--all-targets",
+            "--all-features",
+            "-D warnings",
+        ][..]
+    };
+    if required.iter().all(|fragment| command.contains(fragment)) {
+        return Ok(());
+    }
+    Err(AgentError::new(
+        "policy_rejected",
+        "Check command is too weak for Zerct deploys.",
+        if kind == "static_frontend" {
+            "Set [build].check to run both frontend typechecking and linting, for example `npm run typecheck && npm run lint`, then redeploy."
+        } else {
+            "Set [build].check to include `cargo check --locked` and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy."
+        },
+    ))
 }
 
 fn login(cli: &Cli) -> Result<(), AgentError> {
