@@ -16,9 +16,11 @@ node packages/zerct/bin/zerct.js --version
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --version
 
 cargo fmt --check --manifest-path crates/zerct/Cargo.toml
-cargo check --manifest-path crates/zerct/Cargo.toml
-cargo package --manifest-path crates/zerct/Cargo.toml --allow-dirty --no-verify >/dev/null
+cargo check --locked --manifest-path crates/zerct/Cargo.toml
+cargo clippy --locked --manifest-path crates/zerct/Cargo.toml --all-targets --all-features -- -D warnings
+cargo package --locked --manifest-path crates/zerct/Cargo.toml --allow-dirty --no-verify >/dev/null
 
-cargo generate-lockfile --manifest-path examples/hello-rust/Cargo.toml
-cargo check --manifest-path examples/hello-rust/Cargo.toml
+test -f examples/hello-rust/Cargo.lock
+cargo check --locked --manifest-path examples/hello-rust/Cargo.toml
+cargo clippy --locked --manifest-path examples/hello-rust/Cargo.toml --all-targets --all-features -- -D warnings
 node packages/zerct/bin/zerct.js doctor examples/hello-rust --json >/dev/null

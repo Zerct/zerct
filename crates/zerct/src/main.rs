@@ -61,7 +61,8 @@ fn main() -> ExitCode {
 }
 
 fn run() -> Result<(), AgentError> {
-    let cli = Cli::parse(env::args().skip(1).collect())?;
+    let raw_args = env::args().skip(1).collect::<Vec<_>>();
+    let cli = Cli::parse(&raw_args)?;
     match cli.command.as_str() {
         "help" | "--help" | "-h" => {
             print_help();
@@ -124,7 +125,7 @@ struct Cli {
 }
 
 impl Cli {
-    fn parse(raw: Vec<String>) -> Result<Self, AgentError> {
+    fn parse(raw: &[String]) -> Result<Self, AgentError> {
         let mut args = Vec::new();
         let mut api_url = DEFAULT_API_URL.to_owned();
         let mut app = None;
@@ -136,15 +137,15 @@ impl Cli {
         while let Some(arg) = raw.get(index) {
             match arg.as_str() {
                 "--api" => {
-                    api_url = required_value(&raw, index, "--api")?;
+                    api_url = required_value(raw, index, "--api")?;
                     index += 2;
                 }
                 "--app" => {
-                    app = Some(required_value(&raw, index, "--app")?);
+                    app = Some(required_value(raw, index, "--app")?);
                     index += 2;
                 }
                 "--token" => {
-                    token = Some(required_value(&raw, index, "--token")?);
+                    token = Some(required_value(raw, index, "--token")?);
                     index += 2;
                 }
                 "--database" => {
@@ -459,6 +460,7 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
                 "Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry."
                     .to_owned(),
         });
+        checks.extend(frontend_source_checks(project_dir));
         checks.extend(frontend_script_checks(project_dir));
     }
 
@@ -617,16 +619,16 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
         let key = key.trim();
         let value = value.trim().trim_matches('"');
         match (section, key) {
-            ("", "name") => name = value.to_owned(),
-            ("", "kind") => kind = value.to_owned(),
-            ("build", "check") => check_command = value.to_owned(),
-            ("build", "command") => build_command = value.to_owned(),
+            ("", "name") => value.clone_into(&mut name),
+            ("", "kind") => value.clone_into(&mut kind),
+            ("build", "check") => value.clone_into(&mut check_command),
+            ("build", "command") => value.clone_into(&mut build_command),
             ("build", "output") => build_output_dir = Some(value.to_owned()),
-            ("run", "command") => run_command = value.to_owned(),
+            ("run", "command") => value.clone_into(&mut run_command),
             ("run", "port") => port = parse_u16(value, "invalid_port")?,
-            ("run", "health") => health = value.to_owned(),
-            ("resources", "memory") => memory = value.to_owned(),
-            ("resources", "cpu") => cpu = value.to_owned(),
+            ("run", "health") => value.clone_into(&mut health),
+            ("resources", "memory") => value.clone_into(&mut memory),
+            ("resources", "cpu") => value.clone_into(&mut cpu),
             ("resources", "idle_timeout_minutes") => {
                 idle_timeout_minutes = parse_u16(value, "invalid_idle_timeout")?;
             }
@@ -1158,14 +1160,14 @@ fn write_session_token_file(token_path: &Path, token: &str) -> Result<(), AgentE
             "Check home directory permissions and retry.",
         )
     })?;
-    fs::create_dir_all(&dir).map_err(|error| {
+    fs::create_dir_all(dir).map_err(|error| {
         AgentError::new(
             "write_failed",
             format!("Could not create Zerct token directory: {error}"),
             "Check directory permissions and retry.",
         )
     })?;
-    set_private_dir_permissions(&dir)?;
+    set_private_dir_permissions(dir)?;
     fs::write(token_path, format!("{token}\n")).map_err(|error| {
         AgentError::new(
             "write_failed",
@@ -1188,7 +1190,7 @@ fn read_keychain_token() -> Result<Option<String>, AgentError> {
                 "-w",
             ])
             .output()
-            .map_err(keychain_command_error)?;
+            .map_err(|error| keychain_command_error(&error))?;
         return Ok(output
             .status
             .success()
@@ -1206,7 +1208,7 @@ fn read_keychain_token() -> Result<Option<String>, AgentError> {
                 SESSION_ACCOUNT,
             ])
             .output()
-            .map_err(keychain_command_error)?;
+            .map_err(|error| keychain_command_error(&error))?;
         return Ok(output
             .status
             .success()
@@ -1233,7 +1235,7 @@ fn write_keychain_token(token: &str) -> Result<bool, AgentError> {
                 token,
             ])
             .status()
-            .map_err(keychain_command_error)?;
+            .map_err(|error| keychain_command_error(&error))?;
         return Ok(status.success());
     }
 
@@ -1250,20 +1252,22 @@ fn write_keychain_token(token: &str) -> Result<bool, AgentError> {
             ])
             .stdin(Stdio::piped())
             .spawn()
-            .map_err(keychain_command_error)?;
+            .map_err(|error| keychain_command_error(&error))?;
         if let Some(mut stdin) = child.stdin.take() {
             stdin
                 .write_all(token.as_bytes())
-                .map_err(keychain_write_error)?;
+                .map_err(|error| keychain_write_error(&error))?;
         }
-        let status = child.wait().map_err(keychain_command_error)?;
+        let status = child
+            .wait()
+            .map_err(|error| keychain_command_error(&error))?;
         return Ok(status.success());
     }
 
     Ok(false)
 }
 
-fn keychain_command_error(error: std::io::Error) -> AgentError {
+fn keychain_command_error(error: &std::io::Error) -> AgentError {
     AgentError::new(
         "credential_store_failed",
         format!("Could not access the Zerct credential store: {error}"),
@@ -1271,7 +1275,7 @@ fn keychain_command_error(error: std::io::Error) -> AgentError {
     )
 }
 
-fn keychain_write_error(error: std::io::Error) -> AgentError {
+fn keychain_write_error(error: &std::io::Error) -> AgentError {
     AgentError::new(
         "credential_store_failed",
         format!("Could not write the Zerct credential: {error}"),
@@ -1280,19 +1284,21 @@ fn keychain_write_error(error: std::io::Error) -> AgentError {
 }
 
 fn command_exists(command: &str) -> bool {
-    Command::new("sh")
-        .args(["-c", &format!("command -v {command} >/dev/null 2>&1")])
-        .status()
-        .is_ok_and(|status| status.success())
+    let Some(paths) = env::var_os("PATH") else {
+        return false;
+    };
+    env::split_paths(&paths).any(|directory| directory.join(command).is_file())
 }
 
 #[cfg(unix)]
 fn set_private_dir_permissions(path: &Path) -> Result<(), AgentError> {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut permissions = fs::metadata(path).map_err(permission_error)?.permissions();
+    let mut permissions = fs::metadata(path)
+        .map_err(|error| permission_error(&error))?
+        .permissions();
     permissions.set_mode(0o700);
-    fs::set_permissions(path, permissions).map_err(permission_error)
+    fs::set_permissions(path, permissions).map_err(|error| permission_error(&error))
 }
 
 #[cfg(not(unix))]
@@ -1304,9 +1310,11 @@ fn set_private_dir_permissions(_path: &Path) -> Result<(), AgentError> {
 fn set_private_file_permissions(path: &Path) -> Result<(), AgentError> {
     use std::os::unix::fs::PermissionsExt;
 
-    let mut permissions = fs::metadata(path).map_err(permission_error)?.permissions();
+    let mut permissions = fs::metadata(path)
+        .map_err(|error| permission_error(&error))?
+        .permissions();
     permissions.set_mode(0o600);
-    fs::set_permissions(path, permissions).map_err(permission_error)
+    fs::set_permissions(path, permissions).map_err(|error| permission_error(&error))
 }
 
 #[cfg(not(unix))]
@@ -1314,7 +1322,7 @@ fn set_private_file_permissions(_path: &Path) -> Result<(), AgentError> {
     Ok(())
 }
 
-fn permission_error(error: std::io::Error) -> AgentError {
+fn permission_error(error: &std::io::Error) -> AgentError {
     AgentError::new(
         "write_failed",
         format!("Could not restrict Zerct token permissions: {error}"),
@@ -1334,7 +1342,7 @@ fn scan_unsafe(project_dir: &Path) -> Vec<PathBuf> {
             let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
                 continue;
             };
-            if matches!(name, ".git" | "target" | "node_modules" | ".zerct") {
+            if should_skip_dir(name) {
                 continue;
             }
             if path.is_dir() {
@@ -1350,6 +1358,10 @@ fn scan_unsafe(project_dir: &Path) -> Vec<PathBuf> {
         }
     }
     hits
+}
+
+fn should_skip_dir(name: &str) -> bool {
+    matches!(name, ".git" | "target" | "node_modules" | ".zerct")
 }
 
 fn file_contains_unsafe(path: &Path) -> bool {
@@ -1390,6 +1402,119 @@ fn frontend_lockfile_exists(project_dir: &Path) -> bool {
     ]
     .iter()
     .any(|filename| project_dir.join(filename).exists())
+}
+
+fn frontend_source_checks(project_dir: &Path) -> Vec<Check> {
+    let report = frontend_source_report(project_dir);
+    vec![
+        Check {
+            name: "typescript source".to_owned(),
+            ok: !report.typescript.is_empty(),
+            message: if report.typescript.is_empty() {
+                "missing".to_owned()
+            } else {
+                display_paths(&report.typescript, 3)
+            },
+            agent_instruction:
+                "Add browser source as .ts or .tsx under src, app, pages, routes, or components, then retry."
+                    .to_owned(),
+        },
+        Check {
+            name: "javascript source".to_owned(),
+            ok: report.javascript.is_empty(),
+            message: if report.javascript.is_empty() {
+                "none found".to_owned()
+            } else {
+                display_paths(&report.javascript, 5)
+            },
+            agent_instruction:
+                "Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying."
+                    .to_owned(),
+        },
+    ]
+}
+
+#[derive(Default)]
+struct FrontendSourceReport {
+    typescript: Vec<PathBuf>,
+    javascript: Vec<PathBuf>,
+}
+
+fn frontend_source_report(project_dir: &Path) -> FrontendSourceReport {
+    let mut report = FrontendSourceReport::default();
+    let mut stack = vec![project_dir.to_path_buf()];
+    while let Some(dir) = stack.pop() {
+        let Ok(entries) = fs::read_dir(&dir) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+                continue;
+            };
+            if should_skip_dir(name) {
+                continue;
+            }
+            if path.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            if !path.is_file() {
+                continue;
+            }
+            let relative = path
+                .strip_prefix(project_dir)
+                .map_or(path.as_path(), |path| path);
+            if !is_frontend_source_path(relative) {
+                continue;
+            }
+            if is_frontend_typescript_source(relative) {
+                report.typescript.push(relative.to_path_buf());
+            } else if is_frontend_javascript_source(relative) {
+                report.javascript.push(relative.to_path_buf());
+            }
+        }
+    }
+    report
+}
+
+fn is_frontend_source_path(relative: &Path) -> bool {
+    match relative.components().next() {
+        Some(std::path::Component::Normal(root)) => {
+            matches!(
+                root.to_str(),
+                Some("src" | "app" | "pages" | "routes" | "components")
+            )
+        }
+        _ => false,
+    }
+}
+
+fn is_frontend_typescript_source(relative: &Path) -> bool {
+    !display_path(relative).ends_with(".d.ts") && path_has_extension(relative, &["ts", "tsx"])
+}
+
+fn is_frontend_javascript_source(relative: &Path) -> bool {
+    path_has_extension(relative, &["js", "jsx", "mjs", "cjs"])
+}
+
+fn path_has_extension(path: &Path, allowed: &[&str]) -> bool {
+    path.extension()
+        .and_then(|extension| extension.to_str())
+        .is_some_and(|extension| allowed.contains(&extension))
+}
+
+fn display_paths(paths: &[PathBuf], limit: usize) -> String {
+    paths
+        .iter()
+        .take(limit)
+        .map(|path| display_path(path))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn display_path(path: &Path) -> String {
+    path.to_string_lossy().replace('\\', "/")
 }
 
 fn frontend_script_checks(project_dir: &Path) -> Vec<Check> {
@@ -1588,9 +1713,7 @@ fn current_dir_or_dot() -> PathBuf {
 }
 
 fn home_dir() -> PathBuf {
-    env::var_os("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(current_dir_or_dot)
+    env::var_os("HOME").map_or_else(current_dir_or_dot, PathBuf::from)
 }
 
 fn user_session_path() -> PathBuf {
