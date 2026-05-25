@@ -12,6 +12,8 @@ ambiguous to run.
 - Rust backends run locked `cargo check` and locked all-target, all-feature
   Clippy with `-D warnings`.
 - Static frontends run typechecking and linting before build work starts.
+- Static frontend browser source must use `.ts` or `.tsx`; `.js`, `.jsx`,
+  `.mjs`, and `.cjs` browser source is rejected.
 - A health endpoint is required.
 - Apps must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.

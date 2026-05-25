@@ -19,7 +19,7 @@ import urllib.error
 import urllib.request
 import webbrowser
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Iterator
 
 from . import __version__
 
@@ -264,6 +264,7 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
                 "agent_instruction": "Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.",
             }
         )
+        checks.extend(frontend_source_checks(project_dir))
         checks.extend(frontend_script_checks(project_dir))
 
     unsafe_hits = scan_unsafe(project_dir)
@@ -467,6 +468,49 @@ def frontend_script_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
         checks.append(npm_script_check(project_dir, "typecheck"))
         checks.append(npm_script_check(project_dir, "lint"))
     return checks
+
+
+def frontend_source_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
+    source = frontend_source_report(project_dir)
+    return [
+        {
+            "name": "typescript source",
+            "ok": bool(source["typescript"]),
+            "message": ", ".join(source["typescript"][:3]) if source["typescript"] else "missing",
+            "agent_instruction": "Add browser source as .ts or .tsx under src, app, pages, routes, or components, then retry.",
+        },
+        {
+            "name": "javascript source",
+            "ok": not source["javascript"],
+            "message": "none found" if not source["javascript"] else ", ".join(source["javascript"][:5]),
+            "agent_instruction": "Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying.",
+        },
+    ]
+
+
+def frontend_source_report(project_dir: pathlib.Path) -> dict[str, list[str]]:
+    source: dict[str, list[str]] = {"typescript": [], "javascript": []}
+    for _item, relative in iter_project_files(project_dir):
+        if not is_frontend_source_path(relative):
+            continue
+        relative_text = relative.as_posix()
+        if is_frontend_typescript_source(relative_text):
+            source["typescript"].append(relative_text)
+        elif is_frontend_javascript_source(relative_text):
+            source["javascript"].append(relative_text)
+    return source
+
+
+def is_frontend_source_path(relative: pathlib.Path) -> bool:
+    return bool(relative.parts) and relative.parts[0] in {"src", "app", "pages", "routes", "components"}
+
+
+def is_frontend_typescript_source(relative: str) -> bool:
+    return not relative.endswith(".d.ts") and relative.endswith((".ts", ".tsx"))
+
+
+def is_frontend_javascript_source(relative: str) -> bool:
+    return relative.endswith((".js", ".jsx", ".mjs", ".cjs"))
 
 
 def read_package_json(project_dir: pathlib.Path) -> dict[str, Any] | None:
@@ -708,10 +752,7 @@ def api_request(
 def archive_base64(project_dir: pathlib.Path) -> str:
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w:gz") as archive:
-        for item in project_dir.rglob("*"):
-            relative = item.relative_to(project_dir)
-            if should_exclude(relative):
-                continue
+        for item, relative in iter_project_files(project_dir):
             archive.add(item, arcname=relative)
 
     raw = buffer.getvalue()
@@ -736,11 +777,24 @@ def should_exclude(relative: pathlib.Path) -> bool:
     )
 
 
+def iter_project_files(project_dir: pathlib.Path) -> Iterator[tuple[pathlib.Path, pathlib.Path]]:
+    stack = [project_dir]
+    while stack:
+        directory = stack.pop()
+        for item in directory.iterdir():
+            relative = item.relative_to(project_dir)
+            if should_exclude(relative) or item.is_symlink():
+                continue
+            if item.is_dir():
+                stack.append(item)
+            elif item.is_file():
+                yield item, relative
+
+
 def scan_unsafe(project_dir: pathlib.Path) -> list[str]:
     hits: list[str] = []
-    for item in project_dir.rglob("*.rs"):
-        relative = item.relative_to(project_dir)
-        if should_exclude(relative):
+    for item, relative in iter_project_files(project_dir):
+        if item.suffix != ".rs":
             continue
         if re.search(r"\bunsafe\b", item.read_text(encoding="utf-8", errors="ignore")):
             hits.append(str(relative))

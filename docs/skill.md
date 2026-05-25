@@ -2,7 +2,7 @@
 name: zerct
 description: Deploy Rust backends and static frontends to Zerct.
 license: MIT
-compatibility: Requires zerct.toml. Rust backends require Cargo.toml and Cargo.lock. Static frontends require package.json, typecheck/lint scripts, and a package lockfile.
+compatibility: Requires zerct.toml. Rust backends require Cargo.toml and Cargo.lock. Static frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile.
 metadata:
   author: Zerct
   version: "0.1"
@@ -33,6 +33,8 @@ For static frontends, require:
 
 - `package.json`
 - one package lockfile
+- browser source as `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
+  `components`
 - `kind = "static_frontend"` in `zerct.toml`
 - `typecheck` and `lint` scripts in `package.json`
 - a `[build].check` command that runs typechecking and linting

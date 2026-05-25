@@ -29,7 +29,9 @@ output = "dist"
 
 Rust backend checks must include locked `cargo check` and locked all-target,
 all-feature Clippy with `-D warnings`. Static frontend checks must run both
-typechecking and linting before build work is queued.
+typechecking and linting before build work is queued. Static frontend browser
+source must be `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
+`components`; browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected.
 
 Use Homebrew for a persistent developer CLI:
 

@@ -23,6 +23,8 @@ tighten these rules.
    weaken existing `unsafe_code = "forbid"` settings.
 6. Before finishing, run `./scripts/check-all.sh`, confirm the working tree is
    clean except intentional changes, and state whether publishing happened.
+   `check-all` must keep locked Cargo checks and Clippy with `-D warnings` for
+   the Cargo CLI and examples.
 
 ## Change Discipline
 
@@ -64,7 +66,9 @@ tighten these rules.
    npm, PyPI, Cargo, skills, docs, and examples. Any custom Rust
    `[build].check` must include locked `cargo check` and locked all-target,
    all-feature Clippy with `-D warnings`; any custom static frontend
-   `[build].check` must run both typechecking and linting.
+   `[build].check` must run both typechecking and linting. Static frontend
+   browser source must be TypeScript under `src`, `app`, `pages`, `routes`, or
+   `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
 
 ## Docs And OpenAPI
 
@@ -98,7 +102,8 @@ tighten these rules.
    no secrets.
 3. Static frontend examples must include `zerct.toml` with
    `kind = "static_frontend"`, `package.json`, `typecheck` and `lint` scripts,
-   a package lockfile, strict `[build].check`, and no secrets.
+   TypeScript browser source, a package lockfile, strict `[build].check`, and
+   no secrets.
 4. Skills must be operational, not marketing. Include direct commands, expected
    files, deploy contract, and common failure fixes.
 5. Skills that describe user deployments must keep the no-direct-unsafe policy

@@ -62,7 +62,7 @@ Usage:
 
 Agent contract:
   - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
-  - Static frontends set kind = "static_frontend", keep a package lockfile, and expose typecheck + lint scripts.
+  - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, and typecheck + lint scripts.
   - Keep direct unsafe out of Rust source.
 `
 
@@ -282,6 +282,7 @@ function runDoctor(projectDir) {
       message: hasLockfile ? 'found' : 'missing',
       agent_instruction: 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.'
     })
+    checks.push(...frontendSourceChecks(projectDir))
     checks.push(...frontendScriptChecks(projectDir))
   }
 
@@ -857,6 +858,53 @@ function frontendScriptChecks(projectDir) {
   }
 
   return checks
+}
+
+function frontendSourceChecks(projectDir) {
+  const report = frontendSourceReport(projectDir)
+  return [
+    {
+      name: 'typescript source',
+      ok: report.typescript.length > 0,
+      message: report.typescript.length > 0 ? report.typescript.slice(0, 3).join(', ') : 'missing',
+      agent_instruction: 'Add browser source as .ts or .tsx under src, app, pages, routes, or components, then retry.'
+    },
+    {
+      name: 'javascript source',
+      ok: report.javascript.length === 0,
+      message: report.javascript.length === 0 ? 'none found' : report.javascript.slice(0, 5).join(', '),
+      agent_instruction: 'Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying.'
+    }
+  ]
+}
+
+function frontendSourceReport(projectDir) {
+  const report = { typescript: [], javascript: [] }
+  walk(projectDir, (file) => {
+    const relative = path.relative(projectDir, file).replace(/\\/gu, '/')
+    if (!isFrontendSourcePath(relative)) {
+      return
+    }
+    if (isFrontendTypescriptSource(relative)) {
+      report.typescript.push(relative)
+    } else if (isFrontendJavascriptSource(relative)) {
+      report.javascript.push(relative)
+    }
+  })
+  return report
+}
+
+function isFrontendSourcePath(relative) {
+  const [root] = relative.split('/')
+  return ['src', 'app', 'pages', 'routes', 'components'].includes(root)
+}
+
+function isFrontendTypescriptSource(relative) {
+  return !relative.endsWith('.d.ts') && (relative.endsWith('.ts') || relative.endsWith('.tsx'))
+}
+
+function isFrontendJavascriptSource(relative) {
+  return ['.js', '.jsx', '.mjs', '.cjs'].some((extension) => relative.endsWith(extension))
 }
 
 function readPackageJson(projectDir) {
