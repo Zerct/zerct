@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Zerct",
-  "description": "Deploy Rust backends as APIs for frontends hosted anywhere.",
+  "description": "Deploy free Rust backends with managed Postgres and HTTPS endpoints.",
   "colors": {
     "primary": "#000000",
     "light": "#000000",
