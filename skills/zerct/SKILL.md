@@ -11,7 +11,7 @@ Use when a user wants to deploy a Rust backend or static frontend to Zerct.
 
 1. Ensure the project has `zerct.toml`.
 2. For Rust backends, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint, and the strict locked Cargo checks.
-3. For static frontends, set `kind = "static_frontend"` and ensure `package.json`, TypeScript browser source, `typecheck`/`lint` scripts, a lockfile, and a strict frontend check command. Prefer `tsgo --noEmit` plus source-scoped `oxlint` for new TanStack or Vite projects.
+3. For static frontends, set `kind = "static_frontend"` and ensure `package.json`, TypeScript browser source, `typecheck`/`lint` scripts, a lockfile, and a strict frontend check command. Prefer `tsgo --noEmit` plus source-scoped `oxlint` for new TanStack or Vite projects. Avoid JavaScript-based linters unless no native equivalent exists for a required rule.
 4. Run `npx @zerct/zerct doctor`.
 5. Run `npx @zerct/zerct deploy`.
 6. If Zerct returns an `agent_instruction`, apply it and redeploy.
