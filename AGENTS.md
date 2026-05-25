@@ -80,6 +80,12 @@ tighten these rules.
     `bun.lock` or `bun.lockb` exists, otherwise keep npm compatibility for
     existing projects. The doctor command must reject JavaScript-based
     frontend lint scripts before upload.
+12. Managed Postgres guidance must be connection-efficient. Rust examples,
+    docs, and skills must use a small process-wide pool, avoid
+    connect-per-request code, and stay compatible with PgBouncer transaction
+    pooling. For the `postgres` crate, prefer typed query APIs such as
+    `query_typed_one` and `execute_typed` over prepared-statement paths. Free
+    examples should keep app-side pools at 4 connections or fewer.
 
 ## Docs And OpenAPI
 
@@ -122,6 +128,9 @@ tighten these rules.
    files, deploy contract, and common failure fixes.
 6. Skills that describe user deployments must keep the no-direct-unsafe policy
    visible.
+7. Managed Postgres examples must show bounded queries, explicit column lists,
+   and indexes for joins, filters, and ordering before adding load-test or
+   analytics endpoints.
 
 ## Publishing
 
