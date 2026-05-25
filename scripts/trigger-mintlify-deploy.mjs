@@ -30,12 +30,14 @@ async function mintlifyFetch(path, options = {}) {
 }
 
 function isDomainRevalidationOnlyFailure(status) {
-  const summary = String(status.summary ?? "");
+  const deploymentText = [status.summary, ...(status.logs ?? [])]
+    .filter(Boolean)
+    .join("\n");
 
   return (
-    summary.includes("Failed to revalidate domain: docs.zerct.com") &&
-    summary.includes("Successfully updated deployment") &&
-    summary.includes("Successfully indexed")
+    deploymentText.includes("Failed to revalidate domain: docs.zerct.com") &&
+    deploymentText.includes("Successfully updated deployment") &&
+    deploymentText.includes("Successfully indexed")
   );
 }
 
