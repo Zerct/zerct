@@ -20,9 +20,10 @@ Recommended npm trusted publisher values:
 - Environment name: `npm`
 - Allowed action: `npm publish`
 
-For the very first publish, npm may require either an existing package trusted
-publisher configuration or a valid `NPM_TOKEN` repository environment secret.
-After trusted publishing works, remove long-lived publish tokens.
+The workflow publishes with npm provenance. For the first publish, npm may
+require either an existing package trusted publisher configuration or a valid
+`NPM_TOKEN` repository environment secret. After trusted publishing works,
+remove long-lived publish tokens.
 
 Temporary scoped fallback:
 
@@ -30,6 +31,14 @@ Temporary scoped fallback:
 - Workflow: `.github/workflows/publish-npm-scoped.yml`
 - Local command: `./scripts/publish-npm-scoped.sh`
 - Verified command: `npx @zerct/zerct deploy`
+
+Scoped trusted publisher values:
+
+- Organization or user: `Zerct`
+- Repository: `zerct`
+- Workflow filename: `publish-npm-scoped.yml`
+- Environment name: `npm`
+- Allowed action: `npm publish`
 
 The scoped package is generated from `packages/zerct` during publish so the CLI
 source stays single-owner.

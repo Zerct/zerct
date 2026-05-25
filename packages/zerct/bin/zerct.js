@@ -4,11 +4,38 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.0'
+const VERSION = '0.1.1'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
 const SESSION_FILE = 'session-token'
+const ARCHIVE_EXCLUDES = [
+  '.git',
+  'target',
+  'node_modules',
+  '.zerct',
+  '.env',
+  '.env.*',
+  '.npmrc',
+  '.pypirc',
+  '.netrc',
+  '.ssh',
+  '.aws',
+  '.azure',
+  '.kube',
+  '.config/gcloud',
+  '*.pem',
+  '*.key',
+  '*.p12',
+  '*.pfx',
+  'id_rsa',
+  'id_ed25519',
+  '*.sqlite',
+  '*.sqlite3',
+  '*.db',
+  '*.log',
+  '.DS_Store'
+]
 
 const HELP = `Zerct ${VERSION}
 
@@ -416,19 +443,8 @@ function parseJson(text) {
 }
 
 function createArchiveBase64(projectDir) {
-  const tar = spawnSync('tar', [
-    '--exclude=.git',
-    '--exclude=target',
-    '--exclude=node_modules',
-    '--exclude=.zerct',
-    '--exclude=.env',
-    '--exclude=.env.*',
-    '-czf',
-    '-',
-    '-C',
-    projectDir,
-    '.'
-  ], {
+  const excludeArgs = ARCHIVE_EXCLUDES.map((pattern) => `--exclude=${pattern}`)
+  const tar = spawnSync('tar', [...excludeArgs, '-czf', '-', '-C', projectDir, '.'], {
     encoding: 'buffer',
     maxBuffer: ARCHIVE_LIMIT_BYTES + 1024 * 1024
   })

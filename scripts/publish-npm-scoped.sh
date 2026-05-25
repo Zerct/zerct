@@ -31,5 +31,9 @@ chmod +x "$work_dir/bin/zerct.js"
 
 (
   cd "$work_dir"
-  npm publish --access public --registry=https://registry.npmjs.org/
+  publish_args=(--access public --registry=https://registry.npmjs.org/)
+  if [[ "${NPM_PUBLISH_PROVENANCE:-}" == "1" ]]; then
+    publish_args+=(--provenance)
+  fi
+  npm publish "${publish_args[@]}"
 )
