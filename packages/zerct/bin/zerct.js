@@ -44,6 +44,7 @@ const ARCHIVE_EXCLUDES = [
   '._*',
   '.DS_Store'
 ]
+const WALK_EXCLUDED_DIRS = new Set(['.git', 'target', 'node_modules', '.zerct'])
 
 const HELP = `Zerct ${VERSION}
 
@@ -719,10 +720,10 @@ function writeKeychainToken(token) {
 }
 
 function hasCommand(command) {
-  const result = spawnSync('sh', ['-c', `command -v ${command} >/dev/null 2>&1`], {
-    stdio: 'ignore'
-  })
-  return result.status === 0
+  return (process.env.PATH || '')
+    .split(path.delimiter)
+    .filter(Boolean)
+    .some((directory) => existsSync(path.join(directory, command)))
 }
 
 function parseZerctToml(source) {
@@ -880,8 +881,7 @@ function frontendSourceChecks(projectDir) {
 
 function frontendSourceReport(projectDir) {
   const report = { typescript: [], javascript: [] }
-  walk(projectDir, (file) => {
-    const relative = path.relative(projectDir, file).replace(/\\/gu, '/')
+  walkProjectFiles(projectDir, (file, relative) => {
     if (!isFrontendSourcePath(relative)) {
       return
     }
@@ -947,21 +947,27 @@ function isSafeRelativePath(value) {
 
 function scanUnsafe(projectDir) {
   const hits = []
-  walk(projectDir, (file) => {
+  walkProjectFiles(projectDir, (file, relative) => {
     if (!file.endsWith('.rs')) {
       return
     }
     const source = readFileSync(file, 'utf8')
     if (/\bunsafe\b/u.test(source)) {
-      hits.push(path.relative(projectDir, file))
+      hits.push(relative)
     }
   })
   return hits
 }
 
+function walkProjectFiles(projectDir, visit) {
+  walk(projectDir, (file) => {
+    visit(file, path.relative(projectDir, file).replace(/\\/gu, '/'))
+  })
+}
+
 function walk(dir, visit) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (['.git', 'target', 'node_modules', '.zerct'].includes(entry.name)) {
+    if (WALK_EXCLUDED_DIRS.has(entry.name)) {
       continue
     }
     const fullPath = path.join(dir, entry.name)

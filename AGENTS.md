@@ -59,10 +59,12 @@ tighten these rules.
 6. Package CLIs must not print tokens, env values, database URLs, provider
    secrets, or Stripe/Cloudflare values. Print safe presence, status, ids, and
    public URLs only.
-7. Source archive creation must exclude local secrets, VCS metadata, build
+7. Package CLIs must not shell out just to detect whether a command exists.
+   Use direct PATH lookup or the host language's standard command lookup helper.
+8. Source archive creation must exclude local secrets, VCS metadata, build
    outputs, databases, logs, cloud credentials, SSH material, and private key
    files.
-8. Rust backend and static frontend deploy behavior must stay aligned across
+9. Rust backend and static frontend deploy behavior must stay aligned across
    npm, PyPI, Cargo, skills, docs, and examples. Any custom Rust
    `[build].check` must include locked `cargo check` and locked all-target,
    all-feature Clippy with `-D warnings`; any custom static frontend
