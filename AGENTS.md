@@ -120,9 +120,14 @@ tighten these rules.
    existing version.
 4. Prefer trusted publishing/OIDC. Use long-lived registry tokens only as a
    fallback for flows that cannot use trusted publishing yet.
-5. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
+5. Package publish workflows may run on pushes that touch package version
+   files, but every publish workflow must first check the target registry and
+   skip if that exact version already exists.
+6. Keep `scripts/check-package-versions.mjs` enforcing version consistency
+   across package manifests, lockfiles, and CLI version constants.
+7. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
    this repository.
-6. Current Homebrew command:
+8. Current Homebrew command:
 
    ```sh
    brew tap Zerct/tap
