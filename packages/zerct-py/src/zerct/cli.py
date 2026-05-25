@@ -33,7 +33,7 @@ SESSION_LABEL = "Zerct session"
 DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 DEFAULT_RUST_CHECK_COMMAND = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
-DEFAULT_FRONTEND_CHECK_COMMAND = "npm ci && npm run typecheck && npm run lint"
+DEFAULT_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 EXCLUDED_PARTS = {
     ".git",
     "target",
@@ -432,7 +432,7 @@ def validate_check_command(kind: str, command: str) -> None:
         raise AgentError(
             "policy_rejected",
             "Check command is too weak for Zerct deploys.",
-            "Set [build].check to install dependencies, typecheck, and lint, for example `npm ci && npm run typecheck && npm run lint`, then redeploy.",
+            "Set [build].check to install dependencies, typecheck, and lint, for example `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`, then redeploy.",
         )
     raise AgentError(
         "policy_rejected",

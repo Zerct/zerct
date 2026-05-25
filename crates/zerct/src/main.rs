@@ -20,7 +20,8 @@ const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
 const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
 const DEFAULT_RUST_CHECK_COMMAND: &str =
     "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings";
-const DEFAULT_FRONTEND_CHECK_COMMAND: &str = "npm ci && npm run typecheck && npm run lint";
+const DEFAULT_FRONTEND_CHECK_COMMAND: &str =
+    "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
 const ARCHIVE_EXCLUDES: &[&str] = &[
     ".git",
     "target",
@@ -753,7 +754,7 @@ fn validate_check_command(kind: &str, command: &str) -> Result<(), AgentError> {
         "policy_rejected",
         "Check command is too weak for Zerct deploys.",
         if kind == "static_frontend" {
-            "Set [build].check to install dependencies, typecheck, and lint, for example `npm ci && npm run typecheck && npm run lint`, then redeploy."
+            "Set [build].check to install dependencies, typecheck, and lint, for example `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`, then redeploy."
         } else {
             "Set [build].check to include `cargo check --locked` and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy."
         },

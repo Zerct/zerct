@@ -15,7 +15,7 @@ const SESSION_LABEL = 'Zerct session'
 const DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 const DEFAULT_RUST_CHECK_COMMAND = 'cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
-const DEFAULT_FRONTEND_CHECK_COMMAND = 'npm ci && npm run typecheck && npm run lint'
+const DEFAULT_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
 const ARCHIVE_EXCLUDES = [
   '.git',
   'target',
