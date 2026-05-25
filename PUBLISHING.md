@@ -134,6 +134,11 @@ repository owns validation through Blacksmith workflows:
 - `.github/workflows/docs-score.yml`: checks public agent-readiness endpoints
   and optionally runs authenticated `mint score`.
 
+While `docs.zerct.com` is still in TXT verification, Mintlify can update and
+index the docs but fail domain revalidation. The deploy script treats that as a
+non-fatal pending-domain state only when the update and indexing already
+succeeded.
+
 Required GitHub configuration:
 
 - Secret: `MINTLIFY_ADMIN_API_KEY`

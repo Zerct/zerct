@@ -29,6 +29,16 @@ async function mintlifyFetch(path, options = {}) {
   return body;
 }
 
+function isDomainRevalidationOnlyFailure(status) {
+  const summary = String(status.summary ?? "");
+
+  return (
+    summary.includes("Failed to revalidate domain: docs.zerct.com") &&
+    summary.includes("Successfully updated deployment") &&
+    summary.includes("Successfully indexed")
+  );
+}
+
 const update = await mintlifyFetch(`/project/update/${projectId}`, {
   method: "POST"
 });
@@ -49,6 +59,12 @@ for (let attempt = 1; attempt <= maxPolls; attempt += 1) {
   }
 
   if (status.status === "failure") {
+    if (isDomainRevalidationOnlyFailure(status)) {
+      console.warn("Mintlify deployment updated; docs.zerct.com revalidation is pending DNS cutover.");
+      console.warn(status.summary);
+      process.exit(0);
+    }
+
     console.error(status.summary ?? "Mintlify deployment failed");
     for (const line of status.logs ?? []) {
       console.error(line);
