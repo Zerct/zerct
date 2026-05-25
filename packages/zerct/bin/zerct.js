@@ -9,6 +9,11 @@ const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
 const SESSION_FILE = 'session-token'
+const SESSION_SERVICE = 'com.zerct.cli'
+const SESSION_ACCOUNT = 'session-token'
+const SESSION_LABEL = 'Zerct session'
+const DEFAULT_LOGIN_EXPIRES_SECONDS = 600
+const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 const ARCHIVE_EXCLUDES = [
   '.git',
   'target',
@@ -286,15 +291,12 @@ function runDoctor(projectDir) {
 
 async function login(cli) {
   if (cli.token) {
-    writeSessionToken(process.cwd(), cli.token)
-    console.log('saved Zerct session token to .zerct/session-token')
+    writeSessionToken(cli.token)
+    console.log('saved Zerct session token')
     return
   }
 
-  const response = await apiRequest(cli, 'POST', '/v1/login/device', null, null)
-  openUrl(response.login_url)
-  console.log(`opened ${response.login_url}`)
-  console.log('After login, retry your deploy. If the CLI cannot finish automatically yet, set ZERCT_TOKEN or run `npx @zerct/zerct login --token <token>`.')
+  await loginAndStore(cli)
 }
 
 async function deploy(projectDir, cli) {
@@ -304,7 +306,7 @@ async function deploy(projectDir, cli) {
     throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry.', cli.json)
   }
 
-  const token = readToken(projectDir, cli)
+  const token = await readOrLoginToken(projectDir, cli)
   const archive = createArchiveBase64(projectDir)
   const commitSha = gitCommitSha(projectDir)
   const body = {
@@ -365,14 +367,14 @@ async function envCommand(cli) {
 
   const name = assignment.slice(0, separator)
   const value = assignment.slice(separator + 1)
-  const token = readToken(process.cwd(), cli)
+  const token = await readOrLoginToken(process.cwd(), cli)
   const app = requireApp(cli)
   const response = await apiRequest(cli, 'PUT', `/v1/apps/${encodeURIComponent(app)}/env`, token, { name, value })
   printJsonOrPretty(cli, response)
 }
 
 async function billing(cli) {
-  const token = readToken(process.cwd(), cli)
+  const token = await readOrLoginToken(process.cwd(), cli)
   const response = await apiRequest(cli, 'POST', '/v1/billing/checkout', token, {
     target_plan: 'pro',
     reason: 'Upgrade to Zerct Pro.'
@@ -386,9 +388,66 @@ async function billing(cli) {
 }
 
 async function appGet(cli, kind) {
-  const token = readToken(process.cwd(), cli)
+  const token = await readOrLoginToken(process.cwd(), cli)
   const app = requireApp(cli)
   return apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/${kind}`, token, null)
+}
+
+async function readOrLoginToken(projectDir, cli) {
+  const token = readStoredToken(projectDir, cli)
+  if (token) {
+    return token
+  }
+
+  return loginAndStore(cli)
+}
+
+async function loginAndStore(cli) {
+  const start = await apiRequest(cli, 'POST', '/v1/login/device', null, null)
+  const loginUrl = start.loginUrl || start.login_url
+  if (!loginUrl) {
+    throw agentError('login_failed', 'Zerct login did not return a browser URL.', 'Retry `npx @zerct/zerct login`. If it keeps failing, check Zerct status.', cli.json)
+  }
+  openUrl(loginUrl)
+  progress(cli, 'opened browser login')
+  progress(cli, `waiting for browser login code ${start.userCode || start.user_code || 'ZERCT'}`)
+
+  const session = await pollLogin(cli, start)
+  if (!session.token) {
+    throw agentError('login_failed', 'Zerct login did not return a session token.', 'Run `npx @zerct/zerct login` again and complete the browser login.', cli.json)
+  }
+
+  writeSessionToken(session.token)
+  progress(cli, `logged in as ${session.email || 'Zerct user'}`)
+  return session.token
+}
+
+async function pollLogin(cli, start) {
+  const deviceCode = start.deviceCode || start.device_code
+  if (!deviceCode) {
+    throw agentError('login_failed', 'Zerct login did not return a device code.', 'Retry `npx @zerct/zerct login`. If it keeps failing, check Zerct status.', cli.json)
+  }
+
+  const expiresMs = Number(start.expiresInSeconds || start.expires_in_seconds || DEFAULT_LOGIN_EXPIRES_SECONDS) * 1000
+  const deadline = Date.now() + expiresMs
+  let intervalMs = Number(start.intervalSeconds || start.interval_seconds || DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
+
+  while (Date.now() < deadline) {
+    await sleep(intervalMs)
+    const response = await apiRequest(cli, 'GET', `/v1/login/device/${encodeURIComponent(deviceCode)}`, null, null)
+    if (response.status === 'complete') {
+      return response
+    }
+    if (response.status === 'expired') {
+      throw agentError('login_expired', 'Zerct login expired before it completed.', 'Run `npx @zerct/zerct login` again and finish the browser login in the newly opened tab.', cli.json)
+    }
+    intervalMs = Math.max(
+      DEFAULT_LOGIN_INTERVAL_SECONDS * 1000,
+      Number(response.intervalSeconds || response.interval_seconds || DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
+    )
+  }
+
+  throw agentError('login_expired', 'Zerct login expired before it completed.', 'Run `npx @zerct/zerct login` again and finish the browser login in the newly opened tab.', cli.json)
 }
 
 function requireApp(cli) {
@@ -471,7 +530,7 @@ function gitCommitSha(projectDir) {
   return git.status === 0 ? git.stdout.trim() || null : null
 }
 
-function readToken(projectDir, cli) {
+function readStoredToken(projectDir, cli) {
   if (cli.token) {
     return cli.token
   }
@@ -479,23 +538,120 @@ function readToken(projectDir, cli) {
     return process.env.ZERCT_TOKEN
   }
 
+  const keychainToken = readKeychainToken()
+  if (keychainToken) {
+    return keychainToken
+  }
+
+  const userToken = readTokenFile(userSessionPath())
+  if (userToken) {
+    return userToken
+  }
+
   const projectToken = path.join(projectDir, SESSION_DIR, SESSION_FILE)
-  if (existsSync(projectToken)) {
-    return readFileSync(projectToken, 'utf8').trim()
+  const legacyProjectToken = readTokenFile(projectToken)
+  if (legacyProjectToken) {
+    return legacyProjectToken
   }
 
   const homeToken = path.join(homedir(), SESSION_DIR, SESSION_FILE)
-  if (existsSync(homeToken)) {
-    return readFileSync(homeToken, 'utf8').trim()
-  }
-
-  throw agentError('login_required', 'Zerct login is required.', 'Run `npx @zerct/zerct login`, set `ZERCT_TOKEN`, or run `npx @zerct/zerct login --token <token>`, then retry.', cli.json)
+  return readTokenFile(homeToken)
 }
 
-function writeSessionToken(projectDir, token) {
-  const dir = path.join(projectDir, SESSION_DIR)
+function writeSessionToken(token) {
+  const cleanToken = token.trim()
+  if (!cleanToken) {
+    throw agentError('login_failed', 'Zerct session token is empty.', 'Run `npx @zerct/zerct login` again and complete the browser login.', false)
+  }
+  if (writeKeychainToken(cleanToken)) {
+    return
+  }
+
+  writeTokenFile(userSessionPath(), cleanToken)
+}
+
+function readTokenFile(filePath) {
+  if (!existsSync(filePath)) {
+    return ''
+  }
+  return readFileSync(filePath, 'utf8').trim()
+}
+
+function writeTokenFile(filePath, token) {
+  const dir = path.dirname(filePath)
   mkdirSync(dir, { recursive: true, mode: 0o700 })
-  writeFileSync(path.join(dir, SESSION_FILE), `${token.trim()}\n`, { mode: 0o600 })
+  writeFileSync(filePath, `${token}\n`, { mode: 0o600 })
+}
+
+function userSessionPath() {
+  if (process.platform === 'win32' && process.env.APPDATA) {
+    return path.join(process.env.APPDATA, 'Zerct', SESSION_FILE)
+  }
+  const configHome = process.env.XDG_CONFIG_HOME || path.join(homedir(), '.config')
+  return path.join(configHome, 'zerct', SESSION_FILE)
+}
+
+function readKeychainToken() {
+  if (process.platform === 'darwin') {
+    const result = spawnSync('security', ['find-generic-password', '-s', SESSION_SERVICE, '-a', SESSION_ACCOUNT, '-w'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    })
+    return result.status === 0 ? result.stdout.trim() : ''
+  }
+
+  if (process.platform === 'linux' && hasCommand('secret-tool')) {
+    const result = spawnSync('secret-tool', ['lookup', 'service', SESSION_SERVICE, 'account', SESSION_ACCOUNT], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    })
+    return result.status === 0 ? result.stdout.trim() : ''
+  }
+
+  return ''
+}
+
+function writeKeychainToken(token) {
+  if (process.platform === 'darwin') {
+    const result = spawnSync('security', [
+      'add-generic-password',
+      '-U',
+      '-s',
+      SESSION_SERVICE,
+      '-a',
+      SESSION_ACCOUNT,
+      '-l',
+      SESSION_LABEL,
+      '-w',
+      token
+    ], { stdio: 'ignore' })
+    return result.status === 0
+  }
+
+  if (process.platform === 'linux' && hasCommand('secret-tool')) {
+    const result = spawnSync('secret-tool', [
+      'store',
+      '--label',
+      SESSION_LABEL,
+      'service',
+      SESSION_SERVICE,
+      'account',
+      SESSION_ACCOUNT
+    ], {
+      input: token,
+      stdio: ['pipe', 'ignore', 'ignore']
+    })
+    return result.status === 0
+  }
+
+  return false
+}
+
+function hasCommand(command) {
+  const result = spawnSync('sh', ['-c', `command -v ${command} >/dev/null 2>&1`], {
+    stdio: 'ignore'
+  })
+  return result.status === 0
 }
 
 function parseZerctToml(source) {
@@ -624,6 +780,20 @@ function openUrl(url) {
   const command = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open'
   const args = process.platform === 'win32' ? ['/c', 'start', '', url] : [url]
   spawnSync(command, args, { stdio: 'ignore', detached: true })
+}
+
+function sleep(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds)
+  })
+}
+
+function progress(cli, message) {
+  if (cli.json) {
+    console.error(message)
+    return
+  }
+  console.log(message)
 }
 
 function trimTrailingSlash(value) {

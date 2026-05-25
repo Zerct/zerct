@@ -2,15 +2,22 @@
 
 use std::{
     env, fs,
-    io::Read,
+    io::{Read, Write},
     path::{Path, PathBuf},
     process::{Command, ExitCode, Stdio},
+    thread,
+    time::{Duration, Instant},
 };
 
 const VERSION: &str = "0.1.1";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const SESSION_SERVICE: &str = "com.zerct.cli";
+const SESSION_ACCOUNT: &str = "session-token";
+const SESSION_LABEL: &str = "Zerct session";
+const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
+const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
 const ARCHIVE_EXCLUDES: &[&str] = &[
     ".git",
     "target",
@@ -531,14 +538,12 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
 
 fn login(cli: &Cli) -> Result<(), AgentError> {
     if let Some(token) = &cli.token {
-        write_session_token(&current_dir_or_dot(), token)?;
-        println!("saved Zerct session token to .zerct/session-token");
+        write_session_token(token)?;
+        println!("saved Zerct session token");
         return Ok(());
     }
 
-    let response = api_request(cli, "POST", "/v1/login/device", None, None)?;
-    println!("{response}");
-    open_login_url(&response);
+    let _token = login_and_store(cli)?;
     Ok(())
 }
 
@@ -570,7 +575,7 @@ fn deploy(cli: &Cli) -> Result<(), AgentError> {
         cli.database,
         archive_base64(&project_dir)?
     );
-    let token = read_token(&project_dir, cli)?;
+    let token = read_or_login_token(&project_dir, cli)?;
     let response = api_request(cli, "POST", "/v1/deployments", Some(&token), Some(&body))?;
     println!("{response}");
     Ok(())
@@ -584,7 +589,7 @@ fn app_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
             "Pass `--app <app_id>`. Use the app id printed by `zerct deploy`.",
         )
     })?;
-    let token = read_token(&current_dir_or_dot(), cli)?;
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
     let response = api_request(
         cli,
         "GET",
@@ -625,7 +630,7 @@ fn env_command(cli: &Cli) -> Result<(), AgentError> {
             "Pass `--app <app_id>`.",
         )
     })?;
-    let token = read_token(&current_dir_or_dot(), cli)?;
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
     let body = format!(
         "{{\"name\":\"{}\",\"value\":\"{}\"}}",
         escape_json(name),
@@ -643,7 +648,7 @@ fn env_command(cli: &Cli) -> Result<(), AgentError> {
 }
 
 fn billing(cli: &Cli) -> Result<(), AgentError> {
-    let token = read_token(&current_dir_or_dot(), cli)?;
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
     let body = "{\"target_plan\":\"pro\",\"reason\":\"Upgrade to Zerct Pro.\"}";
     let response = api_request(
         cli,
@@ -777,19 +782,117 @@ fn base64_encode(bytes: &[u8]) -> String {
     encoded
 }
 
-fn read_token(project_dir: &Path, cli: &Cli) -> Result<String, AgentError> {
-    if let Some(token) = &cli.token {
-        return Ok(token.to_owned());
-    }
-    if let Ok(token) = env::var("ZERCT_TOKEN") {
+fn read_or_login_token(project_dir: &Path, cli: &Cli) -> Result<String, AgentError> {
+    if let Some(token) = read_stored_token(project_dir, cli)? {
         return Ok(token);
     }
+
+    login_and_store(cli)
+}
+
+fn login_and_store(cli: &Cli) -> Result<String, AgentError> {
+    let start = api_request(cli, "POST", "/v1/login/device", None, None)?;
+    let login_url = json_string_field(&start, "loginUrl")
+        .or_else(|| json_string_field(&start, "login_url"))
+        .ok_or_else(|| {
+            AgentError::new(
+                "login_failed",
+                "Zerct login did not return a browser URL.",
+                "Retry `zerct login`. If it keeps failing, check Zerct status.",
+            )
+        })?;
+    open_url(&login_url);
+    progress(cli, "opened browser login");
+    let user_code = json_string_field(&start, "userCode")
+        .or_else(|| json_string_field(&start, "user_code"))
+        .unwrap_or_else(|| "ZERCT".to_owned());
+    progress(cli, &format!("waiting for browser login code {user_code}"));
+
+    let session = poll_login(cli, &start)?;
+    let token = json_string_field(&session, "token").ok_or_else(|| {
+        AgentError::new(
+            "login_failed",
+            "Zerct login did not return a session token.",
+            "Run `zerct login` again and complete the browser login.",
+        )
+    })?;
+    write_session_token(&token)?;
+    let email = json_string_field(&session, "email").unwrap_or_else(|| "Zerct user".to_owned());
+    progress(cli, &format!("logged in as {email}"));
+
+    Ok(token)
+}
+
+fn poll_login(cli: &Cli, start: &str) -> Result<String, AgentError> {
+    let device_code = json_string_field(start, "deviceCode")
+        .or_else(|| json_string_field(start, "device_code"))
+        .ok_or_else(|| {
+            AgentError::new(
+                "login_failed",
+                "Zerct login did not return a device code.",
+                "Retry `zerct login`. If it keeps failing, check Zerct status.",
+            )
+        })?;
+    let expires = json_u64_field(start, "expiresInSeconds")
+        .or_else(|| json_u64_field(start, "expires_in_seconds"))
+        .unwrap_or(DEFAULT_LOGIN_EXPIRES_SECONDS);
+    let mut interval = json_u64_field(start, "intervalSeconds")
+        .or_else(|| json_u64_field(start, "interval_seconds"))
+        .unwrap_or(DEFAULT_LOGIN_INTERVAL_SECONDS);
+    let deadline = Instant::now() + Duration::from_secs(expires);
+
+    while Instant::now() < deadline {
+        thread::sleep(Duration::from_secs(
+            interval.max(DEFAULT_LOGIN_INTERVAL_SECONDS),
+        ));
+        let response = api_request(
+            cli,
+            "GET",
+            &format!("/v1/login/device/{device_code}"),
+            None,
+            None,
+        )?;
+        match json_string_field(&response, "status").as_deref() {
+            Some("complete") => return Ok(response),
+            Some("expired") => {
+                return Err(login_expired_error());
+            }
+            _pending => {
+                interval = json_u64_field(&response, "intervalSeconds")
+                    .or_else(|| json_u64_field(&response, "interval_seconds"))
+                    .unwrap_or(DEFAULT_LOGIN_INTERVAL_SECONDS);
+            }
+        }
+    }
+
+    Err(login_expired_error())
+}
+
+fn login_expired_error() -> AgentError {
+    AgentError::new(
+        "login_expired",
+        "Zerct login expired before it completed.",
+        "Run `zerct login` again and finish the browser login in the newly opened tab.",
+    )
+}
+
+fn read_stored_token(project_dir: &Path, cli: &Cli) -> Result<Option<String>, AgentError> {
+    if let Some(token) = &cli.token {
+        return Ok(Some(token.to_owned()));
+    }
+    if let Ok(token) = env::var("ZERCT_TOKEN") {
+        return Ok(Some(token));
+    }
+    if let Some(token) = read_keychain_token()? {
+        return Ok(Some(token));
+    }
     for path in [
+        user_session_path(),
         project_dir.join(".zerct/session-token"),
         home_dir().join(".zerct/session-token"),
     ] {
         if path.exists() {
-            return fs::read_to_string(path).map(|value| value.trim().to_owned()).map_err(|error| {
+            return fs::read_to_string(path).map(|value| Some(value.trim().to_owned())).map_err(|error| {
                 AgentError::new(
                     "login_required",
                     format!("Could not read Zerct token: {error}"),
@@ -798,32 +901,159 @@ fn read_token(project_dir: &Path, cli: &Cli) -> Result<String, AgentError> {
             });
         }
     }
-    Err(AgentError::new(
-        "login_required",
-        "Zerct login is required.",
-        "Run `zerct login`, set `ZERCT_TOKEN`, or run `zerct login --token <token>`, then retry.",
-    ))
+    Ok(None)
 }
 
-fn write_session_token(project_dir: &Path, token: &str) -> Result<(), AgentError> {
-    let dir = project_dir.join(".zerct");
+fn write_session_token(token: &str) -> Result<(), AgentError> {
+    let clean_token = token.trim();
+    if clean_token.is_empty() {
+        return Err(AgentError::new(
+            "login_failed",
+            "Zerct session token is empty.",
+            "Run `zerct login` again and complete the browser login.",
+        ));
+    }
+    if write_keychain_token(clean_token)? {
+        return Ok(());
+    }
+
+    write_session_token_file(&user_session_path(), clean_token)
+}
+
+fn write_session_token_file(token_path: &Path, token: &str) -> Result<(), AgentError> {
+    let dir = token_path.parent().ok_or_else(|| {
+        AgentError::new(
+            "write_failed",
+            "Could not determine Zerct token directory.",
+            "Check home directory permissions and retry.",
+        )
+    })?;
     fs::create_dir_all(&dir).map_err(|error| {
         AgentError::new(
             "write_failed",
-            format!("Could not create .zerct directory: {error}"),
+            format!("Could not create Zerct token directory: {error}"),
             "Check directory permissions and retry.",
         )
     })?;
     set_private_dir_permissions(&dir)?;
-    let token_path = dir.join("session-token");
-    fs::write(&token_path, format!("{}\n", token.trim())).map_err(|error| {
+    fs::write(token_path, format!("{token}\n")).map_err(|error| {
         AgentError::new(
             "write_failed",
             format!("Could not write Zerct token: {error}"),
             "Check directory permissions and retry.",
         )
     })?;
-    set_private_file_permissions(&token_path)
+    set_private_file_permissions(token_path)
+}
+
+fn read_keychain_token() -> Result<Option<String>, AgentError> {
+    if cfg!(target_os = "macos") {
+        let output = Command::new("security")
+            .args([
+                "find-generic-password",
+                "-s",
+                SESSION_SERVICE,
+                "-a",
+                SESSION_ACCOUNT,
+                "-w",
+            ])
+            .output()
+            .map_err(keychain_command_error)?;
+        return Ok(output
+            .status
+            .success()
+            .then(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
+            .filter(|value| !value.is_empty()));
+    }
+
+    if cfg!(target_os = "linux") && command_exists("secret-tool") {
+        let output = Command::new("secret-tool")
+            .args([
+                "lookup",
+                "service",
+                SESSION_SERVICE,
+                "account",
+                SESSION_ACCOUNT,
+            ])
+            .output()
+            .map_err(keychain_command_error)?;
+        return Ok(output
+            .status
+            .success()
+            .then(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
+            .filter(|value| !value.is_empty()));
+    }
+
+    Ok(None)
+}
+
+fn write_keychain_token(token: &str) -> Result<bool, AgentError> {
+    if cfg!(target_os = "macos") {
+        let status = Command::new("security")
+            .args([
+                "add-generic-password",
+                "-U",
+                "-s",
+                SESSION_SERVICE,
+                "-a",
+                SESSION_ACCOUNT,
+                "-l",
+                SESSION_LABEL,
+                "-w",
+                token,
+            ])
+            .status()
+            .map_err(keychain_command_error)?;
+        return Ok(status.success());
+    }
+
+    if cfg!(target_os = "linux") && command_exists("secret-tool") {
+        let mut child = Command::new("secret-tool")
+            .args([
+                "store",
+                "--label",
+                SESSION_LABEL,
+                "service",
+                SESSION_SERVICE,
+                "account",
+                SESSION_ACCOUNT,
+            ])
+            .stdin(Stdio::piped())
+            .spawn()
+            .map_err(keychain_command_error)?;
+        if let Some(mut stdin) = child.stdin.take() {
+            stdin
+                .write_all(token.as_bytes())
+                .map_err(keychain_write_error)?;
+        }
+        let status = child.wait().map_err(keychain_command_error)?;
+        return Ok(status.success());
+    }
+
+    Ok(false)
+}
+
+fn keychain_command_error(error: std::io::Error) -> AgentError {
+    AgentError::new(
+        "credential_store_failed",
+        format!("Could not access the Zerct credential store: {error}"),
+        "Check OS credential-store access, or set `ZERCT_TOKEN` for this command.",
+    )
+}
+
+fn keychain_write_error(error: std::io::Error) -> AgentError {
+    AgentError::new(
+        "credential_store_failed",
+        format!("Could not write the Zerct credential: {error}"),
+        "Check OS credential-store access, or set `ZERCT_TOKEN` for this command.",
+    )
+}
+
+fn command_exists(command: &str) -> bool {
+    Command::new("sh")
+        .args(["-c", &format!("command -v {command} >/dev/null 2>&1")])
+        .status()
+        .is_ok_and(|status| status.success())
 }
 
 #[cfg(unix)]
@@ -967,19 +1197,65 @@ fn git_commit_sha(project_dir: &Path) -> Option<String> {
     }
 }
 
-fn open_login_url(response: &str) {
-    if let Some(url_start) = response.find("https://") {
-        let tail = &response[url_start..];
-        let end = tail.find('"').unwrap_or(tail.len());
-        let url = &tail[..end];
-        let _status = if cfg!(target_os = "macos") {
-            Command::new("open").arg(url).status()
-        } else if cfg!(target_os = "windows") {
-            Command::new("cmd").args(["/c", "start", "", url]).status()
-        } else {
-            Command::new("xdg-open").arg(url).status()
-        };
+fn open_url(url: &str) {
+    let _status = if cfg!(target_os = "macos") {
+        Command::new("open").arg(url).status()
+    } else if cfg!(target_os = "windows") {
+        Command::new("cmd").args(["/c", "start", "", url]).status()
+    } else {
+        Command::new("xdg-open").arg(url).status()
+    };
+}
+
+fn progress(cli: &Cli, message: &str) {
+    if cli.json {
+        eprintln!("{message}");
+    } else {
+        println!("{message}");
     }
+}
+
+fn json_string_field(source: &str, field: &str) -> Option<String> {
+    let needle = format!("\"{field}\":");
+    let start = source.find(&needle)? + needle.len();
+    let tail = source.get(start..)?.trim_start();
+    let raw = tail.strip_prefix('"')?;
+    let mut value = String::new();
+    let mut escaped = false;
+    for character in raw.chars() {
+        if escaped {
+            value.push(match character {
+                '"' => '"',
+                '\\' => '\\',
+                '/' => '/',
+                'n' => '\n',
+                'r' => '\r',
+                't' => '\t',
+                other => other,
+            });
+            escaped = false;
+        } else if character == '\\' {
+            escaped = true;
+        } else if character == '"' {
+            return Some(value);
+        } else {
+            value.push(character);
+        }
+    }
+
+    None
+}
+
+fn json_u64_field(source: &str, field: &str) -> Option<u64> {
+    let needle = format!("\"{field}\":");
+    let start = source.find(&needle)? + needle.len();
+    let digits: String = source
+        .get(start..)?
+        .trim_start()
+        .chars()
+        .take_while(char::is_ascii_digit)
+        .collect();
+    digits.parse().ok()
 }
 
 fn escape_json(value: &str) -> String {
@@ -1005,4 +1281,16 @@ fn home_dir() -> PathBuf {
     env::var_os("HOME")
         .map(PathBuf::from)
         .unwrap_or_else(current_dir_or_dot)
+}
+
+fn user_session_path() -> PathBuf {
+    if cfg!(target_os = "windows") {
+        if let Some(app_data) = env::var_os("APPDATA") {
+            return PathBuf::from(app_data).join("Zerct").join("session-token");
+        }
+    }
+    env::var_os("XDG_CONFIG_HOME").map_or_else(
+        || home_dir().join(".config/zerct/session-token"),
+        |config_home| PathBuf::from(config_home).join("zerct/session-token"),
+    )
 }

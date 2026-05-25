@@ -17,5 +17,6 @@ npx zerct deploy
 Zerct expects `Cargo.toml`, `Cargo.lock`, and `zerct.toml`. The app must listen
 on `0.0.0.0:$PORT` and expose the configured health endpoint.
 
-Use `ZERCT_TOKEN` or `npx @zerct/zerct login --token <token>` for authenticated
-commands.
+On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
+the Zerct session in the OS credential store when available, and continues the
+deploy. Later commands reuse that session.

@@ -9,9 +9,11 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
+import time
 import tomllib
 import urllib.error
 import urllib.request
@@ -25,6 +27,11 @@ DEFAULT_API_URL = "https://api.zerct.com"
 ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 SESSION_DIR = ".zerct"
 SESSION_FILE = "session-token"
+SESSION_SERVICE = "com.zerct.cli"
+SESSION_ACCOUNT = "session-token"
+SESSION_LABEL = "Zerct session"
+DEFAULT_LOGIN_EXPIRES_SECONDS = 600
+DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 EXCLUDED_PARTS = {
     ".git",
     "target",
@@ -291,14 +298,11 @@ def validate_config(config: dict[str, Any]) -> None:
 def login(args: argparse.Namespace) -> None:
     token = args.token
     if token:
-        write_session_token(pathlib.Path.cwd(), token)
-        print("saved Zerct session token to .zerct/session-token")
+        write_session_token(token)
+        print("saved Zerct session token")
         return
 
-    response = api_request(args, "POST", "/v1/login/device", None, None)
-    webbrowser.open(response["login_url"])
-    print(f"opened {response['login_url']}")
-    print("After login, retry your deploy. If the CLI cannot finish automatically yet, set ZERCT_TOKEN or run `zerct login --token <token>`.")
+    login_and_store(args)
 
 
 def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
@@ -307,7 +311,7 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
         failure = next(check for check in report["checks"] if not check["ok"])
         raise AgentError("doctor_failed", "Zerct doctor failed.", failure["agent_instruction"])
 
-    token = read_token(project_dir, args)
+    token = read_or_login_token(project_dir, args)
     response = api_request(
         args,
         "POST",
@@ -340,7 +344,7 @@ def logs(args: argparse.Namespace) -> None:
 
 
 def app_get(args: argparse.Namespace, route: str) -> dict[str, Any]:
-    token = read_token(pathlib.Path.cwd(), args)
+    token = read_or_login_token(pathlib.Path.cwd(), args)
     return api_request(args, "GET", f"/v1/apps/{args.app}/{route}", token, None)
 
 
@@ -352,13 +356,13 @@ def set_env(args: argparse.Namespace) -> None:
             "Environment assignment must be KEY=value.",
             "Pass one uppercase shell-safe environment assignment, for example `API_KEY=value`.",
         )
-    token = read_token(pathlib.Path.cwd(), args)
+    token = read_or_login_token(pathlib.Path.cwd(), args)
     response = api_request(args, "PUT", f"/v1/apps/{args.app}/env", token, {"name": name, "value": value})
     print_response(response, args.json)
 
 
 def billing(args: argparse.Namespace) -> None:
-    token = read_token(pathlib.Path.cwd(), args)
+    token = read_or_login_token(pathlib.Path.cwd(), args)
     response = api_request(
         args,
         "POST",
@@ -371,6 +375,75 @@ def billing(args: argparse.Namespace) -> None:
         return
     print(response["checkout"]["url"])
     webbrowser.open(response["checkout"]["url"])
+
+
+def read_or_login_token(project_dir: pathlib.Path, args: argparse.Namespace) -> str:
+    token = read_stored_token(project_dir, args)
+    if token:
+        return token
+
+    return login_and_store(args)
+
+
+def login_and_store(args: argparse.Namespace) -> str:
+    start = api_request(args, "POST", "/v1/login/device", None, None)
+    login_url = str(start.get("loginUrl") or start.get("login_url") or "")
+    if not login_url:
+        raise AgentError(
+            "login_failed",
+            "Zerct login did not return a browser URL.",
+            "Retry `zerct login`. If it keeps failing, check Zerct status.",
+        )
+    webbrowser.open(login_url)
+    progress(args, "opened browser login")
+    progress(args, f"waiting for browser login code {start.get('userCode') or start.get('user_code', 'ZERCT')}")
+
+    session = poll_login(args, start)
+    token = str(session.get("token", "")).strip()
+    if not token:
+        raise AgentError(
+            "login_failed",
+            "Zerct login did not return a session token.",
+            "Run `zerct login` again and complete the browser login.",
+        )
+
+    write_session_token(token)
+    progress(args, f"logged in as {session.get('email', 'Zerct user')}")
+    return token
+
+
+def poll_login(args: argparse.Namespace, start: dict[str, Any]) -> dict[str, Any]:
+    device_code = str(start.get("deviceCode") or start.get("device_code", "")).strip()
+    if not device_code:
+        raise AgentError(
+            "login_failed",
+            "Zerct login did not return a device code.",
+            "Retry `zerct login`. If it keeps failing, check Zerct status.",
+        )
+
+    expires = int(start.get("expiresInSeconds") or start.get("expires_in_seconds") or DEFAULT_LOGIN_EXPIRES_SECONDS)
+    interval = int(start.get("intervalSeconds") or start.get("interval_seconds") or DEFAULT_LOGIN_INTERVAL_SECONDS)
+    deadline = time.monotonic() + expires
+
+    while time.monotonic() < deadline:
+        time.sleep(max(interval, DEFAULT_LOGIN_INTERVAL_SECONDS))
+        response = api_request(args, "GET", f"/v1/login/device/{device_code}", None, None)
+        status = response.get("status")
+        if status == "complete":
+            return response
+        if status == "expired":
+            raise AgentError(
+                "login_expired",
+                "Zerct login expired before it completed.",
+                "Run `zerct login` again and finish the browser login in the newly opened tab.",
+            )
+        interval = int(response.get("intervalSeconds") or response.get("interval_seconds") or DEFAULT_LOGIN_INTERVAL_SECONDS)
+
+    raise AgentError(
+        "login_expired",
+        "Zerct login expired before it completed.",
+        "Run `zerct login` again and finish the browser login in the newly opened tab.",
+    )
 
 
 def api_request(
@@ -450,30 +523,117 @@ def scan_unsafe(project_dir: pathlib.Path) -> list[str]:
     return hits
 
 
-def read_token(project_dir: pathlib.Path, args: argparse.Namespace) -> str:
+def read_stored_token(project_dir: pathlib.Path, args: argparse.Namespace) -> str:
     if args.token:
         return args.token
     if os.environ.get("ZERCT_TOKEN"):
         return os.environ["ZERCT_TOKEN"]
+
+    keychain_token = read_keychain_token()
+    if keychain_token:
+        return keychain_token
+
     for candidate in (
+        user_session_path(),
         project_dir / SESSION_DIR / SESSION_FILE,
         pathlib.Path.home() / SESSION_DIR / SESSION_FILE,
     ):
         if candidate.exists():
             return candidate.read_text(encoding="utf-8").strip()
-    raise AgentError(
-        "login_required",
-        "Zerct login is required.",
-        "Run `zerct login`, set `ZERCT_TOKEN`, or run `zerct login --token <token>`, then retry.",
-    )
+    return ""
 
 
-def write_session_token(project_dir: pathlib.Path, token: str) -> None:
-    session_dir = project_dir / SESSION_DIR
-    session_dir.mkdir(mode=0o700, exist_ok=True)
-    token_path = session_dir / SESSION_FILE
-    token_path.write_text(token.strip() + "\n", encoding="utf-8")
+def write_session_token(token: str) -> None:
+    clean_token = token.strip()
+    if not clean_token:
+        raise AgentError(
+            "login_failed",
+            "Zerct session token is empty.",
+            "Run `zerct login` again and complete the browser login.",
+        )
+    if write_keychain_token(clean_token):
+        return
+
+    token_path = user_session_path()
+    token_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    token_path.write_text(clean_token + "\n", encoding="utf-8")
     token_path.chmod(0o600)
+
+
+def user_session_path() -> pathlib.Path:
+    if sys.platform == "win32" and os.environ.get("APPDATA"):
+        return pathlib.Path(os.environ["APPDATA"]) / "Zerct" / SESSION_FILE
+    config_home = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", pathlib.Path.home() / ".config"))
+    return config_home / "zerct" / SESSION_FILE
+
+
+def read_keychain_token() -> str:
+    if sys.platform == "darwin":
+        result = subprocess.run(
+            ["security", "find-generic-password", "-s", SESSION_SERVICE, "-a", SESSION_ACCOUNT, "-w"],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+        return result.stdout.strip() if result.returncode == 0 else ""
+
+    if sys.platform.startswith("linux") and shutil.which("secret-tool"):
+        result = subprocess.run(
+            ["secret-tool", "lookup", "service", SESSION_SERVICE, "account", SESSION_ACCOUNT],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+        return result.stdout.strip() if result.returncode == 0 else ""
+
+    return ""
+
+
+def write_keychain_token(token: str) -> bool:
+    if sys.platform == "darwin":
+        result = subprocess.run(
+            [
+                "security",
+                "add-generic-password",
+                "-U",
+                "-s",
+                SESSION_SERVICE,
+                "-a",
+                SESSION_ACCOUNT,
+                "-l",
+                SESSION_LABEL,
+                "-w",
+                token,
+            ],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        return result.returncode == 0
+
+    if sys.platform.startswith("linux") and shutil.which("secret-tool"):
+        result = subprocess.run(
+            [
+                "secret-tool",
+                "store",
+                "--label",
+                SESSION_LABEL,
+                "service",
+                SESSION_SERVICE,
+                "account",
+                SESSION_ACCOUNT,
+            ],
+            input=token,
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+        return result.returncode == 0
+
+    return False
 
 
 def git_commit_sha(project_dir: pathlib.Path) -> str | None:
@@ -495,6 +655,13 @@ def service_name_from_dir(project_dir: pathlib.Path) -> str:
 
 def print_response(response: dict[str, Any], json_output: bool) -> None:
     print(json.dumps(response, indent=2 if json_output else 2))
+
+
+def progress(args: argparse.Namespace, message: str) -> None:
+    if args.json:
+        print(message, file=sys.stderr)
+        return
+    print(message)
 
 
 def print_error(error: AgentError, json_output: bool) -> None:

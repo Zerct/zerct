@@ -101,6 +101,46 @@
         }
       }
     },
+    "/v1/login/device/{device_code}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Poll device login",
+        "description": "Polls a first-run browser login until it is complete, pending, or expired.",
+        "operationId": "pollDeviceLogin",
+        "parameters": [
+          {
+            "name": "device_code",
+            "in": "path",
+            "description": "Opaque device code returned by start device login.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^zdev_[a-f0-9]{64}$"
+            },
+            "example": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LoginPolled"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/deployments": {
       "post": {
         "tags": [
@@ -268,9 +308,62 @@
               "deviceLogin": {
                 "summary": "Device login",
                 "value": {
-                  "loginUrl": "https://zerct.com/device",
-                  "deviceCode": "ZCT-123456",
-                  "intervalSeconds": 5
+                  "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123",
+                  "verificationUri": "https://zerct.com/login",
+                  "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "userCode": "ABC123",
+                  "intervalSeconds": 5,
+                  "expiresInSeconds": 600
+                }
+              }
+            }
+          }
+        }
+      },
+      "LoginPolled": {
+        "description": "Device login poll result.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LoginPollResponse"
+            },
+            "examples": {
+              "complete": {
+                "summary": "Login complete",
+                "value": {
+                  "status": "complete",
+                  "intervalSeconds": 5,
+                  "accountId": "acct_01HW0000000000000000000000",
+                  "email": "dev@example.com",
+                  "provider": "github",
+                  "token": "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "expiresAt": "2026-06-24T12:00:00.000Z"
+                }
+              },
+              "pending": {
+                "summary": "Login pending",
+                "value": {
+                  "status": "pending",
+                  "intervalSeconds": 5,
+                  "accountId": null,
+                  "email": null,
+                  "provider": null,
+                  "token": null,
+                  "expiresAt": null
                 }
               }
             }
@@ -485,8 +578,11 @@
         "additionalProperties": false,
         "required": [
           "loginUrl",
+          "verificationUri",
           "deviceCode",
-          "intervalSeconds"
+          "userCode",
+          "intervalSeconds",
+          "expiresInSeconds"
         ],
         "properties": {
           "loginUrl": {
@@ -494,15 +590,31 @@
             "description": "Browser URL where the user completes login.",
             "format": "uri",
             "examples": [
-              "https://zerct.com/device"
+              "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123"
+            ]
+          },
+          "verificationUri": {
+            "type": "string",
+            "description": "Browser URL where the user chooses GitHub or Google.",
+            "format": "uri",
+            "examples": [
+              "https://zerct.com/login"
             ]
           },
           "deviceCode": {
             "type": "string",
-            "description": "Short code shown by the CLI during device login.",
-            "pattern": "^ZCT-[0-9]{6}$",
+            "description": "Opaque code used by the CLI polling endpoint.",
+            "pattern": "^zdev_[a-f0-9]{64}$",
             "examples": [
-              "ZCT-123456"
+              "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            ]
+          },
+          "userCode": {
+            "type": "string",
+            "description": "Short human-readable code shown by the CLI during login.",
+            "pattern": "^[A-F0-9]{6}$",
+            "examples": [
+              "ABC123"
             ]
           },
           "intervalSeconds": {
@@ -514,13 +626,134 @@
             "examples": [
               5
             ]
+          },
+          "expiresInSeconds": {
+            "type": "integer",
+            "description": "Device login lifetime in seconds.",
+            "format": "int32",
+            "minimum": 60,
+            "maximum": 1800,
+            "examples": [
+              600
+            ]
           }
         },
         "examples": [
           {
-            "loginUrl": "https://zerct.com/device",
-            "deviceCode": "ZCT-123456",
-            "intervalSeconds": 5
+            "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123",
+            "verificationUri": "https://zerct.com/login",
+            "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "userCode": "ABC123",
+            "intervalSeconds": 5,
+            "expiresInSeconds": 600
+          }
+        ]
+      },
+      "LoginPollResponse": {
+        "type": "object",
+        "description": "Device login polling response for the Zerct CLI.",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "intervalSeconds",
+          "accountId",
+          "email",
+          "provider",
+          "token",
+          "expiresAt"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Current device login state.",
+            "enum": [
+              "pending",
+              "complete",
+              "expired"
+            ],
+            "examples": [
+              "complete"
+            ]
+          },
+          "intervalSeconds": {
+            "type": "integer",
+            "description": "Minimum seconds to wait before the next poll.",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 60,
+            "examples": [
+              5
+            ]
+          },
+          "accountId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Authenticated Zerct account id when login is complete.",
+            "pattern": "^acct_[A-Za-z0-9_-]+$",
+            "examples": [
+              "acct_01HW0000000000000000000000"
+            ]
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Verified provider email when login is complete.",
+            "format": "email",
+            "examples": [
+              "dev@example.com"
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Identity provider used when login is complete.",
+            "enum": [
+              "github",
+              "google",
+              null
+            ],
+            "examples": [
+              "github"
+            ]
+          },
+          "token": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Zerct session token returned once and stored by the CLI.",
+            "pattern": "^zct_[a-f0-9]{64}$",
+            "examples": [
+              "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            ]
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTC timestamp when the Zerct session token expires.",
+            "format": "date-time",
+            "examples": [
+              "2026-06-24T12:00:00.000Z"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "status": "complete",
+            "intervalSeconds": 5,
+            "accountId": "acct_01HW0000000000000000000000",
+            "email": "dev@example.com",
+            "provider": "github",
+            "token": "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "expiresAt": "2026-06-24T12:00:00.000Z"
           }
         ]
       },
