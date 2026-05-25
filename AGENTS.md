@@ -60,6 +60,8 @@ tighten these rules.
 7. Source archive creation must exclude local secrets, VCS metadata, build
    outputs, databases, logs, cloud credentials, SSH material, and private key
    files.
+8. Rust backend and static frontend deploy behavior must stay aligned across
+   npm, PyPI, Cargo, skills, docs, and examples.
 
 ## Docs And OpenAPI
 
@@ -88,10 +90,15 @@ tighten these rules.
 
 1. Examples must be minimal, buildable, and safe to copy.
 2. Rust examples must include `Cargo.lock`, `zerct.toml`, a health endpoint, and
+   pass `cargo check --locked` plus
+   `cargo clippy --locked --all-targets --all-features -- -D warnings`, with
    no secrets.
-3. Skills must be operational, not marketing. Include direct commands, expected
+3. Static frontend examples must include `zerct.toml` with
+   `kind = "static_frontend"`, `package.json`, `typecheck` and `lint` scripts,
+   a package lockfile, and no secrets.
+4. Skills must be operational, not marketing. Include direct commands, expected
    files, deploy contract, and common failure fixes.
-4. Skills that describe user deployments must keep the no-direct-unsafe policy
+5. Skills that describe user deployments must keep the no-direct-unsafe policy
    visible.
 
 ## Publishing

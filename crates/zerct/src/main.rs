@@ -18,6 +18,9 @@ const SESSION_ACCOUNT: &str = "session-token";
 const SESSION_LABEL: &str = "Zerct session";
 const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
 const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
+const DEFAULT_RUST_CHECK_COMMAND: &str =
+    "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings";
+const DEFAULT_FRONTEND_CHECK_COMMAND: &str = "npm run typecheck && npm run lint";
 const ARCHIVE_EXCLUDES: &[&str] = &[
     ".git",
     "target",
@@ -232,7 +235,10 @@ impl AgentError {
 #[derive(Debug)]
 struct Config {
     name: String,
+    kind: String,
+    check_command: String,
     build_command: String,
+    build_output_dir: Option<String>,
     run_command: String,
     port: u16,
     health: String,
@@ -362,10 +368,28 @@ impl Check {
 
 impl Config {
     fn to_json(&self) -> String {
+        let build = self.build_output_dir.as_ref().map_or_else(
+            || {
+                format!(
+                    "{{\"check\":\"{}\",\"command\":\"{}\"}}",
+                    escape_json(&self.check_command),
+                    escape_json(&self.build_command)
+                )
+            },
+            |output| {
+                format!(
+                    "{{\"check\":\"{}\",\"command\":\"{}\",\"output\":\"{}\"}}",
+                    escape_json(&self.check_command),
+                    escape_json(&self.build_command),
+                    escape_json(output)
+                )
+            },
+        );
         format!(
-            "{{\"name\":\"{}\",\"build\":{{\"command\":\"{}\"}},\"run\":{{\"command\":\"{}\",\"port\":{},\"health\":\"{}\"}},\"resources\":{{\"memory\":\"{}\",\"cpu\":\"{}\",\"idle_timeout_minutes\":{}}}}}",
+            "{{\"name\":\"{}\",\"kind\":\"{}\",\"build\":{},\"run\":{{\"command\":\"{}\",\"port\":{},\"health\":\"{}\"}},\"resources\":{{\"memory\":\"{}\",\"cpu\":\"{}\",\"idle_timeout_minutes\":{}}}}}",
             escape_json(&self.name),
-            escape_json(&self.build_command),
+            escape_json(&self.kind),
+            build,
             escape_json(&self.run_command),
             self.port,
             escape_json(&self.health),
@@ -378,16 +402,6 @@ impl Config {
 
 fn doctor_report(project_dir: &Path) -> DoctorReport {
     let mut checks = Vec::new();
-    for filename in ["Cargo.toml", "Cargo.lock", "zerct.toml"] {
-        let ok = project_dir.join(filename).exists();
-        checks.push(Check {
-            name: filename.to_owned(),
-            ok,
-            message: if ok { "found" } else { "missing" }.to_owned(),
-            agent_instruction: format!("Create and commit {filename}, then retry."),
-        });
-    }
-
     let config = match parse_config(&project_dir.join("zerct.toml")) {
         Ok(config) => {
             checks.push(Check {
@@ -406,10 +420,47 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
                     message: error.message,
                     agent_instruction: error.agent_instruction,
                 });
+            } else {
+                checks.push(Check {
+                    name: "zerct.toml".to_owned(),
+                    ok: false,
+                    message: "missing".to_owned(),
+                    agent_instruction: "Create and commit zerct.toml, then retry.".to_owned(),
+                });
             }
             None
         }
     };
+
+    let kind = config
+        .as_ref()
+        .map_or("rust_backend", |config| config.kind.as_str());
+    let required_files: &[&str] = if kind == "static_frontend" {
+        &["package.json"]
+    } else {
+        &["Cargo.toml", "Cargo.lock"]
+    };
+    for filename in required_files {
+        let ok = project_dir.join(filename).exists();
+        checks.push(Check {
+            name: (*filename).to_owned(),
+            ok,
+            message: if ok { "found" } else { "missing" }.to_owned(),
+            agent_instruction: format!("Create and commit {filename}, then retry."),
+        });
+    }
+    if kind == "static_frontend" {
+        let ok = frontend_lockfile_exists(project_dir);
+        checks.push(Check {
+            name: "frontend lockfile".to_owned(),
+            ok,
+            message: if ok { "found" } else { "missing" }.to_owned(),
+            agent_instruction:
+                "Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry."
+                    .to_owned(),
+        });
+        checks.extend(frontend_script_checks(project_dir));
+    }
 
     let unsafe_hits = scan_unsafe(project_dir);
     checks.push(Check {
@@ -428,7 +479,10 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
         agent_instruction:
             "Remove direct unsafe usage from workspace Rust source before deploying.".to_owned(),
     });
-    checks.push(cargo_check(project_dir));
+    if kind == "rust_backend" {
+        checks.push(cargo_check(project_dir));
+        checks.push(cargo_clippy(project_dir));
+    }
 
     DoctorReport {
         project: project_dir.to_path_buf(),
@@ -468,6 +522,46 @@ fn cargo_check(project_dir: &Path) -> Check {
     }
 }
 
+fn cargo_clippy(project_dir: &Path) -> Check {
+    let output = Command::new("cargo")
+        .args([
+            "clippy",
+            "--locked",
+            "--all-targets",
+            "--all-features",
+            "--quiet",
+            "--",
+            "-D",
+            "warnings",
+        ])
+        .env("CARGO_TERM_COLOR", "never")
+        .current_dir(project_dir)
+        .output();
+
+    match output {
+        Ok(output) => Check {
+            name: "cargo clippy".to_owned(),
+            ok: output.status.success(),
+            message: if output.status.success() {
+                "passed".to_owned()
+            } else {
+                truncate_check_message(&String::from_utf8_lossy(&output.stderr))
+            },
+            agent_instruction:
+                "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy."
+                    .to_owned(),
+        },
+        Err(error) => Check {
+            name: "cargo clippy".to_owned(),
+            ok: false,
+            message: error.to_string(),
+            agent_instruction:
+                "Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying."
+                    .to_owned(),
+        },
+    }
+}
+
 fn truncate_check_message(message: &str) -> String {
     message.chars().take(240).collect()
 }
@@ -482,7 +576,10 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
     })?;
     let mut section = "";
     let mut name = String::new();
-    let mut build_command = "cargo build --release".to_owned();
+    let mut kind = "rust_backend".to_owned();
+    let mut check_command = String::new();
+    let mut build_command = String::new();
+    let mut build_output_dir = None;
     let mut run_command = String::new();
     let mut port = 3_000u16;
     let mut health = "/healthz".to_owned();
@@ -521,7 +618,10 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
         let value = value.trim().trim_matches('"');
         match (section, key) {
             ("", "name") => name = value.to_owned(),
+            ("", "kind") => kind = value.to_owned(),
+            ("build", "check") => check_command = value.to_owned(),
             ("build", "command") => build_command = value.to_owned(),
+            ("build", "output") => build_output_dir = Some(value.to_owned()),
             ("run", "command") => run_command = value.to_owned(),
             ("run", "port") => port = parse_u16(value, "invalid_port")?,
             ("run", "health") => health = value.to_owned(),
@@ -533,10 +633,30 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
             _unknown => {}
         }
     }
+    if build_command.is_empty() {
+        build_command = if kind == "static_frontend" {
+            "npm ci && npm run build".to_owned()
+        } else {
+            "cargo build --release".to_owned()
+        };
+    }
+    if check_command.is_empty() {
+        check_command = if kind == "static_frontend" {
+            DEFAULT_FRONTEND_CHECK_COMMAND.to_owned()
+        } else {
+            DEFAULT_RUST_CHECK_COMMAND.to_owned()
+        };
+    }
+    if kind == "static_frontend" && build_output_dir.is_none() {
+        build_output_dir = Some("dist".to_owned());
+    }
 
     let config = Config {
         name,
+        kind,
+        check_command,
         build_command,
+        build_output_dir,
         run_command,
         port,
         health,
@@ -555,6 +675,44 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
             "Service name must be lowercase DNS-safe text.",
             "Set `name` in zerct.toml to lowercase letters, numbers, and hyphens only.",
         ));
+    }
+    if config.kind != "rust_backend" && config.kind != "static_frontend" {
+        return Err(AgentError::new(
+            "invalid_project_kind",
+            "Project kind must be rust_backend or static_frontend.",
+            "Set kind in zerct.toml to rust_backend or static_frontend.",
+        ));
+    }
+    if config.build_command.trim().is_empty() {
+        return Err(AgentError::new(
+            "missing_command",
+            "Build command is missing.",
+            "Set [build].command in zerct.toml, then redeploy.",
+        ));
+    }
+    if config.check_command.trim().is_empty() {
+        return Err(AgentError::new(
+            "missing_command",
+            "Check command is missing.",
+            "Set [build].check in zerct.toml to a command that typechecks and lints before the release build.",
+        ));
+    }
+    if config.kind == "static_frontend" {
+        let Some(output_dir) = &config.build_output_dir else {
+            return Err(AgentError::new(
+                "invalid_build_output",
+                "Static frontend output must be a safe relative directory.",
+                "Set [build].output to a relative directory like dist.",
+            ));
+        };
+        if !valid_relative_path(output_dir) {
+            return Err(AgentError::new(
+                "invalid_build_output",
+                "Static frontend output must be a safe relative directory.",
+                "Set [build].output to a relative directory like dist.",
+            ));
+        }
+        return Ok(());
     }
     if config.run_command.trim().is_empty() {
         return Err(AgentError::new(
@@ -601,6 +759,13 @@ fn deploy(cli: &Cli) -> Result<(), AgentError> {
             "Run `zerct init`, commit zerct.toml, then retry.",
         ));
     };
+    if config.kind == "static_frontend" && cli.database {
+        return Err(AgentError::new(
+            "invalid_database_target",
+            "Static frontends cannot attach managed Postgres directly.",
+            "Deploy a Rust backend with managed Postgres and call it from the frontend.",
+        ));
+    }
 
     let body = format!(
         "{{\"config\":{},\"commit_sha\":{},\"wants_database\":{},\"source_archive_base64\":\"{}\"}}",
@@ -1185,6 +1350,86 @@ fn valid_service_name(value: &str) -> bool {
             .chars()
             .last()
             .is_some_and(|character| character.is_ascii_lowercase() || character.is_ascii_digit())
+}
+
+fn frontend_lockfile_exists(project_dir: &Path) -> bool {
+    [
+        "package-lock.json",
+        "npm-shrinkwrap.json",
+        "pnpm-lock.yaml",
+        "yarn.lock",
+        "bun.lock",
+        "bun.lockb",
+    ]
+    .iter()
+    .any(|filename| project_dir.join(filename).exists())
+}
+
+fn frontend_script_checks(project_dir: &Path) -> Vec<Check> {
+    let manifest = fs::read_to_string(project_dir.join("package.json")).unwrap_or_default();
+    let mut checks = ["typecheck", "lint"]
+        .into_iter()
+        .map(|script| {
+            let ok = package_script_exists(&manifest, script);
+            Check {
+                name: format!("npm script {script}"),
+                ok,
+                message: if ok { "found" } else { "missing" }.to_owned(),
+                agent_instruction: format!(
+                    "Add a non-empty \"{script}\" script to package.json, then retry."
+                ),
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if checks.iter().all(|check| check.ok) {
+        checks.push(npm_script_check(project_dir, "typecheck"));
+        checks.push(npm_script_check(project_dir, "lint"));
+    }
+
+    checks
+}
+
+fn package_script_exists(manifest: &str, script: &str) -> bool {
+    let needle = format!("\"{script}\"");
+    manifest.contains("\"scripts\"") && manifest.contains(&needle)
+}
+
+fn npm_script_check(project_dir: &Path, script: &str) -> Check {
+    let output = Command::new("npm")
+        .args(["run", "--silent", script])
+        .current_dir(project_dir)
+        .output();
+
+    match output {
+        Ok(output) => Check {
+            name: format!("npm run {script}"),
+            ok: output.status.success(),
+            message: if output.status.success() {
+                "passed".to_owned()
+            } else {
+                truncate_check_message(&String::from_utf8_lossy(&output.stderr))
+            },
+            agent_instruction: format!("Run `npm run {script}`, fix every error, then redeploy."),
+        },
+        Err(error) => Check {
+            name: format!("npm run {script}"),
+            ok: false,
+            message: error.to_string(),
+            agent_instruction: format!(
+                "Install Node.js and npm, then run `npm run {script}` before deploying."
+            ),
+        },
+    }
+}
+
+fn valid_relative_path(value: &str) -> bool {
+    !value.is_empty()
+        && !Path::new(value).is_absolute()
+        && !value.contains('\\')
+        && value
+            .split('/')
+            .all(|component| !component.is_empty() && component != "." && component != "..")
 }
 
 fn parse_u16(value: &str, code: &'static str) -> Result<u16, AgentError> {
