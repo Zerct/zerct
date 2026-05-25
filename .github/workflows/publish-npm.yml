@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   publish:
@@ -57,7 +56,7 @@ jobs:
         run: npm pack --dry-run
         working-directory: packages/zerct
       - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
-        run: npm publish --access public --provenance
+        run: npm publish --access public
         working-directory: packages/zerct
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
