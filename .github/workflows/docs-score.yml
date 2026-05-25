@@ -34,12 +34,15 @@ jobs:
             const fs = require("node:fs");
             const score = JSON.parse(fs.readFileSync("mint-score.json", "utf8"));
             const value = Number(score.score ?? score.overallScore ?? 0);
-            if (value < 100) {
-              console.error(`Mintlify score is ${value}/100`);
+            const configuredMinimum = process.env.MINTLIFY_SCORE_MIN?.trim();
+            const minimum = Number(configuredMinimum || "90");
+            if (value < minimum) {
+              console.error(`Mintlify score is ${value}/100; expected at least ${minimum}/100`);
               process.exit(1);
             }
             console.log(`Mintlify score is ${value}/100`);
           '
         env:
           MINTLIFY_CLI_CONFIG_JSON: ${{ secrets.MINTLIFY_CLI_CONFIG_JSON }}
+          MINTLIFY_SCORE_MIN: ${{ vars.MINTLIFY_SCORE_MIN }}
           MINTLIFY_TELEMETRY_DISABLED: "1"
