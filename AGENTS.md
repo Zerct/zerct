@@ -1,98 +1,127 @@
 # AGENTS.md
 
-This is the public Zerct packages, SDKs, skills, and examples repository.
+This is the public Zerct packages, SDKs, skills, examples, and docs
+repository.
 
-This file applies to the whole repository. If a nested `AGENTS.md` is added
-later, the nested file may only tighten these rules, not weaken them.
+This file applies to the whole repository. Nested `AGENTS.md` files may only
+tighten these rules.
 
-## Rules
+## Non-Negotiables
 
-1. Keep public UX simple: use `npx @zerct/zerct deploy` until npm approves the
-   unscoped `zerct` package name.
-2. Do not commit secrets, npm tokens, Stripe keys, OAuth secrets, or customer
-   data.
-3. The source npm package manifest in `packages/zerct/package.json` stays named
-   `zerct` so the repo is ready for the unscoped package. The scoped publish
-   script rewrites the package name to `@zerct/zerct` until npm approves
-   unscoped `zerct`.
+1. Do not commit secrets, tokens, OAuth credentials, Stripe keys, customer data,
+   private URLs, SSH material, cloud credentials, database dumps, or logs that
+   contain sensitive data.
+2. Do not use em dashes or double hyphen prose in Markdown, MDX, or text files.
+   Wrap CLI flags such as `--json` in inline code or fenced code.
+3. Do not add general lint, test, or CI workflows. GitHub Actions are allowed
+   only for package publishing, Mintlify docs validation/deployment/score, and
+   explicit CodeRabbit push review.
+4. Every workflow must run on a Blacksmith runner. Use
+   `blacksmith-2vcpu-ubuntu-2404` unless measured runtime, memory, or disk
+   pressure proves a larger runner is needed.
+5. Keep direct Rust `unsafe` out of repo-owned Rust code and examples. Do not
+   weaken existing `unsafe_code = "forbid"` settings.
+6. Before finishing, run `./scripts/check-all.sh`, confirm the working tree is
+   clean except intentional changes, and state whether publishing happened.
+
+## Change Discipline
+
+1. Prefer the smallest change that solves the task.
+2. On every change, simplify: remove stale placeholders, duplicate rules,
+   unused package surface, dead docs, and redundant wrappers before adding new
+   abstraction.
+3. Keep behavior source of truth in one place. Do not let npm, PyPI, Cargo,
+   skills, docs, and examples drift into independent deploy behavior.
+4. Do not rename public commands, package names, domains, workflow names, or
+   published files without updating docs, package metadata, and checks in the
+   same change.
+5. Preserve agent-ready errors. CLI failures should include a stable code,
+   human message, and direct recovery instruction when practical.
+
+## Package Surfaces
+
+1. Public package names stay aligned: npm `zerct`, PyPI `zerct`, crates.io
+   `zerct`, and Homebrew `Zerct/tap/zerct`.
+2. Until npm approves unscoped `zerct`, the public npm command is:
+
+   ```sh
+   npx @zerct/zerct deploy
+   ```
+
+3. Keep `packages/zerct/package.json` named `zerct`; the scoped publish script
+   rewrites the name to `@zerct/zerct`.
 4. Keep `packages/zerct` dependency-free unless a dependency removes real
    complexity and is maintained, small, and necessary.
-5. CLI errors must include a direct `agent_instruction` when possible.
-6. Public Mintlify docs live in `docs/` in this repository. Configure Mintlify
-   as a monorepo with documentation path `/docs`.
-7. Do not add GitHub Actions unless explicitly requested. Allowed workflows are
-   package publishing and Mintlify docs validation, deployment, and score
-   checks. Every workflow must run on Blacksmith runners.
-8. Run local verification before publishing.
-9. Public package names should stay aligned: npm `zerct`, PyPI `zerct`,
-   crates.io `zerct`, and Homebrew `Zerct/tap/zerct`.
-10. GitHub Actions may publish packages or run explicit docs workflows only. Do
-    not add general lint, test, or CI workflows unless explicitly requested.
-11. Use `blacksmith-2vcpu-ubuntu-2404` for lightweight package publishing and
-    docs jobs. Increase runner size only when a measured job needs more CPU,
-    memory, or disk.
-12. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
-    SDKs, and skills must stay thin or share a generated contract instead of
-    growing independent deploy behavior.
-13. On every change, remove redundant code, duplicate instructions, stale
-    placeholders, and unused package surface before adding new abstractions.
-14. Never publish with a dirty working tree. Commit and push the exact package
-    source before triggering a package publishing workflow.
-15. Bump only the packages whose published contents changed. Do not republish an
-    existing version.
-16. Prefer trusted publishing/OIDC for registries. Use long-lived npm tokens
-    only as a fallback for flows that cannot use trusted publishing.
-17. Source archive creation must exclude local secrets, VCS metadata, build
-    outputs, databases, logs, cloud credentials, SSH material, and private key
-    files. Do not add another deploy archive path without equivalent excludes.
-18. Package CLIs must not print tokens, env values, database URLs, provider
-    tokens, or Stripe/Cloudflare values. Print presence, status, ids, and URLs
-    only when they are safe for users and agents.
-19. Keep examples minimal, buildable, and safe to copy. Examples must include
-    `Cargo.lock`, `zerct.toml`, a health endpoint, and no secrets.
-20. Keep skill files agent-ready: direct commands, expected files, deploy
-    contract, and common failure fixes. Do not put marketing copy in skills.
-21. Before finishing, run `./scripts/check-all.sh`, confirm no accidental
-    untracked files, and state whether publishing was performed.
-22. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
-    this repository.
-23. Do not add a separate docs repository for public docs. Keep docs changes
-    co-located with SDK, package, and example changes.
-24. Do not use em dashes or double hyphen prose in Markdown, MDX, or text
-    files. Wrap CLI flags such as `--json` in inline code or fenced code.
-25. Keep `.coderabbit.yaml` strict and concise. CodeRabbit must use Blacksmith
-    for push workflows, and push review must never run without an Agentic API
-    key stored as `CODERABBIT_API_KEY`.
-26. Every OpenAPI file must pass `scripts/check-openapi.sh`. Keep vacuum pinned,
-    use the all-rules ruleset with hard mode, and require score `100/100`.
+5. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
+   SDKs, and skills must stay thin or share generated contracts.
+6. Package CLIs must not print tokens, env values, database URLs, provider
+   secrets, or Stripe/Cloudflare values. Print safe presence, status, ids, and
+   public URLs only.
+7. Source archive creation must exclude local secrets, VCS metadata, build
+   outputs, databases, logs, cloud credentials, SSH material, and private key
+   files.
 
-## Package Commands
+## Docs And OpenAPI
 
-Current public npm command:
+1. Public Mintlify docs live in `docs/` in this repository. Do not add a
+   separate docs repository for public docs.
+2. Mintlify settings must remain:
 
-```sh
-npx @zerct/zerct deploy
-```
+   ```txt
+   Repository: Zerct/zerct
+   Branch: main
+   Documentation path: /docs
+   ```
 
-Use unscoped `npx zerct ...` only after npm approves and the unscoped package is
-published from this repository.
+3. Zerct is on Mintlify Hobby. Rely on repository-owned Blacksmith workflows,
+   not paid Mintlify CI features.
+4. Do not document unlaunched behavior as available. Mark it as planned or omit
+   it.
+5. Docs must be short, direct, copy-pasteable, and agent-readable.
+6. Every OpenAPI file must pass `scripts/check-openapi.sh`. Keep vacuum pinned,
+   use the all-rules ruleset with hard mode, fail at hint severity, and require
+   score `100/100`.
+7. If `docs/docs.json` references an OpenAPI file, that file must exist and be
+   included in the vacuum check.
 
-Current Homebrew command:
+## Examples And Skills
 
-```sh
-brew tap Zerct/tap
-brew install zerct
-```
+1. Examples must be minimal, buildable, and safe to copy.
+2. Rust examples must include `Cargo.lock`, `zerct.toml`, a health endpoint, and
+   no secrets.
+3. Skills must be operational, not marketing. Include direct commands, expected
+   files, deploy contract, and common failure fixes.
+4. Skills that describe user deployments must keep the no-direct-unsafe policy
+   visible.
 
-Current Mintlify settings:
+## Publishing
 
-```txt
-Repository: Zerct/zerct
-Branch: main
-Documentation path: /docs
-```
+1. Never publish with a dirty working tree.
+2. Commit and push the exact package source before triggering a publish
+   workflow.
+3. Bump only packages whose published contents changed. Do not republish an
+   existing version.
+4. Prefer trusted publishing/OIDC. Use long-lived registry tokens only as a
+   fallback for flows that cannot use trusted publishing yet.
+5. Homebrew formulae live in `Zerct/homebrew-tap`. Do not duplicate formulae in
+   this repository.
+6. Current Homebrew command:
 
-## Required Local Checks
+   ```sh
+   brew tap Zerct/tap
+   brew install zerct
+   ```
+
+## CodeRabbit
+
+1. Keep `.coderabbit.yaml` strict and concise.
+2. Native CodeRabbit GitHub App reviews are PR-based.
+3. Push review must use Blacksmith and must never run without an Agentic API key
+   stored as `CODERABBIT_API_KEY`.
+4. If the key is missing, the push workflow must skip with a notice instead of
+   failing.
+
+## Required Local Check
 
 Run this before calling work complete:
 
@@ -100,6 +129,4 @@ Run this before calling work complete:
 ./scripts/check-all.sh
 ```
 
-If a check cannot be run, say exactly why. Package publishing workflows may run
-the same local check, but they are not a replacement for checking locally before
-committing.
+If any check cannot run, say exactly why and what remains unverified.
