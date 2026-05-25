@@ -65,17 +65,6 @@ Agent contract:
   - Return HTTP 200 from the configured health endpoint.
 `
 
-main().catch((error) => {
-  if (error instanceof ZerctError) {
-    printAgentError(error.payload, error.json)
-    process.exitCode = error.exitCode
-    return
-  }
-
-  console.error(`zerct failed: ${error.message}`)
-  process.exitCode = 1
-})
-
 async function main() {
   const cli = parseArgs(process.argv.slice(2))
 
@@ -838,3 +827,14 @@ class ZerctError extends Error {
     this.exitCode = exitCode
   }
 }
+
+main().catch((error) => {
+  if (error instanceof ZerctError) {
+    printAgentError(error.payload, error.json)
+    process.exitCode = error.exitCode
+    return
+  }
+
+  console.error(`zerct failed: ${error.message}`)
+  process.exitCode = 1
+})
