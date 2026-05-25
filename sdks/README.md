@@ -1,10 +1,17 @@
 # SDKs
 
-Public SDKs will live here.
+Zerct SDKs and package surfaces help agents deploy free Rust backends with
+managed Postgres, private logs, and live HTTPS endpoints.
 
-- `js/`: JavaScript/TypeScript SDK
-- `rust/`: Rust SDK
-- `python/`: Python SDK
+- `js/`: JavaScript and TypeScript package surface
+- `rust/`: Rust package surface
+- `python/`: Python package surface
 
-The deploy CLIs live in `packages/` and `crates/` so SDKs can stay focused on
-API clients.
+Start with the CLI:
+
+```sh
+npx @zerct/zerct deploy
+```
+
+The OpenAPI contract for account, deploy, logs, and dashboard endpoints lives in
+`docs/openapi.json`.

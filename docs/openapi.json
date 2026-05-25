@@ -5,8 +5,8 @@
     "title": "Zerct API",
     "summary": "Control-plane API for Zerct deployments.",
     "version": "0.1.0",
-    "description": "Use the Zerct API to authenticate, create Rust backend deployments, and inspect deployment health.",
-    "termsOfService": "https://zerct.com/terms",
+    "description": "Use the Zerct API to authenticate, create Rust backend deployments, manage account onboarding, and inspect deployment health.",
+    "termsOfService": "https://zerct.com/legal/terms",
     "contact": {
       "name": "Zerct",
       "url": "https://zerct.com",
@@ -33,6 +33,10 @@
     }
   ],
   "tags": [
+    {
+      "name": "Accounts",
+      "description": "Private account onboarding and dashboard endpoints."
+    },
     {
       "name": "Auth",
       "description": "Authentication endpoints."
@@ -125,6 +129,105 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/LoginPolled"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/account": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account profile",
+        "description": "Returns the authenticated account profile used by web onboarding and SDK flows.",
+        "operationId": "getAccountProfile",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountProfileLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Update account profile",
+        "description": "Sets the private Zerct handle and display name used for the authenticated dashboard.",
+        "operationId": "updateAccountProfile",
+        "requestBody": {
+          "description": "Account handle and display name.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountProfileUpdateRequest"
+              },
+              "examples": {
+                "acme": {
+                  "summary": "Choose account handle",
+                  "value": {
+                    "handle": "acme",
+                    "displayName": "Acme"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountProfileUpdated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/dashboard": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account dashboard",
+        "description": "Returns deployments and usage for the authenticated account dashboard.",
+        "operationId": "getAccountDashboard",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountDashboardLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -535,6 +638,144 @@
             }
           }
         }
+      },
+      "AccountProfileLoaded": {
+        "description": "Signed-in account profile response.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountProfileResponse"
+            },
+            "examples": {
+              "ready": {
+                "summary": "Account profile with handle",
+                "value": {
+                  "accountId": "acct_01HW0000000000000000000000",
+                  "email": "dev@example.com",
+                  "provider": "github",
+                  "handle": "acme",
+                  "displayName": "Acme",
+                  "accountUrl": "https://zerct.com/acme"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountProfileUpdated": {
+        "description": "Updated authenticated account profile.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountProfileResponse"
+            },
+            "examples": {
+              "updated": {
+                "summary": "Updated account profile",
+                "value": {
+                  "accountId": "acct_01HW0000000000000000000000",
+                  "email": "dev@example.com",
+                  "provider": "github",
+                  "handle": "acme",
+                  "displayName": "Acme",
+                  "accountUrl": "https://zerct.com/acme"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountDashboardLoaded": {
+        "description": "Authenticated account dashboard.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountDashboardResponse"
+            },
+            "examples": {
+              "dashboard": {
+                "summary": "Account dashboard",
+                "value": {
+                  "profile": {
+                    "accountId": "acct_01HW0000000000000000000000",
+                    "email": "dev@example.com",
+                    "provider": "github",
+                    "handle": "acme",
+                    "displayName": "Acme",
+                    "accountUrl": "https://zerct.com/acme"
+                  },
+                  "apps": [
+                    {
+                      "appId": "app_01HW0000000000000000000000",
+                      "name": "hello-rust",
+                      "slug": "hello-rust",
+                      "url": "https://hello-rust.zerct.app",
+                      "plan": "free",
+                      "runtimeStatus": "running",
+                      "latestBuildStatus": "succeeded",
+                      "deployCount": 3,
+                      "runtimeMemoryMib": 256,
+                      "runtimeCpuMillis": 250,
+                      "databaseStorageMib": 512,
+                      "idleTimeoutMinutes": 15,
+                      "latestDeployAt": "2026-05-25T12:00:00.000Z"
+                    }
+                  ],
+                  "usage": {
+                    "appCount": 1,
+                    "runningCount": 1,
+                    "runtimeMemoryMib": 256,
+                    "runtimeCpuMillis": 250,
+                    "databaseStorageMib": 512,
+                    "deployCount": 3
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -910,6 +1151,408 @@
             "traceId": "trc_01HW0000000000000000000000"
           }
         ]
+      },
+      "AuthProvider": {
+        "type": "string",
+        "description": "OAuth provider used by the Zerct account.",
+        "enum": [
+          "github",
+          "google"
+        ],
+        "examples": [
+          "github"
+        ]
+      },
+      "Plan": {
+        "type": "string",
+        "description": "Zerct plan assigned to a deployment.",
+        "enum": [
+          "free",
+          "pro"
+        ],
+        "examples": [
+          "free"
+        ]
+      },
+      "RuntimeStatus": {
+        "type": "string",
+        "description": "Current runtime state.",
+        "enum": [
+          "running",
+          "sleeping",
+          "starting",
+          "stopping",
+          "failed"
+        ],
+        "examples": [
+          "running"
+        ]
+      },
+      "BuildStatus": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Latest build state when a build exists.",
+        "enum": [
+          "queued",
+          "running",
+          "succeeded",
+          "failed",
+          "canceled",
+          null
+        ],
+        "examples": [
+          "succeeded"
+        ]
+      },
+      "AccountProfileResponse": {
+        "type": "object",
+        "description": "Account profile returned to the signed-in user.",
+        "additionalProperties": false,
+        "required": [
+          "accountId",
+          "email",
+          "provider",
+          "handle",
+          "displayName",
+          "accountUrl"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "Authenticated Zerct account id.",
+            "pattern": "^acct_[A-Za-z0-9_-]+$",
+            "examples": [
+              "acct_01HW0000000000000000000000"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "description": "Provider email for the authenticated account.",
+            "format": "email",
+            "examples": [
+              "dev@example.com"
+            ]
+          },
+          "provider": {
+            "$ref": "#/components/schemas/AuthProvider"
+          },
+          "handle": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Private Zerct account handle.",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
+            "examples": [
+              "acme"
+            ]
+          },
+          "displayName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Saved display name for the account.",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,79}$",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Acme"
+            ]
+          },
+          "accountUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Private account dashboard URL.",
+            "format": "uri",
+            "examples": [
+              "https://zerct.com/acme"
+            ]
+          }
+        }
+      },
+      "AccountProfileUpdateRequest": {
+        "type": "object",
+        "description": "Account profile update request.",
+        "additionalProperties": false,
+        "required": [
+          "handle",
+          "displayName"
+        ],
+        "properties": {
+          "handle": {
+            "type": "string",
+            "description": "Unique lowercase account handle.",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
+            "minLength": 3,
+            "maxLength": 39,
+            "examples": [
+              "acme"
+            ]
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name shown in the private dashboard.",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,79}$",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Acme"
+            ]
+          }
+        }
+      },
+      "AccountDashboardResponse": {
+        "type": "object",
+        "description": "Authenticated account dashboard response.",
+        "additionalProperties": false,
+        "required": [
+          "profile",
+          "apps",
+          "usage"
+        ],
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
+          },
+          "apps": {
+            "type": "array",
+            "description": "Deployments owned by the account.",
+            "minItems": 0,
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/AccountDashboardApp"
+            },
+            "examples": [
+              [
+                {
+                  "appId": "app_01HW0000000000000000000000",
+                  "name": "hello-rust",
+                  "slug": "hello-rust",
+                  "url": "https://hello-rust.zerct.app",
+                  "plan": "free",
+                  "runtimeStatus": "running",
+                  "latestBuildStatus": "succeeded",
+                  "deployCount": 3,
+                  "runtimeMemoryMib": 256,
+                  "runtimeCpuMillis": 250,
+                  "databaseStorageMib": 512,
+                  "idleTimeoutMinutes": 15,
+                  "latestDeployAt": "2026-05-25T12:00:00.000Z"
+                }
+              ]
+            ]
+          },
+          "usage": {
+            "$ref": "#/components/schemas/AccountDashboardUsage"
+          }
+        }
+      },
+      "AccountDashboardApp": {
+        "type": "object",
+        "description": "Dashboard deployment row.",
+        "additionalProperties": false,
+        "required": [
+          "appId",
+          "name",
+          "slug",
+          "url",
+          "plan",
+          "runtimeStatus",
+          "latestBuildStatus",
+          "deployCount",
+          "runtimeMemoryMib",
+          "runtimeCpuMillis",
+          "databaseStorageMib",
+          "idleTimeoutMinutes",
+          "latestDeployAt"
+        ],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "App id shown on the account dashboard.",
+            "pattern": "^app_[0-9A-HJKMNP-TV-Z]{26}$",
+            "examples": [
+              "app_01HW0000000000000000000000"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Service name.",
+            "pattern": "^[a-z][a-z0-9-]{2,62}$",
+            "examples": [
+              "hello-rust"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "description": "Public deployment slug.",
+            "pattern": "^[a-z][a-z0-9-]{2,62}$",
+            "examples": [
+              "hello-rust"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "HTTPS endpoint assigned to the deployment.",
+            "format": "uri",
+            "examples": [
+              "https://hello-rust.zerct.app"
+            ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          },
+          "runtimeStatus": {
+            "$ref": "#/components/schemas/RuntimeStatus"
+          },
+          "latestBuildStatus": {
+            "$ref": "#/components/schemas/BuildStatus"
+          },
+          "deployCount": {
+            "type": "integer",
+            "description": "Number of deploy records.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "examples": [
+              3
+            ]
+          },
+          "runtimeMemoryMib": {
+            "type": "integer",
+            "description": "Runtime memory limit in MiB.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576,
+            "examples": [
+              256
+            ]
+          },
+          "runtimeCpuMillis": {
+            "type": "integer",
+            "description": "Runtime CPU limit in millis.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "examples": [
+              250
+            ]
+          },
+          "databaseStorageMib": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Managed Postgres storage limit in MiB when enabled.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576,
+            "examples": [
+              512
+            ]
+          },
+          "idleTimeoutMinutes": {
+            "type": "integer",
+            "description": "Idle timeout in minutes.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10080,
+            "examples": [
+              15
+            ]
+          },
+          "latestDeployAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Latest deploy creation timestamp.",
+            "format": "date-time",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          }
+        }
+      },
+      "AccountDashboardUsage": {
+        "type": "object",
+        "description": "Aggregated account dashboard usage.",
+        "additionalProperties": false,
+        "required": [
+          "appCount",
+          "runningCount",
+          "runtimeMemoryMib",
+          "runtimeCpuMillis",
+          "databaseStorageMib",
+          "deployCount"
+        ],
+        "properties": {
+          "appCount": {
+            "type": "integer",
+            "description": "Number of apps.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "examples": [
+              1
+            ]
+          },
+          "runningCount": {
+            "type": "integer",
+            "description": "Number of running apps.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "examples": [
+              1
+            ]
+          },
+          "runtimeMemoryMib": {
+            "type": "integer",
+            "description": "Sum of runtime memory limits in MiB.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576,
+            "examples": [
+              256
+            ]
+          },
+          "runtimeCpuMillis": {
+            "type": "integer",
+            "description": "Sum of runtime CPU limits in millis.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "examples": [
+              250
+            ]
+          },
+          "databaseStorageMib": {
+            "type": "integer",
+            "description": "Sum of managed database storage limits in MiB.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576,
+            "examples": [
+              512
+            ]
+          },
+          "deployCount": {
+            "type": "integer",
+            "description": "Sum of deployment records.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "examples": [
+              3
+            ]
+          }
+        }
       }
     }
   }
