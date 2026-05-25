@@ -18,3 +18,8 @@ This is the public Zerct packages, SDKs, skills, and examples repository.
    crates.io `zerct`.
 10. GitHub Actions may publish packages only. Do not add push/PR check, lint,
     test, or CI workflows unless explicitly requested.
+11. Keep `packages/zerct` as the CLI behavior source of truth. PyPI, Cargo,
+    SDKs, and skills must stay thin or share a generated contract instead of
+    growing independent deploy behavior.
+12. On every change, remove redundant code, duplicate instructions, stale
+    placeholders, and unused package surface before adding new abstractions.

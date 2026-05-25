@@ -33,6 +33,9 @@ Other package surfaces use the same public name:
 
 Mintlify docs live in the separate public `Zerct/docs` repository.
 
+`packages/zerct` is the CLI behavior source of truth. Other package surfaces
+must stay thin or share the same contract so deploy UX does not drift.
+
 ## Example
 
 ```sh

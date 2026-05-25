@@ -1,7 +1,8 @@
 # Publishing
 
 Package publishing is manual and environment-gated. Local checks remain local;
-GitHub Actions are only for release publishing.
+GitHub Actions are only for release publishing. Run `./scripts/check-all.sh`
+before dispatching any publish workflow.
 
 ## npm
 
