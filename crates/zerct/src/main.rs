@@ -20,8 +20,9 @@ const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
 const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
 const DEFAULT_RUST_CHECK_COMMAND: &str =
     "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings";
-const DEFAULT_FRONTEND_CHECK_COMMAND: &str =
+const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
     "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
+const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str = "bun ci && bun run typecheck && bun run lint";
 const ARCHIVE_EXCLUDES: &[&str] = &[
     ".git",
     "target",
@@ -589,6 +590,7 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
     let mut memory = "512mb".to_owned();
     let mut cpu = "0.25".to_owned();
     let mut idle_timeout_minutes = 15u16;
+    let project_dir = path.parent().unwrap_or_else(|| Path::new("."));
 
     for line in source.lines().map(str::trim) {
         if line.is_empty() || line.starts_with('#') {
@@ -638,14 +640,14 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
     }
     if build_command.is_empty() {
         build_command = if kind == "static_frontend" {
-            "npm run build".to_owned()
+            frontend_build_command(project_dir).to_owned()
         } else {
             "cargo build --release".to_owned()
         };
     }
     if check_command.is_empty() {
         check_command = if kind == "static_frontend" {
-            DEFAULT_FRONTEND_CHECK_COMMAND.to_owned()
+            frontend_check_command(project_dir).to_owned()
         } else {
             DEFAULT_RUST_CHECK_COMMAND.to_owned()
         };
@@ -736,6 +738,13 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
 }
 
 fn validate_check_command(kind: &str, command: &str) -> Result<(), AgentError> {
+    if kind == "static_frontend" && uses_javascript_linter(command) {
+        return Err(AgentError::new(
+            "policy_rejected",
+            "Check command uses a JavaScript-based linter.",
+            "Use native frontend linting such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
+        ));
+    }
     let required = if kind == "static_frontend" {
         &["typecheck", "lint"][..]
     } else {
@@ -1518,14 +1527,51 @@ fn display_path(path: &Path) -> String {
     path.to_string_lossy().replace('\\', "/")
 }
 
+#[derive(Clone, Copy)]
+enum FrontendPackageManager {
+    Bun,
+    Npm,
+}
+
+impl FrontendPackageManager {
+    fn from_project_dir(project_dir: &Path) -> Self {
+        if project_dir.join("bun.lock").exists() || project_dir.join("bun.lockb").exists() {
+            Self::Bun
+        } else {
+            Self::Npm
+        }
+    }
+
+    const fn command(self) -> &'static str {
+        match self {
+            Self::Bun => "bun",
+            Self::Npm => "npm",
+        }
+    }
+}
+
+fn frontend_check_command(project_dir: &Path) -> &'static str {
+    match FrontendPackageManager::from_project_dir(project_dir) {
+        FrontendPackageManager::Bun => DEFAULT_BUN_FRONTEND_CHECK_COMMAND,
+        FrontendPackageManager::Npm => DEFAULT_NPM_FRONTEND_CHECK_COMMAND,
+    }
+}
+
+fn frontend_build_command(project_dir: &Path) -> &'static str {
+    match FrontendPackageManager::from_project_dir(project_dir) {
+        FrontendPackageManager::Bun => "bun run build",
+        FrontendPackageManager::Npm => "npm run build",
+    }
+}
+
 fn frontend_script_checks(project_dir: &Path) -> Vec<Check> {
     let manifest = fs::read_to_string(project_dir.join("package.json")).unwrap_or_default();
     let mut checks = ["typecheck", "lint"]
         .into_iter()
         .map(|script| {
-            let ok = package_script_exists(&manifest, script);
+            let ok = package_script_value(&manifest, script).is_some();
             Check {
-                name: format!("npm script {script}"),
+                name: format!("package script {script}"),
                 ok,
                 message: if ok { "found" } else { "missing" }.to_owned(),
                 agent_instruction: format!(
@@ -1534,43 +1580,117 @@ fn frontend_script_checks(project_dir: &Path) -> Vec<Check> {
             }
         })
         .collect::<Vec<_>>();
+    let lint_script = package_script_value(&manifest, "lint").unwrap_or_default();
+    let native_lint = lint_script.is_empty() || !uses_javascript_linter(&lint_script);
+    checks.push(Check {
+        name: "native frontend lint".to_owned(),
+        ok: native_lint,
+        message: if native_lint {
+            "accepted".to_owned()
+        } else {
+            "JavaScript linter found".to_owned()
+        },
+        agent_instruction: "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.".to_owned(),
+    });
 
     if checks.iter().all(|check| check.ok) {
-        checks.push(npm_script_check(project_dir, "typecheck"));
-        checks.push(npm_script_check(project_dir, "lint"));
+        checks.push(package_script_check(project_dir, "typecheck"));
+        checks.push(package_script_check(project_dir, "lint"));
     }
 
     checks
 }
 
-fn package_script_exists(manifest: &str, script: &str) -> bool {
-    let needle = format!("\"{script}\"");
-    manifest.contains("\"scripts\"") && manifest.contains(&needle)
+fn package_script_value(manifest: &str, script: &str) -> Option<String> {
+    let scripts_start = manifest.find("\"scripts\"")?;
+    let scripts_source = &manifest[scripts_start..];
+    let key = format!("\"{script}\"");
+    let key_start = scripts_source.find(&key)?;
+    let after_key = &scripts_source[key_start + key.len()..];
+    let colon = after_key.find(':')?;
+    parse_json_string(after_key[colon + 1..].trim_start())
 }
 
-fn npm_script_check(project_dir: &Path, script: &str) -> Check {
-    let output = Command::new("npm")
-        .args(["run", "--silent", script])
-        .current_dir(project_dir)
-        .output();
+fn parse_json_string(source: &str) -> Option<String> {
+    let mut chars = source.chars();
+    if chars.next()? != '"' {
+        return None;
+    }
+    let mut value = String::new();
+    let mut escaped = false;
+    for character in chars {
+        if escaped {
+            value.push(character);
+            escaped = false;
+        } else if character == '\\' {
+            escaped = true;
+        } else if character == '"' {
+            return Some(value);
+        } else {
+            value.push(character);
+        }
+    }
+    None
+}
+
+fn uses_javascript_linter(command: &str) -> bool {
+    let tokens = command
+        .split(|character: char| {
+            matches!(
+                character,
+                ' ' | '\t' | '\n' | '\r' | '&' | '|' | ';' | '(' | ')'
+            )
+        })
+        .filter_map(|token| {
+            let trimmed = token.trim_matches(|character| character == '"' || character == '\'');
+            (!trimmed.is_empty()).then_some(trimmed)
+        })
+        .collect::<Vec<_>>();
+    tokens.iter().enumerate().any(|(index, token)| {
+        let command_name = token.rsplit('/').next().unwrap_or(token);
+        matches!(command_name, "eslint" | "eslint_d" | "standard" | "xo")
+            || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
+    })
+}
+
+fn package_script_check(project_dir: &Path, script: &str) -> Check {
+    let manager = FrontendPackageManager::from_project_dir(project_dir);
+    let mut command = Command::new(manager.command());
+    match manager {
+        FrontendPackageManager::Bun => {
+            command.args(["run", script]);
+        }
+        FrontendPackageManager::Npm => {
+            command.args(["run", "--silent", script]);
+        }
+    }
+    let output = command.current_dir(project_dir).output();
 
     match output {
         Ok(output) => Check {
-            name: format!("npm run {script}"),
+            name: format!("{} run {script}", manager.command()),
             ok: output.status.success(),
             message: if output.status.success() {
                 "passed".to_owned()
             } else {
                 truncate_check_message(&String::from_utf8_lossy(&output.stderr))
             },
-            agent_instruction: format!("Run `npm run {script}`, fix every error, then redeploy."),
+            agent_instruction: format!(
+                "Run `{} run {script}`, fix every error, then redeploy.",
+                manager.command()
+            ),
         },
         Err(error) => Check {
-            name: format!("npm run {script}"),
+            name: format!("{} run {script}", manager.command()),
             ok: false,
             message: error.to_string(),
             agent_instruction: format!(
-                "Install Node.js and npm, then run `npm run {script}` before deploying."
+                "Install {}, then run `{} run {script}` before deploying.",
+                match manager {
+                    FrontendPackageManager::Bun => "Bun",
+                    FrontendPackageManager::Npm => "Node.js and npm",
+                },
+                manager.command()
             ),
         },
     }
