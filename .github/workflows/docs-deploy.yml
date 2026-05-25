@@ -6,7 +6,9 @@ on:
       - main
     paths:
       - "docs/**"
+      - ".vacuum.yaml"
       - "scripts/check-docs.mjs"
+      - "scripts/check-openapi.sh"
       - "scripts/check-prose-style.mjs"
       - "scripts/trigger-mintlify-deploy.mjs"
       - ".github/workflows/docs-deploy.yml"
@@ -25,8 +27,13 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.2"
+          cache: false
       - run: node scripts/check-docs.mjs
       - run: node scripts/check-prose-style.mjs
+      - run: scripts/check-openapi.sh
       - name: Validate Mintlify build
         run: npx --yes mint@latest validate
         working-directory: docs

@@ -1,82 +1,150 @@
 {
   "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "Zerct API",
+    "summary": "Control-plane API for Zerct deployments.",
     "version": "0.1.0",
-    "description": "Control-plane API for Zerct deployments."
+    "description": "Use the Zerct API to authenticate, create Rust backend deployments, and inspect deployment health.",
+    "termsOfService": "https://zerct.com/terms",
+    "contact": {
+      "name": "Zerct",
+      "url": "https://zerct.com",
+      "email": "support@zerct.com"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://zerct.com/legal"
+    }
+  },
+  "externalDocs": {
+    "description": "Zerct documentation",
+    "url": "https://docs.zerct.com"
   },
   "servers": [
     {
       "url": "https://api.zerct.com",
-      "description": "Production"
+      "description": "Production API"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints."
+    },
+    {
+      "name": "Deployments",
+      "description": "Deployment lifecycle endpoints."
+    },
+    {
+      "name": "Health",
+      "description": "API availability endpoints."
     }
   ],
   "paths": {
     "/healthz": {
       "get": {
-        "summary": "Health check",
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check API health",
+        "description": "Returns the Zerct control-plane health state.",
         "operationId": "getHealth",
         "responses": {
           "200": {
-            "description": "The API is healthy.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/HealthOk"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
     },
     "/v1/login/device": {
       "post": {
+        "tags": [
+          "Auth"
+        ],
         "summary": "Start device login",
+        "description": "Starts a device login flow for the Zerct CLI.",
         "operationId": "startDeviceLogin",
         "responses": {
           "200": {
-            "description": "Device login information.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginStartResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/LoginStarted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
     },
     "/v1/deployments": {
       "post": {
-        "summary": "Create deployment",
-        "operationId": "createDeployment",
-        "security": [
-          {
-            "bearerAuth": []
-          }
+        "tags": [
+          "Deployments"
         ],
+        "summary": "Create deployment",
+        "description": "Creates a deployment from a source archive produced by the Zerct CLI.",
+        "operationId": "createDeployment",
         "requestBody": {
+          "description": "Deployment source archive and runtime metadata.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DeployRequest"
+              },
+              "examples": {
+                "helloRust": {
+                  "summary": "Deploy a Rust backend",
+                  "value": {
+                    "appName": "hello-rust",
+                    "healthPath": "/healthz",
+                    "archiveBase64": "H4sIAAAAAAAA"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Deployment accepted.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeployResponse"
-                }
-              }
-            }
+            "$ref": "#/components/responses/DeploymentAccepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
         }
       }
@@ -86,89 +154,529 @@
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Zerct session token returned by the login flow. JWT handling follows RFC8725 best current practices."
+      }
+    },
+    "headers": {
+      "RateLimitLimit": {
+        "description": "Maximum requests available in the current rate-limit window.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 100000,
+          "examples": [
+            1000
+          ]
+        }
+      },
+      "RateLimitRemaining": {
+        "description": "Requests remaining in the current rate-limit window.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0,
+          "maximum": 100000,
+          "examples": [
+            999
+          ]
+        }
+      },
+      "RateLimitReset": {
+        "description": "Unix timestamp for the end of the current rate-limit window.",
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "minimum": 1700000000,
+          "maximum": 4102444800,
+          "examples": [
+            1779710400
+          ]
+        }
+      },
+      "RetryAfter": {
+        "description": "Seconds to wait before retrying a rate-limited request.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 3600,
+          "examples": [
+            60
+          ]
+        }
+      }
+    },
+    "responses": {
+      "HealthOk": {
+        "description": "The API is healthy.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HealthResponse"
+            },
+            "examples": {
+              "healthy": {
+                "summary": "Healthy response",
+                "value": {
+                  "ok": true,
+                  "service": "zerct-api"
+                }
+              }
+            }
+          }
+        }
+      },
+      "LoginStarted": {
+        "description": "Device login information.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LoginStartResponse"
+            },
+            "examples": {
+              "deviceLogin": {
+                "summary": "Device login",
+                "value": {
+                  "loginUrl": "https://zerct.com/device",
+                  "deviceCode": "ZCT-123456",
+                  "intervalSeconds": 5
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeploymentAccepted": {
+        "description": "Deployment accepted.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeployResponse"
+            },
+            "examples": {
+              "queuedDeployment": {
+                "summary": "Queued deployment",
+                "value": {
+                  "deployId": "dep_01HW0000000000000000000000",
+                  "appId": "app_01HW0000000000000000000000",
+                  "status": "queued",
+                  "url": "https://hello-rust.zerct.app"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "The request body or parameters are invalid.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "invalidRequest": {
+                "summary": "Invalid request",
+                "value": {
+                  "code": "invalid_request",
+                  "message": "Request validation failed.",
+                  "agentInstruction": "Fix the request payload and retry.",
+                  "traceId": "trc_01HW0000000000000000000000"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication is required or the token is invalid.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "loginRequired": {
+                "summary": "Login required",
+                "value": {
+                  "code": "login_required",
+                  "message": "Zerct login is required.",
+                  "agentInstruction": "Run zerct login and retry.",
+                  "traceId": "trc_01HW0000000000000000000001"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "The rate limit has been exceeded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "rateLimited": {
+                "summary": "Rate limited",
+                "value": {
+                  "code": "rate_limited",
+                  "message": "Too many requests.",
+                  "agentInstruction": "Wait for the rate-limit reset, then retry.",
+                  "traceId": "trc_01HW0000000000000000000002"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "The API could not complete the request.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "serverError": {
+                "summary": "Server error",
+                "value": {
+                  "code": "internal_error",
+                  "message": "The API could not complete the request.",
+                  "agentInstruction": "Retry the request. If it keeps failing, check Zerct status.",
+                  "traceId": "trc_01HW0000000000000000000003"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "schemas": {
       "HealthResponse": {
         "type": "object",
+        "description": "Health response for the control-plane API.",
+        "additionalProperties": false,
         "required": [
           "ok",
           "service"
         ],
         "properties": {
           "ok": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the API is healthy.",
+            "examples": [
+              true
+            ]
           },
           "service": {
-            "type": "string"
+            "type": "string",
+            "description": "Service identifier.",
+            "enum": [
+              "zerct-api"
+            ],
+            "examples": [
+              "zerct-api"
+            ]
           }
-        }
+        },
+        "examples": [
+          {
+            "ok": true,
+            "service": "zerct-api"
+          }
+        ]
       },
       "LoginStartResponse": {
         "type": "object",
+        "description": "Device login response for the Zerct CLI.",
+        "additionalProperties": false,
         "required": [
-          "login_url",
-          "device_code",
-          "interval_seconds"
+          "loginUrl",
+          "deviceCode",
+          "intervalSeconds"
         ],
         "properties": {
-          "login_url": {
+          "loginUrl": {
             "type": "string",
-            "format": "uri"
+            "description": "Browser URL where the user completes login.",
+            "format": "uri",
+            "examples": [
+              "https://zerct.com/device"
+            ]
           },
-          "device_code": {
-            "type": "string"
+          "deviceCode": {
+            "type": "string",
+            "description": "Short code shown by the CLI during device login.",
+            "pattern": "^ZCT-[0-9]{6}$",
+            "examples": [
+              "ZCT-123456"
+            ]
           },
-          "interval_seconds": {
+          "intervalSeconds": {
             "type": "integer",
-            "minimum": 1
+            "description": "Minimum polling interval in seconds.",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 60,
+            "examples": [
+              5
+            ]
           }
-        }
+        },
+        "examples": [
+          {
+            "loginUrl": "https://zerct.com/device",
+            "deviceCode": "ZCT-123456",
+            "intervalSeconds": 5
+          }
+        ]
       },
       "DeployRequest": {
         "type": "object",
+        "description": "Request body for creating a deployment.",
+        "additionalProperties": false,
         "required": [
-          "app_name",
-          "health_path",
-          "archive_base64"
+          "appName",
+          "healthPath",
+          "archiveBase64"
         ],
         "properties": {
-          "app_name": {
-            "type": "string"
-          },
-          "health_path": {
+          "appName": {
             "type": "string",
-            "example": "/health"
+            "description": "Deployment slug.",
+            "pattern": "^[a-z][a-z0-9-]{2,62}$",
+            "examples": [
+              "hello-rust"
+            ]
           },
-          "archive_base64": {
+          "healthPath": {
             "type": "string",
-            "description": "Base64 encoded source archive."
+            "description": "HTTP path used by Zerct health checks.",
+            "pattern": "^/[A-Za-z0-9/_-]{1,120}$",
+            "examples": [
+              "/healthz"
+            ]
+          },
+          "archiveBase64": {
+            "type": "string",
+            "description": "Base64 encoded source archive.",
+            "format": "byte",
+            "maxLength": 52428800,
+            "examples": [
+              "H4sIAAAAAAAA"
+            ]
           }
-        }
+        },
+        "examples": [
+          {
+            "appName": "hello-rust",
+            "healthPath": "/healthz",
+            "archiveBase64": "H4sIAAAAAAAA"
+          }
+        ]
       },
       "DeployResponse": {
         "type": "object",
+        "description": "Response returned after a deployment is accepted.",
+        "additionalProperties": false,
         "required": [
-          "deploy_id",
-          "app_id",
+          "deployId",
+          "appId",
           "status"
         ],
         "properties": {
-          "deploy_id": {
-            "type": "string"
+          "deployId": {
+            "type": "string",
+            "description": "Deployment identifier.",
+            "pattern": "^dep_[0-9A-HJKMNP-TV-Z]{26}$",
+            "examples": [
+              "dep_01HW0000000000000000000000"
+            ]
           },
-          "app_id": {
-            "type": "string"
+          "appId": {
+            "type": "string",
+            "description": "Application identifier.",
+            "pattern": "^app_[0-9A-HJKMNP-TV-Z]{26}$",
+            "examples": [
+              "app_01HW0000000000000000000000"
+            ]
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "description": "Deployment status.",
+            "enum": [
+              "queued",
+              "building",
+              "running",
+              "failed"
+            ],
+            "examples": [
+              "queued"
+            ]
           },
           "url": {
             "type": "string",
-            "format": "uri"
+            "description": "Public deployment URL.",
+            "format": "uri",
+            "examples": [
+              "https://hello-rust.zerct.app"
+            ]
           }
-        }
+        },
+        "examples": [
+          {
+            "deployId": "dep_01HW0000000000000000000000",
+            "appId": "app_01HW0000000000000000000000",
+            "status": "queued",
+            "url": "https://hello-rust.zerct.app"
+          }
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error response with agent-readable recovery guidance.",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "agentInstruction",
+          "traceId"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable machine-readable error code.",
+            "pattern": "^[a-z][a-z0-9_]{2,63}$",
+            "examples": [
+              "invalid_request"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Short human-readable error message.",
+            "pattern": "^[A-Za-z0-9 .,:/_-]{3,160}$",
+            "examples": [
+              "Request validation failed."
+            ]
+          },
+          "agentInstruction": {
+            "type": "string",
+            "description": "Instruction an AI agent can follow to recover.",
+            "pattern": "^[A-Za-z0-9 .,:/_-]{3,240}$",
+            "examples": [
+              "Fix the request payload and retry."
+            ]
+          },
+          "traceId": {
+            "type": "string",
+            "description": "Support trace identifier.",
+            "pattern": "^trc_[0-9A-HJKMNP-TV-Z]{26}$",
+            "examples": [
+              "trc_01HW0000000000000000000000"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "code": "invalid_request",
+            "message": "Request validation failed.",
+            "agentInstruction": "Fix the request payload and retry.",
+            "traceId": "trc_01HW0000000000000000000000"
+          }
+        ]
       }
     }
   }
