@@ -19,3 +19,5 @@ This directory is the Mintlify documentation source for Zerct.
    that expose accounts.
 8. After editing navigation, run `node scripts/check-docs.mjs` from the repo
    root.
+9. Do not use em dashes or double hyphen prose. Wrap CLI flags in inline code
+   or fenced code blocks.

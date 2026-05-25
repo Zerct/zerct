@@ -58,6 +58,8 @@ later, the nested file may only tighten these rules, not weaken them.
     this repository.
 23. Do not add a separate docs repository for public docs. Keep docs changes
     co-located with SDK, package, and example changes.
+24. Do not use em dashes or double hyphen prose in Markdown, MDX, or text
+    files. Wrap CLI flags such as `--json` in inline code or fenced code.
 
 ## Package Commands
 
