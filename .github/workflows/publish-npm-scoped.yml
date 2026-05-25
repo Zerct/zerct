@@ -21,6 +21,3 @@ jobs:
           package-manager-cache: false
       - run: ./scripts/check-all.sh
       - run: ./scripts/publish-npm-scoped.sh
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_PUBLISH_PROVENANCE: "1"
