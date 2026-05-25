@@ -43,6 +43,7 @@ const ARCHIVE_EXCLUDES: &[&str] = &[
     "*.sqlite3",
     "*.db",
     "*.log",
+    "._*",
     ".DS_Store",
 ];
 
@@ -729,6 +730,7 @@ fn archive_base64(project_dir: &Path) -> Result<String, AgentError> {
         command.arg(format!("--exclude={pattern}"));
     }
     let output = command
+        .env("COPYFILE_DISABLE", "1")
         .args(["-czf", "-", "-C"])
         .arg(project_dir)
         .arg(".")
