@@ -28,7 +28,10 @@ jobs:
           version="$(awk -F '"' '/^version = / { print $2; exit }' crates/zerct/Cargo.toml)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-          status="$(curl -sS -o /tmp/zerct-crate.json -w "%{http_code}" "https://crates.io/api/v1/crates/zerct/$version")"
+          status="$(curl -sS -o /tmp/zerct-crate.json -w "%{http_code}" \
+            -H "Accept: application/json" \
+            -H "User-Agent: Zerct publish workflow (https://github.com/Zerct/zerct)" \
+            "https://crates.io/api/v1/crates/zerct/$version")"
           if [ "$status" = "200" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "::notice::zerct@$version already exists on crates.io; skipping publish."
