@@ -9,7 +9,8 @@ This directory is the Mintlify documentation source for Zerct.
 2. The Mintlify dashboard must point at repository `Zerct/zerct`, branch `main`,
    documentation path `/docs`.
 3. Zerct is on Mintlify Hobby. Use repository-owned Blacksmith workflows for
-   docs validation, deployment triggers, and score checks.
+   docs validation, optional deployment triggers, and score checks. Do not
+   depend on paid Mintlify CI features.
 4. Use sentence case headings and short, direct paragraphs.
 5. Keep examples copy-pasteable and agent-readable.
 6. Do not document unlaunched product behavior as available. Mark it as planned
