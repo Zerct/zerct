@@ -7,13 +7,19 @@ anywhere.
 
 ## Install
 
-The primary package is the unscoped npm package `zerct`, so agents and humans
-can run:
+The target npm package is the unscoped package `zerct`, so agents and humans can
+run:
 
 ```sh
 npx zerct init
 npx zerct doctor
 npx zerct deploy
+```
+
+Until npm approves the unscoped name, use the scoped fallback:
+
+```sh
+npx @zerct/zerct deploy
 ```
 
 Other package surfaces use the same public name:
