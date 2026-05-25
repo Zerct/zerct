@@ -157,6 +157,18 @@ As of May 25, 2026, `mint score https://docs.zerct.com` reports `92/100`.
 Hosted Mintlify pages currently lose points on platform-level HTML size/parity
 checks; `mint score https://www.mintlify.com/docs` reports a similar `91/100`.
 
+OpenAPI linting:
+
+- RuleSet: `.vacuum.yaml`
+- Command: `scripts/check-openapi.sh`
+- vacuum version: `v0.26.6`
+- Required score: `100/100`
+- Strict flags: all rules, hard mode, fail at hint severity, minimum score 100
+
+The check verifies the OpenAPI file referenced by `docs/docs.json` exists,
+discovers every tracked OpenAPI or Swagger JSON/YAML file, and runs vacuum
+against all discovered files.
+
 ## CodeRabbit
 
 Native CodeRabbit GitHub App reviews are PR-based. The repository also has

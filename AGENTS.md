@@ -63,6 +63,8 @@ later, the nested file may only tighten these rules, not weaken them.
 25. Keep `.coderabbit.yaml` strict and concise. CodeRabbit must use Blacksmith
     for push workflows, and push review must never run without an Agentic API
     key stored as `CODERABBIT_API_KEY`.
+26. Every OpenAPI file must pass `scripts/check-openapi.sh`. Keep vacuum pinned,
+    use the all-rules ruleset with hard mode, and require score `100/100`.
 
 ## Package Commands
 

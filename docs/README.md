@@ -29,4 +29,5 @@ Local checks:
 npx mint@latest validate
 npx mint@latest broken-links --check-anchors --check-redirects --check-snippets
 npx mint@latest a11y --skip-contrast
+../scripts/check-openapi.sh
 ```

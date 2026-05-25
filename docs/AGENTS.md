@@ -21,3 +21,6 @@ This directory is the Mintlify documentation source for Zerct.
    root.
 9. Do not use em dashes or double hyphen prose. Wrap CLI flags in inline code
    or fenced code blocks.
+10. OpenAPI changes must keep `docs/openapi.json` valid and pass
+    `scripts/check-openapi.sh` from the repo root with a vacuum score of
+    `100/100`.
