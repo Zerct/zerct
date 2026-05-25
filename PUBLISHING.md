@@ -127,10 +127,12 @@ Mintlify dashboard settings:
 - Documentation path: `/docs`
 
 Zerct uses Mintlify Hobby, so do not rely on Mintlify's paid CI checks. The
-repository owns validation through Blacksmith workflows:
+repository owns validation through Blacksmith workflows and lets the Mintlify
+GitHub App deploy from `main`:
 
 - `.github/workflows/docs-validate.yml`: validates PR docs changes.
-- `.github/workflows/docs-deploy.yml`: validates and triggers a Mintlify deploy.
+- `.github/workflows/docs-deploy.yml`: validates, then optionally triggers a
+  Mintlify deploy through the Admin API when configured.
 - `.github/workflows/docs-score.yml`: checks public agent-readiness endpoints
   and optionally runs authenticated `mint score` with an A-grade floor.
 
@@ -139,7 +141,7 @@ index the docs but fail domain revalidation. The deploy script treats that as a
 non-fatal pending-domain state only when the update and indexing already
 succeeded.
 
-Required GitHub configuration:
+Optional GitHub configuration:
 
 - Secret: `MINTLIFY_ADMIN_API_KEY`
 - Variable: `MINTLIFY_PROJECT_ID`
