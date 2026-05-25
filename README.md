@@ -27,6 +27,22 @@ command = "npm run build"
 output = "dist"
 ```
 
+For new TanStack or Vite frontends, prefer fast native checks:
+
+```sh
+npm install -D @typescript/native-preview oxlint
+```
+
+```json
+{
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint src vite.config.ts --deny-warnings",
+    "build": "vite build"
+  }
+}
+```
+
 Rust backend checks must include locked `cargo check` and locked all-target,
 all-feature Clippy with `-D warnings`. Static frontend checks must run both
 typechecking and linting before build work is queued. Static frontend browser
