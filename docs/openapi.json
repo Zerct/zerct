@@ -2985,7 +2985,8 @@
                   "openapi_url": "https://docs.zerct.com/openapi.json",
                   "auth": "Use device login once, then a bearer token.",
                   "agent_workflow": [
-                    "Call GET /v1/capabilities first."
+                    "Call GET /v1/capabilities first.",
+                    "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
                   ],
                   "endpoints": [
                     {
@@ -6553,12 +6554,14 @@
               "pattern": "^[\\s\\S]{1,500}$",
               "maxLength": 500,
               "examples": [
-                "Call GET /v1/capabilities first."
+                "Call GET /v1/capabilities first.",
+                "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
               ]
             },
             "examples": [
               [
-                "Call GET /v1/capabilities first."
+                "Call GET /v1/capabilities first.",
+                "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
               ]
             ]
           },

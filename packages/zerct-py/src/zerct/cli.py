@@ -96,7 +96,19 @@ def main(argv: list[str] | None = None) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="zerct")
+    parser = argparse.ArgumentParser(
+        prog="zerct",
+        epilog=(
+            "Agent contract: Rust backends keep Cargo.lock committed, listen on "
+            "0.0.0.0:$PORT, and return HTTP 200 from health. Static frontends "
+            'set kind = "static_frontend", keep TypeScript source, a package '
+            "lockfile, and typecheck + lint scripts. Run deploy from a repo "
+            "root with nested zerct.toml files to deploy the workspace in one "
+            "command. When a frontend calls a backend on another hostname, "
+            "configure backend CORS or use a same-origin custom domain. Keep "
+            "direct unsafe out of Rust source."
+        ),
+    )
     parser.add_argument("--version", action="version", version=__version__)
     parser.add_argument("--json", action="store_true", help="print JSON")
     parser.add_argument("--api", default=DEFAULT_API_URL, help="Zerct API URL")

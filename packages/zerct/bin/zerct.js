@@ -91,6 +91,7 @@ Agent contract:
   - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, and typecheck + lint scripts.
   - Run deploy from a repo root with nested zerct.toml files to deploy the whole workspace in one command.
+  - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.
   - Keep direct unsafe out of Rust source.
 `
 
