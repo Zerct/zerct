@@ -14,8 +14,8 @@ npx zerct doctor
 npx zerct deploy
 ```
 
-Zerct expects `Cargo.toml`, `Cargo.lock`, and `zerct.toml`. The app must listen
-on `0.0.0.0:$PORT` and expose the configured health endpoint.
+Rust backends expect `Cargo.toml`, `Cargo.lock`, and `zerct.toml`. They must
+listen on `0.0.0.0:$PORT` and expose the configured health endpoint.
 
 From a full-stack repo root, the same deploy command discovers nested
 `zerct.toml` files and deploys the whole workspace in one command.

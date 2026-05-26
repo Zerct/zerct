@@ -118,6 +118,7 @@ Usage:
 Agent contract:
   - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = \"static_frontend\", keep TypeScript source, a package lockfile, and typecheck + lint scripts.
+  - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a repo root with nested zerct.toml files to deploy the whole workspace in one command.
   - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.
   - Keep direct unsafe out of Rust source."
@@ -742,7 +743,6 @@ fn parse_config(path: &Path) -> Result<Config, AgentError> {
     if kind == "static_frontend" && build_output_dir.is_none() {
         build_output_dir = Some("dist".to_owned());
     }
-
     let config = Config {
         name,
         kind,
@@ -806,6 +806,13 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
             ));
         }
         return Ok(());
+    }
+    if config.build_output_dir.is_some() {
+        return Err(AgentError::new(
+            "invalid_build_output",
+            "build.output is only valid for static frontend projects.",
+            "Remove [build].output or set kind to static_frontend.",
+        ));
     }
     if config.run_command.trim().is_empty() {
         return Err(AgentError::new(

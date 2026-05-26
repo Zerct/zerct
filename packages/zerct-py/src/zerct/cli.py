@@ -100,9 +100,9 @@ def build_parser() -> argparse.ArgumentParser:
         prog="zerct",
         epilog=(
             "Agent contract: Rust backends keep Cargo.lock committed, listen on "
-            "0.0.0.0:$PORT, and return HTTP 200 from health. Static frontends "
-            'set kind = "static_frontend", keep TypeScript source, a package '
-            "lockfile, and typecheck + lint scripts. Run deploy from a repo "
+            '0.0.0.0:$PORT, and return HTTP 200 from health. Static frontends set kind = "static_frontend", '
+            "keep TypeScript source, a package lockfile, and typecheck + lint scripts. Frontends call Rust "
+            "backends for APIs, managed Postgres, and server-side logic. Run deploy from a repo "
             "root with nested zerct.toml files to deploy the workspace in one "
             "command. When a frontend calls a backend on another hostname, "
             "configure backend CORS or use a same-origin custom domain. Keep "
@@ -472,6 +472,12 @@ def validate_config(config: dict[str, Any]) -> None:
                 "Set [build].output to a relative directory like dist.",
             )
         return
+    if config["build"].get("output"):
+        raise AgentError(
+            "invalid_build_output",
+            "build.output is only valid for static frontend projects.",
+            "Remove [build].output or set kind to static_frontend.",
+        )
     if not config["run"].get("command"):
         raise AgentError(
             "missing_command",
