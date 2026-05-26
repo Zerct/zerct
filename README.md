@@ -117,5 +117,6 @@ npx @zerct/zerct logs --deploy deploy_1 --json
 npx @zerct/zerct logs --build job_1 --json
 npx @zerct/zerct env list --app app_1
 npx @zerct/zerct domains list --app app_1
+npx @zerct/zerct domains verify --app app_1 api.example.com
 npx @zerct/zerct billing portal
 ```
