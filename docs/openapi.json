@@ -121,7 +121,11 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^zdev_[a-f0-9]{64}$"
+              "pattern": "^zdev_[a-f0-9]{64}$",
+              "maxLength": 512,
+              "examples": [
+                "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+              ]
             },
             "example": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           }
@@ -187,8 +191,8 @@
                 "$ref": "#/components/schemas/AccountProfileUpdateRequest"
               },
               "examples": {
-                "acme": {
-                  "summary": "Choose account handle",
+                "example": {
+                  "summary": "Request example for PUT /v1/account",
                   "value": {
                     "handle": "acme",
                     "displayName": "Acme"
@@ -261,12 +265,21 @@
                 "$ref": "#/components/schemas/DeployRequest"
               },
               "examples": {
-                "helloRust": {
-                  "summary": "Deploy a Rust backend",
+                "example": {
+                  "summary": "Request example for POST /v1/deploy",
                   "value": {
-                    "appName": "hello-rust",
-                    "healthPath": "/healthz",
-                    "archiveBase64": "H4sIAAAAAAAA"
+                    "config": {
+                      "name": "hello-rust",
+                      "kind": "rust_backend",
+                      "run": {
+                        "command": "./target/release/api",
+                        "port": 3000,
+                        "health": "/healthz"
+                      }
+                    },
+                    "commit_sha": null,
+                    "wants_database": true,
+                    "source_archive_base64": "H4sIAAAAAAAA"
                   }
                 }
               }
@@ -276,6 +289,1031 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/DeployAccepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/apps": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List apps",
+        "description": "List apps for GET /v1/apps.",
+        "operationId": "listApps",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AppsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/apps/{app_id}": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Get app",
+        "description": "Get app for GET /v1/apps/{app_id}.",
+        "operationId": "getApp",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StatusLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id.",
+            "example": "app_1"
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete app",
+        "description": "Deletes an app when it is not actively running.",
+        "operationId": "deleteApp",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StatusLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
+            "example": "app_1"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/deploys": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List app deploys",
+        "description": "List app deploys for GET /v1/apps/{app_id}/deploys.",
+        "operationId": "listAppDeploys",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeploysLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                1
+              ]
+            },
+            "description": "Maximum records to return.",
+            "example": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 512,
+              "examples": [
+                "1000"
+              ]
+            },
+            "description": "Cursor returned by the previous response.",
+            "example": "1000"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/builds": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List app builds",
+        "description": "List app builds for GET /v1/apps/{app_id}/builds.",
+        "operationId": "listAppBuilds",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/BuildsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                1
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/builds.get.parameters.1.",
+            "example": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 512,
+              "examples": [
+                "1000"
+              ]
+            },
+            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/builds.get.parameters.2.",
+            "example": "1000"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/logs": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read app logs",
+        "description": "Returns the latest app logs in chronological order.",
+        "operationId": "readAppLogs",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LogsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                1
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/logs.get.parameters.1.",
+            "example": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 512,
+              "examples": [
+                "1000"
+              ]
+            },
+            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/logs.get.parameters.2.",
+            "example": "1000"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/database": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Get managed Postgres",
+        "description": "Get managed Postgres for GET /v1/apps/{app_id}/database.",
+        "operationId": "getAppDatabase",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DatabaseLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
+            "example": "app_1"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/env": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List environment variables",
+        "description": "List environment variables for GET /v1/apps/{app_id}/env.",
+        "operationId": "listAppEnv",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EnvLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
+            "example": "app_1"
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Set environment variable",
+        "description": "Set environment variable for PUT /v1/apps/{app_id}/env.",
+        "operationId": "setAppEnv",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EnvSet"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvSetRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for PUT /v1/apps/{app_id}/env",
+                  "value": {
+                    "name": "value",
+                    "value": "value"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for PUT /v1/apps/{app_id}/env."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/env/{name}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete environment variable",
+        "description": "Delete environment variable for DELETE /v1/apps/{app_id}/env/{name}.",
+        "operationId": "deleteAppEnv",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/EnvDeleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z_][A-Z0-9_]{0,63}$",
+              "maxLength": 512,
+              "examples": [
+                "DATABASE_URL"
+              ]
+            },
+            "description": "Environment variable name.",
+            "example": "DATABASE_URL"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/domains": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List custom domains",
+        "description": "List custom domains for GET /v1/apps/{app_id}/domains.",
+        "operationId": "listAppDomains",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DomainsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
+            "example": "app_1"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Add custom domain",
+        "description": "Add custom domain for POST /v1/apps/{app_id}/domains.",
+        "operationId": "addAppDomain",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DomainAdded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppDomainAddRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/domains",
+                  "value": {
+                    "domain": "api.example.com"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/domains."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/domains/{domain}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete custom domain",
+        "description": "Delete custom domain for DELETE /v1/apps/{app_id}/domains/{domain}.",
+        "operationId": "deleteAppDomain",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DomainDeleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
+              "maxLength": 512,
+              "examples": [
+                "api.example.com"
+              ]
+            },
+            "description": "Custom domain name.",
+            "example": "api.example.com"
+          }
+        ]
+      }
+    },
+    "/v1/deploys/{deploy_id}": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Get deploy",
+        "description": "Get deploy for GET /v1/deploys/{deploy_id}.",
+        "operationId": "getDeploy",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeployDetailsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^deploy_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "deploy_1"
+              ]
+            },
+            "description": "Zerct deploy id.",
+            "example": "deploy_1"
+          }
+        ]
+      }
+    },
+    "/v1/deploys/{deploy_id}/cancel": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Cancel queued deploy",
+        "description": "Cancel queued deploy for POST /v1/deploys/{deploy_id}/cancel.",
+        "operationId": "cancelDeploy",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeployCanceled"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^deploy_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "deploy_1"
+              ]
+            },
+            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0.",
+            "example": "deploy_1"
+          }
+        ]
+      }
+    },
+    "/v1/deploys/{deploy_id}/logs": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read deploy logs",
+        "description": "Read deploy logs for GET /v1/deploys/{deploy_id}/logs.",
+        "operationId": "readDeployLogs",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LogsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "deploy_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^deploy_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "deploy_1"
+              ]
+            },
+            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0.",
+            "example": "deploy_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                1
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.1.",
+            "example": 1
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 512,
+              "examples": [
+                "1000"
+              ]
+            },
+            "description": "Cursor returned by the previous response. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.2.",
+            "example": "1000"
+          }
+        ]
+      }
+    },
+    "/v1/builds/{build_id}": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Get build",
+        "description": "Get build for GET /v1/builds/{build_id}.",
+        "operationId": "getBuild",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/BuildDetailsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^job_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "job_1"
+              ]
+            },
+            "description": "Zerct build id.",
+            "example": "job_1"
+          }
+        ]
+      }
+    },
+    "/v1/billing/portal": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create billing portal link",
+        "description": "Create billing portal link for POST /v1/billing/portal.",
+        "operationId": "createBillingPortal",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/BillingPortalCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/builds/{build_id}/logs": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read build logs",
+        "description": "Returns logs associated with a build job in chronological order.",
+        "operationId": "readBuildLogs",
+        "parameters": [
+          {
+            "name": "build_id",
+            "in": "path",
+            "required": true,
+            "description": "Zerct build job id.",
+            "schema": {
+              "type": "string",
+              "pattern": "^job_[A-Za-z0-9_]+$",
+              "maxLength": 64,
+              "examples": [
+                "job_1"
+              ]
+            },
+            "example": "job_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum build log records to return.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "examples": [
+                100
+              ]
+            },
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor for older build log records.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 128,
+              "examples": [
+                "1000"
+              ]
+            },
+            "example": "1000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/LogsLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -375,8 +1413,8 @@
               "$ref": "#/components/schemas/HealthResponse"
             },
             "examples": {
-              "healthy": {
-                "summary": "Healthy response",
+              "example": {
+                "summary": "The API is healthy.",
                 "value": {
                   "ok": true,
                   "service": "zerct-api"
@@ -408,8 +1446,8 @@
               "$ref": "#/components/schemas/LoginStartResponse"
             },
             "examples": {
-              "deviceLogin": {
-                "summary": "Device login",
+              "example": {
+                "summary": "Device login information.",
                 "value": {
                   "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123",
                   "verificationUri": "https://zerct.com/login",
@@ -445,8 +1483,8 @@
               "$ref": "#/components/schemas/LoginPollResponse"
             },
             "examples": {
-              "complete": {
-                "summary": "Login complete",
+              "example": {
+                "summary": "Device login poll result.",
                 "value": {
                   "status": "complete",
                   "intervalSeconds": 5,
@@ -456,18 +1494,6 @@
                   "token": "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
                   "expiresAt": "2026-06-24T12:00:00.000Z"
                 }
-              },
-              "pending": {
-                "summary": "Login pending",
-                "value": {
-                  "status": "pending",
-                  "intervalSeconds": 5,
-                  "accountId": null,
-                  "email": null,
-                  "provider": null,
-                  "token": null,
-                  "expiresAt": null
-                }
               }
             }
           }
@@ -475,6 +1501,89 @@
       },
       "DeployAccepted": {
         "description": "Deploy accepted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeployResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Deploy accepted.",
+                "value": {
+                  "app": {
+                    "id": "app_1",
+                    "account_id": "acct_1",
+                    "name": "hello-rust",
+                    "kind": "rust_backend",
+                    "plan": "free",
+                    "runtime_status": "running",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "deploy": {
+                    "id": "deploy_1",
+                    "app_id": "app_1",
+                    "build_job_id": "job_1",
+                    "commit_sha": "0123456789abcdef",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "build_job": {
+                    "id": "job_1",
+                    "app_id": "app_1",
+                    "status": "queued",
+                    "message": "Build queued."
+                  },
+                  "deploy_plan": {
+                    "kind": "rust_backend",
+                    "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                    "build_command": "cargo build --release",
+                    "build_output_dir": "dist",
+                    "run_command": "./target/release/api",
+                    "port": 3000,
+                    "health_path": "/healthz",
+                    "build_limits": {
+                      "memory": 2048,
+                      "cpu": 2000,
+                      "timeout_seconds": 600
+                    },
+                    "runtime_limits": {
+                      "memory": 512,
+                      "cpu": 250,
+                      "startup_timeout_seconds": 10
+                    },
+                    "cold_start_policy": "required",
+                    "blue_green": {
+                      "strategy": "blue_green",
+                      "active_slot": "blue",
+                      "candidate_slot": "green",
+                      "health_path": "/healthz",
+                      "keep_active_until_candidate_healthy": true,
+                      "retain_previous_for_rollback": true
+                    },
+                    "idle_timeout_minutes": 15
+                  },
+                  "next_command": "npx @zerct/zerct logs --app app_1"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "The request body or parameters are invalid.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -492,48 +1601,17 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/DeployResponse"
-            },
-            "examples": {
-              "queuedDeploy": {
-                "summary": "Queued deploy",
-                "value": {
-                  "deployId": "dep_01HW0000000000000000000000",
-                  "appId": "app_01HW0000000000000000000000",
-                  "status": "queued",
-                  "url": "https://hello-rust.zerct.app"
-                }
-              }
-            }
-          }
-        }
-      },
-      "BadRequest": {
-        "description": "The request body or parameters are invalid.",
-        "headers": {
-          "X-RateLimit-Limit": {
-            "$ref": "#/components/headers/RateLimitLimit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "#/components/headers/RateLimitRemaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "#/components/headers/RateLimitReset"
-          }
-        },
-        "content": {
-          "application/json": {
-            "schema": {
               "$ref": "#/components/schemas/ErrorResponse"
             },
             "examples": {
               "invalidRequest": {
                 "summary": "Invalid request",
                 "value": {
-                  "code": "invalid_request",
+                  "code": "policy_rejected",
                   "message": "Request validation failed.",
-                  "agentInstruction": "Fix the request payload and retry.",
-                  "traceId": "trc_01HW0000000000000000000000"
+                  "agent_instruction": "Read the error message, update the request, and retry.",
+                  "docs_url": "https://docs.zerct.com",
+                  "checkout_url": null
                 }
               }
             }
@@ -551,6 +1629,9 @@
           },
           "X-RateLimit-Reset": {
             "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
           }
         },
         "content": {
@@ -562,10 +1643,11 @@
               "loginRequired": {
                 "summary": "Login required",
                 "value": {
-                  "code": "login_required",
+                  "code": "policy_rejected",
                   "message": "Zerct login is required.",
-                  "agentInstruction": "Run zerct login and retry.",
-                  "traceId": "trc_01HW0000000000000000000001"
+                  "agent_instruction": "Read the error message, update the request, and retry.",
+                  "docs_url": "https://docs.zerct.com",
+                  "checkout_url": null
                 }
               }
             }
@@ -597,10 +1679,11 @@
               "rateLimited": {
                 "summary": "Rate limited",
                 "value": {
-                  "code": "rate_limited",
+                  "code": "policy_rejected",
                   "message": "Too many requests.",
-                  "agentInstruction": "Wait for the rate-limit reset, then retry.",
-                  "traceId": "trc_01HW0000000000000000000002"
+                  "agent_instruction": "Read the error message, update the request, and retry.",
+                  "docs_url": "https://docs.zerct.com",
+                  "checkout_url": null
                 }
               }
             }
@@ -618,6 +1701,9 @@
           },
           "X-RateLimit-Reset": {
             "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
           }
         },
         "content": {
@@ -629,10 +1715,11 @@
               "serverError": {
                 "summary": "Server error",
                 "value": {
-                  "code": "internal_error",
+                  "code": "database_unavailable",
                   "message": "The API could not complete the request.",
-                  "agentInstruction": "Retry the request. If it keeps failing, check Zerct status.",
-                  "traceId": "trc_01HW0000000000000000000003"
+                  "agent_instruction": "Retry the request. If it keeps failing, check Zerct status.",
+                  "docs_url": "https://docs.zerct.com/status",
+                  "checkout_url": null
                 }
               }
             }
@@ -661,8 +1748,8 @@
               "$ref": "#/components/schemas/AccountProfileResponse"
             },
             "examples": {
-              "ready": {
-                "summary": "Account profile with handle",
+              "example": {
+                "summary": "Signed-in account profile response.",
                 "value": {
                   "accountId": "acct_01HW0000000000000000000000",
                   "email": "dev@example.com",
@@ -698,8 +1785,8 @@
               "$ref": "#/components/schemas/AccountProfileResponse"
             },
             "examples": {
-              "updated": {
-                "summary": "Updated account profile",
+              "example": {
+                "summary": "Updated authenticated account profile.",
                 "value": {
                   "accountId": "acct_01HW0000000000000000000000",
                   "email": "dev@example.com",
@@ -735,8 +1822,8 @@
               "$ref": "#/components/schemas/AccountDashboardResponse"
             },
             "examples": {
-              "dashboard": {
-                "summary": "Account dashboard",
+              "example": {
+                "summary": "Authenticated account dashboard.",
                 "value": {
                   "profile": {
                     "accountId": "acct_01HW0000000000000000000000",
@@ -774,6 +1861,652 @@
                 }
               }
             }
+          }
+        }
+      },
+      "AppsLoaded": {
+        "description": "Apps loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Apps loaded.",
+                "value": {
+                  "apps": [
+                    {
+                      "appId": "app_01HW0000000000000000000000",
+                      "name": "hello-rust",
+                      "slug": "hello-rust",
+                      "url": "https://hello-rust.zerct.app",
+                      "plan": "free",
+                      "runtimeStatus": "running",
+                      "latestBuildStatus": "succeeded",
+                      "deployCount": 3,
+                      "runtimeMemoryMib": 256,
+                      "runtimeCpuMillis": 250,
+                      "databaseStorageMib": 512,
+                      "idleTimeoutMinutes": 15,
+                      "latestDeployAt": "2026-05-25T12:00:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StatusLoaded": {
+        "description": "App status loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StatusResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "App status loaded.",
+                "value": {
+                  "app": {
+                    "id": "app_1",
+                    "account_id": "acct_1",
+                    "name": "hello-rust",
+                    "kind": "rust_backend",
+                    "plan": "free",
+                    "runtime_status": "running",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "latest_deploy": {
+                    "id": "deploy_1",
+                    "app_id": "app_1",
+                    "build_job_id": "job_1",
+                    "commit_sha": "0123456789abcdef",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "latest_build_job": {
+                    "id": "job_1",
+                    "app_id": "app_1",
+                    "status": "queued",
+                    "message": "Build queued."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DeploysLoaded": {
+        "description": "Deploys loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeploysResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Deploys loaded.",
+                "value": {
+                  "deploys": [
+                    {
+                      "id": "deploy_1",
+                      "app_id": "app_1",
+                      "build_job_id": "job_1",
+                      "commit_sha": "0123456789abcdef",
+                      "url": "https://hello-rust.zerct.app"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DeployDetailsLoaded": {
+        "description": "Deploy details loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeployDetailsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Deploy details loaded.",
+                "value": {
+                  "app": {
+                    "id": "app_1",
+                    "account_id": "acct_1",
+                    "name": "hello-rust",
+                    "kind": "rust_backend",
+                    "plan": "free",
+                    "runtime_status": "running",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "deploy": {
+                    "id": "deploy_1",
+                    "app_id": "app_1",
+                    "build_job_id": "job_1",
+                    "commit_sha": "0123456789abcdef",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "build_job": {
+                    "id": "job_1",
+                    "app_id": "app_1",
+                    "status": "queued",
+                    "message": "Build queued."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DeployCanceled": {
+        "description": "Deploy canceled.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DeployCancelResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Deploy canceled.",
+                "value": {
+                  "deploy_id": "app_1",
+                  "canceled_build_jobs": 0
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "BuildsLoaded": {
+        "description": "Builds loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BuildsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Builds loaded.",
+                "value": {
+                  "builds": [
+                    {
+                      "id": "job_1",
+                      "app_id": "app_1",
+                      "status": "queued",
+                      "message": "Build queued."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "BuildDetailsLoaded": {
+        "description": "Build details loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BuildDetailsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Build details loaded.",
+                "value": {
+                  "build": {
+                    "id": "job_1",
+                    "app_id": "app_1",
+                    "status": "queued",
+                    "message": "Build queued."
+                  },
+                  "app": {
+                    "id": "app_1",
+                    "account_id": "acct_1",
+                    "name": "hello-rust",
+                    "kind": "rust_backend",
+                    "plan": "free",
+                    "runtime_status": "running",
+                    "url": "https://hello-rust.zerct.app"
+                  },
+                  "deploy_id": "app_1"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "LogsLoaded": {
+        "description": "Logs loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/LogsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Logs loaded.",
+                "value": {
+                  "lines": [
+                    {
+                      "timestamp": "2026-05-25T12:00:00.000Z",
+                      "stream": "stdout",
+                      "message": "Build queued."
+                    }
+                  ],
+                  "has_more": true,
+                  "next_cursor": "1000"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DatabaseLoaded": {
+        "description": "Database loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DatabaseResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Database loaded.",
+                "value": {
+                  "database": {
+                    "id": "app_1",
+                    "app_id": "app_1",
+                    "plan": "free",
+                    "storage_limit_mib": 1,
+                    "connection_limit": 1,
+                    "external_access": true
+                  },
+                  "database_url_injected": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "EnvLoaded": {
+        "description": "Environment variables loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EnvListResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Environment variables loaded.",
+                "value": {
+                  "env": [
+                    {
+                      "name": "value",
+                      "created_at": "2026-05-25T12:00:00.000Z",
+                      "updated_at": "2026-05-25T12:00:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "EnvSet": {
+        "description": "Environment variable set.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EnvSetResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Environment variable set.",
+                "value": {
+                  "name": "value",
+                  "redeploy_recommended": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "EnvDeleted": {
+        "description": "Environment variable deleted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/EnvDeleteResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Environment variable deleted.",
+                "value": {
+                  "name": "value",
+                  "deleted": true,
+                  "redeploy_recommended": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DomainsLoaded": {
+        "description": "Domains loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppDomainsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Domains loaded.",
+                "value": {
+                  "domains": [
+                    {
+                      "id": "app_1",
+                      "app_id": "app_1",
+                      "domain": "api.example.com",
+                      "verified": true,
+                      "verified_at": "2026-05-25T12:00:00.000Z",
+                      "created_at": "2026-05-25T12:00:00.000Z",
+                      "agent_instruction": "Retry the command after applying the requested fix."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DomainAdded": {
+        "description": "Domain added.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppDomain"
+            },
+            "examples": {
+              "example": {
+                "summary": "Domain added.",
+                "value": {
+                  "id": "app_1",
+                  "app_id": "app_1",
+                  "domain": "api.example.com",
+                  "verified": true,
+                  "verified_at": "2026-05-25T12:00:00.000Z",
+                  "created_at": "2026-05-25T12:00:00.000Z",
+                  "agent_instruction": "Retry the command after applying the requested fix."
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "DomainDeleted": {
+        "description": "Domain deleted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppDomainDeleteResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Domain deleted.",
+                "value": {
+                  "domain": "api.example.com",
+                  "deleted": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "BillingPortalCreated": {
+        "description": "Billing portal created.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BillingCheckoutResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Billing portal created.",
+                "value": {
+                  "checkout": {
+                    "url": "https://hello-rust.zerct.app",
+                    "reason": "value"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
           }
         }
       }
@@ -848,7 +2581,8 @@
             "pattern": "^zdev_[a-f0-9]{64}$",
             "examples": [
               "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-            ]
+            ],
+            "maxLength": 512
           },
           "userCode": {
             "type": "string",
@@ -856,7 +2590,8 @@
             "pattern": "^[A-F0-9]{6}$",
             "examples": [
               "ABC123"
-            ]
+            ],
+            "maxLength": 512
           },
           "intervalSeconds": {
             "type": "integer",
@@ -935,7 +2670,8 @@
             "pattern": "^acct_[A-Za-z0-9_-]+$",
             "examples": [
               "acct_01HW0000000000000000000000"
-            ]
+            ],
+            "maxLength": 512
           },
           "email": {
             "type": [
@@ -972,7 +2708,8 @@
             "pattern": "^zct_[a-f0-9]{64}$",
             "examples": [
               "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-            ]
+            ],
+            "maxLength": 512
           },
           "expiresAt": {
             "type": [
@@ -1003,42 +2740,72 @@
         "description": "Request body for deploying an app.",
         "additionalProperties": false,
         "required": [
-          "appName",
-          "healthPath",
-          "archiveBase64"
+          "config",
+          "commit_sha",
+          "wants_database",
+          "source_archive_base64"
         ],
         "properties": {
-          "appName": {
-            "type": "string",
-            "description": "Deploy slug.",
-            "pattern": "^[a-z][a-z0-9-]{2,62}$",
+          "config": {
             "examples": [
-              "hello-rust"
+              {
+                "name": "hello-rust",
+                "kind": "rust_backend",
+                "run": {
+                  "command": "./target/release/api",
+                  "port": 3000,
+                  "health": "/healthz"
+                }
+              }
+            ],
+            "$ref": "#/components/schemas/ZerctConfig"
+          },
+          "commit_sha": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Git commit SHA when available.",
+            "pattern": "^[0-9a-f]{7,64}$",
+            "maxLength": 512,
+            "examples": [
+              "0123456789abcdef"
             ]
           },
-          "healthPath": {
-            "type": "string",
-            "description": "HTTP path used by Zerct health checks.",
-            "pattern": "^/[A-Za-z0-9/_-]{1,120}$",
+          "wants_database": {
+            "type": "boolean",
+            "description": "Whether managed Postgres should be attached.",
             "examples": [
-              "/healthz"
+              true
             ]
           },
-          "archiveBase64": {
-            "type": "string",
-            "description": "Base64 encoded source archive.",
-            "format": "byte",
-            "maxLength": 52428800,
+          "source_archive_base64": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Base64 encoded gzip tar source archive.",
+            "maxLength": 67108864,
+            "pattern": "^[\\s\\S]{0,8192}$",
             "examples": [
-              "H4sIAAAAAAAA"
+              "value"
             ]
           }
         },
         "examples": [
           {
-            "appName": "hello-rust",
-            "healthPath": "/healthz",
-            "archiveBase64": "H4sIAAAAAAAA"
+            "config": {
+              "name": "hello-rust",
+              "kind": "rust_backend",
+              "run": {
+                "command": "./target/release/api",
+                "port": 3000,
+                "health": "/healthz"
+              }
+            },
+            "commit_sha": null,
+            "wants_database": true,
+            "source_archive_base64": "H4sIAAAAAAAA"
           }
         ]
       },
@@ -1047,108 +2814,246 @@
         "description": "Response returned after a deploy is accepted.",
         "additionalProperties": false,
         "required": [
-          "deployId",
-          "appId",
-          "status"
+          "app",
+          "deploy",
+          "build_job",
+          "deploy_plan",
+          "next_command"
         ],
         "properties": {
-          "deployId": {
-            "type": "string",
-            "description": "Deploy identifier.",
-            "pattern": "^dep_[0-9A-HJKMNP-TV-Z]{26}$",
+          "app": {
             "examples": [
-              "dep_01HW0000000000000000000000"
-            ]
-          },
-          "appId": {
-            "type": "string",
-            "description": "Application identifier.",
-            "pattern": "^app_[0-9A-HJKMNP-TV-Z]{26}$",
-            "examples": [
-              "app_01HW0000000000000000000000"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "description": "Deploy status.",
-            "enum": [
-              "queued",
-              "building",
-              "running",
-              "failed"
+              {
+                "id": "app_1",
+                "account_id": "acct_1",
+                "name": "hello-rust",
+                "kind": "rust_backend",
+                "plan": "free",
+                "runtime_status": "running",
+                "url": "https://hello-rust.zerct.app"
+              }
             ],
-            "examples": [
-              "queued"
-            ]
+            "$ref": "#/components/schemas/App"
           },
-          "url": {
-            "type": "string",
-            "description": "Public deploy URL.",
-            "format": "uri",
+          "deploy": {
             "examples": [
-              "https://hello-rust.zerct.app"
-            ]
+              {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "$ref": "#/components/schemas/Deploy"
+          },
+          "build_job": {
+            "examples": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ],
+            "$ref": "#/components/schemas/BuildJob"
+          },
+          "deploy_plan": {
+            "examples": [
+              {
+                "kind": "rust_backend",
+                "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                "build_command": "cargo build --release",
+                "build_output_dir": "dist",
+                "run_command": "./target/release/api",
+                "port": 3000,
+                "health_path": "/healthz",
+                "build_limits": {
+                  "memory": 2048,
+                  "cpu": 2000,
+                  "timeout_seconds": 600
+                },
+                "runtime_limits": {
+                  "memory": 512,
+                  "cpu": 250,
+                  "startup_timeout_seconds": 10
+                },
+                "cold_start_policy": "required",
+                "blue_green": {
+                  "strategy": "blue_green",
+                  "active_slot": "blue",
+                  "candidate_slot": "green",
+                  "health_path": "/healthz",
+                  "keep_active_until_candidate_healthy": true,
+                  "retain_previous_for_rollback": true
+                },
+                "idle_timeout_minutes": 15
+              }
+            ],
+            "$ref": "#/components/schemas/DeployPlan"
+          },
+          "next_command": {
+            "type": "string",
+            "description": "Next command for humans and agents.",
+            "examples": [
+              "npx @zerct/zerct logs --app app_1"
+            ],
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "maxLength": 512
           }
         },
         "examples": [
           {
-            "deployId": "dep_01HW0000000000000000000000",
-            "appId": "app_01HW0000000000000000000000",
-            "status": "queued",
-            "url": "https://hello-rust.zerct.app"
+            "app": {
+              "id": "app_1",
+              "account_id": "acct_1",
+              "name": "hello-rust",
+              "kind": "rust_backend",
+              "plan": "free",
+              "runtime_status": "running",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "deploy": {
+              "id": "deploy_1",
+              "app_id": "app_1",
+              "build_job_id": "job_1",
+              "commit_sha": "0123456789abcdef",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "build_job": {
+              "id": "job_1",
+              "app_id": "app_1",
+              "status": "queued",
+              "message": "Build queued."
+            },
+            "deploy_plan": {
+              "kind": "rust_backend",
+              "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+              "build_command": "cargo build --release",
+              "build_output_dir": "dist",
+              "run_command": "./target/release/api",
+              "port": 3000,
+              "health_path": "/healthz",
+              "build_limits": {
+                "memory": 2048,
+                "cpu": 2000,
+                "timeout_seconds": 600
+              },
+              "runtime_limits": {
+                "memory": 512,
+                "cpu": 250,
+                "startup_timeout_seconds": 10
+              },
+              "cold_start_policy": "required",
+              "blue_green": {
+                "strategy": "blue_green",
+                "active_slot": "blue",
+                "candidate_slot": "green",
+                "health_path": "/healthz",
+                "keep_active_until_candidate_healthy": true,
+                "retain_previous_for_rollback": true
+              },
+              "idle_timeout_minutes": 15
+            },
+            "next_command": "npx @zerct/zerct logs --app app_1"
           }
         ]
       },
       "ErrorResponse": {
         "type": "object",
-        "description": "Error response with agent-readable recovery guidance.",
+        "description": "Agent-readable API error response.",
         "additionalProperties": false,
         "required": [
           "code",
           "message",
-          "agentInstruction",
-          "traceId"
+          "agent_instruction",
+          "docs_url",
+          "checkout_url"
         ],
         "properties": {
           "code": {
             "type": "string",
             "description": "Stable machine-readable error code.",
-            "pattern": "^[a-z][a-z0-9_]{2,63}$",
+            "enum": [
+              "missing_config",
+              "invalid_toml",
+              "invalid_service_name",
+              "invalid_memory_limit",
+              "invalid_cpu_limit",
+              "invalid_port",
+              "invalid_health_endpoint",
+              "missing_command",
+              "payment_required",
+              "policy_rejected",
+              "database_unavailable",
+              "missing_source_archive"
+            ],
             "examples": [
-              "invalid_request"
+              "policy_rejected"
             ]
           },
           "message": {
             "type": "string",
             "description": "Short human-readable error message.",
-            "pattern": "^[A-Za-z0-9 .,:/_-]{3,160}$",
+            "pattern": "^[\\s\\S]{1,240}$",
+            "maxLength": 240,
             "examples": [
               "Request validation failed."
             ]
           },
-          "agentInstruction": {
+          "agent_instruction": {
             "type": "string",
             "description": "Instruction an AI agent can follow to recover.",
-            "pattern": "^[A-Za-z0-9 .,:/_-]{3,240}$",
+            "pattern": "^[\\s\\S]{1,1000}$",
+            "maxLength": 1000,
             "examples": [
               "Fix the request payload and retry."
             ]
           },
-          "traceId": {
-            "type": "string",
-            "description": "Support trace identifier.",
-            "pattern": "^trc_[0-9A-HJKMNP-TV-Z]{26}$",
+          "docs_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "description": "Documentation URL for the recovery path.",
+                "examples": [
+                  "https://docs.zerct.com/deploy"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
-              "trc_01HW0000000000000000000000"
+              "https://docs.zerct.com/deploy"
+            ]
+          },
+          "checkout_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "description": "Stripe URL when payment is required.",
+                "examples": [
+                  "https://checkout.stripe.com/c/pay/cs_test_123"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "https://checkout.stripe.com/c/pay/cs_test_123"
             ]
           }
         },
         "examples": [
           {
-            "code": "invalid_request",
+            "code": "policy_rejected",
             "message": "Request validation failed.",
-            "agentInstruction": "Fix the request payload and retry.",
-            "traceId": "trc_01HW0000000000000000000000"
+            "agent_instruction": "Fix the request payload and retry.",
+            "docs_url": "https://docs.zerct.com/deploy",
+            "checkout_url": null
           }
         ]
       },
@@ -1225,7 +3130,8 @@
             "pattern": "^acct_[A-Za-z0-9_-]+$",
             "examples": [
               "acct_01HW0000000000000000000000"
-            ]
+            ],
+            "maxLength": 512
           },
           "email": {
             "type": "string",
@@ -1236,6 +3142,9 @@
             ]
           },
           "provider": {
+            "examples": [
+              "github"
+            ],
             "$ref": "#/components/schemas/AuthProvider"
           },
           "handle": {
@@ -1247,7 +3156,8 @@
             "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
             "examples": [
               "acme"
-            ]
+            ],
+            "maxLength": 512
           },
           "displayName": {
             "type": [
@@ -1273,7 +3183,17 @@
               "https://zerct.com/acme"
             ]
           }
-        }
+        },
+        "examples": [
+          {
+            "accountId": "acct_01HW0000000000000000000000",
+            "email": "dev@example.com",
+            "provider": "github",
+            "handle": "acme",
+            "displayName": "Acme",
+            "accountUrl": "https://zerct.com/acme"
+          }
+        ]
       },
       "AccountProfileUpdateRequest": {
         "type": "object",
@@ -1304,7 +3224,13 @@
               "Acme"
             ]
           }
-        }
+        },
+        "examples": [
+          {
+            "handle": "acme",
+            "displayName": "Acme"
+          }
+        ]
       },
       "AccountDashboardResponse": {
         "type": "object",
@@ -1317,6 +3243,16 @@
         ],
         "properties": {
           "profile": {
+            "examples": [
+              {
+                "accountId": "acct_01HW0000000000000000000000",
+                "email": "dev@example.com",
+                "provider": "github",
+                "handle": "acme",
+                "displayName": "Acme",
+                "accountUrl": "https://zerct.com/acme"
+              }
+            ],
             "$ref": "#/components/schemas/AccountProfileResponse"
           },
           "apps": {
@@ -1348,9 +3284,56 @@
             ]
           },
           "usage": {
+            "examples": [
+              {
+                "appCount": 1,
+                "runningCount": 1,
+                "runtimeMemoryMib": 256,
+                "runtimeCpuMillis": 250,
+                "databaseStorageMib": 512,
+                "deployCount": 3
+              }
+            ],
             "$ref": "#/components/schemas/AccountDashboardUsage"
           }
-        }
+        },
+        "examples": [
+          {
+            "profile": {
+              "accountId": "acct_01HW0000000000000000000000",
+              "email": "dev@example.com",
+              "provider": "github",
+              "handle": "acme",
+              "displayName": "Acme",
+              "accountUrl": "https://zerct.com/acme"
+            },
+            "apps": [
+              {
+                "appId": "app_01HW0000000000000000000000",
+                "name": "hello-rust",
+                "slug": "hello-rust",
+                "url": "https://hello-rust.zerct.app",
+                "plan": "free",
+                "runtimeStatus": "running",
+                "latestBuildStatus": "succeeded",
+                "deployCount": 3,
+                "runtimeMemoryMib": 256,
+                "runtimeCpuMillis": 250,
+                "databaseStorageMib": 512,
+                "idleTimeoutMinutes": 15,
+                "latestDeployAt": "2026-05-25T12:00:00.000Z"
+              }
+            ],
+            "usage": {
+              "appCount": 1,
+              "runningCount": 1,
+              "runtimeMemoryMib": 256,
+              "runtimeCpuMillis": 250,
+              "databaseStorageMib": 512,
+              "deployCount": 3
+            }
+          }
+        ]
       },
       "AccountDashboardApp": {
         "type": "object",
@@ -1378,7 +3361,8 @@
             "pattern": "^app_[0-9A-HJKMNP-TV-Z]{26}$",
             "examples": [
               "app_01HW0000000000000000000000"
-            ]
+            ],
+            "maxLength": 512
           },
           "name": {
             "type": "string",
@@ -1386,7 +3370,8 @@
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
-            ]
+            ],
+            "maxLength": 512
           },
           "slug": {
             "type": "string",
@@ -1394,7 +3379,8 @@
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
-            ]
+            ],
+            "maxLength": 512
           },
           "url": {
             "type": "string",
@@ -1405,12 +3391,21 @@
             ]
           },
           "plan": {
+            "examples": [
+              "free"
+            ],
             "$ref": "#/components/schemas/Plan"
           },
           "runtimeStatus": {
+            "examples": [
+              "running"
+            ],
             "$ref": "#/components/schemas/RuntimeStatus"
           },
           "latestBuildStatus": {
+            "examples": [
+              "succeeded"
+            ],
             "$ref": "#/components/schemas/BuildStatus"
           },
           "deployCount": {
@@ -1477,7 +3472,24 @@
               "2026-05-25T12:00:00.000Z"
             ]
           }
-        }
+        },
+        "examples": [
+          {
+            "appId": "app_01HW0000000000000000000000",
+            "name": "hello-rust",
+            "slug": "hello-rust",
+            "url": "https://hello-rust.zerct.app",
+            "plan": "free",
+            "runtimeStatus": "running",
+            "latestBuildStatus": "succeeded",
+            "deployCount": 3,
+            "runtimeMemoryMib": 256,
+            "runtimeCpuMillis": 250,
+            "databaseStorageMib": 512,
+            "idleTimeoutMinutes": 15,
+            "latestDeployAt": "2026-05-25T12:00:00.000Z"
+          }
+        ]
       },
       "AccountDashboardUsage": {
         "type": "object",
@@ -1552,7 +3564,1886 @@
               3
             ]
           }
-        }
+        },
+        "examples": [
+          {
+            "appCount": 1,
+            "runningCount": 1,
+            "runtimeMemoryMib": 256,
+            "runtimeCpuMillis": 250,
+            "databaseStorageMib": 512,
+            "deployCount": 3
+          }
+        ]
+      },
+      "ProjectKind": {
+        "type": "string",
+        "description": "Zerct project kind.",
+        "enum": [
+          "rust_backend",
+          "static_frontend"
+        ],
+        "examples": [
+          "rust_backend"
+        ]
+      },
+      "App": {
+        "type": "object",
+        "description": "Hosted Zerct app.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "account_id",
+          "name",
+          "kind",
+          "plan",
+          "runtime_status",
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "App id.",
+            "examples": [
+              "app_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "account_id": {
+            "type": "string",
+            "description": "Account id.",
+            "examples": [
+              "acct_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "name": {
+            "type": "string",
+            "description": "Service name. Context: components.schemas.App.name.",
+            "examples": [
+              "hello-rust"
+            ],
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,127}$",
+            "maxLength": 512
+          },
+          "kind": {
+            "examples": [
+              "rust_backend"
+            ],
+            "$ref": "#/components/schemas/ProjectKind"
+          },
+          "plan": {
+            "examples": [
+              "free"
+            ],
+            "$ref": "#/components/schemas/Plan"
+          },
+          "runtime_status": {
+            "examples": [
+              "running"
+            ],
+            "$ref": "#/components/schemas/RuntimeStatus"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public app URL.",
+            "examples": [
+              "https://hello-rust.zerct.app"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "id": "app_1",
+            "account_id": "acct_1",
+            "name": "hello-rust",
+            "kind": "rust_backend",
+            "plan": "free",
+            "runtime_status": "running",
+            "url": "https://hello-rust.zerct.app"
+          }
+        ]
+      },
+      "Deploy": {
+        "type": "object",
+        "description": "Deploy metadata.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "app_id",
+          "build_job_id",
+          "commit_sha",
+          "url"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Deploy id.",
+            "examples": [
+              "deploy_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "app_id": {
+            "type": "string",
+            "description": "App id. Context: components.schemas.Deploy.app_id.",
+            "examples": [
+              "app_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "build_job_id": {
+            "type": "string",
+            "description": "Build job id.",
+            "examples": [
+              "job_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "commit_sha": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Git commit SHA when known.",
+            "examples": [
+              "0123456789abcdef"
+            ],
+            "pattern": "^[0-9a-f]{7,64}$",
+            "maxLength": 512
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public app URL. Context: components.schemas.Deploy.url.",
+            "examples": [
+              "https://hello-rust.zerct.app"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "id": "deploy_1",
+            "app_id": "app_1",
+            "build_job_id": "job_1",
+            "commit_sha": "0123456789abcdef",
+            "url": "https://hello-rust.zerct.app"
+          }
+        ]
+      },
+      "BuildJob": {
+        "type": "object",
+        "description": "Build job metadata.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "app_id",
+          "status",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Build job id. Context: components.schemas.BuildJob.id.",
+            "examples": [
+              "job_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "app_id": {
+            "type": "string",
+            "description": "App id. Context: components.schemas.BuildJob.app_id.",
+            "examples": [
+              "app_1"
+            ],
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512
+          },
+          "status": {
+            "type": "string",
+            "description": "Build status.",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "canceled"
+            ],
+            "examples": [
+              "queued"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Build status message.",
+            "examples": [
+              "Build queued."
+            ],
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "maxLength": 8192
+          }
+        },
+        "examples": [
+          {
+            "id": "job_1",
+            "app_id": "app_1",
+            "status": "queued",
+            "message": "Build queued."
+          }
+        ]
+      },
+      "DeployPlan": {
+        "type": "object",
+        "description": "Worker-executable deploy plan.",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "check_command",
+          "build_command",
+          "build_output_dir",
+          "run_command",
+          "port",
+          "health_path",
+          "build_limits",
+          "runtime_limits",
+          "cold_start_policy",
+          "blue_green",
+          "idle_timeout_minutes"
+        ],
+        "properties": {
+          "kind": {
+            "examples": [
+              "rust_backend"
+            ],
+            "$ref": "#/components/schemas/ProjectKind"
+          },
+          "check_command": {
+            "type": "string",
+            "description": "Pre-build check command.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+            ]
+          },
+          "build_command": {
+            "type": "string",
+            "description": "Release build command.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "cargo build --release"
+            ]
+          },
+          "build_output_dir": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Static frontend output directory when applicable.",
+                "pattern": "^[A-Za-z0-9_./-]{1,160}$",
+                "maxLength": 160,
+                "examples": [
+                  "dist"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "dist"
+            ]
+          },
+          "run_command": {
+            "type": "string",
+            "description": "Runtime command.",
+            "pattern": "^[\\s\\S]{0,512}$",
+            "maxLength": 512,
+            "examples": [
+              "./target/release/api"
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 65535,
+            "description": "Internal service port.",
+            "examples": [
+              3000
+            ]
+          },
+          "health_path": {
+            "type": "string",
+            "description": "Health endpoint path.",
+            "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
+            "maxLength": 160,
+            "examples": [
+              "/healthz"
+            ]
+          },
+          "build_limits": {
+            "examples": [
+              {
+                "memory": 2048,
+                "cpu": 2000,
+                "timeout_seconds": 600
+              }
+            ],
+            "$ref": "#/components/schemas/BuildLimits"
+          },
+          "runtime_limits": {
+            "examples": [
+              {
+                "memory": 512,
+                "cpu": 250,
+                "startup_timeout_seconds": 10
+              }
+            ],
+            "$ref": "#/components/schemas/RuntimeLimits"
+          },
+          "cold_start_policy": {
+            "examples": [
+              "required"
+            ],
+            "$ref": "#/components/schemas/ColdStartPolicy"
+          },
+          "blue_green": {
+            "examples": [
+              {
+                "strategy": "blue_green",
+                "active_slot": "blue",
+                "candidate_slot": "green",
+                "health_path": "/healthz",
+                "keep_active_until_candidate_healthy": true,
+                "retain_previous_for_rollback": true
+              }
+            ],
+            "$ref": "#/components/schemas/BlueGreenPlan"
+          },
+          "idle_timeout_minutes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 10080,
+            "description": "Idle timeout in minutes for this app.",
+            "examples": [
+              15
+            ]
+          }
+        },
+        "examples": [
+          {
+            "kind": "rust_backend",
+            "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+            "build_command": "cargo build --release",
+            "build_output_dir": "dist",
+            "run_command": "./target/release/api",
+            "port": 3000,
+            "health_path": "/healthz",
+            "build_limits": {
+              "memory": 2048,
+              "cpu": 2000,
+              "timeout_seconds": 600
+            },
+            "runtime_limits": {
+              "memory": 512,
+              "cpu": 250,
+              "startup_timeout_seconds": 10
+            },
+            "cold_start_policy": "required",
+            "blue_green": {
+              "strategy": "blue_green",
+              "active_slot": "blue",
+              "candidate_slot": "green",
+              "health_path": "/healthz",
+              "keep_active_until_candidate_healthy": true,
+              "retain_previous_for_rollback": true
+            },
+            "idle_timeout_minutes": 15
+          }
+        ]
+      },
+      "AppsResponse": {
+        "type": "object",
+        "description": "Apps owned by the authenticated account.",
+        "additionalProperties": false,
+        "required": [
+          "apps"
+        ],
+        "properties": {
+          "apps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountDashboardApp"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "appId": "app_01HW0000000000000000000000",
+                  "name": "hello-rust",
+                  "slug": "hello-rust",
+                  "url": "https://hello-rust.zerct.app",
+                  "plan": "free",
+                  "runtimeStatus": "running",
+                  "latestBuildStatus": "succeeded",
+                  "deployCount": 3,
+                  "runtimeMemoryMib": 256,
+                  "runtimeCpuMillis": 250,
+                  "databaseStorageMib": 512,
+                  "idleTimeoutMinutes": 15,
+                  "latestDeployAt": "2026-05-25T12:00:00.000Z"
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "apps": [
+              {
+                "appId": "app_01HW0000000000000000000000",
+                "name": "hello-rust",
+                "slug": "hello-rust",
+                "url": "https://hello-rust.zerct.app",
+                "plan": "free",
+                "runtimeStatus": "running",
+                "latestBuildStatus": "succeeded",
+                "deployCount": 3,
+                "runtimeMemoryMib": 256,
+                "runtimeCpuMillis": 250,
+                "databaseStorageMib": 512,
+                "idleTimeoutMinutes": 15,
+                "latestDeployAt": "2026-05-25T12:00:00.000Z"
+              }
+            ]
+          }
+        ]
+      },
+      "DeploysResponse": {
+        "type": "object",
+        "description": "Deploy history.",
+        "additionalProperties": false,
+        "required": [
+          "deploys"
+        ],
+        "properties": {
+          "deploys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Deploy"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "id": "deploy_1",
+                  "app_id": "app_1",
+                  "build_job_id": "job_1",
+                  "commit_sha": "0123456789abcdef",
+                  "url": "https://hello-rust.zerct.app"
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "deploys": [
+              {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ]
+          }
+        ]
+      },
+      "DeployDetailsResponse": {
+        "type": "object",
+        "description": "Deploy details.",
+        "additionalProperties": false,
+        "required": [
+          "app",
+          "deploy",
+          "build_job"
+        ],
+        "properties": {
+          "app": {
+            "examples": [
+              {
+                "id": "app_1",
+                "account_id": "acct_1",
+                "name": "hello-rust",
+                "kind": "rust_backend",
+                "plan": "free",
+                "runtime_status": "running",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "$ref": "#/components/schemas/App"
+          },
+          "deploy": {
+            "examples": [
+              {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "$ref": "#/components/schemas/Deploy"
+          },
+          "build_job": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BuildJob"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ]
+          }
+        },
+        "examples": [
+          {
+            "app": {
+              "id": "app_1",
+              "account_id": "acct_1",
+              "name": "hello-rust",
+              "kind": "rust_backend",
+              "plan": "free",
+              "runtime_status": "running",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "deploy": {
+              "id": "deploy_1",
+              "app_id": "app_1",
+              "build_job_id": "job_1",
+              "commit_sha": "0123456789abcdef",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "build_job": {
+              "id": "job_1",
+              "app_id": "app_1",
+              "status": "queued",
+              "message": "Build queued."
+            }
+          }
+        ]
+      },
+      "DeployCancelResponse": {
+        "type": "object",
+        "description": "Deploy cancel result.",
+        "additionalProperties": false,
+        "required": [
+          "deploy_id",
+          "canceled_build_jobs"
+        ],
+        "properties": {
+          "deploy_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "app_1"
+            ]
+          },
+          "canceled_build_jobs": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 1000000000,
+            "examples": [
+              0
+            ]
+          }
+        },
+        "examples": [
+          {
+            "deploy_id": "app_1",
+            "canceled_build_jobs": 0
+          }
+        ]
+      },
+      "BuildsResponse": {
+        "type": "object",
+        "description": "Build history.",
+        "additionalProperties": false,
+        "required": [
+          "builds"
+        ],
+        "properties": {
+          "builds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuildJob"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "id": "job_1",
+                  "app_id": "app_1",
+                  "status": "queued",
+                  "message": "Build queued."
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "builds": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ]
+          }
+        ]
+      },
+      "BuildDetailsResponse": {
+        "type": "object",
+        "description": "Build details.",
+        "additionalProperties": false,
+        "required": [
+          "build",
+          "app",
+          "deploy_id"
+        ],
+        "properties": {
+          "build": {
+            "examples": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ],
+            "$ref": "#/components/schemas/BuildJob"
+          },
+          "app": {
+            "examples": [
+              {
+                "id": "app_1",
+                "account_id": "acct_1",
+                "name": "hello-rust",
+                "kind": "rust_backend",
+                "plan": "free",
+                "runtime_status": "running",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "$ref": "#/components/schemas/App"
+          },
+          "deploy_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Deploy id attached to the build.",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "app_1"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "build": {
+              "id": "job_1",
+              "app_id": "app_1",
+              "status": "queued",
+              "message": "Build queued."
+            },
+            "app": {
+              "id": "app_1",
+              "account_id": "acct_1",
+              "name": "hello-rust",
+              "kind": "rust_backend",
+              "plan": "free",
+              "runtime_status": "running",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "deploy_id": "app_1"
+          }
+        ]
+      },
+      "LogLine": {
+        "type": "object",
+        "description": "Log line.",
+        "additionalProperties": false,
+        "required": [
+          "timestamp",
+          "stream",
+          "message"
+        ],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "description": "UTC timestamp.",
+            "format": "date-time",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          },
+          "stream": {
+            "type": "string",
+            "enum": [
+              "stdout",
+              "stderr",
+              "system"
+            ],
+            "description": "Log stream.",
+            "examples": [
+              "stdout"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Log message.",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "maxLength": 8192,
+            "examples": [
+              "Build queued."
+            ]
+          }
+        },
+        "examples": [
+          {
+            "timestamp": "2026-05-25T12:00:00.000Z",
+            "stream": "stdout",
+            "message": "Build queued."
+          }
+        ]
+      },
+      "LogsResponse": {
+        "type": "object",
+        "description": "Chronological log page.",
+        "additionalProperties": false,
+        "required": [
+          "lines",
+          "has_more",
+          "next_cursor"
+        ],
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LogLine"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "timestamp": "2026-05-25T12:00:00.000Z",
+                  "stream": "stdout",
+                  "message": "Build queued."
+                }
+              ]
+            ]
+          },
+          "has_more": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Cursor for older lines.",
+            "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+            "maxLength": 512,
+            "examples": [
+              "1000"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "lines": [
+              {
+                "timestamp": "2026-05-25T12:00:00.000Z",
+                "stream": "stdout",
+                "message": "Build queued."
+              }
+            ],
+            "has_more": true,
+            "next_cursor": "1000"
+          }
+        ]
+      },
+      "Database": {
+        "type": "object",
+        "description": "Managed Postgres metadata.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "app_id",
+          "plan",
+          "storage_limit_mib",
+          "connection_limit",
+          "external_access"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "app_1"
+            ]
+          },
+          "app_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "app_1"
+            ]
+          },
+          "plan": {
+            "examples": [
+              "free"
+            ],
+            "$ref": "#/components/schemas/Plan"
+          },
+          "storage_limit_mib": {
+            "type": "integer",
+            "minimum": 1,
+            "format": "int64",
+            "maximum": 1000000000,
+            "examples": [
+              1
+            ]
+          },
+          "connection_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "format": "int64",
+            "maximum": 1000000000,
+            "examples": [
+              1
+            ]
+          },
+          "external_access": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "id": "app_1",
+            "app_id": "app_1",
+            "plan": "free",
+            "storage_limit_mib": 1,
+            "connection_limit": 1,
+            "external_access": true
+          }
+        ]
+      },
+      "DatabaseResponse": {
+        "type": "object",
+        "description": "Managed Postgres status.",
+        "additionalProperties": false,
+        "required": [
+          "database",
+          "database_url_injected"
+        ],
+        "properties": {
+          "database": {
+            "examples": [
+              {
+                "id": "app_1",
+                "app_id": "app_1",
+                "plan": "free",
+                "storage_limit_mib": 1,
+                "connection_limit": 1,
+                "external_access": true
+              }
+            ],
+            "$ref": "#/components/schemas/Database"
+          },
+          "database_url_injected": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "database": {
+              "id": "app_1",
+              "app_id": "app_1",
+              "plan": "free",
+              "storage_limit_mib": 1,
+              "connection_limit": 1,
+              "external_access": true
+            },
+            "database_url_injected": true
+          }
+        ]
+      },
+      "EnvSetRequest": {
+        "type": "object",
+        "description": "Set an environment variable.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Z_][A-Z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "DATABASE_URL"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 8192,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "examples": [
+              "value"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "DATABASE_URL",
+            "value": "value"
+          }
+        ]
+      },
+      "EnvSetResponse": {
+        "type": "object",
+        "description": "Environment variable set result.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "redeploy_recommended"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,127}$",
+            "maxLength": 512,
+            "examples": [
+              "value"
+            ]
+          },
+          "redeploy_recommended": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "value",
+            "redeploy_recommended": true
+          }
+        ]
+      },
+      "EnvVarSummary": {
+        "type": "object",
+        "description": "Environment variable metadata without secret value.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,127}$",
+            "maxLength": 512,
+            "examples": [
+              "value"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "value",
+            "created_at": "2026-05-25T12:00:00.000Z",
+            "updated_at": "2026-05-25T12:00:00.000Z"
+          }
+        ]
+      },
+      "EnvListResponse": {
+        "type": "object",
+        "description": "Environment variables without secret values.",
+        "additionalProperties": false,
+        "required": [
+          "env"
+        ],
+        "properties": {
+          "env": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvVarSummary"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "name": "value",
+                  "created_at": "2026-05-25T12:00:00.000Z",
+                  "updated_at": "2026-05-25T12:00:00.000Z"
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "env": [
+              {
+                "name": "value",
+                "created_at": "2026-05-25T12:00:00.000Z",
+                "updated_at": "2026-05-25T12:00:00.000Z"
+              }
+            ]
+          }
+        ]
+      },
+      "EnvDeleteResponse": {
+        "type": "object",
+        "description": "Environment variable delete result.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "deleted",
+          "redeploy_recommended"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,127}$",
+            "maxLength": 512,
+            "examples": [
+              "value"
+            ]
+          },
+          "deleted": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          },
+          "redeploy_recommended": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "value",
+            "deleted": true,
+            "redeploy_recommended": true
+          }
+        ]
+      },
+      "AppDomain": {
+        "type": "object",
+        "description": "Custom domain metadata.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "app_id",
+          "domain",
+          "verified",
+          "verified_at",
+          "created_at",
+          "agent_instruction"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "app_1"
+            ]
+          },
+          "app_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 512,
+            "examples": [
+              "app_1"
+            ]
+          },
+          "domain": {
+            "type": "string",
+            "pattern": "^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$",
+            "maxLength": 512,
+            "examples": [
+              "api.example.com"
+            ]
+          },
+          "verified": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          },
+          "verified_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          },
+          "agent_instruction": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "maxLength": 8192,
+            "examples": [
+              "Retry the command after applying the requested fix."
+            ]
+          }
+        },
+        "examples": [
+          {
+            "id": "app_1",
+            "app_id": "app_1",
+            "domain": "api.example.com",
+            "verified": true,
+            "verified_at": "2026-05-25T12:00:00.000Z",
+            "created_at": "2026-05-25T12:00:00.000Z",
+            "agent_instruction": "Retry the command after applying the requested fix."
+          }
+        ]
+      },
+      "AppDomainsResponse": {
+        "type": "object",
+        "description": "Custom domains attached to the app.",
+        "additionalProperties": false,
+        "required": [
+          "domains"
+        ],
+        "properties": {
+          "domains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppDomain"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "id": "app_1",
+                  "app_id": "app_1",
+                  "domain": "api.example.com",
+                  "verified": true,
+                  "verified_at": "2026-05-25T12:00:00.000Z",
+                  "created_at": "2026-05-25T12:00:00.000Z",
+                  "agent_instruction": "Retry the command after applying the requested fix."
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "domains": [
+              {
+                "id": "app_1",
+                "app_id": "app_1",
+                "domain": "api.example.com",
+                "verified": true,
+                "verified_at": "2026-05-25T12:00:00.000Z",
+                "created_at": "2026-05-25T12:00:00.000Z",
+                "agent_instruction": "Retry the command after applying the requested fix."
+              }
+            ]
+          }
+        ]
+      },
+      "AppDomainAddRequest": {
+        "type": "object",
+        "description": "Attach a custom domain.",
+        "additionalProperties": false,
+        "required": [
+          "domain"
+        ],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
+            "maxLength": 512,
+            "examples": [
+              "api.example.com"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "domain": "api.example.com"
+          }
+        ]
+      },
+      "AppDomainDeleteResponse": {
+        "type": "object",
+        "description": "Custom domain delete result.",
+        "additionalProperties": false,
+        "required": [
+          "domain",
+          "deleted"
+        ],
+        "properties": {
+          "domain": {
+            "type": "string",
+            "pattern": "^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$",
+            "maxLength": 512,
+            "examples": [
+              "api.example.com"
+            ]
+          },
+          "deleted": {
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "domain": "api.example.com",
+            "deleted": true
+          }
+        ]
+      },
+      "StatusResponse": {
+        "type": "object",
+        "description": "Current app status including the latest deploy and latest build job.",
+        "additionalProperties": false,
+        "required": [
+          "app",
+          "latest_deploy",
+          "latest_build_job"
+        ],
+        "properties": {
+          "app": {
+            "examples": [
+              {
+                "id": "app_1",
+                "account_id": "acct_1",
+                "name": "hello-rust",
+                "kind": "rust_backend",
+                "plan": "free",
+                "runtime_status": "running",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "$ref": "#/components/schemas/App"
+          },
+          "latest_deploy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Deploy"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ]
+          },
+          "latest_build_job": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BuildJob"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ]
+          }
+        },
+        "examples": [
+          {
+            "app": {
+              "id": "app_1",
+              "account_id": "acct_1",
+              "name": "hello-rust",
+              "kind": "rust_backend",
+              "plan": "free",
+              "runtime_status": "running",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "latest_deploy": {
+              "id": "deploy_1",
+              "app_id": "app_1",
+              "build_job_id": "job_1",
+              "commit_sha": "0123456789abcdef",
+              "url": "https://hello-rust.zerct.app"
+            },
+            "latest_build_job": {
+              "id": "job_1",
+              "app_id": "app_1",
+              "status": "queued",
+              "message": "Build queued."
+            }
+          }
+        ]
+      },
+      "BillingCheckout": {
+        "type": "object",
+        "description": "Stripe-hosted billing link for upgrading or managing payment.",
+        "additionalProperties": false,
+        "required": [
+          "url",
+          "reason"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Stripe-hosted URL returned for the account billing action.",
+            "examples": [
+              "https://hello-rust.zerct.app"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Billing action reason selected by Zerct.",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "maxLength": 512,
+            "examples": [
+              "value"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "url": "https://hello-rust.zerct.app",
+            "reason": "value"
+          }
+        ]
+      },
+      "BillingCheckoutResponse": {
+        "type": "object",
+        "description": "Billing checkout or portal response for an authenticated account.",
+        "additionalProperties": false,
+        "required": [
+          "checkout"
+        ],
+        "properties": {
+          "checkout": {
+            "examples": [
+              {
+                "url": "https://hello-rust.zerct.app",
+                "reason": "value"
+              }
+            ],
+            "$ref": "#/components/schemas/BillingCheckout"
+          }
+        },
+        "examples": [
+          {
+            "checkout": {
+              "url": "https://hello-rust.zerct.app",
+              "reason": "value"
+            }
+          }
+        ]
+      },
+      "ZerctBuildConfig": {
+        "type": "object",
+        "description": "Optional build commands from zerct.toml.",
+        "additionalProperties": false,
+        "properties": {
+          "check": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Cheap pre-build validation command.",
+                "pattern": "^[\\s\\S]{1,512}$",
+                "maxLength": 512,
+                "examples": [
+                  "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+            ]
+          },
+          "command": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Release build command. Context: components.schemas.ZerctBuildConfig.properties.command.anyOf.0.",
+                "pattern": "^[\\s\\S]{1,512}$",
+                "maxLength": 512,
+                "examples": [
+                  "cargo build --release"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "cargo build --release"
+            ]
+          },
+          "output": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Static frontend output directory.",
+                "pattern": "^[A-Za-z0-9_./-]{1,160}$",
+                "maxLength": 160,
+                "examples": [
+                  "dist"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "dist"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "check": null,
+            "command": "cargo build --release",
+            "output": null
+          }
+        ]
+      },
+      "ZerctRunConfig": {
+        "type": "object",
+        "description": "Runtime process settings from zerct.toml.",
+        "additionalProperties": false,
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Runtime command for Rust backends.",
+            "pattern": "^[\\s\\S]{0,512}$",
+            "maxLength": 512,
+            "examples": [
+              "./target/release/api"
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 65535,
+            "description": "Internal HTTP port.",
+            "examples": [
+              3000
+            ]
+          },
+          "health": {
+            "type": "string",
+            "description": "Health endpoint path. Context: components.schemas.ZerctRunConfig.properties.health.",
+            "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
+            "maxLength": 160,
+            "examples": [
+              "/healthz"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "command": "./target/release/api",
+            "port": 3000,
+            "health": "/healthz"
+          }
+        ]
+      },
+      "ZerctResourceConfig": {
+        "type": "object",
+        "description": "Runtime resource limits from zerct.toml.",
+        "additionalProperties": false,
+        "properties": {
+          "memory": {
+            "type": "string",
+            "description": "Runtime memory declaration.",
+            "pattern": "^[0-9]{2,5}(mb|gb)$",
+            "maxLength": 16,
+            "examples": [
+              "512mb"
+            ]
+          },
+          "cpu": {
+            "type": "string",
+            "description": "Runtime CPU declaration in vCPU units.",
+            "pattern": "^[0-9]+(\\.[0-9]+)?$",
+            "maxLength": 16,
+            "examples": [
+              "0.25"
+            ]
+          },
+          "idle_timeout_minutes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 10080,
+            "description": "Idle timeout in minutes. Context: components.schemas.ZerctResourceConfig.properties.idle_timeout_minutes.",
+            "examples": [
+              15
+            ]
+          }
+        },
+        "examples": [
+          {
+            "memory": "512mb",
+            "cpu": "0.25",
+            "idle_timeout_minutes": 15
+          }
+        ]
+      },
+      "ZerctConfig": {
+        "type": "object",
+        "description": "Parsed zerct.toml deploy contract.",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Public service name.",
+            "pattern": "^[a-z][a-z0-9-]{2,62}$",
+            "maxLength": 63,
+            "examples": [
+              "hello-rust"
+            ]
+          },
+          "kind": {
+            "examples": [
+              "rust_backend"
+            ],
+            "$ref": "#/components/schemas/ProjectKind"
+          },
+          "build": {
+            "examples": [
+              {
+                "check": null,
+                "command": "cargo build --release",
+                "output": null
+              }
+            ],
+            "$ref": "#/components/schemas/ZerctBuildConfig"
+          },
+          "run": {
+            "examples": [
+              {
+                "command": "./target/release/api",
+                "port": 3000,
+                "health": "/healthz"
+              }
+            ],
+            "$ref": "#/components/schemas/ZerctRunConfig"
+          },
+          "resources": {
+            "examples": [
+              {
+                "memory": "512mb",
+                "cpu": "0.25",
+                "idle_timeout_minutes": 15
+              }
+            ],
+            "$ref": "#/components/schemas/ZerctResourceConfig"
+          }
+        },
+        "examples": [
+          {
+            "name": "hello-rust",
+            "kind": "rust_backend",
+            "run": {
+              "command": "./target/release/api",
+              "port": 3000,
+              "health": "/healthz"
+            }
+          }
+        ]
+      },
+      "ColdStartPolicy": {
+        "type": "string",
+        "description": "Cold-start behavior for a deployed app.",
+        "enum": [
+          "required",
+          "allowed",
+          "disabled"
+        ],
+        "examples": [
+          "required"
+        ]
+      },
+      "DeploymentSlot": {
+        "type": "string",
+        "description": "Blue-green runtime slot.",
+        "enum": [
+          "blue",
+          "green"
+        ],
+        "examples": [
+          "blue"
+        ]
+      },
+      "DeploymentStrategy": {
+        "type": "string",
+        "description": "Traffic promotion strategy.",
+        "enum": [
+          "blue_green"
+        ],
+        "examples": [
+          "blue_green"
+        ]
+      },
+      "BuildLimits": {
+        "type": "object",
+        "description": "Build resource limits selected for a deploy.",
+        "additionalProperties": false,
+        "required": [
+          "memory",
+          "cpu",
+          "timeout_seconds"
+        ],
+        "properties": {
+          "memory": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 65536,
+            "description": "Build memory limit in MiB.",
+            "examples": [
+              2048
+            ]
+          },
+          "cpu": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 16000,
+            "description": "Build CPU limit in millis.",
+            "examples": [
+              2000
+            ]
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 7200,
+            "description": "Build timeout in seconds.",
+            "examples": [
+              600
+            ]
+          }
+        },
+        "examples": [
+          {
+            "memory": 2048,
+            "cpu": 2000,
+            "timeout_seconds": 600
+          }
+        ]
+      },
+      "RuntimeLimits": {
+        "type": "object",
+        "description": "Runtime resource limits selected for a deploy.",
+        "additionalProperties": false,
+        "required": [
+          "memory",
+          "cpu",
+          "startup_timeout_seconds"
+        ],
+        "properties": {
+          "memory": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 65536,
+            "description": "Runtime memory limit in MiB. Context: components.schemas.RuntimeLimits.properties.memory.",
+            "examples": [
+              512
+            ]
+          },
+          "cpu": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 16000,
+            "description": "Runtime CPU limit in millis. Context: components.schemas.RuntimeLimits.properties.cpu.",
+            "examples": [
+              250
+            ]
+          },
+          "startup_timeout_seconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 300,
+            "description": "Runtime startup timeout in seconds.",
+            "examples": [
+              10
+            ]
+          }
+        },
+        "examples": [
+          {
+            "memory": 512,
+            "cpu": 250,
+            "startup_timeout_seconds": 10
+          }
+        ]
+      },
+      "BlueGreenPlan": {
+        "type": "object",
+        "description": "Zero-downtime promotion plan for the deploy.",
+        "additionalProperties": false,
+        "required": [
+          "strategy",
+          "active_slot",
+          "candidate_slot",
+          "health_path",
+          "keep_active_until_candidate_healthy",
+          "retain_previous_for_rollback"
+        ],
+        "properties": {
+          "strategy": {
+            "examples": [
+              "blue_green"
+            ],
+            "$ref": "#/components/schemas/DeploymentStrategy"
+          },
+          "active_slot": {
+            "examples": [
+              "blue"
+            ],
+            "$ref": "#/components/schemas/DeploymentSlot"
+          },
+          "candidate_slot": {
+            "examples": [
+              "blue"
+            ],
+            "$ref": "#/components/schemas/DeploymentSlot"
+          },
+          "health_path": {
+            "type": "string",
+            "description": "Health endpoint checked before traffic switches.",
+            "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
+            "maxLength": 160,
+            "examples": [
+              "/healthz"
+            ]
+          },
+          "keep_active_until_candidate_healthy": {
+            "type": "boolean",
+            "description": "Whether the active slot stays up during promotion.",
+            "examples": [
+              true
+            ]
+          },
+          "retain_previous_for_rollback": {
+            "type": "boolean",
+            "description": "Whether the previous slot is retained briefly after promotion.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "strategy": "blue_green",
+            "active_slot": "blue",
+            "candidate_slot": "green",
+            "health_path": "/healthz",
+            "keep_active_until_candidate_healthy": true,
+            "retain_previous_for_rollback": true
+          }
+        ]
       }
     }
   }

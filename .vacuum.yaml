@@ -1,1 +1,3 @@
 extends: [[vacuum:oas, all]]
+rules:
+  camel-case-properties: false
