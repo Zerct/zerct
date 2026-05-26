@@ -107,7 +107,9 @@ Useful agent commands:
 npx @zerct/zerct capabilities
 npx @zerct/zerct me
 npx @zerct/zerct usage
+npx @zerct/zerct activity --json
 npx @zerct/zerct apps
+npx @zerct/zerct overview --app app_1 --json
 npx @zerct/zerct deploys
 npx @zerct/zerct builds --app app_1
 npx @zerct/zerct logs --app app_1 --limit 100 --json
