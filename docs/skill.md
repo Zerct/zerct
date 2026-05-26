@@ -58,6 +58,19 @@ Check the project:
 npx @zerct/zerct doctor
 ```
 
+Create a full-stack starter:
+
+```sh
+npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+```
+
+Preview one project:
+
+```sh
+npx @zerct/zerct preview api
+npx @zerct/zerct preview web
+```
+
 Deploy:
 
 ```sh

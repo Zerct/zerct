@@ -4,8 +4,10 @@ Rust CLI package for deploying Rust backends and static frontends to Zerct.
 
 ```sh
 cargo install zerct
-zerct init
+zerct init my-app --template fullstack-rust-tanstack
+cd my-app/web && bun install && cd ..
 zerct doctor
+zerct preview
 zerct deploy
 ```
 

@@ -19,6 +19,13 @@ npx @zerct/zerct init
 
 This creates `zerct.toml`.
 
+For a new project, start from a template:
+
+```sh
+npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+cd my-app/web && bun install && cd ..
+```
+
 ## Check locally
 
 ```sh
@@ -27,6 +34,13 @@ npx @zerct/zerct doctor
 
 Fix any reported issue before deploying. Zerct errors are written so agents can
 read the `agent_instruction` field and retry.
+
+Preview one project locally:
+
+```sh
+npx @zerct/zerct preview api
+npx @zerct/zerct preview web
+```
 
 ## Deploy
 
