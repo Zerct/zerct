@@ -35,6 +35,16 @@ jobs:
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Check npm auth
+        if: steps.version.outputs.exists == 'false'
+        run: |
+          user="$(npm whoami --registry=https://registry.npmjs.org)"
+          if [ "$user" != "burakbayir" ]; then
+            echo "::error::NPM_TOKEN authenticated as '$user', expected 'burakbayir' for @zerct/zerct publish access."
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - if: steps.version.outputs.exists == 'false'
         run: ./scripts/check-all.sh
       - if: steps.version.outputs.exists == 'false'
