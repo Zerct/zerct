@@ -2986,6 +2986,7 @@
                   "auth": "Use device login once, then a bearer token.",
                   "agent_workflow": [
                     "Call GET /v1/capabilities first.",
+                    "Use Rust backends for dynamic APIs, Postgres, and server-side logic.",
                     "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
                   ],
                   "endpoints": [
@@ -6555,12 +6556,14 @@
               "maxLength": 500,
               "examples": [
                 "Call GET /v1/capabilities first.",
+                "Use Rust backends for dynamic APIs, Postgres, and server-side logic.",
                 "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
               ]
             },
             "examples": [
               [
                 "Call GET /v1/capabilities first.",
+                "Use Rust backends for dynamic APIs, Postgres, and server-side logic.",
                 "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
               ]
             ]

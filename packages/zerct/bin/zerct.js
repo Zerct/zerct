@@ -18,6 +18,7 @@ const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 const DEFAULT_RUST_CHECK_COMMAND = 'cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
+const PROJECT_KINDS = new Set(['rust_backend', 'static_frontend'])
 const ARCHIVE_EXCLUDES = [
   '.git',
   'target',
@@ -90,6 +91,7 @@ Usage:
 Agent contract:
   - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, and typecheck + lint scripts.
+  - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a repo root with nested zerct.toml files to deploy the whole workspace in one command.
   - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.
   - Keep direct unsafe out of Rust source.
@@ -1207,7 +1209,7 @@ function validateConfig(config) {
   if (!/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/u.test(config.name || '')) {
     throw new Error('name must be lowercase DNS-safe text up to 48 characters')
   }
-  if (!['rust_backend', 'static_frontend'].includes(config.kind)) {
+  if (!PROJECT_KINDS.has(config.kind)) {
     throw new Error('kind must be rust_backend or static_frontend')
   }
   if (typeof config.build.command !== 'string' || !config.build.command.trim()) {
@@ -1222,6 +1224,9 @@ function validateConfig(config) {
       throw new Error('[build].output must be a safe relative directory like dist')
     }
     return
+  }
+  if (config.build.output) {
+    throw new Error('[build].output is only valid for static_frontend')
   }
   if (!config.run.command || typeof config.run.command !== 'string') {
     throw new Error('[run].command is required')

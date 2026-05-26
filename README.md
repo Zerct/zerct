@@ -2,8 +2,9 @@
 
 Public Zerct workspace for packages, SDKs, agent skills, and examples.
 
-Zerct hosts Rust backends and static frontends. Frontends call Rust backend
-deploys for APIs and managed Postgres.
+Zerct hosts Rust backends and static frontends. Frontends can be fully dynamic
+in the browser by calling Rust backend deploys for APIs and managed Postgres,
+without keeping a Node or Bun server alive.
 
 ## Install
 
@@ -17,8 +18,8 @@ npx @zerct/zerct deploy
 
 From a full-stack repo root, `npx @zerct/zerct deploy --database` discovers
 nested `zerct.toml` projects and deploys the whole workspace in one command.
-Rust backends deploy first. Static frontends deploy after them. Managed Postgres
-is requested only for Rust backends.
+Rust backends deploy first. Static frontends deploy after them. Managed
+Postgres is requested only for Rust backends.
 
 Static frontend deploys use the same command with this `zerct.toml`:
 
@@ -50,11 +51,11 @@ bun add -d @typescript/native-preview oxlint
 ```
 
 Rust backend checks must include locked `cargo check` and locked all-target,
-all-feature Clippy with `-D warnings`. Static frontend checks must run both
-typechecking and linting before build work is queued. Static frontend browser
-source must be `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
-`components`; browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected. Bun
-projects should commit `bun.lock` for the fastest Zerct build path. Existing npm
+all-feature Clippy with `-D warnings`. Frontend checks must run both
+typechecking and linting before build work is queued. Frontend browser source
+must be `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or `components`;
+browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected. Bun projects
+should commit `bun.lock` for the fastest Zerct build path. Existing npm
 projects can still deploy with a committed npm lockfile and npm-based build
 commands.
 
