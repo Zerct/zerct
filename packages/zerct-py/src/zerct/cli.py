@@ -54,6 +54,7 @@ EXCLUDED_NAMES = {
     ".DS_Store",
 }
 EXCLUDED_SUFFIXES = (".pem", ".key", ".p12", ".pfx", ".sqlite", ".sqlite3", ".db", ".log")
+WORKSPACE_EXCLUDED_PARTS = EXCLUDED_PARTS | {".cache", ".next", ".turbo", "build", "coverage", "dist", "vendor"}
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,13 @@ class AgentError(Exception):
             "docs_url": self.docs_url,
             "checkout_url": self.checkout_url,
         }
+
+
+@dataclass(frozen=True)
+class DeployProject:
+    directory: pathlib.Path
+    relative: str
+    kind: str
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -612,6 +620,52 @@ def safe_relative_path(value: str) -> bool:
     )
 
 
+def discover_deploy_projects(root_dir: pathlib.Path) -> list[DeployProject]:
+    if not root_dir.is_dir():
+        raise AgentError(
+            "missing_project",
+            "Project directory does not exist.",
+            "Run Zerct from the root of a Rust project or pass the project path.",
+        )
+    if (root_dir / "zerct.toml").exists():
+        return [deploy_project_info(root_dir, root_dir)]
+
+    project_dirs: list[pathlib.Path] = []
+    discover_project_dirs(root_dir, project_dirs)
+    return sorted(
+        (deploy_project_info(project_dir, root_dir) for project_dir in project_dirs),
+        key=lambda project: (kind_order(project.kind), project.relative),
+    )
+
+
+def discover_project_dirs(directory: pathlib.Path, project_dirs: list[pathlib.Path]) -> None:
+    for item in sorted(directory.iterdir(), key=lambda path: path.name):
+        if item.is_symlink() or not item.is_dir() or item.name in WORKSPACE_EXCLUDED_PARTS:
+            continue
+        if (item / "zerct.toml").exists():
+            project_dirs.append(item)
+            continue
+        discover_project_dirs(item, project_dirs)
+
+
+def deploy_project_info(project_dir: pathlib.Path, root_dir: pathlib.Path) -> DeployProject:
+    relative = project_dir.relative_to(root_dir).as_posix() if project_dir != root_dir else "."
+    try:
+        config = parse_config(project_dir / "zerct.toml")
+        kind = str(config.get("kind", "unknown"))
+    except AgentError:
+        kind = "unknown"
+    return DeployProject(project_dir, relative, kind)
+
+
+def kind_order(kind: str) -> int:
+    if kind == "rust_backend":
+        return 0
+    if kind == "static_frontend":
+        return 1
+    return 2
+
+
 def login(args: argparse.Namespace) -> None:
     token = args.token
     if token:
@@ -623,30 +677,64 @@ def login(args: argparse.Namespace) -> None:
 
 
 def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
+    projects = discover_deploy_projects(project_dir)
+    if not projects:
+        raise AgentError(
+            "missing_project_contract",
+            "No zerct.toml was found.",
+            "Run `zerct init` in each app directory, or pass a project path.",
+        )
+
+    if len(projects) == 1:
+        project = projects[0]
+        if project.kind == "static_frontend" and args.database:
+            raise AgentError(
+                "invalid_database_target",
+                "Static frontends cannot attach managed Postgres directly.",
+                "Deploy a Rust backend with managed Postgres and call it from the frontend.",
+            )
+        token = read_or_login_token(project.directory, args)
+        print_deploy_response(deploy_project(project.directory, args, token, args.database), args)
+        return
+
+    token = read_or_login_token(project_dir, args)
+    results: list[tuple[DeployProject, bool, dict[str, Any]]] = []
+    if not args.json:
+        print(f"deploying {len(projects)} projects")
+    for project in projects:
+        wants_database = args.database and project.kind == "rust_backend"
+        if not args.json:
+            print(f"checking {project.relative}")
+        response = deploy_project(project.directory, args, token, wants_database)
+        results.append((project, wants_database, response))
+        if not args.json:
+            print(f"{project.relative} queued {response['build_job']['id']}")
+            print(f"{project.relative} url {response['app']['url']}")
+
+    print_workspace_deploy_response(project_dir, results, args)
+
+
+def deploy_project(project_dir: pathlib.Path, args: argparse.Namespace, token: str, wants_database: bool) -> dict[str, Any]:
     report = run_doctor(project_dir)
     if not report["ok"]:
         failure = next(check for check in report["checks"] if not check["ok"])
         raise AgentError("doctor_failed", "Zerct doctor failed.", failure["agent_instruction"])
-    if report["config"] and report["config"].get("kind") == "static_frontend" and args.database:
-        raise AgentError(
-            "invalid_database_target",
-            "Static frontends cannot attach managed Postgres directly.",
-            "Deploy a Rust backend with managed Postgres and call it from the frontend.",
-        )
 
-    token = read_or_login_token(project_dir, args)
-    response = api_request(
+    return api_request(
         args,
         "POST",
-        "/v1/deployments",
+        "/v1/deploy",
         token,
         {
             "config": report["config"],
             "commit_sha": git_commit_sha(project_dir),
-            "wants_database": args.database,
+            "wants_database": wants_database,
             "source_archive_base64": archive_base64(project_dir),
         },
     )
+
+
+def print_deploy_response(response: dict[str, Any], args: argparse.Namespace) -> None:
     if args.json:
         print(json.dumps(response, indent=2))
         return
@@ -655,6 +743,36 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
     print(f"app {response['app']['id']}")
     print(f"url {response['app']['url']}")
     print(f"next zerct logs --app {response['app']['id']}")
+
+
+def print_workspace_deploy_response(
+    project_dir: pathlib.Path,
+    results: list[tuple[DeployProject, bool, dict[str, Any]]],
+    args: argparse.Namespace,
+) -> None:
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "workspace": str(project_dir),
+                    "deploys": [
+                        {
+                            "path": project.relative,
+                            "kind": project.kind,
+                            "wants_database": wants_database,
+                            "app": response["app"],
+                            "build_job": response["build_job"],
+                        }
+                        for project, wants_database, response in results
+                    ],
+                },
+                indent=2,
+            )
+        )
+        return
+
+    if results:
+        print(f"next zerct logs --app {results[0][2]['app']['id']}")
 
 
 def logs(args: argparse.Namespace) -> None:

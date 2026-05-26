@@ -3,9 +3,9 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "Zerct API",
-    "summary": "Control-plane API for Zerct deployments.",
+    "summary": "Control-plane API for Zerct deploys.",
     "version": "0.1.0",
-    "description": "Use the Zerct API to authenticate, create Rust backend deployments, manage account onboarding, and inspect deployment health.",
+    "description": "Use the Zerct API to authenticate, create Rust backend deploys, manage account onboarding, and inspect deploy health.",
     "termsOfService": "https://zerct.com/legal/terms",
     "contact": {
       "name": "Zerct",
@@ -42,8 +42,8 @@
       "description": "Authentication endpoints."
     },
     {
-      "name": "Deployments",
-      "description": "Deployment lifecycle endpoints."
+      "name": "Deploy",
+      "description": "Deploy lifecycle endpoints."
     },
     {
       "name": "Health",
@@ -223,7 +223,7 @@
           "Accounts"
         ],
         "summary": "Get account dashboard",
-        "description": "Returns deployments and usage for the authenticated account dashboard.",
+        "description": "Returns deploys and usage for the authenticated account dashboard.",
         "operationId": "getAccountDashboard",
         "responses": {
           "200": {
@@ -244,16 +244,16 @@
         }
       }
     },
-    "/v1/deployments": {
+    "/v1/deploy": {
       "post": {
         "tags": [
-          "Deployments"
+          "Deploy"
         ],
-        "summary": "Create deployment",
-        "description": "Creates a deployment from a source archive produced by the Zerct CLI.",
-        "operationId": "createDeployment",
+        "summary": "Deploy app",
+        "description": "Deploys an app from a source archive produced by the Zerct CLI.",
+        "operationId": "createDeploy",
         "requestBody": {
-          "description": "Deployment source archive and runtime metadata.",
+          "description": "Deploy source archive and runtime metadata.",
           "required": true,
           "content": {
             "application/json": {
@@ -275,7 +275,7 @@
         },
         "responses": {
           "200": {
-            "$ref": "#/components/responses/DeploymentAccepted"
+            "$ref": "#/components/responses/DeployAccepted"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -473,8 +473,8 @@
           }
         }
       },
-      "DeploymentAccepted": {
-        "description": "Deployment accepted.",
+      "DeployAccepted": {
+        "description": "Deploy accepted.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -495,8 +495,8 @@
               "$ref": "#/components/schemas/DeployResponse"
             },
             "examples": {
-              "queuedDeployment": {
-                "summary": "Queued deployment",
+              "queuedDeploy": {
+                "summary": "Queued deploy",
                 "value": {
                   "deployId": "dep_01HW0000000000000000000000",
                   "appId": "app_01HW0000000000000000000000",
@@ -1000,7 +1000,7 @@
       },
       "DeployRequest": {
         "type": "object",
-        "description": "Request body for creating a deployment.",
+        "description": "Request body for deploying an app.",
         "additionalProperties": false,
         "required": [
           "appName",
@@ -1010,7 +1010,7 @@
         "properties": {
           "appName": {
             "type": "string",
-            "description": "Deployment slug.",
+            "description": "Deploy slug.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -1044,7 +1044,7 @@
       },
       "DeployResponse": {
         "type": "object",
-        "description": "Response returned after a deployment is accepted.",
+        "description": "Response returned after a deploy is accepted.",
         "additionalProperties": false,
         "required": [
           "deployId",
@@ -1054,7 +1054,7 @@
         "properties": {
           "deployId": {
             "type": "string",
-            "description": "Deployment identifier.",
+            "description": "Deploy identifier.",
             "pattern": "^dep_[0-9A-HJKMNP-TV-Z]{26}$",
             "examples": [
               "dep_01HW0000000000000000000000"
@@ -1070,7 +1070,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Deployment status.",
+            "description": "Deploy status.",
             "enum": [
               "queued",
               "building",
@@ -1083,7 +1083,7 @@
           },
           "url": {
             "type": "string",
-            "description": "Public deployment URL.",
+            "description": "Public deploy URL.",
             "format": "uri",
             "examples": [
               "https://hello-rust.zerct.app"
@@ -1165,7 +1165,7 @@
       },
       "Plan": {
         "type": "string",
-        "description": "Zerct plan assigned to a deployment.",
+        "description": "Zerct plan assigned to a deploy.",
         "enum": [
           "free",
           "pro"
@@ -1321,7 +1321,7 @@
           },
           "apps": {
             "type": "array",
-            "description": "Deployments owned by the account.",
+            "description": "Deploys owned by the account.",
             "minItems": 0,
             "maxItems": 1000,
             "items": {
@@ -1354,7 +1354,7 @@
       },
       "AccountDashboardApp": {
         "type": "object",
-        "description": "Dashboard deployment row.",
+        "description": "Dashboard deploy row.",
         "additionalProperties": false,
         "required": [
           "appId",
@@ -1390,7 +1390,7 @@
           },
           "slug": {
             "type": "string",
-            "description": "Public deployment slug.",
+            "description": "Public deploy slug.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -1398,7 +1398,7 @@
           },
           "url": {
             "type": "string",
-            "description": "HTTPS endpoint assigned to the deployment.",
+            "description": "HTTPS endpoint assigned to the deploy.",
             "format": "uri",
             "examples": [
               "https://hello-rust.zerct.app"
@@ -1544,7 +1544,7 @@
           },
           "deployCount": {
             "type": "integer",
-            "description": "Sum of deployment records.",
+            "description": "Sum of deploy records.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,

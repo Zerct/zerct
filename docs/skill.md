@@ -59,6 +59,10 @@ Deploy:
 npx @zerct/zerct deploy
 ```
 
+From a repo root, `npx @zerct/zerct deploy` must discover nested
+`zerct.toml` files and deploy the workspace in one command. Rust backends deploy
+before static frontends. `--database` applies to Rust backends only.
+
 Use a persistent CLI:
 
 ```sh

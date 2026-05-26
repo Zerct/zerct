@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.2";
+const VERSION: &str = "0.1.4";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -248,6 +248,13 @@ struct Config {
     memory: String,
     cpu: String,
     idle_timeout_minutes: u16,
+}
+
+#[derive(Debug)]
+struct DeployProject {
+    dir: PathBuf,
+    relative: String,
+    kind: String,
 }
 
 fn required_value(raw: &[String], index: usize, name: &'static str) -> Result<String, AgentError> {
@@ -770,6 +777,98 @@ fn validate_check_command(kind: &str, command: &str) -> Result<(), AgentError> {
     ))
 }
 
+fn discover_deploy_projects(root_dir: &Path) -> Result<Vec<DeployProject>, AgentError> {
+    if !root_dir.is_dir() {
+        return Err(AgentError::new(
+            "missing_project",
+            "Project directory does not exist.",
+            "Run Zerct from the root of a Rust project or pass the project path.",
+        ));
+    }
+    if root_dir.join("zerct.toml").exists() {
+        return Ok(vec![deploy_project_info(root_dir, root_dir)]);
+    }
+
+    let mut project_dirs = Vec::new();
+    discover_project_dirs(root_dir, &mut project_dirs);
+    let mut projects = project_dirs
+        .iter()
+        .map(|project_dir| deploy_project_info(project_dir, root_dir))
+        .collect::<Vec<_>>();
+    projects.sort_by(|left, right| {
+        kind_order(&left.kind)
+            .cmp(&kind_order(&right.kind))
+            .then_with(|| left.relative.cmp(&right.relative))
+    });
+    Ok(projects)
+}
+
+fn discover_project_dirs(dir: &Path, project_dirs: &mut Vec<PathBuf>) {
+    let Ok(read_dir) = fs::read_dir(dir) else {
+        return;
+    };
+    let mut entries = read_dir.flatten().collect::<Vec<_>>();
+    entries.sort_by_key(std::fs::DirEntry::file_name);
+    for entry in entries {
+        let path = entry.path();
+        let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+            continue;
+        };
+        let is_symlink = entry
+            .file_type()
+            .is_ok_and(|file_type| file_type.is_symlink());
+        if is_symlink || should_skip_workspace_dir(name) || !path.is_dir() {
+            continue;
+        }
+        if path.join("zerct.toml").exists() {
+            project_dirs.push(path);
+        } else {
+            discover_project_dirs(&path, project_dirs);
+        }
+    }
+}
+
+fn deploy_project_info(project_dir: &Path, root_dir: &Path) -> DeployProject {
+    let relative = project_dir
+        .strip_prefix(root_dir)
+        .ok()
+        .and_then(Path::to_str)
+        .filter(|value| !value.is_empty())
+        .map_or_else(|| ".".to_owned(), |value| value.replace('\\', "/"));
+    let kind = parse_config(&project_dir.join("zerct.toml"))
+        .map_or_else(|_error| "unknown".to_owned(), |config| config.kind);
+    DeployProject {
+        dir: project_dir.to_path_buf(),
+        relative,
+        kind,
+    }
+}
+
+fn kind_order(kind: &str) -> u8 {
+    match kind {
+        "rust_backend" => 0,
+        "static_frontend" => 1,
+        _other => 2,
+    }
+}
+
+fn should_skip_workspace_dir(name: &str) -> bool {
+    matches!(
+        name,
+        ".cache"
+            | ".git"
+            | ".next"
+            | ".turbo"
+            | ".zerct"
+            | "build"
+            | "coverage"
+            | "dist"
+            | "node_modules"
+            | "target"
+            | "vendor"
+    )
+}
+
 fn login(cli: &Cli) -> Result<(), AgentError> {
     if let Some(token) = &cli.token {
         write_session_token(token)?;
@@ -783,7 +882,75 @@ fn login(cli: &Cli) -> Result<(), AgentError> {
 
 fn deploy(cli: &Cli) -> Result<(), AgentError> {
     let project_dir = cli.project_path();
-    let report = doctor_report(&project_dir);
+    let projects = discover_deploy_projects(&project_dir)?;
+    if projects.is_empty() {
+        return Err(AgentError::new(
+            "missing_project_contract",
+            "No zerct.toml was found.",
+            "Run `zerct init` in each app directory, or pass a project path.",
+        ));
+    }
+
+    if projects.len() == 1 {
+        let Some(project) = projects.first() else {
+            return Err(AgentError::new(
+                "missing_project_contract",
+                "No zerct.toml was found.",
+                "Run `zerct init` in each app directory, or pass a project path.",
+            ));
+        };
+        if project.kind == "static_frontend" && cli.database {
+            return Err(AgentError::new(
+                "invalid_database_target",
+                "Static frontends cannot attach managed Postgres directly.",
+                "Deploy a Rust backend with managed Postgres and call it from the frontend.",
+            ));
+        }
+        let token = read_or_login_token(&project.dir, cli)?;
+        println!(
+            "{}",
+            deploy_project(cli, &project.dir, &token, cli.database)?
+        );
+        return Ok(());
+    }
+
+    let token = read_or_login_token(&project_dir, cli)?;
+    if cli.json {
+        println!("[");
+    } else {
+        println!("deploying {} projects", projects.len());
+    }
+    let mut first = true;
+    for project in projects {
+        let wants_database = cli.database && project.kind == "rust_backend";
+        if !cli.json {
+            println!("checking {}", project.relative);
+        }
+        let response = deploy_project(cli, &project.dir, &token, wants_database)?;
+        if cli.json {
+            if first {
+                first = false;
+            } else {
+                println!(",");
+            }
+            print!("{response}");
+        } else {
+            println!("{} {response}", project.relative);
+        }
+    }
+    if cli.json {
+        println!("\n]");
+    }
+    Ok(())
+}
+
+fn deploy_project(
+    cli: &Cli,
+    project_dir: &Path,
+    token: &str,
+    wants_database: bool,
+) -> Result<String, AgentError> {
+    let report = doctor_report(project_dir);
     if let Some(check) = report.checks.iter().find(|check| !check.ok) {
         return Err(AgentError::new(
             "doctor_failed",
@@ -809,17 +976,14 @@ fn deploy(cli: &Cli) -> Result<(), AgentError> {
     let body = format!(
         "{{\"config\":{},\"commit_sha\":{},\"wants_database\":{},\"source_archive_base64\":\"{}\"}}",
         config.to_json(),
-        git_commit_sha(&project_dir).map_or_else(
+        git_commit_sha(project_dir).map_or_else(
             || "null".to_owned(),
             |sha| format!("\"{}\"", escape_json(&sha))
         ),
-        cli.database,
-        archive_base64(&project_dir)?
+        wants_database,
+        archive_base64(project_dir)?
     );
-    let token = read_or_login_token(&project_dir, cli)?;
-    let response = api_request(cli, "POST", "/v1/deployments", Some(&token), Some(&body))?;
-    println!("{response}");
-    Ok(())
+    api_request(cli, "POST", "/v1/deploy", Some(token), Some(&body))
 }
 
 fn app_get(cli: &Cli, route: &str) -> Result<(), AgentError> {

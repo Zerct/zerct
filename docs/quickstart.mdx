@@ -37,3 +37,15 @@ npx @zerct/zerct deploy
 On first deploy, the CLI opens browser login for GitHub or Google, stores the
 Zerct session, then continues automatically. Zerct builds the backend, verifies
 health, and returns the deployment URL.
+
+## Full-stack repos
+
+Put one `zerct.toml` in each deployable app directory, then run one command from
+the repo root:
+
+```sh
+npx @zerct/zerct deploy --database
+```
+
+Zerct discovers every nested project contract, deploys Rust backends first,
+deploys static frontends next, and requests managed Postgres for Rust backends.
