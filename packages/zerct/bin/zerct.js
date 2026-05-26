@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.6'
+const VERSION = '0.1.7'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
@@ -65,9 +65,12 @@ Usage:
   zerct doctor [path] [--json]
   zerct login [--token <token>] [--api <url>]
   zerct deploy [path] [--database] [--api <url>] [--json]
+  zerct capabilities [--api <url>] [--json]
+  zerct me [--api <url>] [--json]
+  zerct usage [--api <url>] [--json]
   zerct apps [--api <url>] [--json]
-  zerct deploys --app <app_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  zerct builds --app <app_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct deploys [--app <app_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct builds [--app <app_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct logs --app <app_id> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct status --app <app_id> [--api <url>] [--json]
   zerct inspect --app <app_id> [--api <url>] [--json]
@@ -115,6 +118,15 @@ async function main() {
       break
     case 'deploy':
       await deploy(projectPath(cli.args[0]), cli)
+      break
+    case 'capabilities':
+      await capabilities(cli)
+      break
+    case 'me':
+      await me(cli)
+      break
+    case 'usage':
+      await usage(cli)
       break
     case 'apps':
       await apps(cli)
@@ -541,13 +553,38 @@ async function apps(cli) {
   printJsonOrPretty(cli, response)
 }
 
+async function capabilities(cli) {
+  const response = await apiRequest(cli, 'GET', '/v1/capabilities', null, null)
+  printJsonOrPretty(cli, response)
+}
+
+async function me(cli) {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const response = await apiRequest(cli, 'GET', '/v1/me', token, null)
+  printJsonOrPretty(cli, response)
+}
+
+async function usage(cli) {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const response = await apiRequest(cli, 'GET', '/v1/usage', token, null)
+  printJsonOrPretty(cli, response)
+}
+
 async function deploys(cli) {
-  const response = await appGet(cli, `deploys${pageQuery(cli)}`)
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const route = cli.app
+    ? `/v1/apps/${encodeURIComponent(cli.app)}/deploys${pageQuery(cli)}`
+    : `/v1/deploys${pageQuery(cli)}`
+  const response = await apiRequest(cli, 'GET', route, token, null)
   printJsonOrPretty(cli, response)
 }
 
 async function builds(cli) {
-  const response = await appGet(cli, `builds${pageQuery(cli)}`)
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const route = cli.app
+    ? `/v1/apps/${encodeURIComponent(cli.app)}/builds${pageQuery(cli)}`
+    : `/v1/builds${pageQuery(cli)}`
+  const response = await apiRequest(cli, 'GET', route, token, null)
   printJsonOrPretty(cli, response)
 }
 
