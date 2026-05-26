@@ -32,6 +32,7 @@ SESSION_ACCOUNT = "session-token"
 SESSION_LABEL = "Zerct session"
 DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 DEFAULT_LOGIN_INTERVAL_SECONDS = 5
+DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
 DEFAULT_RUST_CHECK_COMMAND = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
 DEFAULT_NPM_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 DEFAULT_BUN_FRONTEND_CHECK_COMMAND = "bun ci && bun run typecheck && bun run lint"
@@ -116,8 +117,14 @@ def build_parser() -> argparse.ArgumentParser:
     deploy = subcommands.add_parser("deploy")
     deploy.add_argument("path", nargs="?", default=".")
     deploy.add_argument("--database", action="store_true")
+    deploy.add_argument("--wait", action="store_true")
+    deploy.add_argument("--wait-timeout", type=positive_seconds, default=DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS)
 
-    for command in ("logs", "status", "inspect", "db"):
+    logs = subcommands.add_parser("logs")
+    logs.add_argument("--app", default="")
+    logs.add_argument("--build", default="")
+
+    for command in ("status", "inspect", "db"):
         item = subcommands.add_parser(command)
         item.add_argument("--app", required=True)
 
@@ -162,6 +169,16 @@ def run(args: argparse.Namespace) -> None:
                 "Unknown Zerct command.",
                 "Run `zerct --help` and retry with a supported command.",
             )
+
+
+def positive_seconds(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("must be a positive integer") from error
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
 
 
 def init_project(project_dir: pathlib.Path) -> None:
@@ -698,7 +715,10 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
             )
         token = read_or_login_token(project.directory, args)
         preflight_deploy_limits([project], args, token, args.database)
-        print_deploy_response(deploy_project(project.directory, args, token, args.database), args)
+        response = deploy_project(project.directory, args, token, args.database)
+        if args.wait:
+            response["final_build"] = wait_for_build(args, token, response["build_job"]["id"])
+        print_deploy_response(response, args)
         return
 
     token = read_or_login_token(project_dir, args)
@@ -715,6 +735,10 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
         if not args.json:
             print(f"{project.relative} queued {response['build_job']['id']}")
             print(f"{project.relative} url {response['app']['url']}")
+
+    if args.wait:
+        for _project, _wants_database, response in results:
+            response["final_build"] = wait_for_build(args, token, response["build_job"]["id"])
 
     print_workspace_deploy_response(project_dir, results, args)
 
@@ -814,6 +838,7 @@ def print_workspace_deploy_response(
                             "wants_database": wants_database,
                             "app": response["app"],
                             "build_job": response["build_job"],
+                            "final_build": response.get("final_build"),
                         }
                         for project, wants_database, response in results
                     ],
@@ -827,8 +852,41 @@ def print_workspace_deploy_response(
         print(f"next zerct logs --app {results[0][2]['app']['id']}")
 
 
+def wait_for_build(args: argparse.Namespace, token: str, build_id: str) -> dict[str, Any]:
+    deadline = time.time() + int(args.wait_timeout)
+    last_status = ""
+    while time.time() <= deadline:
+        response = api_request(args, "GET", f"/v1/builds/{build_id}", token, None)
+        build = response.get("build", {})
+        status = build.get("status")
+        if not status:
+            raise AgentError(
+                "build_status_unavailable",
+                "Build status is unavailable.",
+                f"Retry with `zerct logs --build {build_id}`.",
+            )
+        if status != last_status:
+            progress(args, f"build {build_id} {status}")
+            last_status = status
+        if status in {"succeeded", "failed", "canceled"}:
+            return build
+        time.sleep(3)
+
+    raise AgentError(
+        "build_wait_timeout",
+        f"Timed out waiting for build {build_id}.",
+        f"Run `zerct logs --build {build_id}` to continue watching.",
+    )
+
+
 def logs(args: argparse.Namespace) -> None:
-    response = app_get(args, "logs")
+    token = read_or_login_token(pathlib.Path.cwd(), args)
+    if args.build:
+        response = api_request(args, "GET", f"/v1/builds/{args.build}/logs", token, None)
+    elif args.app:
+        response = api_request(args, "GET", f"/v1/apps/{args.app}/logs", token, None)
+    else:
+        raise AgentError("missing_app", "App id or build id is required.", "Pass `--app <app_id>` or `--build <build_id>`.")
     if args.json:
         print(json.dumps(response, indent=2))
         return

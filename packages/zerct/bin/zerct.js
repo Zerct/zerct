@@ -4,9 +4,10 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.10'
+const VERSION = '0.1.11'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
+const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
 const SESSION_DIR = '.zerct'
 const SESSION_FILE = 'session-token'
 const SESSION_SERVICE = 'com.zerct.cli'
@@ -64,7 +65,7 @@ Usage:
   zerct install [path]
   zerct doctor [path] [--json]
   zerct login [--token <token>] [--api <url>]
-  zerct deploy [path] [--database] [--api <url>] [--json]
+  zerct deploy [path] [--database] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
   zerct capabilities [--api <url>] [--json]
   zerct me [--api <url>] [--json]
   zerct usage [--api <url>] [--json]
@@ -184,8 +185,10 @@ function parseArgs(argv) {
     limit: '',
     cursor: '',
     token: '',
+    waitTimeoutSeconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
     json: false,
     database: false,
+    wait: false,
     help: false,
     version: false
   }
@@ -203,6 +206,11 @@ function parseArgs(argv) {
       cli.database = true
     } else if (arg === '--no-database') {
       cli.database = false
+    } else if (arg === '--wait') {
+      cli.wait = true
+    } else if (arg === '--wait-timeout') {
+      cli.waitTimeoutSeconds = parsePositiveInteger(requireValue(argv, index, '--wait-timeout'), '--wait-timeout')
+      index += 1
     } else if (arg === '--api') {
       cli.apiUrl = requireValue(argv, index, '--api')
       index += 1
@@ -236,6 +244,14 @@ function parseArgs(argv) {
 
   cli.apiUrl = trimTrailingSlash(cli.apiUrl)
   return cli
+}
+
+function parsePositiveInteger(value, name) {
+  const parsed = Number.parseInt(value, 10)
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw agentError('invalid_argument', `${name} must be a positive integer.`, `Pass ${name} as seconds, for example ${name} 900.`, false)
+  }
+  return parsed
 }
 
 function requireValue(argv, index, name) {
@@ -450,6 +466,9 @@ async function deploy(projectDir, cli) {
     const token = await readOrLoginToken(project.dir, cli)
     await preflightDeployLimits([project], cli, token, cli.database)
     const result = await deployProject(project.dir, cli, token, cli.database)
+    if (cli.wait) {
+      result.final_build = await waitForBuild(cli, token, result.build_job.id)
+    }
     printDeployResult(result, cli)
     return
   }
@@ -471,6 +490,12 @@ async function deploy(projectDir, cli) {
     if (!cli.json) {
       console.log(`${project.relative} queued ${response.build_job.id}`)
       console.log(`${project.relative} url ${response.app.url}`)
+    }
+  }
+
+  if (cli.wait) {
+    for (const result of results) {
+      result.finalBuild = await waitForBuild(cli, token, result.response.build_job.id)
     }
   }
 
@@ -561,7 +586,8 @@ function printWorkspaceDeployResults(projectDir, results, cli) {
         kind: result.project.kind,
         wants_database: result.wantsDatabase,
         app: result.response.app,
-        build_job: result.response.build_job
+        build_job: result.response.build_job,
+        final_build: result.finalBuild || null
       }))
     }, null, 2))
     return
@@ -571,6 +597,35 @@ function printWorkspaceDeployResults(projectDir, results, cli) {
   if (firstApp) {
     console.log(`next npx @zerct/zerct logs --app ${firstApp}`)
   }
+}
+
+async function waitForBuild(cli, token, buildId) {
+  const deadline = Date.now() + cli.waitTimeoutSeconds * 1000
+  let lastStatus = ''
+
+  while (Date.now() <= deadline) {
+    const response = await apiRequest(cli, 'GET', `/v1/builds/${encodeURIComponent(buildId)}`, token, null)
+    const build = response.build
+    if (!build?.status) {
+      throw agentError('build_status_unavailable', 'Build status is unavailable.', `Retry with \`npx @zerct/zerct logs --build ${buildId}\`.`, cli.json)
+    }
+
+    if (build.status !== lastStatus) {
+      progress(cli, `build ${build.id} ${build.status}`)
+      lastStatus = build.status
+    }
+    if (['succeeded', 'failed', 'canceled'].includes(build.status)) {
+      return build
+    }
+    await sleep(3000)
+  }
+
+  throw agentError(
+    'build_wait_timeout',
+    `Timed out waiting for build ${buildId}.`,
+    `Run \`npx @zerct/zerct logs --build ${buildId}\` to continue watching.`,
+    cli.json
+  )
 }
 
 async function logs(cli) {
