@@ -49,3 +49,5 @@ npx @zerct/zerct deploy --database
 
 Zerct discovers every nested project contract, deploys Rust backends first,
 deploys static frontends next, and requests managed Postgres for Rust backends.
+If the frontend calls the backend from the browser, configure backend CORS for
+the frontend origin or use a same-origin custom domain.

@@ -45,6 +45,11 @@ committed with `bun.lock`. Avoid JavaScript-based linters. Keep the generic
 Zerct contract script-based so existing strict npm projects can still deploy
 with npm commands.
 
+When a browser frontend calls a Rust backend on another hostname, configure
+backend CORS for that frontend origin or put both apps behind a same-origin
+custom domain. Zerct keeps frontend and backend deployments as separate HTTPS
+origins by default.
+
 ## Commands
 
 Check the project:
