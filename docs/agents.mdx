@@ -1,0 +1,33 @@
+---
+title: "Agent Prompts"
+description: "Copy-paste prompts for AI coding agents."
+---
+
+Use these prompts in Cursor, Codex, ChatGPT, Claude, or another coding agent.
+
+## Deploy This Project
+
+```txt
+Use Zerct to deploy this project. Read https://docs.zerct.com/llms.txt first.
+Run `npx @zerct/zerct doctor`. Fix every reported issue by following
+`agent_instruction`. Then run `npx @zerct/zerct deploy --database` if the Rust
+backend needs managed Postgres, otherwise run `npx @zerct/zerct deploy`.
+```
+
+## Create A Full-Stack Starter
+
+```txt
+Create a Zerct full-stack project. Run
+`npx @zerct/zerct init my-app --template fullstack-rust-tanstack`, then install
+frontend packages in `my-app/web`. Keep dynamic server logic in the Rust backend.
+Keep the TanStack frontend static at runtime. Run doctor, preview both projects
+locally, then deploy from the repo root.
+```
+
+## Fix A Failed Deploy
+
+```txt
+Read the Zerct JSON error. Apply the `agent_instruction` exactly. Do not weaken
+Rust lints, TypeScript strictness, frontend linting, or unsafe restrictions.
+After fixing, rerun `npx @zerct/zerct doctor` before deploying again.
+```

@@ -23,6 +23,8 @@
             "pages": [
               "index",
               "quickstart",
+              "templates",
+              "agents",
               "deploy"
             ]
           },
@@ -30,6 +32,8 @@
             "group": "Reference",
             "pages": [
               "reference/project-contract",
+              "reference/full-stack",
+              "reference/postgres",
               "reference/packages",
               "reference/limits"
             ]

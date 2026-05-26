@@ -10,15 +10,26 @@ guessing.
 
 1. Login with GitHub or Google.
 2. Run `zerct doctor`.
-3. Run `zerct deploy`.
-4. Zerct queues the build, runs checks, and verifies the health route for Rust
+3. Run `zerct preview` for local verification.
+4. Run `zerct deploy`.
+5. Zerct queues the build, runs checks, and verifies the health route for Rust
    backends.
-5. Zerct exposes the app on a `zerct.app` deployment hostname.
+6. Zerct exposes the app on a `zerct.app` deployment hostname.
 
 For full-stack repos, run `zerct deploy` from the repo root. The CLI discovers
 nested `zerct.toml` files, deploys Rust backends first, then static frontends.
 Use `--database` to request managed Postgres for Rust backends in that
 workspace.
+
+## Local preview
+
+```sh
+npx @zerct/zerct preview
+```
+
+For Rust backends, preview builds the release binary and starts it with `PORT`.
+For static frontends, preview builds the frontend and serves the output
+directory.
 
 ## Runtime contract
 

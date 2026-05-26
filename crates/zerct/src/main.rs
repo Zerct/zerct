@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.6";
+const VERSION: &str = "0.1.7";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -74,12 +74,13 @@ fn run() -> Result<(), AgentError> {
             println!("{VERSION}");
             Ok(())
         }
-        "init" => init_project(&cli.project_path()),
+        "init" => init_project(&cli.project_path(), cli.template.as_deref()),
         "install" => {
-            init_project(&cli.project_path())?;
+            init_project(&cli.project_path(), cli.template.as_deref())?;
             doctor_project(&cli.project_path(), cli.json)
         }
         "doctor" => doctor_project(&cli.project_path(), cli.json),
+        "preview" => preview_project(&cli),
         "login" => login(&cli),
         "deploy" => deploy(&cli),
         "logs" => app_get(&cli, "logs"),
@@ -101,9 +102,10 @@ fn print_help() {
         "Zerct {VERSION}
 
 Usage:
-  zerct init [path]
-  zerct install [path]
+  zerct init [path] [--template rust-api|tanstack-static-frontend|fullstack-rust-tanstack]
+  zerct install [path] [--template rust-api|tanstack-static-frontend|fullstack-rust-tanstack]
   zerct doctor [path] [--json]
+  zerct preview [path] [--port <port>]
   zerct login [--token <token>] [--api <url>]
   zerct deploy [path] [--database] [--api <url>] [--json]
   zerct logs --app <app> [--api <url>] [--json]
@@ -132,6 +134,8 @@ struct Cli {
     api_url: String,
     app: Option<String>,
     token: Option<String>,
+    template: Option<String>,
+    port: Option<u16>,
     database: bool,
     json: bool,
 }
@@ -142,6 +146,8 @@ impl Cli {
         let mut api_url = DEFAULT_API_URL.to_owned();
         let mut app = None;
         let mut token = None;
+        let mut template = None;
+        let mut port = None;
         let mut database = false;
         let mut json = false;
         let mut index = 0usize;
@@ -158,6 +164,17 @@ impl Cli {
                 }
                 "--token" => {
                     token = Some(required_value(raw, index, "--token")?);
+                    index += 2;
+                }
+                "--template" => {
+                    template = Some(required_value(raw, index, "--template")?);
+                    index += 2;
+                }
+                "--port" => {
+                    port = Some(parse_u16(
+                        &required_value(raw, index, "--port")?,
+                        "invalid_port",
+                    )?);
                     index += 2;
                 }
                 "--database" => {
@@ -182,6 +199,8 @@ impl Cli {
             api_url: api_url.trim_end_matches('/').to_owned(),
             app,
             token,
+            template,
+            port,
             database,
             json,
         })
@@ -285,7 +304,19 @@ fn required_value(raw: &[String], index: usize, name: &'static str) -> Result<St
     Ok(value.to_owned())
 }
 
-fn init_project(project_dir: &Path) -> Result<(), AgentError> {
+fn init_project(project_dir: &Path, template: Option<&str>) -> Result<(), AgentError> {
+    if let Some(template) = template.filter(|value| !value.is_empty()) {
+        fs::create_dir_all(project_dir).map_err(|error| {
+            AgentError::new(
+                "write_failed",
+                format!("Could not create project directory: {error}"),
+                "Check the path and retry `zerct init --template`.",
+            )
+        })?;
+        create_template(project_dir, template)?;
+        return Ok(());
+    }
+
     if !project_dir.is_dir() {
         return Err(AgentError::new(
             "missing_project",
@@ -300,10 +331,12 @@ fn init_project(project_dir: &Path) -> Result<(), AgentError> {
         return Ok(());
     }
 
-    let name = service_name_from_dir(project_dir);
-    let source = format!(
-        "name = \"{name}\"\n\n[build]\ncommand = \"cargo build --release\"\n\n[run]\ncommand = \"./target/release/{name}\"\nport = 3000\nhealth = \"/healthz\"\n\n[resources]\nmemory = \"512mb\"\ncpu = \"0.25\"\nidle_timeout_minutes = 15\n"
-    );
+    let kind = infer_project_kind(project_dir);
+    let source = if kind == "static_frontend" {
+        frontend_config(project_dir)
+    } else {
+        rust_backend_config(project_dir)
+    };
     fs::write(&config_path, source).map_err(|error| {
         AgentError::new(
             "write_failed",
@@ -312,7 +345,149 @@ fn init_project(project_dir: &Path) -> Result<(), AgentError> {
         )
     })?;
     println!("created {}", config_path.display());
+    println!("detected {kind}");
     Ok(())
+}
+
+fn create_template(project_dir: &Path, template: &str) -> Result<(), AgentError> {
+    match template {
+        "rust-api" => write_rust_template(project_dir, &service_name_from_dir(project_dir))?,
+        "tanstack-static-frontend" => {
+            write_frontend_template(project_dir, &service_name_from_dir(project_dir), "/api")?;
+        }
+        "fullstack-rust-tanstack" => {
+            write_rust_template(&project_dir.join("api"), "api")?;
+            write_frontend_template(&project_dir.join("web"), "web", "http://localhost:3000")?;
+        }
+        _other => {
+            return Err(AgentError::new(
+                "invalid_template",
+                "Zerct template is unknown.",
+                "Use rust-api, tanstack-static-frontend, or fullstack-rust-tanstack.",
+            ));
+        }
+    }
+    println!("created {template} template");
+    Ok(())
+}
+
+fn write_rust_template(project_dir: &Path, name: &str) -> Result<(), AgentError> {
+    fs::create_dir_all(project_dir.join("src")).map_err(|error| {
+        AgentError::new(
+            "write_failed",
+            format!("Could not create Rust template directory: {error}"),
+            "Check the path and retry `zerct init --template rust-api`.",
+        )
+    })?;
+    write_new_file(
+        &project_dir.join("Cargo.toml"),
+        &format!(
+            "[package]\nname = \"{name}\"\nversion = \"0.1.0\"\nedition = \"2024\"\npublish = false\n\n[lints.rust]\nunsafe_code = \"forbid\"\nwarnings = \"deny\"\n"
+        ),
+    )?;
+    write_new_file(
+        &project_dir.join("Cargo.lock"),
+        &format!(
+            "# This file is automatically @generated by Cargo.\nversion = 4\n\n[[package]]\nname = \"{name}\"\nversion = \"0.1.0\"\n"
+        ),
+    )?;
+    write_new_file(&project_dir.join("src/main.rs"), rust_api_source())?;
+    write_new_file(
+        &project_dir.join("zerct.toml"),
+        &rust_backend_config(project_dir),
+    )
+}
+
+fn write_frontend_template(
+    project_dir: &Path,
+    name: &str,
+    api_base_url: &str,
+) -> Result<(), AgentError> {
+    fs::create_dir_all(project_dir.join("src")).map_err(|error| {
+        AgentError::new(
+            "write_failed",
+            format!("Could not create frontend template directory: {error}"),
+            "Check the path and retry `zerct init --template tanstack-static-frontend`.",
+        )
+    })?;
+    let package_json = format!(
+        r#"{{
+  "name": "{name}",
+  "private": true,
+  "type": "module",
+  "scripts": {{
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint src vite.config.ts --deny-warnings",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  }},
+  "dependencies": {{
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "@tanstack/react-router": "^1.140.0"
+  }},
+  "devDependencies": {{
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "^7.0.0-dev.20251126.1",
+    "@vitejs/plugin-react": "^5.1.1",
+    "oxlint": "^1.30.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
+  }}
+}}
+"#
+    );
+    write_new_file(&project_dir.join("package.json"), &package_json)?;
+    write_new_file(
+        &project_dir.join("index.html"),
+        "<div id=\"root\"></div><script type=\"module\" src=\"/src/main.tsx\"></script>\n",
+    )?;
+    write_new_file(
+        &project_dir.join("src/styles.css"),
+        "body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n",
+    )?;
+    write_new_file(
+        &project_dir.join("src/vite-env.d.ts"),
+        "/// <reference types=\"vite/client\" />\n",
+    )?;
+    write_new_file(
+        &project_dir.join("src/main.tsx"),
+        &frontend_source(api_base_url),
+    )?;
+    write_new_file(
+        &project_dir.join("tsconfig.json"),
+        "{\"compilerOptions\":{\"strict\":true,\"jsx\":\"react-jsx\",\"module\":\"ESNext\",\"moduleResolution\":\"Bundler\",\"target\":\"ES2022\",\"noEmit\":true,\"skipLibCheck\":true},\"include\":[\"src\",\"vite.config.ts\"]}\n",
+    )?;
+    write_new_file(
+        &project_dir.join("vite.config.ts"),
+        "import react from \"@vitejs/plugin-react\";\nimport { defineConfig } from \"vite\";\n\nexport default defineConfig({ plugins: [react()] });\n",
+    )?;
+    write_new_file(
+        &project_dir.join("zerct.toml"),
+        &frontend_config(project_dir),
+    )?;
+    println!(
+        "run package install in the frontend directory before doctor: bun install or npm install"
+    );
+    Ok(())
+}
+
+fn write_new_file(path: &Path, source: &str) -> Result<(), AgentError> {
+    if path.exists() {
+        return Err(AgentError::new(
+            "file_exists",
+            format!("Refusing to overwrite {}.", path.display()),
+            "Move the existing file or choose an empty directory, then retry.",
+        ));
+    }
+    fs::write(path, source).map_err(|error| {
+        AgentError::new(
+            "write_failed",
+            format!("Could not write {}: {error}", path.display()),
+            "Check directory permissions and retry.",
+        )
+    })
 }
 
 fn doctor_project(project_dir: &Path, json: bool) -> Result<(), AgentError> {
@@ -341,6 +516,119 @@ fn doctor_project(project_dir: &Path, json: bool) -> Result<(), AgentError> {
         ))
     } else {
         Ok(())
+    }
+}
+
+fn preview_project(cli: &Cli) -> Result<(), AgentError> {
+    let project_dir = cli.project_path();
+    if !project_dir.join("zerct.toml").exists() {
+        let projects = discover_deploy_projects(&project_dir)?;
+        if !projects.is_empty() {
+            return Err(AgentError::new(
+                "workspace_preview_unsupported",
+                "Preview one project at a time.",
+                "Run `zerct preview api` or `zerct preview web` from the workspace root.",
+            ));
+        }
+    }
+
+    let report = doctor_report(&project_dir);
+    if let Some(check) = report.checks.iter().find(|check| !check.ok) {
+        return Err(AgentError::new(
+            "doctor_failed",
+            "Zerct doctor failed.",
+            check.agent_instruction.clone(),
+        ));
+    }
+
+    let config = parse_config(&project_dir.join("zerct.toml"))?;
+    run_shell(
+        &config.build_command,
+        &project_dir,
+        "Build failed before preview.",
+    )?;
+    if config.kind == "static_frontend" {
+        let port = cli.port.unwrap_or(4173);
+        let output = config.build_output_dir.unwrap_or_else(|| "dist".to_owned());
+        println!("preview http://127.0.0.1:{port}");
+        let status = Command::new("python3")
+            .args([
+                "-m",
+                "http.server",
+                &port.to_string(),
+                "--bind",
+                "127.0.0.1",
+                "--directory",
+                &output,
+            ])
+            .current_dir(&project_dir)
+            .status()
+            .map_err(|error| {
+                AgentError::new(
+                    "preview_failed",
+                    format!("Could not start static preview: {error}"),
+                    "Install Python 3 or run the frontend preview script directly.",
+                )
+            })?;
+        return status_success(
+            status,
+            "preview_failed",
+            "Static preview exited with an error.",
+        );
+    }
+
+    let port = cli.port.unwrap_or(config.port);
+    println!("preview http://127.0.0.1:{port}");
+    let status = Command::new("sh")
+        .arg("-c")
+        .arg(&config.run_command)
+        .current_dir(project_dir)
+        .env("PORT", port.to_string())
+        .status()
+        .map_err(|error| {
+            AgentError::new(
+                "preview_failed",
+                format!("Could not start runtime preview: {error}"),
+                "Fix [run].command in zerct.toml and retry `zerct preview`.",
+            )
+        })?;
+    status_success(
+        status,
+        "preview_failed",
+        "Runtime preview exited with an error.",
+    )
+}
+
+fn run_shell(command: &str, project_dir: &Path, message: &'static str) -> Result<(), AgentError> {
+    println!("{command}");
+    let status = Command::new("sh")
+        .arg("-c")
+        .arg(command)
+        .current_dir(project_dir)
+        .status()
+        .map_err(|error| {
+            AgentError::new(
+                "command_failed",
+                format!("{message}: {error}"),
+                "Fix the command output above, then retry.",
+            )
+        })?;
+    status_success(status, "command_failed", message)
+}
+
+fn status_success(
+    status: std::process::ExitStatus,
+    code: &'static str,
+    message: &'static str,
+) -> Result<(), AgentError> {
+    if status.success() {
+        Ok(())
+    } else {
+        Err(AgentError::new(
+            code,
+            message,
+            "Fix the command output above, then retry.",
+        ))
     }
 }
 
@@ -1967,11 +2255,15 @@ fn parse_u16(value: &str, code: &'static str) -> Result<u16, AgentError> {
 }
 
 fn service_name_from_dir(project_dir: &Path) -> String {
-    let raw = project_dir
+    let value = project_dir
         .file_name()
         .and_then(|name| name.to_str())
-        .unwrap_or("api")
-        .to_ascii_lowercase();
+        .unwrap_or("api");
+    service_name_from_value(value)
+}
+
+fn service_name_from_value(value: &str) -> String {
+    let raw = value.to_ascii_lowercase();
     let mut output = String::new();
     let mut previous_dash = false;
     for character in raw.chars() {
@@ -1989,6 +2281,159 @@ fn service_name_from_dir(project_dir: &Path) -> String {
     } else {
         trimmed
     }
+}
+
+fn service_name_from_cargo(project_dir: &Path) -> Option<String> {
+    let source = fs::read_to_string(project_dir.join("Cargo.toml")).ok()?;
+    source.lines().find_map(|line| {
+        let trimmed = line.trim();
+        let value = trimmed
+            .strip_prefix("name")
+            .and_then(|rest| rest.trim_start().strip_prefix('='))
+            .map(str::trim)?
+            .trim_matches('"');
+        Some(service_name_from_value(value))
+    })
+}
+
+fn service_name_from_package(project_dir: &Path) -> Option<String> {
+    let source = fs::read_to_string(project_dir.join("package.json")).ok()?;
+    let key = source.find("\"name\"")?;
+    let after_key = &source[key + "\"name\"".len()..];
+    let colon = after_key.find(':')?;
+    parse_json_string(after_key[colon + 1..].trim_start())
+        .map(|name| service_name_from_value(&name))
+}
+
+fn infer_project_kind(project_dir: &Path) -> &'static str {
+    if project_dir.join("Cargo.toml").exists() {
+        "rust_backend"
+    } else if project_dir.join("package.json").exists() {
+        "static_frontend"
+    } else {
+        "rust_backend"
+    }
+}
+
+fn rust_backend_config(project_dir: &Path) -> String {
+    let name =
+        service_name_from_cargo(project_dir).unwrap_or_else(|| service_name_from_dir(project_dir));
+    format!(
+        "name = \"{name}\"\n\n[build]\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\ncommand = \"cargo build --release\"\n\n[run]\ncommand = \"./target/release/{name}\"\nport = 3000\nhealth = \"/healthz\"\n\n[resources]\nmemory = \"512mb\"\ncpu = \"0.25\"\nidle_timeout_minutes = 15\n"
+    )
+}
+
+fn frontend_config(project_dir: &Path) -> String {
+    let name = service_name_from_package(project_dir)
+        .unwrap_or_else(|| service_name_from_dir(project_dir));
+    format!(
+        "name = \"{name}\"\nkind = \"static_frontend\"\n\n[build]\ncheck = \"{}\"\ncommand = \"{}\"\noutput = \"dist\"\n",
+        frontend_check_command(project_dir),
+        frontend_build_command(project_dir)
+    )
+}
+
+fn rust_api_source() -> &'static str {
+    r##"use std::{
+    io::{Read, Write},
+    net::{TcpListener, TcpStream},
+};
+
+fn main() -> std::io::Result<()> {
+    let port = std::env::var("PORT").unwrap_or_else(|_error| "3000".to_owned());
+    let listener = TcpListener::bind(format!("0.0.0.0:{port}"))?;
+
+    for stream in listener.incoming() {
+        handle(stream?)?;
+    }
+
+    Ok(())
+}
+
+fn handle(mut stream: TcpStream) -> std::io::Result<()> {
+    let mut buffer = [0_u8; 2048];
+    let size = stream.read(&mut buffer)?;
+    let request = String::from_utf8_lossy(&buffer[..size]);
+    let mut parts = request
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .split_whitespace();
+    let method = parts.next().unwrap_or_default();
+    let path = parts.next().unwrap_or("/");
+    let origin = request
+        .lines()
+        .find_map(|line| line.strip_prefix("Origin: "))
+        .unwrap_or("*");
+    let cors_origin = allowed_origin(origin);
+
+    if method == "OPTIONS" {
+        return write_response(&mut stream, "204 No Content", "", &cors_origin);
+    }
+
+    let body = if path == "/healthz" {
+        r#"{"ok":true}"#
+    } else {
+        r#"{"message":"hello from zerct","backend":"rust"}"#
+    };
+    write_response(&mut stream, "200 OK", body, &cors_origin)
+}
+
+fn allowed_origin(request_origin: &str) -> String {
+    let configured = std::env::var("FRONTEND_ORIGIN").unwrap_or_else(|_error| request_origin.to_owned());
+    if configured == "*" || configured == request_origin {
+        configured
+    } else {
+        "null".to_owned()
+    }
+}
+
+fn write_response(
+    stream: &mut TcpStream,
+    status: &str,
+    body: &str,
+    origin: &str,
+) -> std::io::Result<()> {
+    write!(
+        stream,
+        "HTTP/1.1 {status}\r\ncontent-type: application/json\r\ncontent-length: {}\r\naccess-control-allow-origin: {origin}\r\naccess-control-allow-methods: GET, OPTIONS\r\naccess-control-allow-headers: content-type, authorization\r\nconnection: close\r\n\r\n{body}",
+        body.len()
+    )
+}
+"##
+}
+
+fn frontend_source(api_base_url: &str) -> String {
+    r"import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
+import { createRoot } from 'react-dom/client'
+import './styles.css'
+
+const apiBaseUrl = import.meta.env.VITE_API_URL ?? '__API_BASE_URL__'
+
+function App() {
+  return (
+    <main>
+      <section>
+        <h1>Zerct TanStack Frontend</h1>
+        <p>Static runtime, dynamic Rust backend calls.</p>
+        <code>{apiBaseUrl}</code>
+      </section>
+    </main>
+  )
+}
+
+const rootRoute = createRootRoute({ component: App })
+const router = createRouter({ routeTree: rootRoute })
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+createRoot(document.getElementById('root')!).render(<RouterProvider router={router} />)
+"
+    .replace("__API_BASE_URL__", api_base_url)
 }
 
 fn git_commit_sha(project_dir: &Path) -> Option<String> {

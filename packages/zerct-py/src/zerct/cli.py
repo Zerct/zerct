@@ -37,6 +37,73 @@ DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
 DEFAULT_RUST_CHECK_COMMAND = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
 DEFAULT_NPM_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 DEFAULT_BUN_FRONTEND_CHECK_COMMAND = "bun ci && bun run typecheck && bun run lint"
+RUST_TEMPLATE_SOURCE = """use std::{
+    io::{Read, Write},
+    net::{TcpListener, TcpStream},
+};
+
+fn main() -> std::io::Result<()> {
+    let port = std::env::var("PORT").unwrap_or_else(|_error| "3000".to_owned());
+    let listener = TcpListener::bind(format!("0.0.0.0:{port}"))?;
+
+    for stream in listener.incoming() {
+        handle(stream?)?;
+    }
+
+    Ok(())
+}
+
+fn handle(mut stream: TcpStream) -> std::io::Result<()> {
+    let mut buffer = [0_u8; 2048];
+    let size = stream.read(&mut buffer)?;
+    let request = String::from_utf8_lossy(&buffer[..size]);
+    let mut parts = request
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .split_whitespace();
+    let method = parts.next().unwrap_or_default();
+    let path = parts.next().unwrap_or("/");
+    let origin = request
+        .lines()
+        .find_map(|line| line.strip_prefix("Origin: "))
+        .unwrap_or("*");
+    let cors_origin = allowed_origin(origin);
+
+    if method == "OPTIONS" {
+        return write_response(&mut stream, "204 No Content", "", &cors_origin);
+    }
+
+    let body = if path == "/healthz" {
+        r#"{"ok":true}"#
+    } else {
+        r#"{"message":"hello from zerct","backend":"rust"}"#
+    };
+    write_response(&mut stream, "200 OK", body, &cors_origin)
+}
+
+fn allowed_origin(request_origin: &str) -> String {
+    let configured = std::env::var("FRONTEND_ORIGIN").unwrap_or_else(|_error| request_origin.to_owned());
+    if configured == "*" || configured == request_origin {
+        configured
+    } else {
+        "null".to_owned()
+    }
+}
+
+fn write_response(
+    stream: &mut TcpStream,
+    status: &str,
+    body: &str,
+    origin: &str,
+) -> std::io::Result<()> {
+    write!(
+        stream,
+        "HTTP/1.1 {status}\\r\\ncontent-type: application/json\\r\\ncontent-length: {}\\r\\naccess-control-allow-origin: {origin}\\r\\naccess-control-allow-methods: GET, OPTIONS\\r\\naccess-control-allow-headers: content-type, authorization\\r\\nconnection: close\\r\\n\\r\\n{body}",
+        body.len()
+    )
+}
+"""
 EXCLUDED_PARTS = {
     ".git",
     "target",
@@ -117,12 +184,17 @@ def build_parser() -> argparse.ArgumentParser:
     subcommands = parser.add_subparsers(dest="command", required=True)
     init = subcommands.add_parser("init")
     init.add_argument("path", nargs="?", default=".")
+    init.add_argument("--template", choices=["rust-api", "tanstack-static-frontend", "fullstack-rust-tanstack"], default="")
 
     install = subcommands.add_parser("install")
     install.add_argument("path", nargs="?", default=".")
 
     doctor = subcommands.add_parser("doctor")
     doctor.add_argument("path", nargs="?", default=".")
+
+    preview = subcommands.add_parser("preview")
+    preview.add_argument("path", nargs="?", default=".")
+    preview.add_argument("--port", type=positive_seconds, default=0)
 
     login = subcommands.add_parser("login")
     login.add_argument("--token", default="", help="Zerct session token")
@@ -137,29 +209,42 @@ def build_parser() -> argparse.ArgumentParser:
     logs.add_argument("--app", default="")
     logs.add_argument("--build", default="")
 
+    shared_json_commands = [init, install, doctor, preview, login, deploy, logs]
     for command in ("status", "inspect", "db"):
         item = subcommands.add_parser(command)
         item.add_argument("--app", required=True)
+        shared_json_commands.append(item)
 
     env = subcommands.add_parser("env")
     env.add_argument("action", choices=["set"])
     env.add_argument("assignment")
     env.add_argument("--app", required=True)
+    shared_json_commands.append(env)
 
-    subcommands.add_parser("billing")
+    billing = subcommands.add_parser("billing")
+    shared_json_commands.append(billing)
+    for command in shared_json_commands:
+        add_command_common_options(command)
     return parser
+
+
+def add_command_common_options(command: argparse.ArgumentParser) -> None:
+    command.add_argument("--json", action="store_true", default=argparse.SUPPRESS)
+    command.add_argument("--api", default=argparse.SUPPRESS)
 
 
 def run(args: argparse.Namespace) -> None:
     args.api = args.api.rstrip("/")
     match args.command:
         case "init":
-            init_project(pathlib.Path(args.path).resolve())
+            init_project(pathlib.Path(args.path).resolve(), args.template)
         case "install":
-            init_project(pathlib.Path(args.path).resolve())
+            init_project(pathlib.Path(args.path).resolve(), "")
             doctor_project(pathlib.Path(args.path).resolve(), args.json)
         case "doctor":
             doctor_project(pathlib.Path(args.path).resolve(), args.json)
+        case "preview":
+            preview_project(pathlib.Path(args.path).resolve(), args.port)
         case "login":
             login(args)
         case "deploy":
@@ -194,7 +279,12 @@ def positive_seconds(value: str) -> int:
     return parsed
 
 
-def init_project(project_dir: pathlib.Path) -> None:
+def init_project(project_dir: pathlib.Path, template: str = "") -> None:
+    if template:
+        project_dir.mkdir(parents=True, exist_ok=True)
+        create_template(project_dir, template)
+        return
+
     if not project_dir.is_dir():
         raise AgentError(
             "missing_project",
@@ -207,11 +297,98 @@ def init_project(project_dir: pathlib.Path) -> None:
         print("zerct.toml already exists")
         return
 
-    name = service_name_from_dir(project_dir)
-    config_path.write_text(
-        f"""name = "{name}"
+    kind = infer_project_kind(project_dir)
+    config_path.write_text(frontend_config(project_dir) if kind == "static_frontend" else rust_backend_config(project_dir), encoding="utf-8")
+    print(f"created {config_path}")
+    print(f"detected {kind}")
+
+
+def create_template(project_dir: pathlib.Path, template: str) -> None:
+    if template == "rust-api":
+        write_rust_template(project_dir, service_name_from_dir(project_dir))
+    elif template == "tanstack-static-frontend":
+        write_frontend_template(project_dir, service_name_from_dir(project_dir), "/api")
+    elif template == "fullstack-rust-tanstack":
+        write_rust_template(project_dir / "api", "api")
+        write_frontend_template(project_dir / "web", "web", "http://localhost:3000")
+    else:
+        raise AgentError("invalid_template", "Zerct template is unknown.", "Use rust-api, tanstack-static-frontend, or fullstack-rust-tanstack.")
+    print(f"created {template} template")
+
+
+def write_rust_template(project_dir: pathlib.Path, name: str) -> None:
+    (project_dir / "src").mkdir(parents=True, exist_ok=True)
+    write_new_file(project_dir / "Cargo.toml", f"""[package]
+name = "{name}"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lints.rust]
+unsafe_code = "forbid"
+warnings = "deny"
+""")
+    write_new_file(project_dir / "Cargo.lock", f"""# This file is automatically @generated by Cargo.
+version = 4
+
+[[package]]
+name = "{name}"
+version = "0.1.0"
+""")
+    write_new_file(project_dir / "src" / "main.rs", RUST_TEMPLATE_SOURCE)
+    write_new_file(project_dir / "zerct.toml", rust_backend_config(project_dir))
+
+
+def write_frontend_template(project_dir: pathlib.Path, name: str, api_base_url: str) -> None:
+    (project_dir / "src").mkdir(parents=True, exist_ok=True)
+    write_new_file(project_dir / "package.json", f"""{{
+  "name": "{name}",
+  "private": true,
+  "type": "module",
+  "scripts": {{
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint src vite.config.ts --deny-warnings",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  }},
+  "dependencies": {{
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "@tanstack/react-router": "^1.140.0"
+  }},
+  "devDependencies": {{
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "^7.0.0-dev.20251126.1",
+    "@vitejs/plugin-react": "^5.1.1",
+    "oxlint": "^1.30.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
+  }}
+}}
+""")
+    write_new_file(project_dir / "index.html", '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n')
+    write_new_file(project_dir / "src" / "styles.css", "body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n")
+    write_new_file(project_dir / "src" / "vite-env.d.ts", '/// <reference types="vite/client" />\n')
+    write_new_file(project_dir / "src" / "main.tsx", frontend_template_source(api_base_url))
+    write_new_file(project_dir / "tsconfig.json", '{"compilerOptions":{"strict":true,"jsx":"react-jsx","module":"ESNext","moduleResolution":"Bundler","target":"ES2022","noEmit":true,"skipLibCheck":true},"include":["src","vite.config.ts"]}\n')
+    write_new_file(project_dir / "vite.config.ts", 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n')
+    write_new_file(project_dir / "zerct.toml", frontend_config(project_dir))
+    print("run package install in the frontend directory before doctor: bun install or npm install")
+
+
+def write_new_file(path: pathlib.Path, source: str) -> None:
+    if path.exists():
+        raise AgentError("file_exists", f"Refusing to overwrite {path}.", "Move the existing file or choose an empty directory, then retry.")
+    path.write_text(source, encoding="utf-8")
+
+
+def rust_backend_config(project_dir: pathlib.Path) -> str:
+    name = service_name_from_cargo(project_dir) or service_name_from_dir(project_dir)
+    return f"""name = "{name}"
 
 [build]
+check = "{DEFAULT_RUST_CHECK_COMMAND}"
 command = "cargo build --release"
 
 [run]
@@ -223,10 +400,19 @@ health = "/healthz"
 memory = "512mb"
 cpu = "0.25"
 idle_timeout_minutes = 15
-""",
-        encoding="utf-8",
-    )
-    print(f"created {config_path}")
+"""
+
+
+def frontend_config(project_dir: pathlib.Path) -> str:
+    name = service_name_from_package(project_dir) or service_name_from_dir(project_dir)
+    return f"""name = "{name}"
+kind = "static_frontend"
+
+[build]
+check = "{frontend_check_command(project_dir)}"
+command = "{frontend_build_command(project_dir)}"
+output = "dist"
+"""
 
 
 def doctor_project(project_dir: pathlib.Path, json_output: bool) -> None:
@@ -257,6 +443,39 @@ def doctor_project(project_dir: pathlib.Path, json_output: bool) -> None:
             "Zerct doctor failed.",
             failure["agent_instruction"],
         )
+
+
+def preview_project(project_dir: pathlib.Path, port: int) -> None:
+    report = run_doctor_workspace(project_dir)
+    if "projects" in report:
+        raise AgentError("workspace_preview_unsupported", "Preview one project at a time.", "Run `zerct preview api` or `zerct preview web` from the workspace root.")
+    if not report["ok"]:
+        failure = next(check for check in report["checks"] if not check["ok"])
+        raise AgentError("doctor_failed", "Zerct doctor failed.", failure["agent_instruction"])
+
+    config = parse_config(project_dir / "zerct.toml")
+    validate_config(config)
+    run_shell(str(config["build"]["command"]), project_dir, "Build failed before preview.")
+    if config["kind"] == "static_frontend":
+        output = project_dir / str(config["build"]["output"])
+        local_port = port or 4173
+        print(f"preview http://127.0.0.1:{local_port}")
+        subprocess.run([sys.executable, "-m", "http.server", str(local_port), "--bind", "127.0.0.1", "--directory", str(output)], check=False)
+        return
+
+    local_port = port or int(config["run"]["port"])
+    print(f"preview http://127.0.0.1:{local_port}")
+    env = {**os.environ, "PORT": str(local_port)}
+    result = subprocess.run(str(config["run"]["command"]), cwd=project_dir, env=env, shell=True, check=False)
+    if result.returncode != 0:
+        raise AgentError("preview_failed", "Preview command exited with an error.", "Fix the local runtime command and retry `zerct preview`.")
+
+
+def run_shell(command: str, project_dir: pathlib.Path, failure_message: str) -> None:
+    print(command)
+    result = subprocess.run(command, cwd=project_dir, shell=True, check=False)
+    if result.returncode != 0:
+        raise AgentError("command_failed", failure_message, "Fix the command output above, then retry.")
 
 
 def run_doctor_workspace(project_dir: pathlib.Path) -> dict[str, Any]:
@@ -1279,8 +1498,67 @@ def git_commit_sha(project_dir: pathlib.Path) -> str | None:
 
 
 def service_name_from_dir(project_dir: pathlib.Path) -> str:
-    name = re.sub(r"[^a-z0-9-]+", "-", project_dir.name.lower()).strip("-")
+    name = service_name_from_value(project_dir.name)
     return name or "api"
+
+
+def service_name_from_value(value: str) -> str:
+    return re.sub(r"[^a-z0-9-]+", "-", value.lower()).strip("-")[:48]
+
+
+def service_name_from_cargo(project_dir: pathlib.Path) -> str:
+    try:
+        source = (project_dir / "Cargo.toml").read_text(encoding="utf-8")
+    except OSError:
+        return ""
+    match = re.search(r'^\s*name\s*=\s*"([^"]+)"', source, flags=re.MULTILINE)
+    return service_name_from_value(match.group(1)) if match else ""
+
+
+def service_name_from_package(project_dir: pathlib.Path) -> str:
+    manifest = read_package_json(project_dir)
+    name = manifest.get("name") if isinstance(manifest, dict) else ""
+    return service_name_from_value(name) if isinstance(name, str) else ""
+
+
+def infer_project_kind(project_dir: pathlib.Path) -> str:
+    if (project_dir / "Cargo.toml").exists():
+        return "rust_backend"
+    if (project_dir / "package.json").exists():
+        return "static_frontend"
+    return "rust_backend"
+
+
+def frontend_template_source(api_base_url: str) -> str:
+    return f"""import {{ createRootRoute, createRouter, RouterProvider }} from '@tanstack/react-router'
+import {{ createRoot }} from 'react-dom/client'
+import './styles.css'
+
+const apiBaseUrl = import.meta.env.VITE_API_URL ?? '{api_base_url}'
+
+function App() {{
+  return (
+    <main>
+      <section>
+        <h1>Zerct TanStack Frontend</h1>
+        <p>Static runtime, dynamic Rust backend calls.</p>
+        <code>{{apiBaseUrl}}</code>
+      </section>
+    </main>
+  )
+}}
+
+const rootRoute = createRootRoute({{ component: App }})
+const router = createRouter({{ routeTree: rootRoute }})
+
+declare module '@tanstack/react-router' {{
+  interface Register {{
+    router: typeof router
+  }}
+}}
+
+createRoot(document.getElementById('root')!).render(<RouterProvider router={{router}} />)
+"""
 
 
 def print_response(response: dict[str, Any], json_output: bool) -> None:

@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { createServer } from 'node:http'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.13'
+const VERSION = '0.1.14'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -19,6 +20,17 @@ const DEFAULT_RUST_CHECK_COMMAND = 'cargo check --locked && cargo clippy --locke
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
 const PROJECT_KINDS = new Set(['rust_backend', 'static_frontend'])
+const PROJECT_TEMPLATES = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
+const FRONTEND_TEMPLATE_FILES = new Set([
+  'index.html',
+  'package.json',
+  'src/main.tsx',
+  'src/styles.css',
+  'src/vite-env.d.ts',
+  'tsconfig.json',
+  'vite.config.ts',
+  'zerct.toml'
+])
 const ARCHIVE_EXCLUDES = [
   '.git',
   'target',
@@ -62,9 +74,10 @@ const WORKSPACE_EXCLUDED_DIRS = new Set([
 const HELP = `Zerct ${VERSION}
 
 Usage:
-  zerct init [path]
+  zerct init [path] [--template rust-api|tanstack-static-frontend|fullstack-rust-tanstack]
   zerct install [path]
   zerct doctor [path] [--json]
+  zerct preview [path] [--port <port>]
   zerct login [--token <token>] [--api <url>]
   zerct deploy [path] [--database] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
   zerct capabilities [--api <url>] [--json]
@@ -112,13 +125,16 @@ async function main() {
 
   switch (cli.command) {
     case 'init':
-      initProject(projectPath(cli.args[0]))
+      initProject(projectPath(cli.args[0]), cli.template)
       break
     case 'install':
-      installProject(projectPath(cli.args[0]))
+      installProject(projectPath(cli.args[0]), cli.template)
       break
     case 'doctor':
       doctorProject(projectPath(cli.args[0]), cli.json)
+      break
+    case 'preview':
+      previewProject(projectPath(cli.args[0]), cli.port)
       break
     case 'login':
       await login(cli)
@@ -188,6 +204,8 @@ function parseArgs(argv) {
     limit: '',
     cursor: '',
     token: '',
+    template: '',
+    port: 0,
     waitTimeoutSeconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
     json: false,
     database: false,
@@ -235,6 +253,12 @@ function parseArgs(argv) {
     } else if (arg === '--token') {
       cli.token = requireValue(argv, index, '--token')
       index += 1
+    } else if (arg === '--template') {
+      cli.template = requireValue(argv, index, '--template')
+      index += 1
+    } else if (arg === '--port') {
+      cli.port = parsePositiveInteger(requireValue(argv, index, '--port'), '--port')
+      index += 1
     } else {
       positional.push(arg)
     }
@@ -269,18 +293,128 @@ function projectPath(value) {
   return path.resolve(value || process.cwd())
 }
 
-function initProject(projectDir) {
+function initProject(projectDir, template = '') {
+  if (template) {
+    mkdirSync(projectDir, { recursive: true, mode: 0o755 })
+    createTemplate(projectDir, template)
+    return
+  }
   ensureDirectory(projectDir)
+
   const configPath = path.join(projectDir, 'zerct.toml')
   if (existsSync(configPath)) {
     console.log('zerct.toml already exists')
     return
   }
 
-  const name = serviceNameFromDir(projectDir)
-  const source = `name = "${name}"
+  const kind = inferProjectKind(projectDir)
+  const source = kind === 'static_frontend'
+    ? frontendConfig(projectDir)
+    : rustBackendConfig(projectDir)
+
+  writeFileSync(configPath, source, { mode: 0o644 })
+  console.log(`created ${path.relative(process.cwd(), configPath)}`)
+  console.log(`detected ${kind}`)
+}
+
+function createTemplate(projectDir, template) {
+  if (!PROJECT_TEMPLATES.has(template)) {
+    throw agentError('invalid_template', 'Zerct template is unknown.', `Use one of: ${[...PROJECT_TEMPLATES].join(', ')}.`, false)
+  }
+  if (template === 'rust-api') {
+    writeRustApiTemplate(projectDir, serviceNameFromDir(projectDir))
+  } else if (template === 'tanstack-static-frontend') {
+    writeFrontendTemplate(projectDir, serviceNameFromDir(projectDir), '/api')
+  } else {
+    const apiDir = path.join(projectDir, 'api')
+    const webDir = path.join(projectDir, 'web')
+    writeRustApiTemplate(apiDir, 'api')
+    writeFrontendTemplate(webDir, 'web', 'http://localhost:3000')
+  }
+  console.log(`created ${template} template`)
+}
+
+function writeRustApiTemplate(projectDir, name) {
+  mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
+  writeNewFile(path.join(projectDir, 'Cargo.toml'), `[package]
+name = "${name}"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lints.rust]
+unsafe_code = "forbid"
+warnings = "deny"
+`)
+  writeNewFile(path.join(projectDir, 'Cargo.lock'), `# This file is automatically @generated by Cargo.
+version = 4
+
+[[package]]
+name = "${name}"
+version = "0.1.0"
+`)
+  writeNewFile(path.join(projectDir, 'src', 'main.rs'), rustApiSource())
+  writeNewFile(path.join(projectDir, 'zerct.toml'), rustBackendConfig(projectDir))
+}
+
+function writeFrontendTemplate(projectDir, name, apiBaseUrl) {
+  mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
+  writeNewFile(path.join(projectDir, 'package.json'), `{
+  "name": "${name}",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint src vite.config.ts --deny-warnings",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "@tanstack/react-router": "^1.140.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@typescript/native-preview": "^7.0.0-dev.20251126.1",
+    "@vitejs/plugin-react": "^5.1.1",
+    "oxlint": "^1.30.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
+  }
+}
+`)
+  writeFrontendTemplateFile(projectDir, 'index.html', '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n')
+  writeFrontendTemplateFile(projectDir, 'src/styles.css', 'body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n')
+  writeFrontendTemplateFile(projectDir, 'src/vite-env.d.ts', '/// <reference types="vite/client" />\n')
+  writeFrontendTemplateFile(projectDir, 'src/main.tsx', frontendSource(apiBaseUrl))
+  writeFrontendTemplateFile(projectDir, 'tsconfig.json', '{"compilerOptions":{"strict":true,"jsx":"react-jsx","module":"ESNext","moduleResolution":"Bundler","target":"ES2022","noEmit":true,"skipLibCheck":true},"include":["src","vite.config.ts"]}\n')
+  writeFrontendTemplateFile(projectDir, 'vite.config.ts', 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n')
+  writeFrontendTemplateFile(projectDir, 'zerct.toml', frontendConfig(projectDir))
+  console.log('run package install in the frontend directory before doctor: bun install or npm install')
+}
+
+function writeFrontendTemplateFile(projectDir, relative, source) {
+  if (!FRONTEND_TEMPLATE_FILES.has(relative)) {
+    throw new Error(`unexpected template file: ${relative}`)
+  }
+  writeNewFile(path.join(projectDir, relative), source)
+}
+
+function writeNewFile(file, source) {
+  if (existsSync(file)) {
+    throw agentError('file_exists', `Refusing to overwrite ${path.relative(process.cwd(), file)}.`, 'Move the existing file or choose an empty directory, then retry.', false)
+  }
+  writeFileSync(file, source, { mode: 0o644 })
+}
+
+function rustBackendConfig(projectDir) {
+  const name = serviceNameFromCargo(projectDir) || serviceNameFromDir(projectDir)
+  return `name = "${name}"
 
 [build]
+check = "${DEFAULT_RUST_CHECK_COMMAND}"
 command = "cargo build --release"
 
 [run]
@@ -293,13 +427,22 @@ memory = "512mb"
 cpu = "0.25"
 idle_timeout_minutes = 15
 `
-
-  writeFileSync(configPath, source, { mode: 0o644 })
-  console.log(`created ${path.relative(process.cwd(), configPath)}`)
 }
 
-function installProject(projectDir) {
-  initProject(projectDir)
+function frontendConfig(projectDir) {
+  const name = serviceNameFromPackage(projectDir) || serviceNameFromDir(projectDir)
+  return `name = "${name}"
+kind = "static_frontend"
+
+[build]
+check = "${frontendCheckCommand(projectDir)}"
+command = "${frontendBuildCommand(projectDir)}"
+output = "dist"
+`
+}
+
+function installProject(projectDir, template = '') {
+  initProject(projectDir, template)
   doctorProject(projectDir, false)
 }
 
@@ -333,6 +476,106 @@ function doctorProject(projectDir, json) {
     const firstFailure = checks.find((check) => !check.ok)
     throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry `npx @zerct/zerct doctor`.', json)
   }
+}
+
+function previewProject(projectDir, port) {
+  const report = runDoctorWorkspace(projectDir)
+  if (Array.isArray(report.projects)) {
+    throw agentError('workspace_preview_unsupported', 'Preview one project at a time.', 'Run `npx @zerct/zerct preview api` or `npx @zerct/zerct preview web` from the workspace root.', false)
+  }
+  if (!report.ok) {
+    const firstFailure = report.checks.find((check) => !check.ok)
+    throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry `npx @zerct/zerct preview`.', false)
+  }
+
+  const config = parseZerctToml(readFileSync(path.join(projectDir, 'zerct.toml'), 'utf8'), projectDir)
+  validateConfig(config)
+  runShell(config.build.command, projectDir, 'Build failed before preview.')
+  if (config.kind === 'static_frontend') {
+    serveStatic(path.join(projectDir, config.build.output), port || 4173)
+    return
+  }
+
+  const runtimePort = port || config.run.port
+  console.log(`preview http://127.0.0.1:${runtimePort}`)
+  const result = spawnSync(config.run.command, {
+    cwd: projectDir,
+    env: { ...process.env, PORT: String(runtimePort) },
+    shell: true,
+    stdio: 'inherit'
+  })
+  if (result.error) {
+    throw agentError('preview_failed', 'Preview command failed.', result.error.message, false)
+  }
+  if (result.status !== 0) {
+    throw agentError('preview_failed', 'Preview command exited with an error.', 'Fix the local runtime command and retry `npx @zerct/zerct preview`.', false)
+  }
+}
+
+function runShell(command, projectDir, failureMessage) {
+  console.log(command)
+  const result = spawnSync(command, {
+    cwd: projectDir,
+    env: process.env,
+    shell: true,
+    stdio: 'inherit'
+  })
+  if (result.error) {
+    throw agentError('command_failed', failureMessage, result.error.message, false)
+  }
+  if (result.status !== 0) {
+    throw agentError('command_failed', failureMessage, 'Fix the command output above, then retry.', false)
+  }
+}
+
+function serveStatic(root, port) {
+  ensureDirectory(root)
+  const server = createServer((request, response) => {
+    const pathname = decodeURIComponent(new URL(request.url || '/', `http://127.0.0.1:${port}`).pathname)
+    const target = staticTarget(root, pathname)
+    if (!target) {
+      response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' })
+      response.end('not found')
+      return
+    }
+    response.writeHead(200, { 'content-type': contentType(target) })
+    response.end(readFileSync(target))
+  })
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`preview http://127.0.0.1:${port}`)
+  })
+}
+
+function staticTarget(root, pathname) {
+  const safePath = pathname.replace(/^\/+/u, '')
+  const candidate = path.resolve(root, safePath || 'index.html')
+  if (!candidate.startsWith(path.resolve(root) + path.sep) && candidate !== path.resolve(root)) {
+    return ''
+  }
+  if (existsSync(candidate) && statSync(candidate).isFile()) {
+    return candidate
+  }
+  const index = path.join(root, 'index.html')
+  return existsSync(index) ? index : ''
+}
+
+function contentType(file) {
+  if (file.endsWith('.html')) {
+    return 'text/html; charset=utf-8'
+  }
+  if (file.endsWith('.css')) {
+    return 'text/css; charset=utf-8'
+  }
+  if (file.endsWith('.js') || file.endsWith('.mjs')) {
+    return 'text/javascript; charset=utf-8'
+  }
+  if (file.endsWith('.json')) {
+    return 'application/json; charset=utf-8'
+  }
+  if (file.endsWith('.svg')) {
+    return 'image/svg+xml'
+  }
+  return 'application/octet-stream'
 }
 
 function runDoctorWorkspace(projectDir) {
@@ -1502,8 +1745,138 @@ function ensureDirectory(dir) {
 }
 
 function serviceNameFromDir(projectDir) {
-  const name = path.basename(projectDir).toLowerCase().replace(/[^a-z0-9-]+/gu, '-').replace(/^-+|-+$/gu, '')
+  const name = serviceNameFromValue(path.basename(projectDir))
   return name || 'api'
+}
+
+function serviceNameFromCargo(projectDir) {
+  try {
+    const source = readFileSync(path.join(projectDir, 'Cargo.toml'), 'utf8')
+    return serviceNameFromValue(source.match(/^\s*name\s*=\s*"([^"]+)"/mu)?.[1] || '')
+  } catch (_error) {
+    return ''
+  }
+}
+
+function serviceNameFromPackage(projectDir) {
+  const manifest = readPackageJson(projectDir)
+  return serviceNameFromValue(typeof manifest?.name === 'string' ? manifest.name : '')
+}
+
+function serviceNameFromValue(value) {
+  return value.toLowerCase().replace(/[^a-z0-9-]+/gu, '-').replace(/^-+|-+$/gu, '').slice(0, 48)
+}
+
+function inferProjectKind(projectDir) {
+  if (existsSync(path.join(projectDir, 'Cargo.toml'))) {
+    return 'rust_backend'
+  }
+  if (existsSync(path.join(projectDir, 'package.json'))) {
+    return 'static_frontend'
+  }
+  return 'rust_backend'
+}
+
+function rustApiSource() {
+  return `use std::{
+    io::{Read, Write},
+    net::{TcpListener, TcpStream},
+};
+
+fn main() -> std::io::Result<()> {
+    let port = std::env::var("PORT").unwrap_or_else(|_error| "3000".to_owned());
+    let listener = TcpListener::bind(format!("0.0.0.0:{port}"))?;
+
+    for stream in listener.incoming() {
+        handle(stream?)?;
+    }
+
+    Ok(())
+}
+
+fn handle(mut stream: TcpStream) -> std::io::Result<()> {
+    let mut buffer = [0_u8; 2048];
+    let size = stream.read(&mut buffer)?;
+    let request = String::from_utf8_lossy(&buffer[..size]);
+    let mut parts = request
+        .lines()
+        .next()
+        .unwrap_or_default()
+        .split_whitespace();
+    let method = parts.next().unwrap_or_default();
+    let path = parts.next().unwrap_or("/");
+    let origin = request
+        .lines()
+        .find_map(|line| line.strip_prefix("Origin: "))
+        .unwrap_or("*");
+    let cors_origin = allowed_origin(origin);
+
+    if method == "OPTIONS" {
+        return write_response(&mut stream, "204 No Content", "", &cors_origin);
+    }
+
+    let body = if path == "/healthz" {
+        r#"{"ok":true}"#
+    } else {
+        r#"{"message":"hello from zerct","backend":"rust"}"#
+    };
+    write_response(&mut stream, "200 OK", body, &cors_origin)
+}
+
+fn allowed_origin(request_origin: &str) -> String {
+    let configured = std::env::var("FRONTEND_ORIGIN").unwrap_or_else(|_error| request_origin.to_owned());
+    if configured == "*" || configured == request_origin {
+        configured
+    } else {
+        "null".to_owned()
+    }
+}
+
+fn write_response(
+    stream: &mut TcpStream,
+    status: &str,
+    body: &str,
+    origin: &str,
+) -> std::io::Result<()> {
+    write!(
+        stream,
+        "HTTP/1.1 {status}\\r\\ncontent-type: application/json\\r\\ncontent-length: {}\\r\\naccess-control-allow-origin: {origin}\\r\\naccess-control-allow-methods: GET, OPTIONS\\r\\naccess-control-allow-headers: content-type, authorization\\r\\nconnection: close\\r\\n\\r\\n{body}",
+        body.len()
+    )
+}
+`
+}
+
+function frontendSource(apiBaseUrl) {
+  return `import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
+import { createRoot } from 'react-dom/client'
+import './styles.css'
+
+const apiBaseUrl = import.meta.env.VITE_API_URL ?? '${apiBaseUrl}'
+
+function App() {
+  return (
+    <main>
+      <section>
+        <h1>Zerct TanStack Frontend</h1>
+        <p>Static runtime, dynamic Rust backend calls.</p>
+        <code>{apiBaseUrl}</code>
+      </section>
+    </main>
+  )
+}
+
+const rootRoute = createRootRoute({ component: App })
+const router = createRouter({ routeTree: rootRoute })
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+createRoot(document.getElementById('root')!).render(<RouterProvider router={router} />)
+`
 }
 
 function printJsonOrPretty(cli, value) {

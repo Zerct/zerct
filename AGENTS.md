@@ -73,6 +73,8 @@ tighten these rules.
    `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
    Running deploy from a repo root with nested `zerct.toml` files must deploy
    the workspace in one command, with Rust backends before static frontends.
+   Template creation, project-kind detection, and local preview behavior must
+   also stay aligned across npm, PyPI, Cargo, skills, and docs.
 10. Prefer native frontend tooling. New static frontend docs, examples, skills,
     and agent guidance should use Bun with committed `bun.lock`, Go-based
     `tsgo` for TypeScript checking, and Rust-based linters such as `oxlint`,
@@ -88,6 +90,9 @@ tighten these rules.
     pooling. For the `postgres` crate, prefer typed query APIs such as
     `query_typed_one` and `execute_typed` over prepared-statement paths. Free
     examples should keep app-side pools at 4 connections or fewer.
+13. Starter templates must create missing target directories, refuse to
+    overwrite existing files, include a safe CORS path through
+    `FRONTEND_ORIGIN`, and keep dynamic work in the Rust backend.
 
 ## Docs And OpenAPI
 

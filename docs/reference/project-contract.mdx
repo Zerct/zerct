@@ -7,6 +7,8 @@ Zerct deploys projects that are explicit and reproducible.
 
 ## Required files
 
+Rust backend:
+
 ```txt
 Cargo.toml
 Cargo.lock
@@ -15,16 +17,48 @@ zerct.toml
 
 `Cargo.lock` is required so builds are deterministic.
 
-## Example zerct.toml
+Static frontend:
+
+```txt
+package.json
+bun.lock or package-lock.json
+src/main.tsx
+zerct.toml
+```
+
+## Rust zerct.toml
 
 ```toml
 name = "hello-rust"
-health_path = "/health"
+
+[build]
+check = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+command = "cargo build --release"
+
+[run]
+command = "./target/release/hello-rust"
+port = 3000
+health = "/healthz"
 ```
 
-## Required runtime behavior
+## Frontend zerct.toml
+
+```toml
+name = "dashboard"
+kind = "static_frontend"
+
+[build]
+check = "bun ci && bun run typecheck && bun run lint"
+command = "bun run build"
+output = "dist"
+```
+
+## Rust runtime behavior
 
 - Bind to `0.0.0.0:$PORT`
 - Return success from the configured health path
 - Keep secrets in server-side environment variables
 - Avoid build steps that require interactive input
+
+Static frontends do not run server code on Zerct. They call Rust backends for
+dynamic behavior.

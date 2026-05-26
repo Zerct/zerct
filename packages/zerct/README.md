@@ -3,6 +3,8 @@
 Deploy Rust backends and static frontends to Zerct.
 
 ```sh
+npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+cd my-app/web && bun install && cd ..
 npx @zerct/zerct deploy
 ```
 
@@ -19,6 +21,12 @@ listen on `0.0.0.0:$PORT` and expose the configured health endpoint.
 
 From a full-stack repo root, the same deploy command discovers nested
 `zerct.toml` files and deploys the whole workspace in one command.
+
+Preview before deploying:
+
+```sh
+npx @zerct/zerct preview
+```
 
 Managed Postgres apps receive `DATABASE_URL`, `ZERCT_DATABASE_URL`, and
 `ZERCT_DATABASE_CONNECTION_LIMIT`. Use that limit as the max size for your

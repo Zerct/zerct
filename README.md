@@ -13,7 +13,15 @@ Use npm for the lowest-friction agent path:
 ```sh
 npx @zerct/zerct init
 npx @zerct/zerct doctor
+npx @zerct/zerct preview
 npx @zerct/zerct deploy
+```
+
+Create a full-stack starter:
+
+```sh
+npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+cd my-app/web && bun install && cd ..
 ```
 
 From a full-stack repo root, `npx @zerct/zerct deploy --database` discovers
@@ -74,6 +82,14 @@ name, `@zerct/zerct` is the public npm package.
 - PyPI: `zerct`
 - crates.io: `zerct`
 - Homebrew: `Zerct/tap/zerct`
+
+Agent prompt:
+
+```txt
+Use Zerct to deploy this project. Run `npx @zerct/zerct doctor`, follow every
+`agent_instruction`, preview each project locally with `npx @zerct/zerct preview`,
+then deploy the repo root with `npx @zerct/zerct deploy`.
+```
 
 ## Repository
 
