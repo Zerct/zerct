@@ -79,6 +79,7 @@ class AgentError(Exception):
 class DeployProject:
     directory: pathlib.Path
     relative: str
+    name: str
     kind: str
 
 
@@ -652,10 +653,12 @@ def deploy_project_info(project_dir: pathlib.Path, root_dir: pathlib.Path) -> De
     relative = project_dir.relative_to(root_dir).as_posix() if project_dir != root_dir else "."
     try:
         config = parse_config(project_dir / "zerct.toml")
+        name = str(config.get("name", ""))
         kind = str(config.get("kind", "unknown"))
     except AgentError:
+        name = ""
         kind = "unknown"
-    return DeployProject(project_dir, relative, kind)
+    return DeployProject(project_dir, relative, name, kind)
 
 
 def kind_order(kind: str) -> int:
@@ -694,10 +697,12 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
                 "Deploy a Rust backend with managed Postgres and call it from the frontend.",
             )
         token = read_or_login_token(project.directory, args)
+        preflight_deploy_limits([project], args, token, args.database)
         print_deploy_response(deploy_project(project.directory, args, token, args.database), args)
         return
 
     token = read_or_login_token(project_dir, args)
+    preflight_deploy_limits(projects, args, token, args.database)
     results: list[tuple[DeployProject, bool, dict[str, Any]]] = []
     if not args.json:
         print(f"deploying {len(projects)} projects")
@@ -712,6 +717,53 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
             print(f"{project.relative} url {response['app']['url']}")
 
     print_workspace_deploy_response(project_dir, results, args)
+
+
+def preflight_deploy_limits(
+    projects: list[DeployProject],
+    args: argparse.Namespace,
+    token: str,
+    database_requested: bool,
+) -> None:
+    usage_response = api_request(args, "GET", "/v1/usage", token, None)
+    apps_response = api_request(args, "GET", "/v1/apps", token, None)
+    usage = usage_response.get("usage", {})
+    limits = usage_response.get("limits", {})
+    apps = apps_response.get("apps", [])
+    existing = {
+        str(app.get("name", "")): app
+        for app in apps
+        if isinstance(app, dict)
+    }
+    new_projects = 0
+    new_databases = 0
+
+    for project in projects:
+        if not project.name or project.kind == "unknown":
+            continue
+        app = existing.get(project.name)
+        if app is None:
+            new_projects += 1
+        if database_requested and project.kind == "rust_backend" and not (app or {}).get("databaseStorageMib"):
+            new_databases += 1
+
+    app_count = int(usage.get("appCount", 0))
+    project_limit = int(limits.get("projects", 0))
+    if new_projects > 0 and app_count + new_projects > project_limit:
+        raise AgentError(
+            "payment_required",
+            f"Project limit reached: {app_count}/{project_limit} projects are already used.",
+            "Redeploy an existing app by reusing its `name` in zerct.toml, or run `zerct billing` to open Stripe Checkout before creating another project.",
+        )
+
+    database_count = int(usage.get("databaseCount", 0))
+    database_limit = int(limits.get("managedDatabases", 0))
+    if new_databases > 0 and database_count + new_databases > database_limit:
+        raise AgentError(
+            "payment_required",
+            f"Managed Postgres limit reached: {database_count}/{database_limit} databases are already used.",
+            "Redeploy an app that already has managed Postgres, deploy without `--database`, or run `zerct billing` to open Stripe Checkout.",
+        )
 
 
 def deploy_project(project_dir: pathlib.Path, args: argparse.Namespace, token: str, wants_database: bool) -> dict[str, Any]:
@@ -894,7 +946,7 @@ def api_request(
     token: str | None,
     body: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/json", "User-Agent": f"zerct-python/{__version__}"}
     data = None
     if token:
         headers["Authorization"] = f"Bearer {token}"

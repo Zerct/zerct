@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.9'
+const VERSION = '0.1.10'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
@@ -448,12 +448,14 @@ async function deploy(projectDir, cli) {
       throw agentError('invalid_database_target', 'Static frontends cannot attach managed Postgres directly.', 'Deploy a Rust backend with managed Postgres and call it from the frontend.', cli.json)
     }
     const token = await readOrLoginToken(project.dir, cli)
+    await preflightDeployLimits([project], cli, token, cli.database)
     const result = await deployProject(project.dir, cli, token, cli.database)
     printDeployResult(result, cli)
     return
   }
 
   const token = await readOrLoginToken(projectDir, cli)
+  await preflightDeployLimits(projects, cli, token, cli.database)
   const results = []
   if (!cli.json) {
     console.log(`deploying ${projects.length} projects`)
@@ -473,6 +475,50 @@ async function deploy(projectDir, cli) {
   }
 
   printWorkspaceDeployResults(projectDir, results, cli)
+}
+
+async function preflightDeployLimits(projects, cli, token, databaseRequested) {
+  const [usageResponse, appsResponse] = await Promise.all([
+    apiRequest(cli, 'GET', '/v1/usage', token, null),
+    apiRequest(cli, 'GET', '/v1/apps', token, null)
+  ])
+  const usage = usageResponse?.usage || {}
+  const limits = usageResponse?.limits || {}
+  const apps = Array.isArray(appsResponse?.apps) ? appsResponse.apps : []
+  const existingApps = new Map(apps.map((app) => [app.name, app]))
+  let newProjects = 0
+  let newDatabases = 0
+
+  for (const project of projects) {
+    if (!project.name || project.kind === 'unknown') {
+      continue
+    }
+    const existing = existingApps.get(project.name)
+    if (!existing) {
+      newProjects += 1
+    }
+    if (databaseRequested && project.kind === 'rust_backend' && !existing?.databaseStorageMib) {
+      newDatabases += 1
+    }
+  }
+
+  if (newProjects > 0 && Number(usage.appCount) + newProjects > Number(limits.projects)) {
+    throw agentError(
+      'payment_required',
+      `Project limit reached: ${usage.appCount}/${limits.projects} projects are already used.`,
+      'Redeploy an existing app by reusing its `name` in zerct.toml, or run `npx @zerct/zerct billing` to open Stripe Checkout before creating another project.',
+      cli.json
+    )
+  }
+
+  if (newDatabases > 0 && Number(usage.databaseCount) + newDatabases > Number(limits.managedDatabases)) {
+    throw agentError(
+      'payment_required',
+      `Managed Postgres limit reached: ${usage.databaseCount}/${limits.managedDatabases} databases are already used.`,
+      'Redeploy an app that already has managed Postgres, deploy without `--database`, or run `npx @zerct/zerct billing` to open Stripe Checkout.',
+      cli.json
+    )
+  }
 }
 
 async function deployProject(projectDir, cli, token, wantsDatabase) {
@@ -1289,9 +1335,9 @@ function deployProjectInfo(dir, rootDir) {
   const relative = path.relative(rootDir, dir).replace(/\\/gu, '/') || '.'
   try {
     const config = parseZerctToml(readFileSync(path.join(dir, 'zerct.toml'), 'utf8'), dir)
-    return { dir, relative, kind: config.kind }
+    return { dir, relative, name: config.name || '', kind: config.kind }
   } catch (_error) {
-    return { dir, relative, kind: 'unknown' }
+    return { dir, relative, name: '', kind: 'unknown' }
   }
 }
 
