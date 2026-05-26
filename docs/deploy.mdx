@@ -29,6 +29,15 @@ Your app must listen on:
 
 Do not hardcode the port. Zerct injects it at runtime.
 
+## Managed Postgres
+
+When `--database` is used, Zerct injects `DATABASE_URL` and
+`ZERCT_DATABASE_URL`. It also injects `ZERCT_DATABASE_CONNECTION_LIMIT`,
+`ZERCT_POSTGRES_CONNECTION_LIMIT`, and `ZERCT_POSTGRES_POOL_MODE`.
+
+Use the connection limit as the max size of your app's database pool. This keeps
+database work fast and predictable for busy apps while matching the plan limit.
+
 ## Agent-ready errors
 
 CLI and API errors should be machine-readable:

@@ -20,6 +20,10 @@ on `0.0.0.0:$PORT` and expose the configured health endpoint.
 From a full-stack repo root, the same deploy command discovers nested
 `zerct.toml` files and deploys the whole workspace in one command.
 
+Managed Postgres apps receive `DATABASE_URL`, `ZERCT_DATABASE_URL`, and
+`ZERCT_DATABASE_CONNECTION_LIMIT`. Use that limit as the max size for your
+database pool.
+
 Agents can also inspect API capabilities, account identity, usage, account
 activity, apps, complete app overviews, deploys, builds, app/deploy/build logs,
 env metadata, custom domains, domain verification, and billing portal links
