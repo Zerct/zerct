@@ -3,7 +3,7 @@
 Public Zerct workspace for packages, SDKs, agent skills, and examples.
 
 Zerct hosts Rust backends and static frontends. Frontends call Rust backend
-deployments for APIs and managed Postgres.
+deploys for APIs and managed Postgres.
 
 ## Install
 
@@ -14,6 +14,11 @@ npx @zerct/zerct init
 npx @zerct/zerct doctor
 npx @zerct/zerct deploy
 ```
+
+From a full-stack repo root, `npx @zerct/zerct deploy --database` discovers
+nested `zerct.toml` projects and deploys the whole workspace in one command.
+Rust backends deploy first. Static frontends deploy after them. Managed Postgres
+is requested only for Rust backends.
 
 Static frontend deploys use the same command with this `zerct.toml`:
 

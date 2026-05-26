@@ -71,6 +71,8 @@ tighten these rules.
    `[build].check` must run both typechecking and linting. Static frontend
    browser source must be TypeScript under `src`, `app`, `pages`, `routes`, or
    `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
+   Running deploy from a repo root with nested `zerct.toml` files must deploy
+   the workspace in one command, with Rust backends before static frontends.
 10. Prefer native frontend tooling. New static frontend docs, examples, skills,
     and agent guidance should use Bun with committed `bun.lock`, Go-based
     `tsgo` for TypeScript checking, and Rust-based linters such as `oxlint`,

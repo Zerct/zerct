@@ -1,6 +1,6 @@
 # zerct
 
-Python CLI package for deploying Rust backends to Zerct.
+Python CLI package for deploying Rust backends and static frontends to Zerct.
 
 ```sh
 pipx install zerct
@@ -8,6 +8,9 @@ zerct init
 zerct doctor
 zerct deploy
 ```
+
+From a full-stack repo root, `zerct deploy` discovers nested `zerct.toml` files
+and deploys the whole workspace in one command.
 
 The npm package remains the primary first install path:
 

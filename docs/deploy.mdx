@@ -14,6 +14,11 @@ guessing.
 4. Zerct queues the build, compiles the backend, and verifies the health route.
 5. Zerct exposes the app on a `zerct.app` deployment hostname.
 
+For full-stack repos, run `zerct deploy` from the repo root. The CLI discovers
+nested `zerct.toml` files, deploys Rust backends first, then deploys static
+frontends. Use `--database` to request managed Postgres for Rust backends in
+that workspace.
+
 ## Runtime contract
 
 Your app must listen on:
