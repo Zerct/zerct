@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import concurrent.futures
 import io
 import json
 import os
@@ -737,8 +738,7 @@ def deploy(project_dir: pathlib.Path, args: argparse.Namespace) -> None:
             print(f"{project.relative} url {response['app']['url']}")
 
     if args.wait:
-        for _project, _wants_database, response in results:
-            response["final_build"] = wait_for_build(args, token, response["build_job"]["id"])
+        wait_for_workspace_builds(args, token, results)
 
     print_workspace_deploy_response(project_dir, results, args)
 
@@ -850,6 +850,20 @@ def print_workspace_deploy_response(
 
     if results:
         print(f"next zerct logs --app {results[0][2]['app']['id']}")
+
+
+def wait_for_workspace_builds(
+    args: argparse.Namespace,
+    token: str,
+    results: list[tuple[DeployProject, bool, dict[str, Any]]],
+) -> None:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(results)) as executor:
+        pending = {
+            executor.submit(wait_for_build, args, token, response["build_job"]["id"]): response
+            for _project, _wants_database, response in results
+        }
+        for future in concurrent.futures.as_completed(pending):
+            pending[future]["final_build"] = future.result()
 
 
 def wait_for_build(args: argparse.Namespace, token: str, build_id: str) -> dict[str, Any]:

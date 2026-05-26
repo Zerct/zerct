@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.11'
+const VERSION = '0.1.12'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -494,9 +494,7 @@ async function deploy(projectDir, cli) {
   }
 
   if (cli.wait) {
-    for (const result of results) {
-      result.finalBuild = await waitForBuild(cli, token, result.response.build_job.id)
-    }
+    await waitForWorkspaceBuilds(cli, token, results)
   }
 
   printWorkspaceDeployResults(projectDir, results, cli)
@@ -597,6 +595,12 @@ function printWorkspaceDeployResults(projectDir, results, cli) {
   if (firstApp) {
     console.log(`next npx @zerct/zerct logs --app ${firstApp}`)
   }
+}
+
+async function waitForWorkspaceBuilds(cli, token, results) {
+  await Promise.all(results.map(async (result) => {
+    result.finalBuild = await waitForBuild(cli, token, result.response.build_job.id)
+  }))
 }
 
 async function waitForBuild(cli, token, buildId) {
