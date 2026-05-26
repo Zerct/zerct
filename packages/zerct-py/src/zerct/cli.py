@@ -218,21 +218,53 @@ idle_timeout_minutes = 15
 
 
 def doctor_project(project_dir: pathlib.Path, json_output: bool) -> None:
-    report = run_doctor(project_dir)
+    report = run_doctor_workspace(project_dir)
     if json_output:
         print(json.dumps(report, indent=2))
     else:
-        for check in report["checks"]:
-            state = "ok" if check["ok"] else "fail"
-            print(f"{state} {check['name']} - {check['message']}")
+        if "projects" in report:
+            for project in report["projects"]:
+                print(f"project {project['relative']}")
+                for check in project["checks"]:
+                    state = "ok" if check["ok"] else "fail"
+                    print(f"{state} {check['name']} - {check['message']}")
+        else:
+            for check in report["checks"]:
+                state = "ok" if check["ok"] else "fail"
+                print(f"{state} {check['name']} - {check['message']}")
 
     if not report["ok"]:
-        failure = next(check for check in report["checks"] if not check["ok"])
+        checks = (
+            [check for project in report["projects"] for check in project["checks"]]
+            if "projects" in report
+            else report["checks"]
+        )
+        failure = next(check for check in checks if not check["ok"])
         raise AgentError(
             "doctor_failed",
             "Zerct doctor failed.",
             failure["agent_instruction"],
         )
+
+
+def run_doctor_workspace(project_dir: pathlib.Path) -> dict[str, Any]:
+    if (project_dir / "zerct.toml").exists():
+        return run_doctor(project_dir)
+
+    projects = discover_deploy_projects(project_dir)
+    if not projects:
+        return run_doctor(project_dir)
+
+    reports = []
+    for project in projects:
+        report = run_doctor(project.directory)
+        report["relative"] = project.relative
+        reports.append(report)
+    return {
+        "ok": all(report["ok"] for report in reports),
+        "workspace": str(project_dir),
+        "projects": reports,
+    }
 
 
 def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
@@ -900,7 +932,11 @@ def logs(args: argparse.Namespace) -> None:
     elif args.app:
         response = api_request(args, "GET", f"/v1/apps/{args.app}/logs", token, None)
     else:
-        raise AgentError("missing_app", "App id or build id is required.", "Pass `--app <app_id>` or `--build <build_id>`.")
+        raise AgentError(
+            "missing_app",
+            "App or build id is required.",
+            "Pass `--app <app>` using the app name from zerct.toml, or pass `--build <build_id>`.",
+        )
     if args.json:
         print(json.dumps(response, indent=2))
         return

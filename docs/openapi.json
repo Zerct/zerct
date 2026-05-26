@@ -364,13 +364,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -406,13 +406,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}.delete.parameters.0. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}.delete.parameters.0. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -433,13 +433,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/overview.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/overview.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -526,13 +526,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -602,13 +602,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/builds.get.parameters.0. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/builds.get.parameters.0. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -678,13 +678,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/logs.get.parameters.0. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/logs.get.parameters.0. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -754,13 +754,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/database.get.parameters.0. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/database.get.parameters.0. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -798,13 +798,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.get.parameters.0. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/env.get.parameters.0. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -840,13 +840,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.put.parameters.0. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/env.put.parameters.0. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
             "example": "app_1"
           }
         ],
@@ -904,13 +904,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
             "example": "app_1"
           },
           {
@@ -963,13 +963,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.get.parameters.0. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains.get.parameters.0. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -1005,13 +1005,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.post.parameters.0. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains.post.parameters.0. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
             "example": "app_1"
           }
         ],
@@ -1068,13 +1068,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.0.",
             "example": "app_1"
           },
           {
@@ -1127,13 +1127,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
+            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
             "example": "app_1"
           },
           {
@@ -1613,17 +1613,17 @@
           "Deploy"
         ],
         "summary": "List deploys",
-        "description": "Lists recent deploys account-wide or filtered by app id. Context: paths./v1/deploys.get.",
+        "description": "Lists recent deploys account-wide or filtered by app id or app name. Context: paths./v1/deploys.get.",
         "operationId": "listDeploys",
         "parameters": [
           {
             "name": "app_id",
             "in": "query",
             "required": false,
-            "description": "Optional app id filter. Context: paths./v1/deploys.get.parameters.0.",
+            "description": "Optional app id or app name filter. Context: paths./v1/deploys.get.parameters.0.",
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 64,
               "examples": [
                 "app_1"
@@ -1689,17 +1689,17 @@
           "Deploy"
         ],
         "summary": "List builds",
-        "description": "Lists recent build jobs account-wide or filtered by app id. Context: paths./v1/builds.get.",
+        "description": "Lists recent build jobs account-wide or filtered by app id or app name. Context: paths./v1/builds.get.",
         "operationId": "listBuilds",
         "parameters": [
           {
             "name": "app_id",
             "in": "query",
             "required": false,
-            "description": "Optional app id filter. Context: paths./v1/builds.get.parameters.0. Context: paths./v1/builds.get.parameters.0.",
+            "description": "Optional app id or app name filter. Context: paths./v1/builds.get.parameters.0. Context: paths./v1/builds.get.parameters.0.",
             "schema": {
               "type": "string",
-              "pattern": "^app_[A-Za-z0-9_]+$",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 64,
               "examples": [
                 "app_1"
@@ -3170,7 +3170,7 @@
                     }
                   ],
                   "next_actions": [
-                    "Use `npx @zerct/zerct overview --app <app_id>` for a compact app state snapshot."
+                    "Use `npx @zerct/zerct overview --app <app>` for a compact app state snapshot."
                   ]
                 }
               }
@@ -6917,7 +6917,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Use `npx @zerct/zerct overview --app <app_id>` for a compact app state snapshot."
+                "Use `npx @zerct/zerct overview --app <app>` for a compact app state snapshot."
               ]
             ]
           }
@@ -6994,7 +6994,7 @@
               }
             ],
             "next_actions": [
-              "Use `npx @zerct/zerct overview --app <app_id>` for a compact app state snapshot."
+              "Use `npx @zerct/zerct overview --app <app>` for a compact app state snapshot."
             ]
           }
         ]

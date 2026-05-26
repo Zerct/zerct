@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.5";
+const VERSION: &str = "0.1.6";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -106,11 +106,11 @@ Usage:
   zerct doctor [path] [--json]
   zerct login [--token <token>] [--api <url>]
   zerct deploy [path] [--database] [--api <url>] [--json]
-  zerct logs --app <app_id> [--api <url>] [--json]
-  zerct status --app <app_id> [--api <url>] [--json]
-  zerct inspect --app <app_id> [--api <url>] [--json]
-  zerct db --app <app_id> [--api <url>] [--json]
-  zerct env set --app <app_id> KEY=value [--api <url>] [--json]
+  zerct logs --app <app> [--api <url>] [--json]
+  zerct status --app <app> [--api <url>] [--json]
+  zerct inspect --app <app> [--api <url>] [--json]
+  zerct db --app <app> [--api <url>] [--json]
+  zerct env set --app <app> KEY=value [--api <url>] [--json]
   zerct billing [--api <url>] [--json]"
     );
 }
@@ -306,6 +306,13 @@ fn init_project(project_dir: &Path) -> Result<(), AgentError> {
 }
 
 fn doctor_project(project_dir: &Path, json: bool) -> Result<(), AgentError> {
+    if !project_dir.join("zerct.toml").exists() {
+        let projects = discover_deploy_projects(project_dir)?;
+        if !projects.is_empty() {
+            return doctor_workspace(project_dir, &projects, json);
+        }
+    }
+
     let report = doctor_report(project_dir);
     if json {
         println!("{}", report.to_json());
@@ -327,6 +334,58 @@ fn doctor_project(project_dir: &Path, json: bool) -> Result<(), AgentError> {
     }
 }
 
+fn doctor_workspace(
+    project_dir: &Path,
+    projects: &[DeployProject],
+    json: bool,
+) -> Result<(), AgentError> {
+    let reports = projects
+        .iter()
+        .map(|project| (project.relative.clone(), doctor_report(&project.dir)))
+        .collect::<Vec<_>>();
+    if json {
+        println!("{}", doctor_workspace_json(project_dir, &reports));
+    } else {
+        for (relative, report) in &reports {
+            println!("project {relative}");
+            for check in &report.checks {
+                let status = if check.ok { "ok" } else { "fail" };
+                println!("{status} {} - {}", check.name, check.message);
+            }
+        }
+    }
+
+    if let Some(check) = reports
+        .iter()
+        .flat_map(|(_relative, report)| report.checks.iter())
+        .find(|check| !check.ok)
+    {
+        Err(AgentError::new(
+            "doctor_failed",
+            "Zerct doctor failed.",
+            check.agent_instruction.clone(),
+        ))
+    } else {
+        Ok(())
+    }
+}
+
+fn doctor_workspace_json(project_dir: &Path, reports: &[(String, DoctorReport)]) -> String {
+    let projects = reports
+        .iter()
+        .map(|(relative, report)| report.to_json_with_relative(relative))
+        .collect::<Vec<_>>()
+        .join(",");
+    format!(
+        "{{\"ok\":{},\"workspace\":\"{}\",\"projects\":[{}]}}",
+        reports
+            .iter()
+            .all(|(_relative, report)| report.checks.iter().all(|check| check.ok)),
+        escape_json(&project_dir.display().to_string()),
+        projects
+    )
+}
+
 #[derive(Debug)]
 struct DoctorReport {
     project: PathBuf,
@@ -336,6 +395,14 @@ struct DoctorReport {
 
 impl DoctorReport {
     fn to_json(&self) -> String {
+        self.to_json_fields(None)
+    }
+
+    fn to_json_with_relative(&self, relative: &str) -> String {
+        self.to_json_fields(Some(relative))
+    }
+
+    fn to_json_fields(&self, relative: Option<&str>) -> String {
         let checks = self
             .checks
             .iter()
@@ -346,8 +413,12 @@ impl DoctorReport {
             .config
             .as_ref()
             .map_or_else(|| "null".to_owned(), Config::to_json);
+        let relative_field = relative.map_or_else(String::new, |value| {
+            format!("\"relative\":\"{}\",", escape_json(value))
+        });
         format!(
-            "{{\"ok\":{},\"project\":\"{}\",\"config\":{},\"checks\":[{}]}}",
+            "{{{}\"ok\":{},\"project\":\"{}\",\"config\":{},\"checks\":[{}]}}",
+            relative_field,
             self.checks.iter().all(|check| check.ok),
             escape_json(&self.project.display().to_string()),
             config,
@@ -990,8 +1061,8 @@ fn app_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
     let app = cli.app.as_deref().ok_or_else(|| {
         AgentError::new(
             "missing_app",
-            "App id is required.",
-            "Pass `--app <app_id>`. Use the app id printed by `zerct deploy`.",
+            "App is required.",
+            "Pass `--app <app>` using either the app name from zerct.toml or the app id printed by deploy.",
         )
     })?;
     let token = read_or_login_token(&current_dir_or_dot(), cli)?;
@@ -1011,7 +1082,7 @@ fn env_command(cli: &Cli) -> Result<(), AgentError> {
         return Err(AgentError::new(
             "unknown_command",
             "Unknown env command.",
-            "Use `zerct env set --app <app_id> KEY=value`.",
+            "Use `zerct env set --app <app> KEY=value`.",
         ));
     }
     let assignment = cli.args.get(1).ok_or_else(|| {
@@ -1031,8 +1102,8 @@ fn env_command(cli: &Cli) -> Result<(), AgentError> {
     let app = cli.app.as_deref().ok_or_else(|| {
         AgentError::new(
             "missing_app",
-            "App id is required.",
-            "Pass `--app <app_id>`.",
+            "App is required.",
+            "Pass `--app <app>` using either the app name from zerct.toml or the app id printed by deploy.",
         )
     })?;
     let token = read_or_login_token(&current_dir_or_dot(), cli)?;

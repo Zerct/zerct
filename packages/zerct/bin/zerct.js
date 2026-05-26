@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.12'
+const VERSION = '0.1.13'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -71,20 +71,20 @@ Usage:
   zerct usage [--api <url>] [--json]
   zerct activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct apps [--api <url>] [--json]
-  zerct overview --app <app_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  zerct deploys [--app <app_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  zerct builds [--app <app_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  zerct logs --app <app_id> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  zerct status --app <app_id> [--api <url>] [--json]
-  zerct inspect --app <app_id> [--api <url>] [--json]
-  zerct db --app <app_id> [--api <url>] [--json]
-  zerct env list --app <app_id> [--api <url>] [--json]
-  zerct env set --app <app_id> KEY=value [--api <url>] [--json]
-  zerct env delete --app <app_id> KEY [--api <url>] [--json]
-  zerct domains list --app <app_id> [--api <url>] [--json]
-  zerct domains add --app <app_id> <domain> [--api <url>] [--json]
-  zerct domains verify --app <app_id> <domain> [--api <url>] [--json]
-  zerct domains delete --app <app_id> <domain> [--api <url>] [--json]
+  zerct overview --app <app> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct deploys [--app <app>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct builds [--app <app>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct logs --app <app> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct status --app <app> [--api <url>] [--json]
+  zerct inspect --app <app> [--api <url>] [--json]
+  zerct db --app <app> [--api <url>] [--json]
+  zerct env list --app <app> [--api <url>] [--json]
+  zerct env set --app <app> KEY=value [--api <url>] [--json]
+  zerct env delete --app <app> KEY [--api <url>] [--json]
+  zerct domains list --app <app> [--api <url>] [--json]
+  zerct domains add --app <app> <domain> [--api <url>] [--json]
+  zerct domains verify --app <app> <domain> [--api <url>] [--json]
+  zerct domains delete --app <app> <domain> [--api <url>] [--json]
   zerct billing [portal] [--api <url>] [--json]
 
 Agent contract:
@@ -301,7 +301,7 @@ function installProject(projectDir) {
 }
 
 function doctorProject(projectDir, json) {
-  const report = runDoctor(projectDir)
+  const report = runDoctorWorkspace(projectDir)
   if (json) {
     console.log(JSON.stringify(report, null, 2))
     if (!report.ok) {
@@ -310,13 +310,46 @@ function doctorProject(projectDir, json) {
     return
   }
 
-  for (const check of report.checks) {
-    console.log(`${check.ok ? 'ok' : 'fail'} ${check.name}${check.message ? ` - ${check.message}` : ''}`)
+  if (Array.isArray(report.projects)) {
+    for (const project of report.projects) {
+      console.log(`project ${project.relative}`)
+      for (const check of project.checks) {
+        console.log(`${check.ok ? 'ok' : 'fail'} ${check.name}${check.message ? ` - ${check.message}` : ''}`)
+      }
+    }
+  } else {
+    for (const check of report.checks) {
+      console.log(`${check.ok ? 'ok' : 'fail'} ${check.name}${check.message ? ` - ${check.message}` : ''}`)
+    }
   }
 
   if (!report.ok) {
-    const firstFailure = report.checks.find((check) => !check.ok)
+    const checks = Array.isArray(report.projects)
+      ? report.projects.flatMap((project) => project.checks)
+      : report.checks
+    const firstFailure = checks.find((check) => !check.ok)
     throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry `npx @zerct/zerct doctor`.', json)
+  }
+}
+
+function runDoctorWorkspace(projectDir) {
+  if (existsSync(path.join(projectDir, 'zerct.toml'))) {
+    return runDoctor(projectDir)
+  }
+
+  const projects = discoverDeployProjects(projectDir)
+  if (projects.length === 0) {
+    return runDoctor(projectDir)
+  }
+
+  const reports = projects.map((project) => ({
+    relative: project.relative,
+    ...runDoctor(project.dir)
+  }))
+  return {
+    ok: reports.every((report) => report.ok),
+    workspace: projectDir,
+    projects: reports
   }
 }
 
@@ -740,7 +773,7 @@ async function envCommand(cli) {
   if (cli.args[0] === 'delete') {
     const name = cli.args[1] || ''
     if (!name) {
-      throw agentError('invalid_env', 'Environment variable name is required.', 'Use `npx @zerct/zerct env delete --app <app_id> KEY`.', cli.json)
+      throw agentError('invalid_env', 'Environment variable name is required.', 'Use `npx @zerct/zerct env delete --app <app> KEY`.', cli.json)
     }
     const token = await readOrLoginToken(process.cwd(), cli)
     const app = requireApp(cli)
@@ -777,7 +810,7 @@ async function domainsCommand(cli) {
 
   const domain = cli.args[1] || ''
   if (!domain) {
-    throw agentError('missing_domain', 'Domain is required.', 'Use `npx @zerct/zerct domains add --app <app_id> api.example.com`.', cli.json)
+    throw agentError('missing_domain', 'Domain is required.', 'Use `npx @zerct/zerct domains add --app <app> api.example.com`.', cli.json)
   }
 
   const token = await readOrLoginToken(process.cwd(), cli)
@@ -891,7 +924,7 @@ async function pollLogin(cli, start) {
 
 function requireApp(cli) {
   if (!cli.app) {
-    throw agentError('missing_app', 'App id is required.', 'Pass `--app <app_id>`. Use the app id printed by `npx @zerct/zerct deploy`.', cli.json)
+    throw agentError('missing_app', 'App is required.', 'Pass `--app <app>` using either the app name from zerct.toml or the app id printed by deploy.', cli.json)
   }
   return cli.app
 }
