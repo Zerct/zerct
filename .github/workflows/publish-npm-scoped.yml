@@ -39,3 +39,5 @@ jobs:
         run: ./scripts/check-all.sh
       - if: steps.version.outputs.exists == 'false'
         run: ./scripts/publish-npm-scoped.sh
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
