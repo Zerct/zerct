@@ -17,6 +17,7 @@ import tarfile
 import time
 import tomllib
 import urllib.error
+import urllib.parse
 import urllib.request
 import webbrowser
 from dataclasses import dataclass
@@ -205,23 +206,61 @@ def build_parser() -> argparse.ArgumentParser:
     deploy.add_argument("--wait", action="store_true")
     deploy.add_argument("--wait-timeout", type=positive_seconds, default=DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS)
 
+    shared_json_commands: list[argparse.ArgumentParser] = []
+    for command in ("capabilities", "me", "usage", "apps"):
+        shared = subcommands.add_parser(command)
+        shared_json_commands.append(shared)
+
+    activity = subcommands.add_parser("activity")
+    activity.add_argument("--limit", default="")
+    activity.add_argument("--cursor", default="")
+    shared_json_commands.append(activity)
+
+    overview = subcommands.add_parser("overview")
+    overview.add_argument("--app", required=True)
+    overview.add_argument("--limit", default="")
+    overview.add_argument("--cursor", default="")
+    shared_json_commands.append(overview)
+
+    deploys = subcommands.add_parser("deploys")
+    deploys.add_argument("--app", default="")
+    deploys.add_argument("--limit", default="")
+    deploys.add_argument("--cursor", default="")
+    shared_json_commands.append(deploys)
+
+    builds = subcommands.add_parser("builds")
+    builds.add_argument("--app", default="")
+    builds.add_argument("--limit", default="")
+    builds.add_argument("--cursor", default="")
+    shared_json_commands.append(builds)
+
     logs = subcommands.add_parser("logs")
     logs.add_argument("--app", default="")
     logs.add_argument("--build", default="")
+    logs.add_argument("--deploy", default="")
+    logs.add_argument("--limit", default="")
+    logs.add_argument("--cursor", default="")
 
-    shared_json_commands = [init, install, doctor, preview, login, deploy, logs]
+    shared_json_commands.extend([init, install, doctor, preview, login, deploy, logs])
     for command in ("status", "inspect", "db"):
         item = subcommands.add_parser(command)
         item.add_argument("--app", required=True)
         shared_json_commands.append(item)
 
     env = subcommands.add_parser("env")
-    env.add_argument("action", choices=["set"])
-    env.add_argument("assignment")
+    env.add_argument("action", choices=["list", "set", "delete"], nargs="?", default="list")
+    env.add_argument("assignment", nargs="?")
     env.add_argument("--app", required=True)
     shared_json_commands.append(env)
 
+    domains = subcommands.add_parser("domains")
+    domains.add_argument("action", choices=["list", "add", "verify", "delete"], nargs="?", default="list")
+    domains.add_argument("domain", nargs="?")
+    domains.add_argument("--app", required=True)
+    shared_json_commands.append(domains)
+
     billing = subcommands.add_parser("billing")
+    billing.add_argument("action", choices=["portal"], nargs="?")
     shared_json_commands.append(billing)
     for command in shared_json_commands:
         add_command_common_options(command)
@@ -249,6 +288,22 @@ def run(args: argparse.Namespace) -> None:
             login(args)
         case "deploy":
             deploy(pathlib.Path(args.path).resolve(), args)
+        case "capabilities":
+            print_response(api_request(args, "GET", "/v1/capabilities", None, None), args.json)
+        case "me":
+            print_response(authenticated_get(args, "/v1/me"), args.json)
+        case "usage":
+            print_response(authenticated_get(args, "/v1/usage"), args.json)
+        case "activity":
+            print_response(authenticated_get(args, f"/v1/activity{page_query(args)}"), args.json)
+        case "apps":
+            print_response(authenticated_get(args, "/v1/apps"), args.json)
+        case "overview":
+            print_response(authenticated_get(args, f"/v1/apps/{urllib.parse.quote(args.app)}/overview{page_query(args)}"), args.json)
+        case "deploys":
+            deploys(args)
+        case "builds":
+            builds(args)
         case "logs":
             logs(args)
         case "status":
@@ -258,7 +313,9 @@ def run(args: argparse.Namespace) -> None:
         case "db":
             print_response(app_get(args, "database"), args.json)
         case "env":
-            set_env(args)
+            env_command(args)
+        case "domains":
+            domains_command(args)
         case "billing":
             billing(args)
         case _:
@@ -1164,43 +1221,146 @@ def wait_for_build(args: argparse.Namespace, token: str, build_id: str) -> dict[
 
 def logs(args: argparse.Namespace) -> None:
     token = read_or_login_token(pathlib.Path.cwd(), args)
+    page = page_query(args)
     if args.build:
-        response = api_request(args, "GET", f"/v1/builds/{args.build}/logs", token, None)
+        response = api_request(args, "GET", f"/v1/builds/{urllib.parse.quote(args.build)}/logs{page}", token, None)
+    elif args.deploy:
+        response = api_request(args, "GET", f"/v1/deploys/{urllib.parse.quote(args.deploy)}/logs{page}", token, None)
     elif args.app:
-        response = api_request(args, "GET", f"/v1/apps/{args.app}/logs", token, None)
+        response = api_request(args, "GET", f"/v1/apps/{urllib.parse.quote(args.app)}/logs{page}", token, None)
     else:
         raise AgentError(
             "missing_app",
-            "App or build id is required.",
-            "Pass `--app <app>` using the app name from zerct.toml, or pass `--build <build_id>`.",
+            "App, deploy, or build id is required.",
+            "Pass `--app <app>`, `--deploy <deploy_id>`, or `--build <build_id>`.",
         )
     if args.json:
         print(json.dumps(response, indent=2))
         return
     for line in response.get("lines", []):
         print(f"[{line['timestamp']}] {line['stream']}: {line['message']}")
+    if response.get("has_more") and response.get("next_cursor"):
+        target = f"--build {args.build}" if args.build else f"--deploy {args.deploy}" if args.deploy else f"--app {args.app}"
+        print(f"next zerct logs {target} --cursor {response['next_cursor']}")
 
 
 def app_get(args: argparse.Namespace, route: str) -> dict[str, Any]:
     token = read_or_login_token(pathlib.Path.cwd(), args)
-    return api_request(args, "GET", f"/v1/apps/{args.app}/{route}", token, None)
+    return api_request(args, "GET", f"/v1/apps/{urllib.parse.quote(args.app)}/{route}", token, None)
 
 
-def set_env(args: argparse.Namespace) -> None:
-    name, separator, value = args.assignment.partition("=")
+def authenticated_get(args: argparse.Namespace, route: str) -> dict[str, Any]:
+    token = read_or_login_token(pathlib.Path.cwd(), args)
+    return api_request(args, "GET", route, token, None)
+
+
+def page_query(args: argparse.Namespace) -> str:
+    params: dict[str, str] = {}
+    if getattr(args, "limit", ""):
+        params["limit"] = str(args.limit)
+    if getattr(args, "cursor", ""):
+        params["cursor"] = str(args.cursor)
+    encoded = urllib.parse.urlencode(params)
+    return f"?{encoded}" if encoded else ""
+
+
+def deploys(args: argparse.Namespace) -> None:
+    token = read_or_login_token(pathlib.Path.cwd(), args)
+    route = (
+        f"/v1/apps/{urllib.parse.quote(args.app)}/deploys{page_query(args)}"
+        if args.app
+        else f"/v1/deploys{page_query(args)}"
+    )
+    print_response(api_request(args, "GET", route, token, None), args.json)
+
+
+def builds(args: argparse.Namespace) -> None:
+    token = read_or_login_token(pathlib.Path.cwd(), args)
+    route = (
+        f"/v1/apps/{urllib.parse.quote(args.app)}/builds{page_query(args)}"
+        if args.app
+        else f"/v1/builds{page_query(args)}"
+    )
+    print_response(api_request(args, "GET", route, token, None), args.json)
+
+
+def env_command(args: argparse.Namespace) -> None:
+    if args.action == "list":
+        print_response(app_get(args, "env"), args.json)
+        return
+
+    token = read_or_login_token(pathlib.Path.cwd(), args)
+    if args.action == "delete":
+        if not args.assignment:
+            raise AgentError(
+                "invalid_env",
+                "Environment variable name is required.",
+                "Use `zerct env delete --app <app> KEY`.",
+            )
+        response = api_request(
+            args,
+            "DELETE",
+            f"/v1/apps/{urllib.parse.quote(args.app)}/env/{urllib.parse.quote(args.assignment)}",
+            token,
+            None,
+        )
+        print_response(response, args.json)
+        return
+
+    assignment = args.assignment or ""
+    name, separator, value = assignment.partition("=")
     if not separator:
         raise AgentError(
             "invalid_env",
             "Environment assignment must be KEY=value.",
             "Pass one uppercase shell-safe environment assignment, for example `API_KEY=value`.",
         )
+    response = api_request(args, "PUT", f"/v1/apps/{urllib.parse.quote(args.app)}/env", token, {"name": name, "value": value})
+    print_response(response, args.json)
+
+
+def domains_command(args: argparse.Namespace) -> None:
+    if args.action == "list":
+        print_response(app_get(args, "domains"), args.json)
+        return
+
+    if not args.domain:
+        raise AgentError(
+            "missing_domain",
+            "Domain is required.",
+            "Use `zerct domains add --app <app> api.example.com`.",
+        )
+
     token = read_or_login_token(pathlib.Path.cwd(), args)
-    response = api_request(args, "PUT", f"/v1/apps/{args.app}/env", token, {"name": name, "value": value})
+    app = urllib.parse.quote(args.app)
+    domain = urllib.parse.quote(args.domain)
+    match args.action:
+        case "add":
+            response = api_request(args, "POST", f"/v1/apps/{app}/domains", token, {"domain": args.domain})
+        case "verify":
+            response = api_request(args, "POST", f"/v1/apps/{app}/domains/{domain}/verify", token, None)
+        case "delete":
+            response = api_request(args, "DELETE", f"/v1/apps/{app}/domains/{domain}", token, None)
+        case _:
+            raise AgentError(
+                "unknown_command",
+                "Unknown domains command.",
+                "Use `domains list`, `domains add`, `domains verify`, or `domains delete`.",
+            )
     print_response(response, args.json)
 
 
 def billing(args: argparse.Namespace) -> None:
     token = read_or_login_token(pathlib.Path.cwd(), args)
+    if args.action == "portal":
+        response = api_request(args, "POST", "/v1/billing/portal", token, None)
+        if args.json:
+            print(json.dumps(response, indent=2))
+            return
+        print(response["checkout"]["url"])
+        webbrowser.open(response["checkout"]["url"])
+        return
+
     response = api_request(
         args,
         "POST",

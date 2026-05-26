@@ -12,6 +12,10 @@ npx @zerct/zerct deploy
 `@zerct/zerct` is the live npm package. The unscoped `zerct` package is the
 company package target.
 
+All official package CLIs expose the same agent commands for login, doctor,
+preview, deploy, wait, capabilities, account usage, apps, deploys, builds,
+logs, env, domains, and billing.
+
 ## Homebrew
 
 ```sh
@@ -24,12 +28,16 @@ zerct deploy
 
 ```sh
 pipx install zerct
-zerct deploy
+zerct deploy --wait
+zerct logs --build job_1 --json
+zerct domains verify --app app_1 api.example.com
 ```
 
 ## crates.io
 
 ```sh
 cargo install zerct
-zerct deploy
+zerct deploy --wait
+zerct logs --deploy deploy_1 --json
+zerct billing portal
 ```

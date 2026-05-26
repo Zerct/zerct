@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.7";
+const VERSION: &str = "0.1.8";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -18,6 +18,7 @@ const SESSION_ACCOUNT: &str = "session-token";
 const SESSION_LABEL: &str = "Zerct session";
 const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
 const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
+const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: u64 = 900;
 const DEFAULT_RUST_CHECK_COMMAND: &str =
     "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings";
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
@@ -83,11 +84,27 @@ fn run() -> Result<(), AgentError> {
         "preview" => preview_project(&cli),
         "login" => login(&cli),
         "deploy" => deploy(&cli),
-        "logs" => app_get(&cli, "logs"),
+        "capabilities" => public_get(&cli, "/v1/capabilities"),
+        "me" => authenticated_get(&cli, "/v1/me"),
+        "usage" => authenticated_get(&cli, "/v1/usage"),
+        "activity" => authenticated_get(&cli, &format!("/v1/activity{}", page_query(&cli))),
+        "apps" => authenticated_get(&cli, "/v1/apps"),
+        "overview" => authenticated_get(
+            &cli,
+            &format!(
+                "/v1/apps/{}/overview{}",
+                url_encode(require_app(&cli)?),
+                page_query(&cli)
+            ),
+        ),
+        "deploys" => deploys(&cli),
+        "builds" => builds(&cli),
+        "logs" => logs(&cli),
         "status" => app_get(&cli, "status"),
         "inspect" => app_get(&cli, "inspect"),
         "db" | "database" => app_get(&cli, "database"),
         "env" => env_command(&cli),
+        "domains" => domains_command(&cli),
         "billing" => billing(&cli),
         _unknown => Err(AgentError::new(
             "unknown_command",
@@ -107,13 +124,27 @@ Usage:
   zerct doctor [path] [--json]
   zerct preview [path] [--port <port>]
   zerct login [--token <token>] [--api <url>]
-  zerct deploy [path] [--database] [--api <url>] [--json]
-  zerct logs --app <app> [--api <url>] [--json]
+  zerct deploy [path] [--database] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
+  zerct capabilities [--api <url>] [--json]
+  zerct me [--api <url>] [--json]
+  zerct usage [--api <url>] [--json]
+  zerct activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct apps [--api <url>] [--json]
+  zerct overview --app <app> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct deploys [--app <app>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct builds [--app <app>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct logs --app <app> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct status --app <app> [--api <url>] [--json]
   zerct inspect --app <app> [--api <url>] [--json]
   zerct db --app <app> [--api <url>] [--json]
+  zerct env list --app <app> [--api <url>] [--json]
   zerct env set --app <app> KEY=value [--api <url>] [--json]
-  zerct billing [--api <url>] [--json]"
+  zerct env delete --app <app> KEY [--api <url>] [--json]
+  zerct domains list --app <app> [--api <url>] [--json]
+  zerct domains add --app <app> <domain> [--api <url>] [--json]
+  zerct domains verify --app <app> <domain> [--api <url>] [--json]
+  zerct domains delete --app <app> <domain> [--api <url>] [--json]
+  zerct billing [portal] [--api <url>] [--json]"
     );
     println!(
         "
@@ -133,10 +164,16 @@ struct Cli {
     args: Vec<String>,
     api_url: String,
     app: Option<String>,
+    build: Option<String>,
+    deploy_id: Option<String>,
+    limit: Option<String>,
+    cursor: Option<String>,
     token: Option<String>,
     template: Option<String>,
     port: Option<u16>,
     database: bool,
+    wait: bool,
+    wait_timeout_seconds: u64,
     json: bool,
 }
 
@@ -145,10 +182,16 @@ impl Cli {
         let mut args = Vec::new();
         let mut api_url = DEFAULT_API_URL.to_owned();
         let mut app = None;
+        let mut build = None;
+        let mut deploy_id = None;
+        let mut limit = None;
+        let mut cursor = None;
         let mut token = None;
         let mut template = None;
         let mut port = None;
         let mut database = false;
+        let mut wait = false;
+        let mut wait_timeout_seconds = DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS;
         let mut json = false;
         let mut index = 0usize;
 
@@ -160,6 +203,22 @@ impl Cli {
                 }
                 "--app" => {
                     app = Some(required_value(raw, index, "--app")?);
+                    index += 2;
+                }
+                "--build" => {
+                    build = Some(required_value(raw, index, "--build")?);
+                    index += 2;
+                }
+                "--deploy" => {
+                    deploy_id = Some(required_value(raw, index, "--deploy")?);
+                    index += 2;
+                }
+                "--limit" => {
+                    limit = Some(required_value(raw, index, "--limit")?);
+                    index += 2;
+                }
+                "--cursor" => {
+                    cursor = Some(required_value(raw, index, "--cursor")?);
                     index += 2;
                 }
                 "--token" => {
@@ -181,6 +240,17 @@ impl Cli {
                     database = true;
                     index += 1;
                 }
+                "--wait" => {
+                    wait = true;
+                    index += 1;
+                }
+                "--wait-timeout" => {
+                    wait_timeout_seconds = parse_u64(
+                        &required_value(raw, index, "--wait-timeout")?,
+                        "invalid_wait_timeout",
+                    )?;
+                    index += 2;
+                }
                 "--json" => {
                     json = true;
                     index += 1;
@@ -198,10 +268,16 @@ impl Cli {
             args: args.into_iter().skip(1).collect(),
             api_url: api_url.trim_end_matches('/').to_owned(),
             app,
+            build,
+            deploy_id,
+            limit,
+            cursor,
             token,
             template,
             port,
             database,
+            wait,
+            wait_timeout_seconds,
             json,
         })
     }
@@ -1282,38 +1358,43 @@ fn deploy(cli: &Cli) -> Result<(), AgentError> {
             ));
         }
         let token = read_or_login_token(&project.dir, cli)?;
-        println!(
-            "{}",
-            deploy_project(cli, &project.dir, &token, cli.database)?
-        );
+        let mut response = deploy_project(cli, &project.dir, &token, cli.database)?;
+        if cli.wait {
+            response = with_final_build(cli, &token, &response)?;
+        }
+        println!("{response}");
         return Ok(());
     }
 
     let token = read_or_login_token(&project_dir, cli)?;
-    if cli.json {
-        println!("[");
-    } else {
+    if !cli.json {
         println!("deploying {} projects", projects.len());
     }
-    let mut first = true;
+    let mut responses = Vec::new();
     for project in projects {
         let wants_database = cli.database && project.kind == "rust_backend";
         if !cli.json {
             println!("checking {}", project.relative);
         }
         let response = deploy_project(cli, &project.dir, &token, wants_database)?;
-        if cli.json {
-            if first {
-                first = false;
-            } else {
-                println!(",");
-            }
-            print!("{response}");
-        } else {
+        if !cli.json {
             println!("{} {response}", project.relative);
+        }
+        responses.push((project.relative, response));
+    }
+    if cli.wait {
+        for (_relative, response) in &mut responses {
+            *response = with_final_build(cli, &token, response)?;
         }
     }
     if cli.json {
+        println!("[");
+        for (index, (_relative, response)) in responses.iter().enumerate() {
+            if index > 0 {
+                println!(",");
+            }
+            print!("{response}");
+        }
         println!("\n]");
     }
     Ok(())
@@ -1361,19 +1442,83 @@ fn deploy_project(
     api_request(cli, "POST", "/v1/deploy", Some(token), Some(&body))
 }
 
-fn app_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
-    let app = cli.app.as_deref().ok_or_else(|| {
+fn with_final_build(cli: &Cli, token: &str, response: &str) -> Result<String, AgentError> {
+    let build_id = json_string_after(response, "\"build_job\"", "id").ok_or_else(|| {
+        AgentError::new(
+            "build_status_unavailable",
+            "Deploy response did not include a build id.",
+            "Run `zerct builds` and `zerct logs --build <build_id>` to inspect the deploy.",
+        )
+    })?;
+    let final_build = wait_for_build(cli, token, &build_id)?;
+    append_json_field(response, "final_build", &final_build)
+}
+
+fn wait_for_build(cli: &Cli, token: &str, build_id: &str) -> Result<String, AgentError> {
+    let deadline = Instant::now() + Duration::from_secs(cli.wait_timeout_seconds);
+    let mut last_status = String::new();
+    while Instant::now() <= deadline {
+        let response = api_request(
+            cli,
+            "GET",
+            &format!("/v1/builds/{}", url_encode(build_id)),
+            Some(token),
+            None,
+        )?;
+        let status = json_string_after(&response, "\"build\"", "status")
+            .or_else(|| json_string_field(&response, "status"))
+            .ok_or_else(|| {
+                AgentError::new(
+                    "build_status_unavailable",
+                    "Build status is unavailable.",
+                    format!("Retry with `zerct logs --build {build_id}`."),
+                )
+            })?;
+        if status != last_status {
+            progress(cli, &format!("build {build_id} {status}"));
+            last_status.clone_from(&status);
+        }
+        if matches!(status.as_str(), "succeeded" | "failed" | "canceled") {
+            return Ok(response);
+        }
+        thread::sleep(Duration::from_secs(3));
+    }
+
+    Err(AgentError::new(
+        "build_wait_timeout",
+        format!("Timed out waiting for build {build_id}."),
+        format!("Run `zerct logs --build {build_id}` to continue watching."),
+    ))
+}
+
+fn require_app(cli: &Cli) -> Result<&str, AgentError> {
+    cli.app.as_deref().ok_or_else(|| {
         AgentError::new(
             "missing_app",
             "App is required.",
             "Pass `--app <app>` using either the app name from zerct.toml or the app id printed by deploy.",
         )
-    })?;
+    })
+}
+
+fn public_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
+    println!("{}", api_request(cli, "GET", route, None, None)?);
+    Ok(())
+}
+
+fn authenticated_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
+    println!("{}", api_request(cli, "GET", route, Some(&token), None)?);
+    Ok(())
+}
+
+fn app_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
+    let app = require_app(cli)?;
     let token = read_or_login_token(&current_dir_or_dot(), cli)?;
     let response = api_request(
         cli,
         "GET",
-        &format!("/v1/apps/{app}/{route}"),
+        &format!("/v1/apps/{}/{route}", url_encode(app)),
         Some(&token),
         None,
     )?;
@@ -1381,36 +1526,75 @@ fn app_get(cli: &Cli, route: &str) -> Result<(), AgentError> {
     Ok(())
 }
 
+fn deploys(cli: &Cli) -> Result<(), AgentError> {
+    let route = if let Some(app) = &cli.app {
+        format!("/v1/apps/{}/deploys{}", url_encode(app), page_query(cli))
+    } else {
+        format!("/v1/deploys{}", page_query(cli))
+    };
+    authenticated_get(cli, &route)
+}
+
+fn builds(cli: &Cli) -> Result<(), AgentError> {
+    let route = if let Some(app) = &cli.app {
+        format!("/v1/apps/{}/builds{}", url_encode(app), page_query(cli))
+    } else {
+        format!("/v1/builds{}", page_query(cli))
+    };
+    authenticated_get(cli, &route)
+}
+
+fn logs(cli: &Cli) -> Result<(), AgentError> {
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
+    let page = page_query(cli);
+    let route = if let Some(build) = &cli.build {
+        format!("/v1/builds/{}/logs{page}", url_encode(build))
+    } else if let Some(deploy) = &cli.deploy_id {
+        format!("/v1/deploys/{}/logs{page}", url_encode(deploy))
+    } else {
+        format!("/v1/apps/{}/logs{page}", url_encode(require_app(cli)?))
+    };
+    println!("{}", api_request(cli, "GET", &route, Some(&token), None)?);
+    Ok(())
+}
+
 fn env_command(cli: &Cli) -> Result<(), AgentError> {
-    if cli.args.first().map(String::as_str) != Some("set") {
+    let action = cli.args.first().map_or("list", String::as_str);
+    if action == "list" {
+        return app_get(cli, "env");
+    }
+    let app = require_app(cli)?;
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
+    if action == "delete" {
+        let name = cli.args.get(1).ok_or_else(|| {
+            AgentError::new(
+                "invalid_env",
+                "Environment variable name is required.",
+                "Use `zerct env delete --app <app> KEY`.",
+            )
+        })?;
+        let response = api_request(
+            cli,
+            "DELETE",
+            &format!("/v1/apps/{}/env/{}", url_encode(app), url_encode(name)),
+            Some(&token),
+            None,
+        )?;
+        println!("{response}");
+        return Ok(());
+    }
+    if action != "set" {
         return Err(AgentError::new(
             "unknown_command",
             "Unknown env command.",
-            "Use `zerct env set --app <app> KEY=value`.",
+            "Use `zerct env list`, `zerct env set`, or `zerct env delete`.",
         ));
     }
-    let assignment = cli.args.get(1).ok_or_else(|| {
-        AgentError::new(
-            "invalid_env",
-            "Environment assignment must be KEY=value.",
-            "Pass one uppercase shell-safe environment assignment, for example `API_KEY=value`.",
-        )
-    })?;
+
+    let assignment = require_env_assignment(cli)?;
     let Some((name, value)) = assignment.split_once('=') else {
-        return Err(AgentError::new(
-            "invalid_env",
-            "Environment assignment must be KEY=value.",
-            "Pass one uppercase shell-safe environment assignment, for example `API_KEY=value`.",
-        ));
+        return Err(invalid_env_error());
     };
-    let app = cli.app.as_deref().ok_or_else(|| {
-        AgentError::new(
-            "missing_app",
-            "App is required.",
-            "Pass `--app <app>` using either the app name from zerct.toml or the app id printed by deploy.",
-        )
-    })?;
-    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
     let body = format!(
         "{{\"name\":\"{}\",\"value\":\"{}\"}}",
         escape_json(name),
@@ -1419,7 +1603,7 @@ fn env_command(cli: &Cli) -> Result<(), AgentError> {
     let response = api_request(
         cli,
         "PUT",
-        &format!("/v1/apps/{app}/env"),
+        &format!("/v1/apps/{}/env", url_encode(app)),
         Some(&token),
         Some(&body),
     )?;
@@ -1427,8 +1611,82 @@ fn env_command(cli: &Cli) -> Result<(), AgentError> {
     Ok(())
 }
 
+fn require_env_assignment(cli: &Cli) -> Result<&str, AgentError> {
+    let assignment = cli.args.get(1).ok_or_else(invalid_env_error)?;
+    if !assignment.contains('=') {
+        return Err(invalid_env_error());
+    }
+    Ok(assignment)
+}
+
+fn invalid_env_error() -> AgentError {
+    AgentError::new(
+        "invalid_env",
+        "Environment assignment must be KEY=value.",
+        "Pass one uppercase shell-safe environment assignment, for example `API_KEY=value`.",
+    )
+}
+
+fn domains_command(cli: &Cli) -> Result<(), AgentError> {
+    let action = cli.args.first().map_or("list", String::as_str);
+    if action == "list" {
+        return app_get(cli, "domains");
+    }
+    let domain = cli.args.get(1).ok_or_else(|| {
+        AgentError::new(
+            "missing_domain",
+            "Domain is required.",
+            "Use `zerct domains add --app <app> api.example.com`.",
+        )
+    })?;
+    let app = require_app(cli)?;
+    let token = read_or_login_token(&current_dir_or_dot(), cli)?;
+    let route = match action {
+        "add" => format!("/v1/apps/{}/domains", url_encode(app)),
+        "verify" => format!(
+            "/v1/apps/{}/domains/{}/verify",
+            url_encode(app),
+            url_encode(domain)
+        ),
+        "delete" => format!(
+            "/v1/apps/{}/domains/{}",
+            url_encode(app),
+            url_encode(domain)
+        ),
+        _unknown => {
+            return Err(AgentError::new(
+                "unknown_command",
+                "Unknown domains command.",
+                "Use `domains list`, `domains add`, `domains verify`, or `domains delete`.",
+            ));
+        }
+    };
+    let body = (action == "add").then(|| format!("{{\"domain\":\"{}\"}}", escape_json(domain)));
+    let response = api_request(
+        cli,
+        domain_method(action),
+        &route,
+        Some(&token),
+        body.as_deref(),
+    )?;
+    println!("{response}");
+    Ok(())
+}
+
+fn domain_method(action: &str) -> &'static str {
+    match action {
+        "delete" => "DELETE",
+        _other => "POST",
+    }
+}
+
 fn billing(cli: &Cli) -> Result<(), AgentError> {
     let token = read_or_login_token(&current_dir_or_dot(), cli)?;
+    if cli.args.first().map(String::as_str) == Some("portal") {
+        let response = api_request(cli, "POST", "/v1/billing/portal", Some(&token), None)?;
+        println!("{response}");
+        return Ok(());
+    }
     let body = "{\"target_plan\":\"pro\",\"reason\":\"Upgrade to Zerct Pro.\"}";
     let response = api_request(
         cli,
@@ -2254,6 +2512,24 @@ fn parse_u16(value: &str, code: &'static str) -> Result<u16, AgentError> {
     })
 }
 
+fn parse_u64(value: &str, code: &'static str) -> Result<u64, AgentError> {
+    let parsed = value.parse::<u64>().map_err(|error| {
+        AgentError::new(
+            code,
+            format!("Invalid numeric value: {error}"),
+            "Use a positive integer value.",
+        )
+    })?;
+    if parsed == 0 {
+        return Err(AgentError::new(
+            code,
+            "Invalid numeric value: zero is not allowed.",
+            "Use a positive integer value.",
+        ));
+    }
+    Ok(parsed)
+}
+
 fn service_name_from_dir(project_dir: &Path) -> String {
     let value = project_dir
         .file_name()
@@ -2467,6 +2743,36 @@ fn progress(cli: &Cli, message: &str) {
     }
 }
 
+fn page_query(cli: &Cli) -> String {
+    let mut params = Vec::new();
+    if let Some(limit) = &cli.limit {
+        params.push(format!("limit={}", url_encode(limit)));
+    }
+    if let Some(cursor) = &cli.cursor {
+        params.push(format!("cursor={}", url_encode(cursor)));
+    }
+    if params.is_empty() {
+        String::new()
+    } else {
+        format!("?{}", params.join("&"))
+    }
+}
+
+fn url_encode(value: &str) -> String {
+    let mut encoded = String::new();
+    for byte in value.bytes() {
+        if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
+            encoded.push(char::from(byte));
+        } else {
+            const HEX: &[u8; 16] = b"0123456789ABCDEF";
+            encoded.push('%');
+            encoded.push(char::from(HEX[usize::from(byte >> 4)]));
+            encoded.push(char::from(HEX[usize::from(byte & 15)]));
+        }
+    }
+    encoded
+}
+
 fn json_string_field(source: &str, field: &str) -> Option<String> {
     let needle = format!("\"{field}\":");
     let start = source.find(&needle)? + needle.len();
@@ -2498,6 +2804,11 @@ fn json_string_field(source: &str, field: &str) -> Option<String> {
     None
 }
 
+fn json_string_after(source: &str, marker: &str, field: &str) -> Option<String> {
+    let start = source.find(marker)?;
+    json_string_field(source.get(start..)?, field)
+}
+
 fn json_u64_field(source: &str, field: &str) -> Option<u64> {
     let needle = format!("\"{field}\":");
     let start = source.find(&needle)? + needle.len();
@@ -2508,6 +2819,27 @@ fn json_u64_field(source: &str, field: &str) -> Option<u64> {
         .take_while(char::is_ascii_digit)
         .collect();
     digits.parse().ok()
+}
+
+fn append_json_field(source: &str, name: &str, raw_value: &str) -> Result<String, AgentError> {
+    let body = source.trim_end().strip_suffix('}').ok_or_else(|| {
+        AgentError::new(
+            "api_unavailable",
+            "Zerct API response was invalid.",
+            "Retry the command. If it keeps failing, check Zerct status.",
+        )
+    })?;
+    let mut output = String::with_capacity(source.len() + raw_value.len() + name.len() + 8);
+    output.push_str(body);
+    if !body.trim_end().ends_with('{') {
+        output.push(',');
+    }
+    output.push('"');
+    output.push_str(name);
+    output.push_str("\":");
+    output.push_str(raw_value);
+    output.push('}');
+    Ok(output)
 }
 
 fn escape_json(value: &str) -> String {

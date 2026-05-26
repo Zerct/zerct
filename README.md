@@ -103,8 +103,10 @@ then deploy the repo root with `npx @zerct/zerct deploy`.
 
 Homebrew formulae live in the separate public `Zerct/homebrew-tap` repository.
 
-`packages/zerct` is the CLI behavior source of truth. Other package surfaces
-must stay thin or share the same contract so deploy UX does not drift.
+`packages/zerct` is the CLI behavior source of truth. PyPI and Cargo CLIs must
+expose the same agent-facing commands, recovery text, login behavior, deploy
+flow, logs, env, domains, usage, and billing operations so deploy UX does not
+drift.
 
 ## Example
 
@@ -136,4 +138,13 @@ npx @zerct/zerct env list --app app_1
 npx @zerct/zerct domains list --app app_1
 npx @zerct/zerct domains verify --app app_1 api.example.com
 npx @zerct/zerct billing portal
+```
+
+The same commands are available through PyPI and Cargo after installation:
+
+```sh
+pipx install zerct
+cargo install zerct
+zerct deploy --wait
+zerct logs --build job_1 --json
 ```
