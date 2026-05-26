@@ -5,7 +5,7 @@
     "title": "Zerct API",
     "summary": "Control-plane API for Zerct deploys.",
     "version": "0.1.0",
-    "description": "Use the Zerct API to authenticate, create Rust backend deploys, manage account onboarding, and inspect deploy health.",
+    "description": "Use the Zerct API to authenticate, create Rust backend deploys, manage account onboarding, and inspect deploy health. Context: info.",
     "termsOfService": "https://zerct.com/legal/terms",
     "contact": {
       "name": "Zerct",
@@ -18,13 +18,13 @@
     }
   },
   "externalDocs": {
-    "description": "Zerct documentation",
+    "description": "Zerct documentation Context: externalDocs.",
     "url": "https://docs.zerct.com"
   },
   "servers": [
     {
       "url": "https://api.zerct.com",
-      "description": "Production API"
+      "description": "Production API Context: servers.0."
     }
   ],
   "security": [
@@ -35,19 +35,19 @@
   "tags": [
     {
       "name": "Accounts",
-      "description": "Private account onboarding and dashboard endpoints."
+      "description": "Private account onboarding and dashboard endpoints. Context: tags.0."
     },
     {
       "name": "Auth",
-      "description": "Authentication endpoints."
+      "description": "Authentication endpoints. Context: tags.1."
     },
     {
       "name": "Deploy",
-      "description": "Deploy lifecycle endpoints."
+      "description": "Deploy lifecycle endpoints. Context: tags.2."
     },
     {
       "name": "Health",
-      "description": "API availability endpoints."
+      "description": "API availability endpoints. Context: tags.3."
     }
   ],
   "paths": {
@@ -57,7 +57,7 @@
           "Health"
         ],
         "summary": "Check API health",
-        "description": "Returns the Zerct control-plane health state.",
+        "description": "Returns the Zerct control-plane health state. Context: paths./healthz.get.",
         "operationId": "getHealth",
         "responses": {
           "200": {
@@ -84,7 +84,7 @@
           "Auth"
         ],
         "summary": "Start device login",
-        "description": "Starts a device login flow for the Zerct CLI.",
+        "description": "Starts a device login flow for the Zerct CLI. Context: paths./v1/login/device.post.",
         "operationId": "startDeviceLogin",
         "responses": {
           "200": {
@@ -111,13 +111,13 @@
           "Auth"
         ],
         "summary": "Poll device login",
-        "description": "Polls a first-run browser login until it is complete, pending, or expired.",
+        "description": "Polls a first-run browser login until it is complete, pending, or expired. Context: paths./v1/login/device/{device_code}.get.",
         "operationId": "pollDeviceLogin",
         "parameters": [
           {
             "name": "device_code",
             "in": "path",
-            "description": "Opaque device code returned by start device login.",
+            "description": "Opaque device code returned by start device login. Context: paths./v1/login/device/{device_code}.get.parameters.0.",
             "required": true,
             "schema": {
               "type": "string",
@@ -155,7 +155,7 @@
           "Accounts"
         ],
         "summary": "Get account profile",
-        "description": "Returns the authenticated account profile used by web onboarding and SDK flows.",
+        "description": "Returns the authenticated account profile used by web onboarding and SDK flows. Context: paths./v1/account.get.",
         "operationId": "getAccountProfile",
         "responses": {
           "200": {
@@ -180,10 +180,10 @@
           "Accounts"
         ],
         "summary": "Update account profile",
-        "description": "Sets the private Zerct handle and display name used for the authenticated dashboard.",
+        "description": "Sets the private Zerct handle and display name used for the authenticated dashboard. Context: paths./v1/account.put.",
         "operationId": "updateAccountProfile",
         "requestBody": {
-          "description": "Account handle and display name.",
+          "description": "Account handle and display name. Context: paths./v1/account.put.requestBody.",
           "required": true,
           "content": {
             "application/json": {
@@ -227,7 +227,7 @@
           "Accounts"
         ],
         "summary": "Get account dashboard",
-        "description": "Returns deploys and usage for the authenticated account dashboard.",
+        "description": "Returns deploys and usage for the authenticated account dashboard. Context: paths./v1/account/dashboard.get.",
         "operationId": "getAccountDashboard",
         "responses": {
           "200": {
@@ -254,10 +254,10 @@
           "Deploy"
         ],
         "summary": "Deploy app",
-        "description": "Deploys an app from a source archive produced by the Zerct CLI.",
+        "description": "Deploys an app from a source archive produced by the Zerct CLI. Context: paths./v1/deploy.post.",
         "operationId": "createDeploy",
         "requestBody": {
-          "description": "Deploy source archive and runtime metadata.",
+          "description": "Deploy source archive and runtime metadata. Context: paths./v1/deploy.post.requestBody.",
           "required": true,
           "content": {
             "application/json": {
@@ -311,7 +311,7 @@
           "Deploy"
         ],
         "summary": "List apps",
-        "description": "List apps for GET /v1/apps.",
+        "description": "List apps for GET /v1/apps. Context: paths./v1/apps.get.",
         "operationId": "listApps",
         "responses": {
           "200": {
@@ -338,7 +338,7 @@
           "Deploy"
         ],
         "summary": "Get app",
-        "description": "Get app for GET /v1/apps/{app_id}.",
+        "description": "Get app for GET /v1/apps/{app_id}. Context: paths./v1/apps/{app_id}.get.",
         "operationId": "getApp",
         "responses": {
           "200": {
@@ -370,7 +370,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -380,7 +380,7 @@
           "Deploy"
         ],
         "summary": "Delete app",
-        "description": "Deletes an app when it is not actively running.",
+        "description": "Deletes an app when it is not actively running. Context: paths./v1/apps/{app_id}.delete.",
         "operationId": "deleteApp",
         "responses": {
           "200": {
@@ -412,7 +412,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}.delete.parameters.0. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -424,7 +424,7 @@
           "Deploy"
         ],
         "summary": "List app deploys",
-        "description": "List app deploys for GET /v1/apps/{app_id}/deploys.",
+        "description": "List app deploys for GET /v1/apps/{app_id}/deploys. Context: paths./v1/apps/{app_id}/deploys.get.",
         "operationId": "listAppDeploys",
         "responses": {
           "200": {
@@ -456,7 +456,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -473,7 +473,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return.",
+            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/deploys.get.parameters.1.",
             "example": 1
           },
           {
@@ -488,7 +488,7 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/deploys.get.parameters.2.",
             "example": "1000"
           }
         ]
@@ -500,7 +500,7 @@
           "Deploy"
         ],
         "summary": "List app builds",
-        "description": "List app builds for GET /v1/apps/{app_id}/builds.",
+        "description": "List app builds for GET /v1/apps/{app_id}/builds. Context: paths./v1/apps/{app_id}/builds.get.",
         "operationId": "listAppBuilds",
         "responses": {
           "200": {
@@ -532,7 +532,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/builds.get.parameters.0. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -549,7 +549,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/builds.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/builds.get.parameters.1. Context: paths./v1/apps/{app_id}/builds.get.parameters.1.",
             "example": 1
           },
           {
@@ -564,7 +564,7 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/builds.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/builds.get.parameters.2. Context: paths./v1/apps/{app_id}/builds.get.parameters.2.",
             "example": "1000"
           }
         ]
@@ -576,7 +576,7 @@
           "Deploy"
         ],
         "summary": "Read app logs",
-        "description": "Returns the latest app logs in chronological order.",
+        "description": "Returns the latest app logs in chronological order. Context: paths./v1/apps/{app_id}/logs.get.",
         "operationId": "readAppLogs",
         "responses": {
           "200": {
@@ -608,7 +608,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/logs.get.parameters.0. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -625,7 +625,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/logs.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/logs.get.parameters.1. Context: paths./v1/apps/{app_id}/logs.get.parameters.1.",
             "example": 1
           },
           {
@@ -640,7 +640,7 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/logs.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/logs.get.parameters.2. Context: paths./v1/apps/{app_id}/logs.get.parameters.2.",
             "example": "1000"
           }
         ]
@@ -652,7 +652,7 @@
           "Deploy"
         ],
         "summary": "Get managed Postgres",
-        "description": "Get managed Postgres for GET /v1/apps/{app_id}/database.",
+        "description": "Get managed Postgres for GET /v1/apps/{app_id}/database. Context: paths./v1/apps/{app_id}/database.get.",
         "operationId": "getAppDatabase",
         "responses": {
           "200": {
@@ -684,7 +684,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/database.get.parameters.0. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -696,7 +696,7 @@
           "Deploy"
         ],
         "summary": "List environment variables",
-        "description": "List environment variables for GET /v1/apps/{app_id}/env.",
+        "description": "List environment variables for GET /v1/apps/{app_id}/env. Context: paths./v1/apps/{app_id}/env.get.",
         "operationId": "listAppEnv",
         "responses": {
           "200": {
@@ -728,7 +728,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.get.parameters.0. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -738,7 +738,7 @@
           "Deploy"
         ],
         "summary": "Set environment variable",
-        "description": "Set environment variable for PUT /v1/apps/{app_id}/env.",
+        "description": "Set environment variable for PUT /v1/apps/{app_id}/env. Context: paths./v1/apps/{app_id}/env.put.",
         "operationId": "setAppEnv",
         "responses": {
           "200": {
@@ -770,7 +770,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env.put.parameters.0. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
             "example": "app_1"
           }
         ],
@@ -792,7 +792,7 @@
               }
             }
           },
-          "description": "Request body for PUT /v1/apps/{app_id}/env."
+          "description": "Request body for PUT /v1/apps/{app_id}/env. Context: paths./v1/apps/{app_id}/env.put.requestBody."
         }
       }
     },
@@ -802,7 +802,7 @@
           "Deploy"
         ],
         "summary": "Delete environment variable",
-        "description": "Delete environment variable for DELETE /v1/apps/{app_id}/env/{name}.",
+        "description": "Delete environment variable for DELETE /v1/apps/{app_id}/env/{name}. Context: paths./v1/apps/{app_id}/env/{name}.delete.",
         "operationId": "deleteAppEnv",
         "responses": {
           "200": {
@@ -834,7 +834,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
             "example": "app_1"
           },
           {
@@ -849,7 +849,7 @@
                 "DATABASE_URL"
               ]
             },
-            "description": "Environment variable name.",
+            "description": "Environment variable name. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.1.",
             "example": "DATABASE_URL"
           }
         ]
@@ -861,7 +861,7 @@
           "Deploy"
         ],
         "summary": "List custom domains",
-        "description": "List custom domains for GET /v1/apps/{app_id}/domains.",
+        "description": "List custom domains for GET /v1/apps/{app_id}/domains. Context: paths./v1/apps/{app_id}/domains.get.",
         "operationId": "listAppDomains",
         "responses": {
           "200": {
@@ -893,7 +893,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.get.parameters.0. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -903,7 +903,7 @@
           "Deploy"
         ],
         "summary": "Add custom domain",
-        "description": "Add custom domain for POST /v1/apps/{app_id}/domains.",
+        "description": "Add custom domain for POST /v1/apps/{app_id}/domains. Context: paths./v1/apps/{app_id}/domains.post.",
         "operationId": "addAppDomain",
         "responses": {
           "200": {
@@ -935,7 +935,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains.post.parameters.0. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
             "example": "app_1"
           }
         ],
@@ -956,7 +956,7 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/domains."
+          "description": "Request body for POST /v1/apps/{app_id}/domains. Context: paths./v1/apps/{app_id}/domains.post.requestBody."
         }
       }
     },
@@ -966,7 +966,7 @@
           "Deploy"
         ],
         "summary": "Delete custom domain",
-        "description": "Delete custom domain for DELETE /v1/apps/{app_id}/domains/{domain}.",
+        "description": "Delete custom domain for DELETE /v1/apps/{app_id}/domains/{domain}. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.",
         "operationId": "deleteAppDomain",
         "responses": {
           "200": {
@@ -998,7 +998,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
             "example": "app_1"
           },
           {
@@ -1013,7 +1013,7 @@
                 "api.example.com"
               ]
             },
-            "description": "Custom domain name.",
+            "description": "Custom domain name. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.1.",
             "example": "api.example.com"
           }
         ]
@@ -1025,7 +1025,7 @@
           "Deploy"
         ],
         "summary": "Get deploy",
-        "description": "Get deploy for GET /v1/deploys/{deploy_id}.",
+        "description": "Get deploy for GET /v1/deploys/{deploy_id}. Context: paths./v1/deploys/{deploy_id}.get.",
         "operationId": "getDeploy",
         "responses": {
           "200": {
@@ -1057,7 +1057,7 @@
                 "deploy_1"
               ]
             },
-            "description": "Zerct deploy id.",
+            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}.get.parameters.0.",
             "example": "deploy_1"
           }
         ]
@@ -1069,7 +1069,7 @@
           "Deploy"
         ],
         "summary": "Cancel queued deploy",
-        "description": "Cancel queued deploy for POST /v1/deploys/{deploy_id}/cancel.",
+        "description": "Cancel queued deploy for POST /v1/deploys/{deploy_id}/cancel. Context: paths./v1/deploys/{deploy_id}/cancel.post.",
         "operationId": "cancelDeploy",
         "responses": {
           "200": {
@@ -1101,7 +1101,7 @@
                 "deploy_1"
               ]
             },
-            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0.",
+            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0.",
             "example": "deploy_1"
           }
         ]
@@ -1113,7 +1113,7 @@
           "Deploy"
         ],
         "summary": "Read deploy logs",
-        "description": "Read deploy logs for GET /v1/deploys/{deploy_id}/logs.",
+        "description": "Read deploy logs for GET /v1/deploys/{deploy_id}/logs. Context: paths./v1/deploys/{deploy_id}/logs.get.",
         "operationId": "readDeployLogs",
         "responses": {
           "200": {
@@ -1145,7 +1145,7 @@
                 "deploy_1"
               ]
             },
-            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0.",
+            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0.",
             "example": "deploy_1"
           },
           {
@@ -1162,7 +1162,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.1. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.1.",
             "example": 1
           },
           {
@@ -1177,7 +1177,7 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.2. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.2.",
             "example": "1000"
           }
         ]
@@ -1189,7 +1189,7 @@
           "Deploy"
         ],
         "summary": "Get build",
-        "description": "Get build for GET /v1/builds/{build_id}.",
+        "description": "Get build for GET /v1/builds/{build_id}. Context: paths./v1/builds/{build_id}.get.",
         "operationId": "getBuild",
         "responses": {
           "200": {
@@ -1221,7 +1221,7 @@
                 "job_1"
               ]
             },
-            "description": "Zerct build id.",
+            "description": "Zerct build id. Context: paths./v1/builds/{build_id}.get.parameters.0.",
             "example": "job_1"
           }
         ]
@@ -1233,7 +1233,7 @@
           "Accounts"
         ],
         "summary": "Create billing portal link",
-        "description": "Create billing portal link for POST /v1/billing/portal.",
+        "description": "Create billing portal link for POST /v1/billing/portal. Context: paths./v1/billing/portal.post.",
         "operationId": "createBillingPortal",
         "responses": {
           "200": {
@@ -1260,14 +1260,14 @@
           "Deploy"
         ],
         "summary": "Read build logs",
-        "description": "Returns logs associated with a build job in chronological order.",
+        "description": "Returns logs associated with a build job in chronological order. Context: paths./v1/builds/{build_id}/logs.get.",
         "operationId": "readBuildLogs",
         "parameters": [
           {
             "name": "build_id",
             "in": "path",
             "required": true,
-            "description": "Zerct build job id.",
+            "description": "Zerct build job id. Context: paths./v1/builds/{build_id}/logs.get.parameters.0.",
             "schema": {
               "type": "string",
               "pattern": "^job_[A-Za-z0-9_]+$",
@@ -1282,7 +1282,7 @@
             "name": "limit",
             "in": "query",
             "required": false,
-            "description": "Maximum build log records to return.",
+            "description": "Maximum build log records to return. Context: paths./v1/builds/{build_id}/logs.get.parameters.1.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1299,7 +1299,7 @@
             "name": "cursor",
             "in": "query",
             "required": false,
-            "description": "Cursor for older build log records.",
+            "description": "Cursor for older build log records. Context: paths./v1/builds/{build_id}/logs.get.parameters.2.",
             "schema": {
               "type": "string",
               "pattern": "^[0-9A-Za-z_:-]{1,128}$",
@@ -1329,6 +1329,239 @@
           }
         }
       }
+    },
+    "/v1/capabilities": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Discover API capabilities",
+        "description": "Returns the public API capability map for humans and agents. Context: paths./v1/capabilities.get.",
+        "operationId": "getCapabilities",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CapabilitiesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get current account",
+        "description": "Returns the authenticated account profile. Context: paths./v1/me.get.",
+        "operationId": "getCurrentAccount",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountProfileLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/usage": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account usage",
+        "description": "Returns account usage and included plan limits. Context: paths./v1/usage.get.",
+        "operationId": "getAccountUsage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountUsageLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/deploys": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List deploys",
+        "description": "Lists recent deploys account-wide or filtered by app id. Context: paths./v1/deploys.get.",
+        "operationId": "listDeploys",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional app id filter. Context: paths./v1/deploys.get.parameters.0.",
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_]+$",
+              "maxLength": 64,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "example": "app_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum records to return. Context: paths./v1/deploys.get.parameters.1. Context: paths./v1/deploys.get.parameters.1.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "examples": [
+                100
+              ]
+            },
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor returned by the previous response. Context: paths./v1/deploys.get.parameters.2. Context: paths./v1/deploys.get.parameters.2.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 128,
+              "examples": [
+                "1000"
+              ]
+            },
+            "example": "1000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DeploysLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/builds": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List builds",
+        "description": "Lists recent build jobs account-wide or filtered by app id. Context: paths./v1/builds.get.",
+        "operationId": "listBuilds",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional app id filter. Context: paths./v1/builds.get.parameters.0. Context: paths./v1/builds.get.parameters.0.",
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_]+$",
+              "maxLength": 64,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "example": "app_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum records to return. Context: paths./v1/builds.get.parameters.1. Context: paths./v1/builds.get.parameters.1.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "examples": [
+                100
+              ]
+            },
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "Cursor returned by the previous response. Context: paths./v1/builds.get.parameters.2. Context: paths./v1/builds.get.parameters.2.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 128,
+              "examples": [
+                "1000"
+              ]
+            },
+            "example": "1000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/BuildsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1337,12 +1570,12 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Zerct session token returned by the login flow. JWT handling follows RFC8725 best current practices."
+        "description": "Zerct session token returned by the login flow. JWT handling follows RFC8725 best current practices. Context: components.securitySchemes.bearerAuth."
       }
     },
     "headers": {
       "RateLimitLimit": {
-        "description": "Maximum requests available in the current rate-limit window.",
+        "description": "Maximum requests available in the current rate-limit window. Context: components.headers.RateLimitLimit.",
         "schema": {
           "type": "integer",
           "format": "int32",
@@ -1354,7 +1587,7 @@
         }
       },
       "RateLimitRemaining": {
-        "description": "Requests remaining in the current rate-limit window.",
+        "description": "Requests remaining in the current rate-limit window. Context: components.headers.RateLimitRemaining.",
         "schema": {
           "type": "integer",
           "format": "int32",
@@ -1366,7 +1599,7 @@
         }
       },
       "RateLimitReset": {
-        "description": "Unix timestamp for the end of the current rate-limit window.",
+        "description": "Unix timestamp for the end of the current rate-limit window. Context: components.headers.RateLimitReset.",
         "schema": {
           "type": "integer",
           "format": "int64",
@@ -1378,7 +1611,7 @@
         }
       },
       "RetryAfter": {
-        "description": "Seconds to wait before retrying a rate-limited request.",
+        "description": "Seconds to wait before retrying a rate-limited request. Context: components.headers.RetryAfter.",
         "schema": {
           "type": "integer",
           "format": "int32",
@@ -1392,7 +1625,7 @@
     },
     "responses": {
       "HealthOk": {
-        "description": "The API is healthy.",
+        "description": "The API is healthy. Context: components.responses.HealthOk.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1425,7 +1658,7 @@
         }
       },
       "LoginStarted": {
-        "description": "Device login information.",
+        "description": "Device login information. Context: components.responses.LoginStarted.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1462,7 +1695,7 @@
         }
       },
       "LoginPolled": {
-        "description": "Device login poll result.",
+        "description": "Device login poll result. Context: components.responses.LoginPolled.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1500,7 +1733,7 @@
         }
       },
       "DeployAccepted": {
-        "description": "Deploy accepted.",
+        "description": "Deploy accepted. Context: components.responses.DeployAccepted.",
         "content": {
           "application/json": {
             "schema": {
@@ -1583,7 +1816,7 @@
         }
       },
       "BadRequest": {
-        "description": "The request body or parameters are invalid.",
+        "description": "The request body or parameters are invalid. Context: components.responses.BadRequest.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1619,7 +1852,7 @@
         }
       },
       "Unauthorized": {
-        "description": "Authentication is required or the token is invalid.",
+        "description": "Authentication is required or the token is invalid. Context: components.responses.Unauthorized.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1655,7 +1888,7 @@
         }
       },
       "TooManyRequests": {
-        "description": "The rate limit has been exceeded.",
+        "description": "The rate limit has been exceeded. Context: components.responses.TooManyRequests.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1691,7 +1924,7 @@
         }
       },
       "InternalServerError": {
-        "description": "The API could not complete the request.",
+        "description": "The API could not complete the request. Context: components.responses.InternalServerError.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1727,7 +1960,7 @@
         }
       },
       "AccountProfileLoaded": {
-        "description": "Signed-in account profile response.",
+        "description": "Signed-in account profile response. Context: components.responses.AccountProfileLoaded.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1754,6 +1987,7 @@
                   "accountId": "acct_01HW0000000000000000000000",
                   "email": "dev@example.com",
                   "provider": "github",
+                  "plan": "free",
                   "handle": "acme",
                   "displayName": "Acme",
                   "accountUrl": "https://zerct.com/acme"
@@ -1764,7 +1998,7 @@
         }
       },
       "AccountProfileUpdated": {
-        "description": "Updated authenticated account profile.",
+        "description": "Updated authenticated account profile. Context: components.responses.AccountProfileUpdated.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1791,6 +2025,7 @@
                   "accountId": "acct_01HW0000000000000000000000",
                   "email": "dev@example.com",
                   "provider": "github",
+                  "plan": "free",
                   "handle": "acme",
                   "displayName": "Acme",
                   "accountUrl": "https://zerct.com/acme"
@@ -1801,7 +2036,7 @@
         }
       },
       "AccountDashboardLoaded": {
-        "description": "Authenticated account dashboard.",
+        "description": "Authenticated account dashboard. Context: components.responses.AccountDashboardLoaded.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -1829,34 +2064,37 @@
                     "accountId": "acct_01HW0000000000000000000000",
                     "email": "dev@example.com",
                     "provider": "github",
+                    "plan": "free",
                     "handle": "acme",
                     "displayName": "Acme",
                     "accountUrl": "https://zerct.com/acme"
                   },
-                  "apps": [
-                    {
-                      "appId": "app_01HW0000000000000000000000",
-                      "name": "hello-rust",
-                      "slug": "hello-rust",
-                      "url": "https://hello-rust.zerct.app",
-                      "plan": "free",
-                      "runtimeStatus": "running",
-                      "latestBuildStatus": "succeeded",
-                      "deployCount": 3,
-                      "runtimeMemoryMib": 256,
-                      "runtimeCpuMillis": 250,
-                      "databaseStorageMib": 512,
-                      "idleTimeoutMinutes": 15,
-                      "latestDeployAt": "2026-05-25T12:00:00.000Z"
-                    }
-                  ],
+                  "apps": [],
                   "usage": {
                     "appCount": 1,
                     "runningCount": 1,
-                    "runtimeMemoryMib": 256,
+                    "databaseCount": 1,
+                    "runtimeMemoryMib": 512,
                     "runtimeCpuMillis": 250,
                     "databaseStorageMib": 512,
-                    "deployCount": 3
+                    "deployCount": 3,
+                    "monthlyDeployCount": 3,
+                    "monthlyBuildMinutes": 5,
+                    "customDomainCount": 1
+                  },
+                  "limits": {
+                    "projects": 3,
+                    "managedDatabases": 1,
+                    "postgresStorageMib": 512,
+                    "postgresStorageMibPerDatabase": 512,
+                    "dataTransferGib": 25,
+                    "monthlyBuildMinutes": 300,
+                    "monthlyDeployments": 200,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 600,
+                    "customDomains": 10,
+                    "alwaysOnApps": 0,
+                    "logRetentionDays": 3
                   }
                 }
               }
@@ -1865,7 +2103,7 @@
         }
       },
       "AppsLoaded": {
-        "description": "Apps loaded.",
+        "description": "Apps loaded. Context: components.responses.AppsLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -1913,7 +2151,7 @@
         }
       },
       "StatusLoaded": {
-        "description": "App status loaded.",
+        "description": "App status loaded. Context: components.responses.StatusLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -1966,7 +2204,7 @@
         }
       },
       "DeploysLoaded": {
-        "description": "Deploys loaded.",
+        "description": "Deploys loaded. Context: components.responses.DeploysLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2006,7 +2244,7 @@
         }
       },
       "DeployDetailsLoaded": {
-        "description": "Deploy details loaded.",
+        "description": "Deploy details loaded. Context: components.responses.DeployDetailsLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2059,7 +2297,7 @@
         }
       },
       "DeployCanceled": {
-        "description": "Deploy canceled.",
+        "description": "Deploy canceled. Context: components.responses.DeployCanceled.",
         "content": {
           "application/json": {
             "schema": {
@@ -2092,7 +2330,7 @@
         }
       },
       "BuildsLoaded": {
-        "description": "Builds loaded.",
+        "description": "Builds loaded. Context: components.responses.BuildsLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2131,7 +2369,7 @@
         }
       },
       "BuildDetailsLoaded": {
-        "description": "Build details loaded.",
+        "description": "Build details loaded. Context: components.responses.BuildDetailsLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2178,7 +2416,7 @@
         }
       },
       "LogsLoaded": {
-        "description": "Logs loaded.",
+        "description": "Logs loaded. Context: components.responses.LogsLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2218,7 +2456,7 @@
         }
       },
       "DatabaseLoaded": {
-        "description": "Database loaded.",
+        "description": "Database loaded. Context: components.responses.DatabaseLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2258,7 +2496,7 @@
         }
       },
       "EnvLoaded": {
-        "description": "Environment variables loaded.",
+        "description": "Environment variables loaded. Context: components.responses.EnvLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2296,7 +2534,7 @@
         }
       },
       "EnvSet": {
-        "description": "Environment variable set.",
+        "description": "Environment variable set. Context: components.responses.EnvSet.",
         "content": {
           "application/json": {
             "schema": {
@@ -2329,7 +2567,7 @@
         }
       },
       "EnvDeleted": {
-        "description": "Environment variable deleted.",
+        "description": "Environment variable deleted. Context: components.responses.EnvDeleted.",
         "content": {
           "application/json": {
             "schema": {
@@ -2363,7 +2601,7 @@
         }
       },
       "DomainsLoaded": {
-        "description": "Domains loaded.",
+        "description": "Domains loaded. Context: components.responses.DomainsLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2405,7 +2643,7 @@
         }
       },
       "DomainAdded": {
-        "description": "Domain added.",
+        "description": "Domain added. Context: components.responses.DomainAdded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2443,7 +2681,7 @@
         }
       },
       "DomainDeleted": {
-        "description": "Domain deleted.",
+        "description": "Domain deleted. Context: components.responses.DomainDeleted.",
         "content": {
           "application/json": {
             "schema": {
@@ -2476,7 +2714,7 @@
         }
       },
       "BillingPortalCreated": {
-        "description": "Billing portal created.",
+        "description": "Billing portal created. Context: components.responses.BillingPortalCreated.",
         "content": {
           "application/json": {
             "schema": {
@@ -2509,12 +2747,133 @@
             "$ref": "#/components/headers/RetryAfter"
           }
         }
+      },
+      "CapabilitiesLoaded": {
+        "description": "API capabilities loaded. Context: components.responses.CapabilitiesLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/CapabilitiesResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "API capabilities loaded.",
+                "value": {
+                  "product": "Zerct",
+                  "api_version": "v1",
+                  "docs_url": "https://docs.zerct.com",
+                  "openapi_url": "https://docs.zerct.com/openapi.json",
+                  "auth": "Use device login once, then a bearer token.",
+                  "agent_workflow": [
+                    "Call GET /v1/capabilities first."
+                  ],
+                  "endpoints": [
+                    {
+                      "name": "Deploy",
+                      "method": "POST",
+                      "path": "/v1/deploy",
+                      "auth_required": true,
+                      "description": "Queues a deploy. Context: components.responses.CapabilitiesLoaded.content.application/json.examples.example.value.endpoints.0.",
+                      "agent_instruction": "Run local checks first."
+                    }
+                  ],
+                  "commands": [
+                    {
+                      "command": "npx @zerct/zerct deploy",
+                      "description": "Deploys the current repo. Context: components.responses.CapabilitiesLoaded.content.application/json.examples.example.value.commands.0."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountUsageLoaded": {
+        "description": "Account usage loaded. Context: components.responses.AccountUsageLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountUsageResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Account usage loaded.",
+                "value": {
+                  "profile": {
+                    "accountId": "acct_01HW0000000000000000000000",
+                    "email": "dev@example.com",
+                    "provider": "github",
+                    "plan": "free",
+                    "handle": "acme",
+                    "displayName": "Acme",
+                    "accountUrl": "https://zerct.com/acme"
+                  },
+                  "usage": {
+                    "appCount": 1,
+                    "runningCount": 1,
+                    "databaseCount": 1,
+                    "runtimeMemoryMib": 512,
+                    "runtimeCpuMillis": 250,
+                    "databaseStorageMib": 512,
+                    "deployCount": 3,
+                    "monthlyDeployCount": 3,
+                    "monthlyBuildMinutes": 5,
+                    "customDomainCount": 1
+                  },
+                  "limits": {
+                    "projects": 3,
+                    "managedDatabases": 1,
+                    "postgresStorageMib": 512,
+                    "postgresStorageMibPerDatabase": 512,
+                    "dataTransferGib": 25,
+                    "monthlyBuildMinutes": 300,
+                    "monthlyDeployments": 200,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 600,
+                    "customDomains": 10,
+                    "alwaysOnApps": 0,
+                    "logRetentionDays": 3
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "schemas": {
       "HealthResponse": {
         "type": "object",
-        "description": "Health response for the control-plane API.",
+        "description": "Health response for the control-plane API. Context: components.schemas.HealthResponse.",
         "additionalProperties": false,
         "required": [
           "ok",
@@ -2523,14 +2882,14 @@
         "properties": {
           "ok": {
             "type": "boolean",
-            "description": "Whether the API is healthy.",
+            "description": "Whether the API is healthy. Context: components.schemas.HealthResponse.properties.ok.",
             "examples": [
               true
             ]
           },
           "service": {
             "type": "string",
-            "description": "Service identifier.",
+            "description": "Service identifier. Context: components.schemas.HealthResponse.properties.service.",
             "enum": [
               "zerct-api"
             ],
@@ -2548,7 +2907,7 @@
       },
       "LoginStartResponse": {
         "type": "object",
-        "description": "Device login response for the Zerct CLI.",
+        "description": "Device login response for the Zerct CLI. Context: components.schemas.LoginStartResponse.",
         "additionalProperties": false,
         "required": [
           "loginUrl",
@@ -2561,7 +2920,7 @@
         "properties": {
           "loginUrl": {
             "type": "string",
-            "description": "Browser URL where the user completes login.",
+            "description": "Browser URL where the user completes login. Context: components.schemas.LoginStartResponse.properties.loginUrl.",
             "format": "uri",
             "examples": [
               "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123"
@@ -2569,7 +2928,7 @@
           },
           "verificationUri": {
             "type": "string",
-            "description": "Browser URL where the user chooses GitHub or Google.",
+            "description": "Browser URL where the user chooses GitHub or Google. Context: components.schemas.LoginStartResponse.properties.verificationUri.",
             "format": "uri",
             "examples": [
               "https://zerct.com/login"
@@ -2577,7 +2936,7 @@
           },
           "deviceCode": {
             "type": "string",
-            "description": "Opaque code used by the CLI polling endpoint.",
+            "description": "Opaque code used by the CLI polling endpoint. Context: components.schemas.LoginStartResponse.properties.deviceCode.",
             "pattern": "^zdev_[a-f0-9]{64}$",
             "examples": [
               "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
@@ -2586,7 +2945,7 @@
           },
           "userCode": {
             "type": "string",
-            "description": "Short human-readable code shown by the CLI during login.",
+            "description": "Short human-readable code shown by the CLI during login. Context: components.schemas.LoginStartResponse.properties.userCode.",
             "pattern": "^[A-F0-9]{6}$",
             "examples": [
               "ABC123"
@@ -2595,7 +2954,7 @@
           },
           "intervalSeconds": {
             "type": "integer",
-            "description": "Minimum polling interval in seconds.",
+            "description": "Minimum polling interval in seconds. Context: components.schemas.LoginStartResponse.properties.intervalSeconds.",
             "format": "int32",
             "minimum": 1,
             "maximum": 60,
@@ -2605,7 +2964,7 @@
           },
           "expiresInSeconds": {
             "type": "integer",
-            "description": "Device login lifetime in seconds.",
+            "description": "Device login lifetime in seconds. Context: components.schemas.LoginStartResponse.properties.expiresInSeconds.",
             "format": "int32",
             "minimum": 60,
             "maximum": 1800,
@@ -2627,7 +2986,7 @@
       },
       "LoginPollResponse": {
         "type": "object",
-        "description": "Device login polling response for the Zerct CLI.",
+        "description": "Device login polling response for the Zerct CLI. Context: components.schemas.LoginPollResponse.",
         "additionalProperties": false,
         "required": [
           "status",
@@ -2641,7 +3000,7 @@
         "properties": {
           "status": {
             "type": "string",
-            "description": "Current device login state.",
+            "description": "Current device login state. Context: components.schemas.LoginPollResponse.properties.status.",
             "enum": [
               "pending",
               "complete",
@@ -2653,7 +3012,7 @@
           },
           "intervalSeconds": {
             "type": "integer",
-            "description": "Minimum seconds to wait before the next poll.",
+            "description": "Minimum seconds to wait before the next poll. Context: components.schemas.LoginPollResponse.properties.intervalSeconds.",
             "format": "int32",
             "minimum": 1,
             "maximum": 60,
@@ -2666,7 +3025,7 @@
               "string",
               "null"
             ],
-            "description": "Authenticated Zerct account id when login is complete.",
+            "description": "Authenticated Zerct account id when login is complete. Context: components.schemas.LoginPollResponse.properties.accountId.",
             "pattern": "^acct_[A-Za-z0-9_-]+$",
             "examples": [
               "acct_01HW0000000000000000000000"
@@ -2678,7 +3037,7 @@
               "string",
               "null"
             ],
-            "description": "Verified provider email when login is complete.",
+            "description": "Verified provider email when login is complete. Context: components.schemas.LoginPollResponse.properties.email.",
             "format": "email",
             "examples": [
               "dev@example.com"
@@ -2689,7 +3048,7 @@
               "string",
               "null"
             ],
-            "description": "Identity provider used when login is complete.",
+            "description": "Identity provider used when login is complete. Context: components.schemas.LoginPollResponse.properties.provider.",
             "enum": [
               "github",
               "google",
@@ -2704,7 +3063,7 @@
               "string",
               "null"
             ],
-            "description": "Zerct session token returned once and stored by the CLI.",
+            "description": "Zerct session token returned once and stored by the CLI. Context: components.schemas.LoginPollResponse.properties.token.",
             "pattern": "^zct_[a-f0-9]{64}$",
             "examples": [
               "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
@@ -2716,7 +3075,7 @@
               "string",
               "null"
             ],
-            "description": "UTC timestamp when the Zerct session token expires.",
+            "description": "UTC timestamp when the Zerct session token expires. Context: components.schemas.LoginPollResponse.properties.expiresAt.",
             "format": "date-time",
             "examples": [
               "2026-06-24T12:00:00.000Z"
@@ -2737,7 +3096,7 @@
       },
       "DeployRequest": {
         "type": "object",
-        "description": "Request body for deploying an app.",
+        "description": "Request body for deploying an app. Context: components.schemas.DeployRequest.",
         "additionalProperties": false,
         "required": [
           "config",
@@ -2765,7 +3124,7 @@
               "string",
               "null"
             ],
-            "description": "Git commit SHA when available.",
+            "description": "Git commit SHA when available. Context: components.schemas.DeployRequest.properties.commit_sha.",
             "pattern": "^[0-9a-f]{7,64}$",
             "maxLength": 512,
             "examples": [
@@ -2774,7 +3133,7 @@
           },
           "wants_database": {
             "type": "boolean",
-            "description": "Whether managed Postgres should be attached.",
+            "description": "Whether managed Postgres should be attached. Context: components.schemas.DeployRequest.properties.wants_database.",
             "examples": [
               true
             ]
@@ -2784,7 +3143,7 @@
               "string",
               "null"
             ],
-            "description": "Base64 encoded gzip tar source archive.",
+            "description": "Base64 encoded gzip tar source archive. Context: components.schemas.DeployRequest.properties.source_archive_base64.",
             "maxLength": 67108864,
             "pattern": "^[\\s\\S]{0,8192}$",
             "examples": [
@@ -2811,7 +3170,7 @@
       },
       "DeployResponse": {
         "type": "object",
-        "description": "Response returned after a deploy is accepted.",
+        "description": "Response returned after a deploy is accepted. Context: components.schemas.DeployResponse.",
         "additionalProperties": false,
         "required": [
           "app",
@@ -2894,7 +3253,7 @@
           },
           "next_command": {
             "type": "string",
-            "description": "Next command for humans and agents.",
+            "description": "Next command for humans and agents. Context: components.schemas.DeployResponse.properties.next_command.",
             "examples": [
               "npx @zerct/zerct logs --app app_1"
             ],
@@ -2961,7 +3320,7 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "description": "Agent-readable API error response.",
+        "description": "Agent-readable API error response. Context: components.schemas.ErrorResponse.",
         "additionalProperties": false,
         "required": [
           "code",
@@ -2973,7 +3332,7 @@
         "properties": {
           "code": {
             "type": "string",
-            "description": "Stable machine-readable error code.",
+            "description": "Stable machine-readable error code. Context: components.schemas.ErrorResponse.properties.code.",
             "enum": [
               "missing_config",
               "invalid_toml",
@@ -2994,7 +3353,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Short human-readable error message.",
+            "description": "Short human-readable error message. Context: components.schemas.ErrorResponse.properties.message.",
             "pattern": "^[\\s\\S]{1,240}$",
             "maxLength": 240,
             "examples": [
@@ -3003,7 +3362,7 @@
           },
           "agent_instruction": {
             "type": "string",
-            "description": "Instruction an AI agent can follow to recover.",
+            "description": "Instruction an AI agent can follow to recover. Context: components.schemas.ErrorResponse.properties.agent_instruction.",
             "pattern": "^[\\s\\S]{1,1000}$",
             "maxLength": 1000,
             "examples": [
@@ -3015,7 +3374,7 @@
               {
                 "type": "string",
                 "format": "uri",
-                "description": "Documentation URL for the recovery path.",
+                "description": "Documentation URL for the recovery path. Context: components.schemas.ErrorResponse.properties.docs_url.anyOf.0.",
                 "examples": [
                   "https://docs.zerct.com/deploy"
                 ]
@@ -3033,7 +3392,7 @@
               {
                 "type": "string",
                 "format": "uri",
-                "description": "Stripe URL when payment is required.",
+                "description": "Stripe URL when payment is required. Context: components.schemas.ErrorResponse.properties.checkout_url.anyOf.0.",
                 "examples": [
                   "https://checkout.stripe.com/c/pay/cs_test_123"
                 ]
@@ -3059,7 +3418,7 @@
       },
       "AuthProvider": {
         "type": "string",
-        "description": "OAuth provider used by the Zerct account.",
+        "description": "OAuth provider used by the Zerct account. Context: components.schemas.AuthProvider.",
         "enum": [
           "github",
           "google"
@@ -3070,7 +3429,7 @@
       },
       "Plan": {
         "type": "string",
-        "description": "Zerct plan assigned to a deploy.",
+        "description": "Zerct plan assigned to a deploy. Context: components.schemas.Plan.",
         "enum": [
           "free",
           "pro"
@@ -3081,7 +3440,7 @@
       },
       "RuntimeStatus": {
         "type": "string",
-        "description": "Current runtime state.",
+        "description": "Current runtime state. Context: components.schemas.RuntimeStatus.",
         "enum": [
           "running",
           "sleeping",
@@ -3098,7 +3457,7 @@
           "string",
           "null"
         ],
-        "description": "Latest build state when a build exists.",
+        "description": "Latest build state when a build exists. Context: components.schemas.BuildStatus.",
         "enum": [
           "queued",
           "running",
@@ -3113,12 +3472,13 @@
       },
       "AccountProfileResponse": {
         "type": "object",
-        "description": "Account profile returned to the signed-in user.",
+        "description": "Account profile returned to the signed-in user. Context: components.schemas.AccountProfileResponse.",
         "additionalProperties": false,
         "required": [
           "accountId",
           "email",
           "provider",
+          "plan",
           "handle",
           "displayName",
           "accountUrl"
@@ -3126,7 +3486,7 @@
         "properties": {
           "accountId": {
             "type": "string",
-            "description": "Authenticated Zerct account id.",
+            "description": "Authenticated Zerct account id. Context: components.schemas.AccountProfileResponse.properties.accountId.",
             "pattern": "^acct_[A-Za-z0-9_-]+$",
             "examples": [
               "acct_01HW0000000000000000000000"
@@ -3135,7 +3495,7 @@
           },
           "email": {
             "type": "string",
-            "description": "Provider email for the authenticated account.",
+            "description": "Provider email for the authenticated account. Context: components.schemas.AccountProfileResponse.properties.email.",
             "format": "email",
             "examples": [
               "dev@example.com"
@@ -3152,7 +3512,7 @@
               "string",
               "null"
             ],
-            "description": "Private Zerct account handle.",
+            "description": "Private Zerct account handle. Context: components.schemas.AccountProfileResponse.properties.handle.",
             "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
             "examples": [
               "acme"
@@ -3164,7 +3524,7 @@
               "string",
               "null"
             ],
-            "description": "Saved display name for the account.",
+            "description": "Saved display name for the account. Context: components.schemas.AccountProfileResponse.properties.displayName.",
             "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,79}$",
             "minLength": 1,
             "maxLength": 80,
@@ -3177,11 +3537,14 @@
               "string",
               "null"
             ],
-            "description": "Private account dashboard URL.",
+            "description": "Private account dashboard URL. Context: components.schemas.AccountProfileResponse.properties.accountUrl.",
             "format": "uri",
             "examples": [
               "https://zerct.com/acme"
             ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
           }
         },
         "examples": [
@@ -3189,6 +3552,7 @@
             "accountId": "acct_01HW0000000000000000000000",
             "email": "dev@example.com",
             "provider": "github",
+            "plan": "free",
             "handle": "acme",
             "displayName": "Acme",
             "accountUrl": "https://zerct.com/acme"
@@ -3197,7 +3561,7 @@
       },
       "AccountProfileUpdateRequest": {
         "type": "object",
-        "description": "Account profile update request.",
+        "description": "Account profile update request. Context: components.schemas.AccountProfileUpdateRequest.",
         "additionalProperties": false,
         "required": [
           "handle",
@@ -3206,7 +3570,7 @@
         "properties": {
           "handle": {
             "type": "string",
-            "description": "Unique lowercase account handle.",
+            "description": "Unique lowercase account handle. Context: components.schemas.AccountProfileUpdateRequest.properties.handle.",
             "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
             "minLength": 3,
             "maxLength": 39,
@@ -3216,7 +3580,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "Display name shown in the private dashboard.",
+            "description": "Display name shown in the private dashboard. Context: components.schemas.AccountProfileUpdateRequest.properties.displayName.",
             "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,79}$",
             "minLength": 1,
             "maxLength": 80,
@@ -3234,12 +3598,13 @@
       },
       "AccountDashboardResponse": {
         "type": "object",
-        "description": "Authenticated account dashboard response.",
+        "description": "Authenticated account dashboard response. Context: components.schemas.AccountDashboardResponse.",
         "additionalProperties": false,
         "required": [
           "profile",
           "apps",
-          "usage"
+          "usage",
+          "limits"
         ],
         "properties": {
           "profile": {
@@ -3257,7 +3622,7 @@
           },
           "apps": {
             "type": "array",
-            "description": "Deploys owned by the account.",
+            "description": "Deploys owned by the account. Context: components.schemas.AccountDashboardResponse.properties.apps.",
             "minItems": 0,
             "maxItems": 1000,
             "items": {
@@ -3295,6 +3660,9 @@
               }
             ],
             "$ref": "#/components/schemas/AccountDashboardUsage"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PlanLimits"
           }
         },
         "examples": [
@@ -3303,41 +3671,44 @@
               "accountId": "acct_01HW0000000000000000000000",
               "email": "dev@example.com",
               "provider": "github",
+              "plan": "free",
               "handle": "acme",
               "displayName": "Acme",
               "accountUrl": "https://zerct.com/acme"
             },
-            "apps": [
-              {
-                "appId": "app_01HW0000000000000000000000",
-                "name": "hello-rust",
-                "slug": "hello-rust",
-                "url": "https://hello-rust.zerct.app",
-                "plan": "free",
-                "runtimeStatus": "running",
-                "latestBuildStatus": "succeeded",
-                "deployCount": 3,
-                "runtimeMemoryMib": 256,
-                "runtimeCpuMillis": 250,
-                "databaseStorageMib": 512,
-                "idleTimeoutMinutes": 15,
-                "latestDeployAt": "2026-05-25T12:00:00.000Z"
-              }
-            ],
+            "apps": [],
             "usage": {
               "appCount": 1,
               "runningCount": 1,
-              "runtimeMemoryMib": 256,
+              "databaseCount": 1,
+              "runtimeMemoryMib": 512,
               "runtimeCpuMillis": 250,
               "databaseStorageMib": 512,
-              "deployCount": 3
+              "deployCount": 3,
+              "monthlyDeployCount": 3,
+              "monthlyBuildMinutes": 5,
+              "customDomainCount": 1
+            },
+            "limits": {
+              "projects": 3,
+              "managedDatabases": 1,
+              "postgresStorageMib": 512,
+              "postgresStorageMibPerDatabase": 512,
+              "dataTransferGib": 25,
+              "monthlyBuildMinutes": 300,
+              "monthlyDeployments": 200,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 600,
+              "customDomains": 10,
+              "alwaysOnApps": 0,
+              "logRetentionDays": 3
             }
           }
         ]
       },
       "AccountDashboardApp": {
         "type": "object",
-        "description": "Dashboard deploy row.",
+        "description": "Dashboard deploy row. Context: components.schemas.AccountDashboardApp.",
         "additionalProperties": false,
         "required": [
           "appId",
@@ -3357,7 +3728,7 @@
         "properties": {
           "appId": {
             "type": "string",
-            "description": "App id shown on the account dashboard.",
+            "description": "App id shown on the account dashboard. Context: components.schemas.AccountDashboardApp.properties.appId.",
             "pattern": "^app_[0-9A-HJKMNP-TV-Z]{26}$",
             "examples": [
               "app_01HW0000000000000000000000"
@@ -3366,7 +3737,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Service name.",
+            "description": "Service name. Context: components.schemas.AccountDashboardApp.properties.name.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -3375,7 +3746,7 @@
           },
           "slug": {
             "type": "string",
-            "description": "Public deploy slug.",
+            "description": "Public deploy slug. Context: components.schemas.AccountDashboardApp.properties.slug.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -3384,7 +3755,7 @@
           },
           "url": {
             "type": "string",
-            "description": "HTTPS endpoint assigned to the deploy.",
+            "description": "HTTPS endpoint assigned to the deploy. Context: components.schemas.AccountDashboardApp.properties.url.",
             "format": "uri",
             "examples": [
               "https://hello-rust.zerct.app"
@@ -3410,7 +3781,7 @@
           },
           "deployCount": {
             "type": "integer",
-            "description": "Number of deploy records.",
+            "description": "Number of deploy records. Context: components.schemas.AccountDashboardApp.properties.deployCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -3420,7 +3791,7 @@
           },
           "runtimeMemoryMib": {
             "type": "integer",
-            "description": "Runtime memory limit in MiB.",
+            "description": "Runtime memory limit in MiB. Context: components.schemas.AccountDashboardApp.properties.runtimeMemoryMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -3430,7 +3801,7 @@
           },
           "runtimeCpuMillis": {
             "type": "integer",
-            "description": "Runtime CPU limit in millis.",
+            "description": "Runtime CPU limit in millis. Context: components.schemas.AccountDashboardApp.properties.runtimeCpuMillis.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -3443,7 +3814,7 @@
               "integer",
               "null"
             ],
-            "description": "Managed Postgres storage limit in MiB when enabled.",
+            "description": "Managed Postgres storage limit in MiB when enabled. Context: components.schemas.AccountDashboardApp.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -3453,7 +3824,7 @@
           },
           "idleTimeoutMinutes": {
             "type": "integer",
-            "description": "Idle timeout in minutes.",
+            "description": "Idle timeout in minutes. Context: components.schemas.AccountDashboardApp.properties.idleTimeoutMinutes.",
             "format": "int64",
             "minimum": 0,
             "maximum": 10080,
@@ -3466,7 +3837,7 @@
               "string",
               "null"
             ],
-            "description": "Latest deploy creation timestamp.",
+            "description": "Latest deploy creation timestamp. Context: components.schemas.AccountDashboardApp.properties.latestDeployAt.",
             "format": "date-time",
             "examples": [
               "2026-05-25T12:00:00.000Z"
@@ -3493,7 +3864,7 @@
       },
       "AccountDashboardUsage": {
         "type": "object",
-        "description": "Aggregated account dashboard usage.",
+        "description": "Aggregated account dashboard usage. Context: components.schemas.AccountDashboardUsage.",
         "additionalProperties": false,
         "required": [
           "appCount",
@@ -3501,12 +3872,16 @@
           "runtimeMemoryMib",
           "runtimeCpuMillis",
           "databaseStorageMib",
-          "deployCount"
+          "deployCount",
+          "databaseCount",
+          "monthlyDeployCount",
+          "monthlyBuildMinutes",
+          "customDomainCount"
         ],
         "properties": {
           "appCount": {
             "type": "integer",
-            "description": "Number of apps.",
+            "description": "Number of apps. Context: components.schemas.AccountDashboardUsage.properties.appCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
@@ -3516,7 +3891,7 @@
           },
           "runningCount": {
             "type": "integer",
-            "description": "Number of running apps.",
+            "description": "Number of running apps. Context: components.schemas.AccountDashboardUsage.properties.runningCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
@@ -3526,7 +3901,7 @@
           },
           "runtimeMemoryMib": {
             "type": "integer",
-            "description": "Sum of runtime memory limits in MiB.",
+            "description": "Sum of runtime memory limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.runtimeMemoryMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -3536,7 +3911,7 @@
           },
           "runtimeCpuMillis": {
             "type": "integer",
-            "description": "Sum of runtime CPU limits in millis.",
+            "description": "Sum of runtime CPU limits in millis. Context: components.schemas.AccountDashboardUsage.properties.runtimeCpuMillis.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -3546,7 +3921,7 @@
           },
           "databaseStorageMib": {
             "type": "integer",
-            "description": "Sum of managed database storage limits in MiB.",
+            "description": "Sum of managed database storage limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -3556,12 +3931,52 @@
           },
           "deployCount": {
             "type": "integer",
-            "description": "Sum of deploy records.",
+            "description": "Sum of deploy records. Context: components.schemas.AccountDashboardUsage.properties.deployCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
             "examples": [
               3
+            ]
+          },
+          "databaseCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Number of managed databases.",
+            "examples": [
+              1
+            ]
+          },
+          "monthlyDeployCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Deploys in the current monthly usage window.",
+            "examples": [
+              3
+            ]
+          },
+          "monthlyBuildMinutes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Build minutes in the current monthly usage window.",
+            "examples": [
+              5
+            ]
+          },
+          "customDomainCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Custom domains attached to account apps.",
+            "examples": [
+              1
             ]
           }
         },
@@ -3569,16 +3984,20 @@
           {
             "appCount": 1,
             "runningCount": 1,
-            "runtimeMemoryMib": 256,
+            "databaseCount": 1,
+            "runtimeMemoryMib": 512,
             "runtimeCpuMillis": 250,
             "databaseStorageMib": 512,
-            "deployCount": 3
+            "deployCount": 3,
+            "monthlyDeployCount": 3,
+            "monthlyBuildMinutes": 5,
+            "customDomainCount": 1
           }
         ]
       },
       "ProjectKind": {
         "type": "string",
-        "description": "Zerct project kind.",
+        "description": "Zerct project kind. Context: components.schemas.ProjectKind.",
         "enum": [
           "rust_backend",
           "static_frontend"
@@ -3589,7 +4008,7 @@
       },
       "App": {
         "type": "object",
-        "description": "Hosted Zerct app.",
+        "description": "Hosted Zerct app. Context: components.schemas.App.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -3603,7 +4022,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "App id.",
+            "description": "App id. Context: components.schemas.App.properties.id.",
             "examples": [
               "app_1"
             ],
@@ -3612,7 +4031,7 @@
           },
           "account_id": {
             "type": "string",
-            "description": "Account id.",
+            "description": "Account id. Context: components.schemas.App.properties.account_id.",
             "examples": [
               "acct_1"
             ],
@@ -3621,7 +4040,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Service name. Context: components.schemas.App.name.",
+            "description": "Service name. Context: components.schemas.App.name. Context: components.schemas.App.properties.name.",
             "examples": [
               "hello-rust"
             ],
@@ -3649,7 +4068,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Public app URL.",
+            "description": "Public app URL. Context: components.schemas.App.properties.url.",
             "examples": [
               "https://hello-rust.zerct.app"
             ]
@@ -3669,7 +4088,7 @@
       },
       "Deploy": {
         "type": "object",
-        "description": "Deploy metadata.",
+        "description": "Deploy metadata. Context: components.schemas.Deploy.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -3681,7 +4100,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Deploy id.",
+            "description": "Deploy id. Context: components.schemas.Deploy.properties.id.",
             "examples": [
               "deploy_1"
             ],
@@ -3690,7 +4109,7 @@
           },
           "app_id": {
             "type": "string",
-            "description": "App id. Context: components.schemas.Deploy.app_id.",
+            "description": "App id. Context: components.schemas.Deploy.app_id. Context: components.schemas.Deploy.properties.app_id.",
             "examples": [
               "app_1"
             ],
@@ -3699,7 +4118,7 @@
           },
           "build_job_id": {
             "type": "string",
-            "description": "Build job id.",
+            "description": "Build job id. Context: components.schemas.Deploy.properties.build_job_id.",
             "examples": [
               "job_1"
             ],
@@ -3711,7 +4130,7 @@
               "string",
               "null"
             ],
-            "description": "Git commit SHA when known.",
+            "description": "Git commit SHA when known. Context: components.schemas.Deploy.properties.commit_sha.",
             "examples": [
               "0123456789abcdef"
             ],
@@ -3721,7 +4140,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Public app URL. Context: components.schemas.Deploy.url.",
+            "description": "Public app URL. Context: components.schemas.Deploy.url. Context: components.schemas.Deploy.properties.url.",
             "examples": [
               "https://hello-rust.zerct.app"
             ]
@@ -3739,7 +4158,7 @@
       },
       "BuildJob": {
         "type": "object",
-        "description": "Build job metadata.",
+        "description": "Build job metadata. Context: components.schemas.BuildJob.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -3750,7 +4169,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Build job id. Context: components.schemas.BuildJob.id.",
+            "description": "Build job id. Context: components.schemas.BuildJob.id. Context: components.schemas.BuildJob.properties.id.",
             "examples": [
               "job_1"
             ],
@@ -3759,7 +4178,7 @@
           },
           "app_id": {
             "type": "string",
-            "description": "App id. Context: components.schemas.BuildJob.app_id.",
+            "description": "App id. Context: components.schemas.BuildJob.app_id. Context: components.schemas.BuildJob.properties.app_id.",
             "examples": [
               "app_1"
             ],
@@ -3768,7 +4187,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Build status.",
+            "description": "Build status. Context: components.schemas.BuildJob.properties.status.",
             "enum": [
               "queued",
               "running",
@@ -3782,7 +4201,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Build status message.",
+            "description": "Build status message. Context: components.schemas.BuildJob.properties.message.",
             "examples": [
               "Build queued."
             ],
@@ -3801,7 +4220,7 @@
       },
       "DeployPlan": {
         "type": "object",
-        "description": "Worker-executable deploy plan.",
+        "description": "Worker-executable deploy plan. Context: components.schemas.DeployPlan.",
         "additionalProperties": false,
         "required": [
           "kind",
@@ -3826,7 +4245,7 @@
           },
           "check_command": {
             "type": "string",
-            "description": "Pre-build check command.",
+            "description": "Pre-build check command. Context: components.schemas.DeployPlan.properties.check_command.",
             "pattern": "^[\\s\\S]{1,512}$",
             "maxLength": 512,
             "examples": [
@@ -3835,7 +4254,7 @@
           },
           "build_command": {
             "type": "string",
-            "description": "Release build command.",
+            "description": "Release build command. Context: components.schemas.DeployPlan.properties.build_command.",
             "pattern": "^[\\s\\S]{1,512}$",
             "maxLength": 512,
             "examples": [
@@ -3846,7 +4265,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "Static frontend output directory when applicable.",
+                "description": "Static frontend output directory when applicable. Context: components.schemas.DeployPlan.properties.build_output_dir.anyOf.0.",
                 "pattern": "^[A-Za-z0-9_./-]{1,160}$",
                 "maxLength": 160,
                 "examples": [
@@ -3863,7 +4282,7 @@
           },
           "run_command": {
             "type": "string",
-            "description": "Runtime command.",
+            "description": "Runtime command. Context: components.schemas.DeployPlan.properties.run_command.",
             "pattern": "^[\\s\\S]{0,512}$",
             "maxLength": 512,
             "examples": [
@@ -3875,14 +4294,14 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 65535,
-            "description": "Internal service port.",
+            "description": "Internal service port. Context: components.schemas.DeployPlan.properties.port.",
             "examples": [
               3000
             ]
           },
           "health_path": {
             "type": "string",
-            "description": "Health endpoint path.",
+            "description": "Health endpoint path. Context: components.schemas.DeployPlan.properties.health_path.",
             "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
             "maxLength": 160,
             "examples": [
@@ -3933,7 +4352,7 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 10080,
-            "description": "Idle timeout in minutes for this app.",
+            "description": "Idle timeout in minutes for this app. Context: components.schemas.DeployPlan.properties.idle_timeout_minutes.",
             "examples": [
               15
             ]
@@ -3973,7 +4392,7 @@
       },
       "AppsResponse": {
         "type": "object",
-        "description": "Apps owned by the authenticated account.",
+        "description": "Apps owned by the authenticated account. Context: components.schemas.AppsResponse.",
         "additionalProperties": false,
         "required": [
           "apps"
@@ -4030,7 +4449,7 @@
       },
       "DeploysResponse": {
         "type": "object",
-        "description": "Deploy history.",
+        "description": "Deploy history. Context: components.schemas.DeploysResponse.",
         "additionalProperties": false,
         "required": [
           "deploys"
@@ -4071,7 +4490,7 @@
       },
       "DeployDetailsResponse": {
         "type": "object",
-        "description": "Deploy details.",
+        "description": "Deploy details. Context: components.schemas.DeployDetailsResponse.",
         "additionalProperties": false,
         "required": [
           "app",
@@ -4153,7 +4572,7 @@
       },
       "DeployCancelResponse": {
         "type": "object",
-        "description": "Deploy cancel result.",
+        "description": "Deploy cancel result. Context: components.schemas.DeployCancelResponse.",
         "additionalProperties": false,
         "required": [
           "deploy_id",
@@ -4187,7 +4606,7 @@
       },
       "BuildsResponse": {
         "type": "object",
-        "description": "Build history.",
+        "description": "Build history. Context: components.schemas.BuildsResponse.",
         "additionalProperties": false,
         "required": [
           "builds"
@@ -4226,7 +4645,7 @@
       },
       "BuildDetailsResponse": {
         "type": "object",
-        "description": "Build details.",
+        "description": "Build details. Context: components.schemas.BuildDetailsResponse.",
         "additionalProperties": false,
         "required": [
           "build",
@@ -4264,7 +4683,7 @@
               "string",
               "null"
             ],
-            "description": "Deploy id attached to the build.",
+            "description": "Deploy id attached to the build. Context: components.schemas.BuildDetailsResponse.properties.deploy_id.",
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
@@ -4295,7 +4714,7 @@
       },
       "LogLine": {
         "type": "object",
-        "description": "Log line.",
+        "description": "Log line. Context: components.schemas.LogLine.",
         "additionalProperties": false,
         "required": [
           "timestamp",
@@ -4305,7 +4724,7 @@
         "properties": {
           "timestamp": {
             "type": "string",
-            "description": "UTC timestamp.",
+            "description": "UTC timestamp. Context: components.schemas.LogLine.properties.timestamp.",
             "format": "date-time",
             "examples": [
               "2026-05-25T12:00:00.000Z"
@@ -4318,14 +4737,14 @@
               "stderr",
               "system"
             ],
-            "description": "Log stream.",
+            "description": "Log stream. Context: components.schemas.LogLine.properties.stream.",
             "examples": [
               "stdout"
             ]
           },
           "message": {
             "type": "string",
-            "description": "Log message.",
+            "description": "Log message. Context: components.schemas.LogLine.properties.message.",
             "pattern": "^[\\s\\S]{0,8192}$",
             "maxLength": 8192,
             "examples": [
@@ -4343,7 +4762,7 @@
       },
       "LogsResponse": {
         "type": "object",
-        "description": "Chronological log page.",
+        "description": "Chronological log page. Context: components.schemas.LogsResponse.",
         "additionalProperties": false,
         "required": [
           "lines",
@@ -4378,7 +4797,7 @@
               "string",
               "null"
             ],
-            "description": "Cursor for older lines.",
+            "description": "Cursor for older lines. Context: components.schemas.LogsResponse.properties.next_cursor.",
             "pattern": "^[0-9A-Za-z_:-]{1,128}$",
             "maxLength": 512,
             "examples": [
@@ -4402,7 +4821,7 @@
       },
       "Database": {
         "type": "object",
-        "description": "Managed Postgres metadata.",
+        "description": "Managed Postgres metadata. Context: components.schemas.Database.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -4473,7 +4892,7 @@
       },
       "DatabaseResponse": {
         "type": "object",
-        "description": "Managed Postgres status.",
+        "description": "Managed Postgres status. Context: components.schemas.DatabaseResponse.",
         "additionalProperties": false,
         "required": [
           "database",
@@ -4516,7 +4935,7 @@
       },
       "EnvSetRequest": {
         "type": "object",
-        "description": "Set an environment variable.",
+        "description": "Set an environment variable. Context: components.schemas.EnvSetRequest.",
         "additionalProperties": false,
         "required": [
           "name",
@@ -4549,7 +4968,7 @@
       },
       "EnvSetResponse": {
         "type": "object",
-        "description": "Environment variable set result.",
+        "description": "Environment variable set result. Context: components.schemas.EnvSetResponse.",
         "additionalProperties": false,
         "required": [
           "name",
@@ -4580,7 +4999,7 @@
       },
       "EnvVarSummary": {
         "type": "object",
-        "description": "Environment variable metadata without secret value.",
+        "description": "Environment variable metadata without secret value. Context: components.schemas.EnvVarSummary.",
         "additionalProperties": false,
         "required": [
           "name",
@@ -4621,7 +5040,7 @@
       },
       "EnvListResponse": {
         "type": "object",
-        "description": "Environment variables without secret values.",
+        "description": "Environment variables without secret values. Context: components.schemas.EnvListResponse.",
         "additionalProperties": false,
         "required": [
           "env"
@@ -4658,7 +5077,7 @@
       },
       "EnvDeleteResponse": {
         "type": "object",
-        "description": "Environment variable delete result.",
+        "description": "Environment variable delete result. Context: components.schemas.EnvDeleteResponse.",
         "additionalProperties": false,
         "required": [
           "name",
@@ -4697,7 +5116,7 @@
       },
       "AppDomain": {
         "type": "object",
-        "description": "Custom domain metadata.",
+        "description": "Custom domain metadata. Context: components.schemas.AppDomain.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -4779,7 +5198,7 @@
       },
       "AppDomainsResponse": {
         "type": "object",
-        "description": "Custom domains attached to the app.",
+        "description": "Custom domains attached to the app. Context: components.schemas.AppDomainsResponse.",
         "additionalProperties": false,
         "required": [
           "domains"
@@ -4824,7 +5243,7 @@
       },
       "AppDomainAddRequest": {
         "type": "object",
-        "description": "Attach a custom domain.",
+        "description": "Attach a custom domain. Context: components.schemas.AppDomainAddRequest.",
         "additionalProperties": false,
         "required": [
           "domain"
@@ -4847,7 +5266,7 @@
       },
       "AppDomainDeleteResponse": {
         "type": "object",
-        "description": "Custom domain delete result.",
+        "description": "Custom domain delete result. Context: components.schemas.AppDomainDeleteResponse.",
         "additionalProperties": false,
         "required": [
           "domain",
@@ -4878,7 +5297,7 @@
       },
       "StatusResponse": {
         "type": "object",
-        "description": "Current app status including the latest deploy and latest build job.",
+        "description": "Current app status including the latest deploy and latest build job. Context: components.schemas.StatusResponse.",
         "additionalProperties": false,
         "required": [
           "app",
@@ -4967,7 +5386,7 @@
       },
       "BillingCheckout": {
         "type": "object",
-        "description": "Stripe-hosted billing link for upgrading or managing payment.",
+        "description": "Stripe-hosted billing link for upgrading or managing payment. Context: components.schemas.BillingCheckout.",
         "additionalProperties": false,
         "required": [
           "url",
@@ -4977,7 +5396,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Stripe-hosted URL returned for the account billing action.",
+            "description": "Stripe-hosted URL returned for the account billing action. Context: components.schemas.BillingCheckout.properties.url.",
             "examples": [
               "https://hello-rust.zerct.app"
             ]
@@ -4985,7 +5404,7 @@
           "reason": {
             "type": "string",
             "minLength": 1,
-            "description": "Billing action reason selected by Zerct.",
+            "description": "Billing action reason selected by Zerct. Context: components.schemas.BillingCheckout.properties.reason.",
             "pattern": "^[\\s\\S]{0,8192}$",
             "maxLength": 512,
             "examples": [
@@ -5002,7 +5421,7 @@
       },
       "BillingCheckoutResponse": {
         "type": "object",
-        "description": "Billing checkout or portal response for an authenticated account.",
+        "description": "Billing checkout or portal response for an authenticated account. Context: components.schemas.BillingCheckoutResponse.",
         "additionalProperties": false,
         "required": [
           "checkout"
@@ -5029,14 +5448,14 @@
       },
       "ZerctBuildConfig": {
         "type": "object",
-        "description": "Optional build commands from zerct.toml.",
+        "description": "Optional build commands from zerct.toml. Context: components.schemas.ZerctBuildConfig.",
         "additionalProperties": false,
         "properties": {
           "check": {
             "anyOf": [
               {
                 "type": "string",
-                "description": "Cheap pre-build validation command.",
+                "description": "Cheap pre-build validation command. Context: components.schemas.ZerctBuildConfig.properties.check.anyOf.0.",
                 "pattern": "^[\\s\\S]{1,512}$",
                 "maxLength": 512,
                 "examples": [
@@ -5055,7 +5474,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "Release build command. Context: components.schemas.ZerctBuildConfig.properties.command.anyOf.0.",
+                "description": "Release build command. Context: components.schemas.ZerctBuildConfig.properties.command.anyOf.0. Context: components.schemas.ZerctBuildConfig.properties.command.anyOf.0.",
                 "pattern": "^[\\s\\S]{1,512}$",
                 "maxLength": 512,
                 "examples": [
@@ -5074,7 +5493,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "Static frontend output directory.",
+                "description": "Static frontend output directory. Context: components.schemas.ZerctBuildConfig.properties.output.anyOf.0.",
                 "pattern": "^[A-Za-z0-9_./-]{1,160}$",
                 "maxLength": 160,
                 "examples": [
@@ -5100,12 +5519,12 @@
       },
       "ZerctRunConfig": {
         "type": "object",
-        "description": "Runtime process settings from zerct.toml.",
+        "description": "Runtime process settings from zerct.toml. Context: components.schemas.ZerctRunConfig.",
         "additionalProperties": false,
         "properties": {
           "command": {
             "type": "string",
-            "description": "Runtime command for Rust backends.",
+            "description": "Runtime command for Rust backends. Context: components.schemas.ZerctRunConfig.properties.command.",
             "pattern": "^[\\s\\S]{0,512}$",
             "maxLength": 512,
             "examples": [
@@ -5117,14 +5536,14 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 65535,
-            "description": "Internal HTTP port.",
+            "description": "Internal HTTP port. Context: components.schemas.ZerctRunConfig.properties.port.",
             "examples": [
               3000
             ]
           },
           "health": {
             "type": "string",
-            "description": "Health endpoint path. Context: components.schemas.ZerctRunConfig.properties.health.",
+            "description": "Health endpoint path. Context: components.schemas.ZerctRunConfig.properties.health. Context: components.schemas.ZerctRunConfig.properties.health.",
             "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
             "maxLength": 160,
             "examples": [
@@ -5142,12 +5561,12 @@
       },
       "ZerctResourceConfig": {
         "type": "object",
-        "description": "Runtime resource limits from zerct.toml.",
+        "description": "Runtime resource limits from zerct.toml. Context: components.schemas.ZerctResourceConfig.",
         "additionalProperties": false,
         "properties": {
           "memory": {
             "type": "string",
-            "description": "Runtime memory declaration.",
+            "description": "Runtime memory declaration. Context: components.schemas.ZerctResourceConfig.properties.memory.",
             "pattern": "^[0-9]{2,5}(mb|gb)$",
             "maxLength": 16,
             "examples": [
@@ -5156,7 +5575,7 @@
           },
           "cpu": {
             "type": "string",
-            "description": "Runtime CPU declaration in vCPU units.",
+            "description": "Runtime CPU declaration in vCPU units. Context: components.schemas.ZerctResourceConfig.properties.cpu.",
             "pattern": "^[0-9]+(\\.[0-9]+)?$",
             "maxLength": 16,
             "examples": [
@@ -5168,7 +5587,7 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 10080,
-            "description": "Idle timeout in minutes. Context: components.schemas.ZerctResourceConfig.properties.idle_timeout_minutes.",
+            "description": "Idle timeout in minutes. Context: components.schemas.ZerctResourceConfig.properties.idle_timeout_minutes. Context: components.schemas.ZerctResourceConfig.properties.idle_timeout_minutes.",
             "examples": [
               15
             ]
@@ -5184,7 +5603,7 @@
       },
       "ZerctConfig": {
         "type": "object",
-        "description": "Parsed zerct.toml deploy contract.",
+        "description": "Parsed zerct.toml deploy contract. Context: components.schemas.ZerctConfig.",
         "additionalProperties": false,
         "required": [
           "name"
@@ -5192,7 +5611,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Public service name.",
+            "description": "Public service name. Context: components.schemas.ZerctConfig.properties.name.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "maxLength": 63,
             "examples": [
@@ -5250,7 +5669,7 @@
       },
       "ColdStartPolicy": {
         "type": "string",
-        "description": "Cold-start behavior for a deployed app.",
+        "description": "Cold-start behavior for a deployed app. Context: components.schemas.ColdStartPolicy.",
         "enum": [
           "required",
           "allowed",
@@ -5262,7 +5681,7 @@
       },
       "DeploymentSlot": {
         "type": "string",
-        "description": "Blue-green runtime slot.",
+        "description": "Blue-green runtime slot. Context: components.schemas.DeploymentSlot.",
         "enum": [
           "blue",
           "green"
@@ -5273,7 +5692,7 @@
       },
       "DeploymentStrategy": {
         "type": "string",
-        "description": "Traffic promotion strategy.",
+        "description": "Traffic promotion strategy. Context: components.schemas.DeploymentStrategy.",
         "enum": [
           "blue_green"
         ],
@@ -5283,7 +5702,7 @@
       },
       "BuildLimits": {
         "type": "object",
-        "description": "Build resource limits selected for a deploy.",
+        "description": "Build resource limits selected for a deploy. Context: components.schemas.BuildLimits.",
         "additionalProperties": false,
         "required": [
           "memory",
@@ -5296,7 +5715,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 65536,
-            "description": "Build memory limit in MiB.",
+            "description": "Build memory limit in MiB. Context: components.schemas.BuildLimits.properties.memory.",
             "examples": [
               2048
             ]
@@ -5306,7 +5725,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 16000,
-            "description": "Build CPU limit in millis.",
+            "description": "Build CPU limit in millis. Context: components.schemas.BuildLimits.properties.cpu.",
             "examples": [
               2000
             ]
@@ -5316,7 +5735,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 7200,
-            "description": "Build timeout in seconds.",
+            "description": "Build timeout in seconds. Context: components.schemas.BuildLimits.properties.timeout_seconds.",
             "examples": [
               600
             ]
@@ -5332,7 +5751,7 @@
       },
       "RuntimeLimits": {
         "type": "object",
-        "description": "Runtime resource limits selected for a deploy.",
+        "description": "Runtime resource limits selected for a deploy. Context: components.schemas.RuntimeLimits.",
         "additionalProperties": false,
         "required": [
           "memory",
@@ -5345,7 +5764,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 65536,
-            "description": "Runtime memory limit in MiB. Context: components.schemas.RuntimeLimits.properties.memory.",
+            "description": "Runtime memory limit in MiB. Context: components.schemas.RuntimeLimits.properties.memory. Context: components.schemas.RuntimeLimits.properties.memory.",
             "examples": [
               512
             ]
@@ -5355,7 +5774,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 16000,
-            "description": "Runtime CPU limit in millis. Context: components.schemas.RuntimeLimits.properties.cpu.",
+            "description": "Runtime CPU limit in millis. Context: components.schemas.RuntimeLimits.properties.cpu. Context: components.schemas.RuntimeLimits.properties.cpu.",
             "examples": [
               250
             ]
@@ -5365,7 +5784,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 300,
-            "description": "Runtime startup timeout in seconds.",
+            "description": "Runtime startup timeout in seconds. Context: components.schemas.RuntimeLimits.properties.startup_timeout_seconds.",
             "examples": [
               10
             ]
@@ -5381,7 +5800,7 @@
       },
       "BlueGreenPlan": {
         "type": "object",
-        "description": "Zero-downtime promotion plan for the deploy.",
+        "description": "Zero-downtime promotion plan for the deploy. Context: components.schemas.BlueGreenPlan.",
         "additionalProperties": false,
         "required": [
           "strategy",
@@ -5412,7 +5831,7 @@
           },
           "health_path": {
             "type": "string",
-            "description": "Health endpoint checked before traffic switches.",
+            "description": "Health endpoint checked before traffic switches. Context: components.schemas.BlueGreenPlan.properties.health_path.",
             "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
             "maxLength": 160,
             "examples": [
@@ -5421,14 +5840,14 @@
           },
           "keep_active_until_candidate_healthy": {
             "type": "boolean",
-            "description": "Whether the active slot stays up during promotion.",
+            "description": "Whether the active slot stays up during promotion. Context: components.schemas.BlueGreenPlan.properties.keep_active_until_candidate_healthy.",
             "examples": [
               true
             ]
           },
           "retain_previous_for_rollback": {
             "type": "boolean",
-            "description": "Whether the previous slot is retained briefly after promotion.",
+            "description": "Whether the previous slot is retained briefly after promotion. Context: components.schemas.BlueGreenPlan.properties.retain_previous_for_rollback.",
             "examples": [
               true
             ]
@@ -5442,6 +5861,456 @@
             "health_path": "/healthz",
             "keep_active_until_candidate_healthy": true,
             "retain_previous_for_rollback": true
+          }
+        ]
+      },
+      "CapabilityEndpoint": {
+        "type": "object",
+        "description": "Agent-facing API endpoint capability. Context: components.schemas.CapabilityEndpoint.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "method",
+          "path",
+          "auth_required",
+          "description",
+          "agent_instruction"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Short endpoint action name. Context: components.schemas.CapabilityEndpoint.properties.name.",
+            "pattern": "^[A-Za-z0-9 ._-]{1,80}$",
+            "maxLength": 80,
+            "examples": [
+              "Deploy"
+            ]
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP method. Context: components.schemas.CapabilityEndpoint.properties.method.",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ],
+            "examples": [
+              "GET"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "Endpoint path template. Context: components.schemas.CapabilityEndpoint.properties.path.",
+            "pattern": "^/[A-Za-z0-9_{}?=&./-]{1,240}$",
+            "maxLength": 240,
+            "examples": [
+              "/v1/deploy"
+            ]
+          },
+          "auth_required": {
+            "type": "boolean",
+            "description": "Whether a Zerct bearer token is required. Context: components.schemas.CapabilityEndpoint.properties.auth_required.",
+            "examples": [
+              true
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "What the endpoint is for. Context: components.schemas.CapabilityEndpoint.properties.description.",
+            "pattern": "^[\\s\\S]{1,240}$",
+            "maxLength": 240,
+            "examples": [
+              "Queues a deploy."
+            ]
+          },
+          "agent_instruction": {
+            "type": "string",
+            "description": "Instruction an agent can follow. Context: components.schemas.CapabilityEndpoint.properties.agent_instruction.",
+            "pattern": "^[\\s\\S]{1,500}$",
+            "maxLength": 500,
+            "examples": [
+              "Run local checks before calling this endpoint."
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "Deploy",
+            "method": "POST",
+            "path": "/v1/deploy",
+            "auth_required": true,
+            "description": "Queues a deploy. Context: components.schemas.CapabilityEndpoint.examples.0. Context: components.schemas.CapabilityEndpoint.examples.0.",
+            "agent_instruction": "Run local checks before calling this endpoint."
+          }
+        ]
+      },
+      "CapabilityCommand": {
+        "type": "object",
+        "description": "Agent-facing CLI command capability. Context: components.schemas.CapabilityCommand.",
+        "additionalProperties": false,
+        "required": [
+          "command",
+          "description"
+        ],
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "CLI command. Context: components.schemas.CapabilityCommand.properties.command.",
+            "pattern": "^[\\s\\S]{1,160}$",
+            "maxLength": 160,
+            "examples": [
+              "npx @zerct/zerct deploy"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "What the command does. Context: components.schemas.CapabilityCommand.properties.description.",
+            "pattern": "^[\\s\\S]{1,240}$",
+            "maxLength": 240,
+            "examples": [
+              "Deploys the current repo."
+            ]
+          }
+        },
+        "examples": [
+          {
+            "command": "npx @zerct/zerct deploy",
+            "description": "Deploys the current repo. Context: components.schemas.CapabilityCommand.examples.0. Context: components.schemas.CapabilityCommand.examples.0."
+          }
+        ]
+      },
+      "CapabilitiesResponse": {
+        "type": "object",
+        "description": "Public machine-readable Zerct API capability map. Context: components.schemas.CapabilitiesResponse.",
+        "additionalProperties": false,
+        "required": [
+          "product",
+          "api_version",
+          "docs_url",
+          "openapi_url",
+          "auth",
+          "agent_workflow",
+          "endpoints",
+          "commands"
+        ],
+        "properties": {
+          "product": {
+            "type": "string",
+            "description": "Product name. Context: components.schemas.CapabilitiesResponse.properties.product.",
+            "pattern": "^[A-Za-z0-9 ._-]{1,80}$",
+            "maxLength": 80,
+            "examples": [
+              "Zerct"
+            ]
+          },
+          "api_version": {
+            "type": "string",
+            "description": "Stable API version. Context: components.schemas.CapabilitiesResponse.properties.api_version.",
+            "pattern": "^v[0-9]+$",
+            "maxLength": 16,
+            "examples": [
+              "v1"
+            ]
+          },
+          "docs_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Documentation URL. Context: components.schemas.CapabilitiesResponse.properties.docs_url.",
+            "examples": [
+              "https://docs.zerct.com"
+            ]
+          },
+          "openapi_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "OpenAPI document URL. Context: components.schemas.CapabilitiesResponse.properties.openapi_url.",
+            "examples": [
+              "https://docs.zerct.com/openapi.json"
+            ]
+          },
+          "auth": {
+            "type": "string",
+            "description": "Authentication summary. Context: components.schemas.CapabilitiesResponse.properties.auth.",
+            "pattern": "^[\\s\\S]{1,500}$",
+            "maxLength": 500,
+            "examples": [
+              "Use device login once, then a bearer token."
+            ]
+          },
+          "agent_workflow": {
+            "type": "array",
+            "description": "Recommended agent workflow steps. Context: components.schemas.CapabilitiesResponse.properties.agent_workflow.",
+            "minItems": 0,
+            "maxItems": 1000,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "Call GET /v1/capabilities first."
+              ]
+            },
+            "examples": [
+              [
+                "Call GET /v1/capabilities first."
+              ]
+            ]
+          },
+          "endpoints": {
+            "type": "array",
+            "description": "Available API endpoints. Context: components.schemas.CapabilitiesResponse.properties.endpoints.",
+            "minItems": 0,
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/CapabilityEndpoint"
+            },
+            "examples": [
+              [
+                {
+                  "name": "Deploy",
+                  "method": "POST",
+                  "path": "/v1/deploy",
+                  "auth_required": true,
+                  "description": "Queues a deploy. Context: components.schemas.CapabilitiesResponse.properties.endpoints.examples.0.0. Context: components.schemas.CapabilitiesResponse.properties.endpoints.examples.0.0.",
+                  "agent_instruction": "Run local checks first."
+                }
+              ]
+            ]
+          },
+          "commands": {
+            "type": "array",
+            "description": "Matching CLI commands. Context: components.schemas.CapabilitiesResponse.properties.commands.",
+            "minItems": 0,
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/CapabilityCommand"
+            },
+            "examples": [
+              [
+                {
+                  "command": "npx @zerct/zerct deploy",
+                  "description": "Deploys the current repo. Context: components.schemas.CapabilitiesResponse.properties.commands.examples.0.0. Context: components.schemas.CapabilitiesResponse.properties.commands.examples.0.0."
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "AccountUsageResponse": {
+        "type": "object",
+        "description": "Account usage and included plan limits. Context: components.schemas.AccountUsageResponse.",
+        "additionalProperties": false,
+        "required": [
+          "profile",
+          "usage",
+          "limits"
+        ],
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/AccountDashboardUsage"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PlanLimits"
+          }
+        },
+        "examples": [
+          {
+            "profile": {
+              "accountId": "acct_01HW0000000000000000000000",
+              "email": "dev@example.com",
+              "provider": "github",
+              "plan": "free",
+              "handle": "acme",
+              "displayName": "Acme",
+              "accountUrl": "https://zerct.com/acme"
+            },
+            "usage": {
+              "appCount": 1,
+              "runningCount": 1,
+              "databaseCount": 1,
+              "runtimeMemoryMib": 512,
+              "runtimeCpuMillis": 250,
+              "databaseStorageMib": 512,
+              "deployCount": 3,
+              "monthlyDeployCount": 3,
+              "monthlyBuildMinutes": 5,
+              "customDomainCount": 1
+            },
+            "limits": {
+              "projects": 3,
+              "managedDatabases": 1,
+              "postgresStorageMib": 512,
+              "postgresStorageMibPerDatabase": 512,
+              "dataTransferGib": 25,
+              "monthlyBuildMinutes": 300,
+              "monthlyDeployments": 200,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 600,
+              "customDomains": 10,
+              "alwaysOnApps": 0,
+              "logRetentionDays": 3
+            }
+          }
+        ]
+      },
+      "PlanLimits": {
+        "type": "object",
+        "description": "Included account limits for the current billing plan. Context: components.schemas.PlanLimits.",
+        "additionalProperties": false,
+        "required": [
+          "projects",
+          "managedDatabases",
+          "postgresStorageMib",
+          "postgresStorageMibPerDatabase",
+          "dataTransferGib",
+          "monthlyBuildMinutes",
+          "monthlyDeployments",
+          "concurrentBuilds",
+          "maxBuildDurationSeconds",
+          "customDomains",
+          "alwaysOnApps",
+          "logRetentionDays"
+        ],
+        "properties": {
+          "projects": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Included hosted projects. Context: components.schemas.PlanLimits.properties.projects.",
+            "examples": [
+              3
+            ]
+          },
+          "managedDatabases": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Included managed Postgres databases. Context: components.schemas.PlanLimits.properties.managedDatabases.",
+            "examples": [
+              1
+            ]
+          },
+          "postgresStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576000,
+            "description": "Included total Postgres storage in MiB. Context: components.schemas.PlanLimits.properties.postgresStorageMib.",
+            "examples": [
+              512
+            ]
+          },
+          "postgresStorageMibPerDatabase": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576000,
+            "description": "Included Postgres storage per database in MiB. Context: components.schemas.PlanLimits.properties.postgresStorageMibPerDatabase.",
+            "examples": [
+              512
+            ]
+          },
+          "dataTransferGib": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576,
+            "description": "Included monthly data transfer in GiB. Context: components.schemas.PlanLimits.properties.dataTransferGib.",
+            "examples": [
+              25
+            ]
+          },
+          "monthlyBuildMinutes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Included monthly build minutes. Context: components.schemas.PlanLimits.properties.monthlyBuildMinutes.",
+            "examples": [
+              300
+            ]
+          },
+          "monthlyDeployments": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Included monthly deploy records. Context: components.schemas.PlanLimits.properties.monthlyDeployments.",
+            "examples": [
+              200
+            ]
+          },
+          "concurrentBuilds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Included concurrent build capacity. Context: components.schemas.PlanLimits.properties.concurrentBuilds.",
+            "examples": [
+              1
+            ]
+          },
+          "maxBuildDurationSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "Max single build duration in seconds. Context: components.schemas.PlanLimits.properties.maxBuildDurationSeconds.",
+            "examples": [
+              600
+            ]
+          },
+          "customDomains": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Included custom domains. Context: components.schemas.PlanLimits.properties.customDomains.",
+            "examples": [
+              10
+            ]
+          },
+          "alwaysOnApps": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100000,
+            "description": "Included always-on apps. Context: components.schemas.PlanLimits.properties.alwaysOnApps.",
+            "examples": [
+              0
+            ]
+          },
+          "logRetentionDays": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 3650,
+            "description": "Included log retention in days. Context: components.schemas.PlanLimits.properties.logRetentionDays.",
+            "examples": [
+              3
+            ]
+          }
+        },
+        "examples": [
+          {
+            "projects": 3,
+            "managedDatabases": 1,
+            "postgresStorageMib": 512,
+            "postgresStorageMibPerDatabase": 512,
+            "dataTransferGib": 25,
+            "monthlyBuildMinutes": 300,
+            "monthlyDeployments": 200,
+            "concurrentBuilds": 1,
+            "maxBuildDurationSeconds": 600,
+            "customDomains": 10,
+            "alwaysOnApps": 0,
+            "logRetentionDays": 3
           }
         ]
       }
