@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.7'
+const VERSION = '0.1.8'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
@@ -68,7 +68,9 @@ Usage:
   zerct capabilities [--api <url>] [--json]
   zerct me [--api <url>] [--json]
   zerct usage [--api <url>] [--json]
+  zerct activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct apps [--api <url>] [--json]
+  zerct overview --app <app_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct deploys [--app <app_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct builds [--app <app_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct logs --app <app_id> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
@@ -128,8 +130,14 @@ async function main() {
     case 'usage':
       await usage(cli)
       break
+    case 'activity':
+      await activity(cli)
+      break
     case 'apps':
       await apps(cli)
+      break
+    case 'overview':
+      await overview(cli)
       break
     case 'deploys':
       await deploys(cli)
@@ -567,6 +575,19 @@ async function me(cli) {
 async function usage(cli) {
   const token = await readOrLoginToken(process.cwd(), cli)
   const response = await apiRequest(cli, 'GET', '/v1/usage', token, null)
+  printJsonOrPretty(cli, response)
+}
+
+async function activity(cli) {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const response = await apiRequest(cli, 'GET', `/v1/activity${pageQuery(cli)}`, token, null)
+  printJsonOrPretty(cli, response)
+}
+
+async function overview(cli) {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const app = requireApp(cli)
+  const response = await apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/overview${pageQuery(cli)}`, token, null)
   printJsonOrPretty(cli, response)
 }
 

@@ -418,6 +418,82 @@
         ]
       }
     },
+    "/v1/apps/{app_id}/overview": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Get app overview",
+        "description": "Returns app status, deploys, builds, logs, env names, domains, database metadata, and next actions. Context: paths./v1/apps/{app_id}/overview.get.",
+        "operationId": "getAppOverview",
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/overview.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                100
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/overview.get.parameters.1.",
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 128,
+              "examples": [
+                "1000"
+              ]
+            },
+            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/overview.get.parameters.2.",
+            "example": "1000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AppOverviewLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/apps/{app_id}/deploys": {
       "get": {
         "tags": [
@@ -1395,6 +1471,67 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/AccountUsageLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/activity": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account activity",
+        "description": "Returns account profile, usage, apps, recent deploys, recent builds, and next actions. Context: paths./v1/activity.get.",
+        "operationId": "getAccountActivity",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                100
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/activity.get.parameters.0.",
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Za-z_:-]{1,128}$",
+              "maxLength": 128,
+              "examples": [
+                "1000"
+              ]
+            },
+            "description": "Cursor returned by the previous response. Context: paths./v1/activity.get.parameters.1.",
+            "example": "1000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountActivityLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2863,6 +3000,204 @@
                     "alwaysOnApps": 0,
                     "logRetentionDays": 3
                   }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AccountActivityLoaded": {
+        "description": "Account activity loaded. Context: components.responses.AccountActivityLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountActivityResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Account activity loaded.",
+                "value": {
+                  "profile": {
+                    "accountId": "acct_01HW0000000000000000000000",
+                    "email": "dev@example.com",
+                    "provider": "github",
+                    "plan": "free",
+                    "handle": "acme",
+                    "displayName": "Acme",
+                    "accountUrl": "https://zerct.com/acme"
+                  },
+                  "usage": {
+                    "appCount": 1,
+                    "runningCount": 1,
+                    "databaseCount": 1,
+                    "runtimeMemoryMib": 512,
+                    "runtimeCpuMillis": 250,
+                    "databaseStorageMib": 512,
+                    "deployCount": 3,
+                    "monthlyDeployCount": 3,
+                    "monthlyBuildMinutes": 5,
+                    "customDomainCount": 1
+                  },
+                  "limits": {
+                    "projects": 3,
+                    "managedDatabases": 1,
+                    "postgresStorageMib": 512,
+                    "postgresStorageMibPerDatabase": 512,
+                    "dataTransferGib": 25,
+                    "monthlyBuildMinutes": 300,
+                    "monthlyDeployments": 200,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 600,
+                    "customDomains": 10,
+                    "alwaysOnApps": 0,
+                    "logRetentionDays": 3
+                  },
+                  "apps": [
+                    {
+                      "appId": "app_01HW0000000000000000000000",
+                      "name": "hello-rust",
+                      "slug": "hello-rust",
+                      "url": "https://hello-rust.zerct.app",
+                      "plan": "free",
+                      "runtimeStatus": "running",
+                      "latestBuildStatus": "succeeded",
+                      "deployCount": 3,
+                      "runtimeMemoryMib": 256,
+                      "runtimeCpuMillis": 250,
+                      "databaseStorageMib": 512,
+                      "idleTimeoutMinutes": 15,
+                      "latestDeployAt": "2026-05-25T12:00:00.000Z"
+                    }
+                  ],
+                  "deploys": [
+                    {
+                      "id": "deploy_1",
+                      "app_id": "app_1",
+                      "build_job_id": "job_1",
+                      "commit_sha": "0123456789abcdef",
+                      "url": "https://hello-rust.zerct.app"
+                    }
+                  ],
+                  "builds": [
+                    {
+                      "id": "job_1",
+                      "app_id": "app_1",
+                      "status": "queued",
+                      "message": "Build queued."
+                    }
+                  ],
+                  "next_actions": [
+                    "Use `npx @zerct/zerct overview --app <app_id>` for a compact app state snapshot."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "AppOverviewLoaded": {
+        "description": "App overview loaded. Context: components.responses.AppOverviewLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppOverviewResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "App overview loaded.",
+                "value": {
+                  "status": {
+                    "app": {
+                      "id": "app_1",
+                      "account_id": "acct_1",
+                      "name": "hello-rust",
+                      "kind": "rust_backend",
+                      "plan": "free",
+                      "runtime_status": "running",
+                      "url": "https://hello-rust.zerct.app"
+                    },
+                    "latest_deploy": {
+                      "id": "deploy_1",
+                      "app_id": "app_1",
+                      "build_job_id": "job_1",
+                      "commit_sha": "0123456789abcdef",
+                      "url": "https://hello-rust.zerct.app"
+                    },
+                    "latest_build_job": {
+                      "id": "job_1",
+                      "app_id": "app_1",
+                      "status": "queued",
+                      "message": "Build queued."
+                    }
+                  },
+                  "deploys": [
+                    {
+                      "id": "deploy_1",
+                      "app_id": "app_1",
+                      "build_job_id": "job_1",
+                      "commit_sha": "0123456789abcdef",
+                      "url": "https://hello-rust.zerct.app"
+                    }
+                  ],
+                  "builds": [
+                    {
+                      "id": "job_1",
+                      "app_id": "app_1",
+                      "status": "queued",
+                      "message": "Build queued."
+                    }
+                  ],
+                  "logs": {
+                    "lines": [
+                      {
+                        "timestamp": "2026-05-25T12:00:00.000Z",
+                        "stream": "stdout",
+                        "message": "Build queued."
+                      }
+                    ],
+                    "has_more": true,
+                    "next_cursor": "1000"
+                  },
+                  "env": [
+                    {
+                      "name": "value",
+                      "created_at": "2026-05-25T12:00:00.000Z",
+                      "updated_at": "2026-05-25T12:00:00.000Z"
+                    }
+                  ],
+                  "domains": [],
+                  "database": null,
+                  "next_actions": [
+                    "Watch the active build with `npx @zerct/zerct logs --app app_1`."
+                  ]
                 }
               }
             }
@@ -6311,6 +6646,371 @@
             "customDomains": 10,
             "alwaysOnApps": 0,
             "logRetentionDays": 3
+          }
+        ]
+      },
+      "AccountActivityResponse": {
+        "type": "object",
+        "description": "Account-wide activity response optimized for dashboards and agents. Context: components.schemas.AccountActivityResponse.",
+        "additionalProperties": false,
+        "required": [
+          "profile",
+          "usage",
+          "limits",
+          "apps",
+          "deploys",
+          "builds",
+          "next_actions"
+        ],
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/AccountDashboardUsage"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PlanLimits"
+          },
+          "apps": {
+            "type": "array",
+            "description": "Account apps. Context: components.schemas.AccountActivityResponse.properties.apps.",
+            "items": {
+              "$ref": "#/components/schemas/AccountDashboardApp"
+            },
+            "maxItems": 1000,
+            "examples": [
+              [
+                {
+                  "appId": "app_01HW0000000000000000000000",
+                  "name": "hello-rust",
+                  "slug": "hello-rust",
+                  "url": "https://hello-rust.zerct.app",
+                  "plan": "free",
+                  "runtimeStatus": "running",
+                  "latestBuildStatus": "succeeded",
+                  "deployCount": 3,
+                  "runtimeMemoryMib": 256,
+                  "runtimeCpuMillis": 250,
+                  "databaseStorageMib": 512,
+                  "idleTimeoutMinutes": 15,
+                  "latestDeployAt": "2026-05-25T12:00:00.000Z"
+                }
+              ]
+            ]
+          },
+          "deploys": {
+            "type": "array",
+            "description": "Recent deploys across the account. Context: components.schemas.AccountActivityResponse.properties.deploys.",
+            "items": {
+              "$ref": "#/components/schemas/Deploy"
+            },
+            "maxItems": 200,
+            "examples": [
+              [
+                {
+                  "id": "deploy_1",
+                  "app_id": "app_1",
+                  "build_job_id": "job_1",
+                  "commit_sha": "0123456789abcdef",
+                  "url": "https://hello-rust.zerct.app"
+                }
+              ]
+            ]
+          },
+          "builds": {
+            "type": "array",
+            "description": "Recent builds across the account. Context: components.schemas.AccountActivityResponse.properties.builds.",
+            "items": {
+              "$ref": "#/components/schemas/BuildJob"
+            },
+            "maxItems": 200,
+            "examples": [
+              [
+                {
+                  "id": "job_1",
+                  "app_id": "app_1",
+                  "status": "queued",
+                  "message": "Build queued."
+                }
+              ]
+            ]
+          },
+          "next_actions": {
+            "type": "array",
+            "description": "Recommended next actions for humans and agents. Context: components.schemas.AccountActivityResponse.properties.next_actions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "maxLength": 8192
+            },
+            "maxItems": 32,
+            "examples": [
+              [
+                "Use `npx @zerct/zerct overview --app <app_id>` for a compact app state snapshot."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "profile": {
+              "accountId": "acct_01HW0000000000000000000000",
+              "email": "dev@example.com",
+              "provider": "github",
+              "plan": "free",
+              "handle": "acme",
+              "displayName": "Acme",
+              "accountUrl": "https://zerct.com/acme"
+            },
+            "usage": {
+              "appCount": 1,
+              "runningCount": 1,
+              "databaseCount": 1,
+              "runtimeMemoryMib": 512,
+              "runtimeCpuMillis": 250,
+              "databaseStorageMib": 512,
+              "deployCount": 3,
+              "monthlyDeployCount": 3,
+              "monthlyBuildMinutes": 5,
+              "customDomainCount": 1
+            },
+            "limits": {
+              "projects": 3,
+              "managedDatabases": 1,
+              "postgresStorageMib": 512,
+              "postgresStorageMibPerDatabase": 512,
+              "dataTransferGib": 25,
+              "monthlyBuildMinutes": 300,
+              "monthlyDeployments": 200,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 600,
+              "customDomains": 10,
+              "alwaysOnApps": 0,
+              "logRetentionDays": 3
+            },
+            "apps": [
+              {
+                "appId": "app_01HW0000000000000000000000",
+                "name": "hello-rust",
+                "slug": "hello-rust",
+                "url": "https://hello-rust.zerct.app",
+                "plan": "free",
+                "runtimeStatus": "running",
+                "latestBuildStatus": "succeeded",
+                "deployCount": 3,
+                "runtimeMemoryMib": 256,
+                "runtimeCpuMillis": 250,
+                "databaseStorageMib": 512,
+                "idleTimeoutMinutes": 15,
+                "latestDeployAt": "2026-05-25T12:00:00.000Z"
+              }
+            ],
+            "deploys": [
+              {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "builds": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ],
+            "next_actions": [
+              "Use `npx @zerct/zerct overview --app <app_id>` for a compact app state snapshot."
+            ]
+          }
+        ]
+      },
+      "AppOverviewResponse": {
+        "type": "object",
+        "description": "Single app overview response optimized for dashboards and agents. Context: components.schemas.AppOverviewResponse.",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "deploys",
+          "builds",
+          "logs",
+          "env",
+          "domains",
+          "database",
+          "next_actions"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/StatusResponse"
+          },
+          "deploys": {
+            "type": "array",
+            "description": "Recent deploys for the app. Context: components.schemas.AppOverviewResponse.properties.deploys.",
+            "items": {
+              "$ref": "#/components/schemas/Deploy"
+            },
+            "maxItems": 200,
+            "examples": [
+              [
+                {
+                  "id": "deploy_1",
+                  "app_id": "app_1",
+                  "build_job_id": "job_1",
+                  "commit_sha": "0123456789abcdef",
+                  "url": "https://hello-rust.zerct.app"
+                }
+              ]
+            ]
+          },
+          "builds": {
+            "type": "array",
+            "description": "Recent builds for the app. Context: components.schemas.AppOverviewResponse.properties.builds.",
+            "items": {
+              "$ref": "#/components/schemas/BuildJob"
+            },
+            "maxItems": 200,
+            "examples": [
+              [
+                {
+                  "id": "job_1",
+                  "app_id": "app_1",
+                  "status": "queued",
+                  "message": "Build queued."
+                }
+              ]
+            ]
+          },
+          "logs": {
+            "$ref": "#/components/schemas/LogsResponse"
+          },
+          "env": {
+            "type": "array",
+            "description": "Environment variable names only. Context: components.schemas.AppOverviewResponse.properties.env.",
+            "items": {
+              "$ref": "#/components/schemas/EnvVarSummary"
+            },
+            "maxItems": 512,
+            "examples": [
+              [
+                {
+                  "name": "value",
+                  "created_at": "2026-05-25T12:00:00.000Z",
+                  "updated_at": "2026-05-25T12:00:00.000Z"
+                }
+              ]
+            ]
+          },
+          "domains": {
+            "type": "array",
+            "description": "Custom domains attached to the app. Context: components.schemas.AppOverviewResponse.properties.domains.",
+            "items": {
+              "$ref": "#/components/schemas/AppDomain"
+            },
+            "maxItems": 100,
+            "examples": [
+              []
+            ]
+          },
+          "database": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Database"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Managed Postgres database metadata, when attached. Context: components.schemas.AppOverviewResponse.properties.database.",
+            "examples": [
+              null
+            ]
+          },
+          "next_actions": {
+            "type": "array",
+            "description": "Recommended next actions for humans and agents. Context: components.schemas.AppOverviewResponse.properties.next_actions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "maxLength": 8192
+            },
+            "maxItems": 32,
+            "examples": [
+              [
+                "Watch the active build with `npx @zerct/zerct logs --app app_1`."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "status": {
+              "app": {
+                "id": "app_1",
+                "account_id": "acct_1",
+                "name": "hello-rust",
+                "kind": "rust_backend",
+                "plan": "free",
+                "runtime_status": "running",
+                "url": "https://hello-rust.zerct.app"
+              },
+              "latest_deploy": {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              },
+              "latest_build_job": {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            },
+            "deploys": [
+              {
+                "id": "deploy_1",
+                "app_id": "app_1",
+                "build_job_id": "job_1",
+                "commit_sha": "0123456789abcdef",
+                "url": "https://hello-rust.zerct.app"
+              }
+            ],
+            "builds": [
+              {
+                "id": "job_1",
+                "app_id": "app_1",
+                "status": "queued",
+                "message": "Build queued."
+              }
+            ],
+            "logs": {
+              "lines": [
+                {
+                  "timestamp": "2026-05-25T12:00:00.000Z",
+                  "stream": "stdout",
+                  "message": "Build queued."
+                }
+              ],
+              "has_more": true,
+              "next_cursor": "1000"
+            },
+            "env": [
+              {
+                "name": "value",
+                "created_at": "2026-05-25T12:00:00.000Z",
+                "updated_at": "2026-05-25T12:00:00.000Z"
+              }
+            ],
+            "domains": [],
+            "database": null,
+            "next_actions": [
+              "Watch the active build with `npx @zerct/zerct logs --app app_1`."
+            ]
           }
         ]
       }

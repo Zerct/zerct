@@ -20,9 +20,9 @@ on `0.0.0.0:$PORT` and expose the configured health endpoint.
 From a full-stack repo root, the same deploy command discovers nested
 `zerct.toml` files and deploys the whole workspace in one command.
 
-Agents can also inspect API capabilities, account identity, usage, apps,
-deploys, builds, app/deploy/build logs, env metadata, custom domains, and
-billing portal links through the same CLI.
+Agents can also inspect API capabilities, account identity, usage, account
+activity, apps, complete app overviews, deploys, builds, app/deploy/build logs,
+env metadata, custom domains, and billing portal links through the same CLI.
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
 the Zerct session in the OS credential store when available, and continues the
