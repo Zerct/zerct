@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.5'
+const VERSION = '0.1.6'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
@@ -65,12 +65,20 @@ Usage:
   zerct doctor [path] [--json]
   zerct login [--token <token>] [--api <url>]
   zerct deploy [path] [--database] [--api <url>] [--json]
-  zerct logs --app <app_id> [--api <url>] [--json]
+  zerct apps [--api <url>] [--json]
+  zerct deploys --app <app_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct builds --app <app_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  zerct logs --app <app_id> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   zerct status --app <app_id> [--api <url>] [--json]
   zerct inspect --app <app_id> [--api <url>] [--json]
   zerct db --app <app_id> [--api <url>] [--json]
+  zerct env list --app <app_id> [--api <url>] [--json]
   zerct env set --app <app_id> KEY=value [--api <url>] [--json]
-  zerct billing [--api <url>] [--json]
+  zerct env delete --app <app_id> KEY [--api <url>] [--json]
+  zerct domains list --app <app_id> [--api <url>] [--json]
+  zerct domains add --app <app_id> <domain> [--api <url>] [--json]
+  zerct domains delete --app <app_id> <domain> [--api <url>] [--json]
+  zerct billing [portal] [--api <url>] [--json]
 
 Agent contract:
   - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
@@ -108,6 +116,15 @@ async function main() {
     case 'deploy':
       await deploy(projectPath(cli.args[0]), cli)
       break
+    case 'apps':
+      await apps(cli)
+      break
+    case 'deploys':
+      await deploys(cli)
+      break
+    case 'builds':
+      await builds(cli)
+      break
     case 'logs':
       await logs(cli)
       break
@@ -124,6 +141,9 @@ async function main() {
     case 'env':
       await envCommand(cli)
       break
+    case 'domains':
+      await domainsCommand(cli)
+      break
     case 'billing':
       await billing(cli)
       break
@@ -138,6 +158,10 @@ function parseArgs(argv) {
     args: [],
     apiUrl: DEFAULT_API_URL,
     app: '',
+    build: '',
+    deploy: '',
+    limit: '',
+    cursor: '',
     token: '',
     json: false,
     database: false,
@@ -163,6 +187,18 @@ function parseArgs(argv) {
       index += 1
     } else if (arg === '--app') {
       cli.app = requireValue(argv, index, '--app')
+      index += 1
+    } else if (arg === '--build') {
+      cli.build = requireValue(argv, index, '--build')
+      index += 1
+    } else if (arg === '--deploy') {
+      cli.deploy = requireValue(argv, index, '--deploy')
+      index += 1
+    } else if (arg === '--limit') {
+      cli.limit = requireValue(argv, index, '--limit')
+      index += 1
+    } else if (arg === '--cursor') {
+      cli.cursor = requireValue(argv, index, '--cursor')
       index += 1
     } else if (arg === '--token') {
       cli.token = requireValue(argv, index, '--token')
@@ -471,7 +507,17 @@ function printWorkspaceDeployResults(projectDir, results, cli) {
 }
 
 async function logs(cli) {
-  const response = await appGet(cli, 'logs')
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const page = pageQuery(cli)
+  let route = ''
+  if (cli.build) {
+    route = `/v1/builds/${encodeURIComponent(cli.build)}/logs${page}`
+  } else if (cli.deploy) {
+    route = `/v1/deploys/${encodeURIComponent(cli.deploy)}/logs${page}`
+  } else {
+    route = `/v1/apps/${encodeURIComponent(requireApp(cli))}/logs${page}`
+  }
+  const response = await apiRequest(cli, 'GET', route, token, null)
   if (cli.json) {
     console.log(JSON.stringify(response, null, 2))
     return
@@ -479,6 +525,30 @@ async function logs(cli) {
   for (const line of response.lines || []) {
     console.log(`[${line.timestamp}] ${line.stream}: ${line.message}`)
   }
+  if (response.has_more && response.next_cursor) {
+    const target = cli.build
+      ? `--build ${cli.build}`
+      : cli.deploy
+        ? `--deploy ${cli.deploy}`
+        : `--app ${requireApp(cli)}`
+    console.log(`next npx @zerct/zerct logs ${target} --cursor ${response.next_cursor}`)
+  }
+}
+
+async function apps(cli) {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const response = await apiRequest(cli, 'GET', '/v1/apps', token, null)
+  printJsonOrPretty(cli, response)
+}
+
+async function deploys(cli) {
+  const response = await appGet(cli, `deploys${pageQuery(cli)}`)
+  printJsonOrPretty(cli, response)
+}
+
+async function builds(cli) {
+  const response = await appGet(cli, `builds${pageQuery(cli)}`)
+  printJsonOrPretty(cli, response)
 }
 
 async function status(cli) {
@@ -497,8 +567,26 @@ async function database(cli) {
 }
 
 async function envCommand(cli) {
+  if (cli.args[0] === 'list') {
+    const response = await appGet(cli, 'env')
+    printJsonOrPretty(cli, response)
+    return
+  }
+
+  if (cli.args[0] === 'delete') {
+    const name = cli.args[1] || ''
+    if (!name) {
+      throw agentError('invalid_env', 'Environment variable name is required.', 'Use `npx @zerct/zerct env delete --app <app_id> KEY`.', cli.json)
+    }
+    const token = await readOrLoginToken(process.cwd(), cli)
+    const app = requireApp(cli)
+    const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/env/${encodeURIComponent(name)}`, token, null)
+    printJsonOrPretty(cli, response)
+    return
+  }
+
   if (cli.args[0] !== 'set') {
-    throw agentError('unknown_command', 'Unknown env command.', 'Use `npx @zerct/zerct env set --app <app_id> KEY=value`.', cli.json)
+    throw agentError('unknown_command', 'Unknown env command.', 'Use `npx @zerct/zerct env list`, `env set`, or `env delete`.', cli.json)
   }
 
   const assignment = cli.args[1] || ''
@@ -515,8 +603,48 @@ async function envCommand(cli) {
   printJsonOrPretty(cli, response)
 }
 
+async function domainsCommand(cli) {
+  const action = cli.args[0] || 'list'
+  if (action === 'list') {
+    const response = await appGet(cli, 'domains')
+    printJsonOrPretty(cli, response)
+    return
+  }
+
+  const domain = cli.args[1] || ''
+  if (!domain) {
+    throw agentError('missing_domain', 'Domain is required.', 'Use `npx @zerct/zerct domains add --app <app_id> api.example.com`.', cli.json)
+  }
+
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const app = requireApp(cli)
+  if (action === 'add') {
+    const response = await apiRequest(cli, 'POST', `/v1/apps/${encodeURIComponent(app)}/domains`, token, { domain })
+    printJsonOrPretty(cli, response)
+    return
+  }
+  if (action === 'delete') {
+    const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}`, token, null)
+    printJsonOrPretty(cli, response)
+    return
+  }
+
+  throw agentError('unknown_command', 'Unknown domains command.', 'Use `domains list`, `domains add`, or `domains delete`.', cli.json)
+}
+
 async function billing(cli) {
   const token = await readOrLoginToken(process.cwd(), cli)
+  if (cli.args[0] === 'portal') {
+    const response = await apiRequest(cli, 'POST', '/v1/billing/portal', token, null)
+    if (cli.json) {
+      console.log(JSON.stringify(response, null, 2))
+      return
+    }
+    console.log(response.checkout.url)
+    openUrl(response.checkout.url)
+    return
+  }
+
   const response = await apiRequest(cli, 'POST', '/v1/billing/checkout', token, {
     target_plan: 'pro',
     reason: 'Upgrade to Zerct Pro.'
@@ -597,6 +725,18 @@ function requireApp(cli) {
     throw agentError('missing_app', 'App id is required.', 'Pass `--app <app_id>`. Use the app id printed by `npx @zerct/zerct deploy`.', cli.json)
   }
   return cli.app
+}
+
+function pageQuery(cli) {
+  const params = new URLSearchParams()
+  if (cli.limit) {
+    params.set('limit', cli.limit)
+  }
+  if (cli.cursor) {
+    params.set('cursor', cli.cursor)
+  }
+  const value = params.toString()
+  return value ? `?${value}` : ''
 }
 
 async function apiRequest(cli, method, route, token, body) {

@@ -100,3 +100,17 @@ npx @zerct/zerct deploy
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
 the Zerct session in the user's credential store when available, and continues
 the deploy. Later commands reuse that session.
+
+Useful agent commands:
+
+```sh
+npx @zerct/zerct apps
+npx @zerct/zerct deploys --app app_1
+npx @zerct/zerct builds --app app_1
+npx @zerct/zerct logs --app app_1 --limit 100 --json
+npx @zerct/zerct logs --deploy deploy_1 --json
+npx @zerct/zerct logs --build job_1 --json
+npx @zerct/zerct env list --app app_1
+npx @zerct/zerct domains list --app app_1
+npx @zerct/zerct billing portal
+```
