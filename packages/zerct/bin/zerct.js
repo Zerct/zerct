@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.8'
+const VERSION = '0.1.9'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const SESSION_DIR = '.zerct'
@@ -82,6 +82,7 @@ Usage:
   zerct env delete --app <app_id> KEY [--api <url>] [--json]
   zerct domains list --app <app_id> [--api <url>] [--json]
   zerct domains add --app <app_id> <domain> [--api <url>] [--json]
+  zerct domains verify --app <app_id> <domain> [--api <url>] [--json]
   zerct domains delete --app <app_id> <domain> [--api <url>] [--json]
   zerct billing [portal] [--api <url>] [--json]
 
@@ -681,13 +682,18 @@ async function domainsCommand(cli) {
     printJsonOrPretty(cli, response)
     return
   }
+  if (action === 'verify') {
+    const response = await apiRequest(cli, 'POST', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}/verify`, token, null)
+    printJsonOrPretty(cli, response)
+    return
+  }
   if (action === 'delete') {
     const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}`, token, null)
     printJsonOrPretty(cli, response)
     return
   }
 
-  throw agentError('unknown_command', 'Unknown domains command.', 'Use `domains list`, `domains add`, or `domains delete`.', cli.json)
+  throw agentError('unknown_command', 'Unknown domains command.', 'Use `domains list`, `domains add`, `domains verify`, or `domains delete`.', cli.json)
 }
 
 async function billing(cli) {

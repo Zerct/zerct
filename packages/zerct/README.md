@@ -22,7 +22,8 @@ From a full-stack repo root, the same deploy command discovers nested
 
 Agents can also inspect API capabilities, account identity, usage, account
 activity, apps, complete app overviews, deploys, builds, app/deploy/build logs,
-env metadata, custom domains, and billing portal links through the same CLI.
+env metadata, custom domains, domain verification, and billing portal links
+through the same CLI.
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
 the Zerct session in the OS credential store when available, and continues the

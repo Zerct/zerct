@@ -1036,6 +1036,65 @@
         }
       }
     },
+    "/v1/apps/{app_id}/domains/{domain}/verify": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Verify custom domain",
+        "description": "Checks whether the custom domain CNAME points at Zerct and activates routing when ownership is verified. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.",
+        "operationId": "verifyAppDomain",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/DomainVerified"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^app_[A-Za-z0-9_-]+$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Zerct app id. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
+              "maxLength": 512,
+              "examples": [
+                "api.example.com"
+              ]
+            },
+            "description": "Custom domain name. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.1.",
+            "example": "api.example.com"
+          }
+        ]
+      }
+    },
     "/v1/apps/{app_id}/domains/{domain}": {
       "delete": {
         "tags": [
@@ -2750,13 +2809,18 @@
                 "value": {
                   "domains": [
                     {
-                      "id": "app_1",
+                      "id": "dom_01HW0000000000000000000000",
                       "app_id": "app_1",
                       "domain": "api.example.com",
-                      "verified": true,
-                      "verified_at": "2026-05-25T12:00:00.000Z",
+                      "status": "pending",
+                      "verified": false,
+                      "verified_at": null,
                       "created_at": "2026-05-25T12:00:00.000Z",
-                      "agent_instruction": "Retry the command after applying the requested fix."
+                      "dns_record_type": "CNAME",
+                      "dns_record_name": "api.example.com",
+                      "dns_record_value": "cname.zerct.app",
+                      "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                      "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
                     }
                   ]
                 }
@@ -2790,13 +2854,18 @@
               "example": {
                 "summary": "Domain added.",
                 "value": {
-                  "id": "app_1",
+                  "id": "dom_01HW0000000000000000000000",
                   "app_id": "app_1",
                   "domain": "api.example.com",
-                  "verified": true,
-                  "verified_at": "2026-05-25T12:00:00.000Z",
+                  "status": "pending",
+                  "verified": false,
+                  "verified_at": null,
                   "created_at": "2026-05-25T12:00:00.000Z",
-                  "agent_instruction": "Retry the command after applying the requested fix."
+                  "dns_record_type": "CNAME",
+                  "dns_record_name": "api.example.com",
+                  "dns_record_value": "cname.zerct.app",
+                  "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
                 }
               }
             }
@@ -3198,6 +3267,49 @@
                   "next_actions": [
                     "Watch the active build with `npx @zerct/zerct logs --app app_1`."
                   ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "DomainVerified": {
+        "description": "Domain verification checked. Context: components.responses.DomainVerified.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AppDomain"
+            },
+            "examples": {
+              "example": {
+                "summary": "Domain verification checked.",
+                "value": {
+                  "id": "dom_01HW0000000000000000000000",
+                  "app_id": "app_1",
+                  "domain": "api.example.com",
+                  "status": "active",
+                  "verified": true,
+                  "verified_at": "2026-05-25T12:00:00.000Z",
+                  "created_at": "2026-05-25T12:00:00.000Z",
+                  "dns_record_type": "CNAME",
+                  "dns_record_name": "api.example.com",
+                  "dns_record_value": "cname.zerct.app",
+                  "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
                 }
               }
             }
@@ -5457,9 +5569,14 @@
           "id",
           "app_id",
           "domain",
+          "status",
           "verified",
           "verified_at",
           "created_at",
+          "dns_record_type",
+          "dns_record_name",
+          "dns_record_value",
+          "cloudflare_dns_url",
           "agent_instruction"
         ],
         "properties": {
@@ -5517,17 +5634,70 @@
             "examples": [
               "Retry the command after applying the requested fix."
             ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Custom domain setup status. Context: components.schemas.AppDomain.properties.status.",
+            "enum": [
+              "pending",
+              "active"
+            ],
+            "examples": [
+              "pending"
+            ]
+          },
+          "dns_record_type": {
+            "type": "string",
+            "description": "DNS record type customers create. Context: components.schemas.AppDomain.properties.dns_record_type.",
+            "enum": [
+              "CNAME"
+            ],
+            "examples": [
+              "CNAME"
+            ]
+          },
+          "dns_record_name": {
+            "type": "string",
+            "description": "DNS record name customers create. Context: components.schemas.AppDomain.properties.dns_record_name.",
+            "pattern": "^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$",
+            "maxLength": 512,
+            "examples": [
+              "api.example.com"
+            ]
+          },
+          "dns_record_value": {
+            "type": "string",
+            "description": "Zerct CNAME target. Context: components.schemas.AppDomain.properties.dns_record_value.",
+            "enum": [
+              "cname.zerct.app"
+            ],
+            "examples": [
+              "cname.zerct.app"
+            ]
+          },
+          "cloudflare_dns_url": {
+            "type": "string",
+            "description": "Cloudflare DNS dashboard URL. Context: components.schemas.AppDomain.properties.cloudflare_dns_url.",
+            "format": "uri",
+            "examples": [
+              "https://dash.cloudflare.com/?to=/:account/:zone/dns/records"
+            ]
           }
         },
         "examples": [
           {
-            "id": "app_1",
+            "id": "dom_01HW0000000000000000000000",
             "app_id": "app_1",
             "domain": "api.example.com",
-            "verified": true,
-            "verified_at": "2026-05-25T12:00:00.000Z",
+            "status": "pending",
+            "verified": false,
+            "verified_at": null,
             "created_at": "2026-05-25T12:00:00.000Z",
-            "agent_instruction": "Retry the command after applying the requested fix."
+            "dns_record_type": "CNAME",
+            "dns_record_name": "api.example.com",
+            "dns_record_value": "cname.zerct.app",
+            "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+            "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
           }
         ]
       },
