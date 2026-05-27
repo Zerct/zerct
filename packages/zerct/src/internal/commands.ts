@@ -4,18 +4,15 @@ import { readOrLoginToken } from './auth.ts'
 import { openUrl, printJsonOrPretty } from './project.ts'
 import type { CheckoutResponse, CliOptions, JsonObject, JsonValue, LogLine, LogsResponse } from './types.ts'
 
+interface LogsRequest {
+  route: string
+  target: string
+}
+
 async function logs(cli: CliOptions): Promise<void> {
   const token = await readOrLoginToken(process.cwd(), cli)
-  const page = pageQuery(cli)
-  let route = ''
-  if (cli.build) {
-    route = `/v1/builds/${encodeURIComponent(cli.build)}/logs${page}`
-  } else if (cli.deploy) {
-    route = `/v1/deploys/${encodeURIComponent(cli.deploy)}/logs${page}`
-  } else {
-    route = `/v1/apps/${encodeURIComponent(requireApp(cli))}/logs${page}`
-  }
-  const response = logsResponse(await apiRequest(cli, 'GET', route, token, null))
+  const request = logsRequest(cli)
+  const response = logsResponse(await apiRequest(cli, 'GET', request.route, token, null))
   if (cli.json) {
     console.log(JSON.stringify(response, null, 2))
     return
@@ -24,12 +21,29 @@ async function logs(cli: CliOptions): Promise<void> {
     console.log(`[${line.timestamp}] ${line.stream}: ${line.message}`)
   }
   if (response.has_more && response.next_cursor) {
-    const target = cli.build
-      ? `--build ${cli.build}`
-      : cli.deploy
-        ? `--deploy ${cli.deploy}`
-        : `--app ${requireApp(cli)}`
-    console.log(`next npx @zerct/zerct logs ${target} --cursor ${response.next_cursor}`)
+    console.log(`next npx @zerct/zerct logs ${request.target} --cursor ${response.next_cursor}`)
+  }
+}
+
+function logsRequest(cli: CliOptions): LogsRequest {
+  const page = pageQuery(cli)
+  if (cli.build) {
+    return {
+      route: `/v1/builds/${encodeURIComponent(cli.build)}/logs${page}`,
+      target: `--build ${cli.build}`
+    }
+  }
+  if (cli.deploy) {
+    return {
+      route: `/v1/deploys/${encodeURIComponent(cli.deploy)}/logs${page}`,
+      target: `--deploy ${cli.deploy}`
+    }
+  }
+
+  const app = requireApp(cli)
+  return {
+    route: `/v1/apps/${encodeURIComponent(app)}/logs${page}`,
+    target: `--app ${app}`
   }
 }
 
