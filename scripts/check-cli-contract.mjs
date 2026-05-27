@@ -35,13 +35,15 @@ const commands = [
   'logs',
   'status',
   'inspect',
+  'db',
+  'database',
   'env',
   'domains',
   'billing'
 ]
 
 for (const command of commands) {
-  requireSnippet(npmCli, `case '${command}':`, `npm command ${command}`)
+  requireSnippet(npmCli, `['${command}',`, `npm command ${command}`)
 }
 
 requireSnippet(npmConstants, 'fullstack-rust-tanstack', 'fullstack template option')
