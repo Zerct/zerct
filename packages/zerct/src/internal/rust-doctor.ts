@@ -25,7 +25,7 @@ function unsafeCheck(projectDir: string): DoctorCheck {
     name: 'unsafe',
     ok: unsafeHits.length === 0,
     message: unsafeHits.length === 0 ? 'no direct unsafe found' : unsafeHits.slice(0, 5).join(', '),
-    agent_instruction: 'Remove direct unsafe usage from workspace Rust source before deploying.'
+    agent_instruction: unsafeHits.length === 0 ? null : 'Remove direct unsafe usage from workspace Rust source before deploying.'
   }
 }
 
@@ -91,7 +91,7 @@ function cargoCommandCheck(projectDir: string, check: CargoCheckSpec): DoctorChe
     name: check.name,
     ok: cargo.status === 0,
     message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || `${check.name} failed`).trim().slice(0, 240),
-    agent_instruction: check.failed
+    agent_instruction: cargo.status === 0 ? null : check.failed
   }
 }
 
@@ -116,7 +116,7 @@ function cargoLints(projectDir: string): DoctorCheck {
     name: 'cargo lints',
     ok,
     message: ok ? 'strict' : 'missing unsafe_code=forbid or warnings=deny',
-    agent_instruction: 'Add `[lints.rust]` with `unsafe_code = "forbid"` and `warnings = "deny"`, then retry.'
+    agent_instruction: ok ? null : 'Add `[lints.rust]` with `unsafe_code = "forbid"` and `warnings = "deny"`, then retry.'
   }
 }
 

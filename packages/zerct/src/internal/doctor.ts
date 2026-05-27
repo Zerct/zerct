@@ -77,7 +77,7 @@ function runDoctor(projectDir: string): DoctorReport {
       config = parseZerctToml(readFileSync(configPath, 'utf8'), projectDir)
       validateConfig(config)
       configValid = true
-      checks.push({ name: 'zerct.toml', ok: true, message: 'valid', agent_instruction: 'Config is valid.' })
+      checks.push({ name: 'zerct.toml', ok: true, message: 'valid', agent_instruction: null })
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error)
       checks.push({
@@ -106,7 +106,7 @@ function runDoctor(projectDir: string): DoctorReport {
       name: file,
       ok,
       message: ok ? 'found' : 'missing',
-      agent_instruction: `Create and commit ${file}, then retry.`
+      agent_instruction: ok ? null : `Create and commit ${file}, then retry.`
     })
   }
 
@@ -116,7 +116,7 @@ function runDoctor(projectDir: string): DoctorReport {
       name: 'frontend lockfile',
       ok: hasLockfile,
       message: hasLockfile ? 'found' : 'missing',
-      agent_instruction: 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.'
+      agent_instruction: hasLockfile ? null : 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.'
     })
     checks.push(...frontendSourceChecks(projectDir))
     checks.push(...frontendScriptChecks(projectDir, configValid))
