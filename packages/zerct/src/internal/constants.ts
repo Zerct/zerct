@@ -1,4 +1,10 @@
-export const VERSION: string = '0.1.40'
+import { readFileSync } from 'node:fs'
+
+interface PackageVersionManifest {
+  version: string
+}
+
+export const VERSION: string = packageVersion()
 export const DEFAULT_API_URL: string = 'https://api.zerct.com'
 export const ARCHIVE_LIMIT_BYTES: number = 48 * 1024 * 1024
 export const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: number = 900
@@ -97,3 +103,19 @@ Agent contract:
   - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.
   - Keep direct unsafe out of Rust source.
 `
+
+function packageVersion(): string {
+  const manifest: unknown = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8'))
+  if (isPackageVersionManifest(manifest)) {
+    return manifest.version
+  }
+  throw new Error('packages/zerct/package.json must include a version string')
+}
+
+function isPackageVersionManifest(value: unknown): value is PackageVersionManifest {
+  return typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    && 'version' in value
+    && typeof value.version === 'string'
+}
