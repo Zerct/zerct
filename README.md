@@ -60,13 +60,12 @@ bun add -d @typescript/native-preview oxlint
 
 Rust backend checks must include `cargo fmt --all --check`, locked
 `cargo check`, and locked all-target, all-feature Clippy with `-D warnings`.
-Frontend checks must install dependencies and run both
-typechecking and linting before build work is queued. Frontend browser source
-must be `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or `components`;
-browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected. Bun projects
-should commit `bun.lock` for the fastest Zerct build path. Existing npm
-projects can still deploy with a committed npm lockfile and npm-based build
-commands.
+Frontend checks must install dependencies, run `tsgo --noEmit`, and run native
+linting before build work is queued. Frontend browser source must be `.ts` or
+`.tsx` under `src`, `app`, `pages`, `routes`, or `components`; browser `.js`,
+`.jsx`, `.mjs`, and `.cjs` source is rejected. Bun projects should commit
+`bun.lock` for the fastest Zerct build path. Existing npm projects can still
+deploy with a committed npm lockfile and npm-based build commands.
 
 Use Homebrew for a persistent developer CLI:
 

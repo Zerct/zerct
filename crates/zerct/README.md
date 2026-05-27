@@ -14,6 +14,9 @@ zerct deploy --wait --json
 From a full-stack repo root, `zerct deploy` discovers nested `zerct.toml` files
 and deploys the whole workspace in one command.
 
+Static frontend deploys require TypeScript browser source, `tsgo --noEmit` for
+typecheck, and native linting such as `oxlint`, `biome check`, or `deno lint`.
+
 The primary first-run path remains:
 
 ```sh

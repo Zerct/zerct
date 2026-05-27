@@ -417,7 +417,7 @@ def write_frontend_template(project_dir: pathlib.Path, name: str, api_base_url: 
   "devDependencies": {{
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "^7.0.0-dev.20251126.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260526.1",
     "@vitejs/plugin-react": "^5.1.1",
     "oxlint": "^1.30.0",
     "typescript": "^5.9.3",
@@ -881,12 +881,25 @@ def frontend_script_checks(project_dir: pathlib.Path, run_scripts: bool) -> list
     if isinstance(manifest, dict) and isinstance(manifest.get("scripts"), dict):
         raw_lint_script = manifest["scripts"].get("lint")
         lint_script = raw_lint_script if isinstance(raw_lint_script, str) else ""
-    native_lint = not lint_script or not uses_javascript_linter(lint_script)
+    typecheck_script = ""
+    if isinstance(manifest, dict) and isinstance(manifest.get("scripts"), dict):
+        raw_typecheck_script = manifest["scripts"].get("typecheck")
+        typecheck_script = raw_typecheck_script if isinstance(raw_typecheck_script, str) else ""
+    strict_typecheck = uses_strict_frontend_typechecker(typecheck_script)
+    checks.append(
+        {
+            "name": "strict frontend typecheck",
+            "ok": strict_typecheck,
+            "message": "accepted" if strict_typecheck else "tsgo --noEmit missing",
+            "agent_instruction": "Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.",
+        }
+    )
+    native_lint = not uses_javascript_linter(lint_script) and uses_native_frontend_linter(lint_script)
     checks.append(
         {
             "name": "native frontend lint",
             "ok": native_lint,
-            "message": "accepted" if native_lint else "JavaScript linter found",
+            "message": "accepted" if native_lint else "native linter missing",
             "agent_instruction": "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.",
         }
     )
@@ -952,9 +965,33 @@ def uses_javascript_linter(command: str) -> bool:
     tokens = command_tokens(command)
     for index, token in enumerate(tokens):
         command_name = command_basename(token)
-        if command_name in {"eslint", "eslint_d", "standard", "xo"}:
+        if command_name in {"eslint", "eslint_d", "jscs", "jshint", "standard", "xo"}:
             return True
         if command_name == "next" and index + 1 < len(tokens) and tokens[index + 1] == "lint":
+            return True
+    return False
+
+
+def uses_strict_frontend_typechecker(command: str) -> bool:
+    tokens = command_tokens(command)
+    for index, token in enumerate(tokens):
+        command_name = command_basename(token)
+        if command_name == "tsgo" and "--noEmit" in tokens:
+            return True
+        if command_name == "deno" and index + 1 < len(tokens) and tokens[index + 1] == "check":
+            return True
+    return False
+
+
+def uses_native_frontend_linter(command: str) -> bool:
+    tokens = command_tokens(command)
+    for index, token in enumerate(tokens):
+        command_name = command_basename(token)
+        if command_name == "oxlint":
+            return True
+        if command_name == "biome" and index + 1 < len(tokens) and tokens[index + 1] in {"check", "lint"}:
+            return True
+        if command_name == "deno" and index + 1 < len(tokens) and tokens[index + 1] == "lint":
             return True
     return False
 

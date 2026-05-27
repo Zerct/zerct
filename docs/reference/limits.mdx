@@ -11,8 +11,8 @@ ambiguous to run.
 - `Cargo.lock` is required.
 - Rust backends run locked `cargo check` and locked all-target, all-feature
   Clippy with `-D warnings`.
-- Static frontend projects run typechecking and linting before build work
-  starts.
+- Static frontend projects run `tsgo --noEmit` and native linting before build
+  work starts.
 - Frontend browser source must use `.ts` or `.tsx`; `.js`, `.jsx`,
   `.mjs`, and `.cjs` browser source is rejected.
 - A health endpoint is required for Rust backends.

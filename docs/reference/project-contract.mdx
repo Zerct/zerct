@@ -26,13 +26,18 @@ src/main.tsx
 zerct.toml
 ```
 
+Static frontend `package.json` must include `typecheck`, `lint`, and `build`
+scripts. `typecheck` must run `tsgo --noEmit` with
+`@typescript/native-preview` installed. `lint` must run native tooling such as
+`oxlint`, `biome check`, or `deno lint`.
+
 ## Rust zerct.toml
 
 ```toml
 name = "hello-rust"
 
 [build]
-check = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+check = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
 command = "cargo build --release"
 
 [run]

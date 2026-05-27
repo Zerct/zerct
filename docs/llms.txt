@@ -42,9 +42,13 @@ Static frontend contract:
 - Browser source is `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
   `components`.
 - `package.json` has `typecheck`, `lint`, and `build` scripts.
+- `typecheck` runs `tsgo --noEmit` with `@typescript/native-preview`
+  installed.
+- `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`.
 - `[build].check` installs dependencies and runs package scripts for typecheck
   and lint.
-- JavaScript-based lint scripts are rejected for deploys.
+- Weak typecheck, fake lint, and JavaScript-based lint scripts are rejected for
+  deploys.
 
 Useful commands:
 

@@ -38,6 +38,8 @@ For static frontends, require:
   `components`
 - `kind = "static_frontend"` in `zerct.toml`
 - `typecheck` and `lint` scripts in `package.json`
+- `typecheck` runs `tsgo --noEmit` with `@typescript/native-preview`
+- `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`
 - a `[build].check` command that installs dependencies and runs typechecking
   plus linting
 

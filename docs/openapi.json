@@ -2020,7 +2020,7 @@
                   },
                   "deploy_plan": {
                     "kind": "rust_backend",
-                    "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                    "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
                     "build_command": "cargo build --release",
                     "build_output_dir": "dist",
                     "run_command": "./target/release/api",
@@ -3813,7 +3813,7 @@
             "examples": [
               {
                 "kind": "rust_backend",
-                "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
                 "build_command": "cargo build --release",
                 "build_output_dir": "dist",
                 "run_command": "./target/release/api",
@@ -3879,7 +3879,7 @@
             },
             "deploy_plan": {
               "kind": "rust_backend",
-              "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+              "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
               "build_command": "cargo build --release",
               "build_output_dir": "dist",
               "run_command": "./target/release/api",
@@ -4841,7 +4841,7 @@
             "pattern": "^[\\s\\S]{1,512}$",
             "maxLength": 512,
             "examples": [
-              "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+              "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
             ]
           },
           "build_command": {
@@ -4953,7 +4953,7 @@
         "examples": [
           {
             "kind": "rust_backend",
-            "check_command": "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+            "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
             "build_command": "cargo build --release",
             "build_output_dir": "dist",
             "run_command": "./target/release/api",
@@ -6109,7 +6109,7 @@
                 "pattern": "^[\\s\\S]{1,512}$",
                 "maxLength": 512,
                 "examples": [
-                  "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+                  "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
                 ]
               },
               {
@@ -6117,7 +6117,7 @@
               }
             ],
             "examples": [
-              "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+              "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
             ]
           },
           "command": {
