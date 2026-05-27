@@ -8,6 +8,32 @@ import { apiRequest, jsonObjectOrEmpty, numberField, stringField } from './api.t
 import { hasCommand, openUrl, progress, sleep } from './project.ts'
 import type { CliOptions, JsonObject, LoginPollResponse, LoginStartResponse } from './types.ts'
 
+type AliasSpec<Key extends string> = Readonly<{
+  field: Key
+  aliases: readonly string[]
+}>
+
+const LOGIN_START_STRING_FIELDS = [
+  { field: 'deviceCode', aliases: ['deviceCode', 'device_code'] },
+  { field: 'loginUrl', aliases: ['loginUrl', 'login_url'] },
+  { field: 'userCode', aliases: ['userCode', 'user_code'] }
+] as const
+
+const LOGIN_START_NUMBER_FIELDS = [
+  { field: 'expiresInSeconds', aliases: ['expiresInSeconds', 'expires_in_seconds'] },
+  { field: 'intervalSeconds', aliases: ['intervalSeconds', 'interval_seconds'] }
+] as const
+
+const LOGIN_POLL_STRING_FIELDS = [
+  { field: 'email', aliases: ['email'] },
+  { field: 'status', aliases: ['status'] },
+  { field: 'token', aliases: ['token'] }
+] as const
+
+const LOGIN_POLL_NUMBER_FIELDS = [
+  { field: 'intervalSeconds', aliases: ['intervalSeconds', 'interval_seconds'] }
+] as const
+
 async function login(cli: CliOptions): Promise<void> {
   if (cli.token) {
     writeSessionToken(cli.token)
@@ -29,13 +55,12 @@ async function readOrLoginToken(projectDir: string, cli: CliOptions): Promise<st
 
 async function loginAndStore(cli: CliOptions): Promise<string> {
   const start = loginStartResponse(await apiRequest(cli, 'POST', '/v1/login/device', null, null))
-  const loginUrl = start.loginUrl ?? start.login_url ?? ''
-  if (!loginUrl) {
+  if (!start.loginUrl) {
     throw agentError('login_failed', 'Zerct login did not return a browser URL.', 'Retry `npx @zerct/zerct login`. If it keeps failing, check Zerct status.', cli.json)
   }
-  openUrl(loginUrl)
+  openUrl(start.loginUrl)
   progress(cli, 'opened browser login')
-  progress(cli, `waiting for browser login code ${start.userCode ?? start.user_code ?? 'ZERCT'}`)
+  progress(cli, `waiting for browser login code ${start.userCode ?? 'ZERCT'}`)
 
   const session = await pollLogin(cli, start)
   if (!session.token) {
@@ -48,18 +73,17 @@ async function loginAndStore(cli: CliOptions): Promise<string> {
 }
 
 async function pollLogin(cli: CliOptions, start: LoginStartResponse): Promise<LoginPollResponse> {
-  const deviceCode = start.deviceCode ?? start.device_code ?? ''
-  if (!deviceCode) {
+  if (!start.deviceCode) {
     throw agentError('login_failed', 'Zerct login did not return a device code.', 'Retry `npx @zerct/zerct login`. If it keeps failing, check Zerct status.', cli.json)
   }
 
-  const expiresMs = (start.expiresInSeconds ?? start.expires_in_seconds ?? DEFAULT_LOGIN_EXPIRES_SECONDS) * 1000
+  const expiresMs = (start.expiresInSeconds ?? DEFAULT_LOGIN_EXPIRES_SECONDS) * 1000
   const deadline = Date.now() + expiresMs
-  let intervalMs = (start.intervalSeconds ?? start.interval_seconds ?? DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
+  let intervalMs = (start.intervalSeconds ?? DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
 
   while (Date.now() < deadline) {
     await sleep(intervalMs)
-    const response = loginPollResponse(await apiRequest(cli, 'GET', `/v1/login/device/${encodeURIComponent(deviceCode)}`, null, null))
+    const response = loginPollResponse(await apiRequest(cli, 'GET', `/v1/login/device/${encodeURIComponent(start.deviceCode)}`, null, null))
     if (response.status === 'complete') {
       return response
     }
@@ -68,7 +92,7 @@ async function pollLogin(cli: CliOptions, start: LoginStartResponse): Promise<Lo
     }
     intervalMs = Math.max(
       DEFAULT_LOGIN_INTERVAL_SECONDS * 1000,
-      (response.intervalSeconds ?? response.interval_seconds ?? DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
+      (response.intervalSeconds ?? DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
     )
   }
 
@@ -194,41 +218,66 @@ function writeKeychainToken(token: string): boolean {
 
 function loginStartResponse(value: Awaited<ReturnType<typeof apiRequest>>): LoginStartResponse {
   const source = jsonObjectOrEmpty(value)
-  return responseFields(
-    source,
-    ['deviceCode', 'device_code', 'loginUrl', 'login_url', 'userCode', 'user_code'],
-    ['expiresInSeconds', 'expires_in_seconds', 'intervalSeconds', 'interval_seconds']
-  )
+  return {
+    ...stringAliasFields(source, LOGIN_START_STRING_FIELDS),
+    ...numberAliasFields(source, LOGIN_START_NUMBER_FIELDS)
+  }
 }
 
 function loginPollResponse(value: Awaited<ReturnType<typeof apiRequest>>): LoginPollResponse {
   const source = jsonObjectOrEmpty(value)
-  return responseFields(
-    source,
-    ['email', 'status', 'token'],
-    ['intervalSeconds', 'interval_seconds']
-  )
+  return {
+    ...stringAliasFields(source, LOGIN_POLL_STRING_FIELDS),
+    ...numberAliasFields(source, LOGIN_POLL_NUMBER_FIELDS)
+  }
 }
 
-function responseFields(
+function stringAliasFields<Key extends string>(
   source: JsonObject,
-  stringKeys: readonly string[],
-  numberKeys: readonly string[]
-): JsonObject {
-  const response: JsonObject = {}
-  for (const key of stringKeys) {
-    const value = stringField(source, key)
+  specs: readonly AliasSpec<Key>[]
+): Partial<Record<Key, string>> {
+  const response: Partial<Record<Key, string>> = {}
+  for (const spec of specs) {
+    const value = firstStringAlias(source, spec.aliases)
     if (value) {
-      response[key] = value
-    }
-  }
-  for (const key of numberKeys) {
-    const value = numberField(source, key)
-    if (value > 0) {
-      response[key] = value
+      response[spec.field] = value
     }
   }
   return response
+}
+
+function numberAliasFields<Key extends string>(
+  source: JsonObject,
+  specs: readonly AliasSpec<Key>[]
+): Partial<Record<Key, number>> {
+  const response: Partial<Record<Key, number>> = {}
+  for (const spec of specs) {
+    const value = firstPositiveNumberAlias(source, spec.aliases)
+    if (value > 0) {
+      response[spec.field] = value
+    }
+  }
+  return response
+}
+
+function firstStringAlias(source: JsonObject, aliases: readonly string[]): string {
+  for (const alias of aliases) {
+    const value = stringField(source, alias)
+    if (value) {
+      return value
+    }
+  }
+  return ''
+}
+
+function firstPositiveNumberAlias(source: JsonObject, aliases: readonly string[]): number {
+  for (const alias of aliases) {
+    const value = numberField(source, alias)
+    if (value > 0) {
+      return value
+    }
+  }
+  return 0
 }
 
 export { login, readOrLoginToken }
