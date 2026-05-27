@@ -1,6 +1,6 @@
 # Zerct
 
-Public Zerct workspace for packages, SDKs, agent skills, and examples.
+Public Zerct workspace for packages, agent skills, examples, and docs.
 
 Zerct hosts Rust backends and static frontends. Frontends can be fully dynamic
 in the browser by calling Rust backend deploys for APIs and managed Postgres,
@@ -99,7 +99,6 @@ error, rerun doctor, and redeploy.
 - `packages/zerct`: npm CLI.
 - `packages/zerct-py`: PyPI CLI package.
 - `crates/zerct`: Cargo CLI crate.
-- `sdks/`: public SDKs.
 - `skills/`: agent skill files.
 - `examples/`: deployable examples.
 - `docs/`: Mintlify documentation.
