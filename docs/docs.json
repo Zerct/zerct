@@ -1,17 +1,57 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "luma",
   "name": "Zerct",
-  "description": "Deploy free Rust backends with managed Postgres and HTTPS endpoints.",
+  "description": "Free Rust backend cloud for agents.",
   "colors": {
-    "primary": "#000000",
-    "light": "#000000",
+    "primary": "#FFFFFF",
+    "light": "#FFFFFF",
     "dark": "#FFFFFF"
   },
   "favicon": "/favicon.svg",
   "logo": {
-    "light": "/favicon.svg",
-    "dark": "/favicon.svg"
+    "light": "/zerct-text-logo.svg",
+    "dark": "/zerct-text-logo.svg",
+    "href": "https://zerct.com"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "fonts": {
+    "family": "Geist",
+    "source": "/fonts/Geist.woff2",
+    "format": "woff2",
+    "weight": 450,
+    "heading": {
+      "family": "Geist",
+      "source": "/fonts/Geist.woff2",
+      "format": "woff2",
+      "weight": 650
+    },
+    "body": {
+      "family": "Geist",
+      "source": "/fonts/Geist.woff2",
+      "format": "woff2",
+      "weight": 450
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "background": {
+    "color": {
+      "light": "#000000",
+      "dark": "#000000"
+    }
+  },
+  "styling": {
+    "eyebrows": "section",
+    "latex": false,
+    "codeblocks": "dark"
+  },
+  "thumbnails": {
+    "appearance": "dark"
   },
   "navigation": {
     "tabs": [
@@ -60,21 +100,18 @@
   "navbar": {
     "links": [
       {
-        "label": "X",
-        "href": "https://x.com/zerctcloud"
-      },
-      {
-        "label": "GitHub",
+        "type": "github",
         "href": "https://github.com/Zerct/zerct"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
+      "label": "Start free",
       "href": "https://zerct.com"
     }
   },
   "contextual": {
+    "display": "toc",
     "options": [
       "copy",
       "view",
