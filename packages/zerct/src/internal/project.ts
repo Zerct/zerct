@@ -144,4 +144,4 @@ function progress(cli: CliOptions, message: string): void {
   console.log(message)
 }
 
-export { hasCommand, isSafeRelativePath, scanUnsafe, walkProjectFiles, walk, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, serviceNameFromValue, inferProjectKind, readPackageJson, isPackageManifest, isRecord, isStringRecord, printJson, openUrl, sleep, progress }
+export { hasCommand, isSafeRelativePath, scanUnsafe, walkProjectFiles, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, inferProjectKind, readPackageJson, printJson, openUrl, sleep, progress }

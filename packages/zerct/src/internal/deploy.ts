@@ -283,17 +283,5 @@ function buildRecordFromJson(source: JsonObject): BuildRecord {
 }
 
 export {
-  deploy,
-  preflightDeployLimits,
-  deployProject,
-  printDeployResult,
-  printWorkspaceDeployResults,
-  waitForWorkspaceBuilds,
-  waitForBuild,
-  appsResponseFromJson,
-  appSummaryFromJson,
-  deployResponseFromJson,
-  appDeployTargetFromJson,
-  buildStatusResponseFromJson,
-  buildRecordFromJson
+  deploy
 }

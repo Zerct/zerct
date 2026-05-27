@@ -1,5 +1,5 @@
 import { agentError } from './errors.ts'
-import { apiRequest, appGet, isJsonObject, jsonArrayField, jsonObjectField, jsonObjectOrEmpty, pageQuery, requireApp, stringField } from './api.ts'
+import { apiRequest, isJsonObject, jsonArrayField, jsonObjectField, jsonObjectOrEmpty, pageQuery, requireApp, stringField } from './api.ts'
 import { readOrLoginToken } from './auth.ts'
 import { openUrl, printJson } from './project.ts'
 import type { CheckoutResponse, CliOptions, JsonObject, JsonValue, LogLine, LogsResponse } from './types.ts'
@@ -189,6 +189,12 @@ async function printAuthenticated(cli: CliOptions, route: string): Promise<void>
   printJson(response)
 }
 
+async function appGet(cli: CliOptions, kind: string): Promise<JsonValue | null> {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const app = requireApp(cli)
+  return apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/${kind}`, token, null)
+}
+
 function logsResponse(value: JsonValue | null): LogsResponse {
   const source = jsonObjectOrEmpty(value)
   const lines = jsonArrayField(source, 'lines').map(logLine).filter((line): line is LogLine => line !== null)
@@ -233,9 +239,5 @@ export {
   database,
   envCommand,
   domainsCommand,
-  billing,
-  printAuthenticated,
-  logsResponse,
-  logLine,
-  checkoutResponse
+  billing
 }
