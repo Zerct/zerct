@@ -26,7 +26,9 @@ tighten these rules.
    structural regressions, needless abstractions, duplicated helpers, and
    spaghetti branching as blockers unless there is a documented reason.
 7. Before finishing, run `./scripts/check-all.sh`, confirm the working tree is
-   clean except intentional changes, and state whether publishing happened.
+   clean except intentional changes, commit, push, and verify the matching
+   publish or docs deploy path. State whether publishing, docs deployment, or
+   no-runtime deployment verification happened.
    `check-all` must keep locked Cargo checks and Clippy with `-D warnings` for
    the Cargo CLI and examples. The Cargo CLI must keep extra deny lints for
    debug macros, TODOs, unimplemented code, forgotten memory, large includes,
@@ -194,6 +196,21 @@ tighten these rules.
    brew tap Zerct/tap
    brew install zerct
    ```
+
+After commit and push, verify the pushed change reached the right distribution
+path before calling work complete:
+
+- package version changes must be watched through the Blacksmith publish
+  workflow and verified against the target registry;
+- docs changes under `docs/` must rely on the Mintlify GitHub App for deploy,
+  while local validation and score checks still run through `check-all`;
+- workflow changes must be inspected with `gh run` or the relevant provider
+  status when they affect publishing or docs validation;
+- instruction-only changes with no package or docs deploy target must be
+  reported as pushed with no runtime publish path.
+
+Do not silently skip publish or deploy verification after pushing. If the
+verification cannot run, say exactly why and what remains unverified.
 
 ## Required Local Check
 
