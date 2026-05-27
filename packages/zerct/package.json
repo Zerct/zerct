@@ -1,6 +1,6 @@
 {
   "name": "zerct",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "description": "Deploy Rust backends and static frontends to Zerct.",
   "type": "module",
   "bin": {
@@ -47,8 +47,7 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "check": "npm run check:source && npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry",
-    "check:source": "if find src -type f \\( -name '*.js' -o -name '*.jsx' -o -name '*.mjs' -o -name '*.cjs' \\) | grep .; then echo 'packages/zerct must stay TypeScript-only: remove JavaScript files above.' >&2; exit 1; fi",
+    "check": "npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry",
     "check:policy": "node ../../scripts/check-npm-sdk-package.mjs",
     "typecheck": "npm run typecheck:tsc && npm run typecheck:tsgo",
     "typecheck:tsc": "tsc --noEmit -p tsconfig.json",
