@@ -43,7 +43,7 @@ function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCh
       name: `package script ${script}`,
       ok: exists,
       message: exists ? 'found' : 'missing',
-      agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
+      agent_instruction: exists ? null : `Add a non-empty "${script}" script to package.json, then retry.`
     }
   })
   const strictTypecheck = usesStrictFrontendTypechecker(scripts.typecheck)
@@ -51,7 +51,7 @@ function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCh
     name: 'strict frontend typecheck',
     ok: strictTypecheck,
     message: strictTypecheck ? 'accepted' : 'tsgo --noEmit missing',
-    agent_instruction: 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.'
+    agent_instruction: strictTypecheck ? null : 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.'
   })
 
   const nativeLint = !usesJavascriptLinter(scripts.lint) && usesNativeFrontendLinter(scripts.lint)
@@ -59,7 +59,7 @@ function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCh
     name: 'native frontend lint',
     ok: nativeLint,
     message: nativeLint ? 'accepted' : 'native linter missing',
-    agent_instruction: 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.'
+    agent_instruction: nativeLint ? null : 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.'
   })
 
   if (runScripts && checks.every((check) => check.ok)) {
@@ -76,13 +76,13 @@ function frontendSourceChecks(projectDir: string): DoctorCheck[] {
       name: 'typescript source',
       ok: report.typescript.length > 0,
       message: report.typescript.length > 0 ? report.typescript.slice(0, 3).join(', ') : 'missing',
-      agent_instruction: 'Add browser source as .ts or .tsx under src, app, pages, routes, or components, then retry.'
+      agent_instruction: report.typescript.length > 0 ? null : 'Add browser source as .ts or .tsx under src, app, pages, routes, or components, then retry.'
     },
     {
       name: 'javascript source',
       ok: report.javascript.length === 0,
       message: report.javascript.length === 0 ? 'none found' : report.javascript.slice(0, 5).join(', '),
-      agent_instruction: 'Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying.'
+      agent_instruction: report.javascript.length === 0 ? null : 'Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying.'
     }
   ]
 }
@@ -200,7 +200,7 @@ function packageScriptCheck(projectDir: string, script: string): DoctorCheck {
     name: `${manager} run ${script}`,
     ok: result.status === 0,
     message: result.status === 0 ? 'passed' : (result.stderr || result.stdout || `${manager} run ${script} failed`).trim().slice(0, 240),
-    agent_instruction: `Run \`${manager} run ${script}\`, fix every error, then redeploy.`
+    agent_instruction: result.status === 0 ? null : `Run \`${manager} run ${script}\`, fix every error, then redeploy.`
   }
 }
 

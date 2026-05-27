@@ -75,7 +75,7 @@ export interface DoctorCheck extends JsonObject {
   name: string
   ok: boolean
   message: string
-  agent_instruction: string
+  agent_instruction: string | null
 }
 
 export interface DoctorReport extends JsonObject {
