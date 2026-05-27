@@ -16,6 +16,8 @@ const npmConstants = readFileSync('packages/zerct/src/internal/constants.ts', 'u
 const npmTemplates = readFileSync('packages/zerct/src/internal/templates.ts', 'utf8')
 const pythonCli = readFileSync('packages/zerct-py/src/zerct/cli.py', 'utf8')
 const cargoCli = readFileSync('crates/zerct/src/main.rs', 'utf8')
+const npmPackage = JSON.parse(readFileSync('packages/zerct/package.json', 'utf8'))
+const npmVersion = npmPackage.version
 
 const commands = [
   'init',
@@ -54,7 +56,9 @@ requireSnippet(npmCli, 'installProject(projectPath(cli.args[0]), cli.template)',
 requireSnippet(npmTemplates, 'function installProject', 'npm install template implementation')
 requireSnippet(pythonCli, 'ZERCT_NPM_CLI', 'PyPI delegates to local npm CLI for checks')
 requireSnippet(pythonCli, 'NPM_PACKAGE = "@zerct/zerct"', 'PyPI delegates to public npm package')
+requireSnippet(pythonCli, `NPM_PACKAGE_VERSION = "${npmVersion}"`, 'PyPI pins delegated npm package version')
 requireSnippet(cargoCli, 'ZERCT_NPM_CLI', 'Cargo delegates to local npm CLI for checks')
 requireSnippet(cargoCli, 'const NPM_PACKAGE: &str = "@zerct/zerct";', 'Cargo delegates to public npm package')
+requireSnippet(cargoCli, `const NPM_PACKAGE_VERSION: &str = "${npmVersion}";`, 'Cargo pins delegated npm package version')
 
 console.log('Checked CLI command and template contract.')

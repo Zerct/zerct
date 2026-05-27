@@ -17,7 +17,7 @@ agent-readiness scoring.
 Local preview:
 
 ```sh
-npx mint@latest dev
+npx mint@4.2.578 dev
 ```
 
 Run the preview command from this `docs/` directory because `docs.json` lives
@@ -26,8 +26,8 @@ here.
 Local checks:
 
 ```sh
-npx mint@latest validate
-npx mint@latest broken-links --check-anchors --check-redirects --check-snippets
-npx mint@latest a11y --skip-contrast
+npx mint@4.2.578 validate
+npx mint@4.2.578 broken-links --check-anchors --check-redirects --check-snippets
+npx mint@4.2.578 a11y --skip-contrast
 ../scripts/check-openapi.sh
 ```

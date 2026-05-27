@@ -12,6 +12,8 @@ import sys
 from . import __version__
 
 NPM_PACKAGE = "@zerct/zerct"
+NPM_PACKAGE_VERSION = "0.1.44"
+NPM_PACKAGE_SPEC = f"{NPM_PACKAGE}@{NPM_PACKAGE_VERSION}"
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -44,7 +46,7 @@ def _delegate_command() -> list[str]:
 
     npx = shutil.which("npx")
     if npx:
-        return [npx, "-y", NPM_PACKAGE]
+        return [npx, "-y", NPM_PACKAGE_SPEC]
 
     raise RuntimeError("Node.js npm tooling is required for the PyPI Zerct CLI.")
 
