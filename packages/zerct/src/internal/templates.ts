@@ -1,12 +1,13 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { DEFAULT_RUST_CHECK_COMMAND, FRONTEND_TEMPLATE_FILES, PROJECT_TEMPLATES } from './constants.js'
-import { agentError } from './errors.js'
-import { doctorProject } from './doctor.js'
-import { frontendBuildCommand, frontendCheckCommand } from './frontend-policy.js'
-import { ensureDirectory, inferProjectKind, serviceNameFromCargo, serviceNameFromDir, serviceNameFromPackage } from './project.js'
+import { DEFAULT_RUST_CHECK_COMMAND, FRONTEND_TEMPLATE_FILES, PROJECT_TEMPLATES } from './constants.ts'
+import { agentError } from './errors.ts'
+import { doctorProject } from './doctor.ts'
+import { frontendBuildCommand, frontendCheckCommand } from './frontend-policy.ts'
+import { ensureDirectory, inferProjectKind, serviceNameFromCargo, serviceNameFromDir, serviceNameFromPackage } from './project.ts'
+import type { TemplateName } from './types.ts'
 
-function initProject(projectDir, template = '') {
+function initProject(projectDir: string, template = ''): void {
   if (template) {
     mkdirSync(projectDir, { recursive: true, mode: 0o755 })
     createTemplate(projectDir, template)
@@ -30,8 +31,8 @@ function initProject(projectDir, template = '') {
   console.log(`detected ${kind}`)
 }
 
-function createTemplate(projectDir, template) {
-  if (!PROJECT_TEMPLATES.has(template)) {
+function createTemplate(projectDir: string, template: string): void {
+  if (!isTemplateName(template)) {
     throw agentError('invalid_template', 'Zerct template is unknown.', `Use one of: ${[...PROJECT_TEMPLATES].join(', ')}.`, false)
   }
   if (template === 'rust-api') {
@@ -47,7 +48,7 @@ function createTemplate(projectDir, template) {
   console.log(`created ${template} template`)
 }
 
-function writeRustApiTemplate(projectDir, name) {
+function writeRustApiTemplate(projectDir: string, name: string): void {
   mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
   writeNewFile(path.join(projectDir, 'Cargo.toml'), `[package]
 name = "${name}"
@@ -70,7 +71,7 @@ version = "0.1.0"
   writeNewFile(path.join(projectDir, 'zerct.toml'), rustBackendConfig(projectDir))
 }
 
-function writeFrontendTemplate(projectDir, name, apiBaseUrl) {
+function writeFrontendTemplate(projectDir: string, name: string, apiBaseUrl: string): void {
   mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
   writeNewFile(path.join(projectDir, 'package.json'), `{
   "name": "${name}",
@@ -108,21 +109,21 @@ function writeFrontendTemplate(projectDir, name, apiBaseUrl) {
   console.log('run package install in the frontend directory before doctor: bun install or npm install')
 }
 
-function writeFrontendTemplateFile(projectDir, relative, source) {
+function writeFrontendTemplateFile(projectDir: string, relative: string, source: string): void {
   if (!FRONTEND_TEMPLATE_FILES.has(relative)) {
     throw new Error(`unexpected template file: ${relative}`)
   }
   writeNewFile(path.join(projectDir, relative), source)
 }
 
-function writeNewFile(file, source) {
+function writeNewFile(file: string, source: string): void {
   if (existsSync(file)) {
     throw agentError('file_exists', `Refusing to overwrite ${path.relative(process.cwd(), file)}.`, 'Move the existing file or choose an empty directory, then retry.', false)
   }
   writeFileSync(file, source, { mode: 0o644 })
 }
 
-function rustBackendConfig(projectDir) {
+function rustBackendConfig(projectDir: string): string {
   const name = serviceNameFromCargo(projectDir) || serviceNameFromDir(projectDir)
   return `name = "${name}"
 
@@ -142,7 +143,7 @@ idle_timeout_minutes = 15
 `
 }
 
-function frontendConfig(projectDir) {
+function frontendConfig(projectDir: string): string {
   const name = serviceNameFromPackage(projectDir) || serviceNameFromDir(projectDir)
   return `name = "${name}"
 kind = "static_frontend"
@@ -154,12 +155,12 @@ output = "dist"
 `
 }
 
-function installProject(projectDir, template = '') {
+function installProject(projectDir: string, template = ''): void {
   initProject(projectDir, template)
   doctorProject(projectDir, false)
 }
 
-function rustApiSource() {
+function rustApiSource(): string {
   return `use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -229,7 +230,7 @@ fn write_response(
 `
 }
 
-function frontendSource(apiBaseUrl) {
+function frontendSource(apiBaseUrl: string): string {
   return `import { createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
@@ -261,4 +262,8 @@ createRoot(document.getElementById('root')!).render(<RouterProvider router={rout
 `
 }
 
-export { initProject, createTemplate, writeRustApiTemplate, writeFrontendTemplate, writeFrontendTemplateFile, writeNewFile, rustBackendConfig, frontendConfig, installProject, rustApiSource, frontendSource }
+function isTemplateName(value: string): value is TemplateName {
+  return PROJECT_TEMPLATES.has(value)
+}
+
+export { initProject, createTemplate, writeRustApiTemplate, writeFrontendTemplate, writeFrontendTemplateFile, writeNewFile, rustBackendConfig, frontendConfig, installProject, rustApiSource, frontendSource, isTemplateName }

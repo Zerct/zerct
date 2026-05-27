@@ -1,14 +1,14 @@
-#!/usr/bin/env node
-import { VERSION, HELP } from './internal/constants.js'
-import { parseArgs, projectPath } from './internal/args.js'
-import { agentError, printAgentError, ZerctError } from './internal/errors.js'
-import { initProject, installProject } from './internal/templates.js'
-import { doctorProject, previewProject } from './internal/doctor.js'
-import { login } from './internal/auth.js'
-import { deploy } from './internal/deploy.js'
-import { apps, builds, activity, billing, capabilities, database, deploys, domainsCommand, envCommand, inspect, logs, me, overview, status, usage } from './internal/commands.js'
+#!/usr/bin/env tsx
+import { VERSION, HELP } from './internal/constants.ts'
+import { parseArgs, projectPath } from './internal/args.ts'
+import { agentError, printAgentError, ZerctError } from './internal/errors.ts'
+import { initProject, installProject } from './internal/templates.ts'
+import { doctorProject, previewProject } from './internal/doctor.ts'
+import { login } from './internal/auth.ts'
+import { deploy } from './internal/deploy.ts'
+import { apps, builds, activity, billing, capabilities, database, deploys, domainsCommand, envCommand, inspect, logs, me, overview, status, usage } from './internal/commands.ts'
 
-async function main() {
+async function main(): Promise<void> {
   const cli = parseArgs(process.argv.slice(2))
 
   if (cli.help) {
@@ -91,13 +91,14 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+main().catch((error: unknown): void => {
   if (error instanceof ZerctError) {
     printAgentError(error.payload, error.json)
     process.exitCode = error.exitCode
     return
   }
 
-  console.error(`zerct failed: ${error.message}`)
+  const message = error instanceof Error ? error.message : String(error)
+  console.error(`zerct failed: ${message}`)
   process.exitCode = 1
 })

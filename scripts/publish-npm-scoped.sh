@@ -12,10 +12,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mkdir -p "$work_dir/bin"
 cp "$source_dir/README.md" "$work_dir/README.md"
 cp "$source_dir/package.json" "$work_dir/package.json"
-cp "$source_dir/bin/zerct.js" "$work_dir/bin/zerct.js"
+cp "$source_dir/tsconfig.json" "$work_dir/tsconfig.json"
+cp -R "$source_dir/src" "$work_dir/src"
 
 node --input-type=module - "$work_dir/package.json" <<'NODE'
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -27,7 +27,7 @@ pkg.publishConfig = { access: 'public' }
 writeFileSync(path, `${JSON.stringify(pkg, null, 2)}\n`)
 NODE
 
-chmod +x "$work_dir/bin/zerct.js"
+chmod +x "$work_dir/src/zerct.ts"
 
 (
   cd "$work_dir"

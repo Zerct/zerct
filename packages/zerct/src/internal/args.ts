@@ -1,9 +1,10 @@
 import path from 'node:path'
-import { DEFAULT_API_URL, DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS } from './constants.js'
-import { agentError } from './errors.js'
+import { DEFAULT_API_URL, DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS } from './constants.ts'
+import { agentError } from './errors.ts'
+import type { CliOptions } from './types.ts'
 
-function parseArgs(argv) {
-  const cli = {
+function parseArgs(argv: string[]): CliOptions {
+  const cli: CliOptions = {
     command: 'help',
     args: [],
     apiUrl: DEFAULT_API_URL,
@@ -23,9 +24,9 @@ function parseArgs(argv) {
     version: false
   }
 
-  const positional = []
+  const positional: string[] = []
   for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index]
+    const arg = argv[index] ?? ''
     if (arg === '--help' || arg === '-h') {
       cli.help = true
     } else if (arg === '--version' || arg === '-v') {
@@ -74,7 +75,7 @@ function parseArgs(argv) {
   }
 
   if (positional.length > 0) {
-    cli.command = positional[0]
+    cli.command = positional[0] ?? 'help'
     cli.args = positional.slice(1)
   }
 
@@ -82,7 +83,7 @@ function parseArgs(argv) {
   return cli
 }
 
-function parsePositiveInteger(value, name) {
+function parsePositiveInteger(value: string, name: string): number {
   const parsed = Number.parseInt(value, 10)
   if (!Number.isInteger(parsed) || parsed <= 0) {
     throw agentError('invalid_argument', `${name} must be a positive integer.`, `Pass ${name} as seconds, for example ${name} 900.`, false)
@@ -90,7 +91,7 @@ function parsePositiveInteger(value, name) {
   return parsed
 }
 
-function requireValue(argv, index, name) {
+function requireValue(argv: string[], index: number, name: string): string {
   const value = argv[index + 1]
   if (!value || value.startsWith('--')) {
     throw agentError('missing_argument', `${name} requires a value.`, `Pass a value after ${name}.`, false)
@@ -98,11 +99,11 @@ function requireValue(argv, index, name) {
   return value
 }
 
-function projectPath(value) {
+function projectPath(value: string | undefined): string {
   return path.resolve(value || process.cwd())
 }
 
-function trimTrailingSlash(value) {
+function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/u, '')
 }
 

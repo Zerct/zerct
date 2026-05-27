@@ -2,13 +2,21 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
 import path from 'node:path'
-import { agentError } from './errors.js'
-import { parseZerctToml, validateConfig } from './config.js'
-import { discoverDeployProjects } from './workspace.js'
-import { ensureDirectory, scanUnsafe } from './project.js'
-import { frontendLockfileExists, frontendScriptChecks, frontendSourceChecks } from './frontend-policy.js'
+import { agentError } from './errors.ts'
+import { parseZerctToml, validateConfig } from './config.ts'
+import { discoverDeployProjects } from './workspace.ts'
+import { ensureDirectory, scanUnsafe } from './project.ts'
+import { frontendLockfileExists, frontendScriptChecks, frontendSourceChecks } from './frontend-policy.ts'
+import type { DoctorCheck, DoctorReport, WorkspaceDoctorReport, ZerctConfig } from './types.ts'
 
-function doctorProject(projectDir, json) {
+interface CargoCheckSpec {
+  name: string
+  args: string[]
+  missing: string
+  failed: string
+}
+
+function doctorProject(projectDir: string, json: boolean): void {
   const report = runDoctorWorkspace(projectDir)
   if (json) {
     console.log(JSON.stringify(report, null, 2))
@@ -18,7 +26,7 @@ function doctorProject(projectDir, json) {
     return
   }
 
-  if (Array.isArray(report.projects)) {
+  if (isWorkspaceDoctorReport(report)) {
     for (const project of report.projects) {
       console.log(`project ${project.relative}`)
       for (const check of project.checks) {
@@ -32,7 +40,7 @@ function doctorProject(projectDir, json) {
   }
 
   if (!report.ok) {
-    const checks = Array.isArray(report.projects)
+    const checks = isWorkspaceDoctorReport(report)
       ? report.projects.flatMap((project) => project.checks)
       : report.checks
     const firstFailure = checks.find((check) => !check.ok)
@@ -40,9 +48,9 @@ function doctorProject(projectDir, json) {
   }
 }
 
-function previewProject(projectDir, port) {
+function previewProject(projectDir: string, port: number): void {
   const report = runDoctorWorkspace(projectDir)
-  if (Array.isArray(report.projects)) {
+  if (isWorkspaceDoctorReport(report)) {
     throw agentError('workspace_preview_unsupported', 'Preview one project at a time.', 'Run `npx @zerct/zerct preview api` or `npx @zerct/zerct preview web` from the workspace root.', false)
   }
   if (!report.ok) {
@@ -54,13 +62,14 @@ function previewProject(projectDir, port) {
   validateConfig(config)
   runShell(config.build.command, projectDir, 'Build failed before preview.')
   if (config.kind === 'static_frontend') {
-    serveStatic(path.join(projectDir, config.build.output), port || 4173)
+    serveStatic(path.join(projectDir, config.build.output ?? 'dist'), port || 4173)
     return
   }
 
   const runtimePort = port || config.run.port
+  const runtimeCommand = config.run.command ?? ''
   console.log(`preview http://127.0.0.1:${runtimePort}`)
-  const result = spawnSync(config.run.command, {
+  const result = spawnSync(runtimeCommand, {
     cwd: projectDir,
     env: { ...process.env, PORT: String(runtimePort) },
     shell: true,
@@ -74,7 +83,7 @@ function previewProject(projectDir, port) {
   }
 }
 
-function runShell(command, projectDir, failureMessage) {
+function runShell(command: string, projectDir: string, failureMessage: string): void {
   console.log(command)
   const result = spawnSync(command, {
     cwd: projectDir,
@@ -90,7 +99,7 @@ function runShell(command, projectDir, failureMessage) {
   }
 }
 
-function serveStatic(root, port) {
+function serveStatic(root: string, port: number): void {
   ensureDirectory(root)
   const server = createServer((request, response) => {
     const pathname = decodeURIComponent(new URL(request.url || '/', `http://127.0.0.1:${port}`).pathname)
@@ -108,7 +117,7 @@ function serveStatic(root, port) {
   })
 }
 
-function staticTarget(root, pathname) {
+function staticTarget(root: string, pathname: string): string {
   const safePath = pathname.replace(/^\/+/u, '')
   const candidate = path.resolve(root, safePath || 'index.html')
   if (!candidate.startsWith(path.resolve(root) + path.sep) && candidate !== path.resolve(root)) {
@@ -121,7 +130,7 @@ function staticTarget(root, pathname) {
   return existsSync(index) ? index : ''
 }
 
-function contentType(file) {
+function contentType(file: string): string {
   if (file.endsWith('.html')) {
     return 'text/html; charset=utf-8'
   }
@@ -140,7 +149,7 @@ function contentType(file) {
   return 'application/octet-stream'
 }
 
-function runDoctorWorkspace(projectDir) {
+function runDoctorWorkspace(projectDir: string): DoctorReport | WorkspaceDoctorReport {
   if (existsSync(path.join(projectDir, 'zerct.toml'))) {
     return runDoctor(projectDir)
   }
@@ -150,10 +159,16 @@ function runDoctorWorkspace(projectDir) {
     return runDoctor(projectDir)
   }
 
-  const reports = projects.map((project) => ({
-    relative: project.relative,
-    ...runDoctor(project.dir)
-  }))
+  const reports = projects.map((project) => {
+    const report = runDoctor(project.dir)
+    return {
+      relative: project.relative,
+      ok: report.ok,
+      project: report.project,
+      config: report.config,
+      checks: report.checks
+    }
+  })
   return {
     ok: reports.every((report) => report.ok),
     workspace: projectDir,
@@ -161,9 +176,9 @@ function runDoctorWorkspace(projectDir) {
   }
 }
 
-function runDoctor(projectDir) {
-  const checks = []
-  let config = null
+function runDoctor(projectDir: string): DoctorReport {
+  const checks: DoctorCheck[] = []
+  let config: ZerctConfig | null = null
   let configValid = false
   const configPath = path.join(projectDir, 'zerct.toml')
   if (existsSync(configPath)) {
@@ -171,13 +186,14 @@ function runDoctor(projectDir) {
       config = parseZerctToml(readFileSync(configPath, 'utf8'), projectDir)
       validateConfig(config)
       configValid = true
-      checks.push({ name: 'zerct.toml', ok: true, message: 'valid' })
-    } catch (error) {
+      checks.push({ name: 'zerct.toml', ok: true, message: 'valid', agent_instruction: 'Config is valid.' })
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
       checks.push({
         name: 'zerct.toml',
         ok: false,
-        message: error.message,
-        agent_instruction: `Fix zerct.toml: ${error.message}.`
+        message,
+        agent_instruction: `Fix zerct.toml: ${message}.`
       })
     }
   } else {
@@ -238,7 +254,7 @@ function runDoctor(projectDir) {
   }
 }
 
-function cargoCheck(projectDir) {
+function cargoCheck(projectDir: string): DoctorCheck {
   return cargoCommandCheck(projectDir, {
     name: 'cargo check',
     args: ['check', '--locked', '--quiet'],
@@ -247,7 +263,7 @@ function cargoCheck(projectDir) {
   })
 }
 
-function cargoFmt(projectDir) {
+function cargoFmt(projectDir: string): DoctorCheck {
   return cargoCommandCheck(projectDir, {
     name: 'cargo fmt',
     args: ['fmt', '--all', '--check'],
@@ -256,7 +272,7 @@ function cargoFmt(projectDir) {
   })
 }
 
-function cargoClippy(projectDir) {
+function cargoClippy(projectDir: string): DoctorCheck {
   return cargoCommandCheck(projectDir, {
     name: 'cargo clippy',
     args: ['clippy', '--locked', '--all-targets', '--all-features', '--quiet', '--', '-D', 'warnings'],
@@ -265,7 +281,7 @@ function cargoClippy(projectDir) {
   })
 }
 
-function cargoCommandCheck(projectDir, check) {
+function cargoCommandCheck(projectDir: string, check: CargoCheckSpec): DoctorCheck {
   const cargo = spawnSync('cargo', check.args, {
     cwd: projectDir,
     encoding: 'utf8',
@@ -290,16 +306,17 @@ function cargoCommandCheck(projectDir, check) {
   }
 }
 
-function cargoLints(projectDir) {
+function cargoLints(projectDir: string): DoctorCheck {
   const cargoToml = path.join(projectDir, 'Cargo.toml')
   let source = ''
   try {
     source = readFileSync(cargoToml, 'utf8')
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
     return {
       name: 'cargo lints',
       ok: false,
-      message: error.message,
+      message,
       agent_instruction: 'Create Cargo.toml with strict Rust lints, then retry.'
     }
   }
@@ -314,13 +331,13 @@ function cargoLints(projectDir) {
   }
 }
 
-function cargoLintLevel(source, lintName) {
+function cargoLintLevel(source: string, lintName: string): string {
   let section = ''
   for (const rawLine of source.split(/\r?\n/u)) {
     const line = rawLine.replace(/#.*/u, '').trim()
     const sectionMatch = line.match(/^\[([^\]]+)\]$/u)
     if (sectionMatch) {
-      section = sectionMatch[1]
+      section = sectionMatch[1] ?? ''
       continue
     }
     if (section !== 'lints.rust' && section !== 'workspace.lints.rust') {
@@ -328,11 +345,15 @@ function cargoLintLevel(source, lintName) {
     }
     const assignment = line.match(/^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]+)"|\{[^}]*level\s*=\s*"([^"]+)")/u)
     if (assignment?.[1] === lintName) {
-      return assignment[2] || assignment[3] || ''
+      return assignment[2] ?? assignment[3] ?? ''
     }
   }
 
   return ''
 }
 
-export { doctorProject, previewProject, runShell, serveStatic, staticTarget, contentType, runDoctorWorkspace, runDoctor, cargoCheck, cargoFmt, cargoClippy, cargoCommandCheck, cargoLints, cargoLintLevel }
+function isWorkspaceDoctorReport(report: DoctorReport | WorkspaceDoctorReport): report is WorkspaceDoctorReport {
+  return 'projects' in report
+}
+
+export { doctorProject, previewProject, runShell, serveStatic, staticTarget, contentType, runDoctorWorkspace, runDoctor, cargoCheck, cargoFmt, cargoClippy, cargoCommandCheck, cargoLints, cargoLintLevel, isWorkspaceDoctorReport }

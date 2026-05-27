@@ -1,6 +1,8 @@
 
 
-function agentError(code, message, agentInstruction, json) {
+import type { AgentErrorPayload } from './types.ts'
+
+function agentError(code: string, message: string, agentInstruction: string, json: boolean): ZerctError {
   return new ZerctError({
     code,
     message,
@@ -10,7 +12,7 @@ function agentError(code, message, agentInstruction, json) {
   }, json, 1)
 }
 
-function printAgentError(payload, json) {
+function printAgentError(payload: AgentErrorPayload, json: boolean): void {
   if (json) {
     console.error(JSON.stringify(payload, null, 2))
     return
@@ -29,7 +31,11 @@ function printAgentError(payload, json) {
 }
 
 class ZerctError extends Error {
-  constructor(payload, json, exitCode) {
+  payload: AgentErrorPayload
+  json: boolean
+  exitCode: number
+
+  constructor(payload: AgentErrorPayload, json: boolean, exitCode: number) {
     super(payload.message || 'Zerct command failed.')
     this.payload = payload
     this.json = json

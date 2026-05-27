@@ -1,23 +1,24 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
-import { WORKSPACE_EXCLUDED_DIRS } from './constants.js'
-import { parseZerctToml } from './config.js'
-import { ensureDirectory } from './project.js'
+import { WORKSPACE_EXCLUDED_DIRS } from './constants.ts'
+import { parseZerctToml } from './config.ts'
+import { ensureDirectory } from './project.ts'
+import type { DeployProjectInfo, DiscoveredProjectKind } from './types.ts'
 
-function discoverDeployProjects(rootDir) {
+function discoverDeployProjects(rootDir: string): DeployProjectInfo[] {
   ensureDirectory(rootDir)
   if (existsSync(path.join(rootDir, 'zerct.toml'))) {
     return [deployProjectInfo(rootDir, rootDir)]
   }
 
-  const projectDirs = []
+  const projectDirs: string[] = []
   discoverProjectDirs(rootDir, projectDirs)
   return projectDirs
     .map((dir) => deployProjectInfo(dir, rootDir))
-    .sort(compareDeployProjects)
+    .toSorted(compareDeployProjects)
 }
 
-function discoverProjectDirs(dir, projectDirs) {
+function discoverProjectDirs(dir: string, projectDirs: string[]): void {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (!entry.isDirectory() || WORKSPACE_EXCLUDED_DIRS.has(entry.name)) {
       continue
@@ -32,22 +33,22 @@ function discoverProjectDirs(dir, projectDirs) {
   }
 }
 
-function deployProjectInfo(dir, rootDir) {
+function deployProjectInfo(dir: string, rootDir: string): DeployProjectInfo {
   const relative = path.relative(rootDir, dir).replace(/\\/gu, '/') || '.'
   try {
     const config = parseZerctToml(readFileSync(path.join(dir, 'zerct.toml'), 'utf8'), dir)
     return { dir, relative, name: config.name || '', kind: config.kind }
-  } catch (_error) {
+  } catch {
     return { dir, relative, name: '', kind: 'unknown' }
   }
 }
 
-function compareDeployProjects(left, right) {
+function compareDeployProjects(left: DeployProjectInfo, right: DeployProjectInfo): number {
   return kindOrder(left.kind) - kindOrder(right.kind)
     || left.relative.localeCompare(right.relative)
 }
 
-function kindOrder(kind) {
+function kindOrder(kind: DiscoveredProjectKind): number {
   if (kind === 'rust_backend') {
     return 0
   }

@@ -4,19 +4,17 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
-export ZERCT_NPM_CLI="$repo_root/packages/zerct/bin/zerct.js"
+export ZERCT_NPM_CLI="$repo_root/packages/zerct/src/zerct.ts"
 
-node --check packages/zerct/bin/zerct.js
-for file in packages/zerct/bin/internal/*.js; do
-  node --check "$file"
-done
+npm --prefix packages/zerct ci
+export PATH="$repo_root/packages/zerct/node_modules/.bin:$PATH"
+npm --prefix packages/zerct run check
 node scripts/check-package-versions.mjs
 node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
 scripts/check-openapi.sh
-node packages/zerct/bin/zerct.js --version
-(cd packages/zerct && npm pack --dry-run >/dev/null)
+packages/zerct/src/zerct.ts --version
 
 "$python_bin" -m compileall -q packages/zerct-py/src
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --version
@@ -29,7 +27,7 @@ cargo package --locked --manifest-path crates/zerct/Cargo.toml --allow-dirty --n
 test -f examples/hello-rust/Cargo.lock
 cargo check --locked --manifest-path examples/hello-rust/Cargo.toml
 cargo clippy --locked --manifest-path examples/hello-rust/Cargo.toml --all-targets --all-features -- -D warnings
-node packages/zerct/bin/zerct.js doctor examples/hello-rust --json >/dev/null
+packages/zerct/src/zerct.ts doctor examples/hello-rust --json >/dev/null
 
 policy_fixture="$(mktemp -d)"
 rust_policy_fixture="$(mktemp -d)"
@@ -60,7 +58,7 @@ mkdir -p "$rust_policy_fixture/src"
 printf 'fn main() {}\n' >"$rust_policy_fixture/src/main.rs"
 
 for command in \
-  "node packages/zerct/bin/zerct.js doctor $rust_policy_fixture --json" \
+  "packages/zerct/src/zerct.ts doctor $rust_policy_fixture --json" \
   "PYTHONPATH=packages/zerct-py/src $python_bin -m zerct doctor $rust_policy_fixture --json" \
   "cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- doctor $rust_policy_fixture --json"; do
   if eval "$command" >/tmp/zerct-policy-check.json 2>/tmp/zerct-policy-check.err; then
@@ -91,7 +89,7 @@ mkdir -p "$policy_fixture/src"
 printf 'export const ok = true\n' >"$policy_fixture/src/main.ts"
 
 for command in \
-  "node packages/zerct/bin/zerct.js doctor $policy_fixture --json" \
+  "packages/zerct/src/zerct.ts doctor $policy_fixture --json" \
   "PYTHONPATH=packages/zerct-py/src $python_bin -m zerct doctor $policy_fixture --json" \
   "cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- doctor $policy_fixture --json"; do
   if eval "$command" >/tmp/zerct-policy-check.json 2>/tmp/zerct-policy-check.err; then
