@@ -30,6 +30,20 @@ const requiredDevelopmentDependencies = [
   'typescript'
 ]
 
+const requiredPackageScripts = {
+  check: 'npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry',
+  'check:deps': 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures --omit=dev',
+  'check:policy': 'node ../../scripts/check-npm-sdk-package.mjs',
+  lint: 'oxlint src -D correctness -D suspicious -D perf -A no-await-in-loop --deny-warnings --type-aware --type-check --tsconfig tsconfig.json --promise-plugin --node-plugin --report-unused-disable-directives',
+  'lint:package': 'publint --strict --pack npm',
+  'pack:dry': 'npm pack --dry-run',
+  runtime: 'src/zerct.ts --version',
+  'type-coverage': 'type-coverage --project tsconfig.json --strict --at-least 100',
+  typecheck: 'npm run typecheck:tsc && npm run typecheck:tsgo',
+  'typecheck:tsc': 'tsc --noEmit -p tsconfig.json',
+  'typecheck:tsgo': 'tsgo --noEmit -p tsconfig.json'
+}
+
 const requiredCompilerOptions = {
   target: 'ES2023',
   module: 'NodeNext',
@@ -204,12 +218,10 @@ for (const script of forbiddenLifecycleScripts) {
   }
 }
 
-assertEqual(packageScripts.typecheck, 'npm run typecheck:tsc && npm run typecheck:tsgo', 'typecheck script')
-assertEqual(packageScripts['typecheck:tsc'], 'tsc --noEmit -p tsconfig.json', 'typecheck:tsc script')
-assertEqual(packageScripts['typecheck:tsgo'], 'tsgo --noEmit -p tsconfig.json', 'typecheck:tsgo script')
-assertEqual(packageScripts['type-coverage'], 'type-coverage --project tsconfig.json --strict --at-least 100', 'type-coverage script')
-assertEqual(packageScripts['lint:package'], 'publint --strict --pack npm', 'lint:package script')
-assertEqual(packageScripts['check:deps'], 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures --omit=dev', 'check:deps script')
+assertKeysExactly(packageScripts, Object.keys(requiredPackageScripts), 'scripts')
+for (const [script, command] of Object.entries(requiredPackageScripts)) {
+  assertEqual(packageScripts[script], command, `${script} script`)
+}
 
 for (const [option, expectedValue] of Object.entries(requiredCompilerOptions)) {
   assertEqual(compilerOptions[option], expectedValue, `compiler option ${option}`)
