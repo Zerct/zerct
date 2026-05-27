@@ -3,11 +3,30 @@ import { apiRequest, pageQuery, requireApp } from './api.ts'
 import { checkoutResponseFromJson, logsResponseFromJson } from './api-models.ts'
 import { readOrLoginToken } from './auth.ts'
 import { openUrl, printJson } from './project.ts'
-import type { CliOptions, JsonObject, JsonValue } from './types.ts'
+import type { ApiMethod, CliOptions, JsonObject, JsonValue } from './types.ts'
 
 interface LogsRequest {
   route: string
   target: string
+}
+
+type SubcommandHandler = (cli: CliOptions) => Promise<void>
+type SubcommandTable = Readonly<Record<string, SubcommandHandler>>
+type DomainMethod = Extract<ApiMethod, 'DELETE' | 'POST'>
+type DomainRoute = (app: string, domain: string) => string
+type DomainBody = (domain: string) => JsonObject | null
+
+const ENV_COMMANDS: SubcommandTable = {
+  list: async (cli): Promise<void> => printJson(await appGet(cli, 'env')),
+  set: envSet,
+  delete: envDelete
+}
+
+const DOMAIN_COMMANDS: SubcommandTable = {
+  list: async (cli): Promise<void> => printJson(await appGet(cli, 'domains')),
+  add: domainMutation('POST', (app): string => `/v1/apps/${encodeURIComponent(app)}/domains`, (domain): JsonObject => ({ domain })),
+  verify: domainMutation('POST', (app, domain): string => `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}/verify`, (): null => null),
+  delete: domainMutation('DELETE', (app, domain): string => `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}`, (): null => null)
 }
 
 async function logs(cli: CliOptions): Promise<void> {
@@ -101,27 +120,18 @@ async function database(cli: CliOptions): Promise<void> {
 }
 
 async function envCommand(cli: CliOptions): Promise<void> {
-  if (cli.args[0] === 'list') {
-    printJson(await appGet(cli, 'env'))
-    return
-  }
+  await runSubcommand(cli, ENV_COMMANDS, 'list', 'Unknown env command.', 'Use `npx @zerct/zerct env list`, `env set`, or `env delete`.')
+}
 
-  if (cli.args[0] === 'delete') {
-    const name = cli.args[1] ?? ''
-    if (!name) {
-      throw agentError('invalid_env', 'Environment variable name is required.', 'Use `npx @zerct/zerct env delete --app <app> KEY`.', cli.json)
-    }
-    const token = await readOrLoginToken(process.cwd(), cli)
-    const app = requireApp(cli)
-    const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/env/${encodeURIComponent(name)}`, token, null)
-    printJson(response)
-    return
-  }
+async function envDelete(cli: CliOptions): Promise<void> {
+  const name = requireCommandArg(cli, 'invalid_env', 'Environment variable name is required.', 'Use `npx @zerct/zerct env delete --app <app> KEY`.')
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const app = requireApp(cli)
+  const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/env/${encodeURIComponent(name)}`, token, null)
+  printJson(response)
+}
 
-  if (cli.args[0] !== 'set') {
-    throw agentError('unknown_command', 'Unknown env command.', 'Use `npx @zerct/zerct env list`, `env set`, or `env delete`.', cli.json)
-  }
-
+async function envSet(cli: CliOptions): Promise<void> {
   const assignment = cli.args[1] ?? ''
   const separator = assignment.indexOf('=')
   if (separator <= 0) {
@@ -137,36 +147,17 @@ async function envCommand(cli: CliOptions): Promise<void> {
 }
 
 async function domainsCommand(cli: CliOptions): Promise<void> {
-  const action = cli.args[0] ?? 'list'
-  if (action === 'list') {
-    printJson(await appGet(cli, 'domains'))
-    return
-  }
+  await runSubcommand(cli, DOMAIN_COMMANDS, 'list', 'Unknown domains command.', 'Use `domains list`, `domains add`, `domains verify`, or `domains delete`.')
+}
 
-  const domain = cli.args[1] ?? ''
-  if (!domain) {
-    throw agentError('missing_domain', 'Domain is required.', 'Use `npx @zerct/zerct domains add --app <app> api.example.com`.', cli.json)
-  }
-
-  const token = await readOrLoginToken(process.cwd(), cli)
-  const app = requireApp(cli)
-  if (action === 'add') {
-    const response = await apiRequest(cli, 'POST', `/v1/apps/${encodeURIComponent(app)}/domains`, token, { domain })
+function domainMutation(method: DomainMethod, route: DomainRoute, body: DomainBody): SubcommandHandler {
+  return async (cli): Promise<void> => {
+    const domain = requireCommandArg(cli, 'missing_domain', 'Domain is required.', 'Use `npx @zerct/zerct domains add --app <app> api.example.com`.')
+    const token = await readOrLoginToken(process.cwd(), cli)
+    const app = requireApp(cli)
+    const response = await apiRequest(cli, method, route(app, domain), token, body(domain))
     printJson(response)
-    return
   }
-  if (action === 'verify') {
-    const response = await apiRequest(cli, 'POST', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}/verify`, token, null)
-    printJson(response)
-    return
-  }
-  if (action === 'delete') {
-    const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}`, token, null)
-    printJson(response)
-    return
-  }
-
-  throw agentError('unknown_command', 'Unknown domains command.', 'Use `domains list`, `domains add`, `domains verify`, or `domains delete`.', cli.json)
 }
 
 async function billing(cli: CliOptions): Promise<void> {
@@ -194,6 +185,22 @@ async function appGet(cli: CliOptions, kind: string): Promise<JsonValue | null> 
   const token = await readOrLoginToken(process.cwd(), cli)
   const app = requireApp(cli)
   return apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/${kind}`, token, null)
+}
+
+async function runSubcommand(cli: CliOptions, commands: SubcommandTable, defaultName: string, message: string, instruction: string): Promise<void> {
+  const command = commands[cli.args[0] ?? defaultName]
+  if (!command) {
+    throw agentError('unknown_command', message, instruction, cli.json)
+  }
+  await command(cli)
+}
+
+function requireCommandArg(cli: CliOptions, code: string, message: string, instruction: string): string {
+  const value = cli.args[1] ?? ''
+  if (!value) {
+    throw agentError(code, message, instruction, cli.json)
+  }
+  return value
 }
 
 export {
