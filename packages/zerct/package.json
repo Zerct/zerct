@@ -38,18 +38,25 @@
     "tsx": "^4.22.3"
   },
   "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260527.1",
     "@types/node": "^25.9.1",
     "oxlint": "^1.67.0",
     "oxlint-tsgolint": "^0.23.0",
+    "publint": "^0.3.21",
     "type-coverage": "^2.29.7",
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "check": "npm run check:source && npm run typecheck && npm run type-coverage && npm run lint && npm run runtime && npm run pack:dry",
+    "check": "npm run check:source && npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry",
     "check:source": "if find src -type f \\( -name '*.js' -o -name '*.jsx' -o -name '*.mjs' -o -name '*.cjs' \\) | grep .; then echo 'packages/zerct must stay TypeScript-only: remove JavaScript files above.' >&2; exit 1; fi",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:policy": "node ../../scripts/check-npm-sdk-package.mjs",
+    "typecheck": "npm run typecheck:tsc && npm run typecheck:tsgo",
+    "typecheck:tsc": "tsc --noEmit -p tsconfig.json",
+    "typecheck:tsgo": "tsgo --noEmit -p tsconfig.json",
     "type-coverage": "type-coverage --project tsconfig.json --strict --at-least 100",
     "lint": "oxlint src -D correctness -D suspicious -D perf -A no-await-in-loop --deny-warnings --type-aware --type-check --tsconfig tsconfig.json --promise-plugin --node-plugin --report-unused-disable-directives",
+    "lint:package": "publint --strict --pack npm",
+    "check:deps": "npm ls --all && npm audit --audit-level=moderate && npm audit signatures",
     "runtime": "src/zerct.ts --version",
     "pack:dry": "npm pack --dry-run"
   }
