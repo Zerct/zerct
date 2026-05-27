@@ -31,7 +31,7 @@ jobs:
 
           mkdir -p "$HOME/.config/mintlify"
           printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
-          npx --yes mint@latest score https://docs.zerct.com --format json > mint-score.json
+          npx --yes mint@4.2.578 score https://docs.zerct.com --format json > mint-score.json
           node -e '
             const fs = require("node:fs");
             const score = JSON.parse(fs.readFileSync("mint-score.json", "utf8"));

@@ -25,17 +25,17 @@ jobs:
       - run: node scripts/check-docs.mjs
       - run: node scripts/check-prose-style.mjs
       - name: Validate Mintlify build
-        run: npx --yes mint@latest validate
+        run: npx --yes mint@4.2.578 validate
         working-directory: docs
         env:
           MINTLIFY_TELEMETRY_DISABLED: "1"
       - name: Check Mintlify links
-        run: npx --yes mint@latest broken-links --check-anchors --check-redirects --check-snippets
+        run: npx --yes mint@4.2.578 broken-links --check-anchors --check-redirects --check-snippets
         working-directory: docs
         env:
           MINTLIFY_TELEMETRY_DISABLED: "1"
       - name: Check Mintlify accessibility
-        run: npx --yes mint@latest a11y --skip-contrast
+        run: npx --yes mint@4.2.578 a11y --skip-contrast
         working-directory: docs
         env:
           MINTLIFY_TELEMETRY_DISABLED: "1"

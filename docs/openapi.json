@@ -1935,7 +1935,7 @@
               "example": {
                 "summary": "Device login information.",
                 "value": {
-                  "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123",
+                  "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
                   "verificationUri": "https://zerct.com/login",
                   "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
                   "userCode": "ABC123",
@@ -3515,7 +3515,7 @@
             "description": "Browser URL where the user completes login. Context: components.schemas.LoginStartResponse.properties.loginUrl.",
             "format": "uri",
             "examples": [
-              "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123"
+              "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             ]
           },
           "verificationUri": {
@@ -3567,7 +3567,7 @@
         },
         "examples": [
           {
-            "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef&user_code=ABC123",
+            "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
             "verificationUri": "https://zerct.com/login",
             "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
             "userCode": "ABC123",

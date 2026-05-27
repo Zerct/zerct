@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling==1.29.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "zerct"
-version = "0.1.18"
+version = "0.1.19"
 description = "Deploy Rust backends and static frontends to Zerct."
 readme = "README.md"
 requires-python = ">=3.11"

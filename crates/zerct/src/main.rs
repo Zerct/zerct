@@ -6,8 +6,9 @@ use std::{
     process::{Command, ExitCode},
 };
 
-const VERSION: &str = "0.1.15";
+const VERSION: &str = "0.1.16";
 const NPM_PACKAGE: &str = "@zerct/zerct";
+const NPM_PACKAGE_VERSION: &str = "0.1.44";
 
 fn main() -> ExitCode {
     match run() {
@@ -63,8 +64,12 @@ fn delegate_command() -> Result<DelegateCommand, CliError> {
     };
     Ok(DelegateCommand {
         program: npx,
-        args: vec!["-y".to_owned(), NPM_PACKAGE.to_owned()],
+        args: vec!["-y".to_owned(), npm_package_spec()],
     })
+}
+
+fn npm_package_spec() -> String {
+    format!("{NPM_PACKAGE}@{NPM_PACKAGE_VERSION}")
 }
 
 fn command_path(name: &str) -> Option<String> {
