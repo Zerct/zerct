@@ -1,4 +1,4 @@
-export const VERSION: string = '0.1.33'
+export const VERSION: string = '0.1.34'
 export const DEFAULT_API_URL: string = 'https://api.zerct.com'
 export const ARCHIVE_LIMIT_BYTES: number = 48 * 1024 * 1024
 export const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: number = 900

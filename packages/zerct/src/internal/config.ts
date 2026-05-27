@@ -5,6 +5,7 @@ import type { BuildConfig, ProjectKind, ResourceConfig, RunConfig, ZerctConfig }
 
 type SectionName = 'build' | 'resources' | 'root' | 'run'
 type TomlValue = boolean | number | string
+type SectionAssigner = (config: MutableZerctConfig, key: string, value: TomlValue) => void
 
 interface MutableZerctConfig {
   name?: string
@@ -12,6 +13,13 @@ interface MutableZerctConfig {
   build: Partial<BuildConfig>
   run: Partial<RunConfig>
   resources: Partial<ResourceConfig>
+}
+
+const SECTION_ASSIGNERS: Readonly<Record<SectionName, SectionAssigner>> = {
+  build: (config, key, value): void => assignBuildValue(config.build, key, value),
+  resources: (config, key, value): void => assignResourceValue(config.resources, key, value),
+  root: assignRootValue,
+  run: (config, key, value): void => assignRunValue(config.run, key, value)
 }
 
 function parseZerctToml(source: string, projectDir: string): ZerctConfig {
@@ -43,31 +51,12 @@ function parseZerctToml(source: string, projectDir: string): ZerctConfig {
   }
 
   const kind = config.kind ?? 'rust_backend'
-  const build: BuildConfig = {
-    check: config.build.check ?? (kind === 'static_frontend' ? frontendCheckCommand(projectDir) : DEFAULT_RUST_CHECK_COMMAND),
-    command: config.build.command ?? (kind === 'static_frontend' ? frontendBuildCommand(projectDir) : 'cargo build --release')
+  const result: ZerctConfig = {
+    kind,
+    build: buildConfig(config, kind, projectDir),
+    run: runConfig(config),
+    resources: resourceConfig(config)
   }
-  if (kind === 'static_frontend') {
-    build.output = config.build.output ?? 'dist'
-  } else if (typeof config.build.output === 'string') {
-    build.output = config.build.output
-  }
-
-  const run: RunConfig = {
-    port: config.run.port ?? 3000,
-    health: config.run.health ?? '/healthz'
-  }
-  if (typeof config.run.command === 'string') {
-    run.command = config.run.command
-  }
-
-  const resources: ResourceConfig = {
-    memory: config.resources.memory ?? '512mb',
-    cpu: config.resources.cpu ?? '0.25',
-    idle_timeout_minutes: config.resources.idle_timeout_minutes ?? 15
-  }
-
-  const result: ZerctConfig = { kind, build, run, resources }
   if (config.name) {
     result.name = config.name
   }
@@ -82,19 +71,7 @@ function parseSection(value: string): SectionName {
 }
 
 function assignTomlValue(config: MutableZerctConfig, section: SectionName, key: string, value: TomlValue): void {
-  if (section === 'root') {
-    assignRootValue(config, key, value)
-    return
-  }
-  if (section === 'build') {
-    assignBuildValue(config.build, key, value)
-    return
-  }
-  if (section === 'run') {
-    assignRunValue(config.run, key, value)
-    return
-  }
-  assignResourceValue(config.resources, key, value)
+  SECTION_ASSIGNERS[section](config, key, value)
 }
 
 function assignRootValue(config: MutableZerctConfig, key: string, value: TomlValue): void {
@@ -181,6 +158,47 @@ function parseTomlValue(raw: string): TomlValue {
     return Number(value)
   }
   throw new Error(`unsupported TOML value: ${value}`)
+}
+
+function buildConfig(config: MutableZerctConfig, kind: ProjectKind, projectDir: string): BuildConfig {
+  const build: BuildConfig = {
+    check: config.build.check ?? defaultCheckCommand(kind, projectDir),
+    command: config.build.command ?? defaultBuildCommand(kind, projectDir)
+  }
+  const output = kind === 'static_frontend'
+    ? config.build.output ?? 'dist'
+    : config.build.output
+  if (typeof output === 'string') {
+    build.output = output
+  }
+  return build
+}
+
+function defaultCheckCommand(kind: ProjectKind, projectDir: string): string {
+  return kind === 'static_frontend' ? frontendCheckCommand(projectDir) : DEFAULT_RUST_CHECK_COMMAND
+}
+
+function defaultBuildCommand(kind: ProjectKind, projectDir: string): string {
+  return kind === 'static_frontend' ? frontendBuildCommand(projectDir) : 'cargo build --release'
+}
+
+function runConfig(config: MutableZerctConfig): RunConfig {
+  const run: RunConfig = {
+    port: config.run.port ?? 3000,
+    health: config.run.health ?? '/healthz'
+  }
+  if (typeof config.run.command === 'string') {
+    run.command = config.run.command
+  }
+  return run
+}
+
+function resourceConfig(config: MutableZerctConfig): ResourceConfig {
+  return {
+    memory: config.resources.memory ?? '512mb',
+    cpu: config.resources.cpu ?? '0.25',
+    idle_timeout_minutes: config.resources.idle_timeout_minutes ?? 15
+  }
 }
 
 function validateConfig(config: ZerctConfig): void {
