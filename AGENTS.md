@@ -21,7 +21,11 @@ tighten these rules.
    pressure proves a larger runner is needed.
 5. Keep direct Rust `unsafe` out of repo-owned Rust code and examples. Do not
    weaken existing `unsafe_code = "forbid"` settings.
-6. Before finishing, run `./scripts/check-all.sh`, confirm the working tree is
+6. Before every commit, run the
+   `thermo-nuclear-code-quality-review` skill against the current diff. Treat
+   structural regressions, needless abstractions, duplicated helpers, and
+   spaghetti branching as blockers unless there is a documented reason.
+7. Before finishing, run `./scripts/check-all.sh`, confirm the working tree is
    clean except intentional changes, and state whether publishing happened.
    `check-all` must keep locked Cargo checks and Clippy with `-D warnings` for
    the Cargo CLI and examples. The Cargo CLI must keep extra deny lints for
