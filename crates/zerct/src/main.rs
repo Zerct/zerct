@@ -23,6 +23,18 @@ const DEFAULT_RUST_CHECK_COMMAND: &str = "cargo fmt --all --check && cargo check
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
     "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str = "bun ci && bun run typecheck && bun run lint";
+const JAVASCRIPT_LINTERS: &[&str] = &["eslint", "eslint_d", "jscs", "jshint", "standard", "xo"];
+const FRONTEND_SOURCE_ROOTS: &[&str] = &["src", "app", "pages", "routes", "components"];
+const FRONTEND_TYPESCRIPT_EXTENSIONS: &[&str] = &["ts", "tsx"];
+const FRONTEND_JAVASCRIPT_EXTENSIONS: &[&str] = &["js", "jsx", "mjs", "cjs"];
+const FRONTEND_PACKAGE_MANAGERS: &[&str] = &["npm", "bun", "pnpm", "yarn"];
+const FRONTEND_INSTALL_COMMANDS: &[(&str, &str)] = &[
+    ("npm", "ci"),
+    ("bun", "ci"),
+    ("bun", "install"),
+    ("pnpm", "install"),
+    ("yarn", "install"),
+];
 const ARCHIVE_EXCLUDES: &[&str] = &[
     ".git",
     "target",
@@ -2388,22 +2400,20 @@ fn frontend_source_report(project_dir: &Path) -> FrontendSourceReport {
 
 fn is_frontend_source_path(relative: &Path) -> bool {
     match relative.components().next() {
-        Some(std::path::Component::Normal(root)) => {
-            matches!(
-                root.to_str(),
-                Some("src" | "app" | "pages" | "routes" | "components")
-            )
-        }
+        Some(std::path::Component::Normal(root)) => root
+            .to_str()
+            .is_some_and(|root| FRONTEND_SOURCE_ROOTS.contains(&root)),
         _ => false,
     }
 }
 
 fn is_frontend_typescript_source(relative: &Path) -> bool {
-    !display_path(relative).ends_with(".d.ts") && path_has_extension(relative, &["ts", "tsx"])
+    !display_path(relative).ends_with(".d.ts")
+        && path_has_extension(relative, FRONTEND_TYPESCRIPT_EXTENSIONS)
 }
 
 fn is_frontend_javascript_source(relative: &Path) -> bool {
-    path_has_extension(relative, &["js", "jsx", "mjs", "cjs"])
+    path_has_extension(relative, FRONTEND_JAVASCRIPT_EXTENSIONS)
 }
 
 fn path_has_extension(path: &Path, allowed: &[&str]) -> bool {
@@ -2549,10 +2559,8 @@ fn uses_javascript_linter(command: &str) -> bool {
     let tokens = command_tokens(command);
     tokens.iter().enumerate().any(|(index, token)| {
         let command_name = command_name(token);
-        matches!(
-            command_name,
-            "eslint" | "eslint_d" | "jscs" | "jshint" | "standard" | "xo"
-        ) || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
+        JAVASCRIPT_LINTERS.contains(&command_name)
+            || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
     })
 }
 
@@ -2600,10 +2608,9 @@ fn command_name(token: &str) -> &str {
 
 fn has_frontend_install_command(tokens: &[&str]) -> bool {
     tokens.windows(2).any(|window| match window {
-        [command, subcommand] => matches!(
-            (command_name(command), *subcommand),
-            ("npm" | "bun", "ci") | ("bun" | "pnpm" | "yarn", "install")
-        ),
+        [command, subcommand] => {
+            FRONTEND_INSTALL_COMMANDS.contains(&(command_name(command), *subcommand))
+        }
         _ => false,
     })
 }
@@ -2623,7 +2630,7 @@ fn has_frontend_script_run(tokens: &[&str], script: &str) -> bool {
 }
 
 fn is_frontend_package_manager(command: &str) -> bool {
-    matches!(command_name(command), "npm" | "bun" | "pnpm" | "yarn")
+    FRONTEND_PACKAGE_MANAGERS.contains(&command_name(command))
 }
 
 fn package_script_check(project_dir: &Path, script: &str) -> Check {

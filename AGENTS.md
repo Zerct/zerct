@@ -92,6 +92,8 @@ tighten these rules.
     `bun.lock` or `bun.lockb` exists, otherwise keep npm compatibility for
     existing projects. The doctor command must reject weak typecheck scripts
     and JavaScript-based or fake frontend lint scripts before upload.
+    Keep frontend policy constants centralized inside each CLI implementation
+    and update npm, PyPI, and Cargo together.
 12. Managed Postgres guidance must be connection-efficient. Rust examples,
     docs, and skills must use a small process-wide pool, avoid
     connect-per-request code, and stay compatible with PgBouncer transaction
