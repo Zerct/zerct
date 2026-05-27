@@ -6,9 +6,9 @@ Rust CLI package for deploying Rust backends and static frontends to Zerct.
 cargo install zerct
 zerct init my-app --template fullstack-rust-tanstack
 cd my-app/web && bun install && cd ..
-zerct doctor
+zerct doctor --json
 zerct preview
-zerct deploy
+zerct deploy --wait --json
 ```
 
 From a full-stack repo root, `zerct deploy` discovers nested `zerct.toml` files
@@ -39,6 +39,17 @@ zerct domains add --app app_1 api.example.com
 zerct domains verify --app app_1 api.example.com
 zerct billing portal
 ```
+
+Agent repair loop:
+
+```sh
+zerct doctor --json
+zerct deploy --wait --json
+zerct logs --build job_1 --json
+```
+
+Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
+fix the first actionable log error, rerun doctor, then redeploy.
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
 the Zerct session in the OS credential store when available, and continues the

@@ -121,6 +121,9 @@ tighten these rules.
    hard mode, fail at hint severity, and require score `100/100`.
 7. If `docs/docs.json` references an OpenAPI file, that file must exist and be
    included in the vacuum check.
+8. Keep the agent repair loop visible in docs, package READMEs, and skills:
+   run doctor in JSON mode, apply `agent_instruction`, deploy with wait in JSON
+   mode, inspect build logs, rerun doctor, then redeploy.
 
 ## Examples And Skills
 

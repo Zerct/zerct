@@ -5,16 +5,12 @@ Deploy Rust backends and static frontends to Zerct.
 ```sh
 npx @zerct/zerct init my-app --template fullstack-rust-tanstack
 cd my-app/web && bun install && cd ..
-npx @zerct/zerct deploy
+npx @zerct/zerct doctor --json
+npx @zerct/zerct deploy --wait --json
 ```
 
-Target unscoped command, pending npm approval:
-
-```sh
-npx zerct init
-npx zerct doctor
-npx zerct deploy
-```
+`npx @zerct/zerct` is the current public npm command. The future unscoped
+`npx zerct` command is pending npm approval.
 
 Rust backends expect `Cargo.toml`, `Cargo.lock`, and `zerct.toml`. They must
 pass `cargo fmt --all --check`, locked Cargo checks, listen on
@@ -28,6 +24,17 @@ Preview before deploying:
 ```sh
 npx @zerct/zerct preview
 ```
+
+Agent repair loop:
+
+```sh
+npx @zerct/zerct doctor --json
+npx @zerct/zerct deploy --wait --json
+npx @zerct/zerct logs --build job_1 --json
+```
+
+Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
+fix the first actionable log error, rerun doctor, then redeploy.
 
 Managed Postgres apps receive `DATABASE_URL`, `ZERCT_DATABASE_URL`, and
 `ZERCT_DATABASE_CONNECTION_LIMIT`. Use that limit as the max size for your

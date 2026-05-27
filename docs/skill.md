@@ -57,7 +57,7 @@ origins by default.
 Check the project:
 
 ```sh
-npx @zerct/zerct doctor
+npx @zerct/zerct doctor --json
 ```
 
 Create a full-stack starter:
@@ -76,7 +76,7 @@ npx @zerct/zerct preview web
 Deploy:
 
 ```sh
-npx @zerct/zerct deploy
+npx @zerct/zerct deploy --wait --json
 ```
 
 From a repo root, `npx @zerct/zerct deploy` must discover nested
@@ -96,3 +96,11 @@ zerct deploy
 When a Zerct command returns JSON with `agent_instruction`, follow that field
 first, change the project, and retry the command. Do not guess around a failed
 guardrail.
+
+After a failed deploy, inspect build logs first:
+
+```sh
+npx @zerct/zerct logs --build <build_id> --json
+```
+
+Fix the first actionable log error, rerun doctor, then redeploy.

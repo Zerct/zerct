@@ -14,10 +14,11 @@ Use when a user wants to deploy a Rust backend or static frontend to Zerct.
 3. For static frontends, set `kind = "static_frontend"` and ensure `package.json`, TypeScript browser source, `typecheck`/`lint` scripts, a lockfile, and a strict frontend check command.
 4. Prefer Bun with `bun.lock`, `tsgo --noEmit`, and source-scoped `oxlint` for new frontend projects. Avoid JavaScript-based linters.
 5. For a new full-stack project, run `npx @zerct/zerct init my-app --template fullstack-rust-tanstack`.
-6. Run `npx @zerct/zerct doctor`.
+6. Run `npx @zerct/zerct doctor --json`.
 7. Run `npx @zerct/zerct preview api` and `npx @zerct/zerct preview web` when local tools are available.
-8. Run `npx @zerct/zerct deploy`. From a repo root with nested `zerct.toml` files, this deploys the whole workspace in one command.
-9. If Zerct returns an `agent_instruction`, apply it and redeploy.
+8. Run `npx @zerct/zerct deploy --wait --json`. From a repo root with nested `zerct.toml` files, this deploys the whole workspace in one command.
+9. If Zerct returns an `agent_instruction`, apply it, rerun doctor, and redeploy.
+10. If a build fails, run `npx @zerct/zerct logs --build <build_id> --json`, fix the first actionable log error, rerun doctor, and redeploy.
 
 ## Contract
 

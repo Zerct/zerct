@@ -1,0 +1,64 @@
+# Zerct agent guide
+
+Zerct deploys Rust backends and static frontends. Dynamic server logic belongs
+in the Rust backend. Static frontends call Rust backend HTTPS endpoints for API,
+database, auth, media, and server-side work.
+
+Use the npm CLI unless the user already installed a persistent CLI:
+
+```sh
+npx @zerct/zerct doctor --json
+npx @zerct/zerct deploy --wait --json
+```
+
+Agent repair loop:
+
+1. Run `npx @zerct/zerct doctor --json`.
+2. If it fails, read the first failed check.
+3. Apply its `agent_instruction` exactly.
+4. Rerun doctor until it passes.
+5. Run `npx @zerct/zerct deploy --wait --json`.
+6. If deploy fails, read `build_job.id` or the failed build id.
+7. Run `npx @zerct/zerct logs --build <build_id> --json`.
+8. Fix the first actionable log error.
+9. Rerun doctor before redeploying.
+
+Rust backend contract:
+
+- `Cargo.toml`, `Cargo.lock`, and `zerct.toml` are committed.
+- `[build].check` includes `cargo fmt --all --check`.
+- `[build].check` includes `cargo check --locked`.
+- `[build].check` includes
+  `cargo clippy --locked --all-targets --all-features -- -D warnings`.
+- The server listens on `0.0.0.0:$PORT`.
+- The configured health path returns HTTP 200.
+- Direct `unsafe` is not allowed in workspace source.
+
+Static frontend contract:
+
+- `kind = "static_frontend"` is set in `zerct.toml`.
+- `package.json` is committed.
+- A package lockfile is committed.
+- Browser source is `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
+  `components`.
+- `package.json` has `typecheck`, `lint`, and `build` scripts.
+- `[build].check` installs dependencies and runs package scripts for typecheck
+  and lint.
+- JavaScript-based lint scripts are rejected for deploys.
+
+Useful commands:
+
+```sh
+npx @zerct/zerct capabilities --json
+npx @zerct/zerct activity --json
+npx @zerct/zerct apps --json
+npx @zerct/zerct overview --app <app> --json
+npx @zerct/zerct builds --app <app> --json
+npx @zerct/zerct logs --build <build_id> --json
+npx @zerct/zerct logs --app <app> --json
+npx @zerct/zerct env list --app <app> --json
+npx @zerct/zerct domains list --app <app> --json
+```
+
+Never print or commit secrets. Put secrets in Zerct env vars with
+`npx @zerct/zerct env set --app <app> KEY=value`.

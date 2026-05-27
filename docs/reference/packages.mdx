@@ -16,6 +16,17 @@ All official package CLIs expose the same agent commands for login, doctor,
 preview, deploy, wait, capabilities, account usage, apps, deploys, builds,
 logs, env, domains, and billing.
 
+The agent repair loop is the same on every package surface:
+
+```sh
+zerct doctor --json
+zerct deploy --wait --json
+zerct logs --build job_1 --json
+```
+
+Fix `agent_instruction` first. If a build fails, fix the first actionable log
+line, rerun doctor, then redeploy.
+
 ## Homebrew
 
 ```sh

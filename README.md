@@ -87,9 +87,12 @@ name, `@zerct/zerct` is the public npm package.
 Agent prompt:
 
 ```txt
-Use Zerct to deploy this project. Run `npx @zerct/zerct doctor`, follow every
-`agent_instruction`, preview each project locally with `npx @zerct/zerct preview`,
-then deploy the repo root with `npx @zerct/zerct deploy`.
+Use Zerct to deploy this project. Read https://docs.zerct.com/llms.txt first.
+Run `npx @zerct/zerct doctor --json`. Fix the first failed check by following
+`agent_instruction`, then rerun doctor. Deploy with
+`npx @zerct/zerct deploy --wait --json`. If the build fails, read
+`npx @zerct/zerct logs --build <build_id> --json`, fix the first actionable
+error, rerun doctor, and redeploy.
 ```
 
 ## Repository
