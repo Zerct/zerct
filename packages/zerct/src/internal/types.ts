@@ -111,15 +111,10 @@ export interface FrontendSourceReport {
 
 export interface LoginStartResponse extends JsonObject {
   loginUrl?: string
-  login_url?: string
   userCode?: string
-  user_code?: string
   deviceCode?: string
-  device_code?: string
   expiresInSeconds?: number
-  expires_in_seconds?: number
   intervalSeconds?: number
-  interval_seconds?: number
 }
 
 export interface LoginPollResponse extends JsonObject {
@@ -127,7 +122,6 @@ export interface LoginPollResponse extends JsonObject {
   token?: string
   email?: string
   intervalSeconds?: number
-  interval_seconds?: number
 }
 
 export interface AppSummary extends JsonObject {
