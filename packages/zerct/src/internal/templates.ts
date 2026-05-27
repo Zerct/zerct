@@ -1,11 +1,23 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { DEFAULT_RUST_CHECK_COMMAND, FRONTEND_TEMPLATE_FILES, PROJECT_TEMPLATES } from './constants.ts'
+import { DEFAULT_RUST_CHECK_COMMAND, PROJECT_TEMPLATES } from './constants.ts'
 import { agentError } from './errors.ts'
 import { doctorProject } from './doctor.ts'
 import { frontendBuildCommand, frontendCheckCommand } from './frontend-policy.ts'
 import { ensureDirectory, inferProjectKind, serviceNameFromCargo, serviceNameFromDir, serviceNameFromPackage } from './project.ts'
 import type { TemplateName } from './types.ts'
+
+type TemplateWriter = (projectDir: string) => void
+type TemplateFile = readonly [relative: string, source: string]
+
+const TEMPLATE_WRITERS: Readonly<Record<TemplateName, TemplateWriter>> = {
+  'rust-api': (projectDir): void => writeRustApiTemplate(projectDir, serviceNameFromDir(projectDir)),
+  'tanstack-static-frontend': (projectDir): void => writeFrontendTemplate(projectDir, serviceNameFromDir(projectDir), '/api'),
+  'fullstack-rust-tanstack': (projectDir): void => {
+    writeRustApiTemplate(path.join(projectDir, 'api'), 'api')
+    writeFrontendTemplate(path.join(projectDir, 'web'), 'web', 'http://localhost:3000')
+  }
+}
 
 function initProject(projectDir: string, template = ''): void {
   if (template) {
@@ -35,16 +47,7 @@ function createTemplate(projectDir: string, template: string): void {
   if (!isTemplateName(template)) {
     throw agentError('invalid_template', 'Zerct template is unknown.', `Use one of: ${[...PROJECT_TEMPLATES].join(', ')}.`, false)
   }
-  if (template === 'rust-api') {
-    writeRustApiTemplate(projectDir, serviceNameFromDir(projectDir))
-  } else if (template === 'tanstack-static-frontend') {
-    writeFrontendTemplate(projectDir, serviceNameFromDir(projectDir), '/api')
-  } else {
-    const apiDir = path.join(projectDir, 'api')
-    const webDir = path.join(projectDir, 'web')
-    writeRustApiTemplate(apiDir, 'api')
-    writeFrontendTemplate(webDir, 'web', 'http://localhost:3000')
-  }
+  TEMPLATE_WRITERS[template](projectDir)
   console.log(`created ${template} template`)
 }
 
@@ -73,7 +76,8 @@ version = "0.1.0"
 
 function writeFrontendTemplate(projectDir: string, name: string, apiBaseUrl: string): void {
   mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
-  writeNewFile(path.join(projectDir, 'package.json'), `{
+  const files: readonly TemplateFile[] = [
+    ['package.json', `{
   "name": "${name}",
   "private": true,
   "type": "module",
@@ -98,22 +102,23 @@ function writeFrontendTemplate(projectDir: string, name: string, apiBaseUrl: str
     "vite": "^7.2.4"
   }
 }
-`)
-  writeFrontendTemplateFile(projectDir, 'index.html', '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n')
-  writeFrontendTemplateFile(projectDir, 'src/styles.css', 'body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n')
-  writeFrontendTemplateFile(projectDir, 'src/vite-env.d.ts', '/// <reference types="vite/client" />\n')
-  writeFrontendTemplateFile(projectDir, 'src/main.tsx', frontendSource(apiBaseUrl))
-  writeFrontendTemplateFile(projectDir, 'tsconfig.json', '{"compilerOptions":{"strict":true,"jsx":"react-jsx","module":"ESNext","moduleResolution":"Bundler","target":"ES2022","noEmit":true,"skipLibCheck":true},"include":["src","vite.config.ts"]}\n')
-  writeFrontendTemplateFile(projectDir, 'vite.config.ts', 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n')
-  writeFrontendTemplateFile(projectDir, 'zerct.toml', frontendConfig(projectDir))
+`],
+    ['index.html', '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n'],
+    ['src/styles.css', 'body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n'],
+    ['src/vite-env.d.ts', '/// <reference types="vite/client" />\n'],
+    ['src/main.tsx', frontendSource(apiBaseUrl)],
+    ['tsconfig.json', '{"compilerOptions":{"strict":true,"jsx":"react-jsx","module":"ESNext","moduleResolution":"Bundler","target":"ES2022","noEmit":true,"skipLibCheck":true},"include":["src","vite.config.ts"]}\n'],
+    ['vite.config.ts', 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n'],
+    ['zerct.toml', frontendConfig(projectDir)]
+  ]
+  writeTemplateFiles(projectDir, files)
   console.log('run package install in the frontend directory before doctor: bun install or npm install')
 }
 
-function writeFrontendTemplateFile(projectDir: string, relative: string, source: string): void {
-  if (!FRONTEND_TEMPLATE_FILES.has(relative)) {
-    throw new Error(`unexpected template file: ${relative}`)
+function writeTemplateFiles(projectDir: string, files: readonly TemplateFile[]): void {
+  for (const [relative, source] of files) {
+    writeNewFile(path.join(projectDir, relative), source)
   }
-  writeNewFile(path.join(projectDir, relative), source)
 }
 
 function writeNewFile(file: string, source: string): void {

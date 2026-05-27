@@ -1,6 +1,6 @@
 {
   "name": "zerct",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "Deploy Rust backends and static frontends to Zerct.",
   "type": "module",
   "bin": {

@@ -1,4 +1,4 @@
-export const VERSION: string = '0.1.32'
+export const VERSION: string = '0.1.33'
 export const DEFAULT_API_URL: string = 'https://api.zerct.com'
 export const ARCHIVE_LIMIT_BYTES: number = 48 * 1024 * 1024
 export const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: number = 900
@@ -19,16 +19,6 @@ export const FRONTEND_SOURCE_ROOTS: ReadonlySet<string> = new Set(['src', 'app',
 export const FRONTEND_JAVASCRIPT_EXTENSIONS: readonly string[] = ['.js', '.jsx', '.mjs', '.cjs']
 export const FRONTEND_PACKAGE_MANAGERS: ReadonlySet<string> = new Set(['npm', 'bun', 'pnpm', 'yarn'])
 export const FRONTEND_INSTALL_COMMANDS: ReadonlySet<string> = new Set(['npm ci', 'bun ci', 'bun install', 'pnpm install', 'yarn install'])
-export const FRONTEND_TEMPLATE_FILES: ReadonlySet<string> = new Set([
-  'index.html',
-  'package.json',
-  'src/main.tsx',
-  'src/styles.css',
-  'src/vite-env.d.ts',
-  'tsconfig.json',
-  'vite.config.ts',
-  'zerct.toml'
-])
 export const ARCHIVE_EXCLUDES: readonly string[] = [
   '.git',
   'target',
