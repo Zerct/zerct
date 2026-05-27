@@ -65,7 +65,10 @@ tighten these rules.
    boundary: `strict`, exact optional properties, unchecked indexed access,
    unchecked side-effect imports, type-only import behavior, isolated modules
    and declarations, erasable syntax, no JavaScript input, and no skipped lib
-   checking. Type coverage must remain 100%.
+   checking. Type coverage must remain 100%. The npm check stack must include
+   `tsc`, `tsgo`, `oxlint` type-aware linting, `publint`, dependency tree
+   validation, vulnerability audit, registry signature audit, and the
+   repository npm SDK policy script.
 5. Keep `packages/zerct` as the CLI behavior source of truth. PyPI and Cargo
    CLIs are thin delegates to the npm CLI so they expose the same agent-facing
    command surface without reimplementing login, init, doctor, preview, deploy,
