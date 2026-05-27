@@ -168,7 +168,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="zerct",
         epilog=(
-            "Agent contract: Rust backends keep Cargo.lock committed, listen on "
+            "Agent contract: Rust backends keep Cargo.lock committed, pass rustfmt, listen on "
             '0.0.0.0:$PORT, and return HTTP 200 from health. Static frontends set kind = "static_frontend", '
             "keep TypeScript source, a package lockfile, and typecheck + lint scripts. Frontends call Rust "
             "backends for APIs, managed Postgres, and server-side logic. Run deploy from a repo "

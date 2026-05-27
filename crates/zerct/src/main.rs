@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.9";
+const VERSION: &str = "0.1.10";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -148,7 +148,7 @@ Usage:
     println!(
         "
 Agent contract:
-  - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
+  - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = \"static_frontend\", keep TypeScript source, a package lockfile, and typecheck + lint scripts.
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a repo root with nested zerct.toml files to deploy the whole workspace in one command.
