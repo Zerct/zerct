@@ -14,8 +14,7 @@ tighten these rules.
 2. Do not use em dashes or double hyphen prose in Markdown, MDX, or text files.
    Wrap CLI flags such as `--json` in inline code or fenced code.
 3. Do not add general lint, test, or CI workflows. GitHub Actions are allowed
-   only for package publishing, Mintlify docs validation/score, and explicit
-   CodeRabbit push review.
+   only for package publishing and Mintlify docs validation/score.
 4. Every workflow must run on a Blacksmith runner. Use
    `blacksmith-2vcpu-ubuntu-2404` unless measured runtime, memory, or disk
    pressure proves a larger runner is needed.
@@ -182,15 +181,6 @@ tighten these rules.
    brew tap Zerct/tap
    brew install zerct
    ```
-
-## CodeRabbit
-
-1. Keep `.coderabbit.yaml` strict and concise.
-2. Native CodeRabbit GitHub App reviews are PR-based.
-3. Push review must use Blacksmith and must never run without an Agentic API key
-   stored as `CODERABBIT_API_KEY`.
-4. If the key is missing, the push workflow must skip with a notice instead of
-   failing.
 
 ## Required Local Check
 
