@@ -24,49 +24,56 @@ async function deploy(projectDir: string, cli: CliOptions): Promise<void> {
     throw agentError('missing_project_contract', 'No zerct.toml was found.', 'Run `npx @zerct/zerct init` in each app directory, or pass a project path.', cli.json)
   }
 
-  if (projects.length === 1) {
-    const project = projects[0]
-    if (project === undefined) {
-      throw agentError('missing_project_contract', 'No zerct.toml was found.', 'Run `npx @zerct/zerct init` in each app directory, or pass a project path.', cli.json)
-    }
-    if (project.kind === 'static_frontend' && cli.database) {
-      throw agentError('invalid_database_target', 'Static frontends cannot attach managed Postgres directly.', 'Deploy a Rust backend with managed Postgres and call it from the frontend.', cli.json)
-    }
-    const token = await readOrLoginToken(project.dir, cli)
-    await preflightDeployLimits([project], cli, token, cli.database)
-    const result = await deployProject(project.dir, cli, token, cli.database)
-    if (cli.wait) {
-      result.final_build = await waitForBuild(cli, token, result.build_job.id)
-    }
-    printDeployResult(result, cli)
-    return
-  }
-
-  const token = await readOrLoginToken(projectDir, cli)
+  const singleProject = projects.length === 1 ? projects[0] : undefined
+  rejectInvalidDatabaseTarget(singleProject, cli)
+  const token = await readOrLoginToken(singleProject?.dir ?? projectDir, cli)
   await preflightDeployLimits(projects, cli, token, cli.database)
-  const results: WorkspaceDeployResult[] = []
-  if (!cli.json) {
-    console.log(`deploying ${projects.length} projects`)
-  }
-
-  for (const project of projects) {
-    const wantsDatabase = cli.database && project.kind === 'rust_backend'
-    if (!cli.json) {
-      console.log(`checking ${project.relative}`)
-    }
-    const response = await deployProject(project.dir, cli, token, wantsDatabase)
-    results.push({ project, wantsDatabase, response })
-    if (!cli.json) {
-      console.log(`${project.relative} queued ${response.build_job.id}`)
-      console.log(`${project.relative} url ${response.app.url}`)
-    }
-  }
+  const results = await deployProjects(projects, cli, token)
 
   if (cli.wait) {
     await waitForWorkspaceBuilds(cli, token, results)
   }
 
+  const singleResult = results.length === 1 ? results[0] : undefined
+  if (singleResult) {
+    printDeployResult(singleResult.response, cli)
+    return
+  }
+
   printWorkspaceDeployResults(projectDir, results, cli)
+}
+
+function rejectInvalidDatabaseTarget(singleProject: DeployProjectInfo | undefined, cli: CliOptions): void {
+  if (singleProject?.kind === 'static_frontend' && cli.database) {
+    throw agentError('invalid_database_target', 'Static frontends cannot attach managed Postgres directly.', 'Deploy a Rust backend with managed Postgres and call it from the frontend.', cli.json)
+  }
+}
+
+async function deployProjects(projects: DeployProjectInfo[], cli: CliOptions, token: string): Promise<WorkspaceDeployResult[]> {
+  const results: WorkspaceDeployResult[] = []
+  const workspaceDeploy = projects.length > 1
+  if (workspaceDeploy && !cli.json) {
+    console.log(`deploying ${projects.length} projects`)
+  }
+
+  for (const project of projects) {
+    const wantsDatabase = projectWantsDatabase(project, cli.database)
+    if (workspaceDeploy && !cli.json) {
+      console.log(`checking ${project.relative}`)
+    }
+    const response = await deployProject(project.dir, cli, token, wantsDatabase)
+    results.push({ project, wantsDatabase, response })
+    if (workspaceDeploy && !cli.json) {
+      console.log(`${project.relative} queued ${response.build_job.id}`)
+      console.log(`${project.relative} url ${response.app.url}`)
+    }
+  }
+
+  return results
+}
+
+function projectWantsDatabase(project: DeployProjectInfo, databaseRequested: boolean): boolean {
+  return databaseRequested && project.kind === 'rust_backend'
 }
 
 async function preflightDeployLimits(projects: DeployProjectInfo[], cli: CliOptions, token: string, databaseRequested: boolean): Promise<void> {
@@ -95,24 +102,29 @@ async function preflightDeployLimits(projects: DeployProjectInfo[], cli: CliOpti
     if (!existing) {
       newProjects += 1
     }
-    if (databaseRequested && project.kind === 'rust_backend' && existing?.databaseStorageMib === undefined) {
+    if (projectWantsDatabase(project, databaseRequested) && existing?.databaseStorageMib === undefined) {
       newDatabases += 1
     }
   }
 
-  if (newProjects > 0 && numberField(usage, 'appCount') + newProjects > numberField(limits, 'projects')) {
+  const usedProjects = numberField(usage, 'appCount')
+  const projectLimit = numberField(limits, 'projects')
+  const usedDatabases = numberField(usage, 'databaseCount')
+  const databaseLimit = numberField(limits, 'managedDatabases')
+
+  if (newProjects > 0 && usedProjects + newProjects > projectLimit) {
     throw agentError(
       'payment_required',
-      `Project limit reached: ${numberField(usage, 'appCount')}/${numberField(limits, 'projects')} projects are already used.`,
+      `Project limit reached: ${usedProjects}/${projectLimit} projects are already used.`,
       'Redeploy an existing app by reusing its `name` in zerct.toml, or run `npx @zerct/zerct billing` to open Stripe Checkout before creating another project.',
       cli.json
     )
   }
 
-  if (newDatabases > 0 && numberField(usage, 'databaseCount') + newDatabases > numberField(limits, 'managedDatabases')) {
+  if (newDatabases > 0 && usedDatabases + newDatabases > databaseLimit) {
     throw agentError(
       'payment_required',
-      `Managed Postgres limit reached: ${numberField(usage, 'databaseCount')}/${numberField(limits, 'managedDatabases')} databases are already used.`,
+      `Managed Postgres limit reached: ${usedDatabases}/${databaseLimit} databases are already used.`,
       'Redeploy an app that already has managed Postgres, deploy without `--database`, or run `npx @zerct/zerct billing` to open Stripe Checkout.',
       cli.json
     )
@@ -172,7 +184,9 @@ function printWorkspaceDeployResults(projectDir: string, results: WorkspaceDeplo
 
 async function waitForWorkspaceBuilds(cli: CliOptions, token: string, results: WorkspaceDeployResult[]): Promise<void> {
   await Promise.all(results.map(async (result): Promise<void> => {
-    result.finalBuild = await waitForBuild(cli, token, result.response.build_job.id)
+    const finalBuild = await waitForBuild(cli, token, result.response.build_job.id)
+    result.finalBuild = finalBuild
+    result.response.final_build = finalBuild
   }))
 }
 
