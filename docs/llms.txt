@@ -11,6 +11,8 @@ npx @zerct/zerct doctor --json
 npx @zerct/zerct deploy --wait --json
 ```
 
+Reference: [Zerct docs](https://docs.zerct.com).
+
 Agent repair loop:
 
 1. Run `npx @zerct/zerct doctor --json`.
