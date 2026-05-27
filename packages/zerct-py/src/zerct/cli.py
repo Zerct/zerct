@@ -35,7 +35,7 @@ SESSION_LABEL = "Zerct session"
 DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 DEFAULT_LOGIN_INTERVAL_SECONDS = 5
 DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
-DEFAULT_RUST_CHECK_COMMAND = "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+DEFAULT_RUST_CHECK_COMMAND = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
 DEFAULT_NPM_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 DEFAULT_BUN_FRONTEND_CHECK_COMMAND = "bun ci && bun run typecheck && bun run lint"
 RUST_TEMPLATE_SOURCE = """use std::{
@@ -134,6 +134,7 @@ class AgentError(Exception):
     agent_instruction: str
     docs_url: str | None = None
     checkout_url: str | None = None
+    already_reported: bool = False
 
     def payload(self) -> dict[str, Any]:
         return {
@@ -499,6 +500,7 @@ def doctor_project(project_dir: pathlib.Path, json_output: bool) -> None:
             "doctor_failed",
             "Zerct doctor failed.",
             failure["agent_instruction"],
+            already_reported=json_output,
         )
 
 
@@ -558,11 +560,13 @@ def run_doctor_workspace(project_dir: pathlib.Path) -> dict[str, Any]:
 def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
     config: dict[str, Any] | None = None
+    config_valid = False
     config_path = project_dir / "zerct.toml"
     if config_path.exists():
         try:
             config = parse_config(config_path)
             validate_config(config)
+            config_valid = True
             checks.append({"name": "zerct.toml", "ok": True, "message": "valid", "agent_instruction": ""})
         except (OSError, tomllib.TOMLDecodeError, AgentError) as error:
             instruction = (
@@ -613,7 +617,7 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
             }
         )
         checks.extend(frontend_source_checks(project_dir))
-        checks.extend(frontend_script_checks(project_dir))
+        checks.extend(frontend_script_checks(project_dir, config_valid))
 
     unsafe_hits = scan_unsafe(project_dir)
     checks.append(
@@ -624,7 +628,8 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
             "agent_instruction": "Remove direct unsafe usage from workspace Rust source before deploying.",
         }
     )
-    if kind == "rust_backend":
+    if kind == "rust_backend" and config_valid:
+        checks.append(cargo_fmt(project_dir))
         checks.append(cargo_check(project_dir))
         checks.append(cargo_clippy(project_dir))
 
@@ -659,6 +664,31 @@ def cargo_check(project_dir: pathlib.Path) -> dict[str, Any]:
         "ok": result.returncode == 0,
         "message": message,
         "agent_instruction": "Run `cargo check --locked`, fix every compiler error and warning, then redeploy.",
+    }
+
+
+def cargo_fmt(project_dir: pathlib.Path) -> dict[str, Any]:
+    try:
+        result = subprocess.run(
+            ["cargo", "fmt", "--all", "--check"],
+            cwd=project_dir,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError as error:
+        return {
+            "name": "cargo fmt",
+            "ok": False,
+            "message": str(error),
+            "agent_instruction": "Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.",
+        }
+    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or "cargo fmt failed").strip()[:240]
+    return {
+        "name": "cargo fmt",
+        "ok": result.returncode == 0,
+        "message": message,
+        "agent_instruction": "Run `cargo fmt --all`, then redeploy.",
     }
 
 
@@ -776,29 +806,33 @@ def validate_config(config: dict[str, Any]) -> None:
 
 
 def validate_check_command(kind: str, command: str) -> None:
-    if kind == "static_frontend" and uses_javascript_linter(command):
+    if kind == "static_frontend":
+        validate_frontend_check_command(command)
+        return
+    required = ("cargo fmt --all --check", "cargo check --locked", "cargo clippy --locked", "--all-targets", "--all-features", "-D warnings")
+    if all(fragment in command for fragment in required):
+        return
+    raise AgentError(
+        "policy_rejected",
+        "Check command is too weak for Zerct deploys.",
+        "Set [build].check to include `cargo fmt --all --check`, `cargo check --locked`, and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy.",
+    )
+
+
+def validate_frontend_check_command(command: str) -> None:
+    if uses_javascript_linter(command):
         raise AgentError(
             "policy_rejected",
             "Check command uses a JavaScript-based linter.",
             "Use native frontend linting such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
         )
-    required = (
-        ("typecheck", "lint")
-        if kind == "static_frontend"
-        else ("cargo check --locked", "cargo clippy --locked", "--all-targets", "--all-features", "-D warnings")
-    )
-    if all(fragment in command for fragment in required):
+    tokens = command_tokens(command)
+    if has_frontend_install_command(tokens) and has_frontend_script_run(tokens, "typecheck") and has_frontend_script_run(tokens, "lint"):
         return
-    if kind == "static_frontend":
-        raise AgentError(
-            "policy_rejected",
-            "Check command is too weak for Zerct deploys.",
-            "Set [build].check to install dependencies, typecheck, and lint, for example `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`, then redeploy.",
-        )
     raise AgentError(
         "policy_rejected",
         "Check command is too weak for Zerct deploys.",
-        "Set [build].check to include `cargo check --locked` and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy.",
+        "Set [build].check to install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`, then redeploy.",
     )
 
 
@@ -827,7 +861,7 @@ def frontend_build_command(project_dir: pathlib.Path) -> str:
     return "npm run build"
 
 
-def frontend_script_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
+def frontend_script_checks(project_dir: pathlib.Path, run_scripts: bool) -> list[dict[str, Any]]:
     manifest = read_package_json(project_dir)
 
     def has_script(name: str) -> bool:
@@ -856,7 +890,7 @@ def frontend_script_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
             "agent_instruction": "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.",
         }
     )
-    if all(check["ok"] for check in checks):
+    if run_scripts and all(check["ok"] for check in checks):
         checks.append(package_script_check(project_dir, "typecheck"))
         checks.append(package_script_check(project_dir, "lint"))
     return checks
@@ -915,16 +949,55 @@ def read_package_json(project_dir: pathlib.Path) -> dict[str, Any] | None:
 
 
 def uses_javascript_linter(command: str) -> bool:
-    tokens = [
+    tokens = command_tokens(command)
+    for index, token in enumerate(tokens):
+        command_name = command_basename(token)
+        if command_name in {"eslint", "eslint_d", "standard", "xo"}:
+            return True
+        if command_name == "next" and index + 1 < len(tokens) and tokens[index + 1] == "lint":
+            return True
+    return False
+
+
+def command_tokens(command: str) -> list[str]:
+    return [
         token.strip("\"'")
         for token in re.split(r"[\s&|;()]+", command)
         if token.strip("\"'")
     ]
+
+
+def command_basename(token: str) -> str:
+    return token.rsplit("/", 1)[-1]
+
+
+def has_frontend_install_command(tokens: list[str]) -> bool:
+    return any(
+        (command_basename(command), subcommand)
+        in {
+            ("npm", "ci"),
+            ("bun", "ci"),
+            ("bun", "install"),
+            ("pnpm", "install"),
+            ("yarn", "install"),
+        }
+        for command, subcommand in zip(tokens, tokens[1:], strict=False)
+    )
+
+
+def has_frontend_script_run(tokens: list[str], script: str) -> bool:
+    managers = {"npm", "bun", "pnpm", "yarn"}
     for index, token in enumerate(tokens):
-        command_name = token.rsplit("/", 1)[-1]
-        if command_name in {"eslint", "eslint_d", "standard", "xo"}:
+        if command_basename(token) not in managers:
+            continue
+        if index + 2 < len(tokens) and tokens[index + 1] == "run" and tokens[index + 2] == script:
             return True
-        if command_name == "next" and index + 1 < len(tokens) and tokens[index + 1] == "lint":
+        if (
+            index + 3 < len(tokens)
+            and tokens[index + 1] == "run"
+            and tokens[index + 2].startswith("-")
+            and tokens[index + 3] == script
+        ):
             return True
     return False
 
@@ -1733,6 +1806,8 @@ def progress(args: argparse.Namespace, message: str) -> None:
 
 
 def print_error(error: AgentError, json_output: bool) -> None:
+    if error.already_reported:
+        return
     if json_output:
         print(json.dumps(error.payload(), indent=2), file=sys.stderr)
         return

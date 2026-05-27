@@ -14,6 +14,9 @@ zerct deploy
 From a full-stack repo root, `zerct deploy` discovers nested `zerct.toml` files
 and deploys the whole workspace in one command.
 
+Rust backend deploys require `cargo fmt --all --check`, locked `cargo check`,
+and locked all-target, all-feature Clippy with `-D warnings`.
+
 The npm package remains the primary first install path:
 
 ```sh

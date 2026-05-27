@@ -58,8 +58,9 @@ bun add -d @typescript/native-preview oxlint
 }
 ```
 
-Rust backend checks must include locked `cargo check` and locked all-target,
-all-feature Clippy with `-D warnings`. Frontend checks must run both
+Rust backend checks must include `cargo fmt --all --check`, locked
+`cargo check`, and locked all-target, all-feature Clippy with `-D warnings`.
+Frontend checks must install dependencies and run both
 typechecking and linting before build work is queued. Frontend browser source
 must be `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or `components`;
 browser `.js`, `.jsx`, `.mjs`, and `.cjs` source is rejected. Bun projects

@@ -16,7 +16,7 @@ const SESSION_ACCOUNT = 'session-token'
 const SESSION_LABEL = 'Zerct session'
 const DEFAULT_LOGIN_EXPIRES_SECONDS = 600
 const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
-const DEFAULT_RUST_CHECK_COMMAND = 'cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
+const DEFAULT_RUST_CHECK_COMMAND = 'cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
 const PROJECT_KINDS = new Set(['rust_backend', 'static_frontend'])
@@ -102,7 +102,7 @@ Usage:
   zerct billing [portal] [--api <url>] [--json]
 
 Agent contract:
-  - Rust backends keep Cargo.lock committed, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
+  - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, and typecheck + lint scripts.
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a repo root with nested zerct.toml files to deploy the whole workspace in one command.
@@ -602,11 +602,13 @@ function runDoctorWorkspace(projectDir) {
 function runDoctor(projectDir) {
   const checks = []
   let config = null
+  let configValid = false
   const configPath = path.join(projectDir, 'zerct.toml')
   if (existsSync(configPath)) {
     try {
       config = parseZerctToml(readFileSync(configPath, 'utf8'), projectDir)
       validateConfig(config)
+      configValid = true
       checks.push({ name: 'zerct.toml', ok: true, message: 'valid' })
     } catch (error) {
       checks.push({
@@ -648,7 +650,7 @@ function runDoctor(projectDir) {
       agent_instruction: 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.'
     })
     checks.push(...frontendSourceChecks(projectDir))
-    checks.push(...frontendScriptChecks(projectDir))
+    checks.push(...frontendScriptChecks(projectDir, configValid))
   }
 
   const unsafeHits = scanUnsafe(projectDir)
@@ -658,7 +660,8 @@ function runDoctor(projectDir) {
     message: unsafeHits.length === 0 ? 'no direct unsafe found' : unsafeHits.slice(0, 5).join(', '),
     agent_instruction: 'Remove direct unsafe usage from workspace Rust source before deploying.'
   })
-  if (kind === 'rust_backend') {
+  if (kind === 'rust_backend' && configValid) {
+    checks.push(cargoFmt(projectDir))
     checks.push(cargoCheck(projectDir))
     checks.push(cargoClippy(projectDir))
   }
@@ -693,6 +696,30 @@ function cargoCheck(projectDir) {
     ok: cargo.status === 0,
     message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo check failed').trim().slice(0, 240),
     agent_instruction: 'Run `cargo check --locked`, fix every compiler error and warning, then redeploy.'
+  }
+}
+
+function cargoFmt(projectDir) {
+  const cargo = spawnSync('cargo', ['fmt', '--all', '--check'], {
+    cwd: projectDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe']
+  })
+
+  if (cargo.error) {
+    return {
+      name: 'cargo fmt',
+      ok: false,
+      message: cargo.error.message,
+      agent_instruction: 'Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.'
+    }
+  }
+
+  return {
+    name: 'cargo fmt',
+    ok: cargo.status === 0,
+    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo fmt failed').trim().slice(0, 240),
+    agent_instruction: 'Run `cargo fmt --all`, then redeploy.'
   }
 }
 
@@ -1489,18 +1516,31 @@ function validateConfig(config) {
 }
 
 function validateCheckCommand(kind, command) {
-  if (kind === 'static_frontend' && usesJavascriptLinter(command)) {
-    throw new Error('[build].check must not run JavaScript-based linters; use oxlint, biome, or deno lint')
+  if (kind === 'static_frontend') {
+    validateFrontendCheckCommand(command)
+    return
   }
-  const required = kind === 'static_frontend'
-    ? ['typecheck', 'lint']
-    : ['cargo check --locked', 'cargo clippy --locked', '--all-targets', '--all-features', '-D warnings']
+
+  const required = ['cargo fmt --all --check', 'cargo check --locked', 'cargo clippy --locked', '--all-targets', '--all-features', '-D warnings']
   if (required.every((fragment) => command.includes(fragment))) {
     return
   }
-  throw new Error(kind === 'static_frontend'
-    ? '[build].check must run frontend typecheck and lint'
-    : '[build].check must include cargo check --locked and cargo clippy --locked --all-targets --all-features -- -D warnings')
+  throw new Error('[build].check must include cargo fmt --all --check, cargo check --locked, and cargo clippy --locked --all-targets --all-features -- -D warnings')
+}
+
+function validateFrontendCheckCommand(command) {
+  if (usesJavascriptLinter(command)) {
+    throw new Error('[build].check must not run JavaScript-based linters; use oxlint, biome, or deno lint')
+  }
+  const tokens = commandTokens(command)
+  if (
+    hasFrontendInstallCommand(tokens) &&
+    hasFrontendScriptRun(tokens, 'typecheck') &&
+    hasFrontendScriptRun(tokens, 'lint')
+  ) {
+    return
+  }
+  throw new Error('[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`')
 }
 
 function frontendLockfileExists(projectDir) {
@@ -1526,7 +1566,7 @@ function frontendBuildCommand(projectDir) {
     : 'npm run build'
 }
 
-function frontendScriptChecks(projectDir) {
+function frontendScriptChecks(projectDir, runScripts) {
   const manifest = readPackageJson(projectDir)
   const missing = (script) => !manifest?.scripts || typeof manifest.scripts[script] !== 'string' || !manifest.scripts[script].trim()
   const checks = ['typecheck', 'lint'].map((script) => ({
@@ -1544,7 +1584,7 @@ function frontendScriptChecks(projectDir) {
     agent_instruction: 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.'
   })
 
-  if (checks.every((check) => check.ok)) {
+  if (runScripts && checks.every((check) => check.ok)) {
     checks.push(packageScriptCheck(projectDir, 'typecheck'))
     checks.push(packageScriptCheck(projectDir, 'lint'))
   }
@@ -1607,15 +1647,38 @@ function readPackageJson(projectDir) {
 }
 
 function usesJavascriptLinter(command) {
-  const tokens = command
+  const tokens = commandTokens(command)
+  return tokens.some((token, index) => {
+    const commandName = commandNameFromToken(token)
+    return ['eslint', 'eslint_d', 'standard', 'xo'].includes(commandName)
+      || (commandName === 'next' && tokens[index + 1] === 'lint')
+  })
+}
+
+function commandTokens(command) {
+  return command
     .replace(/[&|;()]/gu, ' ')
     .split(/\s+/u)
     .map((token) => token.trim().replace(/^["']|["']$/gu, ''))
     .filter(Boolean)
+}
+
+function commandNameFromToken(token) {
+  return token.split('/').pop()
+}
+
+function hasFrontendInstallCommand(tokens) {
+  const accepted = new Set(['npm ci', 'bun ci', 'bun install', 'pnpm install', 'yarn install'])
+  return tokens.some((token, index) => accepted.has(`${commandNameFromToken(token)} ${tokens[index + 1] || ''}`))
+}
+
+function hasFrontendScriptRun(tokens, script) {
+  const managers = new Set(['npm', 'bun', 'pnpm', 'yarn'])
   return tokens.some((token, index) => {
-    const commandName = token.split('/').pop()
-    return ['eslint', 'eslint_d', 'standard', 'xo'].includes(commandName)
-      || (commandName === 'next' && tokens[index + 1] === 'lint')
+    if (!managers.has(commandNameFromToken(token)) || tokens[index + 1] !== 'run') {
+      return false
+    }
+    return tokens[index + 2] === script || (tokens[index + 2] || '').startsWith('-') && tokens[index + 3] === script
   })
 }
 

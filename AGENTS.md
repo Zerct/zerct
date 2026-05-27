@@ -70,9 +70,10 @@ tighten these rules.
    files.
 9. Rust backend and static frontend deploy behavior must stay aligned across
    npm, PyPI, Cargo, skills, docs, and examples. Any custom Rust
-   `[build].check` must include locked `cargo check` and locked all-target,
-   all-feature Clippy with `-D warnings`; any custom static frontend
-   `[build].check` must run both typechecking and linting. Static frontend
+   `[build].check` must include `cargo fmt --all --check`, locked
+   `cargo check`, and locked all-target, all-feature Clippy with
+   `-D warnings`; any custom static frontend `[build].check` must install
+   dependencies and run both typechecking and linting. Static frontend
    browser source must be TypeScript under `src`, `app`, `pages`, `routes`, or
    `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
    Running deploy from a repo root with nested `zerct.toml` files must deploy
@@ -125,7 +126,7 @@ tighten these rules.
 
 1. Examples must be minimal, buildable, and safe to copy.
 2. Rust examples must include `Cargo.lock`, `zerct.toml`, a health endpoint, and
-   pass `cargo check --locked` plus
+   pass `cargo fmt --all --check`, `cargo check --locked`, plus
    `cargo clippy --locked --all-targets --all-features -- -D warnings`, with
    no secrets.
 3. Static frontend examples must include `zerct.toml` with

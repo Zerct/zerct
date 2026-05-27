@@ -17,7 +17,8 @@ npx zerct deploy
 ```
 
 Rust backends expect `Cargo.toml`, `Cargo.lock`, and `zerct.toml`. They must
-listen on `0.0.0.0:$PORT` and expose the configured health endpoint.
+pass `cargo fmt --all --check`, locked Cargo checks, listen on
+`0.0.0.0:$PORT`, and expose the configured health endpoint.
 
 From a full-stack repo root, the same deploy command discovers nested
 `zerct.toml` files and deploys the whole workspace in one command.

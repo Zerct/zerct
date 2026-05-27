@@ -23,9 +23,10 @@ For Rust backends, require:
 
 - `Cargo.toml`
 - `Cargo.lock`
+- passing `cargo fmt --all --check`
 - passing `cargo check --locked`
 - passing `cargo clippy --locked --all-targets --all-features -- -D warnings`
-- a `[build].check` command that includes those locked Rust checks
+- a `[build].check` command that includes formatting plus those locked Rust checks
 
 The server must listen on `0.0.0.0:$PORT` and expose the configured health path.
 
@@ -37,7 +38,8 @@ For static frontends, require:
   `components`
 - `kind = "static_frontend"` in `zerct.toml`
 - `typecheck` and `lint` scripts in `package.json`
-- a `[build].check` command that runs typechecking and linting
+- a `[build].check` command that installs dependencies and runs typechecking
+  plus linting
 
 For new TanStack or Vite frontends, prefer `tsgo --noEmit` for `typecheck` and
 `oxlint src vite.config.ts --deny-warnings` for `lint`, installed with Bun and
