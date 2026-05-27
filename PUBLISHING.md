@@ -170,19 +170,3 @@ OpenAPI linting:
 The check verifies the OpenAPI file referenced by `docs/docs.json` exists,
 discovers every tracked OpenAPI or Swagger JSON/YAML file, and runs vacuum
 against all discovered files.
-
-## CodeRabbit
-
-Native CodeRabbit GitHub App reviews are PR-based. The repository also has
-`.github/workflows/coderabbit-push.yml` for push reviews through the CodeRabbit
-CLI on Blacksmith.
-
-Push review requirements:
-
-- Secret: `CODERABBIT_API_KEY`
-- Key type: CodeRabbit Agentic API key
-- CodeRabbit account setting: Usage-based Add-on enabled
-
-Without that secret, the push workflow exits with a notice and does not run a
-review. This keeps the free PR reviewer active without creating failing push
-checks that cannot authenticate.
