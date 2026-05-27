@@ -31,6 +31,13 @@ chmod +x "$work_dir/src/zerct.ts"
 
 (
   cd "$work_dir"
+  package_name="$(node -p "require('./package.json').name")"
+  package_version="$(node -p "require('./package.json').version")"
+  if npm view "${package_name}@${package_version}" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then
+    echo "${package_name}@${package_version} already exists; skipping publish."
+    exit 0
+  fi
+
   publish_args=(--access public --registry=https://registry.npmjs.org/)
   if [[ "${NPM_PUBLISH_PROVENANCE:-}" == "1" ]]; then
     publish_args+=(--provenance)
