@@ -9,9 +9,9 @@ guessing.
 ## Flow
 
 1. Login with GitHub or Google.
-2. Run `zerct doctor`.
+2. Run `zerct doctor --json`.
 3. Run `zerct preview` for local verification.
-4. Run `zerct deploy`.
+4. Run `zerct deploy --wait --json`.
 5. Zerct queues the build, runs checks, and verifies the health route for Rust
    backends.
 6. Zerct exposes the app on a `zerct.app` deployment hostname.
@@ -61,4 +61,11 @@ CLI and API errors should be machine-readable:
   "message": "Cargo.lock is required for reproducible deploys.",
   "agent_instruction": "Run cargo generate-lockfile, commit Cargo.lock, then retry."
 }
+```
+
+Agents should always fix the first failed check or first actionable log line,
+then rerun doctor before redeploying. After a failed build, start with:
+
+```sh
+npx @zerct/zerct logs --build <build_id> --json
 ```

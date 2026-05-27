@@ -29,11 +29,11 @@ cd my-app/web && bun install && cd ..
 ## Check locally
 
 ```sh
-npx @zerct/zerct doctor
+npx @zerct/zerct doctor --json
 ```
 
-Fix any reported issue before deploying. Zerct errors are written so agents can
-read the `agent_instruction` field and retry.
+Fix the first failed check before deploying. Zerct errors include
+`agent_instruction`, so agents can make the exact code change and rerun doctor.
 
 Preview one project locally:
 
@@ -45,12 +45,20 @@ npx @zerct/zerct preview web
 ## Deploy
 
 ```sh
-npx @zerct/zerct deploy
+npx @zerct/zerct deploy --wait --json
 ```
 
 On first deploy, the CLI opens browser login for GitHub or Google, stores the
 Zerct session, then continues automatically. Zerct builds the backend, verifies
 health, and returns the deployment URL.
+
+If the build fails, inspect the build logs:
+
+```sh
+npx @zerct/zerct logs --build <build_id> --json
+```
+
+Fix the first actionable error, rerun doctor, then redeploy.
 
 ## Full-stack repos
 
