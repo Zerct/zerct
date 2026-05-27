@@ -26,6 +26,8 @@ export interface CliOptions {
   deploy: string
   limit: string
   cursor: string
+  failingCommand: string
+  firstLogLine: string
   token: string
   template: string
   severity: string

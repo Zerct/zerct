@@ -102,7 +102,7 @@ npx @zerct/zerct billing checkout "Plan limit reached" --json
 Create a support ticket after collecting command output and ids:
 
 ```sh
-npx @zerct/zerct support create "Deploy failed" "Command, app id, build id, deploy id, and first actionable log line." --json
+npx @zerct/zerct support create "Deploy failed" "Agent retried deploy after doctor." --app <app_id> --build <build_id> --deploy <deploy_id> --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "first actionable log line" --json
 ```
 
 Resolve a support ticket after the agent fixes the issue:

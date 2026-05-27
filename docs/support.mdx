@@ -12,8 +12,12 @@ actionable log line.
 ```sh
 npx @zerct/zerct support create \
   "Deploy failed" \
-  "Command: npx @zerct/zerct deploy --wait --json. App: app_1. Build: job_1. First log error: cargo check failed in src/main.rs." \
+  "The deploy failed after the Rust check step. The agent already ran doctor and reproduced the same error." \
   --app app_1 \
+  --build job_1 \
+  --deploy deploy_1 \
+  --failing-command "npx @zerct/zerct deploy --wait --json" \
+  --first-log-line "cargo check failed in src/main.rs" \
   --severity normal \
   --json
 ```
@@ -52,8 +56,12 @@ The create body is:
 ```json
 {
   "subject": "Deploy failed",
-  "details": "Command, ids, first log line, and what the agent already tried.",
+  "details": "What the agent already tried and why the issue needs Zerct support.",
   "app_id": "app_1",
+  "build_id": "job_1",
+  "deploy_id": "deploy_1",
+  "failing_command": "npx @zerct/zerct deploy --wait --json",
+  "first_log_line": "cargo check failed in src/main.rs",
   "severity": "normal"
 }
 ```

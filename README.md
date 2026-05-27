@@ -91,7 +91,7 @@ Run `npx @zerct/zerct doctor --json`. Fix the first failed check by following
 error, rerun doctor, and redeploy. If a plan limit blocks work, run
 `npx @zerct/zerct billing checkout --json` and show the returned URL to the
 human. If Zerct support is needed, run `npx @zerct/zerct support create` with
-the failing command, app id, build id, deploy id, and first actionable log line.
+`--failing-command`, `--app`, `--build`, `--deploy`, and `--first-log-line`.
 Resolve the support ticket after the issue is fixed.
 ```
 
@@ -142,7 +142,7 @@ npx @zerct/zerct domains list --app app_1
 npx @zerct/zerct domains verify --app app_1 api.example.com
 npx @zerct/zerct billing checkout --json
 npx @zerct/zerct billing portal
-npx @zerct/zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+npx @zerct/zerct support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 npx @zerct/zerct support list --json
 npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
 ```

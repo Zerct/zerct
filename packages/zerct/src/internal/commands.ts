@@ -223,6 +223,18 @@ async function supportCreate(cli: CliOptions): Promise<void> {
   if (cli.app) {
     body['app_id'] = cli.app
   }
+  if (cli.failingCommand) {
+    body['failing_command'] = cli.failingCommand
+  }
+  if (cli.build) {
+    body['build_id'] = cli.build
+  }
+  if (cli.deploy) {
+    body['deploy_id'] = cli.deploy
+  }
+  if (cli.firstLogLine) {
+    body['first_log_line'] = cli.firstLogLine
+  }
   const response = await apiRequest(cli, 'POST', '/v1/support/tickets', token, body)
   printJson(response)
 }
