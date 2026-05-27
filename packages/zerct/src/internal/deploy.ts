@@ -4,7 +4,7 @@ import { createArchiveBase64, gitCommitSha } from './archive.ts'
 import { readOrLoginToken } from './auth.ts'
 import { runDoctor } from './doctor.ts'
 import { discoverDeployProjects } from './workspace.ts'
-import { progress, sleep } from './project.ts'
+import { printJson, progress, sleep } from './project.ts'
 import type {
   AppsResponse,
   AppSummary,
@@ -150,7 +150,7 @@ async function deployProject(projectDir: string, cli: CliOptions, token: string,
 
 function printDeployResult(response: DeployResponse, cli: CliOptions): void {
   if (cli.json) {
-    console.log(JSON.stringify(response, null, 2))
+    printJson(response)
     return
   }
 
@@ -162,7 +162,7 @@ function printDeployResult(response: DeployResponse, cli: CliOptions): void {
 
 function printWorkspaceDeployResults(projectDir: string, results: WorkspaceDeployResult[], cli: CliOptions): void {
   if (cli.json) {
-    console.log(JSON.stringify({
+    printJson({
       workspace: projectDir,
       deploys: results.map((result) => ({
         path: result.project.relative,
@@ -172,7 +172,7 @@ function printWorkspaceDeployResults(projectDir: string, results: WorkspaceDeplo
         build_job: result.response.build_job,
         final_build: result.finalBuild ?? null
       }))
-    }, null, 2))
+    })
     return
   }
 

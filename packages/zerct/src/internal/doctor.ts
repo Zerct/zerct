@@ -5,7 +5,7 @@ import path from 'node:path'
 import { agentError } from './errors.ts'
 import { parseZerctToml, validateConfig } from './config.ts'
 import { discoverDeployProjects } from './workspace.ts'
-import { ensureDirectory, scanUnsafe } from './project.ts'
+import { ensureDirectory, printJson, scanUnsafe } from './project.ts'
 import { frontendLockfileExists, frontendScriptChecks, frontendSourceChecks } from './frontend-policy.ts'
 import type { DoctorCheck, DoctorReport, WorkspaceDoctorReport, ZerctConfig } from './types.ts'
 
@@ -19,7 +19,7 @@ interface CargoCheckSpec {
 function doctorProject(projectDir: string, json: boolean): void {
   const report = runDoctorWorkspace(projectDir)
   if (json) {
-    console.log(JSON.stringify(report, null, 2))
+    printJson(report)
     if (!report.ok) {
       process.exitCode = 1
     }
