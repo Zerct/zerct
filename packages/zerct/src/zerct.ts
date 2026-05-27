@@ -7,7 +7,7 @@ import { doctorProject } from './internal/doctor.ts'
 import { previewProject } from './internal/preview.ts'
 import { login } from './internal/auth.ts'
 import { deploy } from './internal/deploy.ts'
-import { apps, builds, activity, billing, capabilities, database, deploys, domainsCommand, envCommand, inspect, logs, me, overview, status, usage } from './internal/commands.ts'
+import { apps, builds, activity, billing, capabilities, database, deploys, domainsCommand, envCommand, inspect, logs, me, overview, status, support, usage } from './internal/commands.ts'
 import type { CliOptions } from './internal/types.ts'
 
 type CommandHandler = (cli: CliOptions) => Promise<void> | void
@@ -34,7 +34,8 @@ const COMMANDS = new Map<string, CommandHandler>([
   ['database', database],
   ['env', envCommand],
   ['domains', domainsCommand],
-  ['billing', billing]
+  ['billing', billing],
+  ['support', support]
 ])
 
 async function main(): Promise<void> {

@@ -6,7 +6,7 @@ import {
   numberField,
   optionalJsonObjectField,
   stringField
-} from './api.ts'
+} from './json.ts'
 import type {
   AppsResponse,
   AppSummary,
@@ -111,9 +111,11 @@ function logLineFromJson(value: JsonValue): LogLine | null {
 
 function checkoutResponseFromJson(value: JsonValue | null): CheckoutResponse {
   const source = jsonObjectOrEmpty(value)
+  const checkout = jsonObjectField(source, 'checkout')
   return {
     checkout: {
-      url: stringField(jsonObjectField(source, 'checkout'), 'url')
+      reason: stringField(checkout, 'reason'),
+      url: stringField(checkout, 'url')
     }
   }
 }

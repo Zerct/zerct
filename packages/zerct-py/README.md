@@ -47,7 +47,11 @@ zerct env set --app app_1 API_KEY=value
 zerct env delete --app app_1 API_KEY
 zerct domains add --app app_1 api.example.com
 zerct domains verify --app app_1 api.example.com
+zerct billing checkout --json
 zerct billing portal
+zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+zerct support list --json
+zerct support resolve ticket_0123456789abcdef0123 --json
 ```
 
 Agent repair loop:

@@ -119,7 +119,10 @@ Usage:
   zerct domains add --app <app> <domain> [--api <url>] [--json]
   zerct domains verify --app <app> <domain> [--api <url>] [--json]
   zerct domains delete --app <app> <domain> [--api <url>] [--json]
-  zerct billing [portal] [--api <url>] [--json]
+  zerct billing [checkout|portal] [reason] [--api <url>] [--json]
+  zerct support list [--limit <n>] [--api <url>] [--json]
+  zerct support create "Subject" "Details" [--app <app>] [--severity low|normal|urgent] [--api <url>] [--json]
+  zerct support resolve <ticket_id> [--api <url>] [--json]
 
 Agent contract:
   - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
@@ -127,6 +130,9 @@ Agent contract:
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a repo root with nested zerct.toml files to deploy the whole workspace in one command.
   - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.
+  - When a plan limit blocks work, run zerct billing checkout --json and show the returned URL to the human.
+  - Create support tickets only with command output, app id, build id, deploy id, and the first actionable log line.
+  - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Keep direct unsafe out of Rust source.
 `
 

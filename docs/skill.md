@@ -88,9 +88,27 @@ before static frontends. `--database` applies to Rust backends only.
 Use a persistent CLI:
 
 ```sh
-brew tap Zerct/tap
+brew tap Zerct/zerct https://github.com/Zerct/zerct
 brew install zerct
 zerct deploy
+```
+
+Create a Stripe Checkout URL when a plan limit blocks work:
+
+```sh
+npx @zerct/zerct billing checkout "Plan limit reached" --json
+```
+
+Create a support ticket after collecting command output and ids:
+
+```sh
+npx @zerct/zerct support create "Deploy failed" "Command, app id, build id, deploy id, and first actionable log line." --json
+```
+
+Resolve a support ticket after the agent fixes the issue:
+
+```sh
+npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
 ```
 
 ## Agent behavior
@@ -106,3 +124,9 @@ npx @zerct/zerct logs --build <build_id> --json
 ```
 
 Fix the first actionable log error, rerun doctor, then redeploy.
+
+If the remaining blocker is a Zerct platform issue, create a support ticket
+with the failing command, app id, build id, deploy id, first actionable log
+line, and what the agent already tried. Do not open duplicate tickets before
+running `npx @zerct/zerct support list --json`. Resolve the ticket after the
+issue is fixed.

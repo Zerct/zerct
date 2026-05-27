@@ -65,6 +65,10 @@ npx @zerct/zerct logs --build <build_id> --json
 npx @zerct/zerct logs --app <app> --json
 npx @zerct/zerct env list --app <app> --json
 npx @zerct/zerct domains list --app <app> --json
+npx @zerct/zerct billing checkout --json
+npx @zerct/zerct support list --json
+npx @zerct/zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+npx @zerct/zerct support resolve <ticket_id> --json
 ```
 
 Use `GET /v1/status` only when Zerct itself appears unavailable. If the API is
@@ -73,3 +77,10 @@ checks.
 
 Never print or commit secrets. Put secrets in Zerct env vars with
 `npx @zerct/zerct env set --app <app> KEY=value`.
+
+When a free-tier limit blocks work, run
+`npx @zerct/zerct billing checkout --json` and show the returned URL to the
+human. When Zerct support is needed, create a ticket only after collecting the
+failing command, app id, build id, deploy id, first actionable log line, and
+what the agent already tried. Resolve the ticket when the issue is fixed so
+future agents do not duplicate the same support work.

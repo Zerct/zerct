@@ -70,18 +70,15 @@ deploy with a committed npm lockfile and npm-based build commands.
 Use Homebrew for a persistent developer CLI:
 
 ```sh
-brew tap Zerct/tap
+brew tap Zerct/zerct https://github.com/Zerct/zerct
 brew install zerct
 zerct deploy
 ```
 
-The target npm package is the unscoped package `zerct`. Until npm approves that
-name, `@zerct/zerct` is the public npm package.
-
-- npm: `@zerct/zerct`, pending `zerct`
+- npm: `@zerct/zerct`
 - PyPI: `zerct`
 - crates.io: `zerct`
-- Homebrew: `Zerct/tap/zerct`
+- Homebrew: `Zerct/zerct/zerct`
 
 Agent prompt:
 
@@ -91,7 +88,11 @@ Run `npx @zerct/zerct doctor --json`. Fix the first failed check by following
 `agent_instruction`, then rerun doctor. Deploy with
 `npx @zerct/zerct deploy --wait --json`. If the build fails, read
 `npx @zerct/zerct logs --build <build_id> --json`, fix the first actionable
-error, rerun doctor, and redeploy.
+error, rerun doctor, and redeploy. If a plan limit blocks work, run
+`npx @zerct/zerct billing checkout --json` and show the returned URL to the
+human. If Zerct support is needed, run `npx @zerct/zerct support create` with
+the failing command, app id, build id, deploy id, and first actionable log line.
+Resolve the support ticket after the issue is fixed.
 ```
 
 ## Repository
@@ -103,12 +104,12 @@ error, rerun doctor, and redeploy.
 - `examples/`: deployable examples.
 - `docs/`: Mintlify documentation.
 
-Homebrew formulae live in the separate public `Zerct/homebrew-tap` repository.
+The Homebrew formula lives in `Formula/zerct.rb` in this main public repo.
 
 `packages/zerct` is the CLI behavior source of truth. PyPI and Cargo CLIs must
 expose the same agent-facing commands, recovery text, login behavior, deploy
-flow, logs, env, domains, usage, and billing operations so deploy UX does not
-drift.
+flow, logs, env, domains, usage, billing, and support operations so deploy UX
+does not drift.
 
 ## Example
 
@@ -139,7 +140,11 @@ npx @zerct/zerct logs --build job_1 --json
 npx @zerct/zerct env list --app app_1
 npx @zerct/zerct domains list --app app_1
 npx @zerct/zerct domains verify --app app_1 api.example.com
+npx @zerct/zerct billing checkout --json
 npx @zerct/zerct billing portal
+npx @zerct/zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+npx @zerct/zerct support list --json
+npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
 ```
 
 The same commands are available through PyPI and Cargo after installation:

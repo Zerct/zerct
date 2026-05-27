@@ -1,6 +1,8 @@
 import { agentError } from './errors.ts'
-import { apiRequest, jsonObjectField, jsonObjectOrEmpty, numberField } from './api.ts'
+import { paymentRequiredAgentError } from './agent-error-enrichment.ts'
+import { apiRequest } from './api.ts'
 import { appsResponseFromJson } from './api-models.ts'
+import { jsonObjectField, jsonObjectOrEmpty, numberField } from './json.ts'
 import type { AppSummary, CliOptions, DeployPlanProject, DeployProjectInfo } from './types.ts'
 
 async function createDeployPlan(projects: DeployProjectInfo[], cli: CliOptions, token: string): Promise<DeployPlanProject[]> {
@@ -36,20 +38,20 @@ async function preflightDeployLimits(plan: DeployPlanProject[], cli: CliOptions,
   const databaseLimit = numberField(limits, 'managedDatabases')
 
   if (requested.projects > 0 && usedProjects + requested.projects > projectLimit) {
-    throw agentError(
-      'payment_required',
+    throw await paymentRequiredAgentError(
+      cli,
+      token,
       `Project limit reached: ${usedProjects}/${projectLimit} projects are already used.`,
-      'Redeploy an existing app by reusing its `name` in zerct.toml, or run `npx @zerct/zerct billing` to open Stripe Checkout before creating another project.',
-      cli.json
+      'Redeploy an existing app by reusing its `name` in zerct.toml, or open the returned Stripe Checkout URL before creating another project.'
     )
   }
 
   if (requested.databases > 0 && usedDatabases + requested.databases > databaseLimit) {
-    throw agentError(
-      'payment_required',
+    throw await paymentRequiredAgentError(
+      cli,
+      token,
       `Managed Postgres limit reached: ${usedDatabases}/${databaseLimit} databases are already used.`,
-      'Redeploy an app that already has managed Postgres, deploy without `--database`, or run `npx @zerct/zerct billing` to open Stripe Checkout.',
-      cli.json
+      'Redeploy an app that already has managed Postgres, deploy without `--database`, or open the returned Stripe Checkout URL.'
     )
   }
 }

@@ -1,5 +1,7 @@
 import { ZerctError, agentError } from './errors.ts'
-import type { AgentErrorPayload, ApiMethod, CliOptions, JsonObject, JsonValue } from './types.ts'
+import { enrichAgentErrorPayload } from './agent-error-enrichment.ts'
+import { isJsonObject, parseJson } from './json.ts'
+import type { AgentErrorPayload, ApiMethod, CliOptions, JsonValue } from './types.ts'
 
 function requireApp(cli: CliOptions): string {
   if (!cli.app) {
@@ -54,25 +56,11 @@ async function apiRequest(
       docs_url: null,
       checkout_url: null
     }
+    await enrichAgentErrorPayload({ cli, route, token }, payload)
     throw new ZerctError(payload, cli.json, response.status >= 500 ? 2 : 1)
   }
 
   return data
-}
-
-function parseJson(text: string): JsonValue | null {
-  if (!text.trim()) {
-    return null
-  }
-  try {
-    return JSON.parse(text)
-  } catch {
-    return null
-  }
-}
-
-function isJsonObject(value: JsonValue | null): value is JsonObject {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
 }
 
 function isAgentErrorPayload(value: JsonValue | null): value is AgentErrorPayload {
@@ -82,43 +70,8 @@ function isAgentErrorPayload(value: JsonValue | null): value is AgentErrorPayloa
     && (typeof value['agent_instruction'] === 'string' || value['agent_instruction'] === null)
 }
 
-function jsonObjectOrEmpty(value: JsonValue | null): JsonObject {
-  return isJsonObject(value) ? value : {}
-}
-
-function jsonObjectField(source: JsonObject, key: string): JsonObject {
-  return jsonObjectOrEmpty(source[key] ?? null)
-}
-
-function optionalJsonObjectField(source: JsonObject, key: string): JsonObject | null {
-  const value = source[key] ?? null
-  return isJsonObject(value) ? value : null
-}
-
-function jsonArrayField(source: JsonObject, key: string): JsonValue[] {
-  const value = source[key]
-  return Array.isArray(value) ? value : []
-}
-
-function stringField(source: JsonObject, key: string): string {
-  const value = source[key]
-  return typeof value === 'string' ? value : ''
-}
-
-function numberField(source: JsonObject, key: string): number {
-  const value = source[key]
-  return typeof value === 'number' ? value : Number(value ?? 0)
-}
-
 export {
   requireApp,
   pageQuery,
-  apiRequest,
-  isJsonObject,
-  jsonObjectOrEmpty,
-  jsonObjectField,
-  optionalJsonObjectField,
-  jsonArrayField,
-  stringField,
-  numberField
+  apiRequest
 }

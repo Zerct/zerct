@@ -5,7 +5,7 @@ import type { CliOptions } from './types.ts'
 
 type FlagHandler = (cli: CliOptions, argv: readonly string[], index: number) => number
 type BooleanCliField = 'database' | 'help' | 'json' | 'version' | 'wait'
-type StringCliField = 'apiUrl' | 'app' | 'build' | 'cursor' | 'deploy' | 'limit' | 'template' | 'token'
+type StringCliField = 'apiUrl' | 'app' | 'build' | 'cursor' | 'deploy' | 'limit' | 'severity' | 'template' | 'token'
 type NumberCliField = 'port' | 'waitTimeoutSeconds'
 
 const FLAG_HANDLERS = new Map<string, FlagHandler>([
@@ -24,6 +24,7 @@ const FLAG_HANDLERS = new Map<string, FlagHandler>([
   ['--deploy', stringOption('--deploy', 'deploy')],
   ['--limit', stringOption('--limit', 'limit')],
   ['--cursor', stringOption('--cursor', 'cursor')],
+  ['--severity', stringOption('--severity', 'severity')],
   ['--token', stringOption('--token', 'token')],
   ['--template', stringOption('--template', 'template')],
   ['--port', positiveIntegerOption('--port', 'port')]
@@ -41,6 +42,7 @@ function parseArgs(argv: string[]): CliOptions {
     cursor: '',
     token: '',
     template: '',
+    severity: '',
     port: 0,
     waitTimeoutSeconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
     json: false,

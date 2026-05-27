@@ -1,0 +1,74 @@
+---
+title: "Support"
+description: "Agent-ready support tickets."
+---
+
+Zerct support is API and CLI first. Agents should create tickets only after
+they have collected the exact command, app id, build id, deploy id, and first
+actionable log line.
+
+## Create a ticket
+
+```sh
+npx @zerct/zerct support create \
+  "Deploy failed" \
+  "Command: npx @zerct/zerct deploy --wait --json. App: app_1. Build: job_1. First log error: cargo check failed in src/main.rs." \
+  --app app_1 \
+  --severity normal \
+  --json
+```
+
+The API stores the ticket on the authenticated account and returns
+`agent_instruction`, rate-limit state, and a next command.
+
+## List tickets
+
+```sh
+npx @zerct/zerct support list --json
+```
+
+Agents should list tickets before creating another one so repeated runs do not
+duplicate the same issue.
+
+## Resolve tickets
+
+When the agent fixes the issue or no longer needs Zerct support, resolve the
+ticket from the CLI:
+
+```sh
+npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
+```
+
+## API
+
+```http
+GET /v1/support/tickets
+POST /v1/support/tickets
+POST /v1/support/tickets/{ticket_id}/resolve
+```
+
+The create body is:
+
+```json
+{
+  "subject": "Deploy failed",
+  "details": "Command, ids, first log line, and what the agent already tried.",
+  "app_id": "app_1",
+  "severity": "normal"
+}
+```
+
+Severity is `low`, `normal`, or `urgent`. Ticket creation is rate-limited per
+account.
+
+## When payment is the fix
+
+When a free-tier plan limit blocks work, agents should create a hosted Stripe
+Checkout URL instead of opening the dashboard:
+
+```sh
+npx @zerct/zerct billing checkout "Project limit reached" --json
+```
+
+Show the returned `checkout.url` to the human. Do not collect card details in
+the app, CLI, or agent.
