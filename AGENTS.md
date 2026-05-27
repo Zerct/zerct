@@ -74,8 +74,11 @@ tighten these rules.
    `cargo check`, and locked all-target, all-feature Clippy with
    `-D warnings`; any custom static frontend `[build].check` must install
    dependencies and run both typechecking and linting. Static frontend
-   browser source must be TypeScript under `src`, `app`, `pages`, `routes`, or
-   `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser source.
+   `typecheck` scripts must run `tsgo --noEmit`, and `lint` scripts must run
+   native linting such as `oxlint`, `biome check`, or `deno lint`. Static
+   frontend browser source must be TypeScript under `src`, `app`, `pages`,
+   `routes`, or `components`; reject `.js`, `.jsx`, `.mjs`, and `.cjs` browser
+   source.
    Running deploy from a repo root with nested `zerct.toml` files must deploy
    the workspace in one command, with Rust backends before static frontends.
    Template creation, project-kind detection, and local preview behavior must
@@ -87,8 +90,8 @@ tighten these rules.
     to new examples.
 11. Static frontend SDK behavior must be lockfile-aware: use Bun defaults when
     `bun.lock` or `bun.lockb` exists, otherwise keep npm compatibility for
-    existing projects. The doctor command must reject JavaScript-based
-    frontend lint scripts before upload.
+    existing projects. The doctor command must reject weak typecheck scripts
+    and JavaScript-based or fake frontend lint scripts before upload.
 12. Managed Postgres guidance must be connection-efficient. Rust examples,
     docs, and skills must use a small process-wide pool, avoid
     connect-per-request code, and stay compatible with PgBouncer transaction
@@ -133,9 +136,9 @@ tighten these rules.
    `cargo clippy --locked --all-targets --all-features -- -D warnings`, with
    no secrets.
 3. Static frontend examples must include `zerct.toml` with
-   `kind = "static_frontend"`, `package.json`, `typecheck` and `lint` scripts,
-   TypeScript browser source, a package lockfile, strict `[build].check`, and
-   no secrets.
+   `kind = "static_frontend"`, `package.json`, `tsgo --noEmit` typecheck,
+   native linting, TypeScript browser source, a package lockfile, strict
+   `[build].check`, and no secrets.
 4. New TanStack or Vite frontend examples should prefer `tsgo --noEmit` for
    `typecheck` and source-scoped `oxlint` for `lint`. Avoid JavaScript-based
    linters unless no native equivalent exists for a required rule.

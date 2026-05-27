@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.11";
+const VERSION: &str = "0.1.12";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -524,7 +524,7 @@ fn write_frontend_template(
   "devDependencies": {{
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "^7.0.0-dev.20251126.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260526.1",
     "@vitejs/plugin-react": "^5.1.1",
     "oxlint": "^1.30.0",
     "typescript": "^5.9.3",
@@ -2479,14 +2479,28 @@ fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> Vec<Check> {
         })
         .collect::<Vec<_>>();
     let lint_script = package_script_value(&manifest, "lint").unwrap_or_default();
-    let native_lint = lint_script.is_empty() || !uses_javascript_linter(&lint_script);
+    let typecheck_script = package_script_value(&manifest, "typecheck").unwrap_or_default();
+    let strict_typecheck = uses_strict_frontend_typechecker(&typecheck_script);
+    checks.push(Check {
+        name: "strict frontend typecheck".to_owned(),
+        ok: strict_typecheck,
+        message: if strict_typecheck {
+            "accepted".to_owned()
+        } else {
+            "tsgo --noEmit missing".to_owned()
+        },
+        agent_instruction: "Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.".to_owned(),
+    });
+
+    let native_lint =
+        !uses_javascript_linter(&lint_script) && uses_native_frontend_linter(&lint_script);
     checks.push(Check {
         name: "native frontend lint".to_owned(),
         ok: native_lint,
         message: if native_lint {
             "accepted".to_owned()
         } else {
-            "JavaScript linter found".to_owned()
+            "native linter missing".to_owned()
         },
         agent_instruction: "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.".to_owned(),
     });
@@ -2535,8 +2549,33 @@ fn uses_javascript_linter(command: &str) -> bool {
     let tokens = command_tokens(command);
     tokens.iter().enumerate().any(|(index, token)| {
         let command_name = command_name(token);
-        matches!(command_name, "eslint" | "eslint_d" | "standard" | "xo")
-            || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
+        matches!(
+            command_name,
+            "eslint" | "eslint_d" | "jscs" | "jshint" | "standard" | "xo"
+        ) || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
+    })
+}
+
+fn uses_strict_frontend_typechecker(command: &str) -> bool {
+    let tokens = command_tokens(command);
+    tokens.iter().enumerate().any(|(index, token)| {
+        let command_name = command_name(token);
+        (command_name == "tsgo" && tokens.contains(&"--noEmit"))
+            || (command_name == "deno"
+                && tokens.get(index + 1).is_some_and(|next| *next == "check"))
+    })
+}
+
+fn uses_native_frontend_linter(command: &str) -> bool {
+    let tokens = command_tokens(command);
+    tokens.iter().enumerate().any(|(index, token)| {
+        let command_name = command_name(token);
+        command_name == "oxlint"
+            || (command_name == "biome"
+                && tokens
+                    .get(index + 1)
+                    .is_some_and(|next| matches!(*next, "check" | "lint")))
+            || (command_name == "deno" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
     })
 }
 

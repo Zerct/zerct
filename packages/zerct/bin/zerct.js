@@ -5,7 +5,7 @@ import { createServer } from 'node:http'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.17'
+const VERSION = '0.1.18'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -377,7 +377,7 @@ function writeFrontendTemplate(projectDir, name, apiBaseUrl) {
   "devDependencies": {
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "^7.0.0-dev.20251126.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260526.1",
     "@vitejs/plugin-react": "^5.1.1",
     "oxlint": "^1.30.0",
     "typescript": "^5.9.3",
@@ -1575,12 +1575,21 @@ function frontendScriptChecks(projectDir, runScripts) {
     message: missing(script) ? 'missing' : 'found',
     agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
   }))
+  const typecheckScript = manifest?.scripts?.typecheck || ''
+  const strictTypecheck = usesStrictFrontendTypechecker(typecheckScript)
+  checks.push({
+    name: 'strict frontend typecheck',
+    ok: strictTypecheck,
+    message: strictTypecheck ? 'accepted' : 'tsgo --noEmit missing',
+    agent_instruction: 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.'
+  })
+
   const lintScript = manifest?.scripts?.lint || ''
-  const nativeLint = !lintScript || !usesJavascriptLinter(lintScript)
+  const nativeLint = !usesJavascriptLinter(lintScript) && usesNativeFrontendLinter(lintScript)
   checks.push({
     name: 'native frontend lint',
     ok: nativeLint,
-    message: nativeLint ? 'accepted' : 'JavaScript linter found',
+    message: nativeLint ? 'accepted' : 'native linter missing',
     agent_instruction: 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.'
   })
 
@@ -1650,8 +1659,27 @@ function usesJavascriptLinter(command) {
   const tokens = commandTokens(command)
   return tokens.some((token, index) => {
     const commandName = commandNameFromToken(token)
-    return ['eslint', 'eslint_d', 'standard', 'xo'].includes(commandName)
+    return ['eslint', 'eslint_d', 'jscs', 'jshint', 'standard', 'xo'].includes(commandName)
       || (commandName === 'next' && tokens[index + 1] === 'lint')
+  })
+}
+
+function usesStrictFrontendTypechecker(command) {
+  const tokens = commandTokens(command)
+  return tokens.some((token, index) => {
+    const commandName = commandNameFromToken(token)
+    return (commandName === 'tsgo' && tokens.includes('--noEmit'))
+      || (commandName === 'deno' && tokens[index + 1] === 'check')
+  })
+}
+
+function usesNativeFrontendLinter(command) {
+  const tokens = commandTokens(command)
+  return tokens.some((token, index) => {
+    const commandName = commandNameFromToken(token)
+    return commandName === 'oxlint'
+      || (commandName === 'biome' && ['check', 'lint'].includes(tokens[index + 1]))
+      || (commandName === 'deno' && tokens[index + 1] === 'lint')
   })
 }
 
