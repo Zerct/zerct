@@ -4,6 +4,20 @@ import path from "node:path";
 
 const proseExtensions = new Set([".md", ".mdx", ".txt"]);
 const ignoredPaths = new Set(["docs/robots.txt"]);
+const ignoredBinaryExtensions = new Set([
+  ".avif",
+  ".gif",
+  ".ico",
+  ".jpeg",
+  ".jpg",
+  ".otf",
+  ".pdf",
+  ".png",
+  ".ttf",
+  ".webp",
+  ".woff",
+  ".woff2"
+]);
 
 function gitFiles() {
   const output = execFileSync(
@@ -76,12 +90,40 @@ function findAll(line, needle) {
 }
 
 const findings = [];
-const files = gitFiles().filter((file) => {
-  return proseExtensions.has(path.extname(file)) && !ignoredPaths.has(file);
-});
+const files = gitFiles().filter((file) => !ignoredPaths.has(file));
+const textFiles = [];
+const emDash = String.fromCodePoint(0x2014);
 
 for (const file of files) {
-  const lines = readFileSync(file, "utf8").split(/\r?\n/);
+  if (ignoredBinaryExtensions.has(path.extname(file))) {
+    continue;
+  }
+
+  const contents = readFileSync(file);
+  if (contents.includes(0)) {
+    continue;
+  }
+
+  const text = contents.toString("utf8");
+  textFiles.push({ file, text });
+
+  const lines = text.split(/\r?\n/);
+  lines.forEach((line, lineIndex) => {
+    for (const column of findAll(line, emDash)) {
+      findings.push({
+        column,
+        file,
+        line: lineIndex + 1,
+        message: "em dash is not allowed in any tracked text file"
+      });
+    }
+  });
+}
+
+const proseFiles = textFiles.filter(({ file }) => proseExtensions.has(path.extname(file)));
+
+for (const { file, text } of proseFiles) {
+  const lines = text.split(/\r?\n/);
   let inFence = false;
   let fenceMarker = "";
 
@@ -100,16 +142,6 @@ for (const file of files) {
     }
 
     const searchable = searchableLine(line);
-
-    for (const column of findAll(searchable, "—")) {
-      findings.push({
-        column,
-        file,
-        line: lineIndex + 1,
-        message: "em dash is not allowed in prose"
-      });
-    }
-
     for (const column of findAll(searchable, "--")) {
       findings.push({
         column,
@@ -122,8 +154,9 @@ for (const file of files) {
 }
 
 if (findings.length > 0) {
-  console.error("Prose style check failed.");
-  console.error("Do not use em dashes or double hyphen prose outside inline code or fenced code blocks.");
+  console.error("Style check failed.");
+  console.error("Do not use em dashes in tracked text files.");
+  console.error("Do not use double hyphen prose outside inline code or fenced code blocks.");
 
   for (const finding of findings) {
     console.error(`${finding.file}:${finding.line}:${finding.column}: ${finding.message}`);
@@ -132,4 +165,5 @@ if (findings.length > 0) {
   process.exit(1);
 }
 
-console.log(`Checked ${files.length} prose files for em dashes and double hyphen prose.`);
+console.log(`Checked ${textFiles.length} text files for em dashes.`);
+console.log(`Checked ${proseFiles.length} prose files for double hyphen prose.`);

@@ -11,8 +11,9 @@ tighten these rules.
 1. Do not commit secrets, tokens, OAuth credentials, Stripe keys, customer data,
    private URLs, SSH material, cloud credentials, database dumps, or logs that
    contain sensitive data.
-2. Do not use em dashes or double hyphen prose in Markdown, MDX, or text files.
-   Wrap CLI flags such as `--json` in inline code or fenced code.
+2. Do not use em dashes in any tracked text file. Do not use double hyphen
+   prose in Markdown, MDX, or text files. Wrap CLI flags such as `--json` in
+   inline code or fenced code.
 3. Do not add general lint, test, or CI workflows. GitHub Actions are allowed
    only for package publishing and Mintlify docs validation/score.
 4. Every workflow must run on a Blacksmith runner. Use
