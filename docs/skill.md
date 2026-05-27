@@ -45,7 +45,7 @@ For static frontends, require:
 
 For new TanStack or Vite frontends, prefer `tsgo --noEmit` for `typecheck` and
 `oxlint src vite.config.ts --deny-warnings` for `lint`, installed with Bun and
-committed with `bun.lock`. Avoid JavaScript-based linters. Keep the generic
+committed with `bun.lock`. Avoid JavaScript-based lint or format tooling. Keep the generic
 Zerct contract script-based so existing strict npm projects can still deploy
 with npm commands.
 

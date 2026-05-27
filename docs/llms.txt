@@ -47,7 +47,7 @@ Static frontend contract:
 - `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`.
 - `[build].check` installs dependencies and runs package scripts for typecheck
   and lint.
-- Weak typecheck, fake lint, and JavaScript-based lint scripts are rejected for
+- Weak typecheck, fake lint, and JavaScript-based lint/format scripts are rejected for
   deploys.
 
 Useful commands:

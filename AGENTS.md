@@ -24,7 +24,9 @@ tighten these rules.
 6. Before finishing, run `./scripts/check-all.sh`, confirm the working tree is
    clean except intentional changes, and state whether publishing happened.
    `check-all` must keep locked Cargo checks and Clippy with `-D warnings` for
-   the Cargo CLI and examples.
+   the Cargo CLI and examples. The Cargo CLI must keep extra deny lints for
+   debug macros, TODOs, unimplemented code, forgotten memory, large includes,
+   path overwrite pushes, panics in Result-returning functions, and unwraps.
 
 ## Change Discipline
 
@@ -86,12 +88,12 @@ tighten these rules.
 10. Prefer native frontend tooling. New static frontend docs, examples, skills,
     and agent guidance should use Bun with committed `bun.lock`, Go-based
     `tsgo` for TypeScript checking, and Rust-based linters such as `oxlint`,
-    `biome`, or `deno lint`. Do not add JavaScript-based linters such as ESLint
-    to new examples.
+    `biome`, or `deno lint`. Do not add JavaScript-based lint or format tools
+    such as ESLint or Prettier to new examples.
 11. Static frontend SDK behavior must be lockfile-aware: use Bun defaults when
     `bun.lock` or `bun.lockb` exists, otherwise keep npm compatibility for
     existing projects. The doctor command must reject weak typecheck scripts
-    and JavaScript-based or fake frontend lint scripts before upload.
+    and JavaScript-based or fake frontend lint/format scripts before upload.
     Keep frontend policy constants centralized inside each CLI implementation
     and update npm, PyPI, and Cargo together.
 12. Managed Postgres guidance must be connection-efficient. Rust examples,

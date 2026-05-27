@@ -12,7 +12,7 @@ Use when a user wants to deploy a Rust backend or static frontend to Zerct.
 1. Ensure the project has `zerct.toml`.
 2. For Rust backends, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint, `cargo fmt --all --check`, and the strict locked Cargo checks.
 3. For static frontends, set `kind = "static_frontend"` and ensure `package.json`, TypeScript browser source, `tsgo --noEmit` typecheck, native linting, a lockfile, and a strict frontend check command.
-4. Prefer Bun with `bun.lock`, `tsgo --noEmit`, and source-scoped `oxlint` for new frontend projects. Avoid JavaScript-based linters.
+4. Prefer Bun with `bun.lock`, `tsgo --noEmit`, and source-scoped `oxlint` for new frontend projects. Avoid JavaScript-based lint or format tooling.
 5. For a new full-stack project, run `npx @zerct/zerct init my-app --template fullstack-rust-tanstack`.
 6. Run `npx @zerct/zerct doctor --json`.
 7. Run `npx @zerct/zerct preview api` and `npx @zerct/zerct preview web` when local tools are available.
