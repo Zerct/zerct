@@ -32,7 +32,7 @@ const requiredDevelopmentDependencies = [
 
 const requiredPackageScripts = {
   check: 'npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry',
-  'check:deps': 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures --omit=dev',
+  'check:deps': 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures --omit=dev --json',
   'check:policy': 'node ../../scripts/check-npm-sdk-package.mjs',
   lint: 'oxlint src -D correctness -D suspicious -D perf -A no-await-in-loop --deny-warnings --type-aware --type-check --tsconfig tsconfig.json --promise-plugin --node-plugin --report-unused-disable-directives',
   'lint:package': 'publint --strict --pack npm',
