@@ -1,0 +1,48 @@
+---
+title: "Status"
+description: "How humans, SDKs, and agents should check Zerct availability."
+---
+
+Use status endpoints only to understand Zerct availability. Use logs and deploy
+responses to debug your project.
+
+## Endpoints
+
+```sh
+curl https://api.zerct.com/health
+curl https://api.zerct.com/v1/status
+```
+
+`/health` is the simple human-friendly health alias. `/healthz` remains the
+infrastructure probe for load balancers and deploy scripts.
+
+`/v1/status` is the structured endpoint for SDKs and agents:
+
+```json
+{
+  "ok": true,
+  "service": "zerct-api",
+  "api_version": "v1",
+  "checks": [
+    {
+      "name": "control_plane_database",
+      "ok": true,
+      "message": "reachable"
+    }
+  ],
+  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
+  "docs_url": "https://docs.zerct.com/status"
+}
+```
+
+If `ok` is true, continue with `GET /v1/capabilities` or the CLI command you
+were running. If `ok` is false, retry later before changing project code.
+
+## Agent Rule
+
+Do not use status as a project debugger. After deploy failures, inspect build
+logs instead:
+
+```sh
+npx @zerct/zerct logs --build <build_id> --json
+```

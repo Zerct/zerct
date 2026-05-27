@@ -25,6 +25,7 @@
               "quickstart",
               "templates",
               "agents",
+              "status",
               "deploy"
             ]
           },
