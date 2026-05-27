@@ -47,13 +47,13 @@ jobs:
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
-      - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
-        run: node scripts/check-prose-style.mjs
-      - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
-        run: node --check bin/zerct.js
+      - name: Install package dependencies
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        run: npm ci
         working-directory: packages/zerct
-      - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
-        run: npm pack --dry-run
+      - name: Check package
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        run: npm run check
         working-directory: packages/zerct
       - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
         run: npm publish --access public

@@ -14,8 +14,8 @@ function match(source, pattern, label) {
 }
 
 const npmPackage = JSON.parse(readFileSync('packages/zerct/package.json', 'utf8'))
-const npmConstants = readFileSync('packages/zerct/bin/internal/constants.js', 'utf8')
-const npmCliVersion = match(npmConstants, /export const VERSION = '([^']+)'/u, 'npm CLI version')
+const npmConstants = readFileSync('packages/zerct/src/internal/constants.ts', 'utf8')
+const npmCliVersion = match(npmConstants, /export const VERSION(?:: string)? = '([^']+)'/u, 'npm CLI version')
 if (npmPackage.version !== npmCliVersion) {
   fail(`npm package.json ${npmPackage.version} does not match CLI ${npmCliVersion}`)
 }

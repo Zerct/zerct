@@ -1,35 +1,36 @@
 import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
-import { DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND, FRONTEND_INSTALL_COMMANDS, FRONTEND_JAVASCRIPT_EXTENSIONS, FRONTEND_PACKAGE_MANAGERS, FRONTEND_SOURCE_ROOTS, JAVASCRIPT_LINTERS } from './constants.js'
-import { readPackageJson, walkProjectFiles } from './project.js'
+import { DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND, FRONTEND_INSTALL_COMMANDS, FRONTEND_JAVASCRIPT_EXTENSIONS, FRONTEND_PACKAGE_MANAGERS, FRONTEND_SOURCE_ROOTS, JAVASCRIPT_LINTERS } from './constants.ts'
+import { readPackageJson, walkProjectFiles } from './project.ts'
+import type { DoctorCheck, FrontendSourceReport, PackageManifest } from './types.ts'
 
-function frontendLockfileExists(projectDir) {
+function frontendLockfileExists(projectDir: string): boolean {
   return ['package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb']
     .some((file) => existsSync(path.join(projectDir, file)))
 }
 
-function frontendPackageManager(projectDir) {
+function frontendPackageManager(projectDir: string): 'bun' | 'npm' {
   return existsSync(path.join(projectDir, 'bun.lock')) || existsSync(path.join(projectDir, 'bun.lockb'))
     ? 'bun'
     : 'npm'
 }
 
-function frontendCheckCommand(projectDir) {
+function frontendCheckCommand(projectDir: string): string {
   return frontendPackageManager(projectDir) === 'bun'
     ? DEFAULT_BUN_FRONTEND_CHECK_COMMAND
     : DEFAULT_NPM_FRONTEND_CHECK_COMMAND
 }
 
-function frontendBuildCommand(projectDir) {
+function frontendBuildCommand(projectDir: string): string {
   return frontendPackageManager(projectDir) === 'bun'
     ? 'bun run build'
     : 'npm run build'
 }
 
-function frontendScriptChecks(projectDir, runScripts) {
+function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCheck[] {
   const manifest = readPackageJson(projectDir)
-  const missing = (script) => packageScriptValue(manifest, script) === ''
+  const missing = (script: string): boolean => packageScriptValue(manifest, script) === ''
   const checks = ['typecheck', 'lint'].map((script) => ({
     name: `package script ${script}`,
     ok: !missing(script),
@@ -62,7 +63,7 @@ function frontendScriptChecks(projectDir, runScripts) {
   return checks
 }
 
-function frontendSourceChecks(projectDir) {
+function frontendSourceChecks(projectDir: string): DoctorCheck[] {
   const report = frontendSourceReport(projectDir)
   return [
     {
@@ -80,9 +81,9 @@ function frontendSourceChecks(projectDir) {
   ]
 }
 
-function frontendSourceReport(projectDir) {
-  const report = { typescript: [], javascript: [] }
-  walkProjectFiles(projectDir, (file, relative) => {
+function frontendSourceReport(projectDir: string): FrontendSourceReport {
+  const report: FrontendSourceReport = { typescript: [], javascript: [] }
+  walkProjectFiles(projectDir, (_file, relative) => {
     if (!isFrontendSourcePath(relative)) {
       return
     }
@@ -95,25 +96,25 @@ function frontendSourceReport(projectDir) {
   return report
 }
 
-function isFrontendSourcePath(relative) {
-  const [root] = relative.split('/')
+function isFrontendSourcePath(relative: string): boolean {
+  const [root = ''] = relative.split('/')
   return FRONTEND_SOURCE_ROOTS.has(root)
 }
 
-function isFrontendTypescriptSource(relative) {
+function isFrontendTypescriptSource(relative: string): boolean {
   return !relative.endsWith('.d.ts') && (relative.endsWith('.ts') || relative.endsWith('.tsx'))
 }
 
-function isFrontendJavascriptSource(relative) {
+function isFrontendJavascriptSource(relative: string): boolean {
   return FRONTEND_JAVASCRIPT_EXTENSIONS.some((extension) => relative.endsWith(extension))
 }
 
-function packageScriptValue(manifest, script) {
+function packageScriptValue(manifest: PackageManifest | null, script: string): string {
   const value = manifest?.scripts?.[script]
   return typeof value === 'string' ? value.trim() : ''
 }
 
-function usesJavascriptLinter(command) {
+function usesJavascriptLinter(command: string): boolean {
   const tokens = commandTokens(command)
   return tokens.some((token, index) => {
     const commandName = commandNameFromToken(token)
@@ -122,7 +123,7 @@ function usesJavascriptLinter(command) {
   })
 }
 
-function usesStrictFrontendTypechecker(command) {
+function usesStrictFrontendTypechecker(command: string): boolean {
   const tokens = commandTokens(command)
   return tokens.some((token, index) => {
     const commandName = commandNameFromToken(token)
@@ -131,17 +132,17 @@ function usesStrictFrontendTypechecker(command) {
   })
 }
 
-function usesNativeFrontendLinter(command) {
+function usesNativeFrontendLinter(command: string): boolean {
   const tokens = commandTokens(command)
   return tokens.some((token, index) => {
     const commandName = commandNameFromToken(token)
     return commandName === 'oxlint'
-      || (commandName === 'biome' && ['check', 'lint'].includes(tokens[index + 1]))
+      || (commandName === 'biome' && ['check', 'lint'].includes(tokens[index + 1] ?? ''))
       || (commandName === 'deno' && tokens[index + 1] === 'lint')
   })
 }
 
-function commandTokens(command) {
+function commandTokens(command: string): string[] {
   return command
     .replace(/[&|;()]/gu, ' ')
     .split(/\s+/u)
@@ -149,24 +150,24 @@ function commandTokens(command) {
     .filter(Boolean)
 }
 
-function commandNameFromToken(token) {
-  return token.split('/').pop()
+function commandNameFromToken(token: string): string {
+  return token.split('/').pop() ?? ''
 }
 
-function hasFrontendInstallCommand(tokens) {
+function hasFrontendInstallCommand(tokens: string[]): boolean {
   return tokens.some((token, index) => FRONTEND_INSTALL_COMMANDS.has(`${commandNameFromToken(token)} ${tokens[index + 1] || ''}`))
 }
 
-function hasFrontendScriptRun(tokens, script) {
+function hasFrontendScriptRun(tokens: string[], script: string): boolean {
   return tokens.some((token, index) => {
     if (!FRONTEND_PACKAGE_MANAGERS.has(commandNameFromToken(token)) || tokens[index + 1] !== 'run') {
       return false
     }
-    return tokens[index + 2] === script || (tokens[index + 2] || '').startsWith('-') && tokens[index + 3] === script
+    return tokens[index + 2] === script || ((tokens[index + 2] ?? '').startsWith('-') && tokens[index + 3] === script)
   })
 }
 
-function packageScriptCheck(projectDir, script) {
+function packageScriptCheck(projectDir: string, script: string): DoctorCheck {
   const manager = frontendPackageManager(projectDir)
   const args = manager === 'bun' ? ['run', script] : ['run', '--silent', script]
   const result = spawnSync(manager, args, {

@@ -40,7 +40,7 @@ def _delegate_command() -> list[str]:
         path = pathlib.Path(local_cli).expanduser()
         if not path.is_file():
             raise RuntimeError(f"ZERCT_NPM_CLI does not point to a file: {path}")
-        return [_required_executable("node"), str(path)]
+        return [_local_tsx(path), str(path)]
 
     npx = shutil.which("npx")
     if npx:
@@ -56,11 +56,19 @@ def _required_executable(name: str) -> str:
     raise RuntimeError(f"{name} is required to run the local Zerct npm CLI.")
 
 
+def _local_tsx(cli_path: pathlib.Path) -> str:
+    package_root = cli_path.parent.parent
+    local_bin = package_root / "node_modules" / ".bin" / ("tsx.cmd" if os.name == "nt" else "tsx")
+    if local_bin.is_file():
+        return str(local_bin)
+    return _required_executable("tsx")
+
+
 def _print_agent_error(message: str, json_output: bool) -> None:
     payload = {
         "code": "dependency_missing",
         "message": message,
-        "agent_instruction": "Install Node.js 18+ with npx, or set ZERCT_NPM_CLI to packages/zerct/bin/zerct.js in this repository.",
+        "agent_instruction": "Install Node.js 18+ with npx, or set ZERCT_NPM_CLI to packages/zerct/src/zerct.ts after running npm install in packages/zerct.",
         "docs_url": "https://docs.zerct.com/reference/packages",
         "checkout_url": None,
     }

@@ -1,25 +1,25 @@
-export const VERSION = '0.1.21'
-export const DEFAULT_API_URL = 'https://api.zerct.com'
-export const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
-export const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
-export const SESSION_DIR = '.zerct'
-export const SESSION_FILE = 'session-token'
-export const SESSION_SERVICE = 'com.zerct.cli'
-export const SESSION_ACCOUNT = 'session-token'
-export const SESSION_LABEL = 'Zerct session'
-export const DEFAULT_LOGIN_EXPIRES_SECONDS = 600
-export const DEFAULT_LOGIN_INTERVAL_SECONDS = 5
-export const DEFAULT_RUST_CHECK_COMMAND = 'cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
-export const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
-export const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
-export const PROJECT_KINDS = new Set(['rust_backend', 'static_frontend'])
-export const PROJECT_TEMPLATES = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
-export const JAVASCRIPT_LINTERS = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'prettier', 'prettierd', 'standard', 'xo'])
-export const FRONTEND_SOURCE_ROOTS = new Set(['src', 'app', 'pages', 'routes', 'components'])
-export const FRONTEND_JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs', '.cjs']
-export const FRONTEND_PACKAGE_MANAGERS = new Set(['npm', 'bun', 'pnpm', 'yarn'])
-export const FRONTEND_INSTALL_COMMANDS = new Set(['npm ci', 'bun ci', 'bun install', 'pnpm install', 'yarn install'])
-export const FRONTEND_TEMPLATE_FILES = new Set([
+export const VERSION: string = '0.1.21'
+export const DEFAULT_API_URL: string = 'https://api.zerct.com'
+export const ARCHIVE_LIMIT_BYTES: number = 48 * 1024 * 1024
+export const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: number = 900
+export const SESSION_DIR: string = '.zerct'
+export const SESSION_FILE: string = 'session-token'
+export const SESSION_SERVICE: string = 'com.zerct.cli'
+export const SESSION_ACCOUNT: string = 'session-token'
+export const SESSION_LABEL: string = 'Zerct session'
+export const DEFAULT_LOGIN_EXPIRES_SECONDS: number = 600
+export const DEFAULT_LOGIN_INTERVAL_SECONDS: number = 5
+export const DEFAULT_RUST_CHECK_COMMAND: string = 'cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
+export const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: string = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
+export const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: string = 'bun ci && bun run typecheck && bun run lint'
+export const PROJECT_KINDS: ReadonlySet<string> = new Set(['rust_backend', 'static_frontend'])
+export const PROJECT_TEMPLATES: ReadonlySet<string> = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
+export const JAVASCRIPT_LINTERS: ReadonlySet<string> = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'prettier', 'prettierd', 'standard', 'xo'])
+export const FRONTEND_SOURCE_ROOTS: ReadonlySet<string> = new Set(['src', 'app', 'pages', 'routes', 'components'])
+export const FRONTEND_JAVASCRIPT_EXTENSIONS: readonly string[] = ['.js', '.jsx', '.mjs', '.cjs']
+export const FRONTEND_PACKAGE_MANAGERS: ReadonlySet<string> = new Set(['npm', 'bun', 'pnpm', 'yarn'])
+export const FRONTEND_INSTALL_COMMANDS: ReadonlySet<string> = new Set(['npm ci', 'bun ci', 'bun install', 'pnpm install', 'yarn install'])
+export const FRONTEND_TEMPLATE_FILES: ReadonlySet<string> = new Set([
   'index.html',
   'package.json',
   'src/main.tsx',
@@ -29,7 +29,7 @@ export const FRONTEND_TEMPLATE_FILES = new Set([
   'vite.config.ts',
   'zerct.toml'
 ])
-export const ARCHIVE_EXCLUDES = [
+export const ARCHIVE_EXCLUDES: readonly string[] = [
   '.git',
   'target',
   'node_modules',
@@ -57,8 +57,8 @@ export const ARCHIVE_EXCLUDES = [
   '._*',
   '.DS_Store'
 ]
-export const WALK_EXCLUDED_DIRS = new Set(['.git', 'target', 'node_modules', '.zerct'])
-export const WORKSPACE_EXCLUDED_DIRS = new Set([
+export const WALK_EXCLUDED_DIRS: ReadonlySet<string> = new Set(['.git', 'target', 'node_modules', '.zerct'])
+export const WORKSPACE_EXCLUDED_DIRS: ReadonlySet<string> = new Set([
   ...WALK_EXCLUDED_DIRS,
   '.cache',
   '.next',
@@ -69,7 +69,7 @@ export const WORKSPACE_EXCLUDED_DIRS = new Set([
   'vendor'
 ])
 
-export const HELP = `Zerct ${VERSION}
+export const HELP: string = `Zerct ${VERSION}
 
 Usage:
   zerct init [path] [--template rust-api|tanstack-static-frontend|fullstack-rust-tanstack]

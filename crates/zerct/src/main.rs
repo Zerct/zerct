@@ -49,8 +49,9 @@ fn delegate_command() -> Result<DelegateCommand, CliError> {
                 path.display()
             )));
         }
+        let tsx = local_tsx_command(&path)?;
         return Ok(DelegateCommand {
-            program: required_command("node")?,
+            program: tsx,
             args: vec![path.into_os_string().to_string_lossy().into_owned()],
         });
     }
@@ -66,14 +67,6 @@ fn delegate_command() -> Result<DelegateCommand, CliError> {
     })
 }
 
-fn required_command(name: &str) -> Result<String, CliError> {
-    command_path(name).ok_or_else(|| {
-        CliError::new(format!(
-            "{name} is required to run the local Zerct npm CLI."
-        ))
-    })
-}
-
 fn command_path(name: &str) -> Option<String> {
     if Path::new(name).components().count() > 1 {
         return Path::new(name).is_file().then(|| name.to_owned());
@@ -85,6 +78,31 @@ fn command_path(name: &str) -> Option<String> {
         .flat_map(|directory| executable_candidates(&directory, name))
         .find(|candidate| candidate.is_file())
         .map(|candidate| candidate.into_os_string().to_string_lossy().into_owned())
+}
+
+fn local_tsx_command(cli_path: &Path) -> Result<String, CliError> {
+    let Some(package_root) = cli_path.parent().and_then(Path::parent) else {
+        return Err(CliError::new(
+            "Could not locate the Zerct npm package root from ZERCT_NPM_CLI.",
+        ));
+    };
+    let local_bin = if cfg!(windows) {
+        package_root
+            .join("node_modules")
+            .join(".bin")
+            .join("tsx.cmd")
+    } else {
+        package_root.join("node_modules").join(".bin").join("tsx")
+    };
+    if local_bin.is_file() {
+        return Ok(local_bin.into_os_string().to_string_lossy().into_owned());
+    }
+
+    command_path("tsx").ok_or_else(|| {
+        CliError::new(
+            "tsx is required to run the local TypeScript Zerct npm CLI. Run npm install in packages/zerct.",
+        )
+    })
 }
 
 fn executable_candidates(directory: &Path, name: &str) -> Vec<PathBuf> {
@@ -130,7 +148,7 @@ impl CliError {
     fn print(&self) {
         eprintln!("{}", self.message);
         eprintln!(
-            "agent_instruction: Install Node.js 18+ with npx, or set ZERCT_NPM_CLI to packages/zerct/bin/zerct.js in this repository."
+            "agent_instruction: Install Node.js 18+ with npx, or set ZERCT_NPM_CLI to packages/zerct/src/zerct.ts after running npm install in packages/zerct."
         );
     }
 }

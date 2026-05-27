@@ -2,12 +2,13 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
-import { DEFAULT_LOGIN_EXPIRES_SECONDS, DEFAULT_LOGIN_INTERVAL_SECONDS, SESSION_ACCOUNT, SESSION_DIR, SESSION_FILE, SESSION_LABEL, SESSION_SERVICE } from './constants.js'
-import { agentError } from './errors.js'
-import { apiRequest } from './api.js'
-import { hasCommand, openUrl, progress, sleep } from './project.js'
+import { DEFAULT_LOGIN_EXPIRES_SECONDS, DEFAULT_LOGIN_INTERVAL_SECONDS, SESSION_ACCOUNT, SESSION_DIR, SESSION_FILE, SESSION_LABEL, SESSION_SERVICE } from './constants.ts'
+import { agentError } from './errors.ts'
+import { apiRequest, jsonObjectOrEmpty, numberField, stringField } from './api.ts'
+import { hasCommand, openUrl, progress, sleep } from './project.ts'
+import type { CliOptions, JsonObject, LoginPollResponse, LoginStartResponse } from './types.ts'
 
-async function login(cli) {
+async function login(cli: CliOptions): Promise<void> {
   if (cli.token) {
     writeSessionToken(cli.token)
     console.log('saved Zerct session token')
@@ -17,7 +18,7 @@ async function login(cli) {
   await loginAndStore(cli)
 }
 
-async function readOrLoginToken(projectDir, cli) {
+async function readOrLoginToken(projectDir: string, cli: CliOptions): Promise<string> {
   const token = readStoredToken(projectDir, cli)
   if (token) {
     return token
@@ -26,15 +27,15 @@ async function readOrLoginToken(projectDir, cli) {
   return loginAndStore(cli)
 }
 
-async function loginAndStore(cli) {
-  const start = await apiRequest(cli, 'POST', '/v1/login/device', null, null)
-  const loginUrl = start.loginUrl || start.login_url
+async function loginAndStore(cli: CliOptions): Promise<string> {
+  const start = loginStartResponse(await apiRequest(cli, 'POST', '/v1/login/device', null, null))
+  const loginUrl = start.loginUrl ?? start.login_url ?? ''
   if (!loginUrl) {
     throw agentError('login_failed', 'Zerct login did not return a browser URL.', 'Retry `npx @zerct/zerct login`. If it keeps failing, check Zerct status.', cli.json)
   }
   openUrl(loginUrl)
   progress(cli, 'opened browser login')
-  progress(cli, `waiting for browser login code ${start.userCode || start.user_code || 'ZERCT'}`)
+  progress(cli, `waiting for browser login code ${start.userCode ?? start.user_code ?? 'ZERCT'}`)
 
   const session = await pollLogin(cli, start)
   if (!session.token) {
@@ -42,23 +43,23 @@ async function loginAndStore(cli) {
   }
 
   writeSessionToken(session.token)
-  progress(cli, `logged in as ${session.email || 'Zerct user'}`)
+  progress(cli, `logged in as ${session.email ?? 'Zerct user'}`)
   return session.token
 }
 
-async function pollLogin(cli, start) {
-  const deviceCode = start.deviceCode || start.device_code
+async function pollLogin(cli: CliOptions, start: LoginStartResponse): Promise<LoginPollResponse> {
+  const deviceCode = start.deviceCode ?? start.device_code ?? ''
   if (!deviceCode) {
     throw agentError('login_failed', 'Zerct login did not return a device code.', 'Retry `npx @zerct/zerct login`. If it keeps failing, check Zerct status.', cli.json)
   }
 
-  const expiresMs = Number(start.expiresInSeconds || start.expires_in_seconds || DEFAULT_LOGIN_EXPIRES_SECONDS) * 1000
+  const expiresMs = (start.expiresInSeconds ?? start.expires_in_seconds ?? DEFAULT_LOGIN_EXPIRES_SECONDS) * 1000
   const deadline = Date.now() + expiresMs
-  let intervalMs = Number(start.intervalSeconds || start.interval_seconds || DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
+  let intervalMs = (start.intervalSeconds ?? start.interval_seconds ?? DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
 
   while (Date.now() < deadline) {
     await sleep(intervalMs)
-    const response = await apiRequest(cli, 'GET', `/v1/login/device/${encodeURIComponent(deviceCode)}`, null, null)
+    const response = loginPollResponse(await apiRequest(cli, 'GET', `/v1/login/device/${encodeURIComponent(deviceCode)}`, null, null))
     if (response.status === 'complete') {
       return response
     }
@@ -67,19 +68,19 @@ async function pollLogin(cli, start) {
     }
     intervalMs = Math.max(
       DEFAULT_LOGIN_INTERVAL_SECONDS * 1000,
-      Number(response.intervalSeconds || response.interval_seconds || DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
+      (response.intervalSeconds ?? response.interval_seconds ?? DEFAULT_LOGIN_INTERVAL_SECONDS) * 1000
     )
   }
 
   throw agentError('login_expired', 'Zerct login expired before it completed.', 'Run `npx @zerct/zerct login` again and finish the browser login in the newly opened tab.', cli.json)
 }
 
-function readStoredToken(projectDir, cli) {
+function readStoredToken(projectDir: string, cli: CliOptions): string {
   if (cli.token) {
     return cli.token
   }
-  if (process.env.ZERCT_TOKEN) {
-    return process.env.ZERCT_TOKEN
+  if (process.env['ZERCT_TOKEN']) {
+    return process.env['ZERCT_TOKEN']
   }
 
   const keychainToken = readKeychainToken()
@@ -102,7 +103,7 @@ function readStoredToken(projectDir, cli) {
   return readTokenFile(homeToken)
 }
 
-function writeSessionToken(token) {
+function writeSessionToken(token: string): void {
   const cleanToken = token.trim()
   if (!cleanToken) {
     throw agentError('login_failed', 'Zerct session token is empty.', 'Run `npx @zerct/zerct login` again and complete the browser login.', false)
@@ -114,28 +115,28 @@ function writeSessionToken(token) {
   writeTokenFile(userSessionPath(), cleanToken)
 }
 
-function readTokenFile(filePath) {
+function readTokenFile(filePath: string): string {
   if (!existsSync(filePath)) {
     return ''
   }
   return readFileSync(filePath, 'utf8').trim()
 }
 
-function writeTokenFile(filePath, token) {
+function writeTokenFile(filePath: string, token: string): void {
   const dir = path.dirname(filePath)
   mkdirSync(dir, { recursive: true, mode: 0o700 })
   writeFileSync(filePath, `${token}\n`, { mode: 0o600 })
 }
 
-function userSessionPath() {
-  if (process.platform === 'win32' && process.env.APPDATA) {
-    return path.join(process.env.APPDATA, 'Zerct', SESSION_FILE)
+function userSessionPath(): string {
+  if (process.platform === 'win32' && process.env['APPDATA']) {
+    return path.join(process.env['APPDATA'], 'Zerct', SESSION_FILE)
   }
-  const configHome = process.env.XDG_CONFIG_HOME || path.join(homedir(), '.config')
+  const configHome = process.env['XDG_CONFIG_HOME'] ?? path.join(homedir(), '.config')
   return path.join(configHome, 'zerct', SESSION_FILE)
 }
 
-function readKeychainToken() {
+function readKeychainToken(): string {
   if (process.platform === 'darwin') {
     const result = spawnSync('security', ['find-generic-password', '-s', SESSION_SERVICE, '-a', SESSION_ACCOUNT, '-w'], {
       encoding: 'utf8',
@@ -155,7 +156,7 @@ function readKeychainToken() {
   return ''
 }
 
-function writeKeychainToken(token) {
+function writeKeychainToken(token: string): boolean {
   if (process.platform === 'darwin') {
     const result = spawnSync('security', [
       'add-generic-password',
@@ -189,6 +190,47 @@ function writeKeychainToken(token) {
   }
 
   return false
+}
+
+function loginStartResponse(value: Awaited<ReturnType<typeof apiRequest>>): LoginStartResponse {
+  const source = jsonObjectOrEmpty(value)
+  const response: LoginStartResponse = {}
+  copyString(source, response, 'loginUrl')
+  copyString(source, response, 'login_url')
+  copyString(source, response, 'userCode')
+  copyString(source, response, 'user_code')
+  copyString(source, response, 'deviceCode')
+  copyString(source, response, 'device_code')
+  copyNumber(source, response, 'expiresInSeconds')
+  copyNumber(source, response, 'expires_in_seconds')
+  copyNumber(source, response, 'intervalSeconds')
+  copyNumber(source, response, 'interval_seconds')
+  return response
+}
+
+function loginPollResponse(value: Awaited<ReturnType<typeof apiRequest>>): LoginPollResponse {
+  const source = jsonObjectOrEmpty(value)
+  const response: LoginPollResponse = {}
+  copyString(source, response, 'status')
+  copyString(source, response, 'token')
+  copyString(source, response, 'email')
+  copyNumber(source, response, 'intervalSeconds')
+  copyNumber(source, response, 'interval_seconds')
+  return response
+}
+
+function copyString(source: JsonObject, target: JsonObject, key: string): void {
+  const value = stringField(source, key)
+  if (value) {
+    target[key] = value
+  }
+}
+
+function copyNumber(source: JsonObject, target: JsonObject, key: string): void {
+  const value = numberField(source, key)
+  if (value > 0) {
+    target[key] = value
+  }
 }
 
 export { login, readOrLoginToken, loginAndStore, pollLogin, readStoredToken, writeSessionToken, readTokenFile, writeTokenFile, userSessionPath, readKeychainToken, writeKeychainToken }

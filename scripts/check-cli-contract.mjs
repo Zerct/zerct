@@ -11,9 +11,9 @@ function requireSnippet(source, snippet, label) {
   }
 }
 
-const npmCli = readFileSync('packages/zerct/bin/zerct.js', 'utf8')
-const npmConstants = readFileSync('packages/zerct/bin/internal/constants.js', 'utf8')
-const npmTemplates = readFileSync('packages/zerct/bin/internal/templates.js', 'utf8')
+const npmCli = readFileSync('packages/zerct/src/zerct.ts', 'utf8')
+const npmConstants = readFileSync('packages/zerct/src/internal/constants.ts', 'utf8')
+const npmTemplates = readFileSync('packages/zerct/src/internal/templates.ts', 'utf8')
 const pythonCli = readFileSync('packages/zerct-py/src/zerct/cli.py', 'utf8')
 const cargoCli = readFileSync('crates/zerct/src/main.rs', 'utf8')
 

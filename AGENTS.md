@@ -57,16 +57,23 @@ tighten these rules.
 
 3. Keep `packages/zerct/package.json` named `zerct`; the scoped publish script
    rewrites the name to `@zerct/zerct`.
-4. Keep `packages/zerct` dependency-free unless a dependency removes real
-   complexity and is maintained, small, and necessary.
+4. Keep `packages/zerct` TypeScript-only. No `.js`, `.jsx`, `.mjs`, or `.cjs`
+   files are allowed inside the npm package. The only runtime dependency
+   currently allowed is `tsx`, because the published npm bin is TypeScript
+   source and must run on supported Node versions.
+   Keep `packages/zerct/tsconfig.json` at the strictest practical compiler
+   boundary: `strict`, exact optional properties, unchecked indexed access,
+   unchecked side-effect imports, type-only import behavior, isolated modules
+   and declarations, erasable syntax, no JavaScript input, and no skipped lib
+   checking. Type coverage must remain 100%.
 5. Keep `packages/zerct` as the CLI behavior source of truth. PyPI and Cargo
    CLIs are thin delegates to the npm CLI so they expose the same agent-facing
    command surface without reimplementing login, init, doctor, preview, deploy,
    wait, capabilities, identity, usage, activity, apps, overview, deploys,
    builds, logs, status, inspect, database, env, domains, and billing portal
    behavior. SDKs and skills must document the same contract.
-   The npm `bin/zerct.js` file must stay a small dispatcher; feature logic
-   belongs in focused `bin/internal/` modules.
+   The npm `src/zerct.ts` file must stay a small dispatcher; feature logic
+   belongs in focused `src/internal/` modules with explicit types.
 6. Package CLIs must not print tokens, env values, database URLs, provider
    secrets, or Stripe/Cloudflare values. Print safe presence, status, ids, and
    public URLs only.

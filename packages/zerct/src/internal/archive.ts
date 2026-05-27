@@ -1,8 +1,8 @@
 import { spawnSync } from 'node:child_process'
-import { ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES } from './constants.js'
-import { agentError } from './errors.js'
+import { ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES } from './constants.ts'
+import { agentError } from './errors.ts'
 
-function createArchiveBase64(projectDir) {
+function createArchiveBase64(projectDir: string): string {
   const excludeArgs = ARCHIVE_EXCLUDES.map((pattern) => `--exclude=${pattern}`)
   const tar = spawnSync('tar', [...excludeArgs, '-czf', '-', '-C', projectDir, '.'], {
     encoding: 'buffer',
@@ -23,7 +23,7 @@ function createArchiveBase64(projectDir) {
   return tar.stdout.toString('base64')
 }
 
-function gitCommitSha(projectDir) {
+function gitCommitSha(projectDir: string): string | null {
   const git = spawnSync('git', ['rev-parse', 'HEAD'], {
     cwd: projectDir,
     encoding: 'utf8',
