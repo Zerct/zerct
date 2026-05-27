@@ -12,6 +12,8 @@ function requireSnippet(source, snippet, label) {
 }
 
 const npmCli = readFileSync('packages/zerct/bin/zerct.js', 'utf8')
+const npmConstants = readFileSync('packages/zerct/bin/internal/constants.js', 'utf8')
+const npmTemplates = readFileSync('packages/zerct/bin/internal/templates.js', 'utf8')
 const pythonCli = readFileSync('packages/zerct-py/src/zerct/cli.py', 'utf8')
 const cargoCli = readFileSync('crates/zerct/src/main.rs', 'utf8')
 
@@ -40,19 +42,17 @@ const commands = [
 
 for (const command of commands) {
   requireSnippet(npmCli, `case '${command}':`, `npm command ${command}`)
-  requireSnippet(pythonCli, `case "${command}":`, `PyPI command ${command}`)
-  requireSnippet(cargoCli, `"${command}" =>`, `Cargo command ${command}`)
 }
 
-for (const source of [npmCli, pythonCli, cargoCli]) {
-  requireSnippet(source, 'fullstack-rust-tanstack', 'fullstack template option')
-  requireSnippet(source, 'tanstack-static-frontend', 'frontend template option')
-  requireSnippet(source, 'rust-api', 'Rust template option')
-}
+requireSnippet(npmConstants, 'fullstack-rust-tanstack', 'fullstack template option')
+requireSnippet(npmConstants, 'tanstack-static-frontend', 'frontend template option')
+requireSnippet(npmConstants, 'rust-api', 'Rust template option')
 
-requireSnippet(pythonCli, '"--template"', 'PyPI install template flag')
-requireSnippet(pythonCli, 'init_project(pathlib.Path(args.path).resolve(), args.template)', 'PyPI install template behavior')
 requireSnippet(npmCli, 'installProject(projectPath(cli.args[0]), cli.template)', 'npm install template behavior')
-requireSnippet(cargoCli, 'init_project(&cli.project_path(), cli.template.as_deref())?', 'Cargo install template behavior')
+requireSnippet(npmTemplates, 'function installProject', 'npm install template implementation')
+requireSnippet(pythonCli, 'ZERCT_NPM_CLI', 'PyPI delegates to local npm CLI for checks')
+requireSnippet(pythonCli, 'NPM_PACKAGE = "@zerct/zerct"', 'PyPI delegates to public npm package')
+requireSnippet(cargoCli, 'ZERCT_NPM_CLI', 'Cargo delegates to local npm CLI for checks')
+requireSnippet(cargoCli, 'const NPM_PACKAGE: &str = "@zerct/zerct";', 'Cargo delegates to public npm package')
 
 console.log('Checked CLI command and template contract.')

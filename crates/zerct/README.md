@@ -1,6 +1,8 @@
 # zerct
 
 Rust CLI package for deploying Rust backends and static frontends to Zerct.
+It delegates to the npm Zerct CLI so Cargo stays aligned with the primary
+agent command surface.
 
 ```sh
 cargo install zerct
@@ -22,6 +24,8 @@ The primary first-run path remains:
 ```sh
 npx @zerct/zerct deploy
 ```
+
+Cargo installs require Node.js 18+ with `npx` available at runtime.
 
 The Cargo package exposes the same agent command surface as npm:
 
