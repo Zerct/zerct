@@ -34,7 +34,9 @@ function walk(dir: string, visit: PathVisitor): void {
     const fullPath = path.join(dir, entry.name)
     if (entry.isDirectory()) {
       walk(fullPath, visit)
-    } else if (entry.isFile()) {
+      continue
+    }
+    if (entry.isFile()) {
       visit(fullPath)
     }
   }
