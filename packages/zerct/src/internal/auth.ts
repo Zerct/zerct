@@ -194,43 +194,41 @@ function writeKeychainToken(token: string): boolean {
 
 function loginStartResponse(value: Awaited<ReturnType<typeof apiRequest>>): LoginStartResponse {
   const source = jsonObjectOrEmpty(value)
-  const response: LoginStartResponse = {}
-  copyString(source, response, 'loginUrl')
-  copyString(source, response, 'login_url')
-  copyString(source, response, 'userCode')
-  copyString(source, response, 'user_code')
-  copyString(source, response, 'deviceCode')
-  copyString(source, response, 'device_code')
-  copyNumber(source, response, 'expiresInSeconds')
-  copyNumber(source, response, 'expires_in_seconds')
-  copyNumber(source, response, 'intervalSeconds')
-  copyNumber(source, response, 'interval_seconds')
-  return response
+  return responseFields(
+    source,
+    ['deviceCode', 'device_code', 'loginUrl', 'login_url', 'userCode', 'user_code'],
+    ['expiresInSeconds', 'expires_in_seconds', 'intervalSeconds', 'interval_seconds']
+  )
 }
 
 function loginPollResponse(value: Awaited<ReturnType<typeof apiRequest>>): LoginPollResponse {
   const source = jsonObjectOrEmpty(value)
-  const response: LoginPollResponse = {}
-  copyString(source, response, 'status')
-  copyString(source, response, 'token')
-  copyString(source, response, 'email')
-  copyNumber(source, response, 'intervalSeconds')
-  copyNumber(source, response, 'interval_seconds')
+  return responseFields(
+    source,
+    ['email', 'status', 'token'],
+    ['intervalSeconds', 'interval_seconds']
+  )
+}
+
+function responseFields(
+  source: JsonObject,
+  stringKeys: readonly string[],
+  numberKeys: readonly string[]
+): JsonObject {
+  const response: JsonObject = {}
+  for (const key of stringKeys) {
+    const value = stringField(source, key)
+    if (value) {
+      response[key] = value
+    }
+  }
+  for (const key of numberKeys) {
+    const value = numberField(source, key)
+    if (value > 0) {
+      response[key] = value
+    }
+  }
   return response
-}
-
-function copyString(source: JsonObject, target: JsonObject, key: string): void {
-  const value = stringField(source, key)
-  if (value) {
-    target[key] = value
-  }
-}
-
-function copyNumber(source: JsonObject, target: JsonObject, key: string): void {
-  const value = numberField(source, key)
-  if (value > 0) {
-    target[key] = value
-  }
 }
 
 export { login, readOrLoginToken, loginAndStore, pollLogin, readStoredToken, writeSessionToken, readTokenFile, writeTokenFile, userSessionPath, readKeychainToken, writeKeychainToken }
