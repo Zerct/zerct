@@ -1922,15 +1922,19 @@
                   "summary": "Create support ticket",
                   "value": {
                     "subject": "Deploy failed",
-                    "details": "Command: npx @zerct/zerct deploy --wait --json. App: app_1. Build: job_1. First log error: cargo check failed.",
+                    "details": "Agent retried deploy after doctor.",
                     "app_id": "app_1",
+                    "failing_command": "npx @zerct/zerct deploy --wait --json",
+                    "build_id": "job_1",
+                    "deploy_id": "deploy_1",
+                    "first_log_line": "cargo check failed in src/main.rs",
                     "severity": "normal"
                   }
                 }
               }
             }
           },
-          "description": "JSON body describing the support issue, optional app, and optional severity. Context: paths./v1/support/tickets.post.requestBody."
+          "description": "JSON body describing the support issue, optional app, structured failure context, and optional severity. Context: paths./v1/support/tickets.post.requestBody."
         },
         "responses": {
           "200": {
@@ -3695,12 +3699,16 @@
                     "id": "ticket_0123456789abcdef0123",
                     "app_id": "app_1",
                     "subject": "Deploy failed",
-                    "details": "Command, ids, and first actionable log line.",
+                    "details": "Agent retried deploy after doctor.",
                     "severity": "normal",
                     "status": "open",
                     "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
                     "created_at": "2026-05-27T12:00:00Z",
-                    "updated_at": "2026-05-27T12:00:00Z"
+                    "updated_at": "2026-05-27T12:00:00Z",
+                    "failing_command": "npx @zerct/zerct deploy --wait --json",
+                    "build_id": "job_1",
+                    "deploy_id": "deploy_1",
+                    "first_log_line": "cargo check failed in src/main.rs"
                   },
                   "rate_limit": {
                     "limitPerHour": 3,
@@ -3745,12 +3753,16 @@
                       "id": "ticket_0123456789abcdef0123",
                       "app_id": "app_1",
                       "subject": "Deploy failed",
-                      "details": "Command, ids, and first actionable log line.",
+                      "details": "Agent retried deploy after doctor.",
                       "severity": "normal",
                       "status": "open",
                       "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
                       "created_at": "2026-05-27T12:00:00Z",
-                      "updated_at": "2026-05-27T12:00:00Z"
+                      "updated_at": "2026-05-27T12:00:00Z",
+                      "failing_command": "npx @zerct/zerct deploy --wait --json",
+                      "build_id": "job_1",
+                      "deploy_id": "deploy_1",
+                      "first_log_line": "cargo check failed in src/main.rs"
                     }
                   ],
                   "rate_limit": {
@@ -3793,12 +3805,16 @@
                   "id": "ticket_0123456789abcdef0123",
                   "app_id": "app_1",
                   "subject": "Deploy failed",
-                  "details": "Command, ids, and first actionable log line.",
+                  "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "resolved",
                   "agent_instruction": "Ticket resolved. Run `npx @zerct/zerct support list --json` to confirm status, and create a new ticket only if the issue returns with fresh command output.",
                   "created_at": "2026-05-27T12:00:00Z",
-                  "updated_at": "2026-05-27T12:00:00Z"
+                  "updated_at": "2026-05-27T12:00:00Z",
+                  "failing_command": "npx @zerct/zerct deploy --wait --json",
+                  "build_id": "job_1",
+                  "deploy_id": "deploy_1",
+                  "first_log_line": "cargo check failed in src/main.rs"
                 }
               }
             }
@@ -7941,7 +7957,7 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 8000,
-            "description": "Agent-readable details, commands, ids, first log line, and attempted fixes. Context: components.schemas.SupportTicketCreateRequest.properties.details.",
+            "description": "Agent-readable details and attempted fixes. Context: components.schemas.SupportTicketCreateRequest.properties.details.",
             "examples": [
               "Command, app id, build id, deploy id, and first actionable log line."
             ],
@@ -7959,6 +7975,56 @@
             "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
             "maxLength": 64
           },
+          "failing_command": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "Exact Zerct command or SDK action that failed. Context: components.schemas.SupportTicketCreateRequest.properties.failing_command.",
+            "examples": [
+              "npx @zerct/zerct deploy --wait --json"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
+          },
+          "build_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "description": "Related build job id, when available. Context: components.schemas.SupportTicketCreateRequest.properties.build_id.",
+            "examples": [
+              "job_1"
+            ],
+            "pattern": "^[a-z0-9_]{1,64}$"
+          },
+          "deploy_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "description": "Related deploy id, when available. Context: components.schemas.SupportTicketCreateRequest.properties.deploy_id.",
+            "examples": [
+              "deploy_1"
+            ],
+            "pattern": "^[a-z0-9_]{1,64}$"
+          },
+          "first_log_line": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "First actionable log line or error line. Context: components.schemas.SupportTicketCreateRequest.properties.first_log_line.",
+            "examples": [
+              "cargo check failed in src/main.rs"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
+          },
           "severity": {
             "anyOf": [
               {
@@ -7974,8 +8040,12 @@
         "examples": [
           {
             "subject": "Deploy failed",
-            "details": "Command, ids, and first actionable log line.",
+            "details": "Agent retried deploy after doctor.",
             "app_id": "app_1",
+            "failing_command": "npx @zerct/zerct deploy --wait --json",
+            "build_id": "job_1",
+            "deploy_id": "deploy_1",
+            "first_log_line": "cargo check failed in src/main.rs",
             "severity": "normal"
           }
         ]
@@ -7989,6 +8059,10 @@
           "app_id",
           "subject",
           "details",
+          "failing_command",
+          "build_id",
+          "deploy_id",
+          "first_log_line",
           "severity",
           "status",
           "agent_instruction",
@@ -8028,12 +8102,62 @@
           },
           "details": {
             "type": "string",
-            "description": "Agent-readable details. Context: components.schemas.SupportTicket.properties.details.",
+            "description": "Agent-readable details and attempted fixes. Context: components.schemas.SupportTicket.properties.details.",
             "examples": [
               "Command, ids, and first actionable log line."
             ],
             "pattern": "^[\\s\\S]{1,8000}$",
             "maxLength": 8000
+          },
+          "failing_command": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "Exact Zerct command or SDK action that failed. Context: components.schemas.SupportTicket.properties.failing_command.",
+            "examples": [
+              "npx @zerct/zerct deploy --wait --json"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
+          },
+          "build_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "description": "Related build job id, when available. Context: components.schemas.SupportTicket.properties.build_id.",
+            "examples": [
+              "job_1"
+            ],
+            "pattern": "^[a-z0-9_]{1,64}$"
+          },
+          "deploy_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "description": "Related deploy id, when available. Context: components.schemas.SupportTicket.properties.deploy_id.",
+            "examples": [
+              "deploy_1"
+            ],
+            "pattern": "^[a-z0-9_]{1,64}$"
+          },
+          "first_log_line": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "First actionable log line or error line. Context: components.schemas.SupportTicket.properties.first_log_line.",
+            "examples": [
+              "cargo check failed in src/main.rs"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
           },
           "severity": {
             "$ref": "#/components/schemas/SupportTicketSeverity"
@@ -8072,7 +8196,11 @@
             "id": "ticket_0123456789abcdef0123",
             "app_id": "app_1",
             "subject": "Deploy failed",
-            "details": "Command, ids, and first actionable log line.",
+            "details": "Agent retried deploy after doctor.",
+            "failing_command": "npx @zerct/zerct deploy --wait --json",
+            "build_id": "job_1",
+            "deploy_id": "deploy_1",
+            "first_log_line": "cargo check failed in src/main.rs",
             "severity": "normal",
             "status": "open",
             "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
@@ -8212,12 +8340,16 @@
                   "id": "ticket_123",
                   "app_id": "app_1",
                   "subject": "Deploy failed",
-                  "details": "Command, ids, and first actionable log line.",
+                  "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "open",
                   "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
                   "created_at": "2026-05-27T12:00:00Z",
-                  "updated_at": "2026-05-27T12:00:00Z"
+                  "updated_at": "2026-05-27T12:00:00Z",
+                  "failing_command": "npx @zerct/zerct deploy --wait --json",
+                  "build_id": "job_1",
+                  "deploy_id": "deploy_1",
+                  "first_log_line": "cargo check failed in src/main.rs"
                 }
               ]
             ]
@@ -8233,12 +8365,16 @@
                 "id": "ticket_0123456789abcdef0123",
                 "app_id": "app_1",
                 "subject": "Deploy failed",
-                "details": "Command, ids, and first actionable log line.",
+                "details": "Agent retried deploy after doctor.",
                 "severity": "normal",
                 "status": "open",
                 "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
                 "created_at": "2026-05-27T12:00:00Z",
-                "updated_at": "2026-05-27T12:00:00Z"
+                "updated_at": "2026-05-27T12:00:00Z",
+                "failing_command": "npx @zerct/zerct deploy --wait --json",
+                "build_id": "job_1",
+                "deploy_id": "deploy_1",
+                "first_log_line": "cargo check failed in src/main.rs"
               }
             ],
             "rate_limit": {

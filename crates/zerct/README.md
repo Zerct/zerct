@@ -46,7 +46,7 @@ zerct domains add --app app_1 api.example.com
 zerct domains verify --app app_1 api.example.com
 zerct billing checkout --json
 zerct billing portal
-zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+zerct support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "zerct deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 zerct support list --json
 zerct support resolve ticket_0123456789abcdef0123 --json
 ```

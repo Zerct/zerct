@@ -67,7 +67,7 @@ npx @zerct/zerct env list --app <app> --json
 npx @zerct/zerct domains list --app <app> --json
 npx @zerct/zerct billing checkout --json
 npx @zerct/zerct support list --json
-npx @zerct/zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+npx @zerct/zerct support create "Deploy failed" "Agent retried deploy after doctor." --app <app> --build <build_id> --deploy <deploy_id> --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "first actionable log line" --json
 npx @zerct/zerct support resolve <ticket_id> --json
 ```
 

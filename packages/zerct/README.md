@@ -57,7 +57,7 @@ npx @zerct/zerct billing checkout --json
 When Zerct support is needed, include enough evidence for a support agent:
 
 ```sh
-npx @zerct/zerct support create "Deploy failed" "Command, app id, build id, deploy id, and first actionable log line." --json
+npx @zerct/zerct support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 ```
 
 When the issue is fixed, resolve the ticket:

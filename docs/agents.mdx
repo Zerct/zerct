@@ -44,8 +44,12 @@ operator agent to act:
 ```sh
 npx @zerct/zerct support create \
   "Deploy failed" \
-  "Command, app id, build id, deploy id, first actionable log line, and what the agent already tried." \
+  "Agent already ran doctor and retried deploy." \
   --app app_1 \
+  --build job_1 \
+  --deploy deploy_1 \
+  --failing-command "npx @zerct/zerct deploy --wait --json" \
+  --first-log-line "cargo check failed in src/main.rs" \
   --severity normal \
   --json
 ```

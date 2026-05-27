@@ -121,7 +121,7 @@ Usage:
   zerct domains delete --app <app> <domain> [--api <url>] [--json]
   zerct billing [checkout|portal] [reason] [--api <url>] [--json]
   zerct support list [--limit <n>] [--api <url>] [--json]
-  zerct support create "Subject" "Details" [--app <app>] [--severity low|normal|urgent] [--api <url>] [--json]
+  zerct support create "Subject" "Details" [--app <app>] [--build <build_id>] [--deploy <deploy_id>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
   zerct support resolve <ticket_id> [--api <url>] [--json]
 
 Agent contract:

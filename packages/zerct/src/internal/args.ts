@@ -5,7 +5,7 @@ import type { CliOptions } from './types.ts'
 
 type FlagHandler = (cli: CliOptions, argv: readonly string[], index: number) => number
 type BooleanCliField = 'database' | 'help' | 'json' | 'version' | 'wait'
-type StringCliField = 'apiUrl' | 'app' | 'build' | 'cursor' | 'deploy' | 'limit' | 'severity' | 'template' | 'token'
+type StringCliField = 'apiUrl' | 'app' | 'build' | 'cursor' | 'deploy' | 'failingCommand' | 'firstLogLine' | 'limit' | 'severity' | 'template' | 'token'
 type NumberCliField = 'port' | 'waitTimeoutSeconds'
 
 const FLAG_HANDLERS = new Map<string, FlagHandler>([
@@ -22,6 +22,8 @@ const FLAG_HANDLERS = new Map<string, FlagHandler>([
   ['--app', stringOption('--app', 'app')],
   ['--build', stringOption('--build', 'build')],
   ['--deploy', stringOption('--deploy', 'deploy')],
+  ['--failing-command', stringOption('--failing-command', 'failingCommand')],
+  ['--first-log-line', stringOption('--first-log-line', 'firstLogLine')],
   ['--limit', stringOption('--limit', 'limit')],
   ['--cursor', stringOption('--cursor', 'cursor')],
   ['--severity', stringOption('--severity', 'severity')],
@@ -40,6 +42,8 @@ function parseArgs(argv: string[]): CliOptions {
     deploy: '',
     limit: '',
     cursor: '',
+    failingCommand: '',
+    firstLogLine: '',
     token: '',
     template: '',
     severity: '',
