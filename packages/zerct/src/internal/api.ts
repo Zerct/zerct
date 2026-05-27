@@ -90,6 +90,11 @@ function jsonObjectField(source: JsonObject, key: string): JsonObject {
   return jsonObjectOrEmpty(source[key] ?? null)
 }
 
+function optionalJsonObjectField(source: JsonObject, key: string): JsonObject | null {
+  const value = source[key] ?? null
+  return isJsonObject(value) ? value : null
+}
+
 function jsonArrayField(source: JsonObject, key: string): JsonValue[] {
   const value = source[key]
   return Array.isArray(value) ? value : []
@@ -112,6 +117,7 @@ export {
   isJsonObject,
   jsonObjectOrEmpty,
   jsonObjectField,
+  optionalJsonObjectField,
   jsonArrayField,
   stringField,
   numberField

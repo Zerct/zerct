@@ -4,6 +4,7 @@ import {
   jsonObjectField,
   jsonObjectOrEmpty,
   numberField,
+  optionalJsonObjectField,
   stringField
 } from './api.ts'
 import type {
@@ -53,14 +54,14 @@ function appSummaryFromJson(value: JsonValue): AppSummary | null {
 
 function deployResponseFromJson(value: JsonValue | null): DeployResponse {
   const source = jsonObjectOrEmpty(value)
-  const finalBuild = jsonObjectOrEmpty(source['final_build'] ?? null)
+  const finalBuild = optionalJsonObjectField(source, 'final_build')
   const response: DeployResponse = {
     app: appDeployTargetFromJson(jsonObjectField(source, 'app')),
     build_job: {
       id: stringField(jsonObjectField(source, 'build_job'), 'id')
     }
   }
-  if (Object.keys(finalBuild).length > 0) {
+  if (finalBuild) {
     response.final_build = buildRecordFromJson(finalBuild)
   }
   return response
@@ -75,8 +76,8 @@ function appDeployTargetFromJson(source: JsonObject): DeployResponse['app'] {
 
 function buildStatusResponseFromJson(value: JsonValue | null): BuildStatusResponse {
   const source = jsonObjectOrEmpty(value)
-  const build = jsonObjectField(source, 'build')
-  return Object.keys(build).length === 0 ? {} : { build: buildRecordFromJson(build) }
+  const build = optionalJsonObjectField(source, 'build')
+  return build ? { build: buildRecordFromJson(build) } : {}
 }
 
 function buildRecordFromJson(source: JsonObject): BuildRecord {
