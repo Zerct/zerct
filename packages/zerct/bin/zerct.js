@@ -5,7 +5,7 @@ import { createServer } from 'node:http'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.18'
+const VERSION = '0.1.19'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -21,7 +21,7 @@ const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit -
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
 const PROJECT_KINDS = new Set(['rust_backend', 'static_frontend'])
 const PROJECT_TEMPLATES = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
-const JAVASCRIPT_LINTERS = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'standard', 'xo'])
+const JAVASCRIPT_LINTERS = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'prettier', 'prettierd', 'standard', 'xo'])
 const FRONTEND_SOURCE_ROOTS = new Set(['src', 'app', 'pages', 'routes', 'components'])
 const FRONTEND_JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs', '.cjs']
 const FRONTEND_PACKAGE_MANAGERS = new Set(['npm', 'bun', 'pnpm', 'yarn'])
@@ -1535,7 +1535,7 @@ function validateCheckCommand(kind, command) {
 
 function validateFrontendCheckCommand(command) {
   if (usesJavascriptLinter(command)) {
-    throw new Error('[build].check must not run JavaScript-based linters; use oxlint, biome, or deno lint')
+    throw new Error('[build].check must not run JavaScript-based lint or format tooling; use oxlint, biome, or deno lint')
   }
   const tokens = commandTokens(command)
   if (

@@ -38,7 +38,7 @@ DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
 DEFAULT_RUST_CHECK_COMMAND = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
 DEFAULT_NPM_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 DEFAULT_BUN_FRONTEND_CHECK_COMMAND = "bun ci && bun run typecheck && bun run lint"
-JAVASCRIPT_LINTERS = {"eslint", "eslint_d", "jscs", "jshint", "standard", "xo"}
+JAVASCRIPT_LINTERS = {"eslint", "eslint_d", "jscs", "jshint", "prettier", "prettierd", "standard", "xo"}
 FRONTEND_SOURCE_ROOTS = {"src", "app", "pages", "routes", "components"}
 FRONTEND_JAVASCRIPT_EXTENSIONS = (".js", ".jsx", ".mjs", ".cjs")
 FRONTEND_PACKAGE_MANAGERS = {"npm", "bun", "pnpm", "yarn"}
@@ -834,8 +834,8 @@ def validate_frontend_check_command(command: str) -> None:
     if uses_javascript_linter(command):
         raise AgentError(
             "policy_rejected",
-            "Check command uses a JavaScript-based linter.",
-            "Use native frontend linting such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
+            "Check command uses JavaScript-based lint or format tooling.",
+            "Use native frontend checks such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
         )
     tokens = command_tokens(command)
     if has_frontend_install_command(tokens) and has_frontend_script_run(tokens, "typecheck") and has_frontend_script_run(tokens, "lint"):

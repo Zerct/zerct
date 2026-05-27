@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.12";
+const VERSION: &str = "0.1.13";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -23,7 +23,16 @@ const DEFAULT_RUST_CHECK_COMMAND: &str = "cargo fmt --all --check && cargo check
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
     "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str = "bun ci && bun run typecheck && bun run lint";
-const JAVASCRIPT_LINTERS: &[&str] = &["eslint", "eslint_d", "jscs", "jshint", "standard", "xo"];
+const JAVASCRIPT_LINTERS: &[&str] = &[
+    "eslint",
+    "eslint_d",
+    "jscs",
+    "jshint",
+    "prettier",
+    "prettierd",
+    "standard",
+    "xo",
+];
 const FRONTEND_SOURCE_ROOTS: &[&str] = &["src", "app", "pages", "routes", "components"];
 const FRONTEND_TYPESCRIPT_EXTENSIONS: &[&str] = &["ts", "tsx"];
 const FRONTEND_JAVASCRIPT_EXTENSIONS: &[&str] = &["js", "jsx", "mjs", "cjs"];
@@ -1321,8 +1330,8 @@ fn validate_frontend_check_command(command: &str) -> Result<(), AgentError> {
     if uses_javascript_linter(command) {
         return Err(AgentError::new(
             "policy_rejected",
-            "Check command uses a JavaScript-based linter.",
-            "Use native frontend linting such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
+            "Check command uses JavaScript-based lint or format tooling.",
+            "Use native frontend checks such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
         ));
     }
 

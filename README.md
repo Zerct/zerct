@@ -42,7 +42,7 @@ output = "dist"
 ```
 
 For new TanStack or Vite frontends, prefer fast native checks and avoid
-JavaScript-based linters:
+JavaScript-based lint or format tooling:
 
 ```sh
 bun add -d @typescript/native-preview oxlint
