@@ -22,12 +22,23 @@ packages/zerct/src/zerct.ts --version
 packages/zerct/src/zerct.ts --help | grep -q 'zerct support create'
 packages/zerct/src/zerct.ts --help | grep -q 'zerct support resolve'
 packages/zerct/src/zerct.ts --help | grep -q 'zerct billing checkout'
+if packages/zerct/src/zerct.ts --json --definitely-unknown >/tmp/zerct-unknown-flag.out 2>/tmp/zerct-unknown-flag.err; then
+  printf 'expected npm CLI unknown flag to fail\n' >&2
+  exit 1
+fi
+grep -q '"code": "unknown_argument"' /tmp/zerct-unknown-flag.err
+test "$(packages/zerct/src/zerct.ts -V)" = "$(packages/zerct/src/zerct.ts --version)"
 
 "$python_bin" -m compileall -q packages/zerct-py/src
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --version
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct support create'
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct support resolve'
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct billing checkout'
+if PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --json --definitely-unknown >/tmp/zerct-unknown-flag.out 2>/tmp/zerct-unknown-flag.err; then
+  printf 'expected Python CLI unknown flag to fail\n' >&2
+  exit 1
+fi
+grep -q '"code": "unknown_argument"' /tmp/zerct-unknown-flag.err
 
 cargo fmt --check --manifest-path crates/zerct/Cargo.toml
 cargo check --locked --manifest-path crates/zerct/Cargo.toml
@@ -36,6 +47,11 @@ cargo package --locked --manifest-path crates/zerct/Cargo.toml --allow-dirty --n
 cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct support create'
 cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct support resolve'
 cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct billing checkout'
+if cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --json --definitely-unknown >/tmp/zerct-unknown-flag.out 2>/tmp/zerct-unknown-flag.err; then
+  printf 'expected Cargo CLI unknown flag to fail\n' >&2
+  exit 1
+fi
+grep -q '"code": "unknown_argument"' /tmp/zerct-unknown-flag.err
 
 test -f examples/hello-rust/Cargo.lock
 cargo check --locked --manifest-path examples/hello-rust/Cargo.toml

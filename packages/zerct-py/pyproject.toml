@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zerct"
-version = "0.1.19"
+version = "0.1.20"
 description = "Deploy Rust backends and static frontends to Zerct."
 readme = "README.md"
 requires-python = ">=3.11"

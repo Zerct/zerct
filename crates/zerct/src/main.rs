@@ -6,9 +6,9 @@ use std::{
     process::{Command, ExitCode},
 };
 
-const VERSION: &str = "0.1.16";
+const VERSION: &str = "0.1.17";
 const NPM_PACKAGE: &str = "@zerct/zerct";
-const NPM_PACKAGE_VERSION: &str = "0.1.45";
+const NPM_PACKAGE_VERSION: &str = "0.1.46";
 
 fn main() -> ExitCode {
     match run() {
