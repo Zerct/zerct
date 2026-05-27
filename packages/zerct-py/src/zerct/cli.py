@@ -629,6 +629,8 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
         )
         checks.extend(frontend_source_checks(project_dir))
         checks.extend(frontend_script_checks(project_dir, config_valid))
+    else:
+        checks.append(cargo_lints(project_dir))
 
     unsafe_hits = scan_unsafe(project_dir)
     checks.append(
@@ -727,6 +729,42 @@ def cargo_clippy(project_dir: pathlib.Path) -> dict[str, Any]:
         "message": message,
         "agent_instruction": "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.",
     }
+
+
+def cargo_lints(project_dir: pathlib.Path) -> dict[str, Any]:
+    try:
+        source = (project_dir / "Cargo.toml").read_text(encoding="utf-8")
+    except OSError as error:
+        return {
+            "name": "cargo lints",
+            "ok": False,
+            "message": str(error),
+            "agent_instruction": "Create Cargo.toml with strict Rust lints, then retry.",
+        }
+
+    ok = cargo_lint_level(source, "unsafe_code") == "forbid" and cargo_lint_level(source, "warnings") == "deny"
+    return {
+        "name": "cargo lints",
+        "ok": ok,
+        "message": "strict" if ok else "missing unsafe_code=forbid or warnings=deny",
+        "agent_instruction": 'Add `[lints.rust]` with `unsafe_code = "forbid"` and `warnings = "deny"`, then retry.',
+    }
+
+
+def cargo_lint_level(source: str, lint_name: str) -> str:
+    section = ""
+    for raw_line in source.splitlines():
+        line = raw_line.split("#", 1)[0].strip()
+        section_match = re.match(r"^\[([^\]]+)\]$", line)
+        if section_match:
+            section = section_match.group(1)
+            continue
+        if section not in {"lints.rust", "workspace.lints.rust"}:
+            continue
+        assignment = re.match(r'^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]+)"|\{[^}]*level\s*=\s*"([^"]+)")', line)
+        if assignment and assignment.group(1) == lint_name:
+            return assignment.group(2) or assignment.group(3) or ""
+    return ""
 
 
 def parse_config(path: pathlib.Path) -> dict[str, Any]:

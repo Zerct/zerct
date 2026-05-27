@@ -72,6 +72,8 @@ tighten these rules.
    files.
 9. Rust backend and static frontend deploy behavior must stay aligned across
    npm, PyPI, Cargo, skills, docs, and examples. Any custom Rust
+   backend must declare `[lints.rust]` or `[workspace.lints.rust]` with
+   `unsafe_code = "forbid"` and `warnings = "deny"`. Any custom Rust
    `[build].check` must include `cargo fmt --all --check`, locked
    `cargo check`, and locked all-target, all-feature Clippy with
    `-D warnings`; any custom static frontend `[build].check` must install

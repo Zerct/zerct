@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.13";
+const VERSION: &str = "0.1.14";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -974,6 +974,8 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
         });
         checks.extend(frontend_source_checks(project_dir));
         checks.extend(frontend_script_checks(project_dir, config.is_some()));
+    } else {
+        checks.push(cargo_lints(project_dir));
     }
 
     let unsafe_hits = scan_unsafe(project_dir);
@@ -1004,6 +1006,72 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
         config,
         checks,
     }
+}
+
+fn cargo_lints(project_dir: &Path) -> Check {
+    let source = match fs::read_to_string(project_dir.join("Cargo.toml")) {
+        Ok(source) => source,
+        Err(error) => {
+            return Check {
+                name: "cargo lints".to_owned(),
+                ok: false,
+                message: error.to_string(),
+                agent_instruction: "Create Cargo.toml with strict Rust lints, then retry."
+                    .to_owned(),
+            };
+        }
+    };
+    let ok = cargo_lint_level(&source, "unsafe_code").as_deref() == Some("forbid")
+        && cargo_lint_level(&source, "warnings").as_deref() == Some("deny");
+
+    Check {
+        name: "cargo lints".to_owned(),
+        ok,
+        message: if ok {
+            "strict".to_owned()
+        } else {
+            "missing unsafe_code=forbid or warnings=deny".to_owned()
+        },
+        agent_instruction:
+            "Add `[lints.rust]` with `unsafe_code = \"forbid\"` and `warnings = \"deny\"`, then retry."
+                .to_owned(),
+    }
+}
+
+fn cargo_lint_level(source: &str, lint_name: &str) -> Option<String> {
+    let mut section = "";
+    for raw_line in source.lines() {
+        let line = raw_line.split('#').next().unwrap_or_default().trim();
+        if let Some(section_name) = line
+            .strip_prefix('[')
+            .and_then(|rest| rest.strip_suffix(']'))
+        {
+            section = section_name;
+            continue;
+        }
+        if section != "lints.rust" && section != "workspace.lints.rust" {
+            continue;
+        }
+        let Some((key, value)) = line.split_once('=') else {
+            continue;
+        };
+        if key.trim() == lint_name {
+            return cargo_lint_value_level(value.trim());
+        }
+    }
+
+    None
+}
+
+fn cargo_lint_value_level(value: &str) -> Option<String> {
+    if let Some(level) = parse_json_string(value) {
+        return Some(level);
+    }
+
+    let level_start = value.find("level")?;
+    let after_level = &value[level_start + "level".len()..];
+    let (_key, value) = after_level.split_once('=')?;
+    parse_json_string(value.trim())
 }
 
 fn detect_project_kind(project_dir: &Path) -> String {
