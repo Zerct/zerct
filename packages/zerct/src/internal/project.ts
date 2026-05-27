@@ -20,20 +20,6 @@ function isSafeRelativePath(value: string | undefined): value is string {
     && value.split('/').every((part) => part && part !== '.' && part !== '..')
 }
 
-function scanUnsafe(projectDir: string): string[] {
-  const hits: string[] = []
-  walkProjectFiles(projectDir, (file, relative) => {
-    if (!file.endsWith('.rs')) {
-      return
-    }
-    const source = readFileSync(file, 'utf8')
-    if (/\bunsafe\b/u.test(source)) {
-      hits.push(relative)
-    }
-  })
-  return hits
-}
-
 function walkProjectFiles(projectDir: string, visit: FileVisitor): void {
   walk(projectDir, (file) => {
     visit(file, path.relative(projectDir, file).replace(/\\/gu, '/'))
@@ -144,4 +130,4 @@ function progress(cli: CliOptions, message: string): void {
   console.log(message)
 }
 
-export { hasCommand, isSafeRelativePath, scanUnsafe, walkProjectFiles, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, inferProjectKind, readPackageJson, printJson, openUrl, sleep, progress }
+export { hasCommand, isSafeRelativePath, walkProjectFiles, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, inferProjectKind, readPackageJson, printJson, openUrl, sleep, progress }

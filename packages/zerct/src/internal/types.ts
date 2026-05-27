@@ -99,6 +99,11 @@ export interface DeployProjectInfo {
   kind: DiscoveredProjectKind
 }
 
+export interface DeployPlanProject {
+  project: DeployProjectInfo
+  wantsDatabase: boolean
+}
+
 export interface FrontendSourceReport {
   typescript: string[]
   javascript: string[]

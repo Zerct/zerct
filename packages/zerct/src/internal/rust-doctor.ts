@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import { scanUnsafe } from './project.ts'
+import { walkProjectFiles } from './project.ts'
 import type { DoctorCheck } from './types.ts'
 
 interface CargoCheckSpec {
@@ -27,6 +27,20 @@ function unsafeCheck(projectDir: string): DoctorCheck {
     message: unsafeHits.length === 0 ? 'no direct unsafe found' : unsafeHits.slice(0, 5).join(', '),
     agent_instruction: 'Remove direct unsafe usage from workspace Rust source before deploying.'
   }
+}
+
+function scanUnsafe(projectDir: string): string[] {
+  const hits: string[] = []
+  walkProjectFiles(projectDir, (file, relative) => {
+    if (!file.endsWith('.rs')) {
+      return
+    }
+    const source = readFileSync(file, 'utf8')
+    if (/\bunsafe\b/u.test(source)) {
+      hits.push(relative)
+    }
+  })
+  return hits
 }
 
 function cargoCheck(projectDir: string): DoctorCheck {
