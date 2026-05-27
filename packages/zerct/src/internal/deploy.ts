@@ -84,7 +84,7 @@ async function preflightDeployLimits(projects: DeployProjectInfo[], cli: CliOpti
   const usageRoot = jsonObjectOrEmpty(usageResponse)
   const usage = jsonObjectField(usageRoot, 'usage')
   const limits = jsonObjectField(usageRoot, 'limits')
-  const apps = appsResponseFromJson(appsResponse).apps ?? []
+  const apps = appsResponseFromJson(appsResponse).apps
   const existingApps = new Map<string, AppSummary>()
   for (const app of apps) {
     if (app.name) {

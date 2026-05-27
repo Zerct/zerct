@@ -120,8 +120,8 @@ function isStringRecord(value: unknown): value is Record<string, string | undefi
   return isRecord(value) && Object.values(value).every((entry) => entry === undefined || typeof entry === 'string')
 }
 
-function printJsonOrPretty(cli: CliOptions, value: JsonValue | null): void {
-  console.log(JSON.stringify(value, null, cli.json ? 2 : 2))
+function printJson(value: JsonValue | null): void {
+  console.log(JSON.stringify(value, null, 2))
 }
 
 function openUrl(url: string): void {
@@ -144,4 +144,4 @@ function progress(cli: CliOptions, message: string): void {
   console.log(message)
 }
 
-export { hasCommand, isSafeRelativePath, scanUnsafe, walkProjectFiles, walk, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, serviceNameFromValue, inferProjectKind, readPackageJson, isPackageManifest, isRecord, isStringRecord, printJsonOrPretty, openUrl, sleep, progress }
+export { hasCommand, isSafeRelativePath, scanUnsafe, walkProjectFiles, walk, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, serviceNameFromValue, inferProjectKind, readPackageJson, isPackageManifest, isRecord, isStringRecord, printJson, openUrl, sleep, progress }

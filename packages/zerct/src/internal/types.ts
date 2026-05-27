@@ -138,7 +138,7 @@ export interface UsageResponse extends JsonObject {
 }
 
 export interface AppsResponse extends JsonObject {
-  apps?: AppSummary[]
+  apps: AppSummary[]
 }
 
 export interface BuildJob extends JsonObject {
@@ -179,9 +179,9 @@ export interface LogLine extends JsonObject {
 }
 
 export interface LogsResponse extends JsonObject {
-  lines?: LogLine[]
-  has_more?: boolean
-  next_cursor?: string
+  lines: LogLine[]
+  has_more: boolean
+  next_cursor: string
 }
 
 export interface CheckoutResponse extends JsonObject {

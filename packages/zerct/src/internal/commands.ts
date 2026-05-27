@@ -1,7 +1,7 @@
 import { agentError } from './errors.ts'
 import { apiRequest, appGet, isJsonObject, jsonArrayField, jsonObjectField, jsonObjectOrEmpty, pageQuery, requireApp, stringField } from './api.ts'
 import { readOrLoginToken } from './auth.ts'
-import { openUrl, printJsonOrPretty } from './project.ts'
+import { openUrl, printJson } from './project.ts'
 import type { CheckoutResponse, CliOptions, JsonObject, JsonValue, LogLine, LogsResponse } from './types.ts'
 
 interface LogsRequest {
@@ -17,7 +17,7 @@ async function logs(cli: CliOptions): Promise<void> {
     console.log(JSON.stringify(response, null, 2))
     return
   }
-  for (const line of response.lines ?? []) {
+  for (const line of response.lines) {
     console.log(`[${line.timestamp}] ${line.stream}: ${line.message}`)
   }
   if (response.has_more && response.next_cursor) {
@@ -53,7 +53,7 @@ async function apps(cli: CliOptions): Promise<void> {
 
 async function capabilities(cli: CliOptions): Promise<void> {
   const response = await apiRequest(cli, 'GET', '/v1/capabilities', null, null)
-  printJsonOrPretty(cli, response)
+  printJson(response)
 }
 
 async function me(cli: CliOptions): Promise<void> {
@@ -88,20 +88,20 @@ async function builds(cli: CliOptions): Promise<void> {
 }
 
 async function status(cli: CliOptions): Promise<void> {
-  printJsonOrPretty(cli, await appGet(cli, 'status'))
+  printJson(await appGet(cli, 'status'))
 }
 
 async function inspect(cli: CliOptions): Promise<void> {
-  printJsonOrPretty(cli, await appGet(cli, 'inspect'))
+  printJson(await appGet(cli, 'inspect'))
 }
 
 async function database(cli: CliOptions): Promise<void> {
-  printJsonOrPretty(cli, await appGet(cli, 'database'))
+  printJson(await appGet(cli, 'database'))
 }
 
 async function envCommand(cli: CliOptions): Promise<void> {
   if (cli.args[0] === 'list') {
-    printJsonOrPretty(cli, await appGet(cli, 'env'))
+    printJson(await appGet(cli, 'env'))
     return
   }
 
@@ -113,7 +113,7 @@ async function envCommand(cli: CliOptions): Promise<void> {
     const token = await readOrLoginToken(process.cwd(), cli)
     const app = requireApp(cli)
     const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/env/${encodeURIComponent(name)}`, token, null)
-    printJsonOrPretty(cli, response)
+    printJson(response)
     return
   }
 
@@ -132,13 +132,13 @@ async function envCommand(cli: CliOptions): Promise<void> {
   const token = await readOrLoginToken(process.cwd(), cli)
   const app = requireApp(cli)
   const response = await apiRequest(cli, 'PUT', `/v1/apps/${encodeURIComponent(app)}/env`, token, { name, value })
-  printJsonOrPretty(cli, response)
+  printJson(response)
 }
 
 async function domainsCommand(cli: CliOptions): Promise<void> {
   const action = cli.args[0] ?? 'list'
   if (action === 'list') {
-    printJsonOrPretty(cli, await appGet(cli, 'domains'))
+    printJson(await appGet(cli, 'domains'))
     return
   }
 
@@ -151,17 +151,17 @@ async function domainsCommand(cli: CliOptions): Promise<void> {
   const app = requireApp(cli)
   if (action === 'add') {
     const response = await apiRequest(cli, 'POST', `/v1/apps/${encodeURIComponent(app)}/domains`, token, { domain })
-    printJsonOrPretty(cli, response)
+    printJson(response)
     return
   }
   if (action === 'verify') {
     const response = await apiRequest(cli, 'POST', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}/verify`, token, null)
-    printJsonOrPretty(cli, response)
+    printJson(response)
     return
   }
   if (action === 'delete') {
     const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}`, token, null)
-    printJsonOrPretty(cli, response)
+    printJson(response)
     return
   }
 
@@ -186,7 +186,7 @@ async function billing(cli: CliOptions): Promise<void> {
 async function printAuthenticated(cli: CliOptions, route: string): Promise<void> {
   const token = await readOrLoginToken(process.cwd(), cli)
   const response = await apiRequest(cli, 'GET', route, token, null)
-  printJsonOrPretty(cli, response)
+  printJson(response)
 }
 
 function logsResponse(value: JsonValue | null): LogsResponse {
