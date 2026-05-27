@@ -12,7 +12,7 @@ import sys
 from . import __version__
 
 NPM_PACKAGE = "@zerct/zerct"
-NPM_PACKAGE_VERSION = "0.1.45"
+NPM_PACKAGE_VERSION = "0.1.46"
 NPM_PACKAGE_SPEC = f"{NPM_PACKAGE}@{NPM_PACKAGE_VERSION}"
 
 

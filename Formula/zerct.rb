@@ -1,8 +1,8 @@
 class Zerct < Formula
   desc "Deploy Rust backends and static frontends to Zerct"
   homepage "https://zerct.com"
-  url "https://registry.npmjs.org/@zerct/zerct/-/zerct-0.1.45.tgz"
-  sha256 "9b818ddb956dce6be0311229ae450a9f1c0034c09eeb2129bb97599d532a85de"
+  url "https://registry.npmjs.org/@zerct/zerct/-/zerct-0.1.46.tgz"
+  sha256 "66afcb46c07278a4074ac7c3de1e3e626127427f7e4c4f3f710ee442f765626c"
   license "MIT"
 
   depends_on "node"

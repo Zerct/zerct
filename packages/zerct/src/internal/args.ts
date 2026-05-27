@@ -13,6 +13,7 @@ const FLAG_HANDLERS = new Map<string, FlagHandler>([
   ['-h', booleanOption('help', true)],
   ['--version', booleanOption('version', true)],
   ['-v', booleanOption('version', true)],
+  ['-V', booleanOption('version', true)],
   ['--json', booleanOption('json', true)],
   ['--database', booleanOption('database', true)],
   ['--no-database', booleanOption('database', false)],
@@ -59,9 +60,15 @@ function parseArgs(argv: string[]): CliOptions {
   const positional: string[] = []
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index] ?? ''
+    if (arg === '--') {
+      positional.push(...argv.slice(index + 1))
+      break
+    }
     const handler = FLAG_HANDLERS.get(arg)
     if (handler) {
       index = handler(cli, argv, index)
+    } else if (arg.startsWith('-')) {
+      throw unknownFlag(cli, arg)
     } else {
       positional.push(arg)
     }
@@ -111,6 +118,15 @@ function requireValue(argv: readonly string[], index: number, name: string): str
     throw agentError('missing_argument', `${name} requires a value.`, `Pass a value after ${name}.`, false)
   }
   return value
+}
+
+function unknownFlag(cli: CliOptions, value: string): never {
+  throw agentError(
+    'unknown_argument',
+    `Unknown Zerct option: ${value}.`,
+    'Run `npx @zerct/zerct --help`, remove or correct the unsupported option, then retry.',
+    cli.json
+  )
 }
 
 function projectPath(value: string | undefined): string {
