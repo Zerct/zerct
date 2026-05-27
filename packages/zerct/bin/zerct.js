@@ -5,7 +5,7 @@ import { createServer } from 'node:http'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.19'
+const VERSION = '0.1.20'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -656,6 +656,8 @@ function runDoctor(projectDir) {
     })
     checks.push(...frontendSourceChecks(projectDir))
     checks.push(...frontendScriptChecks(projectDir, configValid))
+  } else {
+    checks.push(cargoLints(projectDir))
   }
 
   const unsafeHits = scanUnsafe(projectDir)
@@ -751,6 +753,51 @@ function cargoClippy(projectDir) {
     message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo clippy failed').trim().slice(0, 240),
     agent_instruction: 'Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.'
   }
+}
+
+function cargoLints(projectDir) {
+  const cargoToml = path.join(projectDir, 'Cargo.toml')
+  let source = ''
+  try {
+    source = readFileSync(cargoToml, 'utf8')
+  } catch (error) {
+    return {
+      name: 'cargo lints',
+      ok: false,
+      message: error.message,
+      agent_instruction: 'Create Cargo.toml with strict Rust lints, then retry.'
+    }
+  }
+
+  const ok = cargoLintLevel(source, 'unsafe_code') === 'forbid' &&
+    cargoLintLevel(source, 'warnings') === 'deny'
+  return {
+    name: 'cargo lints',
+    ok,
+    message: ok ? 'strict' : 'missing unsafe_code=forbid or warnings=deny',
+    agent_instruction: 'Add `[lints.rust]` with `unsafe_code = "forbid"` and `warnings = "deny"`, then retry.'
+  }
+}
+
+function cargoLintLevel(source, lintName) {
+  let section = ''
+  for (const rawLine of source.split(/\r?\n/u)) {
+    const line = rawLine.replace(/#.*/u, '').trim()
+    const sectionMatch = line.match(/^\[([^\]]+)\]$/u)
+    if (sectionMatch) {
+      section = sectionMatch[1]
+      continue
+    }
+    if (section !== 'lints.rust' && section !== 'workspace.lints.rust') {
+      continue
+    }
+    const assignment = line.match(/^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]+)"|\{[^}]*level\s*=\s*"([^"]+)")/u)
+    if (assignment?.[1] === lintName) {
+      return assignment[2] || assignment[3] || ''
+    }
+  }
+
+  return ''
 }
 
 async function login(cli) {
