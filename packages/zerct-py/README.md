@@ -1,6 +1,8 @@
 # zerct
 
 Python CLI package for deploying Rust backends and static frontends to Zerct.
+It delegates to the npm Zerct CLI so PyPI stays aligned with the primary
+agent command surface.
 
 ```sh
 pipx install zerct
@@ -25,6 +27,8 @@ The npm package remains the primary first install path:
 ```sh
 npx @zerct/zerct deploy
 ```
+
+Python installs require Node.js 18+ with `npx` available at runtime.
 
 The Python package exposes the same agent command surface as npm:
 

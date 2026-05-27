@@ -60,11 +60,13 @@ tighten these rules.
 4. Keep `packages/zerct` dependency-free unless a dependency removes real
    complexity and is maintained, small, and necessary.
 5. Keep `packages/zerct` as the CLI behavior source of truth. PyPI and Cargo
-   CLIs must expose the same agent-facing command surface as npm, including
-   login, init, doctor, preview, deploy, wait, capabilities, identity, usage,
-   activity, apps, overview, deploys, builds, logs, status, inspect, database,
-   env, domains, and billing portal commands. SDKs and skills must document the
-   same contract.
+   CLIs are thin delegates to the npm CLI so they expose the same agent-facing
+   command surface without reimplementing login, init, doctor, preview, deploy,
+   wait, capabilities, identity, usage, activity, apps, overview, deploys,
+   builds, logs, status, inspect, database, env, domains, and billing portal
+   behavior. SDKs and skills must document the same contract.
+   The npm `bin/zerct.js` file must stay a small dispatcher; feature logic
+   belongs in focused `bin/internal/` modules.
 6. Package CLIs must not print tokens, env values, database URLs, provider
    secrets, or Stripe/Cloudflare values. Print safe presence, status, ids, and
    public URLs only.

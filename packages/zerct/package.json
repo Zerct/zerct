@@ -34,7 +34,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "check": "node --check bin/zerct.js",
+    "check": "node --check bin/zerct.js && for file in bin/internal/*.js; do node --check \"$file\"; done",
     "pack:dry": "npm pack --dry-run"
   }
 }

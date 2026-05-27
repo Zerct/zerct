@@ -4,8 +4,12 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
+export ZERCT_NPM_CLI="$repo_root/packages/zerct/bin/zerct.js"
 
 node --check packages/zerct/bin/zerct.js
+for file in packages/zerct/bin/internal/*.js; do
+  node --check "$file"
+done
 node scripts/check-package-versions.mjs
 node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
