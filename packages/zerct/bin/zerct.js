@@ -5,7 +5,7 @@ import { createServer } from 'node:http'
 import { homedir } from 'node:os'
 import path from 'node:path'
 
-const VERSION = '0.1.20'
+const VERSION = '0.1.21'
 const DEFAULT_API_URL = 'https://api.zerct.com'
 const ARCHIVE_LIMIT_BYTES = 48 * 1024 * 1024
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
@@ -682,56 +682,34 @@ function runDoctor(projectDir) {
 }
 
 function cargoCheck(projectDir) {
-  const cargo = spawnSync('cargo', ['check', '--locked', '--quiet'], {
-    cwd: projectDir,
-    encoding: 'utf8',
-    env: { ...process.env, CARGO_TERM_COLOR: 'never' },
-    stdio: ['ignore', 'pipe', 'pipe']
-  })
-
-  if (cargo.error) {
-    return {
-      name: 'cargo check',
-      ok: false,
-      message: cargo.error.message,
-      agent_instruction: 'Install Rust and Cargo, then run `cargo check --locked` locally before deploying.'
-    }
-  }
-
-  return {
+  return cargoCommandCheck(projectDir, {
     name: 'cargo check',
-    ok: cargo.status === 0,
-    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo check failed').trim().slice(0, 240),
-    agent_instruction: 'Run `cargo check --locked`, fix every compiler error and warning, then redeploy.'
-  }
+    args: ['check', '--locked', '--quiet'],
+    missing: 'Install Rust and Cargo, then run `cargo check --locked` locally before deploying.',
+    failed: 'Run `cargo check --locked`, fix every compiler error and warning, then redeploy.'
+  })
 }
 
 function cargoFmt(projectDir) {
-  const cargo = spawnSync('cargo', ['fmt', '--all', '--check'], {
-    cwd: projectDir,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe']
-  })
-
-  if (cargo.error) {
-    return {
-      name: 'cargo fmt',
-      ok: false,
-      message: cargo.error.message,
-      agent_instruction: 'Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.'
-    }
-  }
-
-  return {
+  return cargoCommandCheck(projectDir, {
     name: 'cargo fmt',
-    ok: cargo.status === 0,
-    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo fmt failed').trim().slice(0, 240),
-    agent_instruction: 'Run `cargo fmt --all`, then redeploy.'
-  }
+    args: ['fmt', '--all', '--check'],
+    missing: 'Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.',
+    failed: 'Run `cargo fmt --all`, then redeploy.'
+  })
 }
 
 function cargoClippy(projectDir) {
-  const cargo = spawnSync('cargo', ['clippy', '--locked', '--all-targets', '--all-features', '--quiet', '--', '-D', 'warnings'], {
+  return cargoCommandCheck(projectDir, {
+    name: 'cargo clippy',
+    args: ['clippy', '--locked', '--all-targets', '--all-features', '--quiet', '--', '-D', 'warnings'],
+    missing: 'Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.',
+    failed: 'Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.'
+  })
+}
+
+function cargoCommandCheck(projectDir, check) {
+  const cargo = spawnSync('cargo', check.args, {
     cwd: projectDir,
     encoding: 'utf8',
     env: { ...process.env, CARGO_TERM_COLOR: 'never' },
@@ -740,18 +718,18 @@ function cargoClippy(projectDir) {
 
   if (cargo.error) {
     return {
-      name: 'cargo clippy',
+      name: check.name,
       ok: false,
       message: cargo.error.message,
-      agent_instruction: 'Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.'
+      agent_instruction: check.missing
     }
   }
 
   return {
-    name: 'cargo clippy',
+    name: check.name,
     ok: cargo.status === 0,
-    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || 'cargo clippy failed').trim().slice(0, 240),
-    agent_instruction: 'Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.'
+    message: cargo.status === 0 ? 'passed' : (cargo.stderr || cargo.stdout || `${check.name} failed`).trim().slice(0, 240),
+    agent_instruction: check.failed
   }
 }
 
