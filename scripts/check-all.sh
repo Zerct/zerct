@@ -14,15 +14,28 @@ node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
 scripts/check-openapi.sh
+ruby -c Formula/zerct.rb >/dev/null
+if command -v brew >/dev/null 2>&1; then
+  brew style Formula/zerct.rb
+fi
 packages/zerct/src/zerct.ts --version
+packages/zerct/src/zerct.ts --help | grep -q 'zerct support create'
+packages/zerct/src/zerct.ts --help | grep -q 'zerct support resolve'
+packages/zerct/src/zerct.ts --help | grep -q 'zerct billing checkout'
 
 "$python_bin" -m compileall -q packages/zerct-py/src
 PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --version
+PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct support create'
+PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct support resolve'
+PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct billing checkout'
 
 cargo fmt --check --manifest-path crates/zerct/Cargo.toml
 cargo check --locked --manifest-path crates/zerct/Cargo.toml
 cargo clippy --locked --manifest-path crates/zerct/Cargo.toml --all-targets --all-features -- -D warnings
 cargo package --locked --manifest-path crates/zerct/Cargo.toml --allow-dirty --no-verify >/dev/null
+cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct support create'
+cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct support resolve'
+cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct billing checkout'
 
 test -f examples/hello-rust/Cargo.lock
 cargo check --locked --manifest-path examples/hello-rust/Cargo.toml

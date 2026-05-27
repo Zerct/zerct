@@ -9,12 +9,12 @@ description: "Official Zerct package surfaces."
 npx @zerct/zerct deploy
 ```
 
-`@zerct/zerct` is the live npm package. The unscoped `zerct` package is the
-company package target.
+`@zerct/zerct` is the live npm package and the source of truth for the PyPI,
+Cargo, and Homebrew wrappers.
 
 All official package CLIs expose the same agent commands for login, doctor,
 preview, deploy, wait, capabilities, account usage, apps, deploys, builds,
-logs, env, domains, and billing.
+logs, env, domains, billing, and support.
 
 The agent repair loop is the same on every package surface:
 
@@ -22,6 +22,9 @@ The agent repair loop is the same on every package surface:
 zerct doctor --json
 zerct deploy --wait --json
 zerct logs --build job_1 --json
+zerct billing checkout --json
+zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+zerct support resolve ticket_0123456789abcdef0123 --json
 ```
 
 Fix `agent_instruction` first. If a build fails, fix the first actionable log
@@ -30,7 +33,7 @@ line, rerun doctor, then redeploy.
 ## Homebrew
 
 ```sh
-brew tap Zerct/tap
+brew tap Zerct/zerct https://github.com/Zerct/zerct
 brew install zerct
 zerct deploy
 ```
@@ -42,6 +45,9 @@ pipx install zerct
 zerct deploy --wait
 zerct logs --build job_1 --json
 zerct domains verify --app app_1 api.example.com
+zerct billing checkout --json
+zerct support create "Deploy failed" "Command, ids, and first actionable log line." --json
+zerct support resolve ticket_0123456789abcdef0123 --json
 ```
 
 ## crates.io
@@ -50,5 +56,7 @@ zerct domains verify --app app_1 api.example.com
 cargo install zerct
 zerct deploy --wait
 zerct logs --deploy deploy_1 --json
-zerct billing portal
+zerct billing checkout --json
+zerct support list --json
+zerct support resolve ticket_0123456789abcdef0123 --json
 ```

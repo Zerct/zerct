@@ -1815,6 +1815,190 @@
           }
         }
       }
+    },
+    "/v1/billing/checkout": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create subscription checkout link",
+        "description": "Create a Stripe-hosted subscription Checkout URL for Zerct Pro. Context: paths./v1/billing/checkout.post.",
+        "operationId": "createBillingCheckout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BillingCheckoutRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Create Pro checkout",
+                  "value": {
+                    "target_plan": "pro",
+                    "reason": "Project limit reached"
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body describing the target plan and agent-readable checkout reason. Context: paths./v1/billing/checkout.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/BillingCheckoutCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/support/tickets": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "List support tickets",
+        "description": "List recent support tickets for the authenticated account. Context: paths./v1/support/tickets.get.",
+        "operationId": "listSupportTickets",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "format": "int32"
+            },
+            "description": "Maximum number of tickets to return. Context: paths./v1/support/tickets.get.parameters.limit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SupportTicketsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create support ticket",
+        "description": "Create a rate-limited support ticket with agent-readable details. Context: paths./v1/support/tickets.post.",
+        "operationId": "createSupportTicket",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportTicketCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Create support ticket",
+                  "value": {
+                    "subject": "Deploy failed",
+                    "details": "Command: npx @zerct/zerct deploy --wait --json. App: app_1. Build: job_1. First log error: cargo check failed.",
+                    "app_id": "app_1",
+                    "severity": "normal"
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body describing the support issue, optional app, and optional severity. Context: paths./v1/support/tickets.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SupportTicketCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/support/tickets/{ticket_id}/resolve": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Resolve support ticket",
+        "description": "Mark an authenticated account support ticket resolved after the agent fixes the issue. Context: paths./v1/support/tickets/{ticket_id}/resolve.post.",
+        "operationId": "resolveSupportTicket",
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^ticket_[a-f0-9]{20}$",
+              "maxLength": 27
+            },
+            "description": "Support ticket id returned by support list or create. Context: paths./v1/support/tickets/{ticket_id}/resolve.post.parameters.ticket_id.",
+            "examples": {
+              "example": {
+                "summary": "Ticket id",
+                "value": "ticket_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SupportTicketResolved"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3455,6 +3639,216 @@
                   ],
                   "agent_instruction": "Retry the command. If it keeps failing, check Zerct status before changing your project.",
                   "docs_url": "https://docs.zerct.com/status"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BillingCheckoutCreated": {
+        "description": "Billing checkout created. Context: components.responses.BillingCheckoutCreated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BillingCheckoutResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Billing checkout created.",
+                "value": {
+                  "checkout": {
+                    "url": "https://checkout.stripe.com/c/pay/cs_test_123",
+                    "reason": "Project limit reached"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "SupportTicketCreated": {
+        "description": "Support ticket created. Context: components.responses.SupportTicketCreated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicketCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Support ticket created.",
+                "value": {
+                  "ticket": {
+                    "id": "ticket_0123456789abcdef0123",
+                    "app_id": "app_1",
+                    "subject": "Deploy failed",
+                    "details": "Command, ids, and first actionable log line.",
+                    "severity": "normal",
+                    "status": "open",
+                    "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                    "created_at": "2026-05-27T12:00:00Z",
+                    "updated_at": "2026-05-27T12:00:00Z"
+                  },
+                  "rate_limit": {
+                    "limitPerHour": 3,
+                    "remainingHour": 2,
+                    "limitPerDay": 10,
+                    "remainingDay": 9
+                  },
+                  "next_command": "npx @zerct/zerct support list --json"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "SupportTicketsLoaded": {
+        "description": "Support tickets loaded. Context: components.responses.SupportTicketsLoaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicketsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Support tickets loaded.",
+                "value": {
+                  "tickets": [
+                    {
+                      "id": "ticket_0123456789abcdef0123",
+                      "app_id": "app_1",
+                      "subject": "Deploy failed",
+                      "details": "Command, ids, and first actionable log line.",
+                      "severity": "normal",
+                      "status": "open",
+                      "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                      "created_at": "2026-05-27T12:00:00Z",
+                      "updated_at": "2026-05-27T12:00:00Z"
+                    }
+                  ],
+                  "rate_limit": {
+                    "limitPerHour": 3,
+                    "remainingHour": 2,
+                    "limitPerDay": 10,
+                    "remainingDay": 9
+                  }
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "SupportTicketResolved": {
+        "description": "Support ticket resolved. Context: components.responses.SupportTicketResolved.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicket"
+            },
+            "examples": {
+              "example": {
+                "summary": "Support ticket resolved.",
+                "value": {
+                  "id": "ticket_0123456789abcdef0123",
+                  "app_id": "app_1",
+                  "subject": "Deploy failed",
+                  "details": "Command, ids, and first actionable log line.",
+                  "severity": "normal",
+                  "status": "resolved",
+                  "agent_instruction": "Ticket resolved. Run `npx @zerct/zerct support list --json` to confirm status, and create a new ticket only if the issue returns with fresh command output.",
+                  "created_at": "2026-05-27T12:00:00Z",
+                  "updated_at": "2026-05-27T12:00:00Z"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "NotFound": {
+        "description": "The requested resource was not found for the authenticated account. Context: components.responses.NotFound.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "notFound": {
+                "summary": "Resource not found",
+                "value": {
+                  "code": "policy_rejected",
+                  "message": "Resource was not found for this account.",
+                  "agent_instruction": "List resources, pick an id from that response, and retry.",
+                  "docs_url": "https://docs.zerct.com",
+                  "checkout_url": null
                 }
               }
             }
@@ -7466,6 +7860,393 @@
             ],
             "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
             "docs_url": "https://docs.zerct.com/status"
+          }
+        ]
+      },
+      "BillingCheckoutRequest": {
+        "type": "object",
+        "description": "Billing checkout request. Context: components.schemas.BillingCheckoutRequest.",
+        "additionalProperties": false,
+        "required": [
+          "target_plan",
+          "reason"
+        ],
+        "properties": {
+          "target_plan": {
+            "$ref": "#/components/schemas/Plan",
+            "description": "Target billing plan. Context: components.schemas.BillingCheckoutRequest.properties.target_plan."
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Agent-readable reason for creating checkout. Context: components.schemas.BillingCheckoutRequest.properties.reason.",
+            "examples": [
+              "Project limit reached"
+            ],
+            "pattern": "^[\\s\\S]{1,512}$"
+          }
+        },
+        "examples": [
+          {
+            "target_plan": "pro",
+            "reason": "Project limit reached"
+          }
+        ]
+      },
+      "SupportTicketSeverity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "normal",
+          "urgent"
+        ],
+        "description": "Support ticket severity. Context: components.schemas.SupportTicketSeverity.",
+        "examples": [
+          "normal"
+        ]
+      },
+      "SupportTicketStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "in_progress",
+          "resolved"
+        ],
+        "description": "Support ticket status. Context: components.schemas.SupportTicketStatus.",
+        "examples": [
+          "open"
+        ]
+      },
+      "SupportTicketCreateRequest": {
+        "type": "object",
+        "description": "Request body for creating a support ticket. Context: components.schemas.SupportTicketCreateRequest.",
+        "additionalProperties": false,
+        "required": [
+          "subject",
+          "details"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
+            "description": "Short one-line issue summary. Context: components.schemas.SupportTicketCreateRequest.properties.subject.",
+            "examples": [
+              "Deploy failed"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,160}$"
+          },
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Agent-readable details, commands, ids, first log line, and attempted fixes. Context: components.schemas.SupportTicketCreateRequest.properties.details.",
+            "examples": [
+              "Command, app id, build id, deploy id, and first actionable log line."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          },
+          "app_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional related app id or app name. Context: components.schemas.SupportTicketCreateRequest.properties.app_id.",
+            "examples": [
+              "app_1"
+            ],
+            "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "maxLength": 64
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SupportTicketSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional ticket severity. Missing means normal. Context: components.schemas.SupportTicketCreateRequest.properties.severity."
+          }
+        },
+        "examples": [
+          {
+            "subject": "Deploy failed",
+            "details": "Command, ids, and first actionable log line.",
+            "app_id": "app_1",
+            "severity": "normal"
+          }
+        ]
+      },
+      "SupportTicket": {
+        "type": "object",
+        "description": "Support ticket returned to users and agents. Context: components.schemas.SupportTicket.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "app_id",
+          "subject",
+          "details",
+          "severity",
+          "status",
+          "agent_instruction",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable ticket id. Context: components.schemas.SupportTicket.properties.id.",
+            "examples": [
+              "ticket_0123456789abcdef0123"
+            ],
+            "pattern": "^ticket_[a-f0-9]{20}$",
+            "maxLength": 27
+          },
+          "app_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Related app id. Context: components.schemas.SupportTicket.properties.app_id.",
+            "examples": [
+              "app_1"
+            ],
+            "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "maxLength": 64
+          },
+          "subject": {
+            "type": "string",
+            "description": "Short one-line issue summary. Context: components.schemas.SupportTicket.properties.subject.",
+            "examples": [
+              "Deploy failed"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,160}$",
+            "maxLength": 160
+          },
+          "details": {
+            "type": "string",
+            "description": "Agent-readable details. Context: components.schemas.SupportTicket.properties.details.",
+            "examples": [
+              "Command, ids, and first actionable log line."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$",
+            "maxLength": 8000
+          },
+          "severity": {
+            "$ref": "#/components/schemas/SupportTicketSeverity"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SupportTicketStatus"
+          },
+          "agent_instruction": {
+            "type": "string",
+            "description": "Next step for the user agent. Context: components.schemas.SupportTicket.properties.agent_instruction.",
+            "examples": [
+              "Continue with npx @zerct/zerct overview --app app_1 --json."
+            ],
+            "pattern": "^[\\s\\S]{1,500}$",
+            "maxLength": 500
+          },
+          "created_at": {
+            "type": "string",
+            "description": "UTC creation time. Context: components.schemas.SupportTicket.properties.created_at.",
+            "examples": [
+              "2026-05-27T12:00:00Z"
+            ],
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "UTC update time. Context: components.schemas.SupportTicket.properties.updated_at.",
+            "examples": [
+              "2026-05-27T12:00:00Z"
+            ],
+            "format": "date-time"
+          }
+        },
+        "examples": [
+          {
+            "id": "ticket_0123456789abcdef0123",
+            "app_id": "app_1",
+            "subject": "Deploy failed",
+            "details": "Command, ids, and first actionable log line.",
+            "severity": "normal",
+            "status": "open",
+            "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+            "created_at": "2026-05-27T12:00:00Z",
+            "updated_at": "2026-05-27T12:00:00Z"
+          }
+        ]
+      },
+      "SupportTicketRateLimit": {
+        "type": "object",
+        "description": "Account support ticket rate limit. Context: components.schemas.SupportTicketRateLimit.",
+        "additionalProperties": false,
+        "required": [
+          "limitPerHour",
+          "remainingHour",
+          "limitPerDay",
+          "remainingDay"
+        ],
+        "properties": {
+          "limitPerHour": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Allowed tickets per hour. Context: components.schemas.SupportTicketRateLimit.properties.limitPerHour.",
+            "examples": [
+              3
+            ],
+            "format": "int32",
+            "maximum": 100
+          },
+          "remainingHour": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Remaining tickets in the rolling hour. Context: components.schemas.SupportTicketRateLimit.properties.remainingHour.",
+            "examples": [
+              2
+            ],
+            "format": "int32",
+            "maximum": 100
+          },
+          "limitPerDay": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Allowed tickets per day. Context: components.schemas.SupportTicketRateLimit.properties.limitPerDay.",
+            "examples": [
+              10
+            ],
+            "format": "int32",
+            "maximum": 100
+          },
+          "remainingDay": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Remaining tickets in the rolling day. Context: components.schemas.SupportTicketRateLimit.properties.remainingDay.",
+            "examples": [
+              9
+            ],
+            "format": "int32",
+            "maximum": 100
+          }
+        },
+        "examples": [
+          {
+            "limitPerHour": 3,
+            "remainingHour": 2,
+            "limitPerDay": 10,
+            "remainingDay": 9
+          }
+        ]
+      },
+      "SupportTicketCreateResponse": {
+        "type": "object",
+        "description": "Support ticket creation response. Context: components.schemas.SupportTicketCreateResponse.",
+        "additionalProperties": false,
+        "required": [
+          "ticket",
+          "rate_limit",
+          "next_command"
+        ],
+        "properties": {
+          "ticket": {
+            "$ref": "#/components/schemas/SupportTicket"
+          },
+          "rate_limit": {
+            "$ref": "#/components/schemas/SupportTicketRateLimit"
+          },
+          "next_command": {
+            "type": "string",
+            "description": "Recommended next CLI command. Context: components.schemas.SupportTicketCreateResponse.properties.next_command.",
+            "examples": [
+              "npx @zerct/zerct support list --json"
+            ],
+            "pattern": "^[\\s\\S]{1,240}$",
+            "maxLength": 240
+          }
+        },
+        "examples": [
+          {
+            "ticket": {
+              "id": "ticket_0123456789abcdef0123",
+              "app_id": "app_1",
+              "subject": "Deploy failed",
+              "details": "Command, ids, and first actionable log line.",
+              "severity": "normal",
+              "status": "open",
+              "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+              "created_at": "2026-05-27T12:00:00Z",
+              "updated_at": "2026-05-27T12:00:00Z"
+            },
+            "rate_limit": {
+              "limitPerHour": 3,
+              "remainingHour": 2,
+              "limitPerDay": 10,
+              "remainingDay": 9
+            },
+            "next_command": "npx @zerct/zerct support list --json"
+          }
+        ]
+      },
+      "SupportTicketsResponse": {
+        "type": "object",
+        "description": "Recent support tickets for an account. Context: components.schemas.SupportTicketsResponse.",
+        "additionalProperties": false,
+        "required": [
+          "tickets",
+          "rate_limit"
+        ],
+        "properties": {
+          "tickets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportTicket"
+            },
+            "description": "Tickets in newest-first order. Context: components.schemas.SupportTicketsResponse.properties.tickets.",
+            "examples": [
+              [
+                {
+                  "id": "ticket_123",
+                  "app_id": "app_1",
+                  "subject": "Deploy failed",
+                  "details": "Command, ids, and first actionable log line.",
+                  "severity": "normal",
+                  "status": "open",
+                  "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                  "created_at": "2026-05-27T12:00:00Z",
+                  "updated_at": "2026-05-27T12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "rate_limit": {
+            "$ref": "#/components/schemas/SupportTicketRateLimit"
+          }
+        },
+        "examples": [
+          {
+            "tickets": [
+              {
+                "id": "ticket_0123456789abcdef0123",
+                "app_id": "app_1",
+                "subject": "Deploy failed",
+                "details": "Command, ids, and first actionable log line.",
+                "severity": "normal",
+                "status": "open",
+                "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                "created_at": "2026-05-27T12:00:00Z",
+                "updated_at": "2026-05-27T12:00:00Z"
+              }
+            ],
+            "rate_limit": {
+              "limitPerHour": 3,
+              "remainingHour": 2,
+              "limitPerDay": 10,
+              "remainingDay": 9
+            }
           }
         ]
       }

@@ -28,6 +28,7 @@ export interface CliOptions {
   cursor: string
   token: string
   template: string
+  severity: string
   port: number
   waitTimeoutSeconds: number
   json: boolean
@@ -185,6 +186,7 @@ export interface LogsResponse extends JsonObject {
 
 export interface CheckoutResponse extends JsonObject {
   checkout: {
+    reason?: string
     url: string
   }
 }

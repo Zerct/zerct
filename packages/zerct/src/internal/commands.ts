@@ -15,6 +15,7 @@ type SubcommandTable = Readonly<Record<string, SubcommandHandler>>
 type DomainMethod = Extract<ApiMethod, 'DELETE' | 'POST'>
 type DomainRoute = (app: string, domain: string) => string
 type DomainBody = (domain: string) => JsonObject | null
+type BillingAction = 'checkout' | 'portal'
 
 const ENV_COMMANDS: SubcommandTable = {
   list: async (cli): Promise<void> => printJson(await appGet(cli, 'env')),
@@ -27,6 +28,12 @@ const DOMAIN_COMMANDS: SubcommandTable = {
   add: domainMutation('POST', (app): string => `/v1/apps/${encodeURIComponent(app)}/domains`, (domain): JsonObject => ({ domain })),
   verify: domainMutation('POST', (app, domain): string => `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}/verify`, (): null => null),
   delete: domainMutation('DELETE', (app, domain): string => `/v1/apps/${encodeURIComponent(app)}/domains/${encodeURIComponent(domain)}`, (): null => null)
+}
+
+const SUPPORT_COMMANDS: SubcommandTable = {
+  list: supportList,
+  create: supportCreate,
+  resolve: supportResolve
 }
 
 async function logs(cli: CliOptions): Promise<void> {
@@ -162,9 +169,11 @@ function domainMutation(method: DomainMethod, route: DomainRoute, body: DomainBo
 
 async function billing(cli: CliOptions): Promise<void> {
   const token = await readOrLoginToken(process.cwd(), cli)
-  const route = cli.args[0] === 'portal' ? '/v1/billing/portal' : '/v1/billing/checkout'
-  const body: JsonObject | null = route.endsWith('/checkout')
-    ? { target_plan: 'pro', reason: 'Upgrade to Zerct Pro.' }
+  const action = billingAction(cli.args[0] ?? 'checkout', cli.json)
+  const route = action === 'portal' ? '/v1/billing/portal' : '/v1/billing/checkout'
+  const reason = cli.args.slice(1).join(' ').trim() || 'Upgrade to Zerct Pro.'
+  const body: JsonObject | null = action === 'checkout'
+    ? { target_plan: 'pro', reason }
     : null
   const response = checkoutResponseFromJson(await apiRequest(cli, 'POST', route, token, body))
   if (cli.json) {
@@ -173,6 +182,61 @@ async function billing(cli: CliOptions): Promise<void> {
   }
   console.log(response.checkout.url)
   openUrl(response.checkout.url)
+}
+
+function billingAction(value: string, json: boolean): BillingAction {
+  if (!value || value === 'checkout') {
+    return 'checkout'
+  }
+  if (value === 'portal') {
+    return 'portal'
+  }
+  throw agentError('unknown_billing_command', 'Unknown billing command.', 'Use `npx @zerct/zerct billing checkout --json` or `npx @zerct/zerct billing portal`.', json)
+}
+
+async function support(cli: CliOptions): Promise<void> {
+  await runSubcommand(cli, SUPPORT_COMMANDS, 'list', 'Unknown support command.', 'Use `npx @zerct/zerct support list --json` or `support create` with subject and details.')
+}
+
+async function supportList(cli: CliOptions): Promise<void> {
+  await printAuthenticated(cli, `/v1/support/tickets${pageQuery(cli)}`)
+}
+
+async function supportCreate(cli: CliOptions): Promise<void> {
+  const subject = cli.args[1] ?? ''
+  const details = cli.args.slice(2).join(' ').trim()
+  if (!subject || !details) {
+    throw agentError(
+      'invalid_support_ticket',
+      'Support ticket subject and details are required.',
+      'Use `npx @zerct/zerct support create "Short subject" "Command, app id, build id, deploy id, and first actionable log line" --json`.',
+      cli.json
+    )
+  }
+
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const body: JsonObject = {
+    details,
+    severity: cli.severity || 'normal',
+    subject
+  }
+  if (cli.app) {
+    body['app_id'] = cli.app
+  }
+  const response = await apiRequest(cli, 'POST', '/v1/support/tickets', token, body)
+  printJson(response)
+}
+
+async function supportResolve(cli: CliOptions): Promise<void> {
+  const ticketId = requireCommandArg(
+    cli,
+    'invalid_support_ticket',
+    'Support ticket id is required.',
+    'Use `npx @zerct/zerct support resolve <ticket_id> --json` with an id from support list.'
+  )
+  const token = await readOrLoginToken(process.cwd(), cli)
+  const response = await apiRequest(cli, 'POST', `/v1/support/tickets/${encodeURIComponent(ticketId)}/resolve`, token, null)
+  printJson(response)
 }
 
 async function printAuthenticated(cli: CliOptions, route: string): Promise<void> {
@@ -218,5 +282,6 @@ export {
   database,
   envCommand,
   domainsCommand,
-  billing
+  billing,
+  support
 }

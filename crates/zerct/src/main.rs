@@ -8,7 +8,7 @@ use std::{
 
 const VERSION: &str = "0.1.16";
 const NPM_PACKAGE: &str = "@zerct/zerct";
-const NPM_PACKAGE_VERSION: &str = "0.1.44";
+const NPM_PACKAGE_VERSION: &str = "0.1.45";
 
 fn main() -> ExitCode {
     match run() {

@@ -182,7 +182,7 @@ if (javascriptFiles.length > 0) {
   fail(`packages/zerct must stay TypeScript-only: ${javascriptFiles.map(relativeToPackage).join(', ')}`)
 }
 
-assertEqual(packageJson.name, 'zerct', 'package name')
+assertEqual(packageJson.name, '@zerct/zerct', 'package name')
 assertEqual(packageJson.type, 'module', 'package type')
 assertEqual(packageJson.description, 'Deploy Rust backends and static frontends to Zerct.', 'package description')
 assertEqual(packageJson.homepage, 'https://zerct.com', 'package homepage')

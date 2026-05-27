@@ -14,6 +14,12 @@ Use this page when an AI coding agent is deploying with Zerct.
 5. If the build fails, run `npx @zerct/zerct logs --build <build_id> --json`.
 6. Fix the first actionable error from the logs.
 7. Redeploy with the same deploy command.
+8. If a plan limit blocks the deploy, run
+   `npx @zerct/zerct billing checkout --json` and show the returned
+   `checkout.url` to the human.
+9. If Zerct itself needs help, create a support ticket with the exact command,
+   app id, build id, deploy id, and first actionable log line.
+10. Resolve the support ticket after the agent fixes the issue.
 
 Do not weaken Rust lints, TypeScript strictness, `tsgo --noEmit`, native
 frontend linting, or unsafe restrictions to pass Zerct checks.
@@ -28,6 +34,38 @@ Run `npx @zerct/zerct doctor --json`. Fix the first failed check by following
 `npx @zerct/zerct logs --build <build_id> --json`, fix the first actionable
 error, and redeploy. Use `--database` only when the Rust backend needs managed
 Postgres.
+```
+
+## Support loop
+
+Create support tickets only with enough evidence for a Zerct support agent or
+operator agent to act:
+
+```sh
+npx @zerct/zerct support create \
+  "Deploy failed" \
+  "Command, app id, build id, deploy id, first actionable log line, and what the agent already tried." \
+  --app app_1 \
+  --severity normal \
+  --json
+```
+
+Before opening another ticket, list recent tickets:
+
+```sh
+npx @zerct/zerct support list --json
+```
+
+After the issue is fixed, resolve the ticket:
+
+```sh
+npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
+```
+
+When a limit is the blocker, create a hosted Stripe subscription checkout link:
+
+```sh
+npx @zerct/zerct billing checkout "Project limit reached" --json
 ```
 
 ## Starter prompt
@@ -48,6 +86,9 @@ npx @zerct/zerct builds --app app_1 --json
 npx @zerct/zerct logs --build job_1 --json
 npx @zerct/zerct logs --deploy deploy_1 --json
 npx @zerct/zerct logs --app app_1 --json
+npx @zerct/zerct billing checkout --json
+npx @zerct/zerct support list --json
+npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
 ```
 
 `logs --build` is the best first command after a failed deploy. Use

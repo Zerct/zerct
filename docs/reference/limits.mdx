@@ -22,6 +22,22 @@ ambiguous to run.
 
 ## Planned guardrails
 
-- Resource limits per deployment
-- Idle cold starts for free deployments
-- Database connection and migration safety checks
+When a free-tier account reaches a plan limit, agents can create a hosted
+subscription link without dashboard work:
+
+```sh
+npx @zerct/zerct billing checkout "Plan limit reached" --json
+```
+
+Show the returned `checkout.url` to the human. If the issue is not a payment
+problem, create a support ticket with command output and ids:
+
+```sh
+npx @zerct/zerct support create "Limit issue" "Command, app id, build id, deploy id, and first actionable log line." --json
+```
+
+Resolve the ticket after the issue is fixed:
+
+```sh
+npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
+```

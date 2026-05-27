@@ -15,6 +15,7 @@ function match(source, pattern, label) {
 }
 
 const npmPackage = JSON.parse(readFileSync('packages/zerct/package.json', 'utf8'))
+const formula = readFileSync('Formula/zerct.rb', 'utf8')
 const npmCliVersion = execFileSync('packages/zerct/src/zerct.ts', ['--version'], {
   env: {
     ...process.env,
@@ -24,6 +25,14 @@ const npmCliVersion = execFileSync('packages/zerct/src/zerct.ts', ['--version'],
 }).trim()
 if (npmPackage.version !== npmCliVersion) {
   fail(`npm package.json ${npmPackage.version} does not match CLI ${npmCliVersion}`)
+}
+const formulaNpmVersion = match(
+  formula,
+  /url "https:\/\/registry\.npmjs\.org\/@zerct\/zerct\/-\/zerct-([^"]+)\.tgz"/u,
+  'Homebrew npm package version'
+)
+if (formulaNpmVersion !== npmPackage.version) {
+  fail(`Homebrew formula npm version ${formulaNpmVersion} does not match npm package ${npmPackage.version}`)
 }
 
 const pyproject = readFileSync('packages/zerct-py/pyproject.toml', 'utf8')
