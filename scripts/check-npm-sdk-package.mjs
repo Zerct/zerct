@@ -209,7 +209,7 @@ assertEqual(packageScripts['typecheck:tsc'], 'tsc --noEmit -p tsconfig.json', 't
 assertEqual(packageScripts['typecheck:tsgo'], 'tsgo --noEmit -p tsconfig.json', 'typecheck:tsgo script')
 assertEqual(packageScripts['type-coverage'], 'type-coverage --project tsconfig.json --strict --at-least 100', 'type-coverage script')
 assertEqual(packageScripts['lint:package'], 'publint --strict --pack npm', 'lint:package script')
-assertEqual(packageScripts['check:deps'], 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures', 'check:deps script')
+assertEqual(packageScripts['check:deps'], 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures --omit=dev', 'check:deps script')
 
 for (const [option, expectedValue] of Object.entries(requiredCompilerOptions)) {
   assertEqual(compilerOptions[option], expectedValue, `compiler option ${option}`)
