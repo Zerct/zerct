@@ -5,7 +5,7 @@ import { agentError } from './errors.ts'
 import { doctorProject } from './doctor.ts'
 import { frontendBuildCommand, frontendCheckCommand } from './frontend-policy.ts'
 import { ensureDirectory, inferProjectKind, serviceNameFromCargo, serviceNameFromDir, serviceNameFromPackage } from './project.ts'
-import type { TemplateName } from './types.ts'
+import type { JsonObject, TemplateName } from './types.ts'
 
 type TemplateWriter = (projectDir: string) => void
 type TemplateFile = readonly [relative: string, source: string]
@@ -80,81 +80,91 @@ version = "0.1.0"
 function writeFrontendTemplate(projectDir: string, name: string, apiBaseUrl: string): void {
   mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
   const files: readonly TemplateFile[] = [
-    ['package.json', `{
-  "name": "${name}",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "typecheck": "tsgo --noEmit",
-    "lint": "oxlint src vite.config.ts --deny-warnings",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
-  },
-  "dependencies": {
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-    "@tanstack/react-router": "^1.140.0"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "@types/node": "^24.12.3",
-    "@typescript/native-preview": "^7.0.0-dev.20260526.1",
-    "@vitejs/plugin-react": "^5.1.1",
-    "oxlint": "^1.30.0",
-    "typescript": "^5.9.3",
-    "vite": "^7.2.4"
-  }
-}
-`],
+    ['package.json', frontendPackageJson(name)],
     ['index.html', '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n'],
     ['src/styles.css', 'body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n'],
-    ['src/vite-env.d.ts', '/// <reference types="vite/client" />\n'],
+    ['src/vite-env.d.ts', frontendViteEnvSource()],
     ['src/main.tsx', frontendSource(apiBaseUrl)],
-    ['tsconfig.json', `{
-  "compilerOptions": {
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "alwaysStrict": true,
-    "erasableSyntaxOnly": true,
-    "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "lib": ["ESNext", "DOM"],
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "moduleResolution": "Bundler",
-    "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noUncheckedIndexedAccess": true,
-    "noUncheckedSideEffectImports": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "skipLibCheck": false,
-    "strict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "target": "ES2022",
-    "types": ["vite/client", "node"],
-    "useUnknownInCatchVariables": true,
-    "verbatimModuleSyntax": true
-  },
-  "include": ["src", "vite.config.ts"]
-}
-`],
+    ['tsconfig.json', frontendTsConfig()],
     ['vite.config.ts', 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n'],
     ['zerct.toml', frontendConfig(projectDir)]
   ]
   writeTemplateFiles(projectDir, files)
   console.log('run package install in the frontend directory before doctor: bun install or npm install')
+}
+
+function frontendPackageJson(name: string): string {
+  return jsonSource({
+    name,
+    private: true,
+    type: 'module',
+    scripts: {
+      typecheck: 'tsgo --noEmit',
+      lint: 'oxlint src vite.config.ts --deny-warnings',
+      build: 'vite build',
+      preview: 'vite preview --host 0.0.0.0'
+    },
+    dependencies: {
+      '@tanstack/react-router': '^1.140.0',
+      react: '^19.2.1',
+      'react-dom': '^19.2.1'
+    },
+    devDependencies: {
+      '@types/node': '^24.12.3',
+      '@types/react': '^19.2.7',
+      '@types/react-dom': '^19.2.3',
+      '@typescript/native-preview': '^7.0.0-dev.20260526.1',
+      '@vitejs/plugin-react': '^5.1.1',
+      oxlint: '^1.30.0',
+      typescript: '^5.9.3',
+      vite: '^7.2.4'
+    }
+  })
+}
+
+function frontendTsConfig(): string {
+  return jsonSource({
+    compilerOptions: {
+      allowUnreachableCode: false,
+      allowUnusedLabels: false,
+      alwaysStrict: true,
+      erasableSyntaxOnly: true,
+      exactOptionalPropertyTypes: true,
+      forceConsistentCasingInFileNames: true,
+      isolatedModules: true,
+      jsx: 'react-jsx',
+      lib: ['ESNext', 'DOM'],
+      module: 'ESNext',
+      moduleDetection: 'force',
+      moduleResolution: 'Bundler',
+      noEmit: true,
+      noFallthroughCasesInSwitch: true,
+      noImplicitAny: true,
+      noImplicitOverride: true,
+      noImplicitReturns: true,
+      noImplicitThis: true,
+      noPropertyAccessFromIndexSignature: true,
+      noUncheckedIndexedAccess: true,
+      noUncheckedSideEffectImports: true,
+      noUnusedLocals: true,
+      noUnusedParameters: true,
+      skipLibCheck: false,
+      strict: true,
+      strictBindCallApply: true,
+      strictFunctionTypes: true,
+      strictNullChecks: true,
+      strictPropertyInitialization: true,
+      target: 'ES2022',
+      types: ['vite/client', 'node'],
+      useUnknownInCatchVariables: true,
+      verbatimModuleSyntax: true
+    },
+    include: ['src', 'vite.config.ts']
+  })
+}
+
+function jsonSource(value: JsonObject): string {
+  return `${JSON.stringify(value, null, 2)}\n`
 }
 
 function writeTemplateFiles(projectDir: string, files: readonly TemplateFile[]): void {
@@ -282,7 +292,7 @@ function frontendSource(apiBaseUrl: string): string {
 import { createRoot } from 'react-dom/client'
 import './styles.css'
 
-const apiBaseUrl = import.meta.env['VITE_API_URL'] ?? '${apiBaseUrl}'
+const apiBaseUrl = import.meta.env.VITE_API_URL ?? '${apiBaseUrl}'
 
 function App() {
   return (
@@ -311,6 +321,19 @@ if (rootElement === null) {
 }
 
 createRoot(rootElement).render(<RouterProvider router={router} />)
+`
+}
+
+function frontendViteEnvSource(): string {
+  return `/// <reference types="vite/client" />
+
+interface ViteTypeOptions {
+  strictImportMetaEnv: unknown
+}
+
+interface ImportMetaEnv {
+  readonly VITE_API_URL?: string
+}
 `
 }
 
