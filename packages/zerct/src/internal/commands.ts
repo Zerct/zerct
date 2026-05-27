@@ -14,7 +14,7 @@ async function logs(cli: CliOptions): Promise<void> {
   const request = logsRequest(cli)
   const response = logsResponse(await apiRequest(cli, 'GET', request.route, token, null))
   if (cli.json) {
-    console.log(JSON.stringify(response, null, 2))
+    printJson(response)
     return
   }
   for (const line of response.lines) {
@@ -176,7 +176,7 @@ async function billing(cli: CliOptions): Promise<void> {
     : null
   const response = checkoutResponse(await apiRequest(cli, 'POST', route, token, body))
   if (cli.json) {
-    console.log(JSON.stringify(response, null, 2))
+    printJson(response)
     return
   }
   console.log(response.checkout.url)
