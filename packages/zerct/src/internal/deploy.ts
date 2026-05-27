@@ -1,17 +1,17 @@
 import { agentError } from './errors.ts'
-import { apiRequest, jsonObjectField, jsonObjectOrEmpty, numberField } from './api.ts'
-import { appsResponseFromJson, buildStatusResponseFromJson, deployResponseFromJson } from './api-models.ts'
+import { apiRequest } from './api.ts'
+import { buildStatusResponseFromJson, deployResponseFromJson } from './api-models.ts'
 import { createArchiveBase64, gitCommitSha } from './archive.ts'
 import { readOrLoginToken } from './auth.ts'
+import { createDeployPlan } from './deploy-plan.ts'
 import { runDoctor } from './doctor.ts'
 import { discoverDeployProjects } from './workspace.ts'
 import { printJson, progress, sleep } from './project.ts'
 import type {
-  AppSummary,
   BuildRecord,
   CliOptions,
+  DeployPlanProject,
   DeployResponse,
-  DeployProjectInfo,
   JsonObject,
   WorkspaceDeployResult
 } from './types.ts'
@@ -22,11 +22,9 @@ async function deploy(projectDir: string, cli: CliOptions): Promise<void> {
     throw agentError('missing_project_contract', 'No zerct.toml was found.', 'Run `npx @zerct/zerct init` in each app directory, or pass a project path.', cli.json)
   }
 
-  const singleProject = projects.length === 1 ? projects[0] : undefined
-  rejectInvalidDatabaseTarget(singleProject, cli)
-  const token = await readOrLoginToken(singleProject?.dir ?? projectDir, cli)
-  await preflightDeployLimits(projects, cli, token, cli.database)
-  const results = await deployProjects(projects, cli, token)
+  const token = await readOrLoginToken(projects.length === 1 ? projects[0]?.dir ?? projectDir : projectDir, cli)
+  const plan = await createDeployPlan(projects, cli, token)
+  const results = await deployProjects(plan, cli, token)
 
   if (cli.wait) {
     await waitForWorkspaceBuilds(cli, token, results)
@@ -41,21 +39,14 @@ async function deploy(projectDir: string, cli: CliOptions): Promise<void> {
   printWorkspaceDeployResults(projectDir, results, cli)
 }
 
-function rejectInvalidDatabaseTarget(singleProject: DeployProjectInfo | undefined, cli: CliOptions): void {
-  if (singleProject?.kind === 'static_frontend' && cli.database) {
-    throw agentError('invalid_database_target', 'Static frontends cannot attach managed Postgres directly.', 'Deploy a Rust backend with managed Postgres and call it from the frontend.', cli.json)
-  }
-}
-
-async function deployProjects(projects: DeployProjectInfo[], cli: CliOptions, token: string): Promise<WorkspaceDeployResult[]> {
+async function deployProjects(plan: DeployPlanProject[], cli: CliOptions, token: string): Promise<WorkspaceDeployResult[]> {
   const results: WorkspaceDeployResult[] = []
-  const workspaceDeploy = projects.length > 1
+  const workspaceDeploy = plan.length > 1
   if (workspaceDeploy && !cli.json) {
-    console.log(`deploying ${projects.length} projects`)
+    console.log(`deploying ${plan.length} projects`)
   }
 
-  for (const project of projects) {
-    const wantsDatabase = projectWantsDatabase(project, cli.database)
+  for (const { project, wantsDatabase } of plan) {
     if (workspaceDeploy && !cli.json) {
       console.log(`checking ${project.relative}`)
     }
@@ -68,65 +59,6 @@ async function deployProjects(projects: DeployProjectInfo[], cli: CliOptions, to
   }
 
   return results
-}
-
-function projectWantsDatabase(project: DeployProjectInfo, databaseRequested: boolean): boolean {
-  return databaseRequested && project.kind === 'rust_backend'
-}
-
-async function preflightDeployLimits(projects: DeployProjectInfo[], cli: CliOptions, token: string, databaseRequested: boolean): Promise<void> {
-  const [usageResponse, appsResponse] = await Promise.all([
-    apiRequest(cli, 'GET', '/v1/usage', token, null),
-    apiRequest(cli, 'GET', '/v1/apps', token, null)
-  ])
-  const usageRoot = jsonObjectOrEmpty(usageResponse)
-  const usage = jsonObjectField(usageRoot, 'usage')
-  const limits = jsonObjectField(usageRoot, 'limits')
-  const apps = appsResponseFromJson(appsResponse).apps
-  const existingApps = new Map<string, AppSummary>()
-  for (const app of apps) {
-    if (app.name) {
-      existingApps.set(app.name, app)
-    }
-  }
-  let newProjects = 0
-  let newDatabases = 0
-
-  for (const project of projects) {
-    if (!project.name || project.kind === 'unknown') {
-      continue
-    }
-    const existing = existingApps.get(project.name)
-    if (!existing) {
-      newProjects += 1
-    }
-    if (projectWantsDatabase(project, databaseRequested) && existing?.databaseStorageMib === undefined) {
-      newDatabases += 1
-    }
-  }
-
-  const usedProjects = numberField(usage, 'appCount')
-  const projectLimit = numberField(limits, 'projects')
-  const usedDatabases = numberField(usage, 'databaseCount')
-  const databaseLimit = numberField(limits, 'managedDatabases')
-
-  if (newProjects > 0 && usedProjects + newProjects > projectLimit) {
-    throw agentError(
-      'payment_required',
-      `Project limit reached: ${usedProjects}/${projectLimit} projects are already used.`,
-      'Redeploy an existing app by reusing its `name` in zerct.toml, or run `npx @zerct/zerct billing` to open Stripe Checkout before creating another project.',
-      cli.json
-    )
-  }
-
-  if (newDatabases > 0 && usedDatabases + newDatabases > databaseLimit) {
-    throw agentError(
-      'payment_required',
-      `Managed Postgres limit reached: ${usedDatabases}/${databaseLimit} databases are already used.`,
-      'Redeploy an app that already has managed Postgres, deploy without `--database`, or run `npx @zerct/zerct billing` to open Stripe Checkout.',
-      cli.json
-    )
-  }
 }
 
 async function deployProject(projectDir: string, cli: CliOptions, token: string, wantsDatabase: boolean): Promise<DeployResponse> {
