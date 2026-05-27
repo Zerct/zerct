@@ -1,20 +1,18 @@
 import { agentError } from './errors.ts'
-import { apiRequest, isJsonObject, jsonArrayField, jsonObjectField, jsonObjectOrEmpty, numberField, stringField } from './api.ts'
+import { apiRequest, jsonObjectField, jsonObjectOrEmpty, numberField } from './api.ts'
+import { appsResponseFromJson, buildStatusResponseFromJson, deployResponseFromJson } from './api-models.ts'
 import { createArchiveBase64, gitCommitSha } from './archive.ts'
 import { readOrLoginToken } from './auth.ts'
 import { runDoctor } from './doctor.ts'
 import { discoverDeployProjects } from './workspace.ts'
 import { printJson, progress, sleep } from './project.ts'
 import type {
-  AppsResponse,
   AppSummary,
   BuildRecord,
-  BuildStatusResponse,
   CliOptions,
-  DeployProjectInfo,
   DeployResponse,
+  DeployProjectInfo,
   JsonObject,
-  JsonValue,
   WorkspaceDeployResult
 } from './types.ts'
 
@@ -217,69 +215,6 @@ async function waitForBuild(cli: CliOptions, token: string, buildId: string): Pr
     `Run \`npx @zerct/zerct logs --build ${buildId}\` to continue watching.`,
     cli.json
   )
-}
-
-function appsResponseFromJson(value: JsonValue | null): AppsResponse {
-  return { apps: jsonArrayField(jsonObjectOrEmpty(value), 'apps').map(appSummaryFromJson).filter((app): app is AppSummary => app !== null) }
-}
-
-function appSummaryFromJson(value: JsonValue): AppSummary | null {
-  if (!isJsonObject(value)) {
-    return null
-  }
-  const app: AppSummary = {}
-  const id = stringField(value, 'id')
-  const name = stringField(value, 'name')
-  const url = stringField(value, 'url')
-  const databaseStorageMib = numberField(value, 'databaseStorageMib')
-  if (id) {
-    app.id = id
-  }
-  if (name) {
-    app.name = name
-  }
-  if (url) {
-    app.url = url
-  }
-  if (databaseStorageMib > 0) {
-    app.databaseStorageMib = databaseStorageMib
-  }
-  return app
-}
-
-function deployResponseFromJson(value: JsonValue | null): DeployResponse {
-  const source = jsonObjectOrEmpty(value)
-  const finalBuild = jsonObjectOrEmpty(source['final_build'] ?? null)
-  const response: DeployResponse = {
-    app: appDeployTargetFromJson(jsonObjectField(source, 'app')),
-    build_job: {
-      id: stringField(jsonObjectField(source, 'build_job'), 'id')
-    }
-  }
-  if (Object.keys(finalBuild).length > 0) {
-    response.final_build = buildRecordFromJson(finalBuild)
-  }
-  return response
-}
-
-function appDeployTargetFromJson(source: JsonObject): DeployResponse['app'] {
-  return {
-    id: stringField(source, 'id'),
-    url: stringField(source, 'url')
-  }
-}
-
-function buildStatusResponseFromJson(value: JsonValue | null): BuildStatusResponse {
-  const source = jsonObjectOrEmpty(value)
-  const build = jsonObjectField(source, 'build')
-  return Object.keys(build).length === 0 ? {} : { build: buildRecordFromJson(build) }
-}
-
-function buildRecordFromJson(source: JsonObject): BuildRecord {
-  return {
-    id: stringField(source, 'id'),
-    status: stringField(source, 'status')
-  }
 }
 
 export {

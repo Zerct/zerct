@@ -1,8 +1,9 @@
 import { agentError } from './errors.ts'
-import { apiRequest, isJsonObject, jsonArrayField, jsonObjectField, jsonObjectOrEmpty, pageQuery, requireApp, stringField } from './api.ts'
+import { apiRequest, pageQuery, requireApp } from './api.ts'
+import { checkoutResponseFromJson, logsResponseFromJson } from './api-models.ts'
 import { readOrLoginToken } from './auth.ts'
 import { openUrl, printJson } from './project.ts'
-import type { CheckoutResponse, CliOptions, JsonObject, JsonValue, LogLine, LogsResponse } from './types.ts'
+import type { CliOptions, JsonObject, JsonValue } from './types.ts'
 
 interface LogsRequest {
   route: string
@@ -12,7 +13,7 @@ interface LogsRequest {
 async function logs(cli: CliOptions): Promise<void> {
   const token = await readOrLoginToken(process.cwd(), cli)
   const request = logsRequest(cli)
-  const response = logsResponse(await apiRequest(cli, 'GET', request.route, token, null))
+  const response = logsResponseFromJson(await apiRequest(cli, 'GET', request.route, token, null))
   if (cli.json) {
     printJson(response)
     return
@@ -174,7 +175,7 @@ async function billing(cli: CliOptions): Promise<void> {
   const body: JsonObject | null = route.endsWith('/checkout')
     ? { target_plan: 'pro', reason: 'Upgrade to Zerct Pro.' }
     : null
-  const response = checkoutResponse(await apiRequest(cli, 'POST', route, token, body))
+  const response = checkoutResponseFromJson(await apiRequest(cli, 'POST', route, token, body))
   if (cli.json) {
     printJson(response)
     return
@@ -193,35 +194,6 @@ async function appGet(cli: CliOptions, kind: string): Promise<JsonValue | null> 
   const token = await readOrLoginToken(process.cwd(), cli)
   const app = requireApp(cli)
   return apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/${kind}`, token, null)
-}
-
-function logsResponse(value: JsonValue | null): LogsResponse {
-  const source = jsonObjectOrEmpty(value)
-  const lines = jsonArrayField(source, 'lines').map(logLine).filter((line): line is LogLine => line !== null)
-  return {
-    lines,
-    has_more: source['has_more'] === true,
-    next_cursor: stringField(source, 'next_cursor')
-  }
-}
-
-function logLine(value: JsonValue): LogLine | null {
-  if (!isJsonObject(value)) {
-    return null
-  }
-  const timestamp = stringField(value, 'timestamp')
-  const stream = stringField(value, 'stream')
-  const message = stringField(value, 'message')
-  return timestamp && stream && message ? { timestamp, stream, message } : null
-}
-
-function checkoutResponse(value: JsonValue | null): CheckoutResponse {
-  const source = jsonObjectOrEmpty(value)
-  return {
-    checkout: {
-      url: stringField(jsonObjectField(source, 'checkout'), 'url')
-    }
-  }
 }
 
 export {
