@@ -21,6 +21,11 @@ const DEFAULT_NPM_FRONTEND_CHECK_COMMAND = 'npm ci --prefer-offline --no-audit -
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND = 'bun ci && bun run typecheck && bun run lint'
 const PROJECT_KINDS = new Set(['rust_backend', 'static_frontend'])
 const PROJECT_TEMPLATES = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
+const JAVASCRIPT_LINTERS = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'standard', 'xo'])
+const FRONTEND_SOURCE_ROOTS = new Set(['src', 'app', 'pages', 'routes', 'components'])
+const FRONTEND_JAVASCRIPT_EXTENSIONS = ['.js', '.jsx', '.mjs', '.cjs']
+const FRONTEND_PACKAGE_MANAGERS = new Set(['npm', 'bun', 'pnpm', 'yarn'])
+const FRONTEND_INSTALL_COMMANDS = new Set(['npm ci', 'bun ci', 'bun install', 'pnpm install', 'yarn install'])
 const FRONTEND_TEMPLATE_FILES = new Set([
   'index.html',
   'package.json',
@@ -1568,14 +1573,14 @@ function frontendBuildCommand(projectDir) {
 
 function frontendScriptChecks(projectDir, runScripts) {
   const manifest = readPackageJson(projectDir)
-  const missing = (script) => !manifest?.scripts || typeof manifest.scripts[script] !== 'string' || !manifest.scripts[script].trim()
+  const missing = (script) => packageScriptValue(manifest, script) === ''
   const checks = ['typecheck', 'lint'].map((script) => ({
     name: `package script ${script}`,
     ok: !missing(script),
     message: missing(script) ? 'missing' : 'found',
     agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
   }))
-  const typecheckScript = manifest?.scripts?.typecheck || ''
+  const typecheckScript = packageScriptValue(manifest, 'typecheck')
   const strictTypecheck = usesStrictFrontendTypechecker(typecheckScript)
   checks.push({
     name: 'strict frontend typecheck',
@@ -1584,7 +1589,7 @@ function frontendScriptChecks(projectDir, runScripts) {
     agent_instruction: 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.'
   })
 
-  const lintScript = manifest?.scripts?.lint || ''
+  const lintScript = packageScriptValue(manifest, 'lint')
   const nativeLint = !usesJavascriptLinter(lintScript) && usesNativeFrontendLinter(lintScript)
   checks.push({
     name: 'native frontend lint',
@@ -1636,7 +1641,7 @@ function frontendSourceReport(projectDir) {
 
 function isFrontendSourcePath(relative) {
   const [root] = relative.split('/')
-  return ['src', 'app', 'pages', 'routes', 'components'].includes(root)
+  return FRONTEND_SOURCE_ROOTS.has(root)
 }
 
 function isFrontendTypescriptSource(relative) {
@@ -1644,7 +1649,7 @@ function isFrontendTypescriptSource(relative) {
 }
 
 function isFrontendJavascriptSource(relative) {
-  return ['.js', '.jsx', '.mjs', '.cjs'].some((extension) => relative.endsWith(extension))
+  return FRONTEND_JAVASCRIPT_EXTENSIONS.some((extension) => relative.endsWith(extension))
 }
 
 function readPackageJson(projectDir) {
@@ -1655,11 +1660,16 @@ function readPackageJson(projectDir) {
   }
 }
 
+function packageScriptValue(manifest, script) {
+  const value = manifest?.scripts?.[script]
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 function usesJavascriptLinter(command) {
   const tokens = commandTokens(command)
   return tokens.some((token, index) => {
     const commandName = commandNameFromToken(token)
-    return ['eslint', 'eslint_d', 'jscs', 'jshint', 'standard', 'xo'].includes(commandName)
+    return JAVASCRIPT_LINTERS.has(commandName)
       || (commandName === 'next' && tokens[index + 1] === 'lint')
   })
 }
@@ -1696,14 +1706,12 @@ function commandNameFromToken(token) {
 }
 
 function hasFrontendInstallCommand(tokens) {
-  const accepted = new Set(['npm ci', 'bun ci', 'bun install', 'pnpm install', 'yarn install'])
-  return tokens.some((token, index) => accepted.has(`${commandNameFromToken(token)} ${tokens[index + 1] || ''}`))
+  return tokens.some((token, index) => FRONTEND_INSTALL_COMMANDS.has(`${commandNameFromToken(token)} ${tokens[index + 1] || ''}`))
 }
 
 function hasFrontendScriptRun(tokens, script) {
-  const managers = new Set(['npm', 'bun', 'pnpm', 'yarn'])
   return tokens.some((token, index) => {
-    if (!managers.has(commandNameFromToken(token)) || tokens[index + 1] !== 'run') {
+    if (!FRONTEND_PACKAGE_MANAGERS.has(commandNameFromToken(token)) || tokens[index + 1] !== 'run') {
       return false
     }
     return tokens[index + 2] === script || (tokens[index + 2] || '').startsWith('-') && tokens[index + 3] === script

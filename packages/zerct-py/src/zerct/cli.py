@@ -38,6 +38,17 @@ DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS = 900
 DEFAULT_RUST_CHECK_COMMAND = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
 DEFAULT_NPM_FRONTEND_CHECK_COMMAND = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 DEFAULT_BUN_FRONTEND_CHECK_COMMAND = "bun ci && bun run typecheck && bun run lint"
+JAVASCRIPT_LINTERS = {"eslint", "eslint_d", "jscs", "jshint", "standard", "xo"}
+FRONTEND_SOURCE_ROOTS = {"src", "app", "pages", "routes", "components"}
+FRONTEND_JAVASCRIPT_EXTENSIONS = (".js", ".jsx", ".mjs", ".cjs")
+FRONTEND_PACKAGE_MANAGERS = {"npm", "bun", "pnpm", "yarn"}
+FRONTEND_INSTALL_COMMANDS = {
+    ("npm", "ci"),
+    ("bun", "ci"),
+    ("bun", "install"),
+    ("pnpm", "install"),
+    ("yarn", "install"),
+}
 RUST_TEMPLATE_SOURCE = """use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -863,28 +874,8 @@ def frontend_build_command(project_dir: pathlib.Path) -> str:
 
 def frontend_script_checks(project_dir: pathlib.Path, run_scripts: bool) -> list[dict[str, Any]]:
     manifest = read_package_json(project_dir)
-
-    def has_script(name: str) -> bool:
-        scripts = manifest.get("scripts") if isinstance(manifest, dict) else None
-        return isinstance(scripts, dict) and isinstance(scripts.get(name), str) and bool(scripts[name].strip())
-
-    checks = [
-        {
-            "name": f"package script {script}",
-            "ok": has_script(script),
-            "message": "found" if has_script(script) else "missing",
-            "agent_instruction": f'Add a non-empty "{script}" script to package.json, then retry.',
-        }
-        for script in ("typecheck", "lint")
-    ]
-    lint_script = ""
-    if isinstance(manifest, dict) and isinstance(manifest.get("scripts"), dict):
-        raw_lint_script = manifest["scripts"].get("lint")
-        lint_script = raw_lint_script if isinstance(raw_lint_script, str) else ""
-    typecheck_script = ""
-    if isinstance(manifest, dict) and isinstance(manifest.get("scripts"), dict):
-        raw_typecheck_script = manifest["scripts"].get("typecheck")
-        typecheck_script = raw_typecheck_script if isinstance(raw_typecheck_script, str) else ""
+    checks = [package_script_presence_check(manifest, script) for script in ("typecheck", "lint")]
+    typecheck_script = package_script_value(manifest, "typecheck")
     strict_typecheck = uses_strict_frontend_typechecker(typecheck_script)
     checks.append(
         {
@@ -894,6 +885,7 @@ def frontend_script_checks(project_dir: pathlib.Path, run_scripts: bool) -> list
             "agent_instruction": "Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.",
         }
     )
+    lint_script = package_script_value(manifest, "lint")
     native_lint = not uses_javascript_linter(lint_script) and uses_native_frontend_linter(lint_script)
     checks.append(
         {
@@ -907,6 +899,16 @@ def frontend_script_checks(project_dir: pathlib.Path, run_scripts: bool) -> list
         checks.append(package_script_check(project_dir, "typecheck"))
         checks.append(package_script_check(project_dir, "lint"))
     return checks
+
+
+def package_script_presence_check(manifest: dict[str, Any] | None, script: str) -> dict[str, Any]:
+    found = bool(package_script_value(manifest, script))
+    return {
+        "name": f"package script {script}",
+        "ok": found,
+        "message": "found" if found else "missing",
+        "agent_instruction": f'Add a non-empty "{script}" script to package.json, then retry.',
+    }
 
 
 def frontend_source_checks(project_dir: pathlib.Path) -> list[dict[str, Any]]:
@@ -941,7 +943,7 @@ def frontend_source_report(project_dir: pathlib.Path) -> dict[str, list[str]]:
 
 
 def is_frontend_source_path(relative: pathlib.Path) -> bool:
-    return bool(relative.parts) and relative.parts[0] in {"src", "app", "pages", "routes", "components"}
+    return bool(relative.parts) and relative.parts[0] in FRONTEND_SOURCE_ROOTS
 
 
 def is_frontend_typescript_source(relative: str) -> bool:
@@ -949,7 +951,7 @@ def is_frontend_typescript_source(relative: str) -> bool:
 
 
 def is_frontend_javascript_source(relative: str) -> bool:
-    return relative.endswith((".js", ".jsx", ".mjs", ".cjs"))
+    return relative.endswith(FRONTEND_JAVASCRIPT_EXTENSIONS)
 
 
 def read_package_json(project_dir: pathlib.Path) -> dict[str, Any] | None:
@@ -961,11 +963,17 @@ def read_package_json(project_dir: pathlib.Path) -> dict[str, Any] | None:
     return parsed if isinstance(parsed, dict) else None
 
 
+def package_script_value(manifest: dict[str, Any] | None, script: str) -> str:
+    scripts = manifest.get("scripts") if isinstance(manifest, dict) else None
+    value = scripts.get(script) if isinstance(scripts, dict) else None
+    return value.strip() if isinstance(value, str) else ""
+
+
 def uses_javascript_linter(command: str) -> bool:
     tokens = command_tokens(command)
     for index, token in enumerate(tokens):
         command_name = command_basename(token)
-        if command_name in {"eslint", "eslint_d", "jscs", "jshint", "standard", "xo"}:
+        if command_name in JAVASCRIPT_LINTERS:
             return True
         if command_name == "next" and index + 1 < len(tokens) and tokens[index + 1] == "lint":
             return True
@@ -1010,22 +1018,14 @@ def command_basename(token: str) -> str:
 
 def has_frontend_install_command(tokens: list[str]) -> bool:
     return any(
-        (command_basename(command), subcommand)
-        in {
-            ("npm", "ci"),
-            ("bun", "ci"),
-            ("bun", "install"),
-            ("pnpm", "install"),
-            ("yarn", "install"),
-        }
+        (command_basename(command), subcommand) in FRONTEND_INSTALL_COMMANDS
         for command, subcommand in zip(tokens, tokens[1:], strict=False)
     )
 
 
 def has_frontend_script_run(tokens: list[str], script: str) -> bool:
-    managers = {"npm", "bun", "pnpm", "yarn"}
     for index, token in enumerate(tokens):
-        if command_basename(token) not in managers:
+        if command_basename(token) not in FRONTEND_PACKAGE_MANAGERS:
             continue
         if index + 2 < len(tokens) and tokens[index + 1] == "run" and tokens[index + 2] == script:
             return True
