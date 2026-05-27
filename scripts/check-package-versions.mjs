@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 
 function fail(message) {
   console.error(`package version check failed: ${message}`)
@@ -14,8 +15,13 @@ function match(source, pattern, label) {
 }
 
 const npmPackage = JSON.parse(readFileSync('packages/zerct/package.json', 'utf8'))
-const npmConstants = readFileSync('packages/zerct/src/internal/constants.ts', 'utf8')
-const npmCliVersion = match(npmConstants, /export const VERSION(?:: string)? = '([^']+)'/u, 'npm CLI version')
+const npmCliVersion = execFileSync('packages/zerct/src/zerct.ts', ['--version'], {
+  env: {
+    ...process.env,
+    PATH: `packages/zerct/node_modules/.bin:${process.env.PATH ?? ''}`
+  },
+  encoding: 'utf8'
+}).trim()
 if (npmPackage.version !== npmCliVersion) {
   fail(`npm package.json ${npmPackage.version} does not match CLI ${npmCliVersion}`)
 }
