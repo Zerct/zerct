@@ -10,7 +10,7 @@ Use when a user wants to deploy a Rust backend or static frontend to Zerct.
 ## Workflow
 
 1. Ensure the project has `zerct.toml`.
-2. For Rust backends, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint, and the strict locked Cargo checks.
+2. For Rust backends, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint, `cargo fmt --all --check`, and the strict locked Cargo checks.
 3. For static frontends, set `kind = "static_frontend"` and ensure `package.json`, TypeScript browser source, `typecheck`/`lint` scripts, a lockfile, and a strict frontend check command.
 4. Prefer Bun with `bun.lock`, `tsgo --noEmit`, and source-scoped `oxlint` for new frontend projects. Avoid JavaScript-based linters.
 5. For a new full-stack project, run `npx @zerct/zerct init my-app --template fullstack-rust-tanstack`.
@@ -22,9 +22,10 @@ Use when a user wants to deploy a Rust backend or static frontend to Zerct.
 ## Contract
 
 Rust backends must listen on `0.0.0.0:$PORT`, expose the configured health
-endpoint, run locked `cargo check`, run locked all-target/all-feature Clippy
-with `-D warnings`, and avoid direct `unsafe` in workspace source. Static
+endpoint, pass `cargo fmt --all --check`, run locked `cargo check`, run locked
+all-target/all-feature Clippy with `-D warnings`, and avoid direct `unsafe` in
+workspace source. Static
 frontends must use `.ts` or `.tsx` browser source under `src`, `app`, `pages`,
-`routes`, or `components`; run typechecking and linting; build to
+`routes`, or `components`; install dependencies and run typechecking plus linting; build to
 `[build].output`, default `dist`; and include `index.html`. Frontends call Rust
 backends for APIs, managed Postgres, and server-side logic.

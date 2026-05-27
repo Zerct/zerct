@@ -19,8 +19,7 @@ const SESSION_LABEL: &str = "Zerct session";
 const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
 const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
 const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: u64 = 900;
-const DEFAULT_RUST_CHECK_COMMAND: &str =
-    "cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings";
+const DEFAULT_RUST_CHECK_COMMAND: &str = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings";
 const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
     "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
 const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str = "bun ci && bun run typecheck && bun run lint";
@@ -310,6 +309,7 @@ struct AgentError {
     agent_instruction: String,
     docs_url: Option<String>,
     checkout_url: Option<String>,
+    already_reported: bool,
 }
 
 impl AgentError {
@@ -324,10 +324,29 @@ impl AgentError {
             agent_instruction: agent_instruction.into(),
             docs_url: None,
             checkout_url: None,
+            already_reported: false,
+        }
+    }
+
+    fn already_reported(
+        code: &'static str,
+        message: impl Into<String>,
+        agent_instruction: impl Into<String>,
+    ) -> Self {
+        Self {
+            code,
+            message: message.into(),
+            agent_instruction: agent_instruction.into(),
+            docs_url: None,
+            checkout_url: None,
+            already_reported: true,
         }
     }
 
     fn print(&self) {
+        if self.already_reported {
+            return;
+        }
         eprintln!("code: {}", self.code);
         eprintln!("{}", self.message);
         eprintln!("agent_instruction: {}", self.agent_instruction);
@@ -585,11 +604,19 @@ fn doctor_project(project_dir: &Path, json: bool) -> Result<(), AgentError> {
     }
 
     if let Some(check) = report.checks.iter().find(|check| !check.ok) {
-        Err(AgentError::new(
-            "doctor_failed",
-            "Zerct doctor failed.",
-            check.agent_instruction.clone(),
-        ))
+        if json {
+            Err(AgentError::already_reported(
+                "doctor_failed",
+                "Zerct doctor failed.",
+                check.agent_instruction.clone(),
+            ))
+        } else {
+            Err(AgentError::new(
+                "doctor_failed",
+                "Zerct doctor failed.",
+                check.agent_instruction.clone(),
+            ))
+        }
     } else {
         Ok(())
     }
@@ -734,11 +761,19 @@ fn doctor_workspace(
         .flat_map(|(_relative, report)| report.checks.iter())
         .find(|check| !check.ok)
     {
-        Err(AgentError::new(
-            "doctor_failed",
-            "Zerct doctor failed.",
-            check.agent_instruction.clone(),
-        ))
+        if json {
+            Err(AgentError::already_reported(
+                "doctor_failed",
+                "Zerct doctor failed.",
+                check.agent_instruction.clone(),
+            ))
+        } else {
+            Err(AgentError::new(
+                "doctor_failed",
+                "Zerct doctor failed.",
+                check.agent_instruction.clone(),
+            ))
+        }
     } else {
         Ok(())
     }
@@ -857,8 +892,10 @@ impl Config {
 
 fn doctor_report(project_dir: &Path) -> DoctorReport {
     let mut checks = Vec::new();
+    let mut detected_kind = detect_project_kind(project_dir);
     let config = match parse_config(&project_dir.join("zerct.toml")) {
         Ok(config) => {
+            detected_kind.clone_from(&config.kind);
             checks.push(Check {
                 name: "zerct.toml".to_owned(),
                 ok: true,
@@ -889,7 +926,7 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
 
     let kind = config
         .as_ref()
-        .map_or("rust_backend", |config| config.kind.as_str());
+        .map_or(detected_kind.as_str(), |config| config.kind.as_str());
     let required_files: &[&str] = if kind == "static_frontend" {
         &["package.json"]
     } else {
@@ -915,7 +952,7 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
                     .to_owned(),
         });
         checks.extend(frontend_source_checks(project_dir));
-        checks.extend(frontend_script_checks(project_dir));
+        checks.extend(frontend_script_checks(project_dir, config.is_some()));
     }
 
     let unsafe_hits = scan_unsafe(project_dir);
@@ -935,7 +972,8 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
         agent_instruction:
             "Remove direct unsafe usage from workspace Rust source before deploying.".to_owned(),
     });
-    if kind == "rust_backend" {
+    if kind == "rust_backend" && config.is_some() {
+        checks.push(cargo_fmt(project_dir));
         checks.push(cargo_check(project_dir));
         checks.push(cargo_clippy(project_dir));
     }
@@ -945,6 +983,22 @@ fn doctor_report(project_dir: &Path) -> DoctorReport {
         config,
         checks,
     }
+}
+
+fn detect_project_kind(project_dir: &Path) -> String {
+    let source = fs::read_to_string(project_dir.join("zerct.toml")).unwrap_or_default();
+    source
+        .lines()
+        .find_map(|line| {
+            let trimmed = line.trim();
+            trimmed
+                .strip_prefix("kind")
+                .and_then(|after_key| after_key.trim_start().strip_prefix('='))
+                .map(str::trim)
+                .map(|value| value.trim_matches('"').to_owned())
+        })
+        .filter(|kind| kind == "static_frontend" || kind == "rust_backend")
+        .unwrap_or_else(|| "rust_backend".to_owned())
 }
 
 fn cargo_check(project_dir: &Path) -> Check {
@@ -973,6 +1027,34 @@ fn cargo_check(project_dir: &Path) -> Check {
             message: error.to_string(),
             agent_instruction:
                 "Install Rust and Cargo, then run `cargo check --locked` locally before deploying."
+                    .to_owned(),
+        },
+    }
+}
+
+fn cargo_fmt(project_dir: &Path) -> Check {
+    let output = Command::new("cargo")
+        .args(["fmt", "--all", "--check"])
+        .current_dir(project_dir)
+        .output();
+
+    match output {
+        Ok(output) => Check {
+            name: "cargo fmt".to_owned(),
+            ok: output.status.success(),
+            message: if output.status.success() {
+                "passed".to_owned()
+            } else {
+                truncate_check_message(&String::from_utf8_lossy(&output.stderr))
+            },
+            agent_instruction: "Run `cargo fmt --all`, then redeploy.".to_owned(),
+        },
+        Err(error) => Check {
+            name: "cargo fmt".to_owned(),
+            ok: false,
+            message: error.to_string(),
+            agent_instruction:
+                "Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying."
                     .to_owned(),
         },
     }
@@ -1196,35 +1278,54 @@ fn validate_config(config: &Config) -> Result<(), AgentError> {
 }
 
 fn validate_check_command(kind: &str, command: &str) -> Result<(), AgentError> {
-    if kind == "static_frontend" && uses_javascript_linter(command) {
+    if kind == "static_frontend" {
+        return validate_frontend_check_command(command);
+    }
+
+    validate_rust_check_command(command)
+}
+
+fn validate_rust_check_command(command: &str) -> Result<(), AgentError> {
+    let required = [
+        "cargo fmt --all --check",
+        "cargo check --locked",
+        "cargo clippy --locked",
+        "--all-targets",
+        "--all-features",
+        "-D warnings",
+    ];
+    if required.iter().all(|fragment| command.contains(fragment)) {
+        return Ok(());
+    }
+
+    Err(AgentError::new(
+        "policy_rejected",
+        "Check command is too weak for Zerct deploys.",
+        "Set [build].check to include `cargo fmt --all --check`, `cargo check --locked`, and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy.",
+    ))
+}
+
+fn validate_frontend_check_command(command: &str) -> Result<(), AgentError> {
+    if uses_javascript_linter(command) {
         return Err(AgentError::new(
             "policy_rejected",
             "Check command uses a JavaScript-based linter.",
             "Use native frontend linting such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then redeploy.",
         ));
     }
-    let required = if kind == "static_frontend" {
-        &["typecheck", "lint"][..]
-    } else {
-        &[
-            "cargo check --locked",
-            "cargo clippy --locked",
-            "--all-targets",
-            "--all-features",
-            "-D warnings",
-        ][..]
-    };
-    if required.iter().all(|fragment| command.contains(fragment)) {
+
+    let tokens = command_tokens(command);
+    if has_frontend_install_command(&tokens)
+        && has_frontend_script_run(&tokens, "typecheck")
+        && has_frontend_script_run(&tokens, "lint")
+    {
         return Ok(());
     }
+
     Err(AgentError::new(
         "policy_rejected",
         "Check command is too weak for Zerct deploys.",
-        if kind == "static_frontend" {
-            "Set [build].check to install dependencies, typecheck, and lint, for example `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`, then redeploy."
-        } else {
-            "Set [build].check to include `cargo check --locked` and `cargo clippy --locked --all-targets --all-features -- -D warnings`, then redeploy."
-        },
+        "Set [build].check to install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`, then redeploy.",
     ))
 }
 
@@ -2361,7 +2462,7 @@ fn frontend_build_command(project_dir: &Path) -> &'static str {
     }
 }
 
-fn frontend_script_checks(project_dir: &Path) -> Vec<Check> {
+fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> Vec<Check> {
     let manifest = fs::read_to_string(project_dir.join("package.json")).unwrap_or_default();
     let mut checks = ["typecheck", "lint"]
         .into_iter()
@@ -2390,7 +2491,7 @@ fn frontend_script_checks(project_dir: &Path) -> Vec<Check> {
         agent_instruction: "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.".to_owned(),
     });
 
-    if checks.iter().all(|check| check.ok) {
+    if run_scripts && checks.iter().all(|check| check.ok) {
         checks.push(package_script_check(project_dir, "typecheck"));
         checks.push(package_script_check(project_dir, "lint"));
     }
@@ -2431,7 +2532,16 @@ fn parse_json_string(source: &str) -> Option<String> {
 }
 
 fn uses_javascript_linter(command: &str) -> bool {
-    let tokens = command
+    let tokens = command_tokens(command);
+    tokens.iter().enumerate().any(|(index, token)| {
+        let command_name = command_name(token);
+        matches!(command_name, "eslint" | "eslint_d" | "standard" | "xo")
+            || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
+    })
+}
+
+fn command_tokens(command: &str) -> Vec<&str> {
+    command
         .split(|character: char| {
             matches!(
                 character,
@@ -2442,12 +2552,39 @@ fn uses_javascript_linter(command: &str) -> bool {
             let trimmed = token.trim_matches(|character| character == '"' || character == '\'');
             (!trimmed.is_empty()).then_some(trimmed)
         })
-        .collect::<Vec<_>>();
-    tokens.iter().enumerate().any(|(index, token)| {
-        let command_name = token.rsplit('/').next().unwrap_or(token);
-        matches!(command_name, "eslint" | "eslint_d" | "standard" | "xo")
-            || (command_name == "next" && tokens.get(index + 1).is_some_and(|next| *next == "lint"))
+        .collect()
+}
+
+fn command_name(token: &str) -> &str {
+    token.rsplit('/').next().unwrap_or(token)
+}
+
+fn has_frontend_install_command(tokens: &[&str]) -> bool {
+    tokens.windows(2).any(|window| match window {
+        [command, subcommand] => matches!(
+            (command_name(command), *subcommand),
+            ("npm" | "bun", "ci") | ("bun" | "pnpm" | "yarn", "install")
+        ),
+        _ => false,
     })
+}
+
+fn has_frontend_script_run(tokens: &[&str], script: &str) -> bool {
+    tokens.windows(3).any(|window| match window {
+        [command, "run", script_name] => {
+            is_frontend_package_manager(command) && *script_name == script
+        }
+        _ => false,
+    }) || tokens.windows(4).any(|window| match window {
+        [command, "run", flag, script_name] => {
+            is_frontend_package_manager(command) && flag.starts_with('-') && *script_name == script
+        }
+        _ => false,
+    })
+}
+
+fn is_frontend_package_manager(command: &str) -> bool {
+    matches!(command_name(command), "npm" | "bun" | "pnpm" | "yarn")
 }
 
 fn package_script_check(project_dir: &Path, script: &str) -> Check {
