@@ -5,6 +5,9 @@ import { DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND,
 import { readPackageJson, walkProjectFiles } from './project.ts'
 import type { DoctorCheck, FrontendSourceReport, PackageManifest } from './types.ts'
 
+const REQUIRED_FRONTEND_SCRIPTS = ['typecheck', 'lint'] as const
+type FrontendScriptName = typeof REQUIRED_FRONTEND_SCRIPTS[number]
+
 function frontendLockfileExists(projectDir: string): boolean {
   return ['package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb']
     .some((file) => existsSync(path.join(projectDir, file)))
@@ -30,15 +33,20 @@ function frontendBuildCommand(projectDir: string): string {
 
 function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCheck[] {
   const manifest = readPackageJson(projectDir)
-  const missing = (script: string): boolean => packageScriptValue(manifest, script) === ''
-  const checks = ['typecheck', 'lint'].map((script) => ({
-    name: `package script ${script}`,
-    ok: !missing(script),
-    message: missing(script) ? 'missing' : 'found',
-    agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
-  }))
-  const typecheckScript = packageScriptValue(manifest, 'typecheck')
-  const strictTypecheck = usesStrictFrontendTypechecker(typecheckScript)
+  const scripts: Record<FrontendScriptName, string> = {
+    typecheck: packageScriptValue(manifest, 'typecheck'),
+    lint: packageScriptValue(manifest, 'lint')
+  }
+  const checks: DoctorCheck[] = REQUIRED_FRONTEND_SCRIPTS.map((script) => {
+    const exists = scripts[script] !== ''
+    return {
+      name: `package script ${script}`,
+      ok: exists,
+      message: exists ? 'found' : 'missing',
+      agent_instruction: `Add a non-empty "${script}" script to package.json, then retry.`
+    }
+  })
+  const strictTypecheck = usesStrictFrontendTypechecker(scripts.typecheck)
   checks.push({
     name: 'strict frontend typecheck',
     ok: strictTypecheck,
@@ -46,8 +54,7 @@ function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCh
     agent_instruction: 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.'
   })
 
-  const lintScript = packageScriptValue(manifest, 'lint')
-  const nativeLint = !usesJavascriptLinter(lintScript) && usesNativeFrontendLinter(lintScript)
+  const nativeLint = !usesJavascriptLinter(scripts.lint) && usesNativeFrontendLinter(scripts.lint)
   checks.push({
     name: 'native frontend lint',
     ok: nativeLint,
@@ -56,8 +63,7 @@ function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCh
   })
 
   if (runScripts && checks.every((check) => check.ok)) {
-    checks.push(packageScriptCheck(projectDir, 'typecheck'))
-    checks.push(packageScriptCheck(projectDir, 'lint'))
+    checks.push(...REQUIRED_FRONTEND_SCRIPTS.map((script) => packageScriptCheck(projectDir, script)))
   }
 
   return checks
@@ -84,16 +90,22 @@ function frontendSourceChecks(projectDir: string): DoctorCheck[] {
 function frontendSourceReport(projectDir: string): FrontendSourceReport {
   const report: FrontendSourceReport = { typescript: [], javascript: [] }
   walkProjectFiles(projectDir, (_file, relative) => {
-    if (!isFrontendSourcePath(relative)) {
-      return
-    }
-    if (isFrontendTypescriptSource(relative)) {
-      report.typescript.push(relative)
-    } else if (isFrontendJavascriptSource(relative)) {
-      report.javascript.push(relative)
+    const sourceKind = frontendSourceKind(relative)
+    if (sourceKind) {
+      report[sourceKind].push(relative)
     }
   })
   return report
+}
+
+function frontendSourceKind(relative: string): keyof FrontendSourceReport | null {
+  if (!isFrontendSourcePath(relative)) {
+    return null
+  }
+  if (isFrontendTypescriptSource(relative)) {
+    return 'typescript'
+  }
+  return isFrontendJavascriptSource(relative) ? 'javascript' : null
 }
 
 function isFrontendSourcePath(relative: string): boolean {
