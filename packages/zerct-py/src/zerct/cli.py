@@ -201,6 +201,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     install = subcommands.add_parser("install")
     install.add_argument("path", nargs="?", default=".")
+    install.add_argument(
+        "--template",
+        choices=["rust-api", "tanstack-static-frontend", "fullstack-rust-tanstack"],
+        default="",
+    )
 
     doctor = subcommands.add_parser("doctor")
     doctor.add_argument("path", nargs="?", default=".")
@@ -290,7 +295,7 @@ def run(args: argparse.Namespace) -> None:
         case "init":
             init_project(pathlib.Path(args.path).resolve(), args.template)
         case "install":
-            init_project(pathlib.Path(args.path).resolve(), "")
+            init_project(pathlib.Path(args.path).resolve(), args.template)
             doctor_project(pathlib.Path(args.path).resolve(), args.json)
         case "doctor":
             doctor_project(pathlib.Path(args.path).resolve(), args.json)
