@@ -655,60 +655,45 @@ def run_doctor(project_dir: pathlib.Path) -> dict[str, Any]:
 
 
 def cargo_check(project_dir: pathlib.Path) -> dict[str, Any]:
-    try:
-        result = subprocess.run(
-            ["cargo", "check", "--locked", "--quiet"],
-            cwd=project_dir,
-            env={**os.environ, "CARGO_TERM_COLOR": "never"},
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError as error:
-        return {
-            "name": "cargo check",
-            "ok": False,
-            "message": str(error),
-            "agent_instruction": "Install Rust and Cargo, then run `cargo check --locked` locally before deploying.",
-        }
-    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or "cargo check failed").strip()[:240]
-    return {
-        "name": "cargo check",
-        "ok": result.returncode == 0,
-        "message": message,
-        "agent_instruction": "Run `cargo check --locked`, fix every compiler error and warning, then redeploy.",
-    }
+    return cargo_command_check(
+        project_dir,
+        "cargo check",
+        ["check", "--locked", "--quiet"],
+        "Install Rust and Cargo, then run `cargo check --locked` locally before deploying.",
+        "Run `cargo check --locked`, fix every compiler error and warning, then redeploy.",
+    )
 
 
 def cargo_fmt(project_dir: pathlib.Path) -> dict[str, Any]:
-    try:
-        result = subprocess.run(
-            ["cargo", "fmt", "--all", "--check"],
-            cwd=project_dir,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except OSError as error:
-        return {
-            "name": "cargo fmt",
-            "ok": False,
-            "message": str(error),
-            "agent_instruction": "Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.",
-        }
-    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or "cargo fmt failed").strip()[:240]
-    return {
-        "name": "cargo fmt",
-        "ok": result.returncode == 0,
-        "message": message,
-        "agent_instruction": "Run `cargo fmt --all`, then redeploy.",
-    }
+    return cargo_command_check(
+        project_dir,
+        "cargo fmt",
+        ["fmt", "--all", "--check"],
+        "Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.",
+        "Run `cargo fmt --all`, then redeploy.",
+    )
 
 
 def cargo_clippy(project_dir: pathlib.Path) -> dict[str, Any]:
+    return cargo_command_check(
+        project_dir,
+        "cargo clippy",
+        ["clippy", "--locked", "--all-targets", "--all-features", "--quiet", "--", "-D", "warnings"],
+        "Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.",
+        "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.",
+    )
+
+
+def cargo_command_check(
+    project_dir: pathlib.Path,
+    name: str,
+    args: list[str],
+    missing_instruction: str,
+    failed_instruction: str,
+) -> dict[str, Any]:
     try:
         result = subprocess.run(
-            ["cargo", "clippy", "--locked", "--all-targets", "--all-features", "--quiet", "--", "-D", "warnings"],
+            ["cargo", *args],
             cwd=project_dir,
             env={**os.environ, "CARGO_TERM_COLOR": "never"},
             capture_output=True,
@@ -717,17 +702,17 @@ def cargo_clippy(project_dir: pathlib.Path) -> dict[str, Any]:
         )
     except OSError as error:
         return {
-            "name": "cargo clippy",
+            "name": name,
             "ok": False,
             "message": str(error),
-            "agent_instruction": "Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.",
+            "agent_instruction": missing_instruction,
         }
-    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or "cargo clippy failed").strip()[:240]
+    message = "passed" if result.returncode == 0 else (result.stderr or result.stdout or f"{name} failed").strip()[:240]
     return {
-        "name": "cargo clippy",
+        "name": name,
         "ok": result.returncode == 0,
         "message": message,
-        "agent_instruction": "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.",
+        "agent_instruction": failed_instruction,
     }
 
 

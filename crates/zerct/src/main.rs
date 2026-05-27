@@ -9,7 +9,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-const VERSION: &str = "0.1.14";
+const VERSION: &str = "0.1.15";
 const DEFAULT_API_URL: &str = "https://api.zerct.com";
 const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 const BASE64_TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -1091,67 +1091,30 @@ fn detect_project_kind(project_dir: &Path) -> String {
 }
 
 fn cargo_check(project_dir: &Path) -> Check {
-    let output = Command::new("cargo")
-        .args(["check", "--locked", "--quiet"])
-        .env("CARGO_TERM_COLOR", "never")
-        .current_dir(project_dir)
-        .output();
-
-    match output {
-        Ok(output) => Check {
-            name: "cargo check".to_owned(),
-            ok: output.status.success(),
-            message: if output.status.success() {
-                "passed".to_owned()
-            } else {
-                truncate_check_message(&String::from_utf8_lossy(&output.stderr))
-            },
-            agent_instruction:
-                "Run `cargo check --locked`, fix every compiler error and warning, then redeploy."
-                    .to_owned(),
-        },
-        Err(error) => Check {
-            name: "cargo check".to_owned(),
-            ok: false,
-            message: error.to_string(),
-            agent_instruction:
-                "Install Rust and Cargo, then run `cargo check --locked` locally before deploying."
-                    .to_owned(),
-        },
-    }
+    cargo_command_check(
+        project_dir,
+        "cargo check",
+        &["check", "--locked", "--quiet"],
+        "Install Rust and Cargo, then run `cargo check --locked` locally before deploying.",
+        "Run `cargo check --locked`, fix every compiler error and warning, then redeploy.",
+    )
 }
 
 fn cargo_fmt(project_dir: &Path) -> Check {
-    let output = Command::new("cargo")
-        .args(["fmt", "--all", "--check"])
-        .current_dir(project_dir)
-        .output();
-
-    match output {
-        Ok(output) => Check {
-            name: "cargo fmt".to_owned(),
-            ok: output.status.success(),
-            message: if output.status.success() {
-                "passed".to_owned()
-            } else {
-                truncate_check_message(&String::from_utf8_lossy(&output.stderr))
-            },
-            agent_instruction: "Run `cargo fmt --all`, then redeploy.".to_owned(),
-        },
-        Err(error) => Check {
-            name: "cargo fmt".to_owned(),
-            ok: false,
-            message: error.to_string(),
-            agent_instruction:
-                "Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying."
-                    .to_owned(),
-        },
-    }
+    cargo_command_check(
+        project_dir,
+        "cargo fmt",
+        &["fmt", "--all", "--check"],
+        "Install rustfmt with Rust, then run `cargo fmt --all --check` before deploying.",
+        "Run `cargo fmt --all`, then redeploy.",
+    )
 }
 
 fn cargo_clippy(project_dir: &Path) -> Check {
-    let output = Command::new("cargo")
-        .args([
+    cargo_command_check(
+        project_dir,
+        "cargo clippy",
+        &[
             "clippy",
             "--locked",
             "--all-targets",
@@ -1160,31 +1123,41 @@ fn cargo_clippy(project_dir: &Path) -> Check {
             "--",
             "-D",
             "warnings",
-        ])
+        ],
+        "Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.",
+        "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.",
+    )
+}
+
+fn cargo_command_check(
+    project_dir: &Path,
+    name: &str,
+    args: &[&str],
+    missing_instruction: &str,
+    failed_instruction: &str,
+) -> Check {
+    let output = Command::new("cargo")
+        .args(args)
         .env("CARGO_TERM_COLOR", "never")
         .current_dir(project_dir)
         .output();
 
     match output {
         Ok(output) => Check {
-            name: "cargo clippy".to_owned(),
+            name: name.to_owned(),
             ok: output.status.success(),
             message: if output.status.success() {
                 "passed".to_owned()
             } else {
                 truncate_check_message(&String::from_utf8_lossy(&output.stderr))
             },
-            agent_instruction:
-                "Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy."
-                    .to_owned(),
+            agent_instruction: failed_instruction.to_owned(),
         },
         Err(error) => Check {
-            name: "cargo clippy".to_owned(),
+            name: name.to_owned(),
             ok: false,
             message: error.to_string(),
-            agent_instruction:
-                "Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying."
-                    .to_owned(),
+            agent_instruction: missing_instruction.to_owned(),
         },
     }
 }
