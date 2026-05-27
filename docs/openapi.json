@@ -51,14 +51,14 @@
     }
   ],
   "paths": {
-    "/healthz": {
+    "/health": {
       "get": {
         "tags": [
           "Health"
         ],
-        "summary": "Check API health",
-        "description": "Returns the Zerct control-plane health state. Context: paths./healthz.get.",
-        "operationId": "getHealth",
+        "summary": "Check public API health",
+        "description": "Returns the Zerct control-plane health state from the public health alias. Context: paths./health.get.",
+        "operationId": "getHealthAlias",
         "responses": {
           "200": {
             "$ref": "#/components/responses/HealthOk"
@@ -74,6 +74,63 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check infrastructure API health",
+        "description": "Returns the Zerct control-plane health state for infrastructure probes and deploy scripts. Context: paths./healthz.get.",
+        "operationId": "getHealthz",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/HealthOk"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Check platform status",
+        "description": "Returns structured Zerct API and dependency health for humans, SDKs, and agents. Context: paths./v1/status.get.",
+        "operationId": "getPlatformStatus",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformStatusLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/PlatformStatusUnavailable"
           }
         }
       }
@@ -3312,6 +3369,92 @@
                   "dns_record_value": "cname.zerct.app",
                   "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
                   "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
+                }
+              }
+            }
+          }
+        }
+      },
+      "PlatformStatusLoaded": {
+        "description": "Zerct platform status loaded. Context: components.responses.PlatformStatusLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PlatformStatusResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Zerct platform status loaded.",
+                "value": {
+                  "ok": true,
+                  "service": "zerct-api",
+                  "api_version": "v1",
+                  "checks": [
+                    {
+                      "name": "control_plane_database",
+                      "ok": true,
+                      "message": "reachable"
+                    }
+                  ],
+                  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
+                  "docs_url": "https://docs.zerct.com/status"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PlatformStatusUnavailable": {
+        "description": "Zerct platform status is temporarily unavailable. Context: components.responses.PlatformStatusUnavailable.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PlatformStatusResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Zerct platform status unavailable.",
+                "value": {
+                  "ok": false,
+                  "service": "zerct-api",
+                  "api_version": "v1",
+                  "checks": [
+                    {
+                      "name": "control_plane_database",
+                      "ok": false,
+                      "message": "unavailable"
+                    }
+                  ],
+                  "agent_instruction": "Retry the command. If it keeps failing, check Zerct status before changing your project.",
+                  "docs_url": "https://docs.zerct.com/status"
                 }
               }
             }
@@ -7187,6 +7330,142 @@
             "next_actions": [
               "Watch the active build with `npx @zerct/zerct logs --app app_1`."
             ]
+          }
+        ]
+      },
+      "PlatformStatusCheck": {
+        "type": "object",
+        "description": "Single Zerct platform dependency health check. Context: components.schemas.PlatformStatusCheck.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "ok",
+          "message"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Stable dependency name. Context: components.schemas.PlatformStatusCheck.properties.name.",
+            "pattern": "^[a-z0-9_]{1,80}$",
+            "maxLength": 80,
+            "examples": [
+              "control_plane_database"
+            ]
+          },
+          "ok": {
+            "type": "boolean",
+            "description": "Whether this dependency is healthy. Context: components.schemas.PlatformStatusCheck.properties.ok.",
+            "examples": [
+              true
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Short dependency status message. Context: components.schemas.PlatformStatusCheck.properties.message.",
+            "pattern": "^[\\s\\S]{1,160}$",
+            "maxLength": 160,
+            "examples": [
+              "reachable"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "control_plane_database",
+            "ok": true,
+            "message": "reachable"
+          }
+        ]
+      },
+      "PlatformStatusResponse": {
+        "type": "object",
+        "description": "Structured Zerct platform status for humans, SDKs, and agents. Context: components.schemas.PlatformStatusResponse.",
+        "additionalProperties": false,
+        "required": [
+          "ok",
+          "service",
+          "api_version",
+          "checks",
+          "agent_instruction",
+          "docs_url"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether Zerct is available for normal API commands. Context: components.schemas.PlatformStatusResponse.properties.ok.",
+            "examples": [
+              true
+            ]
+          },
+          "service": {
+            "type": "string",
+            "description": "Service identifier. Context: components.schemas.PlatformStatusResponse.properties.service.",
+            "enum": [
+              "zerct-api"
+            ],
+            "examples": [
+              "zerct-api"
+            ]
+          },
+          "api_version": {
+            "type": "string",
+            "description": "Stable API version. Context: components.schemas.PlatformStatusResponse.properties.api_version.",
+            "pattern": "^v[0-9]+$",
+            "maxLength": 16,
+            "examples": [
+              "v1"
+            ]
+          },
+          "checks": {
+            "type": "array",
+            "description": "Dependency health checks. Context: components.schemas.PlatformStatusResponse.properties.checks.",
+            "minItems": 1,
+            "maxItems": 32,
+            "items": {
+              "$ref": "#/components/schemas/PlatformStatusCheck"
+            },
+            "examples": [
+              [
+                {
+                  "name": "control_plane_database",
+                  "ok": true,
+                  "message": "reachable"
+                }
+              ]
+            ]
+          },
+          "agent_instruction": {
+            "type": "string",
+            "description": "Direct next step for coding agents. Context: components.schemas.PlatformStatusResponse.properties.agent_instruction.",
+            "pattern": "^[\\s\\S]{1,500}$",
+            "maxLength": 500,
+            "examples": [
+              "Continue with GET /v1/capabilities, then run the requested Zerct command."
+            ]
+          },
+          "docs_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Documentation URL for service status guidance. Context: components.schemas.PlatformStatusResponse.properties.docs_url.",
+            "examples": [
+              "https://docs.zerct.com/status"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "ok": true,
+            "service": "zerct-api",
+            "api_version": "v1",
+            "checks": [
+              {
+                "name": "control_plane_database",
+                "ok": true,
+                "message": "reachable"
+              }
+            ],
+            "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
+            "docs_url": "https://docs.zerct.com/status"
           }
         ]
       }

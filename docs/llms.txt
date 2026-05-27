@@ -50,6 +50,7 @@ Useful commands:
 
 ```sh
 npx @zerct/zerct capabilities --json
+curl https://api.zerct.com/v1/status
 npx @zerct/zerct activity --json
 npx @zerct/zerct apps --json
 npx @zerct/zerct overview --app <app> --json
@@ -59,6 +60,10 @@ npx @zerct/zerct logs --app <app> --json
 npx @zerct/zerct env list --app <app> --json
 npx @zerct/zerct domains list --app <app> --json
 ```
+
+Use `GET /v1/status` only when Zerct itself appears unavailable. If the API is
+available and a deploy fails, inspect build logs instead of changing status
+checks.
 
 Never print or commit secrets. Put secrets in Zerct env vars with
 `npx @zerct/zerct env set --app <app> KEY=value`.
