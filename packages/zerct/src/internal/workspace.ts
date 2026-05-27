@@ -58,4 +58,4 @@ function kindOrder(kind: DiscoveredProjectKind): number {
   return 2
 }
 
-export { discoverDeployProjects, discoverProjectDirs, deployProjectInfo, compareDeployProjects, kindOrder }
+export { discoverDeployProjects }

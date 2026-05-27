@@ -356,4 +356,4 @@ function isWorkspaceDoctorReport(report: DoctorReport | WorkspaceDoctorReport): 
   return 'projects' in report
 }
 
-export { doctorProject, previewProject, runShell, serveStatic, staticTarget, contentType, runDoctorWorkspace, runDoctor, cargoCheck, cargoFmt, cargoClippy, cargoCommandCheck, cargoLints, cargoLintLevel, isWorkspaceDoctorReport }
+export { doctorProject, previewProject, runDoctor }

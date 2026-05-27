@@ -1,12 +1,5 @@
 import { ZerctError, agentError } from './errors.ts'
-import { readOrLoginToken } from './auth.ts'
 import type { AgentErrorPayload, ApiMethod, CliOptions, JsonObject, JsonValue } from './types.ts'
-
-async function appGet(cli: CliOptions, kind: string): Promise<JsonValue | null> {
-  const token = await readOrLoginToken(process.cwd(), cli)
-  const app = requireApp(cli)
-  return apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/${kind}`, token, null)
-}
 
 function requireApp(cli: CliOptions): string {
   if (!cli.app) {
@@ -113,13 +106,10 @@ function numberField(source: JsonObject, key: string): number {
 }
 
 export {
-  appGet,
   requireApp,
   pageQuery,
   apiRequest,
-  parseJson,
   isJsonObject,
-  isAgentErrorPayload,
   jsonObjectOrEmpty,
   jsonObjectField,
   jsonArrayField,

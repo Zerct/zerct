@@ -192,4 +192,4 @@ function packageScriptCheck(projectDir: string, script: string): DoctorCheck {
   }
 }
 
-export { frontendLockfileExists, frontendPackageManager, frontendCheckCommand, frontendBuildCommand, frontendScriptChecks, frontendSourceChecks, frontendSourceReport, isFrontendSourcePath, isFrontendTypescriptSource, isFrontendJavascriptSource, packageScriptValue, usesJavascriptLinter, usesStrictFrontendTypechecker, usesNativeFrontendLinter, commandTokens, commandNameFromToken, hasFrontendInstallCommand, hasFrontendScriptRun, packageScriptCheck }
+export { frontendLockfileExists, frontendCheckCommand, frontendBuildCommand, frontendScriptChecks, frontendSourceChecks, usesJavascriptLinter, commandTokens, hasFrontendInstallCommand, hasFrontendScriptRun }

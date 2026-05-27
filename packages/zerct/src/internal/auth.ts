@@ -231,4 +231,4 @@ function responseFields(
   return response
 }
 
-export { login, readOrLoginToken, loginAndStore, pollLogin, readStoredToken, writeSessionToken, readTokenFile, writeTokenFile, userSessionPath, readKeychainToken, writeKeychainToken }
+export { login, readOrLoginToken }

@@ -266,4 +266,4 @@ function isTemplateName(value: string): value is TemplateName {
   return PROJECT_TEMPLATES.has(value)
 }
 
-export { initProject, createTemplate, writeRustApiTemplate, writeFrontendTemplate, writeFrontendTemplateFile, writeNewFile, rustBackendConfig, frontendConfig, installProject, rustApiSource, frontendSource, isTemplateName }
+export { initProject, installProject }

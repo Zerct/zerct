@@ -253,9 +253,5 @@ function validateFrontendCheckCommand(command: string): void {
 
 export {
   parseZerctToml,
-  parseTomlValue,
-  validateConfig,
-  validateCheckCommand,
-  validateFrontendCheckCommand,
-  isProjectKind
+  validateConfig
 }
