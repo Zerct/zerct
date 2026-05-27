@@ -1,55 +1,42 @@
 ---
 title: "Zerct"
-description: "Deploy free Rust backends with managed Postgres and HTTPS endpoints."
+description: "Free Rust backend cloud for agents."
 ---
 
-Zerct deploys free Rust backends with managed Postgres, private logs, and live
-HTTPS endpoints.
+Ship a Rust backend, managed Postgres, and an HTTPS endpoint from one command.
+Zerct returns structured feedback so agents can fix issues and deploy again.
 
 ```sh
 npx @zerct/zerct deploy
 ```
 
-The package checks your project, guides your agent with JSON output, and starts
-the deployment from a valid project contract.
+## Start
 
-## What Zerct expects
-
-- A Rust backend with `Cargo.toml` and `Cargo.lock`
-- A `zerct.toml` project contract
-- A server that listens on `0.0.0.0:$PORT`
-- A health endpoint for deploy verification
-
-## Package surfaces
-
-Use npm for the agent-first flow:
+- Add a `zerct.toml` project contract.
+- Run `doctor` before `deploy`.
+- Fix any JSON `agent_instruction`.
+- Deploy when the checks pass.
 
 ```sh
+npx @zerct/zerct doctor
 npx @zerct/zerct deploy
 ```
 
-Use Homebrew for a persistent developer CLI:
+## Agent prompt
+
+```text
+Use Zerct to deploy this Rust backend for free.
+Read https://docs.zerct.com/llms.txt.
+Run `npx @zerct/zerct doctor`.
+Fix any JSON `agent_instruction`.
+Run `npx @zerct/zerct deploy`.
+```
+
+## Packages
 
 ```sh
-brew tap Zerct/tap
+npx @zerct/zerct deploy
 brew install zerct
-zerct deploy
-```
-
-Use PyPI from Python environments:
-
-```sh
 pipx install zerct
-zerct deploy
-zerct usage
-zerct logs --app app_1 --json
-```
-
-Use crates.io from Rust environments:
-
-```sh
 cargo install zerct
-zerct deploy
-zerct apps
-zerct billing portal
 ```

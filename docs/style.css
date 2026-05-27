@@ -1,0 +1,212 @@
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 100 900;
+}
+
+:root {
+  color-scheme: dark;
+  --zerct-bg: #000000;
+  --zerct-fg: #ffffff;
+  --zerct-gray-100: #ffffff0f;
+  --zerct-gray-200: #ffffff17;
+  --zerct-gray-300: #ffffff21;
+  --zerct-gray-400: #ffffff24;
+  --zerct-gray-600: #ffffff82;
+  --zerct-gray-900: #ffffff9c;
+  --zerct-gray-1000: #ffffffeb;
+}
+
+html,
+body,
+#background-color,
+#body-content {
+  background: var(--zerct-bg);
+  color: var(--zerct-fg);
+}
+
+* {
+  letter-spacing: 0;
+}
+
+body {
+  font-family:
+    "Geist",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a,
+button,
+#search-bar-entry,
+#search-bar-entry-mobile,
+#topbar-cta-button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family:
+    "Geist Mono",
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+
+::selection {
+  background: var(--zerct-fg);
+  color: var(--zerct-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--zerct-fg);
+  outline-offset: 2px;
+}
+
+#navbar {
+  background: rgb(0 0 0 / 86%);
+  border-bottom: 1px solid var(--zerct-gray-300);
+  backdrop-filter: saturate(180%) blur(16px);
+}
+
+#navbar img {
+  width: auto;
+  max-width: 112px;
+  height: 22px;
+  object-fit: contain;
+}
+
+#assistant-entry,
+#assistant-entry-mobile,
+#ask-assistant-code-block-button,
+.chat-assistant-floating-input {
+  display: none;
+}
+
+#sidebar,
+#table-of-contents {
+  background: var(--zerct-bg);
+  border-color: var(--zerct-gray-300);
+}
+
+#search-bar-entry,
+#search-bar-entry-mobile {
+  background: var(--zerct-gray-100);
+  border: 1px solid var(--zerct-gray-300);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--zerct-gray-1000);
+}
+
+#topbar-cta-button {
+  background: var(--zerct-fg);
+  border: 1px solid var(--zerct-fg);
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--zerct-bg);
+  font-weight: 560;
+}
+
+#topbar-cta-button:hover,
+#search-bar-entry:hover,
+#search-bar-entry-mobile:hover,
+#sidebar a:hover,
+#table-of-contents a:hover {
+  background: var(--zerct-gray-200);
+  color: var(--zerct-fg);
+}
+
+#topbar-cta-button:hover {
+  background: var(--zerct-gray-1000);
+  color: var(--zerct-bg);
+}
+
+#page-title,
+#header h1,
+#content h1,
+#content h2,
+#content h3 {
+  color: var(--zerct-fg);
+  font-family: "Geist", system-ui, sans-serif;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+#content p,
+#content li,
+#content dd,
+#content td,
+#content th {
+  color: var(--zerct-gray-1000);
+  line-height: 1.7;
+}
+
+#content a,
+#footer a {
+  color: var(--zerct-fg);
+  text-decoration-color: var(--zerct-gray-600);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+#content a:hover,
+#footer a:hover {
+  text-decoration-color: var(--zerct-fg);
+}
+
+#content code:not(pre code) {
+  background: var(--zerct-gray-100);
+  border: 1px solid var(--zerct-gray-300);
+  border-radius: 6px;
+  color: var(--zerct-fg);
+  padding: 0.12rem 0.32rem;
+}
+
+#content pre,
+#request-example,
+#response-example {
+  background: #050505;
+  border: 1px solid var(--zerct-gray-300);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+#pagination a,
+#footer,
+footer {
+  border-color: var(--zerct-gray-300);
+}
+
+#footer,
+footer {
+  color: var(--zerct-gray-900);
+}
+
+@media (width <= 768px) {
+  #navbar img {
+    max-width: 96px;
+    height: 20px;
+  }
+}
