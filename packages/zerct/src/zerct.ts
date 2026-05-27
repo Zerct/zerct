@@ -8,6 +8,34 @@ import { previewProject } from './internal/preview.ts'
 import { login } from './internal/auth.ts'
 import { deploy } from './internal/deploy.ts'
 import { apps, builds, activity, billing, capabilities, database, deploys, domainsCommand, envCommand, inspect, logs, me, overview, status, usage } from './internal/commands.ts'
+import type { CliOptions } from './internal/types.ts'
+
+type CommandHandler = (cli: CliOptions) => Promise<void> | void
+
+const COMMANDS = new Map<string, CommandHandler>([
+  ['init', (cli): void => initProject(projectPath(cli.args[0]), cli.template)],
+  ['install', (cli): void => installProject(projectPath(cli.args[0]), cli.template)],
+  ['doctor', (cli): void => doctorProject(projectPath(cli.args[0]), cli.json)],
+  ['preview', (cli): void => previewProject(projectPath(cli.args[0]), cli.port)],
+  ['login', login],
+  ['deploy', (cli): Promise<void> => deploy(projectPath(cli.args[0]), cli)],
+  ['capabilities', capabilities],
+  ['me', me],
+  ['usage', usage],
+  ['activity', activity],
+  ['apps', apps],
+  ['overview', overview],
+  ['deploys', deploys],
+  ['builds', builds],
+  ['logs', logs],
+  ['status', status],
+  ['inspect', inspect],
+  ['db', database],
+  ['database', database],
+  ['env', envCommand],
+  ['domains', domainsCommand],
+  ['billing', billing]
+])
 
 async function main(): Promise<void> {
   const cli = parseArgs(process.argv.slice(2))
@@ -22,74 +50,11 @@ async function main(): Promise<void> {
     return
   }
 
-  switch (cli.command) {
-    case 'init':
-      initProject(projectPath(cli.args[0]), cli.template)
-      break
-    case 'install':
-      installProject(projectPath(cli.args[0]), cli.template)
-      break
-    case 'doctor':
-      doctorProject(projectPath(cli.args[0]), cli.json)
-      break
-    case 'preview':
-      previewProject(projectPath(cli.args[0]), cli.port)
-      break
-    case 'login':
-      await login(cli)
-      break
-    case 'deploy':
-      await deploy(projectPath(cli.args[0]), cli)
-      break
-    case 'capabilities':
-      await capabilities(cli)
-      break
-    case 'me':
-      await me(cli)
-      break
-    case 'usage':
-      await usage(cli)
-      break
-    case 'activity':
-      await activity(cli)
-      break
-    case 'apps':
-      await apps(cli)
-      break
-    case 'overview':
-      await overview(cli)
-      break
-    case 'deploys':
-      await deploys(cli)
-      break
-    case 'builds':
-      await builds(cli)
-      break
-    case 'logs':
-      await logs(cli)
-      break
-    case 'status':
-      await status(cli)
-      break
-    case 'inspect':
-      await inspect(cli)
-      break
-    case 'db':
-    case 'database':
-      await database(cli)
-      break
-    case 'env':
-      await envCommand(cli)
-      break
-    case 'domains':
-      await domainsCommand(cli)
-      break
-    case 'billing':
-      await billing(cli)
-      break
-    default:
-      throw agentError('unknown_command', 'Unknown Zerct command.', 'Run `npx @zerct/zerct --help` and retry with a supported command.', cli.json)
+  const command = COMMANDS.get(cli.command)
+  if (!command) {
+    throw agentError('unknown_command', 'Unknown Zerct command.', 'Run `npx @zerct/zerct --help` and retry with a supported command.', cli.json)
   }
+  await command(cli)
 }
 
 main().catch((error: unknown): void => {
