@@ -61,6 +61,12 @@ test-results/
 .codex/
 .claude/
 .cursor/
+.continue/
+.roo/
+.windsurf/
+.aider*
+.vscode/
+.idea/
 
 __pycache__/
 **/__pycache__/
@@ -70,8 +76,6 @@ __pycache__/
 
 [Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]
 **/[Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]
-![Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]
-!**/[Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]
 CLAUDE.md
 **/CLAUDE.md
 GEMINI.md
