@@ -1,8 +1,8 @@
-const target = process.argv[2] ?? "https://docs.zerct.com";
+const target = process.argv[2] ?? "https://docs.tovuk.com";
 const normalizedTarget = target.startsWith("http") ? target : `https://${target}`;
 const baseUrl = normalizedTarget.replace(/\/$/, "");
-const fetchRetries = Number.parseInt(process.env.ZERCT_DOCS_CHECK_RETRIES ?? "8", 10);
-const fetchRetryDelayMs = Number.parseInt(process.env.ZERCT_DOCS_CHECK_RETRY_DELAY_MS ?? "5000", 10);
+const fetchRetries = Number.parseInt(process.env.TOVUK_DOCS_CHECK_RETRIES ?? "8", 10);
+const fetchRetryDelayMs = Number.parseInt(process.env.TOVUK_DOCS_CHECK_RETRY_DELAY_MS ?? "5000", 10);
 
 const requiredPaths = [
   "/llms.txt",
@@ -90,7 +90,7 @@ assertIncludes("llms.txt", llms.text, /\[[^\]]+\]\([^)]+\)/);
 
 const skill = await fetchText("/skill.md");
 assertIncludes("skill.md", skill.text, /^---\n/m);
-assertIncludes("skill.md", skill.text, /name:\s*zerct/i);
+assertIncludes("skill.md", skill.text, /name:\s*tovuk/i);
 
 const robots = await fetchText("/robots.txt");
 if (/Disallow:\s*\//i.test(robots.text) && !/Allow:\s*\//i.test(robots.text)) {
@@ -98,10 +98,10 @@ if (/Disallow:\s*\//i.test(robots.text) && !/Allow:\s*\//i.test(robots.text)) {
 }
 
 const markdown = await fetchText("/", { Accept: "text/markdown" });
-assertIncludes("Markdown content negotiation", markdown.text, /Zerct/i);
+assertIncludes("Markdown content negotiation", markdown.text, /Tovuk/i);
 
 const plaintext = await fetchText("/", { Accept: "text/plain" });
-assertIncludes("Plain text content negotiation", plaintext.text, /Zerct/i);
+assertIncludes("Plain text content negotiation", plaintext.text, /Tovuk/i);
 
 const mcpDiscovery = await fetchText("/.well-known/mcp");
 assertIncludes("MCP discovery", mcpDiscovery.text, /"url"\s*:/);

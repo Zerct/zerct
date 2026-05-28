@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://docs.zerct.com/sitemap.xml
+Sitemap: https://docs.tovuk.com/sitemap.xml

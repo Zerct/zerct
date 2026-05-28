@@ -3,20 +3,20 @@ title: "Support"
 description: "Agent-ready support tickets."
 ---
 
-Zerct support is API and CLI first. Agents should create tickets only after
+Tovuk support is API and CLI first. Agents should create tickets only after
 they have collected the exact command, app id, build id, deploy id, and first
 actionable log line.
 
 ## Create a ticket
 
 ```sh
-npx @zerct/zerct support create \
+tovuk support create \
   "Deploy failed" \
   "The deploy failed after the Rust check step. The agent already ran doctor and reproduced the same error." \
   --app app_1 \
   --build job_1 \
   --deploy deploy_1 \
-  --failing-command "npx @zerct/zerct deploy --wait --json" \
+  --failing-command "tovuk deploy --wait --json" \
   --first-log-line "cargo check failed in src/main.rs" \
   --severity normal \
   --json
@@ -28,7 +28,7 @@ The API stores the ticket on the authenticated account and returns
 ## List tickets
 
 ```sh
-npx @zerct/zerct support list --json
+tovuk support list --json
 ```
 
 Agents should list tickets before creating another one so repeated runs do not
@@ -36,11 +36,11 @@ duplicate the same issue.
 
 ## Resolve tickets
 
-When the agent fixes the issue or no longer needs Zerct support, resolve the
+When the agent fixes the issue or no longer needs Tovuk support, resolve the
 ticket from the CLI:
 
 ```sh
-npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 ## API
@@ -56,11 +56,11 @@ The create body is:
 ```json
 {
   "subject": "Deploy failed",
-  "details": "What the agent already tried and why the issue needs Zerct support.",
+  "details": "What the agent already tried and why the issue needs Tovuk support.",
   "app_id": "app_1",
   "build_id": "job_1",
   "deploy_id": "deploy_1",
-  "failing_command": "npx @zerct/zerct deploy --wait --json",
+  "failing_command": "tovuk deploy --wait --json",
   "first_log_line": "cargo check failed in src/main.rs",
   "severity": "normal"
 }
@@ -75,7 +75,7 @@ When a free-tier plan limit blocks work, agents should create a hosted Stripe
 Checkout URL instead of opening the dashboard:
 
 ```sh
-npx @zerct/zerct billing checkout "Project limit reached" --json
+tovuk billing checkout "Project limit reached" --json
 ```
 
 Show the returned `checkout.url` to the human. Do not collect card details in

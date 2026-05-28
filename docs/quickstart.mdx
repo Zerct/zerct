@@ -1,6 +1,6 @@
 ---
 title: "Quickstart"
-description: "Deploy a Rust backend with Zerct."
+description: "Deploy a Rust backend with Tovuk."
 ---
 
 ## Requirements
@@ -14,62 +14,62 @@ description: "Deploy a Rust backend with Zerct."
 From your backend directory:
 
 ```sh
-npx @zerct/zerct init
+tovuk init
 ```
 
-This creates `zerct.toml`.
+This creates `tovuk.toml`.
 
 For a new project, start from a template:
 
 ```sh
-npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+tovuk init my-app --template fullstack-rust-tanstack
 cd my-app/web && bun install && cd ..
 ```
 
 ## Check locally
 
 ```sh
-npx @zerct/zerct doctor --json
+tovuk doctor --json
 ```
 
-Fix the first failed check before deploying. Zerct errors include
+Fix the first failed check before deploying. Tovuk errors include
 `agent_instruction`, so agents can make the exact code change and rerun doctor.
 
 Preview one project locally:
 
 ```sh
-npx @zerct/zerct preview api
-npx @zerct/zerct preview web
+tovuk preview api
+tovuk preview web
 ```
 
 ## Deploy
 
 ```sh
-npx @zerct/zerct deploy --wait --json
+tovuk deploy --wait --json
 ```
 
 On first deploy, the CLI opens browser login for GitHub or Google, stores the
-Zerct session, then continues automatically. Zerct builds the backend, verifies
+Tovuk session, then continues automatically. Tovuk builds the backend, verifies
 health, and returns the deployment URL.
 
 If the build fails, inspect the build logs:
 
 ```sh
-npx @zerct/zerct logs --build <build_id> --json
+tovuk logs --build <build_id> --json
 ```
 
 Fix the first actionable error, rerun doctor, then redeploy.
 
 ## Full-stack repos
 
-Put one `zerct.toml` in each deployable app directory, then run one command from
+Put one `tovuk.toml` in each deployable app directory, then run one command from
 the repo root:
 
 ```sh
-npx @zerct/zerct deploy --database
+tovuk deploy --database
 ```
 
-Zerct discovers every nested project contract, deploys Rust backends first,
+Tovuk discovers every nested project contract, deploys Rust backends first,
 deploys static frontends next, and requests managed Postgres for Rust backends.
 If the frontend calls the backend from the browser, configure backend CORS for
 the frontend origin or use a same-origin custom domain.

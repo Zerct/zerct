@@ -55,7 +55,7 @@ test-results/
 **/.DS_Store
 *.log
 *.tgz
-.zerct/
+.tovuk/
 .mintlify/
 .agents/
 .codex/

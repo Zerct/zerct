@@ -1,9 +1,9 @@
 ---
 title: "Project contract"
-description: "The minimum files and runtime behavior a Zerct deployment needs."
+description: "The minimum files and runtime behavior a Tovuk deployment needs."
 ---
 
-Zerct deploys projects that are explicit and reproducible.
+Tovuk deploys projects that are explicit and reproducible.
 
 ## Required files
 
@@ -12,7 +12,7 @@ Rust backend:
 ```txt
 Cargo.toml
 Cargo.lock
-zerct.toml
+tovuk.toml
 ```
 
 `Cargo.lock` is required so builds are deterministic.
@@ -23,7 +23,7 @@ Static frontend:
 package.json
 bun.lock or package-lock.json
 src/main.tsx
-zerct.toml
+tovuk.toml
 ```
 
 Static frontend `package.json` must include `typecheck`, `lint`, and `build`
@@ -32,7 +32,7 @@ scripts. `typecheck` must run `tsgo --noEmit` with
 `oxlint`, `biome check`, or `deno lint`, plus Fallow `dead-code`, semantic
 `dupes`, and `health` gates.
 
-## Rust zerct.toml
+## Rust tovuk.toml
 
 ```toml
 name = "hello-rust"
@@ -47,7 +47,7 @@ port = 3000
 health = "/healthz"
 ```
 
-## Frontend zerct.toml
+## Frontend tovuk.toml
 
 ```toml
 name = "dashboard"
@@ -66,5 +66,5 @@ output = "dist"
 - Keep secrets in server-side environment variables
 - Avoid build steps that require interactive input
 
-Static frontends do not run server code on Zerct. They call Rust backends for
+Static frontends do not run server code on Tovuk. They call Rust backends for
 dynamic behavior.
