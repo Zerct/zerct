@@ -11,7 +11,14 @@ function requireSnippet(source, snippet, label) {
   }
 }
 
+function rejectSnippet(source, snippet, label) {
+  if (source.includes(snippet)) {
+    fail(`${label} is present`)
+  }
+}
+
 const npmCli = readFileSync('packages/zerct/src/zerct.ts', 'utf8')
+const npmAuth = readFileSync('packages/zerct/src/internal/auth.ts', 'utf8')
 const npmConstants = readFileSync('packages/zerct/src/internal/constants.ts', 'utf8')
 const npmTemplates = readFileSync('packages/zerct/src/internal/templates.ts', 'utf8')
 const pythonCli = readFileSync('packages/zerct-py/src/zerct/cli.py', 'utf8')
@@ -68,6 +75,7 @@ requireSnippet(homebrewFormula, `zerct-${npmVersion}.tgz`, 'Homebrew formula pin
 requireSnippet(homebrewFormula, 'std_npm_args(prefix: libexec)', 'Homebrew formula uses standard npm install args')
 requireSnippet(homebrewFormula, 'zerct billing [checkout|portal]', 'Homebrew formula tests billing commands')
 requireSnippet(homebrewFormula, 'zerct support create', 'Homebrew formula tests support commands')
+rejectSnippet(npmAuth, 'path.join(projectDir, SESSION_DIR, SESSION_FILE)', 'project-local session token fallback')
 
 for (const source of [npmConstants, pythonReadme, cargoReadme]) {
   requireSnippet(source, 'zerct billing checkout --json', 'agentic billing checkout command')

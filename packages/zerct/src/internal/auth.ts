@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
 import { DEFAULT_LOGIN_EXPIRES_SECONDS, DEFAULT_LOGIN_INTERVAL_SECONDS, SESSION_ACCOUNT, SESSION_DIR, SESSION_FILE, SESSION_LABEL, SESSION_SERVICE } from './constants.ts'
@@ -45,8 +45,8 @@ async function login(cli: CliOptions): Promise<void> {
   await loginAndStore(cli)
 }
 
-async function readOrLoginToken(projectDir: string, cli: CliOptions): Promise<string> {
-  const token = readStoredToken(projectDir, cli)
+async function readOrLoginToken(cli: CliOptions): Promise<string> {
+  const token = readStoredToken(cli)
   if (token) {
     return token
   }
@@ -100,7 +100,7 @@ async function pollLogin(cli: CliOptions, start: LoginStartResponse): Promise<Lo
   throw agentError('login_expired', 'Zerct login expired before it completed.', 'Run `npx @zerct/zerct login` again and finish the browser login in the newly opened tab.', cli.json)
 }
 
-function readStoredToken(projectDir: string, cli: CliOptions): string {
+function readStoredToken(cli: CliOptions): string {
   if (cli.token) {
     return cli.token
   }
@@ -116,12 +116,6 @@ function readStoredToken(projectDir: string, cli: CliOptions): string {
   const userToken = readTokenFile(userSessionPath())
   if (userToken) {
     return userToken
-  }
-
-  const projectToken = path.join(projectDir, SESSION_DIR, SESSION_FILE)
-  const legacyProjectToken = readTokenFile(projectToken)
-  if (legacyProjectToken) {
-    return legacyProjectToken
   }
 
   const homeToken = path.join(homedir(), SESSION_DIR, SESSION_FILE)
@@ -151,6 +145,7 @@ function writeTokenFile(filePath: string, token: string): void {
   const dir = path.dirname(filePath)
   mkdirSync(dir, { recursive: true, mode: 0o700 })
   writeFileSync(filePath, `${token}\n`, { mode: 0o600 })
+  chmodSync(filePath, 0o600)
 }
 
 function userSessionPath(): string {

@@ -22,7 +22,7 @@ async function deploy(projectDir: string, cli: CliOptions): Promise<void> {
     throw agentError('missing_project_contract', 'No zerct.toml was found.', 'Run `npx @zerct/zerct init` in each app directory, or pass a project path.', cli.json)
   }
 
-  const token = await readOrLoginToken(projects.length === 1 ? projects[0]?.dir ?? projectDir : projectDir, cli)
+  const token = await readOrLoginToken(cli)
   const plan = await createDeployPlan(projects, cli, token)
   const results = await deployProjects(plan, cli, token)
 
