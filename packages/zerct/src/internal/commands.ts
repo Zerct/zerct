@@ -37,7 +37,7 @@ const SUPPORT_COMMANDS: SubcommandTable = {
 }
 
 async function logs(cli: CliOptions): Promise<void> {
-  const token = await readOrLoginToken(process.cwd(), cli)
+  const token = await readOrLoginToken(cli)
   const request = logsRequest(cli)
   const response = logsResponseFromJson(await apiRequest(cli, 'GET', request.route, token, null))
   if (cli.json) {
@@ -160,7 +160,7 @@ function domainMutation(method: DomainMethod, route: DomainRoute, body: DomainBo
 }
 
 async function billing(cli: CliOptions): Promise<void> {
-  const token = await readOrLoginToken(process.cwd(), cli)
+  const token = await readOrLoginToken(cli)
   const action = billingAction(cli.args[0] ?? 'checkout', cli.json)
   const route = action === 'portal' ? '/v1/billing/portal' : '/v1/billing/checkout'
   const reason = cli.args.slice(1).join(' ').trim() || 'Upgrade to Zerct Pro.'
@@ -206,7 +206,7 @@ async function supportCreate(cli: CliOptions): Promise<void> {
     )
   }
 
-  const token = await readOrLoginToken(process.cwd(), cli)
+  const token = await readOrLoginToken(cli)
   const body = supportTicketBody(cli, subject, details)
   const response = await apiRequest(cli, 'POST', '/v1/support/tickets', token, body)
   printJson(response)
@@ -239,7 +239,7 @@ async function supportResolve(cli: CliOptions): Promise<void> {
 }
 
 async function printAuthenticated(cli: CliOptions, route: string): Promise<void> {
-  const token = await readOrLoginToken(process.cwd(), cli)
+  const token = await readOrLoginToken(cli)
   const response = await apiRequest(cli, 'GET', route, token, null)
   printJson(response)
 }
@@ -249,7 +249,7 @@ async function printPagedAuthenticated(cli: CliOptions, route: string): Promise<
 }
 
 async function printAuthenticatedMutation(cli: CliOptions, method: ApiMethod, route: string, body: JsonObject | null): Promise<void> {
-  const token = await readOrLoginToken(process.cwd(), cli)
+  const token = await readOrLoginToken(cli)
   printJson(await apiRequest(cli, method, route, token, body))
 }
 
@@ -258,7 +258,7 @@ function appRoute(cli: CliOptions, suffix: string): string {
 }
 
 async function appGet(cli: CliOptions, kind: string): Promise<JsonValue | null> {
-  const token = await readOrLoginToken(process.cwd(), cli)
+  const token = await readOrLoginToken(cli)
   return apiRequest(cli, 'GET', appRoute(cli, kind), token, null)
 }
 
