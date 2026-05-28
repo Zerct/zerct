@@ -237,24 +237,26 @@ function stringAliasFields<Key extends string>(
   source: JsonObject,
   specs: readonly AliasSpec<Key>[]
 ): Partial<Record<Key, string>> {
-  const response: Partial<Record<Key, string>> = {}
-  for (const spec of specs) {
-    const value = firstStringAlias(source, spec.aliases)
-    if (value) {
-      response[spec.field] = value
-    }
-  }
-  return response
+  return aliasFields(source, specs, firstStringAlias, (value) => value !== '')
 }
 
 function numberAliasFields<Key extends string>(
   source: JsonObject,
   specs: readonly AliasSpec<Key>[]
 ): Partial<Record<Key, number>> {
-  const response: Partial<Record<Key, number>> = {}
+  return aliasFields(source, specs, firstPositiveNumberAlias, (value) => value > 0)
+}
+
+function aliasFields<Key extends string, Value>(
+  source: JsonObject,
+  specs: readonly AliasSpec<Key>[],
+  read: (source: JsonObject, aliases: readonly string[]) => Value,
+  keep: (value: Value) => boolean
+): Partial<Record<Key, Value>> {
+  const response: Partial<Record<Key, Value>> = {}
   for (const spec of specs) {
-    const value = firstPositiveNumberAlias(source, spec.aliases)
-    if (value > 0) {
+    const value = read(source, spec.aliases)
+    if (keep(value)) {
       response[spec.field] = value
     }
   }

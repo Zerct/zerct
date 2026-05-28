@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { doctorCheck } from './checks.ts'
 import { agentError } from './errors.ts'
 import { parseZerctToml, validateConfig } from './config.ts'
 import { discoverDeployProjects } from './workspace.ts'
@@ -18,24 +19,10 @@ function doctorProject(projectDir: string, json: boolean): void {
     return
   }
 
-  if (isWorkspaceDoctorReport(report)) {
-    for (const project of report.projects) {
-      console.log(`project ${project.relative}`)
-      for (const check of project.checks) {
-        console.log(`${check.ok ? 'ok' : 'fail'} ${check.name}${check.message ? ` - ${check.message}` : ''}`)
-      }
-    }
-  } else {
-    for (const check of report.checks) {
-      console.log(`${check.ok ? 'ok' : 'fail'} ${check.name}${check.message ? ` - ${check.message}` : ''}`)
-    }
-  }
+  printDoctorReport(report)
 
   if (!report.ok) {
-    const checks = isWorkspaceDoctorReport(report)
-      ? report.projects.flatMap((project) => project.checks)
-      : report.checks
-    const firstFailure = checks.find((check) => !check.ok)
+    const firstFailure = doctorChecks(report).find((check) => !check.ok)
     throw agentError('doctor_failed', 'Zerct doctor failed.', firstFailure?.agent_instruction || 'Fix the failed checks and retry `npx @zerct/zerct doctor`.', json)
   }
 }
@@ -68,60 +55,16 @@ function runDoctorWorkspace(projectDir: string): DoctorReport | WorkspaceDoctorR
 }
 
 function runDoctor(projectDir: string): DoctorReport {
-  const checks: DoctorCheck[] = []
-  let config: ZerctConfig | null = null
-  let configValid = false
-  const configPath = path.join(projectDir, 'zerct.toml')
-  if (existsSync(configPath)) {
-    try {
-      config = parseZerctToml(readFileSync(configPath, 'utf8'), projectDir)
-      validateConfig(config)
-      configValid = true
-      checks.push({ name: 'zerct.toml', ok: true, message: 'valid', agent_instruction: null })
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error)
-      checks.push({
-        name: 'zerct.toml',
-        ok: false,
-        message,
-        agent_instruction: `Fix zerct.toml: ${message}.`
-      })
-    }
-  } else {
-    checks.push({
-      name: 'zerct.toml',
-      ok: false,
-      message: 'missing',
-      agent_instruction: 'Create and commit zerct.toml, then retry.'
-    })
-  }
-
-  const kind = config?.kind || 'rust_backend'
-  const requiredFiles = kind === 'static_frontend'
-    ? ['package.json']
-    : ['Cargo.toml', 'Cargo.lock']
-  for (const file of requiredFiles) {
-    const ok = existsSync(path.join(projectDir, file))
-    checks.push({
-      name: file,
-      ok,
-      message: ok ? 'found' : 'missing',
-      agent_instruction: ok ? null : `Create and commit ${file}, then retry.`
-    })
-  }
-
+  const configResult = readConfig(projectDir)
+  const checks: DoctorCheck[] = [configResult.check]
+  const kind = configResult.config?.kind || 'rust_backend'
+  checks.push(...requiredFileChecks(projectDir, kind))
   if (kind === 'static_frontend') {
-    const hasLockfile = frontendLockfileExists(projectDir)
-    checks.push({
-      name: 'frontend lockfile',
-      ok: hasLockfile,
-      message: hasLockfile ? 'found' : 'missing',
-      agent_instruction: hasLockfile ? null : 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.'
-    })
+    checks.push(frontendLockfileCheck(projectDir))
     checks.push(...frontendSourceChecks(projectDir))
-    checks.push(...frontendScriptChecks(projectDir, configValid))
+    checks.push(...frontendScriptChecks(projectDir, configResult.valid))
   } else {
-    checks.push(...rustDoctorChecks(projectDir, configValid))
+    checks.push(...rustDoctorChecks(projectDir, configResult.valid))
   }
 
   if (kind === 'static_frontend') {
@@ -131,9 +74,69 @@ function runDoctor(projectDir: string): DoctorReport {
   return {
     ok: checks.every((check) => check.ok),
     project: projectDir,
-    config,
+    config: configResult.config,
     checks
   }
+}
+
+function printDoctorReport(report: DoctorReport | WorkspaceDoctorReport): void {
+  if (isWorkspaceDoctorReport(report)) {
+    report.projects.forEach(printProjectReport)
+    return
+  }
+  printChecks(report.checks)
+}
+
+function printProjectReport(report: DoctorReport & { relative: string }): void {
+  console.log(`project ${report.relative}`)
+  printChecks(report.checks)
+}
+
+function printChecks(checks: readonly DoctorCheck[]): void {
+  for (const check of checks) {
+    console.log(`${check.ok ? 'ok' : 'fail'} ${check.name}${check.message ? ` - ${check.message}` : ''}`)
+  }
+}
+
+function doctorChecks(report: DoctorReport | WorkspaceDoctorReport): DoctorCheck[] {
+  return isWorkspaceDoctorReport(report)
+    ? report.projects.flatMap((project) => project.checks)
+    : report.checks
+}
+
+function readConfig(projectDir: string): { check: DoctorCheck; config: ZerctConfig | null; valid: boolean } {
+  const configPath = path.join(projectDir, 'zerct.toml')
+  if (!existsSync(configPath)) {
+    return {
+      check: { name: 'zerct.toml', ok: false, message: 'missing', agent_instruction: 'Create and commit zerct.toml, then retry.' },
+      config: null,
+      valid: false
+    }
+  }
+  try {
+    const config = parseZerctToml(readFileSync(configPath, 'utf8'), projectDir)
+    validateConfig(config)
+    return { check: { name: 'zerct.toml', ok: true, message: 'valid', agent_instruction: null }, config, valid: true }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return { check: { name: 'zerct.toml', ok: false, message, agent_instruction: `Fix zerct.toml: ${message}.` }, config: null, valid: false }
+  }
+}
+
+function requiredFileChecks(projectDir: string, kind: ZerctConfig['kind']): DoctorCheck[] {
+  return requiredFiles(kind).map((file) => {
+    const ok = existsSync(path.join(projectDir, file))
+    return doctorCheck(file, ok, 'found', 'missing', `Create and commit ${file}, then retry.`)
+  })
+}
+
+function requiredFiles(kind: ZerctConfig['kind']): string[] {
+  return kind === 'static_frontend' ? ['package.json'] : ['Cargo.toml', 'Cargo.lock']
+}
+
+function frontendLockfileCheck(projectDir: string): DoctorCheck {
+  const ok = frontendLockfileExists(projectDir)
+  return doctorCheck('frontend lockfile', ok, 'found', 'missing', 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.')
 }
 
 function isWorkspaceDoctorReport(report: DoctorReport | WorkspaceDoctorReport): report is WorkspaceDoctorReport {

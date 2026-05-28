@@ -92,26 +92,26 @@ async function usage(cli: CliOptions): Promise<void> {
 }
 
 async function activity(cli: CliOptions): Promise<void> {
-  await printAuthenticated(cli, `/v1/activity${pageQuery(cli)}`)
+  await printPagedAuthenticated(cli, '/v1/activity')
 }
 
 async function overview(cli: CliOptions): Promise<void> {
-  const app = requireApp(cli)
-  await printAuthenticated(cli, `/v1/apps/${encodeURIComponent(app)}/overview${pageQuery(cli)}`)
+  await printPagedAuthenticated(cli, appRoute(cli, 'overview'))
 }
 
 async function deploys(cli: CliOptions): Promise<void> {
-  const route = cli.app
-    ? `/v1/apps/${encodeURIComponent(cli.app)}/deploys${pageQuery(cli)}`
-    : `/v1/deploys${pageQuery(cli)}`
-  await printAuthenticated(cli, route)
+  await printAuthenticated(cli, appScopedCollectionRoute(cli, 'deploys'))
 }
 
 async function builds(cli: CliOptions): Promise<void> {
+  await printAuthenticated(cli, appScopedCollectionRoute(cli, 'builds'))
+}
+
+function appScopedCollectionRoute(cli: CliOptions, collection: 'builds' | 'deploys'): string {
   const route = cli.app
-    ? `/v1/apps/${encodeURIComponent(cli.app)}/builds${pageQuery(cli)}`
-    : `/v1/builds${pageQuery(cli)}`
-  await printAuthenticated(cli, route)
+    ? `/v1/apps/${encodeURIComponent(cli.app)}/${collection}`
+    : `/v1/${collection}`
+  return `${route}${pageQuery(cli)}`
 }
 
 async function status(cli: CliOptions): Promise<void> {
@@ -132,10 +132,7 @@ async function envCommand(cli: CliOptions): Promise<void> {
 
 async function envDelete(cli: CliOptions): Promise<void> {
   const name = requireCommandArg(cli, 'invalid_env', 'Environment variable name is required.', 'Use `npx @zerct/zerct env delete --app <app> KEY`.')
-  const token = await readOrLoginToken(process.cwd(), cli)
-  const app = requireApp(cli)
-  const response = await apiRequest(cli, 'DELETE', `/v1/apps/${encodeURIComponent(app)}/env/${encodeURIComponent(name)}`, token, null)
-  printJson(response)
+  await printAuthenticatedMutation(cli, 'DELETE', appRoute(cli, `env/${encodeURIComponent(name)}`), null)
 }
 
 async function envSet(cli: CliOptions): Promise<void> {
@@ -147,10 +144,7 @@ async function envSet(cli: CliOptions): Promise<void> {
 
   const name = assignment.slice(0, separator)
   const value = assignment.slice(separator + 1)
-  const token = await readOrLoginToken(process.cwd(), cli)
-  const app = requireApp(cli)
-  const response = await apiRequest(cli, 'PUT', `/v1/apps/${encodeURIComponent(app)}/env`, token, { name, value })
-  printJson(response)
+  await printAuthenticatedMutation(cli, 'PUT', appRoute(cli, 'env'), { name, value })
 }
 
 async function domainsCommand(cli: CliOptions): Promise<void> {
@@ -160,10 +154,8 @@ async function domainsCommand(cli: CliOptions): Promise<void> {
 function domainMutation(method: DomainMethod, route: DomainRoute, body: DomainBody): SubcommandHandler {
   return async (cli): Promise<void> => {
     const domain = requireCommandArg(cli, 'missing_domain', 'Domain is required.', 'Use `npx @zerct/zerct domains add --app <app> api.example.com`.')
-    const token = await readOrLoginToken(process.cwd(), cli)
     const app = requireApp(cli)
-    const response = await apiRequest(cli, method, route(app, domain), token, body(domain))
-    printJson(response)
+    await printAuthenticatedMutation(cli, method, route(app, domain), body(domain))
   }
 }
 
@@ -199,7 +191,7 @@ async function support(cli: CliOptions): Promise<void> {
 }
 
 async function supportList(cli: CliOptions): Promise<void> {
-  await printAuthenticated(cli, `/v1/support/tickets${pageQuery(cli)}`)
+  await printPagedAuthenticated(cli, '/v1/support/tickets')
 }
 
 async function supportCreate(cli: CliOptions): Promise<void> {
@@ -215,28 +207,25 @@ async function supportCreate(cli: CliOptions): Promise<void> {
   }
 
   const token = await readOrLoginToken(process.cwd(), cli)
-  const body: JsonObject = {
-    details,
-    severity: cli.severity || 'normal',
-    subject
-  }
-  if (cli.app) {
-    body['app_id'] = cli.app
-  }
-  if (cli.failingCommand) {
-    body['failing_command'] = cli.failingCommand
-  }
-  if (cli.build) {
-    body['build_id'] = cli.build
-  }
-  if (cli.deploy) {
-    body['deploy_id'] = cli.deploy
-  }
-  if (cli.firstLogLine) {
-    body['first_log_line'] = cli.firstLogLine
-  }
+  const body = supportTicketBody(cli, subject, details)
   const response = await apiRequest(cli, 'POST', '/v1/support/tickets', token, body)
   printJson(response)
+}
+
+function supportTicketBody(cli: CliOptions, subject: string, details: string): JsonObject {
+  const body: JsonObject = { details, severity: cli.severity || 'normal', subject }
+  addOptionalField(body, 'app_id', cli.app)
+  addOptionalField(body, 'failing_command', cli.failingCommand)
+  addOptionalField(body, 'build_id', cli.build)
+  addOptionalField(body, 'deploy_id', cli.deploy)
+  addOptionalField(body, 'first_log_line', cli.firstLogLine)
+  return body
+}
+
+function addOptionalField(body: JsonObject, key: string, value: string): void {
+  if (value) {
+    body[key] = value
+  }
 }
 
 async function supportResolve(cli: CliOptions): Promise<void> {
@@ -246,9 +235,7 @@ async function supportResolve(cli: CliOptions): Promise<void> {
     'Support ticket id is required.',
     'Use `npx @zerct/zerct support resolve <ticket_id> --json` with an id from support list.'
   )
-  const token = await readOrLoginToken(process.cwd(), cli)
-  const response = await apiRequest(cli, 'POST', `/v1/support/tickets/${encodeURIComponent(ticketId)}/resolve`, token, null)
-  printJson(response)
+  await printAuthenticatedMutation(cli, 'POST', `/v1/support/tickets/${encodeURIComponent(ticketId)}/resolve`, null)
 }
 
 async function printAuthenticated(cli: CliOptions, route: string): Promise<void> {
@@ -257,10 +244,22 @@ async function printAuthenticated(cli: CliOptions, route: string): Promise<void>
   printJson(response)
 }
 
+async function printPagedAuthenticated(cli: CliOptions, route: string): Promise<void> {
+  await printAuthenticated(cli, `${route}${pageQuery(cli)}`)
+}
+
+async function printAuthenticatedMutation(cli: CliOptions, method: ApiMethod, route: string, body: JsonObject | null): Promise<void> {
+  const token = await readOrLoginToken(process.cwd(), cli)
+  printJson(await apiRequest(cli, method, route, token, body))
+}
+
+function appRoute(cli: CliOptions, suffix: string): string {
+  return `/v1/apps/${encodeURIComponent(requireApp(cli))}/${suffix}`
+}
+
 async function appGet(cli: CliOptions, kind: string): Promise<JsonValue | null> {
   const token = await readOrLoginToken(process.cwd(), cli)
-  const app = requireApp(cli)
-  return apiRequest(cli, 'GET', `/v1/apps/${encodeURIComponent(app)}/${kind}`, token, null)
+  return apiRequest(cli, 'GET', appRoute(cli, kind), token, null)
 }
 
 async function runSubcommand(cli: CliOptions, commands: SubcommandTable, defaultName: string, message: string, instruction: string): Promise<void> {

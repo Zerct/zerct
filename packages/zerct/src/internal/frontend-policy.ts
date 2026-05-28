@@ -1,12 +1,14 @@
 import { existsSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
+import { doctorCheck } from './checks.ts'
 import { DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND, FRONTEND_INSTALL_COMMANDS, FRONTEND_JAVASCRIPT_EXTENSIONS, FRONTEND_PACKAGE_MANAGERS, FRONTEND_SOURCE_ROOTS, JAVASCRIPT_LINTERS } from './constants.ts'
 import { readPackageJson, walkProjectFiles } from './project.ts'
 import type { DoctorCheck, FrontendSourceReport, PackageManifest } from './types.ts'
 
 const REQUIRED_FRONTEND_SCRIPTS = ['typecheck', 'lint'] as const
 type FrontendScriptName = typeof REQUIRED_FRONTEND_SCRIPTS[number]
+type CommandPredicate = (command: string) => boolean
 
 function frontendLockfileExists(projectDir: string): boolean {
   return ['package-lock.json', 'npm-shrinkwrap.json', 'pnpm-lock.yaml', 'yarn.lock', 'bun.lock', 'bun.lockb']
@@ -37,36 +39,41 @@ function frontendScriptChecks(projectDir: string, runScripts: boolean): DoctorCh
     typecheck: packageScriptValue(manifest, 'typecheck'),
     lint: packageScriptValue(manifest, 'lint')
   }
-  const checks: DoctorCheck[] = REQUIRED_FRONTEND_SCRIPTS.map((script) => {
-    const exists = scripts[script] !== ''
-    return {
-      name: `package script ${script}`,
-      ok: exists,
-      message: exists ? 'found' : 'missing',
-      agent_instruction: exists ? null : `Add a non-empty "${script}" script to package.json, then retry.`
-    }
-  })
-  const strictTypecheck = usesStrictFrontendTypechecker(scripts.typecheck)
-  checks.push({
-    name: 'strict frontend typecheck',
-    ok: strictTypecheck,
-    message: strictTypecheck ? 'accepted' : 'tsgo --noEmit missing',
-    agent_instruction: strictTypecheck ? null : 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.'
-  })
-
-  const nativeLint = !usesJavascriptLinter(scripts.lint) && usesNativeFrontendLinter(scripts.lint)
-  checks.push({
-    name: 'native frontend lint',
-    ok: nativeLint,
-    message: nativeLint ? 'accepted' : 'native linter missing',
-    agent_instruction: nativeLint ? null : 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.'
-  })
+  const checks: DoctorCheck[] = [
+    ...REQUIRED_FRONTEND_SCRIPTS.map((script) => packageScriptExistsCheck(script, scripts[script])),
+    strictTypecheckCheck(scripts.typecheck),
+    nativeLintCheck(manifest),
+    nativeQualityGateCheck(manifest)
+  ]
 
   if (runScripts && checks.every((check) => check.ok)) {
     checks.push(...REQUIRED_FRONTEND_SCRIPTS.map((script) => packageScriptCheck(projectDir, script)))
   }
 
   return checks
+}
+
+function packageScriptExistsCheck(script: FrontendScriptName, command: string): DoctorCheck {
+  const ok = command !== ''
+  return doctorCheck(`package script ${script}`, ok, 'found', 'missing', `Add a non-empty "${script}" script to package.json, then retry.`)
+}
+
+function strictTypecheckCheck(command: string): DoctorCheck {
+  const ok = usesStrictFrontendTypechecker(command)
+  return doctorCheck('strict frontend typecheck', ok, 'accepted', 'tsgo --noEmit missing', 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.')
+}
+
+function nativeLintCheck(manifest: PackageManifest | null): DoctorCheck {
+  const ok = !packageScriptTreeUses(manifest, 'lint', usesJavascriptLinter)
+    && packageScriptTreeUses(manifest, 'lint', usesNativeFrontendLinter)
+  return doctorCheck('native frontend lint', ok, 'accepted', 'native linter missing', 'Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.')
+}
+
+function nativeQualityGateCheck(manifest: PackageManifest | null): DoctorCheck {
+  const ok = packageScriptTreeUses(manifest, 'lint', usesNativeDeadCodeChecker)
+    && packageScriptTreeUses(manifest, 'lint', usesNativeDuplicateChecker)
+    && packageScriptTreeUses(manifest, 'lint', usesNativeHealthChecker)
+  return doctorCheck('native frontend quality gates', ok, 'accepted', 'dead-code, duplicate-code, or health gate missing', 'Add Fallow checks for `dead-code`, semantic `dupes`, and `health` to package.json `lint`, then retry.')
 }
 
 function frontendSourceChecks(projectDir: string): DoctorCheck[] {
@@ -152,6 +159,64 @@ function usesNativeFrontendLinter(command: string): boolean {
       || (commandName === 'biome' && ['check', 'lint'].includes(tokens[index + 1] ?? ''))
       || (commandName === 'deno' && tokens[index + 1] === 'lint')
   })
+}
+
+function usesNativeDeadCodeChecker(command: string): boolean {
+  return usesFallowSubcommand(command, 'dead-code')
+}
+
+function usesNativeDuplicateChecker(command: string): boolean {
+  return usesFallowSubcommand(command, 'dupes')
+}
+
+function usesNativeHealthChecker(command: string): boolean {
+  return usesFallowSubcommand(command, 'health')
+}
+
+function usesFallowSubcommand(command: string, subcommand: string): boolean {
+  return commandTokens(command).some((token, index, tokens) => (
+    commandNameFromToken(token) === 'fallow' && tokens[index + 1] === subcommand
+  ))
+}
+
+function packageScriptTreeUses(manifest: PackageManifest | null, script: string, predicate: CommandPredicate, seen = new Set<string>()): boolean {
+  if (seen.has(script)) {
+    return false
+  }
+  seen.add(script)
+
+  const command = packageScriptValue(manifest, script)
+  if (command === '') {
+    return false
+  }
+  if (predicate(command)) {
+    return true
+  }
+
+  return referencedPackageScripts(command).some((referencedScript) => packageScriptTreeUses(manifest, referencedScript, predicate, seen))
+}
+
+function referencedPackageScripts(command: string): string[] {
+  const tokens = commandTokens(command)
+  const scripts: string[] = []
+  for (const [index, token] of tokens.entries()) {
+    if (!FRONTEND_PACKAGE_MANAGERS.has(commandNameFromToken(token)) || tokens[index + 1] !== 'run') {
+      continue
+    }
+    const script = scriptNameAfterRun(tokens, index + 2)
+    if (script !== null) {
+      scripts.push(script)
+    }
+  }
+  return scripts
+}
+
+function scriptNameAfterRun(tokens: readonly string[], start: number): string | null {
+  let index = start
+  while (tokens[index]?.startsWith('-')) {
+    index += 1
+  }
+  return tokens[index] ?? null
 }
 
 function commandTokens(command: string): string[] {

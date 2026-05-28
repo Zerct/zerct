@@ -17,7 +17,8 @@ From a full-stack repo root, `zerct deploy` discovers nested `zerct.toml` files
 and deploys the whole workspace in one command.
 
 Static frontend deploys require TypeScript browser source, `tsgo --noEmit` for
-typecheck, and native linting such as `oxlint`, `biome check`, or `deno lint`.
+typecheck, native linting such as `oxlint`, `biome check`, or `deno lint`, and
+Fallow dead-code, semantic duplicate-code, and health gates.
 
 The primary first-run path remains:
 

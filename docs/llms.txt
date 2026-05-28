@@ -47,10 +47,11 @@ Static frontend contract:
 - `typecheck` runs `tsgo --noEmit` with `@typescript/native-preview`
   installed.
 - `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`.
+- `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health` gates.
 - `[build].check` installs dependencies and runs package scripts for typecheck
   and lint.
-- Weak typecheck, fake lint, and JavaScript-based lint/format scripts are rejected for
-  deploys.
+- Weak typecheck, fake lint, missing Fallow quality gates, and
+  JavaScript-based lint/format scripts are rejected for deploys.
 
 Useful commands:
 

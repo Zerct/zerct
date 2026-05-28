@@ -69,7 +69,7 @@ function deployResponseFromJson(value: JsonValue | null): DeployResponse {
 
 function appDeployTargetFromJson(source: JsonObject): DeployResponse['app'] {
   return {
-    id: stringField(source, 'id'),
+    id: idFromJson(source),
     url: stringField(source, 'url')
   }
 }
@@ -82,9 +82,13 @@ function buildStatusResponseFromJson(value: JsonValue | null): BuildStatusRespon
 
 function buildRecordFromJson(source: JsonObject): BuildRecord {
   return {
-    id: stringField(source, 'id'),
+    id: idFromJson(source),
     status: stringField(source, 'status')
   }
+}
+
+function idFromJson(source: JsonObject): string {
+  return stringField(source, 'id')
 }
 
 function logsResponseFromJson(value: JsonValue | null): LogsResponse {

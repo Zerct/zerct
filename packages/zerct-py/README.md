@@ -20,7 +20,8 @@ Rust backend deploys require `cargo fmt --all --check`, locked `cargo check`,
 and locked all-target, all-feature Clippy with `-D warnings`.
 
 Static frontend deploys require TypeScript browser source, `tsgo --noEmit` for
-typecheck, and native linting such as `oxlint`, `biome check`, or `deno lint`.
+typecheck, native linting such as `oxlint`, `biome check`, or `deno lint`, and
+Fallow dead-code, semantic duplicate-code, and health gates.
 
 The npm package remains the primary first install path:
 

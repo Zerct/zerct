@@ -124,21 +124,34 @@ function cargoLintLevel(source: string, lintName: string): string {
   let section = ''
   for (const rawLine of source.split(/\r?\n/u)) {
     const line = rawLine.replace(/#.*/u, '').trim()
-    const sectionMatch = line.match(/^\[([^\]]+)\]$/u)
-    if (sectionMatch) {
-      section = sectionMatch[1] ?? ''
+    const nextSection = tomlSection(line)
+    if (nextSection !== null) {
+      section = nextSection
       continue
     }
-    if (section !== 'lints.rust' && section !== 'workspace.lints.rust') {
+    if (!isRustLintSection(section)) {
       continue
     }
-    const assignment = line.match(/^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]+)"|\{[^}]*level\s*=\s*"([^"]+)")/u)
-    if (assignment?.[1] === lintName) {
-      return assignment[2] ?? assignment[3] ?? ''
+    const level = lintAssignmentLevel(line, lintName)
+    if (level) {
+      return level
     }
   }
 
   return ''
+}
+
+function tomlSection(line: string): string | null {
+  return line.match(/^\[([^\]]+)\]$/u)?.[1] ?? null
+}
+
+function isRustLintSection(section: string): boolean {
+  return section === 'lints.rust' || section === 'workspace.lints.rust'
+}
+
+function lintAssignmentLevel(line: string, lintName: string): string {
+  const assignment = line.match(/^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]+)"|\{[^}]*level\s*=\s*"([^"]+)")/u)
+  return assignment?.[1] === lintName ? assignment[2] ?? assignment[3] ?? '' : ''
 }
 
 export { rustDoctorChecks, unsafeCheck }

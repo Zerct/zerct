@@ -16,7 +16,8 @@ pass `cargo fmt --all --check`, locked Cargo checks, listen on
 `0.0.0.0:$PORT`, and expose the configured health endpoint.
 
 Static frontends must use TypeScript browser source, `tsgo --noEmit` for
-typecheck, and native linting such as `oxlint`, `biome check`, or `deno lint`.
+typecheck, native linting such as `oxlint`, `biome check`, or `deno lint`, and
+Fallow dead-code, semantic duplicate-code, and health gates.
 
 From a full-stack repo root, the same deploy command discovers nested
 `zerct.toml` files and deploys the whole workspace in one command.

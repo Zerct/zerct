@@ -19,28 +19,36 @@ function toJsonValue(value: unknown): JsonValue | undefined {
     return Number.isFinite(value) ? value : undefined
   }
   if (isUnknownArray(value)) {
-    const items: JsonValue[] = []
-    for (const item of value) {
-      const parsed = toJsonValue(item)
-      if (parsed === undefined) {
-        return undefined
-      }
-      items.push(parsed)
-    }
-    return items
+    return jsonArrayValue(value)
   }
   if (isUnknownRecord(value)) {
-    const object: JsonObject = {}
-    for (const [key, item] of Object.entries(value)) {
-      const parsed = toJsonValue(item)
-      if (parsed === undefined) {
-        return undefined
-      }
-      object[key] = parsed
-    }
-    return object
+    return jsonObjectValue(value)
   }
   return undefined
+}
+
+function jsonArrayValue(value: readonly unknown[]): JsonValue[] | undefined {
+  const items: JsonValue[] = []
+  for (const item of value) {
+    const parsed = toJsonValue(item)
+    if (parsed === undefined) {
+      return undefined
+    }
+    items.push(parsed)
+  }
+  return items
+}
+
+function jsonObjectValue(value: Record<string, unknown>): JsonObject | undefined {
+  const object: JsonObject = {}
+  for (const [key, item] of Object.entries(value)) {
+    const parsed = toJsonValue(item)
+    if (parsed === undefined) {
+      return undefined
+    }
+    object[key] = parsed
+  }
+  return object
 }
 
 function isUnknownArray(value: unknown): value is readonly unknown[] {

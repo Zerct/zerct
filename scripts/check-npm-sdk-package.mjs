@@ -23,6 +23,7 @@ const requiredRuntimeDependencies = ['tsx']
 const requiredDevelopmentDependencies = [
   '@types/node',
   '@typescript/native-preview',
+  'fallow',
   'oxlint',
   'oxlint-tsgolint',
   'publint',
@@ -31,17 +32,18 @@ const requiredDevelopmentDependencies = [
 ]
 
 const requiredPackageScripts = {
-  check: 'npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry',
+  check: 'npm run check:policy && npm run typecheck && npm run type-coverage && npm run lint && npm run lint:dead && npm run lint:dupes && npm run lint:health && npm run lint:package && npm run check:deps && npm run runtime && npm run pack:dry',
   'check:deps': 'npm ls --all && npm audit --audit-level=moderate && npm audit signatures --omit=dev --json',
   'check:policy': 'node ../../scripts/check-npm-sdk-package.mjs',
   lint: 'oxlint src -D correctness -D suspicious -D perf -A no-await-in-loop --deny-warnings --type-aware --type-check --tsconfig tsconfig.json --promise-plugin --node-plugin --report-unused-disable-directives',
+  'lint:dead': 'fallow dead-code --production --include-dupes --include-entry-exports --fail-on-issues',
+  'lint:dupes': 'fallow dupes --production --mode semantic --threshold 1 --ignore-imports --fail-on-issues; dupes=$(fallow dupes --production --mode semantic --threshold 1 --ignore-imports --format json | jq \'.clone_groups | length\'); test "$dupes" = 0',
+  'lint:health': 'fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity --format json | jq -e \'[.findings[] | select(.severity == "critical")] | length == 0\' >/dev/null && fallow health --production --score --format json | jq -e \'.health_score.score >= 90\' >/dev/null',
   'lint:package': 'publint --strict --pack npm',
   'pack:dry': 'npm pack --dry-run',
   runtime: 'src/zerct.ts --version',
   'type-coverage': 'type-coverage --project tsconfig.json --strict --at-least 100',
-  typecheck: 'npm run typecheck:tsc && npm run typecheck:tsgo',
-  'typecheck:tsc': 'tsc --noEmit -p tsconfig.json',
-  'typecheck:tsgo': 'tsgo --noEmit -p tsconfig.json'
+  typecheck: 'tsgo --noEmit -p tsconfig.json'
 }
 
 const requiredCompilerOptions = {
