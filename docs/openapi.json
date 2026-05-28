@@ -2,28 +2,28 @@
   "openapi": "3.1.0",
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
-    "title": "Zerct API",
-    "summary": "Control-plane API for Zerct deploys.",
+    "title": "Tovuk API",
+    "summary": "Control-plane API for Tovuk deploys.",
     "version": "0.1.0",
-    "description": "Use the Zerct API to authenticate, create Rust backend deploys, manage account onboarding, and inspect deploy health. Context: info.",
-    "termsOfService": "https://zerct.com/legal/terms",
+    "description": "Use the Tovuk API to authenticate, create Rust backend deploys, manage account onboarding, and inspect deploy health. Context: info.",
+    "termsOfService": "https://tovuk.com/legal/terms",
     "contact": {
-      "name": "Zerct",
-      "url": "https://zerct.com",
-      "email": "support@zerct.com"
+      "name": "Tovuk",
+      "url": "https://tovuk.com",
+      "email": "support@tovuk.com"
     },
     "license": {
       "name": "Proprietary",
-      "url": "https://zerct.com/legal"
+      "url": "https://tovuk.com/legal"
     }
   },
   "externalDocs": {
-    "description": "Zerct documentation Context: externalDocs.",
-    "url": "https://docs.zerct.com"
+    "description": "Tovuk documentation Context: externalDocs.",
+    "url": "https://docs.tovuk.com"
   },
   "servers": [
     {
-      "url": "https://api.zerct.com",
+      "url": "https://api.tovuk.com",
       "description": "Production API Context: servers.0."
     }
   ],
@@ -57,7 +57,7 @@
           "Health"
         ],
         "summary": "Check public API health",
-        "description": "Returns the Zerct control-plane health state from the public health alias. Context: paths./health.get.",
+        "description": "Returns the Tovuk control-plane health state from the public health alias. Context: paths./health.get.",
         "operationId": "getHealthAlias",
         "responses": {
           "200": {
@@ -84,7 +84,7 @@
           "Health"
         ],
         "summary": "Check infrastructure API health",
-        "description": "Returns the Zerct control-plane health state for infrastructure probes and deploy scripts. Context: paths./healthz.get.",
+        "description": "Returns the Tovuk control-plane health state for infrastructure probes and deploy scripts. Context: paths./healthz.get.",
         "operationId": "getHealthz",
         "responses": {
           "200": {
@@ -111,7 +111,7 @@
           "Health"
         ],
         "summary": "Check platform status",
-        "description": "Returns structured Zerct API and dependency health for humans, SDKs, and agents. Context: paths./v1/status.get.",
+        "description": "Returns structured Tovuk API and dependency health for humans, SDKs, and agents. Context: paths./v1/status.get.",
         "operationId": "getPlatformStatus",
         "responses": {
           "200": {
@@ -141,7 +141,7 @@
           "Auth"
         ],
         "summary": "Start device login",
-        "description": "Starts a device login flow for the Zerct CLI. Context: paths./v1/login/device.post.",
+        "description": "Starts a device login flow for the Tovuk CLI. Context: paths./v1/login/device.post.",
         "operationId": "startDeviceLogin",
         "responses": {
           "200": {
@@ -237,7 +237,7 @@
           "Accounts"
         ],
         "summary": "Update account profile",
-        "description": "Sets the private Zerct handle and display name used for the authenticated dashboard. Context: paths./v1/account.put.",
+        "description": "Sets the private Tovuk handle and display name used for the authenticated dashboard. Context: paths./v1/account.put.",
         "operationId": "updateAccountProfile",
         "requestBody": {
           "description": "Account handle and display name. Context: paths./v1/account.put.requestBody.",
@@ -311,7 +311,7 @@
           "Deploy"
         ],
         "summary": "Deploy app",
-        "description": "Deploys an app from a source archive produced by the Zerct CLI. Context: paths./v1/deploy.post.",
+        "description": "Deploys an app from a source archive produced by the Tovuk CLI. Context: paths./v1/deploy.post.",
         "operationId": "createDeploy",
         "requestBody": {
           "description": "Deploy source archive and runtime metadata. Context: paths./v1/deploy.post.requestBody.",
@@ -427,7 +427,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -469,7 +469,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}.delete.parameters.0. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}.delete.parameters.0. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -496,7 +496,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/overview.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/overview.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -589,7 +589,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -665,7 +665,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/builds.get.parameters.0. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/builds.get.parameters.0. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -741,7 +741,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/logs.get.parameters.0. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/logs.get.parameters.0. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
             "example": "app_1"
           },
           {
@@ -817,7 +817,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/database.get.parameters.0. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/database.get.parameters.0. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -861,7 +861,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/env.get.parameters.0. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/env.get.parameters.0. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -903,7 +903,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/env.put.parameters.0. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/env.put.parameters.0. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
             "example": "app_1"
           }
         ],
@@ -967,7 +967,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
             "example": "app_1"
           },
           {
@@ -1026,7 +1026,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains.get.parameters.0. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains.get.parameters.0. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
             "example": "app_1"
           }
         ]
@@ -1068,7 +1068,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains.post.parameters.0. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains.post.parameters.0. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
             "example": "app_1"
           }
         ],
@@ -1099,7 +1099,7 @@
           "Deploy"
         ],
         "summary": "Verify custom domain",
-        "description": "Checks whether the custom domain CNAME points at Zerct and activates routing when ownership is verified. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.",
+        "description": "Checks whether the custom domain CNAME points at Tovuk and activates routing when ownership is verified. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.",
         "operationId": "verifyAppDomain",
         "responses": {
           "200": {
@@ -1131,7 +1131,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.0.",
             "example": "app_1"
           },
           {
@@ -1190,7 +1190,7 @@
                 "app_1"
               ]
             },
-            "description": "Zerct app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
             "example": "app_1"
           },
           {
@@ -1249,7 +1249,7 @@
                 "deploy_1"
               ]
             },
-            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}.get.parameters.0.",
+            "description": "Tovuk deploy id. Context: paths./v1/deploys/{deploy_id}.get.parameters.0.",
             "example": "deploy_1"
           }
         ]
@@ -1293,7 +1293,7 @@
                 "deploy_1"
               ]
             },
-            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0.",
+            "description": "Tovuk deploy id. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0. Context: paths./v1/deploys/{deploy_id}/cancel.post.parameters.0.",
             "example": "deploy_1"
           }
         ]
@@ -1337,7 +1337,7 @@
                 "deploy_1"
               ]
             },
-            "description": "Zerct deploy id. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0.",
+            "description": "Tovuk deploy id. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0. Context: paths./v1/deploys/{deploy_id}/logs.get.parameters.0.",
             "example": "deploy_1"
           },
           {
@@ -1413,7 +1413,7 @@
                 "job_1"
               ]
             },
-            "description": "Zerct build id. Context: paths./v1/builds/{build_id}.get.parameters.0.",
+            "description": "Tovuk build id. Context: paths./v1/builds/{build_id}.get.parameters.0.",
             "example": "job_1"
           }
         ]
@@ -1459,7 +1459,7 @@
             "name": "build_id",
             "in": "path",
             "required": true,
-            "description": "Zerct build job id. Context: paths./v1/builds/{build_id}/logs.get.parameters.0.",
+            "description": "Tovuk build job id. Context: paths./v1/builds/{build_id}/logs.get.parameters.0.",
             "schema": {
               "type": "string",
               "pattern": "^job_[A-Za-z0-9_]+$",
@@ -1822,7 +1822,7 @@
           "Accounts"
         ],
         "summary": "Create subscription checkout link",
-        "description": "Create a Stripe-hosted subscription Checkout URL for Zerct Pro. Context: paths./v1/billing/checkout.post.",
+        "description": "Create a Stripe-hosted subscription Checkout URL for Tovuk Pro. Context: paths./v1/billing/checkout.post.",
         "operationId": "createBillingCheckout",
         "requestBody": {
           "required": true,
@@ -1924,7 +1924,7 @@
                     "subject": "Deploy failed",
                     "details": "Agent retried deploy after doctor.",
                     "app_id": "app_1",
-                    "failing_command": "npx @zerct/zerct deploy --wait --json",
+                    "failing_command": "npx tovuk deploy --wait --json",
                     "build_id": "job_1",
                     "deploy_id": "deploy_1",
                     "first_log_line": "cargo check failed in src/main.rs",
@@ -2011,7 +2011,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "Zerct session token returned by the login flow. JWT handling follows RFC8725 best current practices. Context: components.securitySchemes.bearerAuth."
+        "description": "Tovuk session token returned by the login flow. JWT handling follows RFC8725 best current practices. Context: components.securitySchemes.bearerAuth."
       }
     },
     "headers": {
@@ -2091,7 +2091,7 @@
                 "summary": "The API is healthy.",
                 "value": {
                   "ok": true,
-                  "service": "zerct-api"
+                  "service": "tovuk-api"
                 }
               }
             }
@@ -2123,8 +2123,8 @@
               "example": {
                 "summary": "Device login information.",
                 "value": {
-                  "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-                  "verificationUri": "https://zerct.com/login",
+                  "loginUrl": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "verificationUri": "https://tovuk.com/login",
                   "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
                   "userCode": "ABC123",
                   "intervalSeconds": 5,
@@ -2165,7 +2165,7 @@
                   "accountId": "acct_01HW0000000000000000000000",
                   "email": "dev@example.com",
                   "provider": "github",
-                  "token": "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "token": "tovuk_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
                   "expiresAt": "2026-06-24T12:00:00.000Z"
                 }
               }
@@ -2191,14 +2191,14 @@
                     "kind": "rust_backend",
                     "plan": "free",
                     "runtime_status": "running",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "deploy": {
                     "id": "deploy_1",
                     "app_id": "app_1",
                     "build_job_id": "job_1",
                     "commit_sha": "0123456789abcdef",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "build_job": {
                     "id": "job_1",
@@ -2235,7 +2235,7 @@
                     },
                     "idle_timeout_minutes": 15
                   },
-                  "next_command": "npx @zerct/zerct logs --app app_1"
+                  "next_command": "npx tovuk logs --app app_1"
                 }
               }
             }
@@ -2284,7 +2284,7 @@
                   "code": "policy_rejected",
                   "message": "Request validation failed.",
                   "agent_instruction": "Read the error message, update the request, and retry.",
-                  "docs_url": "https://docs.zerct.com",
+                  "docs_url": "https://docs.tovuk.com",
                   "checkout_url": null
                 }
               }
@@ -2318,9 +2318,9 @@
                 "summary": "Login required",
                 "value": {
                   "code": "policy_rejected",
-                  "message": "Zerct login is required.",
+                  "message": "Tovuk login is required.",
                   "agent_instruction": "Read the error message, update the request, and retry.",
-                  "docs_url": "https://docs.zerct.com",
+                  "docs_url": "https://docs.tovuk.com",
                   "checkout_url": null
                 }
               }
@@ -2356,7 +2356,7 @@
                   "code": "policy_rejected",
                   "message": "Too many requests.",
                   "agent_instruction": "Read the error message, update the request, and retry.",
-                  "docs_url": "https://docs.zerct.com",
+                  "docs_url": "https://docs.tovuk.com",
                   "checkout_url": null
                 }
               }
@@ -2391,8 +2391,8 @@
                 "value": {
                   "code": "database_unavailable",
                   "message": "The API could not complete the request.",
-                  "agent_instruction": "Retry the request. If it keeps failing, check Zerct status.",
-                  "docs_url": "https://docs.zerct.com/status",
+                  "agent_instruction": "Retry the request. If it keeps failing, check Tovuk status.",
+                  "docs_url": "https://docs.tovuk.com/status",
                   "checkout_url": null
                 }
               }
@@ -2431,7 +2431,7 @@
                   "plan": "free",
                   "handle": "acme",
                   "displayName": "Acme",
-                  "accountUrl": "https://zerct.com/acme"
+                  "accountUrl": "https://tovuk.com/acme"
                 }
               }
             }
@@ -2469,7 +2469,7 @@
                   "plan": "free",
                   "handle": "acme",
                   "displayName": "Acme",
-                  "accountUrl": "https://zerct.com/acme"
+                  "accountUrl": "https://tovuk.com/acme"
                 }
               }
             }
@@ -2508,7 +2508,7 @@
                     "plan": "free",
                     "handle": "acme",
                     "displayName": "Acme",
-                    "accountUrl": "https://zerct.com/acme"
+                    "accountUrl": "https://tovuk.com/acme"
                   },
                   "apps": [],
                   "usage": {
@@ -2559,7 +2559,7 @@
                       "appId": "app_01HW0000000000000000000000",
                       "name": "hello-rust",
                       "slug": "hello-rust",
-                      "url": "https://hello-rust.zerct.app",
+                      "url": "https://hello-rust.tovuk.app",
                       "plan": "free",
                       "runtimeStatus": "running",
                       "latestBuildStatus": "succeeded",
@@ -2609,14 +2609,14 @@
                     "kind": "rust_backend",
                     "plan": "free",
                     "runtime_status": "running",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "latest_deploy": {
                     "id": "deploy_1",
                     "app_id": "app_1",
                     "build_job_id": "job_1",
                     "commit_sha": "0123456789abcdef",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "latest_build_job": {
                     "id": "job_1",
@@ -2661,7 +2661,7 @@
                       "app_id": "app_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
-                      "url": "https://hello-rust.zerct.app"
+                      "url": "https://hello-rust.tovuk.app"
                     }
                   ]
                 }
@@ -2702,14 +2702,14 @@
                     "kind": "rust_backend",
                     "plan": "free",
                     "runtime_status": "running",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "deploy": {
                     "id": "deploy_1",
                     "app_id": "app_1",
                     "build_job_id": "job_1",
                     "commit_sha": "0123456789abcdef",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "build_job": {
                     "id": "job_1",
@@ -2833,7 +2833,7 @@
                     "kind": "rust_backend",
                     "plan": "free",
                     "runtime_status": "running",
-                    "url": "https://hello-rust.zerct.app"
+                    "url": "https://hello-rust.tovuk.app"
                   },
                   "deploy_id": "app_1"
                 }
@@ -3063,9 +3063,9 @@
                       "created_at": "2026-05-25T12:00:00.000Z",
                       "dns_record_type": "CNAME",
                       "dns_record_name": "api.example.com",
-                      "dns_record_value": "cname.zerct.app",
+                      "dns_record_value": "cname.tovuk.app",
                       "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-                      "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
+                      "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
                     }
                   ]
                 }
@@ -3108,9 +3108,9 @@
                   "created_at": "2026-05-25T12:00:00.000Z",
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
-                  "dns_record_value": "cname.zerct.app",
+                  "dns_record_value": "cname.tovuk.app",
                   "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
+                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
                 }
               }
             }
@@ -3176,7 +3176,7 @@
                 "summary": "Billing portal created.",
                 "value": {
                   "checkout": {
-                    "url": "https://hello-rust.zerct.app",
+                    "url": "https://hello-rust.tovuk.app",
                     "reason": "value"
                   }
                 }
@@ -3224,10 +3224,10 @@
               "example": {
                 "summary": "API capabilities loaded.",
                 "value": {
-                  "product": "Zerct",
+                  "product": "Tovuk",
                   "api_version": "v1",
-                  "docs_url": "https://docs.zerct.com",
-                  "openapi_url": "https://docs.zerct.com/openapi.json",
+                  "docs_url": "https://docs.tovuk.com",
+                  "openapi_url": "https://docs.tovuk.com/openapi.json",
                   "auth": "Use device login once, then a bearer token.",
                   "agent_workflow": [
                     "Call GET /v1/capabilities first.",
@@ -3246,7 +3246,7 @@
                   ],
                   "commands": [
                     {
-                      "command": "npx @zerct/zerct deploy",
+                      "command": "npx tovuk deploy",
                       "description": "Deploys the current repo. Context: components.responses.CapabilitiesLoaded.content.application/json.examples.example.value.commands.0."
                     }
                   ]
@@ -3288,7 +3288,7 @@
                     "plan": "free",
                     "handle": "acme",
                     "displayName": "Acme",
-                    "accountUrl": "https://zerct.com/acme"
+                    "accountUrl": "https://tovuk.com/acme"
                   },
                   "usage": {
                     "appCount": 1,
@@ -3354,7 +3354,7 @@
                     "plan": "free",
                     "handle": "acme",
                     "displayName": "Acme",
-                    "accountUrl": "https://zerct.com/acme"
+                    "accountUrl": "https://tovuk.com/acme"
                   },
                   "usage": {
                     "appCount": 1,
@@ -3387,7 +3387,7 @@
                       "appId": "app_01HW0000000000000000000000",
                       "name": "hello-rust",
                       "slug": "hello-rust",
-                      "url": "https://hello-rust.zerct.app",
+                      "url": "https://hello-rust.tovuk.app",
                       "plan": "free",
                       "runtimeStatus": "running",
                       "latestBuildStatus": "succeeded",
@@ -3405,7 +3405,7 @@
                       "app_id": "app_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
-                      "url": "https://hello-rust.zerct.app"
+                      "url": "https://hello-rust.tovuk.app"
                     }
                   ],
                   "builds": [
@@ -3417,7 +3417,7 @@
                     }
                   ],
                   "next_actions": [
-                    "Use `npx @zerct/zerct overview --app <app>` for a compact app state snapshot."
+                    "Use `npx tovuk overview --app <app>` for a compact app state snapshot."
                   ]
                 }
               }
@@ -3458,14 +3458,14 @@
                       "kind": "rust_backend",
                       "plan": "free",
                       "runtime_status": "running",
-                      "url": "https://hello-rust.zerct.app"
+                      "url": "https://hello-rust.tovuk.app"
                     },
                     "latest_deploy": {
                       "id": "deploy_1",
                       "app_id": "app_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
-                      "url": "https://hello-rust.zerct.app"
+                      "url": "https://hello-rust.tovuk.app"
                     },
                     "latest_build_job": {
                       "id": "job_1",
@@ -3480,7 +3480,7 @@
                       "app_id": "app_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
-                      "url": "https://hello-rust.zerct.app"
+                      "url": "https://hello-rust.tovuk.app"
                     }
                   ],
                   "builds": [
@@ -3512,7 +3512,7 @@
                   "domains": [],
                   "database": null,
                   "next_actions": [
-                    "Watch the active build with `npx @zerct/zerct logs --app app_1`."
+                    "Watch the active build with `npx tovuk logs --app app_1`."
                   ]
                 }
               }
@@ -3554,9 +3554,9 @@
                   "created_at": "2026-05-25T12:00:00.000Z",
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
-                  "dns_record_value": "cname.zerct.app",
+                  "dns_record_value": "cname.tovuk.app",
                   "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
+                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
                 }
               }
             }
@@ -3564,7 +3564,7 @@
         }
       },
       "PlatformStatusLoaded": {
-        "description": "Zerct platform status loaded. Context: components.responses.PlatformStatusLoaded.",
+        "description": "Tovuk platform status loaded. Context: components.responses.PlatformStatusLoaded.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -3586,10 +3586,10 @@
             },
             "examples": {
               "example": {
-                "summary": "Zerct platform status loaded.",
+                "summary": "Tovuk platform status loaded.",
                 "value": {
                   "ok": true,
-                  "service": "zerct-api",
+                  "service": "tovuk-api",
                   "api_version": "v1",
                   "checks": [
                     {
@@ -3598,8 +3598,8 @@
                       "message": "reachable"
                     }
                   ],
-                  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
-                  "docs_url": "https://docs.zerct.com/status"
+                  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
+                  "docs_url": "https://docs.tovuk.com/status"
                 }
               }
             }
@@ -3607,7 +3607,7 @@
         }
       },
       "PlatformStatusUnavailable": {
-        "description": "Zerct platform status is temporarily unavailable. Context: components.responses.PlatformStatusUnavailable.",
+        "description": "Tovuk platform status is temporarily unavailable. Context: components.responses.PlatformStatusUnavailable.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -3629,10 +3629,10 @@
             },
             "examples": {
               "example": {
-                "summary": "Zerct platform status unavailable.",
+                "summary": "Tovuk platform status unavailable.",
                 "value": {
                   "ok": false,
-                  "service": "zerct-api",
+                  "service": "tovuk-api",
                   "api_version": "v1",
                   "checks": [
                     {
@@ -3641,8 +3641,8 @@
                       "message": "unavailable"
                     }
                   ],
-                  "agent_instruction": "Retry the command. If it keeps failing, check Zerct status before changing your project.",
-                  "docs_url": "https://docs.zerct.com/status"
+                  "agent_instruction": "Retry the command. If it keeps failing, check Tovuk status before changing your project.",
+                  "docs_url": "https://docs.tovuk.com/status"
                 }
               }
             }
@@ -3702,10 +3702,10 @@
                     "details": "Agent retried deploy after doctor.",
                     "severity": "normal",
                     "status": "open",
-                    "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                    "agent_instruction": "Continue with npx tovuk overview --app app_1 --json.",
                     "created_at": "2026-05-27T12:00:00Z",
                     "updated_at": "2026-05-27T12:00:00Z",
-                    "failing_command": "npx @zerct/zerct deploy --wait --json",
+                    "failing_command": "npx tovuk deploy --wait --json",
                     "build_id": "job_1",
                     "deploy_id": "deploy_1",
                     "first_log_line": "cargo check failed in src/main.rs"
@@ -3716,7 +3716,7 @@
                     "limitPerDay": 10,
                     "remainingDay": 9
                   },
-                  "next_command": "npx @zerct/zerct support list --json"
+                  "next_command": "npx tovuk support list --json"
                 }
               }
             }
@@ -3756,10 +3756,10 @@
                       "details": "Agent retried deploy after doctor.",
                       "severity": "normal",
                       "status": "open",
-                      "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                      "agent_instruction": "Continue with npx tovuk overview --app app_1 --json.",
                       "created_at": "2026-05-27T12:00:00Z",
                       "updated_at": "2026-05-27T12:00:00Z",
-                      "failing_command": "npx @zerct/zerct deploy --wait --json",
+                      "failing_command": "npx tovuk deploy --wait --json",
                       "build_id": "job_1",
                       "deploy_id": "deploy_1",
                       "first_log_line": "cargo check failed in src/main.rs"
@@ -3808,10 +3808,10 @@
                   "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "resolved",
-                  "agent_instruction": "Ticket resolved. Run `npx @zerct/zerct support list --json` to confirm status, and create a new ticket only if the issue returns with fresh command output.",
+                  "agent_instruction": "Ticket resolved. Run `npx tovuk support list --json` to confirm status, and create a new ticket only if the issue returns with fresh command output.",
                   "created_at": "2026-05-27T12:00:00Z",
                   "updated_at": "2026-05-27T12:00:00Z",
-                  "failing_command": "npx @zerct/zerct deploy --wait --json",
+                  "failing_command": "npx tovuk deploy --wait --json",
                   "build_id": "job_1",
                   "deploy_id": "deploy_1",
                   "first_log_line": "cargo check failed in src/main.rs"
@@ -3863,7 +3863,7 @@
                   "code": "policy_rejected",
                   "message": "Resource was not found for this account.",
                   "agent_instruction": "List resources, pick an id from that response, and retry.",
-                  "docs_url": "https://docs.zerct.com",
+                  "docs_url": "https://docs.tovuk.com",
                   "checkout_url": null
                 }
               }
@@ -3893,23 +3893,23 @@
             "type": "string",
             "description": "Service identifier. Context: components.schemas.HealthResponse.properties.service.",
             "enum": [
-              "zerct-api"
+              "tovuk-api"
             ],
             "examples": [
-              "zerct-api"
+              "tovuk-api"
             ]
           }
         },
         "examples": [
           {
             "ok": true,
-            "service": "zerct-api"
+            "service": "tovuk-api"
           }
         ]
       },
       "LoginStartResponse": {
         "type": "object",
-        "description": "Device login response for the Zerct CLI. Context: components.schemas.LoginStartResponse.",
+        "description": "Device login response for the Tovuk CLI. Context: components.schemas.LoginStartResponse.",
         "additionalProperties": false,
         "required": [
           "loginUrl",
@@ -3925,7 +3925,7 @@
             "description": "Browser URL where the user completes login. Context: components.schemas.LoginStartResponse.properties.loginUrl.",
             "format": "uri",
             "examples": [
-              "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+              "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             ]
           },
           "verificationUri": {
@@ -3933,7 +3933,7 @@
             "description": "Browser URL where the user chooses GitHub or Google. Context: components.schemas.LoginStartResponse.properties.verificationUri.",
             "format": "uri",
             "examples": [
-              "https://zerct.com/login"
+              "https://tovuk.com/login"
             ]
           },
           "deviceCode": {
@@ -3977,8 +3977,8 @@
         },
         "examples": [
           {
-            "loginUrl": "https://zerct.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-            "verificationUri": "https://zerct.com/login",
+            "loginUrl": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "verificationUri": "https://tovuk.com/login",
             "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
             "userCode": "ABC123",
             "intervalSeconds": 5,
@@ -3988,7 +3988,7 @@
       },
       "LoginPollResponse": {
         "type": "object",
-        "description": "Device login polling response for the Zerct CLI. Context: components.schemas.LoginPollResponse.",
+        "description": "Device login polling response for the Tovuk CLI. Context: components.schemas.LoginPollResponse.",
         "additionalProperties": false,
         "required": [
           "status",
@@ -4027,7 +4027,7 @@
               "string",
               "null"
             ],
-            "description": "Authenticated Zerct account id when login is complete. Context: components.schemas.LoginPollResponse.properties.accountId.",
+            "description": "Authenticated Tovuk account id when login is complete. Context: components.schemas.LoginPollResponse.properties.accountId.",
             "pattern": "^acct_[A-Za-z0-9_-]+$",
             "examples": [
               "acct_01HW0000000000000000000000"
@@ -4065,10 +4065,10 @@
               "string",
               "null"
             ],
-            "description": "Zerct session token returned once and stored by the CLI. Context: components.schemas.LoginPollResponse.properties.token.",
-            "pattern": "^zct_[a-f0-9]{64}$",
+            "description": "Tovuk session token returned once and stored by the CLI. Context: components.schemas.LoginPollResponse.properties.token.",
+            "pattern": "^tovuk_[a-f0-9]{64}$",
             "examples": [
-              "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+              "tovuk_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             ],
             "maxLength": 512
           },
@@ -4077,7 +4077,7 @@
               "string",
               "null"
             ],
-            "description": "UTC timestamp when the Zerct session token expires. Context: components.schemas.LoginPollResponse.properties.expiresAt.",
+            "description": "UTC timestamp when the Tovuk session token expires. Context: components.schemas.LoginPollResponse.properties.expiresAt.",
             "format": "date-time",
             "examples": [
               "2026-06-24T12:00:00.000Z"
@@ -4091,7 +4091,7 @@
             "accountId": "acct_01HW0000000000000000000000",
             "email": "dev@example.com",
             "provider": "github",
-            "token": "zct_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "token": "tovuk_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
             "expiresAt": "2026-06-24T12:00:00.000Z"
           }
         ]
@@ -4119,7 +4119,7 @@
                 }
               }
             ],
-            "$ref": "#/components/schemas/ZerctConfig"
+            "$ref": "#/components/schemas/TovukConfig"
           },
           "commit_sha": {
             "type": [
@@ -4191,7 +4191,7 @@
                 "kind": "rust_backend",
                 "plan": "free",
                 "runtime_status": "running",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "$ref": "#/components/schemas/App"
@@ -4203,7 +4203,7 @@
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "$ref": "#/components/schemas/Deploy"
@@ -4257,7 +4257,7 @@
             "type": "string",
             "description": "Next command for humans and agents. Context: components.schemas.DeployResponse.properties.next_command.",
             "examples": [
-              "npx @zerct/zerct logs --app app_1"
+              "npx tovuk logs --app app_1"
             ],
             "pattern": "^[\\s\\S]{0,8192}$",
             "maxLength": 512
@@ -4272,14 +4272,14 @@
               "kind": "rust_backend",
               "plan": "free",
               "runtime_status": "running",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "deploy": {
               "id": "deploy_1",
               "app_id": "app_1",
               "build_job_id": "job_1",
               "commit_sha": "0123456789abcdef",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "build_job": {
               "id": "job_1",
@@ -4316,7 +4316,7 @@
               },
               "idle_timeout_minutes": 15
             },
-            "next_command": "npx @zerct/zerct logs --app app_1"
+            "next_command": "npx tovuk logs --app app_1"
           }
         ]
       },
@@ -4378,7 +4378,7 @@
                 "format": "uri",
                 "description": "Documentation URL for the recovery path. Context: components.schemas.ErrorResponse.properties.docs_url.anyOf.0.",
                 "examples": [
-                  "https://docs.zerct.com/deploy"
+                  "https://docs.tovuk.com/deploy"
                 ]
               },
               {
@@ -4386,7 +4386,7 @@
               }
             ],
             "examples": [
-              "https://docs.zerct.com/deploy"
+              "https://docs.tovuk.com/deploy"
             ]
           },
           "checkout_url": {
@@ -4413,14 +4413,14 @@
             "code": "policy_rejected",
             "message": "Request validation failed.",
             "agent_instruction": "Fix the request payload and retry.",
-            "docs_url": "https://docs.zerct.com/deploy",
+            "docs_url": "https://docs.tovuk.com/deploy",
             "checkout_url": null
           }
         ]
       },
       "AuthProvider": {
         "type": "string",
-        "description": "OAuth provider used by the Zerct account. Context: components.schemas.AuthProvider.",
+        "description": "OAuth provider used by the Tovuk account. Context: components.schemas.AuthProvider.",
         "enum": [
           "github",
           "google"
@@ -4431,7 +4431,7 @@
       },
       "Plan": {
         "type": "string",
-        "description": "Zerct plan assigned to a deploy. Context: components.schemas.Plan.",
+        "description": "Tovuk plan assigned to a deploy. Context: components.schemas.Plan.",
         "enum": [
           "free",
           "pro"
@@ -4488,7 +4488,7 @@
         "properties": {
           "accountId": {
             "type": "string",
-            "description": "Authenticated Zerct account id. Context: components.schemas.AccountProfileResponse.properties.accountId.",
+            "description": "Authenticated Tovuk account id. Context: components.schemas.AccountProfileResponse.properties.accountId.",
             "pattern": "^acct_[A-Za-z0-9_-]+$",
             "examples": [
               "acct_01HW0000000000000000000000"
@@ -4514,7 +4514,7 @@
               "string",
               "null"
             ],
-            "description": "Private Zerct account handle. Context: components.schemas.AccountProfileResponse.properties.handle.",
+            "description": "Private Tovuk account handle. Context: components.schemas.AccountProfileResponse.properties.handle.",
             "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
             "examples": [
               "acme"
@@ -4542,7 +4542,7 @@
             "description": "Private account dashboard URL. Context: components.schemas.AccountProfileResponse.properties.accountUrl.",
             "format": "uri",
             "examples": [
-              "https://zerct.com/acme"
+              "https://tovuk.com/acme"
             ]
           },
           "plan": {
@@ -4557,7 +4557,7 @@
             "plan": "free",
             "handle": "acme",
             "displayName": "Acme",
-            "accountUrl": "https://zerct.com/acme"
+            "accountUrl": "https://tovuk.com/acme"
           }
         ]
       },
@@ -4617,7 +4617,7 @@
                 "provider": "github",
                 "handle": "acme",
                 "displayName": "Acme",
-                "accountUrl": "https://zerct.com/acme"
+                "accountUrl": "https://tovuk.com/acme"
               }
             ],
             "$ref": "#/components/schemas/AccountProfileResponse"
@@ -4636,7 +4636,7 @@
                   "appId": "app_01HW0000000000000000000000",
                   "name": "hello-rust",
                   "slug": "hello-rust",
-                  "url": "https://hello-rust.zerct.app",
+                  "url": "https://hello-rust.tovuk.app",
                   "plan": "free",
                   "runtimeStatus": "running",
                   "latestBuildStatus": "succeeded",
@@ -4676,7 +4676,7 @@
               "plan": "free",
               "handle": "acme",
               "displayName": "Acme",
-              "accountUrl": "https://zerct.com/acme"
+              "accountUrl": "https://tovuk.com/acme"
             },
             "apps": [],
             "usage": {
@@ -4760,7 +4760,7 @@
             "description": "HTTPS endpoint assigned to the deploy. Context: components.schemas.AccountDashboardApp.properties.url.",
             "format": "uri",
             "examples": [
-              "https://hello-rust.zerct.app"
+              "https://hello-rust.tovuk.app"
             ]
           },
           "plan": {
@@ -4851,7 +4851,7 @@
             "appId": "app_01HW0000000000000000000000",
             "name": "hello-rust",
             "slug": "hello-rust",
-            "url": "https://hello-rust.zerct.app",
+            "url": "https://hello-rust.tovuk.app",
             "plan": "free",
             "runtimeStatus": "running",
             "latestBuildStatus": "succeeded",
@@ -4999,7 +4999,7 @@
       },
       "ProjectKind": {
         "type": "string",
-        "description": "Zerct project kind. Context: components.schemas.ProjectKind.",
+        "description": "Tovuk project kind. Context: components.schemas.ProjectKind.",
         "enum": [
           "rust_backend",
           "static_frontend"
@@ -5010,7 +5010,7 @@
       },
       "App": {
         "type": "object",
-        "description": "Hosted Zerct app. Context: components.schemas.App.",
+        "description": "Hosted Tovuk app. Context: components.schemas.App.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -5072,7 +5072,7 @@
             "format": "uri",
             "description": "Public app URL. Context: components.schemas.App.properties.url.",
             "examples": [
-              "https://hello-rust.zerct.app"
+              "https://hello-rust.tovuk.app"
             ]
           }
         },
@@ -5084,7 +5084,7 @@
             "kind": "rust_backend",
             "plan": "free",
             "runtime_status": "running",
-            "url": "https://hello-rust.zerct.app"
+            "url": "https://hello-rust.tovuk.app"
           }
         ]
       },
@@ -5144,7 +5144,7 @@
             "format": "uri",
             "description": "Public app URL. Context: components.schemas.Deploy.url. Context: components.schemas.Deploy.properties.url.",
             "examples": [
-              "https://hello-rust.zerct.app"
+              "https://hello-rust.tovuk.app"
             ]
           }
         },
@@ -5154,7 +5154,7 @@
             "app_id": "app_1",
             "build_job_id": "job_1",
             "commit_sha": "0123456789abcdef",
-            "url": "https://hello-rust.zerct.app"
+            "url": "https://hello-rust.tovuk.app"
           }
         ]
       },
@@ -5412,7 +5412,7 @@
                   "appId": "app_01HW0000000000000000000000",
                   "name": "hello-rust",
                   "slug": "hello-rust",
-                  "url": "https://hello-rust.zerct.app",
+                  "url": "https://hello-rust.tovuk.app",
                   "plan": "free",
                   "runtimeStatus": "running",
                   "latestBuildStatus": "succeeded",
@@ -5434,7 +5434,7 @@
                 "appId": "app_01HW0000000000000000000000",
                 "name": "hello-rust",
                 "slug": "hello-rust",
-                "url": "https://hello-rust.zerct.app",
+                "url": "https://hello-rust.tovuk.app",
                 "plan": "free",
                 "runtimeStatus": "running",
                 "latestBuildStatus": "succeeded",
@@ -5470,7 +5470,7 @@
                   "app_id": "app_1",
                   "build_job_id": "job_1",
                   "commit_sha": "0123456789abcdef",
-                  "url": "https://hello-rust.zerct.app"
+                  "url": "https://hello-rust.tovuk.app"
                 }
               ]
             ]
@@ -5484,7 +5484,7 @@
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ]
           }
@@ -5509,7 +5509,7 @@
                 "kind": "rust_backend",
                 "plan": "free",
                 "runtime_status": "running",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "$ref": "#/components/schemas/App"
@@ -5521,7 +5521,7 @@
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "$ref": "#/components/schemas/Deploy"
@@ -5554,14 +5554,14 @@
               "kind": "rust_backend",
               "plan": "free",
               "runtime_status": "running",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "deploy": {
               "id": "deploy_1",
               "app_id": "app_1",
               "build_job_id": "job_1",
               "commit_sha": "0123456789abcdef",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "build_job": {
               "id": "job_1",
@@ -5675,7 +5675,7 @@
                 "kind": "rust_backend",
                 "plan": "free",
                 "runtime_status": "running",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "$ref": "#/components/schemas/App"
@@ -5708,7 +5708,7 @@
               "kind": "rust_backend",
               "plan": "free",
               "runtime_status": "running",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "deploy_id": "app_1"
           }
@@ -6222,12 +6222,12 @@
           },
           "dns_record_value": {
             "type": "string",
-            "description": "Zerct CNAME target. Context: components.schemas.AppDomain.properties.dns_record_value.",
+            "description": "Tovuk CNAME target. Context: components.schemas.AppDomain.properties.dns_record_value.",
             "enum": [
-              "cname.zerct.app"
+              "cname.tovuk.app"
             ],
             "examples": [
-              "cname.zerct.app"
+              "cname.tovuk.app"
             ]
           },
           "cloudflare_dns_url": {
@@ -6250,9 +6250,9 @@
             "created_at": "2026-05-25T12:00:00.000Z",
             "dns_record_type": "CNAME",
             "dns_record_name": "api.example.com",
-            "dns_record_value": "cname.zerct.app",
+            "dns_record_value": "cname.tovuk.app",
             "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-            "agent_instruction": "Create a CNAME for api.example.com pointing to cname.zerct.app. Do not create an A record to Zerct origin IP."
+            "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
           }
         ]
       },
@@ -6374,7 +6374,7 @@
                 "kind": "rust_backend",
                 "plan": "free",
                 "runtime_status": "running",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "$ref": "#/components/schemas/App"
@@ -6394,7 +6394,7 @@
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ]
           },
@@ -6426,14 +6426,14 @@
               "kind": "rust_backend",
               "plan": "free",
               "runtime_status": "running",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "latest_deploy": {
               "id": "deploy_1",
               "app_id": "app_1",
               "build_job_id": "job_1",
               "commit_sha": "0123456789abcdef",
-              "url": "https://hello-rust.zerct.app"
+              "url": "https://hello-rust.tovuk.app"
             },
             "latest_build_job": {
               "id": "job_1",
@@ -6458,13 +6458,13 @@
             "format": "uri",
             "description": "Stripe-hosted URL returned for the account billing action. Context: components.schemas.BillingCheckout.properties.url.",
             "examples": [
-              "https://hello-rust.zerct.app"
+              "https://hello-rust.tovuk.app"
             ]
           },
           "reason": {
             "type": "string",
             "minLength": 1,
-            "description": "Billing action reason selected by Zerct. Context: components.schemas.BillingCheckout.properties.reason.",
+            "description": "Billing action reason selected by Tovuk. Context: components.schemas.BillingCheckout.properties.reason.",
             "pattern": "^[\\s\\S]{0,8192}$",
             "maxLength": 512,
             "examples": [
@@ -6474,7 +6474,7 @@
         },
         "examples": [
           {
-            "url": "https://hello-rust.zerct.app",
+            "url": "https://hello-rust.tovuk.app",
             "reason": "value"
           }
         ]
@@ -6490,7 +6490,7 @@
           "checkout": {
             "examples": [
               {
-                "url": "https://hello-rust.zerct.app",
+                "url": "https://hello-rust.tovuk.app",
                 "reason": "value"
               }
             ],
@@ -6500,22 +6500,22 @@
         "examples": [
           {
             "checkout": {
-              "url": "https://hello-rust.zerct.app",
+              "url": "https://hello-rust.tovuk.app",
               "reason": "value"
             }
           }
         ]
       },
-      "ZerctBuildConfig": {
+      "TovukBuildConfig": {
         "type": "object",
-        "description": "Optional build commands from zerct.toml. Context: components.schemas.ZerctBuildConfig.",
+        "description": "Optional build commands from tovuk.toml. Context: components.schemas.TovukBuildConfig.",
         "additionalProperties": false,
         "properties": {
           "check": {
             "anyOf": [
               {
                 "type": "string",
-                "description": "Cheap pre-build validation command. Context: components.schemas.ZerctBuildConfig.properties.check.anyOf.0.",
+                "description": "Cheap pre-build validation command. Context: components.schemas.TovukBuildConfig.properties.check.anyOf.0.",
                 "pattern": "^[\\s\\S]{1,512}$",
                 "maxLength": 512,
                 "examples": [
@@ -6534,7 +6534,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "Release build command. Context: components.schemas.ZerctBuildConfig.properties.command.anyOf.0. Context: components.schemas.ZerctBuildConfig.properties.command.anyOf.0.",
+                "description": "Release build command. Context: components.schemas.TovukBuildConfig.properties.command.anyOf.0. Context: components.schemas.TovukBuildConfig.properties.command.anyOf.0.",
                 "pattern": "^[\\s\\S]{1,512}$",
                 "maxLength": 512,
                 "examples": [
@@ -6553,7 +6553,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "description": "Static frontend output directory. Context: components.schemas.ZerctBuildConfig.properties.output.anyOf.0.",
+                "description": "Static frontend output directory. Context: components.schemas.TovukBuildConfig.properties.output.anyOf.0.",
                 "pattern": "^[A-Za-z0-9_./-]{1,160}$",
                 "maxLength": 160,
                 "examples": [
@@ -6577,14 +6577,14 @@
           }
         ]
       },
-      "ZerctRunConfig": {
+      "TovukRunConfig": {
         "type": "object",
-        "description": "Runtime process settings from zerct.toml. Context: components.schemas.ZerctRunConfig.",
+        "description": "Runtime process settings from tovuk.toml. Context: components.schemas.TovukRunConfig.",
         "additionalProperties": false,
         "properties": {
           "command": {
             "type": "string",
-            "description": "Runtime command for Rust backends. Context: components.schemas.ZerctRunConfig.properties.command.",
+            "description": "Runtime command for Rust backends. Context: components.schemas.TovukRunConfig.properties.command.",
             "pattern": "^[\\s\\S]{0,512}$",
             "maxLength": 512,
             "examples": [
@@ -6596,14 +6596,14 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 65535,
-            "description": "Internal HTTP port. Context: components.schemas.ZerctRunConfig.properties.port.",
+            "description": "Internal HTTP port. Context: components.schemas.TovukRunConfig.properties.port.",
             "examples": [
               3000
             ]
           },
           "health": {
             "type": "string",
-            "description": "Health endpoint path. Context: components.schemas.ZerctRunConfig.properties.health. Context: components.schemas.ZerctRunConfig.properties.health.",
+            "description": "Health endpoint path. Context: components.schemas.TovukRunConfig.properties.health. Context: components.schemas.TovukRunConfig.properties.health.",
             "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
             "maxLength": 160,
             "examples": [
@@ -6619,14 +6619,14 @@
           }
         ]
       },
-      "ZerctResourceConfig": {
+      "TovukResourceConfig": {
         "type": "object",
-        "description": "Runtime resource limits from zerct.toml. Context: components.schemas.ZerctResourceConfig.",
+        "description": "Runtime resource limits from tovuk.toml. Context: components.schemas.TovukResourceConfig.",
         "additionalProperties": false,
         "properties": {
           "memory": {
             "type": "string",
-            "description": "Runtime memory declaration. Context: components.schemas.ZerctResourceConfig.properties.memory.",
+            "description": "Runtime memory declaration. Context: components.schemas.TovukResourceConfig.properties.memory.",
             "pattern": "^[0-9]{2,5}(mb|gb)$",
             "maxLength": 16,
             "examples": [
@@ -6635,7 +6635,7 @@
           },
           "cpu": {
             "type": "string",
-            "description": "Runtime CPU declaration in vCPU units. Context: components.schemas.ZerctResourceConfig.properties.cpu.",
+            "description": "Runtime CPU declaration in vCPU units. Context: components.schemas.TovukResourceConfig.properties.cpu.",
             "pattern": "^[0-9]+(\\.[0-9]+)?$",
             "maxLength": 16,
             "examples": [
@@ -6647,7 +6647,7 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 10080,
-            "description": "Idle timeout in minutes. Context: components.schemas.ZerctResourceConfig.properties.idle_timeout_minutes. Context: components.schemas.ZerctResourceConfig.properties.idle_timeout_minutes.",
+            "description": "Idle timeout in minutes. Context: components.schemas.TovukResourceConfig.properties.idle_timeout_minutes. Context: components.schemas.TovukResourceConfig.properties.idle_timeout_minutes.",
             "examples": [
               15
             ]
@@ -6661,9 +6661,9 @@
           }
         ]
       },
-      "ZerctConfig": {
+      "TovukConfig": {
         "type": "object",
-        "description": "Parsed zerct.toml deploy contract. Context: components.schemas.ZerctConfig.",
+        "description": "Parsed tovuk.toml deploy contract. Context: components.schemas.TovukConfig.",
         "additionalProperties": false,
         "required": [
           "name"
@@ -6671,7 +6671,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Public service name. Context: components.schemas.ZerctConfig.properties.name.",
+            "description": "Public service name. Context: components.schemas.TovukConfig.properties.name.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "maxLength": 63,
             "examples": [
@@ -6692,7 +6692,7 @@
                 "output": null
               }
             ],
-            "$ref": "#/components/schemas/ZerctBuildConfig"
+            "$ref": "#/components/schemas/TovukBuildConfig"
           },
           "run": {
             "examples": [
@@ -6702,7 +6702,7 @@
                 "health": "/healthz"
               }
             ],
-            "$ref": "#/components/schemas/ZerctRunConfig"
+            "$ref": "#/components/schemas/TovukRunConfig"
           },
           "resources": {
             "examples": [
@@ -6712,7 +6712,7 @@
                 "idle_timeout_minutes": 15
               }
             ],
-            "$ref": "#/components/schemas/ZerctResourceConfig"
+            "$ref": "#/components/schemas/TovukResourceConfig"
           }
         },
         "examples": [
@@ -6970,7 +6970,7 @@
           },
           "auth_required": {
             "type": "boolean",
-            "description": "Whether a Zerct bearer token is required. Context: components.schemas.CapabilityEndpoint.properties.auth_required.",
+            "description": "Whether a Tovuk bearer token is required. Context: components.schemas.CapabilityEndpoint.properties.auth_required.",
             "examples": [
               true
             ]
@@ -7020,7 +7020,7 @@
             "pattern": "^[\\s\\S]{1,160}$",
             "maxLength": 160,
             "examples": [
-              "npx @zerct/zerct deploy"
+              "npx tovuk deploy"
             ]
           },
           "description": {
@@ -7035,14 +7035,14 @@
         },
         "examples": [
           {
-            "command": "npx @zerct/zerct deploy",
+            "command": "npx tovuk deploy",
             "description": "Deploys the current repo. Context: components.schemas.CapabilityCommand.examples.0. Context: components.schemas.CapabilityCommand.examples.0."
           }
         ]
       },
       "CapabilitiesResponse": {
         "type": "object",
-        "description": "Public machine-readable Zerct API capability map. Context: components.schemas.CapabilitiesResponse.",
+        "description": "Public machine-readable Tovuk API capability map. Context: components.schemas.CapabilitiesResponse.",
         "additionalProperties": false,
         "required": [
           "product",
@@ -7061,7 +7061,7 @@
             "pattern": "^[A-Za-z0-9 ._-]{1,80}$",
             "maxLength": 80,
             "examples": [
-              "Zerct"
+              "Tovuk"
             ]
           },
           "api_version": {
@@ -7078,7 +7078,7 @@
             "format": "uri",
             "description": "Documentation URL. Context: components.schemas.CapabilitiesResponse.properties.docs_url.",
             "examples": [
-              "https://docs.zerct.com"
+              "https://docs.tovuk.com"
             ]
           },
           "openapi_url": {
@@ -7086,7 +7086,7 @@
             "format": "uri",
             "description": "OpenAPI document URL. Context: components.schemas.CapabilitiesResponse.properties.openapi_url.",
             "examples": [
-              "https://docs.zerct.com/openapi.json"
+              "https://docs.tovuk.com/openapi.json"
             ]
           },
           "auth": {
@@ -7153,7 +7153,7 @@
             "examples": [
               [
                 {
-                  "command": "npx @zerct/zerct deploy",
+                  "command": "npx tovuk deploy",
                   "description": "Deploys the current repo. Context: components.schemas.CapabilitiesResponse.properties.commands.examples.0.0. Context: components.schemas.CapabilitiesResponse.properties.commands.examples.0.0."
                 }
               ]
@@ -7190,7 +7190,7 @@
               "plan": "free",
               "handle": "acme",
               "displayName": "Acme",
-              "accountUrl": "https://zerct.com/acme"
+              "accountUrl": "https://tovuk.com/acme"
             },
             "usage": {
               "appCount": 1,
@@ -7414,7 +7414,7 @@
                   "appId": "app_01HW0000000000000000000000",
                   "name": "hello-rust",
                   "slug": "hello-rust",
-                  "url": "https://hello-rust.zerct.app",
+                  "url": "https://hello-rust.tovuk.app",
                   "plan": "free",
                   "runtimeStatus": "running",
                   "latestBuildStatus": "succeeded",
@@ -7442,7 +7442,7 @@
                   "app_id": "app_1",
                   "build_job_id": "job_1",
                   "commit_sha": "0123456789abcdef",
-                  "url": "https://hello-rust.zerct.app"
+                  "url": "https://hello-rust.tovuk.app"
                 }
               ]
             ]
@@ -7476,7 +7476,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Use `npx @zerct/zerct overview --app <app>` for a compact app state snapshot."
+                "Use `npx tovuk overview --app <app>` for a compact app state snapshot."
               ]
             ]
           }
@@ -7490,7 +7490,7 @@
               "plan": "free",
               "handle": "acme",
               "displayName": "Acme",
-              "accountUrl": "https://zerct.com/acme"
+              "accountUrl": "https://tovuk.com/acme"
             },
             "usage": {
               "appCount": 1,
@@ -7523,7 +7523,7 @@
                 "appId": "app_01HW0000000000000000000000",
                 "name": "hello-rust",
                 "slug": "hello-rust",
-                "url": "https://hello-rust.zerct.app",
+                "url": "https://hello-rust.tovuk.app",
                 "plan": "free",
                 "runtimeStatus": "running",
                 "latestBuildStatus": "succeeded",
@@ -7541,7 +7541,7 @@
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "builds": [
@@ -7553,7 +7553,7 @@
               }
             ],
             "next_actions": [
-              "Use `npx @zerct/zerct overview --app <app>` for a compact app state snapshot."
+              "Use `npx tovuk overview --app <app>` for a compact app state snapshot."
             ]
           }
         ]
@@ -7590,7 +7590,7 @@
                   "app_id": "app_1",
                   "build_job_id": "job_1",
                   "commit_sha": "0123456789abcdef",
-                  "url": "https://hello-rust.zerct.app"
+                  "url": "https://hello-rust.tovuk.app"
                 }
               ]
             ]
@@ -7669,7 +7669,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Watch the active build with `npx @zerct/zerct logs --app app_1`."
+                "Watch the active build with `npx tovuk logs --app app_1`."
               ]
             ]
           }
@@ -7684,14 +7684,14 @@
                 "kind": "rust_backend",
                 "plan": "free",
                 "runtime_status": "running",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               },
               "latest_deploy": {
                 "id": "deploy_1",
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               },
               "latest_build_job": {
                 "id": "job_1",
@@ -7706,7 +7706,7 @@
                 "app_id": "app_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
-                "url": "https://hello-rust.zerct.app"
+                "url": "https://hello-rust.tovuk.app"
               }
             ],
             "builds": [
@@ -7738,14 +7738,14 @@
             "domains": [],
             "database": null,
             "next_actions": [
-              "Watch the active build with `npx @zerct/zerct logs --app app_1`."
+              "Watch the active build with `npx tovuk logs --app app_1`."
             ]
           }
         ]
       },
       "PlatformStatusCheck": {
         "type": "object",
-        "description": "Single Zerct platform dependency health check. Context: components.schemas.PlatformStatusCheck.",
+        "description": "Single Tovuk platform dependency health check. Context: components.schemas.PlatformStatusCheck.",
         "additionalProperties": false,
         "required": [
           "name",
@@ -7789,7 +7789,7 @@
       },
       "PlatformStatusResponse": {
         "type": "object",
-        "description": "Structured Zerct platform status for humans, SDKs, and agents. Context: components.schemas.PlatformStatusResponse.",
+        "description": "Structured Tovuk platform status for humans, SDKs, and agents. Context: components.schemas.PlatformStatusResponse.",
         "additionalProperties": false,
         "required": [
           "ok",
@@ -7802,7 +7802,7 @@
         "properties": {
           "ok": {
             "type": "boolean",
-            "description": "Whether Zerct is available for normal API commands. Context: components.schemas.PlatformStatusResponse.properties.ok.",
+            "description": "Whether Tovuk is available for normal API commands. Context: components.schemas.PlatformStatusResponse.properties.ok.",
             "examples": [
               true
             ]
@@ -7811,10 +7811,10 @@
             "type": "string",
             "description": "Service identifier. Context: components.schemas.PlatformStatusResponse.properties.service.",
             "enum": [
-              "zerct-api"
+              "tovuk-api"
             ],
             "examples": [
-              "zerct-api"
+              "tovuk-api"
             ]
           },
           "api_version": {
@@ -7850,7 +7850,7 @@
             "pattern": "^[\\s\\S]{1,500}$",
             "maxLength": 500,
             "examples": [
-              "Continue with GET /v1/capabilities, then run the requested Zerct command."
+              "Continue with GET /v1/capabilities, then run the requested Tovuk command."
             ]
           },
           "docs_url": {
@@ -7858,14 +7858,14 @@
             "format": "uri",
             "description": "Documentation URL for service status guidance. Context: components.schemas.PlatformStatusResponse.properties.docs_url.",
             "examples": [
-              "https://docs.zerct.com/status"
+              "https://docs.tovuk.com/status"
             ]
           }
         },
         "examples": [
           {
             "ok": true,
-            "service": "zerct-api",
+            "service": "tovuk-api",
             "api_version": "v1",
             "checks": [
               {
@@ -7874,8 +7874,8 @@
                 "message": "reachable"
               }
             ],
-            "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
-            "docs_url": "https://docs.zerct.com/status"
+            "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
+            "docs_url": "https://docs.tovuk.com/status"
           }
         ]
       },
@@ -7982,9 +7982,9 @@
             ],
             "minLength": 1,
             "maxLength": 2000,
-            "description": "Exact Zerct command or SDK action that failed. Context: components.schemas.SupportTicketCreateRequest.properties.failing_command.",
+            "description": "Exact Tovuk command or SDK action that failed. Context: components.schemas.SupportTicketCreateRequest.properties.failing_command.",
             "examples": [
-              "npx @zerct/zerct deploy --wait --json"
+              "npx tovuk deploy --wait --json"
             ],
             "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
           },
@@ -8042,7 +8042,7 @@
             "subject": "Deploy failed",
             "details": "Agent retried deploy after doctor.",
             "app_id": "app_1",
-            "failing_command": "npx @zerct/zerct deploy --wait --json",
+            "failing_command": "npx tovuk deploy --wait --json",
             "build_id": "job_1",
             "deploy_id": "deploy_1",
             "first_log_line": "cargo check failed in src/main.rs",
@@ -8116,9 +8116,9 @@
             ],
             "minLength": 1,
             "maxLength": 2000,
-            "description": "Exact Zerct command or SDK action that failed. Context: components.schemas.SupportTicket.properties.failing_command.",
+            "description": "Exact Tovuk command or SDK action that failed. Context: components.schemas.SupportTicket.properties.failing_command.",
             "examples": [
-              "npx @zerct/zerct deploy --wait --json"
+              "npx tovuk deploy --wait --json"
             ],
             "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
           },
@@ -8169,7 +8169,7 @@
             "type": "string",
             "description": "Next step for the user agent. Context: components.schemas.SupportTicket.properties.agent_instruction.",
             "examples": [
-              "Continue with npx @zerct/zerct overview --app app_1 --json."
+              "Continue with npx tovuk overview --app app_1 --json."
             ],
             "pattern": "^[\\s\\S]{1,500}$",
             "maxLength": 500
@@ -8197,13 +8197,13 @@
             "app_id": "app_1",
             "subject": "Deploy failed",
             "details": "Agent retried deploy after doctor.",
-            "failing_command": "npx @zerct/zerct deploy --wait --json",
+            "failing_command": "npx tovuk deploy --wait --json",
             "build_id": "job_1",
             "deploy_id": "deploy_1",
             "first_log_line": "cargo check failed in src/main.rs",
             "severity": "normal",
             "status": "open",
-            "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+            "agent_instruction": "Continue with npx tovuk overview --app app_1 --json.",
             "created_at": "2026-05-27T12:00:00Z",
             "updated_at": "2026-05-27T12:00:00Z"
           }
@@ -8290,7 +8290,7 @@
             "type": "string",
             "description": "Recommended next CLI command. Context: components.schemas.SupportTicketCreateResponse.properties.next_command.",
             "examples": [
-              "npx @zerct/zerct support list --json"
+              "npx tovuk support list --json"
             ],
             "pattern": "^[\\s\\S]{1,240}$",
             "maxLength": 240
@@ -8305,7 +8305,7 @@
               "details": "Command, ids, and first actionable log line.",
               "severity": "normal",
               "status": "open",
-              "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+              "agent_instruction": "Continue with npx tovuk overview --app app_1 --json.",
               "created_at": "2026-05-27T12:00:00Z",
               "updated_at": "2026-05-27T12:00:00Z"
             },
@@ -8315,7 +8315,7 @@
               "limitPerDay": 10,
               "remainingDay": 9
             },
-            "next_command": "npx @zerct/zerct support list --json"
+            "next_command": "npx tovuk support list --json"
           }
         ]
       },
@@ -8343,10 +8343,10 @@
                   "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "open",
-                  "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                  "agent_instruction": "Continue with npx tovuk overview --app app_1 --json.",
                   "created_at": "2026-05-27T12:00:00Z",
                   "updated_at": "2026-05-27T12:00:00Z",
-                  "failing_command": "npx @zerct/zerct deploy --wait --json",
+                  "failing_command": "npx tovuk deploy --wait --json",
                   "build_id": "job_1",
                   "deploy_id": "deploy_1",
                   "first_log_line": "cargo check failed in src/main.rs"
@@ -8368,10 +8368,10 @@
                 "details": "Agent retried deploy after doctor.",
                 "severity": "normal",
                 "status": "open",
-                "agent_instruction": "Continue with npx @zerct/zerct overview --app app_1 --json.",
+                "agent_instruction": "Continue with npx tovuk overview --app app_1 --json.",
                 "created_at": "2026-05-27T12:00:00Z",
                 "updated_at": "2026-05-27T12:00:00Z",
-                "failing_command": "npx @zerct/zerct deploy --wait --json",
+                "failing_command": "npx tovuk deploy --wait --json",
                 "build_id": "job_1",
                 "deploy_id": "deploy_1",
                 "first_log_line": "cargo check failed in src/main.rs"

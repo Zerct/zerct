@@ -1,16 +1,16 @@
 ---
 title: "Status"
-description: "How humans, SDKs, and agents should check Zerct availability."
+description: "How humans, SDKs, and agents should check Tovuk availability."
 ---
 
-Use status endpoints only to understand Zerct availability. Use logs and deploy
+Use status endpoints only to understand Tovuk availability. Use logs and deploy
 responses to debug your project.
 
 ## Endpoints
 
 ```sh
-curl https://api.zerct.com/health
-curl https://api.zerct.com/v1/status
+curl https://api.tovuk.com/health
+curl https://api.tovuk.com/v1/status
 ```
 
 `/health` is the simple human-friendly health alias. `/healthz` remains the
@@ -21,7 +21,7 @@ infrastructure probe for load balancers and deploy scripts.
 ```json
 {
   "ok": true,
-  "service": "zerct-api",
+  "service": "tovuk-api",
   "api_version": "v1",
   "checks": [
     {
@@ -30,8 +30,8 @@ infrastructure probe for load balancers and deploy scripts.
       "message": "reachable"
     }
   ],
-  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Zerct command.",
-  "docs_url": "https://docs.zerct.com/status"
+  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
+  "docs_url": "https://docs.tovuk.com/status"
 }
 ```
 
@@ -44,5 +44,5 @@ Do not use status as a project debugger. After deploy failures, inspect build
 logs instead:
 
 ```sh
-npx @zerct/zerct logs --build <build_id> --json
+npx tovuk logs --build <build_id> --json
 ```

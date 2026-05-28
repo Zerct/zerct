@@ -6,14 +6,14 @@ on:
     branches:
       - main
     paths:
-      - "crates/zerct/Cargo.toml"
+      - "crates/tovuk/Cargo.toml"
 
 permissions:
   contents: read
 
 jobs:
   publish:
-    name: publish zerct to crates.io
+    name: publish tovuk to crates.io
     runs-on: blacksmith-2vcpu-ubuntu-2404
     environment: crates
     steps:
@@ -25,21 +25,21 @@ jobs:
       - name: Check registry version
         id: version
         run: |
-          version="$(awk -F '"' '/^version = / { print $2; exit }' crates/zerct/Cargo.toml)"
+          version="$(awk -F '"' '/^version = / { print $2; exit }' crates/tovuk/Cargo.toml)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-          status="$(curl -sS -o /tmp/zerct-crate.json -w "%{http_code}" \
+          status="$(curl -sS -o /tmp/tovuk-crate.json -w "%{http_code}" \
             -H "Accept: application/json" \
-            -H "User-Agent: Zerct publish workflow (https://github.com/Zerct/zerct)" \
-            "https://crates.io/api/v1/crates/zerct/$version")"
+            -H "User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)" \
+            "https://crates.io/api/v1/crates/tovuk/$version")"
           if [ "$status" = "200" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::zerct@$version already exists on crates.io; skipping publish."
+            echo "::notice::tovuk@$version already exists on crates.io; skipping publish."
           elif [ "$status" = "404" ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "Unexpected crates.io status: $status" >&2
-            cat /tmp/zerct-crate.json >&2
+            cat /tmp/tovuk-crate.json >&2
             exit 1
           fi
       - if: steps.version.outputs.exists == 'false'
@@ -48,9 +48,9 @@ jobs:
         if: steps.version.outputs.exists == 'false'
       - if: steps.version.outputs.exists == 'false'
         run: cargo package --locked
-        working-directory: crates/zerct
+        working-directory: crates/tovuk
       - if: steps.version.outputs.exists == 'false'
         run: cargo publish --locked
-        working-directory: crates/zerct
+        working-directory: crates/tovuk
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

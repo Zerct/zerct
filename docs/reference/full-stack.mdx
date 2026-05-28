@@ -1,9 +1,9 @@
 ---
 title: "Full Stack"
-description: "How Zerct combines Rust backends with static frontends."
+description: "How Tovuk combines Rust backends with static frontends."
 ---
 
-Zerct full-stack apps use two deployable projects:
+Tovuk full-stack apps use two deployable projects:
 
 - Rust backend: APIs, auth callbacks, writes, server-side rules, managed
   Postgres.
@@ -11,20 +11,20 @@ Zerct full-stack apps use two deployable projects:
 
 ## One Command
 
-Put a `zerct.toml` in each app directory:
+Put a `tovuk.toml` in each app directory:
 
 ```txt
-api/zerct.toml
-web/zerct.toml
+api/tovuk.toml
+web/tovuk.toml
 ```
 
 Deploy from the repo root:
 
 ```sh
-npx @zerct/zerct deploy --database
+npx tovuk deploy --database
 ```
 
-Zerct deploys Rust backends first, then static frontends. Managed Postgres is
+Tovuk deploys Rust backends first, then static frontends. Managed Postgres is
 attached only to Rust backends.
 
 ## CORS
@@ -37,8 +37,8 @@ For production, prefer setting an explicit frontend origin in an environment
 variable. The starter reads `FRONTEND_ORIGIN`.
 
 ```sh
-npx @zerct/zerct env set --app api FRONTEND_ORIGIN=https://web.zerct.app
-npx @zerct/zerct deploy api
+npx tovuk env set --app api FRONTEND_ORIGIN=https://web.tovuk.app
+npx tovuk deploy api
 ```
 
 For a same-origin product URL, connect a custom domain and route frontend and

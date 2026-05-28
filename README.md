@@ -1,8 +1,8 @@
-# Zerct
+# Tovuk
 
-Public Zerct workspace for packages, agent skills, examples, and docs.
+Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Zerct hosts Rust backends and static frontends. Frontends can be fully dynamic
+Tovuk hosts Rust backends and static frontends. Frontends can be fully dynamic
 in the browser by calling Rust backend deploys for APIs and managed Postgres,
 without keeping a Node or Bun server alive.
 
@@ -11,25 +11,25 @@ without keeping a Node or Bun server alive.
 Use npm for the lowest-friction agent path:
 
 ```sh
-npx @zerct/zerct init
-npx @zerct/zerct doctor
-npx @zerct/zerct preview
-npx @zerct/zerct deploy
+npx tovuk init
+npx tovuk doctor
+npx tovuk preview
+npx tovuk deploy
 ```
 
 Create a full-stack starter:
 
 ```sh
-npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+npx tovuk init my-app --template fullstack-rust-tanstack
 cd my-app/web && bun install && cd ..
 ```
 
-From a full-stack repo root, `npx @zerct/zerct deploy --database` discovers
-nested `zerct.toml` projects and deploys the whole workspace in one command.
+From a full-stack repo root, `npx tovuk deploy --database` discovers
+nested `tovuk.toml` projects and deploys the whole workspace in one command.
 Rust backends deploy first. Static frontends deploy after them. Managed
 Postgres is requested only for Rust backends.
 
-Static frontend deploys use the same command with this `zerct.toml`:
+Static frontend deploys use the same command with this `tovuk.toml`:
 
 ```toml
 name = "dashboard"
@@ -65,49 +65,49 @@ linting plus Fallow dead-code, semantic duplicate-code, and health gates before
 build work is queued. Frontend browser source must be `.ts` or `.tsx` under
 `src`, `app`, `pages`, `routes`, or `components`; browser `.js`, `.jsx`,
 `.mjs`, and `.cjs` source is rejected. Bun projects should commit `bun.lock`
-for the fastest Zerct build path. Existing npm projects can still deploy with a
+for the fastest Tovuk build path. Existing npm projects can still deploy with a
 committed npm lockfile and npm-based build commands.
 
 Use Homebrew for a persistent developer CLI:
 
 ```sh
-brew tap Zerct/zerct https://github.com/Zerct/zerct
-brew install zerct
-zerct deploy
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+tovuk deploy
 ```
 
-- npm: `@zerct/zerct`
-- PyPI: `zerct`
-- crates.io: `zerct`
-- Homebrew: `Zerct/zerct/zerct`
+- npm: `tovuk`
+- PyPI: `tovuk`
+- crates.io: `tovuk`
+- Homebrew: `tovuk/tovuk/tovuk`
 
 Agent prompt:
 
 ```txt
-Use Zerct to deploy this project. Read https://docs.zerct.com/llms.txt first.
-Run `npx @zerct/zerct doctor --json`. Fix the first failed check by following
+Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
+Run `npx tovuk doctor --json`. Fix the first failed check by following
 `agent_instruction`, then rerun doctor. Deploy with
-`npx @zerct/zerct deploy --wait --json`. If the build fails, read
-`npx @zerct/zerct logs --build <build_id> --json`, fix the first actionable
+`npx tovuk deploy --wait --json`. If the build fails, read
+`npx tovuk logs --build <build_id> --json`, fix the first actionable
 error, rerun doctor, and redeploy. If a plan limit blocks work, run
-`npx @zerct/zerct billing checkout --json` and show the returned URL to the
-human. If Zerct support is needed, run `npx @zerct/zerct support create` with
+`npx tovuk billing checkout --json` and show the returned URL to the
+human. If Tovuk support is needed, run `npx tovuk support create` with
 `--failing-command`, `--app`, `--build`, `--deploy`, and `--first-log-line`.
 Resolve the support ticket after the issue is fixed.
 ```
 
 ## Repository
 
-- `packages/zerct`: npm CLI.
-- `packages/zerct-py`: PyPI CLI package.
-- `crates/zerct`: Cargo CLI crate.
+- `packages/tovuk`: npm CLI.
+- `packages/tovuk-py`: PyPI CLI package.
+- `crates/tovuk`: Cargo CLI crate.
 - `skills/`: agent skill files.
 - `examples/`: deployable examples.
 - `docs/`: Mintlify documentation.
 
-The Homebrew formula lives in `Formula/zerct.rb` in this main public repo.
+The Homebrew formula lives in `Formula/tovuk.rb` in this main public repo.
 
-`packages/zerct` is the CLI behavior source of truth. PyPI and Cargo CLIs must
+`packages/tovuk` is the CLI behavior source of truth. PyPI and Cargo CLIs must
 expose the same agent-facing commands, recovery text, login behavior, deploy
 flow, logs, env, domains, usage, billing, and support operations so deploy UX
 does not drift.
@@ -116,43 +116,43 @@ does not drift.
 
 ```sh
 cd examples/hello-rust
-npx @zerct/zerct doctor
-npx @zerct/zerct deploy
+npx tovuk doctor
+npx tovuk deploy
 ```
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
-the Zerct session in the user's credential store when available, and continues
+the Tovuk session in the user's credential store when available, and continues
 the deploy. Later commands reuse that session.
 
 Useful agent commands:
 
 ```sh
-npx @zerct/zerct capabilities
-npx @zerct/zerct me
-npx @zerct/zerct usage
-npx @zerct/zerct activity --json
-npx @zerct/zerct apps
-npx @zerct/zerct overview --app app_1 --json
-npx @zerct/zerct deploys
-npx @zerct/zerct builds --app app_1
-npx @zerct/zerct logs --app app_1 --limit 100 --json
-npx @zerct/zerct logs --deploy deploy_1 --json
-npx @zerct/zerct logs --build job_1 --json
-npx @zerct/zerct env list --app app_1
-npx @zerct/zerct domains list --app app_1
-npx @zerct/zerct domains verify --app app_1 api.example.com
-npx @zerct/zerct billing checkout --json
-npx @zerct/zerct billing portal
-npx @zerct/zerct support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
-npx @zerct/zerct support list --json
-npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
+npx tovuk capabilities
+npx tovuk me
+npx tovuk usage
+npx tovuk activity --json
+npx tovuk apps
+npx tovuk overview --app app_1 --json
+npx tovuk deploys
+npx tovuk builds --app app_1
+npx tovuk logs --app app_1 --limit 100 --json
+npx tovuk logs --deploy deploy_1 --json
+npx tovuk logs --build job_1 --json
+npx tovuk env list --app app_1
+npx tovuk domains list --app app_1
+npx tovuk domains verify --app app_1 api.example.com
+npx tovuk billing checkout --json
+npx tovuk billing portal
+npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+npx tovuk support list --json
+npx tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 The same commands are available through PyPI and Cargo after installation:
 
 ```sh
-pipx install zerct
-cargo install zerct
-zerct deploy --wait
-zerct logs --build job_1 --json
+pipx install tovuk
+cargo install tovuk
+tovuk deploy --wait
+tovuk logs --build job_1 --json
 ```

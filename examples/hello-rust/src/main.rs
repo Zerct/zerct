@@ -27,7 +27,7 @@ fn handle(mut stream: TcpStream) -> std::io::Result<()> {
     let (status, body) = if path == "/healthz" {
         ("200 OK", "{\"ok\":true}")
     } else {
-        ("200 OK", "{\"message\":\"hello from zerct\"}")
+        ("200 OK", "{\"message\":\"hello from tovuk\"}")
     };
 
     write!(

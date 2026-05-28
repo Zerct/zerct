@@ -1,33 +1,33 @@
-# Zerct agent guide
+# Tovuk agent guide
 
-Zerct deploys Rust backends and static frontends. Dynamic server logic belongs
+Tovuk deploys Rust backends and static frontends. Dynamic server logic belongs
 in the Rust backend. Static frontends call Rust backend HTTPS endpoints for API,
 database, auth, media, and server-side work.
 
 Use the npm CLI unless the user already installed a persistent CLI:
 
 ```sh
-npx @zerct/zerct doctor --json
-npx @zerct/zerct deploy --wait --json
+npx tovuk doctor --json
+npx tovuk deploy --wait --json
 ```
 
-Reference: [Zerct docs](https://docs.zerct.com).
+Reference: [Tovuk docs](https://docs.tovuk.com).
 
 Agent repair loop:
 
-1. Run `npx @zerct/zerct doctor --json`.
+1. Run `npx tovuk doctor --json`.
 2. If it fails, read the first failed check.
 3. Apply its `agent_instruction` exactly.
 4. Rerun doctor until it passes.
-5. Run `npx @zerct/zerct deploy --wait --json`.
+5. Run `npx tovuk deploy --wait --json`.
 6. If deploy fails, read `build_job.id` or the failed build id.
-7. Run `npx @zerct/zerct logs --build <build_id> --json`.
+7. Run `npx tovuk logs --build <build_id> --json`.
 8. Fix the first actionable log error.
 9. Rerun doctor before redeploying.
 
 Rust backend contract:
 
-- `Cargo.toml`, `Cargo.lock`, and `zerct.toml` are committed.
+- `Cargo.toml`, `Cargo.lock`, and `tovuk.toml` are committed.
 - `[build].check` includes `cargo fmt --all --check`.
 - `[build].check` includes `cargo check --locked`.
 - `[build].check` includes
@@ -38,7 +38,7 @@ Rust backend contract:
 
 Static frontend contract:
 
-- `kind = "static_frontend"` is set in `zerct.toml`.
+- `kind = "static_frontend"` is set in `tovuk.toml`.
 - `package.json` is committed.
 - A package lockfile is committed.
 - Browser source is `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
@@ -56,32 +56,32 @@ Static frontend contract:
 Useful commands:
 
 ```sh
-npx @zerct/zerct capabilities --json
-curl https://api.zerct.com/v1/status
-npx @zerct/zerct activity --json
-npx @zerct/zerct apps --json
-npx @zerct/zerct overview --app <app> --json
-npx @zerct/zerct builds --app <app> --json
-npx @zerct/zerct logs --build <build_id> --json
-npx @zerct/zerct logs --app <app> --json
-npx @zerct/zerct env list --app <app> --json
-npx @zerct/zerct domains list --app <app> --json
-npx @zerct/zerct billing checkout --json
-npx @zerct/zerct support list --json
-npx @zerct/zerct support create "Deploy failed" "Agent retried deploy after doctor." --app <app> --build <build_id> --deploy <deploy_id> --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "first actionable log line" --json
-npx @zerct/zerct support resolve <ticket_id> --json
+npx tovuk capabilities --json
+curl https://api.tovuk.com/v1/status
+npx tovuk activity --json
+npx tovuk apps --json
+npx tovuk overview --app <app> --json
+npx tovuk builds --app <app> --json
+npx tovuk logs --build <build_id> --json
+npx tovuk logs --app <app> --json
+npx tovuk env list --app <app> --json
+npx tovuk domains list --app <app> --json
+npx tovuk billing checkout --json
+npx tovuk support list --json
+npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app <app> --build <build_id> --deploy <deploy_id> --failing-command "npx tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
+npx tovuk support resolve <ticket_id> --json
 ```
 
-Use `GET /v1/status` only when Zerct itself appears unavailable. If the API is
+Use `GET /v1/status` only when Tovuk itself appears unavailable. If the API is
 available and a deploy fails, inspect build logs instead of changing status
 checks.
 
-Never print or commit secrets. Put secrets in Zerct env vars with
-`npx @zerct/zerct env set --app <app> KEY=value`.
+Never print or commit secrets. Put secrets in Tovuk env vars with
+`npx tovuk env set --app <app> KEY=value`.
 
 When a free-tier limit blocks work, run
-`npx @zerct/zerct billing checkout --json` and show the returned URL to the
-human. When Zerct support is needed, create a ticket only after collecting the
+`npx tovuk billing checkout --json` and show the returned URL to the
+human. When Tovuk support is needed, create a ticket only after collecting the
 failing command, app id, build id, deploy id, first actionable log line, and
 what the agent already tried. Resolve the ticket when the issue is fixed so
 future agents do not duplicate the same support work.

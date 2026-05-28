@@ -3,32 +3,32 @@ title: "Templates"
 description: "Start with Rust APIs, TanStack static frontends, or both."
 ---
 
-Use templates when you want Zerct to create the project shape.
+Use templates when you want Tovuk to create the project shape.
 
 ## Rust API
 
 ```sh
-npx @zerct/zerct init api --template rust-api
-npx @zerct/zerct doctor
-npx @zerct/zerct preview
+npx tovuk init api --template rust-api
+npx tovuk doctor
+npx tovuk preview
 ```
 
 ## TanStack Static Frontend
 
 ```sh
-npx @zerct/zerct init web --template tanstack-static-frontend
+npx tovuk init web --template tanstack-static-frontend
 bun install
-npx @zerct/zerct doctor
-npx @zerct/zerct preview
+npx tovuk doctor
+npx tovuk preview
 ```
 
 ## Full Stack
 
 ```sh
-npx @zerct/zerct init my-app --template fullstack-rust-tanstack
+npx tovuk init my-app --template fullstack-rust-tanstack
 cd my-app/web && bun install && cd ..
-npx @zerct/zerct doctor
-npx @zerct/zerct deploy --database
+npx tovuk doctor
+npx tovuk deploy --database
 ```
 
 The full-stack template creates `api/` and `web/`. The Rust API owns dynamic

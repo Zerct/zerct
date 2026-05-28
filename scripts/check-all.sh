@@ -4,69 +4,69 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
-export ZERCT_NPM_CLI="$repo_root/packages/zerct/src/zerct.ts"
+export TOVUK_NPM_CLI="$repo_root/packages/tovuk/src/tovuk.ts"
 
-npm --prefix packages/zerct ci
-export PATH="$repo_root/packages/zerct/node_modules/.bin:$PATH"
-npm --prefix packages/zerct run check
+npm --prefix packages/tovuk ci
+export PATH="$repo_root/packages/tovuk/node_modules/.bin:$PATH"
+npm --prefix packages/tovuk run check
 node scripts/check-package-versions.mjs
 node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
 scripts/check-openapi.sh
-ruby -c Formula/zerct.rb >/dev/null
+ruby -c Formula/tovuk.rb >/dev/null
 if command -v brew >/dev/null 2>&1; then
-  brew style Formula/zerct.rb
+  brew style Formula/tovuk.rb
 fi
-npm_cli_version="$(packages/zerct/src/zerct.ts --version)"
+npm_cli_version="$(packages/tovuk/src/tovuk.ts --version)"
 printf '%s\n' "$npm_cli_version"
-packages/zerct/src/zerct.ts --help | grep -q 'zerct support create'
-packages/zerct/src/zerct.ts --help | grep -q 'zerct support resolve'
-packages/zerct/src/zerct.ts --help | grep -q 'zerct billing checkout'
-if packages/zerct/src/zerct.ts --json --definitely-unknown >/tmp/zerct-unknown-flag.out 2>/tmp/zerct-unknown-flag.err; then
+packages/tovuk/src/tovuk.ts --help | grep -q 'tovuk support create'
+packages/tovuk/src/tovuk.ts --help | grep -q 'tovuk support resolve'
+packages/tovuk/src/tovuk.ts --help | grep -q 'tovuk billing checkout'
+if packages/tovuk/src/tovuk.ts --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
   printf 'expected npm CLI unknown flag to fail\n' >&2
   exit 1
 fi
-grep -q '"code": "unknown_argument"' /tmp/zerct-unknown-flag.err
-test "$(packages/zerct/src/zerct.ts -V)" = "$npm_cli_version"
-test "$(packages/zerct/src/zerct.ts --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
+grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
+test "$(packages/tovuk/src/tovuk.ts -V)" = "$npm_cli_version"
+test "$(packages/tovuk/src/tovuk.ts --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
 
-"$python_bin" -m compileall -q packages/zerct-py/src
-PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --version
-PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct support create'
-PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct support resolve'
-PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --help | grep -q 'zerct billing checkout'
-test "$(PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
-if PYTHONPATH=packages/zerct-py/src "$python_bin" -m zerct --json --definitely-unknown >/tmp/zerct-unknown-flag.out 2>/tmp/zerct-unknown-flag.err; then
+"$python_bin" -m compileall -q packages/tovuk-py/src
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support create'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support resolve'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
+test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
+if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
   printf 'expected Python CLI unknown flag to fail\n' >&2
   exit 1
 fi
-grep -q '"code": "unknown_argument"' /tmp/zerct-unknown-flag.err
+grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
 
-cargo fmt --check --manifest-path crates/zerct/Cargo.toml
-cargo check --locked --manifest-path crates/zerct/Cargo.toml
-cargo clippy --locked --manifest-path crates/zerct/Cargo.toml --all-targets --all-features -- -D warnings
-cargo package --locked --manifest-path crates/zerct/Cargo.toml --allow-dirty --no-verify >/dev/null
-cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct support create'
-cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct support resolve'
-cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --help | grep -q 'zerct billing checkout'
-test "$(cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
-if cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- --json --definitely-unknown >/tmp/zerct-unknown-flag.out 2>/tmp/zerct-unknown-flag.err; then
+cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
+cargo check --locked --manifest-path crates/tovuk/Cargo.toml
+cargo clippy --locked --manifest-path crates/tovuk/Cargo.toml --all-targets --all-features -- -D warnings
+cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty --no-verify >/dev/null
+cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --help | grep -q 'tovuk support create'
+cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --help | grep -q 'tovuk support resolve'
+cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --help | grep -q 'tovuk billing checkout'
+test "$(cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
+if cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
   printf 'expected Cargo CLI unknown flag to fail\n' >&2
   exit 1
 fi
-grep -q '"code": "unknown_argument"' /tmp/zerct-unknown-flag.err
+grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
 
 test -f examples/hello-rust/Cargo.lock
 cargo check --locked --manifest-path examples/hello-rust/Cargo.toml
 cargo clippy --locked --manifest-path examples/hello-rust/Cargo.toml --all-targets --all-features -- -D warnings
-packages/zerct/src/zerct.ts doctor examples/hello-rust --json >/dev/null
+packages/tovuk/src/tovuk.ts doctor examples/hello-rust --json >/dev/null
 
 policy_fixture="$(mktemp -d)"
 rust_policy_fixture="$(mktemp -d)"
 trap 'rm -rf "$policy_fixture" "$rust_policy_fixture"' EXIT
 
-cat >"$rust_policy_fixture/zerct.toml" <<'EOF'
+cat >"$rust_policy_fixture/tovuk.toml" <<'EOF'
 name = "missing-lints"
 
 [run]
@@ -91,17 +91,17 @@ mkdir -p "$rust_policy_fixture/src"
 printf 'fn main() {}\n' >"$rust_policy_fixture/src/main.rs"
 
 for command in \
-  "packages/zerct/src/zerct.ts doctor $rust_policy_fixture --json" \
-  "PYTHONPATH=packages/zerct-py/src $python_bin -m zerct doctor $rust_policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- doctor $rust_policy_fixture --json"; do
-  if eval "$command" >/tmp/zerct-policy-check.json 2>/tmp/zerct-policy-check.err; then
+  "packages/tovuk/src/tovuk.ts doctor $rust_policy_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $rust_policy_fixture --json" \
+  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $rust_policy_fixture --json"; do
+  if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected Rust policy fixture to fail: %s\n' "$command" >&2
     exit 1
   fi
-  grep -q 'cargo lints' /tmp/zerct-policy-check.json
+  grep -q 'cargo lints' /tmp/tovuk-policy-check.json
 done
 
-cat >"$policy_fixture/zerct.toml" <<'EOF'
+cat >"$policy_fixture/tovuk.toml" <<'EOF'
 name = "strict-web"
 kind = "static_frontend"
 
@@ -122,14 +122,14 @@ mkdir -p "$policy_fixture/src"
 printf 'export const ok = true\n' >"$policy_fixture/src/main.ts"
 
 for command in \
-  "packages/zerct/src/zerct.ts doctor $policy_fixture --json" \
-  "PYTHONPATH=packages/zerct-py/src $python_bin -m zerct doctor $policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- doctor $policy_fixture --json"; do
-  if eval "$command" >/tmp/zerct-policy-check.json 2>/tmp/zerct-policy-check.err; then
+  "packages/tovuk/src/tovuk.ts doctor $policy_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $policy_fixture --json" \
+  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $policy_fixture --json"; do
+  if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected policy fixture to fail: %s\n' "$command" >&2
     exit 1
   fi
-  grep -q 'native frontend lint' /tmp/zerct-policy-check.json
+  grep -q 'native frontend lint' /tmp/tovuk-policy-check.json
 done
 
 cat >"$policy_fixture/package.json" <<'EOF'
@@ -143,12 +143,12 @@ cat >"$policy_fixture/package.json" <<'EOF'
 EOF
 
 for command in \
-  "packages/zerct/src/zerct.ts doctor $policy_fixture --json" \
-  "PYTHONPATH=packages/zerct-py/src $python_bin -m zerct doctor $policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- doctor $policy_fixture --json"; do
-  if eval "$command" >/tmp/zerct-policy-check.json 2>/tmp/zerct-policy-check.err; then
+  "packages/tovuk/src/tovuk.ts doctor $policy_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $policy_fixture --json" \
+  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $policy_fixture --json"; do
+  if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected missing Fallow policy fixture to fail: %s\n' "$command" >&2
     exit 1
   fi
-  grep -q 'native frontend quality gates' /tmp/zerct-policy-check.json
+  grep -q 'native frontend quality gates' /tmp/tovuk-policy-check.json
 done

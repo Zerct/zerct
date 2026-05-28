@@ -1,0 +1,33 @@
+[package]
+name = "tovuk"
+version = "0.1.18"
+edition = "2024"
+rust-version = "1.85"
+description = "Deploy Rust backends and static frontends to Tovuk."
+license = "MIT"
+repository = "https://github.com/tovuk/tovuk"
+homepage = "https://tovuk.com"
+readme = "README.md"
+keywords = ["tovuk", "rust", "deploy", "hosting"]
+categories = ["command-line-utilities", "development-tools"]
+include = ["src/**", "README.md", "Cargo.toml"]
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+warnings = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+dbg_macro = "deny"
+expect_used = "deny"
+large_include_file = "deny"
+mem_forget = "deny"
+panic = "deny"
+panic_in_result_fn = "deny"
+path_buf_push_overwrite = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_in_result = "deny"
+unwrap_used = "deny"

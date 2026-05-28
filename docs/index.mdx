@@ -1,43 +1,43 @@
 ---
-title: "Zerct"
+title: "Tovuk"
 description: "Free Rust backend cloud for agents."
 ---
 
 Ship a Rust backend, managed Postgres, and an HTTPS endpoint from one command.
-Zerct returns structured feedback so agents can fix issues and deploy again.
+Tovuk returns structured feedback so agents can fix issues and deploy again.
 
 ```sh
-npx @zerct/zerct deploy
+npx tovuk deploy
 ```
 
 ## Start
 
-- Add a `zerct.toml` project contract.
+- Add a `tovuk.toml` project contract.
 - Run `doctor` before `deploy`.
 - Fix any JSON `agent_instruction`.
 - Deploy when the checks pass.
 
 ```sh
-npx @zerct/zerct doctor
-npx @zerct/zerct deploy
+npx tovuk doctor
+npx tovuk deploy
 ```
 
 ## Agent prompt
 
 ```text
-Use Zerct to deploy this Rust backend for free.
-Read https://docs.zerct.com/llms.txt.
-Run `npx @zerct/zerct doctor`.
+Use Tovuk to deploy this Rust backend for free.
+Read https://docs.tovuk.com/llms.txt.
+Run `npx tovuk doctor`.
 Fix any JSON `agent_instruction`.
-Run `npx @zerct/zerct deploy`.
+Run `npx tovuk deploy`.
 ```
 
 ## Packages
 
 ```sh
-npx @zerct/zerct deploy
-brew tap Zerct/zerct https://github.com/Zerct/zerct
-brew install zerct
-pipx install zerct
-cargo install zerct
+npx tovuk deploy
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+pipx install tovuk
+cargo install tovuk
 ```

@@ -1,21 +1,21 @@
 ---
 title: "Managed Postgres"
-description: "Connection and migration guidance for Zerct managed Postgres."
+description: "Connection and migration guidance for Tovuk managed Postgres."
 ---
 
 Managed Postgres is attached to Rust backends.
 
 ```sh
-npx @zerct/zerct deploy --database
+npx tovuk deploy --database
 ```
 
 The runtime receives:
 
 ```txt
 DATABASE_URL
-ZERCT_DATABASE_URL
-ZERCT_DATABASE_CONNECTION_LIMIT
-ZERCT_POSTGRES_POOL_MODE
+TOVUK_DATABASE_URL
+TOVUK_DATABASE_CONNECTION_LIMIT
+TOVUK_POSTGRES_POOL_MODE
 ```
 
 Use the connection limit as the maximum app pool size. Do not open a new

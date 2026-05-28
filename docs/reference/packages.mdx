@@ -1,15 +1,15 @@
 ---
 title: "Packages"
-description: "Official Zerct package surfaces."
+description: "Official Tovuk package surfaces."
 ---
 
 ## npm
 
 ```sh
-npx @zerct/zerct deploy
+npx tovuk deploy
 ```
 
-`@zerct/zerct` is the live npm package and the source of truth for the PyPI,
+`tovuk` is the live npm package and the source of truth for the PyPI,
 Cargo, and Homebrew wrappers.
 
 All official package CLIs expose the same agent commands for login, doctor,
@@ -19,12 +19,12 @@ logs, env, domains, billing, and support.
 The agent repair loop is the same on every package surface:
 
 ```sh
-zerct doctor --json
-zerct deploy --wait --json
-zerct logs --build job_1 --json
-zerct billing checkout --json
-zerct support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "zerct deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
-zerct support resolve ticket_0123456789abcdef0123 --json
+tovuk doctor --json
+tovuk deploy --wait --json
+tovuk logs --build job_1 --json
+tovuk billing checkout --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 Fix `agent_instruction` first. If a build fails, fix the first actionable log
@@ -33,30 +33,30 @@ line, rerun doctor, then redeploy.
 ## Homebrew
 
 ```sh
-brew tap Zerct/zerct https://github.com/Zerct/zerct
-brew install zerct
-zerct deploy
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+tovuk deploy
 ```
 
 ## PyPI
 
 ```sh
-pipx install zerct
-zerct deploy --wait
-zerct logs --build job_1 --json
-zerct domains verify --app app_1 api.example.com
-zerct billing checkout --json
-zerct support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "zerct deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
-zerct support resolve ticket_0123456789abcdef0123 --json
+pipx install tovuk
+tovuk deploy --wait
+tovuk logs --build job_1 --json
+tovuk domains verify --app app_1 api.example.com
+tovuk billing checkout --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 ## crates.io
 
 ```sh
-cargo install zerct
-zerct deploy --wait
-zerct logs --deploy deploy_1 --json
-zerct billing checkout --json
-zerct support list --json
-zerct support resolve ticket_0123456789abcdef0123 --json
+cargo install tovuk
+tovuk deploy --wait
+tovuk logs --deploy deploy_1 --json
+tovuk billing checkout --json
+tovuk support list --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```

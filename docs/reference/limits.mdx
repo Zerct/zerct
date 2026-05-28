@@ -3,7 +3,7 @@ title: "Limits"
 description: "Current deployment limits and guardrails."
 ---
 
-Zerct keeps deploys predictable by rejecting projects that are expensive or
+Tovuk keeps deploys predictable by rejecting projects that are expensive or
 ambiguous to run.
 
 ## Current guardrails
@@ -26,18 +26,18 @@ When a free-tier account reaches a plan limit, agents can create a hosted
 subscription link without dashboard work:
 
 ```sh
-npx @zerct/zerct billing checkout "Plan limit reached" --json
+npx tovuk billing checkout "Plan limit reached" --json
 ```
 
 Show the returned `checkout.url` to the human. If the issue is not a payment
 problem, create a support ticket with command output and ids:
 
 ```sh
-npx @zerct/zerct support create "Limit issue" "Agent could not proceed after checking usage." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx @zerct/zerct deploy --wait --json" --first-log-line "plan limit reached" --json
+npx tovuk support create "Limit issue" "Agent could not proceed after checking usage." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
 ```
 
 Resolve the ticket after the issue is fixed:
 
 ```sh
-npx @zerct/zerct support resolve ticket_0123456789abcdef0123 --json
+npx tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
