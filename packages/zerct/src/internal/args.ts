@@ -3,12 +3,23 @@ import { DEFAULT_API_URL, DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS } from './constant
 import { agentError } from './errors.ts'
 import type { CliOptions } from './types.ts'
 
-type FlagHandler = (cli: CliOptions, argv: readonly string[], index: number) => number
 type BooleanCliField = 'database' | 'help' | 'json' | 'version' | 'wait'
 type StringCliField = 'apiUrl' | 'app' | 'build' | 'cursor' | 'deploy' | 'failingCommand' | 'firstLogLine' | 'limit' | 'severity' | 'template' | 'token'
 type NumberCliField = 'port' | 'waitTimeoutSeconds'
+type FlagValueKind = 'none' | 'string' | 'positiveInteger'
+type FlagSetter = (cli: CliOptions, value: string | null, name: string) => void
 
-const FLAG_HANDLERS = new Map<string, FlagHandler>([
+interface FlagSpec {
+  valueKind: FlagValueKind
+  set: FlagSetter
+}
+
+interface ParsedFlag {
+  name: string
+  inlineValue: string | null
+}
+
+const FLAG_SPECS = new Map<string, FlagSpec>([
   ['--help', booleanOption('help', true)],
   ['-h', booleanOption('help', true)],
   ['--version', booleanOption('version', true)],
@@ -18,19 +29,19 @@ const FLAG_HANDLERS = new Map<string, FlagHandler>([
   ['--database', booleanOption('database', true)],
   ['--no-database', booleanOption('database', false)],
   ['--wait', booleanOption('wait', true)],
-  ['--wait-timeout', positiveIntegerOption('--wait-timeout', 'waitTimeoutSeconds')],
-  ['--api', stringOption('--api', 'apiUrl')],
-  ['--app', stringOption('--app', 'app')],
-  ['--build', stringOption('--build', 'build')],
-  ['--deploy', stringOption('--deploy', 'deploy')],
-  ['--failing-command', stringOption('--failing-command', 'failingCommand')],
-  ['--first-log-line', stringOption('--first-log-line', 'firstLogLine')],
-  ['--limit', stringOption('--limit', 'limit')],
-  ['--cursor', stringOption('--cursor', 'cursor')],
-  ['--severity', stringOption('--severity', 'severity')],
-  ['--token', stringOption('--token', 'token')],
-  ['--template', stringOption('--template', 'template')],
-  ['--port', positiveIntegerOption('--port', 'port')]
+  ['--wait-timeout', positiveIntegerOption('waitTimeoutSeconds')],
+  ['--api', stringOption('apiUrl')],
+  ['--app', stringOption('app')],
+  ['--build', stringOption('build')],
+  ['--deploy', stringOption('deploy')],
+  ['--failing-command', stringOption('failingCommand')],
+  ['--first-log-line', stringOption('firstLogLine')],
+  ['--limit', stringOption('limit')],
+  ['--cursor', stringOption('cursor')],
+  ['--severity', stringOption('severity')],
+  ['--token', stringOption('token')],
+  ['--template', stringOption('template')],
+  ['--port', positiveIntegerOption('port')]
 ])
 
 function parseArgs(argv: string[]): CliOptions {
@@ -64,9 +75,10 @@ function parseArgs(argv: string[]): CliOptions {
       positional.push(...argv.slice(index + 1))
       break
     }
-    const handler = FLAG_HANDLERS.get(arg)
-    if (handler) {
-      index = handler(cli, argv, index)
+    const parsedFlag = parseFlag(arg)
+    const spec = FLAG_SPECS.get(parsedFlag.name)
+    if (spec) {
+      index = applyFlag(cli, spec, parsedFlag, argv, index)
     } else if (arg.startsWith('-')) {
       throw unknownFlag(cli, arg)
     } else {
@@ -83,25 +95,58 @@ function parseArgs(argv: string[]): CliOptions {
   return cli
 }
 
-function booleanOption(field: BooleanCliField, value: boolean): FlagHandler {
-  return (cli, _argv, index): number => {
-    cli[field] = value
+function booleanOption(field: BooleanCliField, value: boolean): FlagSpec {
+  return {
+    valueKind: 'none',
+    set: (cli): void => {
+      cli[field] = value
+    }
+  }
+}
+
+function stringOption(field: StringCliField): FlagSpec {
+  return {
+    valueKind: 'string',
+    set: (cli, value): void => {
+      cli[field] = value ?? ''
+    }
+  }
+}
+
+function positiveIntegerOption(field: NumberCliField): FlagSpec {
+  return {
+    valueKind: 'positiveInteger',
+    set: (cli, value, name): void => {
+      cli[field] = parsePositiveInteger(value ?? '', name)
+    }
+  }
+}
+
+function applyFlag(cli: CliOptions, spec: FlagSpec, flag: ParsedFlag, argv: readonly string[], index: number): number {
+  if (spec.valueKind === 'none') {
+    if (flag.inlineValue !== null) {
+      throw agentError('invalid_argument', `${flag.name} does not accept a value.`, `Use ${flag.name} without =value.`, cli.json)
+    }
+    spec.set(cli, null, flag.name)
     return index
   }
+
+  const value = flag.inlineValue ?? requireValue(argv, index, flag.name)
+  if (value === '') {
+    throw agentError('missing_argument', `${flag.name} requires a value.`, `Pass a value after ${flag.name}.`, cli.json)
+  }
+  spec.set(cli, value, flag.name)
+  return flag.inlineValue === null ? index + 1 : index
 }
 
-function stringOption(name: string, field: StringCliField): FlagHandler {
-  return (cli, argv, index): number => {
-    cli[field] = requireValue(argv, index, name)
-    return index + 1
+function parseFlag(arg: string): ParsedFlag {
+  if (!arg.startsWith('--')) {
+    return { name: arg, inlineValue: null }
   }
-}
-
-function positiveIntegerOption(name: string, field: NumberCliField): FlagHandler {
-  return (cli, argv, index): number => {
-    cli[field] = parsePositiveInteger(requireValue(argv, index, name), name)
-    return index + 1
-  }
+  const separator = arg.indexOf('=')
+  return separator > 2
+    ? { name: arg.slice(0, separator), inlineValue: arg.slice(separator + 1) }
+    : { name: arg, inlineValue: null }
 }
 
 function parsePositiveInteger(value: string, name: string): number {
