@@ -21,16 +21,21 @@ function previewProject(projectDir: string, port: number): void {
   validateConfig(config)
   runShell(config.build.command, projectDir, 'Build failed before preview.')
   if (config.kind === 'static_frontend') {
-    serveStatic(path.join(projectDir, config.build.output ?? 'dist'), port || 4173)
+    previewStatic(projectDir, config.build.output ?? 'dist', port)
     return
   }
+  previewRuntime(projectDir, config.run.command ?? '', port || config.run.port)
+}
 
-  const runtimePort = port || config.run.port
-  const runtimeCommand = config.run.command ?? ''
-  console.log(`preview http://127.0.0.1:${runtimePort}`)
-  const result = spawnSync(runtimeCommand, {
+function previewStatic(projectDir: string, output: string, port: number): void {
+  serveStatic(path.join(projectDir, output), port || 4173)
+}
+
+function previewRuntime(projectDir: string, command: string, port: number): void {
+  console.log(`preview http://127.0.0.1:${port}`)
+  const result = spawnSync(command, {
     cwd: projectDir,
-    env: { ...process.env, PORT: String(runtimePort) },
+    env: { ...process.env, PORT: String(port) },
     shell: true,
     stdio: 'inherit'
   })

@@ -31,23 +31,15 @@ function parseZerctToml(source: string, projectDir: string): ZerctConfig {
   let section: SectionName = 'root'
 
   for (const rawLine of source.split(/\r?\n/u)) {
-    const line = rawLine.trim()
-    if (!line || line.startsWith('#')) {
+    const parsedLine = parseTomlLine(rawLine)
+    if (parsedLine === null) {
       continue
     }
-
-    const sectionMatch = line.match(/^\[([a-z_]+)\]$/u)
-    if (sectionMatch) {
-      section = parseSection(sectionMatch[1] ?? '')
+    if (parsedLine.kind === 'section') {
+      section = parsedLine.section
       continue
     }
-
-    const assignment = line.match(/^([a-z_]+)\s*=\s*(.+)$/u)
-    if (!assignment) {
-      throw new Error(`invalid line: ${line}`)
-    }
-
-    assignTomlValue(config, section, assignment[1] ?? '', parseTomlValue(assignment[2] ?? ''))
+    assignTomlValue(config, section, parsedLine.key, parsedLine.value)
   }
 
   const kind = config.kind ?? 'rust_backend'
@@ -61,6 +53,22 @@ function parseZerctToml(source: string, projectDir: string): ZerctConfig {
     result.name = config.name
   }
   return result
+}
+
+function parseTomlLine(rawLine: string): { kind: 'section'; section: SectionName } | { kind: 'assignment'; key: string; value: TomlValue } | null {
+  const line = rawLine.trim()
+  if (!line || line.startsWith('#')) {
+    return null
+  }
+  const sectionMatch = line.match(/^\[([a-z_]+)\]$/u)
+  if (sectionMatch) {
+    return { kind: 'section', section: parseSection(sectionMatch[1] ?? '') }
+  }
+  const assignment = line.match(/^([a-z_]+)\s*=\s*(.+)$/u)
+  if (assignment) {
+    return { kind: 'assignment', key: assignment[1] ?? '', value: parseTomlValue(assignment[2] ?? '') }
+  }
+  throw new Error(`invalid line: ${line}`)
 }
 
 function parseSection(value: string): SectionName {
@@ -202,12 +210,25 @@ function resourceConfig(config: MutableZerctConfig): ResourceConfig {
 }
 
 function validateConfig(config: ZerctConfig): void {
+  validateIdentity(config)
+  validateBuildConfig(config)
+  if (config.kind === 'static_frontend') {
+    validateStaticFrontendConfig(config)
+    return
+  }
+  validateRustBackendConfig(config)
+}
+
+function validateIdentity(config: ZerctConfig): void {
   if (!/^[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?$/u.test(config.name ?? '')) {
     throw new Error('name must be lowercase DNS-safe text up to 48 characters')
   }
   if (!PROJECT_KINDS.has(config.kind)) {
     throw new Error('kind must be rust_backend or static_frontend')
   }
+}
+
+function validateBuildConfig(config: ZerctConfig): void {
   if (!config.build.command.trim()) {
     throw new Error('[build].command is required')
   }
@@ -215,12 +236,15 @@ function validateConfig(config: ZerctConfig): void {
     throw new Error('[build].check is required')
   }
   validateCheckCommand(config.kind, config.build.check)
-  if (config.kind === 'static_frontend') {
-    if (typeof config.build.output !== 'string' || !isSafeRelativePath(config.build.output)) {
-      throw new Error('[build].output must be a safe relative directory like dist')
-    }
-    return
+}
+
+function validateStaticFrontendConfig(config: ZerctConfig): void {
+  if (typeof config.build.output !== 'string' || !isSafeRelativePath(config.build.output)) {
+    throw new Error('[build].output must be a safe relative directory like dist')
   }
+}
+
+function validateRustBackendConfig(config: ZerctConfig): void {
   if (config.build.output) {
     throw new Error('[build].output is only valid for static_frontend')
   }
@@ -233,6 +257,10 @@ function validateConfig(config: ZerctConfig): void {
   if (!config.run.health.startsWith('/')) {
     throw new Error('[run].health must be an absolute path')
   }
+  validateResourceConfig(config)
+}
+
+function validateResourceConfig(config: ZerctConfig): void {
   if (!/^\d+\s*(mb|mib|gb|gib)$/iu.test(config.resources.memory)) {
     throw new Error('[resources].memory must look like 512mb or 1gb')
   }

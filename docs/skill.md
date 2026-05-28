@@ -40,14 +40,16 @@ For static frontends, require:
 - `typecheck` and `lint` scripts in `package.json`
 - `typecheck` runs `tsgo --noEmit` with `@typescript/native-preview`
 - `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`
+- `lint` runs Fallow `dead-code`, semantic `dupes`, and `health` gates
 - a `[build].check` command that installs dependencies and runs typechecking
   plus linting
 
 For new TanStack or Vite frontends, prefer `tsgo --noEmit` for `typecheck` and
-`oxlint src vite.config.ts --deny-warnings` for `lint`, installed with Bun and
-committed with `bun.lock`. Avoid JavaScript-based lint or format tooling. Keep the generic
-Zerct contract script-based so existing strict npm projects can still deploy
-with npm commands.
+`oxlint src vite.config.ts --deny-warnings` plus Fallow for `lint`, installed
+with Bun and committed with `bun.lock`. Avoid JavaScript-based lint, format,
+dead-code, or duplicate-code tooling. Keep the generic Zerct contract
+script-based so existing strict npm projects can still deploy with npm
+commands.
 
 When a browser frontend calls a Rust backend on another hostname, configure
 backend CORS for that frontend origin or put both apps behind a same-origin

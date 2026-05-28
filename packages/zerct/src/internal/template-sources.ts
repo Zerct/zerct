@@ -7,24 +7,25 @@ function frontendPackageJson(name: string): string {
     type: 'module',
     scripts: {
       typecheck: 'tsgo --noEmit',
-      lint: 'oxlint src vite.config.ts --deny-warnings',
+      lint: 'oxlint src vite.config.ts --deny-warnings && fallow dead-code --production --include-dupes --include-entry-exports --fail-on-issues && fallow dupes --production --mode semantic --threshold 1 --ignore-imports --fail-on-issues && fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity',
       build: 'vite build',
       preview: 'vite preview --host 0.0.0.0'
     },
     dependencies: {
-      '@tanstack/react-router': '^1.140.0',
-      react: '^19.2.1',
-      'react-dom': '^19.2.1'
+      '@tanstack/react-router': '^1.170.8',
+      react: '^19.2.6',
+      'react-dom': '^19.2.6'
     },
     devDependencies: {
-      '@types/node': '^24.12.3',
-      '@types/react': '^19.2.7',
+      '@types/node': '^25.9.1',
+      '@types/react': '^19.2.15',
       '@types/react-dom': '^19.2.3',
-      '@typescript/native-preview': '^7.0.0-dev.20260526.1',
-      '@vitejs/plugin-react': '^5.1.1',
-      oxlint: '^1.30.0',
-      typescript: '^5.9.3',
-      vite: '^7.2.4'
+      '@typescript/native-preview': '^7.0.0-dev.20260527.2',
+      '@vitejs/plugin-react': '^6.0.2',
+      fallow: '^2.84.0',
+      oxlint: '^1.67.0',
+      typescript: '^6.0.3',
+      vite: '^8.0.14'
     }
   })
 }

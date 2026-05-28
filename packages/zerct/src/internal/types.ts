@@ -45,153 +45,30 @@ export interface PackageManifest {
   scripts?: Record<string, string | undefined>
 }
 
-export interface BuildConfig extends JsonObject {
-  command: string
-  check: string
-  output?: string
-}
-
-export interface RunConfig extends JsonObject {
-  command?: string
-  port: number
-  health: string
-}
-
-export interface ResourceConfig extends JsonObject {
-  memory: string
-  cpu: string
-  idle_timeout_minutes: number
-}
-
-export interface ZerctConfig extends JsonObject {
-  name?: string
-  kind: ProjectKind
-  build: BuildConfig
-  run: RunConfig
-  resources: ResourceConfig
-}
-
-export interface DoctorCheck extends JsonObject {
-  name: string
-  ok: boolean
-  message: string
-  agent_instruction: string | null
-}
-
-export interface DoctorReport extends JsonObject {
-  ok: boolean
-  project: string
-  config: ZerctConfig | null
-  checks: DoctorCheck[]
-}
-
-export interface ProjectDoctorReport extends DoctorReport {
-  relative: string
-}
-
-export interface WorkspaceDoctorReport extends JsonObject {
-  ok: boolean
-  workspace: string
-  projects: ProjectDoctorReport[]
-}
-
-export interface DeployProjectInfo {
-  dir: string
-  relative: string
-  name: string
-  kind: DiscoveredProjectKind
-}
-
-export interface DeployPlanProject {
-  project: DeployProjectInfo
-  wantsDatabase: boolean
-}
-
-export interface FrontendSourceReport {
-  typescript: string[]
-  javascript: string[]
-}
-
-export interface LoginStartResponse extends JsonObject {
-  loginUrl?: string
-  userCode?: string
-  deviceCode?: string
-  expiresInSeconds?: number
-  intervalSeconds?: number
-}
-
-export interface LoginPollResponse extends JsonObject {
-  status?: string
-  token?: string
-  email?: string
-  intervalSeconds?: number
-}
-
-export interface AppSummary extends JsonObject {
-  id?: string
-  name?: string
-  url?: string
-  databaseStorageMib?: number
-}
-
-export interface UsageResponse extends JsonObject {
-  usage?: JsonObject
-  limits?: JsonObject
-}
-
-export interface AppsResponse extends JsonObject {
-  apps: AppSummary[]
-}
-
-export interface BuildJob extends JsonObject {
-  id: string
-}
-
-export interface AppDeployTarget extends JsonObject {
-  id: string
-  url: string
-}
-
-export interface BuildRecord extends JsonObject {
-  id: string
-  status: string
-}
-
-export interface BuildStatusResponse extends JsonObject {
-  build?: BuildRecord
-}
-
-export interface DeployResponse extends JsonObject {
-  app: AppDeployTarget
-  build_job: BuildJob
-  final_build?: BuildRecord | null
-}
-
-export interface WorkspaceDeployResult {
-  project: DeployProjectInfo
-  wantsDatabase: boolean
-  response: DeployResponse
-  finalBuild?: BuildRecord
-}
-
-export interface LogLine extends JsonObject {
-  timestamp: string
-  stream: string
-  message: string
-}
-
-export interface LogsResponse extends JsonObject {
-  lines: LogLine[]
-  has_more: boolean
-  next_cursor: string
-}
-
-export interface CheckoutResponse extends JsonObject {
-  checkout: {
-    reason?: string
-    url: string
-  }
-}
+export type BuildConfig = JsonObject & { command: string; check: string; output?: string }
+export type RunConfig = JsonObject & { command?: string; port: number; health: string }
+export type ResourceConfig = JsonObject & { memory: string; cpu: string; idle_timeout_minutes: number }
+export type ZerctConfig = JsonObject & { name?: string; kind: ProjectKind; build: BuildConfig; run: RunConfig; resources: ResourceConfig }
+export type DoctorCheck = JsonObject & { name: string; ok: boolean; message: string; agent_instruction: string | null }
+export type DoctorReport = JsonObject & { ok: boolean; project: string; config: ZerctConfig | null; checks: DoctorCheck[] }
+export type ProjectDoctorReport = DoctorReport & { relative: string }
+export type WorkspaceDoctorReport = JsonObject & { ok: boolean; workspace: string; projects: ProjectDoctorReport[] }
+export type DeployProjectInfo = { dir: string; relative: string; name: string; kind: DiscoveredProjectKind }
+export type DeployPlanProject = { project: DeployProjectInfo; wantsDatabase: boolean }
+export type FrontendSourceReport = { typescript: string[]; javascript: string[] }
+export type LoginStartResponse = JsonObject & { loginUrl?: string; userCode?: string; deviceCode?: string; expiresInSeconds?: number; intervalSeconds?: number }
+export type LoginPollResponse = JsonObject & { status?: string; token?: string; email?: string; intervalSeconds?: number }
+export type AppSummary = JsonObject & { id?: string; name?: string; url?: string; databaseStorageMib?: number }
+export type AppsResponse = JsonObject & { apps: AppSummary[] }
+export type BuildJob = JsonObject & { id: string }
+export type AppDeployTarget = JsonObject & { id: string; url: string }
+export type BuildRecord = JsonObject & { id: string; status: string }
+export type BuildStatusResponse = JsonObject & { build?: BuildRecord }
+export type DeployResponse = JsonObject & { app: AppDeployTarget; build_job: BuildJob; final_build?: BuildRecord | null }
+export type WorkspaceDeployResult = { project: DeployProjectInfo; wantsDatabase: boolean; response: DeployResponse; finalBuild?: BuildRecord }
+export type LogLine = JsonObject & { timestamp: string; stream: string; message: string }
+export type LogsResponse = JsonObject & { lines: LogLine[]; has_more: boolean; next_cursor: string }
+export type CheckoutResponse = JsonObject & { checkout: { reason?: string; url: string } }
 
 export type FileVisitor = (file: string, relative: string) => void
 export type PathVisitor = (file: string) => void

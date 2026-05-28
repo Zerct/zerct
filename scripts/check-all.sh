@@ -131,3 +131,24 @@ for command in \
   fi
   grep -q 'native frontend lint' /tmp/zerct-policy-check.json
 done
+
+cat >"$policy_fixture/package.json" <<'EOF'
+{
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint src vite.config.ts --deny-warnings"
+  }
+}
+EOF
+
+for command in \
+  "packages/zerct/src/zerct.ts doctor $policy_fixture --json" \
+  "PYTHONPATH=packages/zerct-py/src $python_bin -m zerct doctor $policy_fixture --json" \
+  "cargo run --quiet --manifest-path crates/zerct/Cargo.toml -- doctor $policy_fixture --json"; do
+  if eval "$command" >/tmp/zerct-policy-check.json 2>/tmp/zerct-policy-check.err; then
+    printf 'expected missing Fallow policy fixture to fail: %s\n' "$command" >&2
+    exit 1
+  fi
+  grep -q 'native frontend quality gates' /tmp/zerct-policy-check.json
+done
