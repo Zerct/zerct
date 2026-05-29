@@ -8,6 +8,7 @@ use super::{
     },
     project::{is_dns_safe_name, is_safe_relative_directory, is_safe_relative_path},
     project_kind::ProjectKind,
+    project_layout::{default_build_command, default_check_command},
 };
 use serde::Serialize;
 use std::path::Path;
@@ -298,22 +299,6 @@ pub(crate) fn get_section_u16(
             .map(Some)
             .ok_or_else(|| format!("{key} must be between 0 and 65535"))
     })
-}
-
-pub(crate) fn default_check_command(kind: ProjectKind, project_dir: &Path) -> String {
-    if kind.is_static_frontend() {
-        frontend_check_command(project_dir)
-    } else {
-        DEFAULT_RUST_CHECK_COMMAND.to_owned()
-    }
-}
-
-pub(crate) fn default_build_command(kind: ProjectKind, project_dir: &Path) -> String {
-    if kind.is_static_frontend() {
-        frontend_build_command(project_dir)
-    } else {
-        "cargo build --release".to_owned()
-    }
 }
 
 pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), String> {

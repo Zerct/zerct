@@ -6,10 +6,11 @@ use super::{
     errors::{Result, agent_error, internal_error},
     frontend_checks::{frontend_build_command, frontend_check_command, is_plain_static_frontend},
     project::{
-        detect_fullstack_roots, ensure_directory, infer_project_kind, path_relative,
-        service_name_from_cargo, service_name_from_dir, service_name_from_package,
+        ensure_directory, path_relative, service_name_from_cargo, service_name_from_dir,
+        service_name_from_package,
     },
     project_kind::ProjectKind,
+    project_layout::{detect_fullstack_roots, infer_project_kind},
     template_sources::{
         frontend_package_json, frontend_source, frontend_ts_config, frontend_vite_env_source,
         rust_api_source, rust_template_cargo_lock, rust_template_cargo_toml,

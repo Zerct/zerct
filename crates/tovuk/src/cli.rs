@@ -11,6 +11,7 @@ mod help;
 mod preview;
 mod project;
 mod project_kind;
+mod project_layout;
 mod runtime;
 mod template_sources;
 mod templates;
