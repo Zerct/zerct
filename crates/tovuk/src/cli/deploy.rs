@@ -1,13 +1,31 @@
 use super::{
-    ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, BASE64, CliOptions, Compression, DirEntry, Duration,
-    GzEncoder, Method, Path, PathBuf, Result, Stdio, Value, WALK_EXCLUDED_DIRS,
-    WORKSPACE_EXCLUDED_DIRS, WalkDir, agent_error, api_request, encode_component, ensure_directory,
-    json, nested_string, number_field, parse_tovuk_toml, path_relative,
-    payment_required_agent_error, print_json, progress, read_or_login_token, run_doctor,
-    string_field,
+    api_commands::{api_request, payment_required_agent_error},
+    args::CliOptions,
+    auth::read_or_login_token,
+    config::parse_tovuk_toml,
+    constants::{
+        ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, WALK_EXCLUDED_DIRS, WORKSPACE_EXCLUDED_DIRS,
+    },
+    doctor::run_doctor,
+    errors::{Result, agent_error, print_json},
+    project::{
+        encode_component, ensure_directory, nested_string, number_field, path_relative, progress,
+        string_field,
+    },
 };
-use base64::Engine as _;
-use std::{collections::BTreeSet, fs, process::Command, thread, time::Instant};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use flate2::{Compression, write::GzEncoder};
+use reqwest::Method;
+use serde_json::{Value, json};
+use std::{
+    collections::BTreeSet,
+    fs,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+    thread,
+    time::{Duration, Instant},
+};
+use walkdir::{DirEntry, WalkDir};
 
 #[derive(Clone, Debug)]
 pub(crate) struct DeployProjectInfo {

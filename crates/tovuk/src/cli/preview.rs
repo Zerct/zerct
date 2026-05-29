@@ -1,7 +1,16 @@
 use super::{
-    Client, Command, DoctorReportKind, Method, Path, PathBuf, Read, Result, StatusCode,
-    TcpListener, TcpStream, TovukConfig, Write, agent_error, ensure_directory, fs, internal_error,
-    parse_tovuk_toml, run_doctor_workspace, validate_config,
+    config::{TovukConfig, parse_tovuk_toml, validate_config},
+    doctor::{DoctorReportKind, run_doctor_workspace},
+    errors::{Result, agent_error, internal_error},
+    project::ensure_directory,
+};
+use reqwest::{Method, StatusCode, blocking::Client};
+use std::{
+    fs,
+    io::{Read, Write},
+    net::{TcpListener, TcpStream},
+    path::{Path, PathBuf},
+    process::Command,
 };
 
 pub(crate) fn preview_project(project_dir: &Path, port: u16) -> Result<()> {

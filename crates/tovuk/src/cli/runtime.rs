@@ -1,9 +1,20 @@
 use super::{
-    ExitCode, Result, VERSION, agent_error, app_get_command, app_route, billing_command,
-    builds_command, capabilities, deploy, deploys_command, doctor_project, domains_command, env,
-    env_command, help_text, init_project, install_project, login, logs_command, parse_args,
-    preview_project, print_authenticated, print_paged_authenticated, project_path, support_command,
+    api_commands::{
+        app_get_command, app_route, billing_command, builds_command, capabilities, deploys_command,
+        domains_command, env_command, logs_command, print_authenticated, print_paged_authenticated,
+        support_command,
+    },
+    args::{parse_args, project_path},
+    auth::login,
+    constants::VERSION,
+    deploy::deploy,
+    doctor::doctor_project,
+    errors::{Result, agent_error},
+    help::help_text,
+    preview::preview_project,
+    templates::{init_project, install_project},
 };
+use std::{env, process::ExitCode};
 
 pub(crate) fn runtime_entrypoint() -> ExitCode {
     match run() {

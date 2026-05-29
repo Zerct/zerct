@@ -1,4 +1,4 @@
-use super::json;
+use serde_json::json;
 
 pub(crate) fn rust_template_cargo_toml(name: &str) -> String {
     format!(

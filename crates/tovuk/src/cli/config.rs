@@ -1,10 +1,16 @@
 use super::{
-    DEFAULT_RUST_CHECK_COMMAND, JAVASCRIPT_BACKEND_RUNTIMES, PROJECT_KINDS, Path,
-    RUST_STRICT_CLIPPY_DENY_LINTS, Serialize, command_name_from_token, command_tokens,
-    frontend_build_command, frontend_check_command, has_frontend_install_command,
-    has_frontend_script_run, is_dns_safe_name, is_safe_relative_directory, is_safe_relative_path,
-    uses_javascript_linter,
+    constants::{
+        DEFAULT_RUST_CHECK_COMMAND, JAVASCRIPT_BACKEND_RUNTIMES, PROJECT_KINDS,
+        RUST_STRICT_CLIPPY_DENY_LINTS,
+    },
+    frontend_checks::{
+        command_name_from_token, command_tokens, frontend_build_command, frontend_check_command,
+        has_frontend_install_command, has_frontend_script_run, uses_javascript_linter,
+    },
+    project::{is_dns_safe_name, is_safe_relative_directory, is_safe_relative_path},
 };
+use serde::Serialize;
+use std::path::Path;
 
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct TovukConfig {
