@@ -23,7 +23,7 @@ concurrency:
 jobs:
   publish:
     name: publish tovuk to npm
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: npm
     steps:

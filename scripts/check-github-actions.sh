@@ -21,12 +21,14 @@ reject_match() {
   fi
 }
 
-reject_match 'runs-on:\s*(ubuntu|macos|windows)-' \
-  'workflows must use Blacksmith runner labels instead of generic GitHub-hosted labels'
+reject_match 'blacksmith-' \
+  'Blacksmith runners are forbidden; use Tovuk trusted self-hosted runners or GitHub-hosted runners'
 reject_match 'useblacksmith/(cache|setup-(go|node|python|ruby|java)|rust-cache)' \
-  'deprecated Blacksmith cache forks are forbidden; use official cache-aware actions on Blacksmith runners'
+  'Blacksmith cache forks are forbidden; use official cache-aware actions on GitHub-hosted runners'
 reject_match 'actions/cache@(v[0-4]|main|master)' \
   'actions/cache must stay on the latest stable major'
+reject_match 'pull_request_target:' \
+  'pull_request_target is forbidden for this public repository'
 
 for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
   [ -e "$workflow" ] || continue
@@ -46,15 +48,43 @@ for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
     status=1
   fi
 
+  if rg -q 'self-hosted' "$workflow"; then
+    if ! rg -q 'public-trusted-ci' "$workflow"; then
+      printf '%s: public self-hosted jobs must use the public-trusted-ci label\n' "$workflow" >&2
+      status=1
+    fi
+
+    if ! rg -q "github.actor == 'kriptoburak'" "$workflow"; then
+      printf '%s: public self-hosted jobs must require github.actor == kriptoburak\n' "$workflow" >&2
+      status=1
+    fi
+
+    if ! rg -q "github.event.pull_request.head.repo.full_name == github.repository" "$workflow"; then
+      printf '%s: public self-hosted pull_request jobs must require same-repository heads\n' "$workflow" >&2
+      status=1
+    fi
+
+    if ! rg -q "github.event.pull_request.base.ref == 'main'" "$workflow"; then
+      printf '%s: public self-hosted pull_request jobs must require base branch main\n' "$workflow" >&2
+      status=1
+    fi
+
+    if ! rg -q "github.ref == 'refs/heads/main'" "$workflow"; then
+      printf '%s: public self-hosted push and workflow_dispatch jobs must require refs/heads/main\n' "$workflow" >&2
+      status=1
+    fi
+  fi
+
   if rg -q 'cargo (build|check|test|clippy|package|publish)' "$workflow" \
+    && ! rg -q 'public-trusted-ci' "$workflow" \
     && ! rg -q 'actions/cache@v5' "$workflow"; then
-    printf '%s: Rust jobs must use Blacksmith-backed actions/cache@v5\n' "$workflow" >&2
+    printf '%s: GitHub-hosted Rust jobs must use actions/cache@v5\n' "$workflow" >&2
     status=1
   fi
 done
 
-if ! rg -q 'blacksmith-' "$workflow_dir"; then
-  printf 'no Blacksmith runner labels found in workflows\n' >&2
+if ! rg -q 'public-trusted-ci' "$workflow_dir"; then
+  printf 'no Tovuk public trusted self-hosted runner labels found in workflows\n' >&2
   status=1
 fi
 
