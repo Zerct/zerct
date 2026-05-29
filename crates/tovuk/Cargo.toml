@@ -1,6 +1,6 @@
 [package]
 name = "tovuk"
-version = "0.1.50"
+version = "0.1.51"
 edition = "2024"
 rust-version = "1.85"
 description = "Deploy Rust backends, static frontends, and fullstack apps to Tovuk."
@@ -37,3 +37,13 @@ unimplemented = "deny"
 unwrap_in_result = "deny"
 unwrap_used = "deny"
 clone_on_ref_ptr = "deny"
+
+[dependencies]
+base64 = "0.22.1"
+flate2 = "1.1.9"
+reqwest = { version = "0.13.4", default-features = false, features = ["blocking", "json", "rustls"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+tar = "0.4.46"
+toml = "1.1.2"
+walkdir = "2.5.0"

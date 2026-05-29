@@ -7,6 +7,11 @@ on:
       - main
     paths:
       - "packages/tovuk/package.json"
+      - "packages/tovuk/install.mjs"
+      - "packages/tovuk/bin/tovuk"
+      - "crates/tovuk/**"
+      - "scripts/check-npm-cli-package.mjs"
+      - "scripts/check-npm-native-runtime.mjs"
 
 permissions:
   contents: read
@@ -23,6 +28,7 @@ jobs:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
+      - uses: dtolnay/rust-toolchain@stable
       - name: Check unscoped publishing gate
         id: gate
         run: |
@@ -49,12 +55,17 @@ jobs:
           fi
       - name: Install package dependencies
         if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
-        run: npm ci
+        run: npm ci --ignore-scripts
         working-directory: packages/tovuk
+      - name: Build native CLI for package checks
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - name: Check package
         if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
         run: npm run check
         working-directory: packages/tovuk
+        env:
+          TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
       - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
         run: npm publish --access public
         working-directory: packages/tovuk

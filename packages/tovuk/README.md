@@ -9,7 +9,9 @@ npx tovuk doctor --json
 npx tovuk deploy --wait --json
 ```
 
-`npx tovuk` is the public npm command.
+The npm package installs the native Tovuk binary for the current platform.
+Node is required by npm to install the package, but the `tovuk` command itself
+does not delegate to `npx`, `tsx`, or any JavaScript runtime.
 
 Rust backends expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
@@ -59,12 +61,13 @@ npx tovuk billing checkout --json
 When Tovuk support is needed, include enough evidence for a support agent:
 
 ```sh
-npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 ```
 
 When the issue is fixed, resolve the ticket:
 
 ```sh
+npx tovuk support list --json
 npx tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 

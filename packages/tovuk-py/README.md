@@ -2,8 +2,9 @@
 
 Python CLI package for deploying Rust backends, static frontends, and fullstack
 apps to Tovuk.
-It delegates to the npm Tovuk CLI so PyPI stays aligned with the primary
-agent command surface.
+It installs or downloads the same native Tovuk binary used by npm, Homebrew,
+and Cargo. PyPI requires Python to install and launch the package, but it does
+not require Node.js, npm, `npx`, or `tsx`.
 
 ```sh
 pipx install tovuk
@@ -27,13 +28,11 @@ type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
 or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health
 gates.
 
-The npm package remains the primary first install path:
+The npm package is also available:
 
 ```sh
 npx tovuk deploy
 ```
-
-Python installs require Node.js 18+ with `npx` available at runtime.
 
 The Python package exposes the same agent command surface as npm:
 

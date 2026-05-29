@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const proseExtensions = new Set([".md", ".mdx", ".txt"]);
@@ -90,7 +90,7 @@ function findAll(line, needle) {
 }
 
 const findings = [];
-const files = gitFiles().filter((file) => !ignoredPaths.has(file));
+const files = gitFiles().filter((file) => !ignoredPaths.has(file) && existsSync(file));
 const textFiles = [];
 const emDash = String.fromCodePoint(0x2014);
 

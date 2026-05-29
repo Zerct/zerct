@@ -1,19 +1,19 @@
-"""Thin Python entrypoint for the npm Tovuk CLI source of truth."""
+"""Python package entrypoint for the native Tovuk binary."""
 
 from __future__ import annotations
 
 import json
 import os
 import pathlib
-import shutil
-import subprocess
+import platform
+import stat
 import sys
+import urllib.error
+import urllib.request
 
 from . import __version__
 
-NPM_PACKAGE = "tovuk"
-NPM_PACKAGE_VERSION = "0.1.50"
-NPM_PACKAGE_SPEC = f"{NPM_PACKAGE}@{NPM_PACKAGE_VERSION}"
+REPOSITORY = "https://github.com/tovuk/tovuk"
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -23,54 +23,80 @@ def main(argv: list[str] | None = None) -> None:
         return
 
     try:
-        command = _delegate_command()
+        binary = _native_binary()
     except RuntimeError as error:
         _print_agent_error(str(error), "--json" in args)
         raise SystemExit(1) from error
 
-    completed = subprocess.run([*command, *args], check=False)
-    raise SystemExit(completed.returncode)
+    os.execv(str(binary), [str(binary), *args])
 
 
 def _wants_version(args: list[str]) -> bool:
     return len(args) == 1 and args[0] in {"--version", "-v", "-V"}
 
 
-def _delegate_command() -> list[str]:
-    local_cli = os.environ.get("TOVUK_NPM_CLI", "").strip()
-    if local_cli:
-        path = pathlib.Path(local_cli).expanduser()
-        if not path.is_file():
-            raise RuntimeError(f"TOVUK_NPM_CLI does not point to a file: {path}")
-        return [_local_tsx(path), str(path)]
+def _native_binary() -> pathlib.Path:
+    override = os.environ.get("TOVUK_NATIVE_BINARY", "").strip()
+    if override:
+        path = pathlib.Path(override).expanduser()
+        if path.is_file():
+            return path
+        raise RuntimeError(f"TOVUK_NATIVE_BINARY does not point to a file: {path}")
 
-    npx = shutil.which("npx")
-    if npx:
-        return [npx, "-y", NPM_PACKAGE_SPEC]
+    packaged = pathlib.Path(__file__).with_name("bin") / "tovuk"
+    if packaged.is_file():
+        return packaged
 
-    raise RuntimeError("Node.js npm tooling is required for the PyPI Tovuk CLI.")
+    target = _native_target()
+    binary = _cache_dir() / __version__ / target / "tovuk"
+    if binary.is_file():
+        return binary
+
+    binary.parent.mkdir(parents=True, exist_ok=True)
+    _download_release_binary(target, binary)
+    binary.chmod(binary.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    return binary
 
 
-def _required_executable(name: str) -> str:
-    executable = shutil.which(name)
-    if executable:
-        return executable
-    raise RuntimeError(f"{name} is required to run the local Tovuk npm CLI.")
+def _cache_dir() -> pathlib.Path:
+    if os.name == "nt" and os.environ.get("LOCALAPPDATA"):
+        return pathlib.Path(os.environ["LOCALAPPDATA"]) / "Tovuk" / "bin"
+    root = pathlib.Path(os.environ.get("XDG_CACHE_HOME", pathlib.Path.home() / ".cache"))
+    return root / "tovuk" / "bin"
 
 
-def _local_tsx(cli_path: pathlib.Path) -> str:
-    package_root = cli_path.parent.parent
-    local_bin = package_root / "node_modules" / ".bin" / ("tsx.cmd" if os.name == "nt" else "tsx")
-    if local_bin.is_file():
-        return str(local_bin)
-    return _required_executable("tsx")
+def _native_target() -> str:
+    system = platform.system().lower()
+    machine = platform.machine().lower()
+    if system == "darwin" and machine in {"arm64", "aarch64"}:
+        return "aarch64-apple-darwin"
+    if system == "darwin" and machine in {"x86_64", "amd64"}:
+        return "x86_64-apple-darwin"
+    if system == "linux" and machine in {"arm64", "aarch64"}:
+        return "aarch64-unknown-linux-gnu"
+    if system == "linux" and machine in {"x86_64", "amd64"}:
+        return "x86_64-unknown-linux-gnu"
+    if system == "windows" and machine in {"x86_64", "amd64"}:
+        return "x86_64-pc-windows-msvc"
+    raise RuntimeError(f"Unsupported Tovuk native target: {system}/{machine}")
+
+
+def _download_release_binary(target: str, destination: pathlib.Path) -> None:
+    suffix = ".exe" if target.endswith("windows-msvc") else ""
+    asset = f"tovuk-{__version__}-{target}{suffix}"
+    url = f"{REPOSITORY}/releases/download/v{__version__}/{asset}"
+    try:
+        with urllib.request.urlopen(url, timeout=30) as response:
+            destination.write_bytes(response.read())
+    except (OSError, urllib.error.URLError) as error:
+        raise RuntimeError(f"Could not install native Tovuk binary from {url}: {error}") from error
 
 
 def _print_agent_error(message: str, json_output: bool) -> None:
     payload = {
-        "code": "dependency_missing",
+        "code": "native_binary_unavailable",
         "message": message,
-        "agent_instruction": "Install Node.js 18+ with npx, or set TOVUK_NPM_CLI to packages/tovuk/src/tovuk.ts after running npm install in packages/tovuk.",
+        "agent_instruction": "Install a supported Tovuk native binary from GitHub Releases, Homebrew, Cargo, npm, or rerun the PyPI command with network access.",
         "docs_url": "https://docs.tovuk.com/reference/packages",
         "checkout_url": None,
     }
