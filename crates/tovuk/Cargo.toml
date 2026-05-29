@@ -41,7 +41,11 @@ clone_on_ref_ptr = "deny"
 [dependencies]
 base64 = "0.22.1"
 flate2 = "1.1.9"
-reqwest = { version = "0.13.4", default-features = false, features = ["blocking", "json", "rustls"] }
+reqwest = { version = "0.13.4", default-features = false, features = [
+  "blocking",
+  "json",
+  "rustls",
+] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
 tar = "0.4.46"

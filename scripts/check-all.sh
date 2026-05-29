@@ -73,6 +73,7 @@ node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
 scripts/check-github-actions.sh
 scripts/check-shell-style.sh
+scripts/check-toml-style.sh
 scripts/check-typos.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb >/dev/null
