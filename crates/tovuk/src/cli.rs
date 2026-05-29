@@ -14,6 +14,7 @@ mod project;
 mod project_kind;
 mod project_layout;
 mod runtime;
+mod source_policy;
 mod template_sources;
 mod templates;
 
