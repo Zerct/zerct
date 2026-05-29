@@ -70,7 +70,7 @@ npm --prefix packages/tovuk run check
 node scripts/check-package-versions.mjs
 node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
-node scripts/check-prose-style.mjs
+go run scripts/check-prose-style.go
 scripts/check-github-actions.sh
 scripts/check-shell-style.sh
 scripts/check-toml-style.sh
