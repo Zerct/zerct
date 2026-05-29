@@ -10,6 +10,7 @@ use super::{
     project::{is_dns_safe_name, is_safe_relative_directory, is_safe_relative_path},
     project_kind::ProjectKind,
     project_layout::{default_build_command, default_check_command},
+    resource_config::{ResourceConfig, parse_resource_config, validate_resource_config},
 };
 use serde::Serialize;
 use std::path::Path;
@@ -68,13 +69,6 @@ pub(crate) struct BackendConfig {
     pub(crate) port: Option<u16>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) health: Option<String>,
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub(crate) struct ResourceConfig {
-    pub(crate) memory: String,
-    pub(crate) cpu: String,
-    pub(crate) idle_timeout_minutes: u16,
 }
 
 pub(crate) fn parse_tovuk_toml(
@@ -214,14 +208,6 @@ fn parse_backend_config(
     })
 }
 
-fn parse_resource_config(table: &toml::Table) -> std::result::Result<ResourceConfig, String> {
-    Ok(ResourceConfig {
-        memory: get_section_string(table, "memory")?.unwrap_or_else(|| "512mb".to_owned()),
-        cpu: get_section_string(table, "cpu")?.unwrap_or_else(|| "0.25".to_owned()),
-        idle_timeout_minutes: get_section_u16(table, "idle_timeout_minutes")?.unwrap_or(15),
-    })
-}
-
 pub(crate) fn reject_unknown_root_keys(
     table: &toml::map::Map<String, toml::Value>,
 ) -> std::result::Result<(), String> {
@@ -343,7 +329,7 @@ pub(crate) fn validate_rust_backend_config(
     validate_rust_run_command(config.run.command.as_deref())?;
     validate_port(config.run.port, "[run].port")?;
     validate_health(&config.run.health, "[run].health")?;
-    validate_resource_config(config)
+    validate_resource_config(&config.resources)
 }
 
 pub(crate) fn validate_fullstack_config(config: &TovukConfig) -> std::result::Result<(), String> {
@@ -372,7 +358,7 @@ pub(crate) fn validate_fullstack_config(config: &TovukConfig) -> std::result::Re
     )?)?;
     require_config_command(config.frontend.build.as_deref(), "[frontend].build")?;
     validate_output(config.frontend.output.as_deref(), "[frontend].output")?;
-    validate_resource_config(config)
+    validate_resource_config(&config.resources)
 }
 
 pub(crate) fn require_config_command<'a>(
@@ -423,26 +409,6 @@ pub(crate) fn validate_output(value: Option<&str>, field: &str) -> std::result::
             "{field} must be a safe relative directory like dist or ."
         ))
     }
-}
-
-pub(crate) fn validate_resource_config(config: &TovukConfig) -> std::result::Result<(), String> {
-    let memory_mib = memory_to_mib(&config.resources.memory)?;
-    if !(128..=2048).contains(&memory_mib) {
-        return Err(
-            "[resources].memory must be between 128mb and 2gb; use the smallest working value"
-                .to_owned(),
-        );
-    }
-    let cpu_millis = cpu_to_millis(&config.resources.cpu)?;
-    if !(50..=2000).contains(&cpu_millis) {
-        return Err(
-            "[resources].cpu must be between 0.05 and 2; use the smallest working value".to_owned(),
-        );
-    }
-    if !(1..=60).contains(&config.resources.idle_timeout_minutes) {
-        return Err("[resources].idle_timeout_minutes must be between 1 and 60".to_owned());
-    }
-    Ok(())
 }
 
 pub(crate) fn validate_check_command(
@@ -528,48 +494,4 @@ pub(crate) fn validate_frontend_check_command(command: &str) -> std::result::Res
     } else {
         Err("[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`".to_owned())
     }
-}
-
-pub(crate) fn memory_to_mib(value: &str) -> std::result::Result<u32, String> {
-    let clean = value.trim().to_ascii_lowercase();
-    let amount = clean
-        .chars()
-        .take_while(char::is_ascii_digit)
-        .collect::<String>();
-    let unit = clean[amount.len()..].trim();
-    let amount = amount
-        .parse::<u32>()
-        .map_err(|_error| "[resources].memory must look like 256mb, 512mb, or 1gb".to_owned())?;
-    match unit {
-        "mb" | "mib" => Ok(amount),
-        "gb" | "gib" => Ok(amount * 1024),
-        _ => Err("[resources].memory must look like 256mb, 512mb, or 1gb".to_owned()),
-    }
-}
-
-pub(crate) fn cpu_to_millis(value: &str) -> std::result::Result<u32, String> {
-    let clean = value.trim();
-    if clean.is_empty()
-        || clean
-            .chars()
-            .any(|character| !character.is_ascii_digit() && character != '.')
-        || clean.matches('.').count() > 1
-    {
-        return Err("[resources].cpu must look like 0.25, 0.5, 1, or 2".to_owned());
-    }
-    let mut parts = clean.split('.');
-    let whole = parts
-        .next()
-        .unwrap_or_default()
-        .parse::<u32>()
-        .map_err(|_error| "[resources].cpu must look like 0.25, 0.5, 1, or 2".to_owned())?;
-    let fraction = parts.next().unwrap_or_default();
-    if parts.next().is_some() || fraction.len() > 3 {
-        return Err("[resources].cpu must look like 0.25, 0.5, 1, or 2".to_owned());
-    }
-    let mut fractional_millis = 0u32;
-    for (index, digit) in fraction.bytes().enumerate() {
-        fractional_millis += u32::from(digit - b'0') * [100, 10, 1][index];
-    }
-    Ok(whole * 1000 + fractional_millis)
 }
