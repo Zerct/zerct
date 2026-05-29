@@ -29,6 +29,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.x"
+          cache: false
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -92,7 +96,7 @@ jobs:
           PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
           PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
       - if: steps.version.outputs.exists == 'false'
-        run: node scripts/check-prose-style.mjs
+        run: go run scripts/check-prose-style.go
       - if: steps.version.outputs.exists == 'false'
         run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - if: steps.version.outputs.exists == 'false'
