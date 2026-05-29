@@ -24,6 +24,15 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
+      - name: Verify unscoped PyPI project name
+        run: |
+          python3 - <<'PY'
+          import tomllib
+
+          name = tomllib.load(open("packages/tovuk-py/pyproject.toml", "rb"))["project"]["name"]
+          if name != "tovuk":
+              raise SystemExit(f'PyPI project name must stay unscoped "tovuk", got {name!r}')
+          PY
       - name: Check registry version
         id: version
         run: |
@@ -44,18 +53,42 @@ jobs:
           else:
               print("exists=true")
           PY
+      - name: Select PyPI publish auth
+        id: publish_auth
+        if: steps.version.outputs.exists == 'false'
+        run: |
+          if [ -n "${PYPI_API_TOKEN:-}" ]; then
+            echo "method=token" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${PYPI_TRUSTED_PUBLISHING_ENABLED:-}" = "true" ]; then
+            echo "method=trusted" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "method=skip" >> "$GITHUB_OUTPUT"
+          echo "::notice::Skipping PyPI publish for unscoped project tovuk. Configure PYPI_API_TOKEN or enable trusted publishing for project tovuk with owner tovuk, repository tovuk, workflow publish-pypi.yml, environment pypi."
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
       - if: steps.version.outputs.exists == 'false'
         run: node scripts/check-prose-style.mjs
       - uses: actions/setup-python@v6
-        if: steps.version.outputs.exists == 'false'
+        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         with:
           python-version: "3.13"
-      - if: steps.version.outputs.exists == 'false'
+      - if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: python -m pip install --upgrade build==1.5.0
-      - if: steps.version.outputs.exists == 'false'
+      - if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: python -m build
         working-directory: packages/tovuk-py
       - uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.version.outputs.exists == 'false'
+        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'trusted'
         with:
           packages-dir: packages/tovuk-py/dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'token'
+        with:
+          packages-dir: packages/tovuk-py/dist
+          password: ${{ secrets.PYPI_API_TOKEN }}
