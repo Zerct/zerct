@@ -30,6 +30,11 @@ Usage:
   tovuk domains add --app <app> <domain> [--api <url>] [--json]
   tovuk domains verify --app <app> <domain> [--api <url>] [--json]
   tovuk domains delete --app <app> <domain> [--api <url>] [--json]
+  tovuk storage list --app <app> [--api <url>] [--json]
+  tovuk storage upload --app <app> <local_file> [storage_path] [--content-type <mime>] [--public] [--api <url>] [--json]
+  tovuk storage download --app <app> <storage_path> [local_file] [--api <url>] [--json]
+  tovuk storage delete --app <app> <storage_path> [--api <url>] [--json]
+  tovuk storage url --app <app> <storage_path> [--api <url>] [--json]
   tovuk billing [checkout|portal] [reason] [--api <url>] [--json]
   tovuk support list [--limit <n>] [--api <url>] [--json]
   tovuk support create "Subject" "Details" [--app <app>] [--build <build_id>] [--deploy <deploy_id>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
@@ -42,6 +47,7 @@ Agent contract:
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; backend build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
+  - Use tovuk storage upload/list/download/delete for app files and media without dashboard access; pass --public only when a CDN URL is intended.
   - Run deploy from a fullstack repo root with one tovuk.toml to build backend and frontend together.
   - When split frontend and backend apps use different hostnames, configure backend CORS or use a same-origin custom domain.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.

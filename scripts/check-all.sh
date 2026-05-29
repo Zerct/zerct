@@ -86,6 +86,8 @@ native_cli_version="$("$native_cli" --version)"
 printf '%s\n' "$native_cli_version"
 "$native_cli" --help | grep -q 'tovuk support create'
 "$native_cli" --help | grep -q 'tovuk support resolve'
+"$native_cli" --help | grep -q 'tovuk storage upload'
+"$native_cli" --help | grep -q 'tovuk storage download'
 "$native_cli" --help | grep -q 'tovuk billing checkout'
 test "$("$native_cli" -V)" = "$native_cli_version"
 test "$("$native_cli" --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
@@ -99,6 +101,8 @@ grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support create'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support resolve'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage upload'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage download'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
 if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then

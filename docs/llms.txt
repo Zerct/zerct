@@ -93,6 +93,10 @@ tovuk logs --build <build_id> --json
 tovuk logs --app <app> --json
 tovuk env list --app <app> --json
 tovuk domains list --app <app> --json
+tovuk storage list --app <app> --json
+tovuk storage upload --app <app> ./file.png uploads/file.png --public --json
+tovuk storage download --app <app> uploads/file.png ./file.png --json
+tovuk storage delete --app <app> uploads/file.png --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app <app> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json

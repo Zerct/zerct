@@ -6,6 +6,7 @@ mod generic;
 mod http;
 mod lists;
 mod logs;
+mod storage;
 mod support;
 
 pub(crate) use billing::billing_command;
@@ -18,4 +19,5 @@ pub(crate) use generic::{
 pub(crate) use http::{api_request, payment_required_agent_error};
 pub(crate) use lists::{builds_command, deploys_command};
 pub(crate) use logs::logs_command;
+pub(crate) use storage::storage_command;
 pub(crate) use support::support_command;

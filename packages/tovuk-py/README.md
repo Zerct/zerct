@@ -51,6 +51,10 @@ tovuk env set --app app_1 API_KEY=value
 tovuk env delete --app app_1 API_KEY
 tovuk domains add --app app_1 api.example.com
 tovuk domains verify --app app_1 api.example.com
+tovuk storage list --app app_1 --json
+tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --app app_1 uploads/logo.png --json
 tovuk billing checkout --json
 tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json

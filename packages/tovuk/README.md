@@ -48,9 +48,19 @@ database pool.
 
 Agents can also inspect API capabilities, account identity, usage, account
 activity, apps, complete app overviews, deploys, builds, app/deploy/build logs,
-env metadata, custom domains, domain verification, billing checkout links,
-billing portal links, and support ticket create, list, and resolve actions
+env metadata, custom domains, domain verification, app storage files and media,
+billing checkout links, billing portal links, and support ticket create, list,
+and resolve actions
 through the same CLI.
+
+Manage app files and media without dashboard access:
+
+```sh
+tovuk storage list --app app_1 --json
+tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --app app_1 uploads/logo.png --json
+```
 
 When a free-tier limit blocks work, run:
 
