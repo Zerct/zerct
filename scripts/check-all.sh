@@ -61,6 +61,10 @@ cargo test --locked --release --all-targets --all-features --manifest-path crate
 cargo clippy --manifest-path crates/tovuk/Cargo.toml "${strict_clippy_args[@]}"
 cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
 cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty --no-verify >/dev/null
+(cd crates/tovuk && cargo machete)
+mkdir -p target
+cargo metadata --locked --manifest-path crates/tovuk/Cargo.toml --all-features --format-version 1 >target/tovuk-cargo-deny-metadata.json
+cargo deny --manifest-path crates/tovuk/Cargo.toml check --config deny.toml --metadata-path target/tovuk-cargo-deny-metadata.json all
 
 npm --prefix packages/tovuk run check
 node scripts/check-package-versions.mjs
@@ -68,6 +72,8 @@ node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
 scripts/check-github-actions.sh
+scripts/check-shell-style.sh
+scripts/check-typos.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb >/dev/null
 if command -v brew >/dev/null 2>&1; then

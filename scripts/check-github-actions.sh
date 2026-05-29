@@ -29,6 +29,8 @@ reject_match 'actions/cache@(v[0-4]|main|master)' \
   'actions/cache must stay on the latest stable major'
 reject_match 'pull_request_target:' \
   'pull_request_target is forbidden for this public repository'
+reject_match '(^|[^[:alnum:]_-])(eslint|prettier|tsc)([^[:alnum:]_-]|$)' \
+  'JavaScript linters and typecheckers are forbidden in CI; use Rust or Go based checks'
 
 for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
   [ -e "$workflow" ] || continue
@@ -75,9 +77,9 @@ for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
     fi
   fi
 
-  if rg -q 'cargo (build|check|test|clippy|package|publish)' "$workflow" \
-    && ! rg -q 'public-trusted-ci' "$workflow" \
-    && ! rg -q 'actions/cache@v5' "$workflow"; then
+  if rg -q 'cargo (build|check|test|clippy|package|publish)' "$workflow" &&
+    ! rg -q 'public-trusted-ci' "$workflow" &&
+    ! rg -q 'actions/cache@v5' "$workflow"; then
     printf '%s: GitHub-hosted Rust jobs must use actions/cache@v5\n' "$workflow" >&2
     status=1
   fi

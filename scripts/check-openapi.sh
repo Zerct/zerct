@@ -26,9 +26,9 @@ openapi_files=()
 while IFS= read -r openapi_file; do
   openapi_files+=("$openapi_file")
 done < <(
-  git ls-files \
-    | awk 'tolower($0) ~ "(^|[/._-])(openapi|swagger)([/._-]|$)" && tolower($0) ~ "\\.(json|ya?ml)$" { print }' \
-    | sort -u
+  git ls-files |
+    awk 'tolower($0) ~ "(^|[/._-])(openapi|swagger)([/._-]|$)" && tolower($0) ~ "\\.(json|ya?ml)$" { print }' |
+    sort -u
 )
 
 if [ "${#openapi_files[@]}" -eq 0 ]; then
