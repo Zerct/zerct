@@ -108,3 +108,6 @@ output = "dist"
 
 Static frontends do not run server code on Tovuk. Fullstack apps keep the
 frontend static and proxy `/api/*` to the Rust backend inside the same app URL.
+JavaScript and TypeScript are frontend-only: Next API routes, Astro server
+endpoints, Svelte `+server` handlers, middleware, SSR handlers, and Node/Bun
+servers are rejected. Put that logic in Rust under the backend root.

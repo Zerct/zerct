@@ -21,6 +21,7 @@ export const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: string = 'bun ci && bun run typ
 export const PROJECT_KINDS: ReadonlySet<string> = new Set(['fullstack', 'rust_backend', 'static_frontend'])
 export const PROJECT_TEMPLATES: ReadonlySet<string> = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
 export const JAVASCRIPT_LINTERS: ReadonlySet<string> = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'prettier', 'prettierd', 'standard', 'xo'])
+export const JAVASCRIPT_BACKEND_RUNTIMES: ReadonlySet<string> = new Set(['astro', 'bun', 'deno', 'next', 'node', 'npm', 'npx', 'pnpm', 'svelte-kit', 'tsx', 'ts-node', 'vite', 'yarn'])
 export const FRONTEND_SOURCE_ROOTS: ReadonlySet<string> = new Set(['src', 'app', 'pages', 'routes', 'components'])
 export const FRONTEND_JAVASCRIPT_EXTENSIONS: readonly string[] = ['.js', '.jsx', '.mjs', '.cjs']
 export const FRONTEND_PACKAGE_MANAGERS: ReadonlySet<string> = new Set(['npm', 'bun', 'pnpm', 'yarn'])
@@ -129,6 +130,7 @@ Agent contract:
   - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
+  - JavaScript and TypeScript are frontend-only on Tovuk; backend build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a fullstack repo root with one tovuk.toml to build backend and frontend together.
   - When split frontend and backend apps use different hostnames, configure backend CORS or use a same-origin custom domain.

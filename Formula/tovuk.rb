@@ -1,8 +1,8 @@
 class Tovuk < Formula
   desc "Deploy Rust backends, static frontends, and fullstack apps to Tovuk"
   homepage "https://tovuk.com"
-  url "https://registry.npmjs.org/tovuk/-/tovuk-0.1.48.tgz"
-  sha256 "0a79528c801ef623ec1273a1a6a87cdc713e14aa5d5cc71e953783d830a0c6a0"
+  url "https://registry.npmjs.org/tovuk/-/tovuk-0.1.49.tgz"
+  sha256 "80feb4f60875d5f8ec4f9ce5126d81eb43613d038586b5841c03f97565b0eaa5"
   license "MIT"
 
   depends_on "node"

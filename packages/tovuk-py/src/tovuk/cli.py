@@ -12,7 +12,7 @@ import sys
 from . import __version__
 
 NPM_PACKAGE = "tovuk"
-NPM_PACKAGE_VERSION = "0.1.48"
+NPM_PACKAGE_VERSION = "0.1.49"
 NPM_PACKAGE_SPEC = f"{NPM_PACKAGE}@{NPM_PACKAGE_VERSION}"
 
 

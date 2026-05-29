@@ -1,4 +1,4 @@
-import { PROJECT_KINDS } from './constants.ts'
+import { JAVASCRIPT_BACKEND_RUNTIMES, PROJECT_KINDS } from './constants.ts'
 import { commandTokens, hasFrontendInstallCommand, hasFrontendScriptRun, usesJavascriptLinter } from './frontend-policy.ts'
 import { isSafeRelativePath } from './project.ts'
 import type { ProjectKind, TovukConfig } from './types.ts'
@@ -34,6 +34,9 @@ function validateBuildConfig(config: TovukConfig): void {
     throw new Error('[build].check is required')
   }
   validateCheckCommand(config.kind, config.build.check)
+  if (config.kind === 'rust_backend') {
+    validateRustBuildCommand(config.build.command)
+  }
 }
 
 function validateStaticFrontendConfig(config: TovukConfig): void {
@@ -45,6 +48,7 @@ function validateRustBackendConfig(config: TovukConfig): void {
     throw new Error('[build].output is only valid for static_frontend')
   }
   requireCommand(config.run.command, '[run].command')
+  validateRustRunCommand(config.run.command)
   validatePort(config.run.port, '[run].port')
   validateHealth(config.run.health, '[run].health')
   validateResourceConfig(config)
@@ -62,8 +66,8 @@ function validateFullstackConfig(config: TovukConfig): void {
 
 function validateFullstackSections(config: TovukConfig): void {
   validateRustCheckCommand(requireCommand(config.backend.check, '[backend].check'))
-  requireCommand(config.backend.build, '[backend].build')
-  requireCommand(config.backend.command, '[backend].command')
+  validateRustBuildCommand(requireCommand(config.backend.build, '[backend].build'))
+  validateRustRunCommand(requireCommand(config.backend.command, '[backend].command'))
   validatePort(config.backend.port, '[backend].port')
   validateHealth(config.backend.health, '[backend].health')
   validateFrontendCheckCommand(requireCommand(config.frontend.check, '[frontend].check'))
@@ -129,6 +133,28 @@ function validateRustCheckCommand(command: string): void {
   throw new Error('[build].check must include cargo fmt --all --check, cargo check --locked, and cargo clippy --locked --all-targets --all-features -- -D warnings')
 }
 
+function validateRustBuildCommand(command: string): void {
+  if (usesJavascriptBackendRuntime(command)) {
+    throw new Error('Rust backend build commands cannot invoke JavaScript or TypeScript runtimes; use cargo build --release')
+  }
+  const tokens = commandTokens(command)
+  if (tokens.some((token) => commandNameFromToken(token) === 'cargo') && tokens.includes('build') && tokens.includes('--release')) {
+    return
+  }
+  throw new Error('Rust backend build commands must run cargo build --release')
+}
+
+function validateRustRunCommand(command: string | undefined): void {
+  const value = command ?? ''
+  if (usesJavascriptBackendRuntime(value)) {
+    throw new Error('Rust backend runtime commands cannot invoke JavaScript or TypeScript runtimes; run ./target/release/<binary> instead')
+  }
+  if (commandTokens(value).some((token) => token.includes('target/release/'))) {
+    return
+  }
+  throw new Error('Rust backend runtime commands must start a binary under ./target/release/')
+}
+
 function validateFrontendCheckCommand(command: string): void {
   if (isNoopCommand(command)) {
     return
@@ -147,12 +173,21 @@ function validateFrontendCheckCommand(command: string): void {
   throw new Error('[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`')
 }
 
+function usesJavascriptBackendRuntime(command: string): boolean {
+  return commandTokens(command)
+    .some((token) => JAVASCRIPT_BACKEND_RUNTIMES.has(commandNameFromToken(token)))
+}
+
 function isSafeRelativeDirectory(value: string): boolean {
   return value === '.' || isSafeRelativePath(value)
 }
 
 function isNoopCommand(command: string): boolean {
   return command.trim() === ':' || command.trim() === 'true'
+}
+
+function commandNameFromToken(token: string): string {
+  return token.split('/').pop() ?? ''
 }
 
 export { validateConfig }
