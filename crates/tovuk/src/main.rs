@@ -6,7 +6,7 @@ use std::{
     process::{Command, ExitCode},
 };
 
-const VERSION: &str = "0.1.19";
+const VERSION: &str = "0.1.48";
 const NPM_PACKAGE: &str = "tovuk";
 const NPM_PACKAGE_VERSION: &str = "0.1.48";
 

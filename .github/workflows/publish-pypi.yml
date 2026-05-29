@@ -79,7 +79,7 @@ jobs:
         with:
           python-version: "3.13"
       - if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
-        run: python -m pip install --upgrade build==1.5.0
+        run: python -m pip install --upgrade build==1.4.4
       - if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: python -m build
         working-directory: packages/tovuk-py
