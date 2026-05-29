@@ -52,6 +52,8 @@ Static frontend contract:
   and lint.
 - Weak typecheck, fake lint, missing Fallow quality gates, and
   JavaScript-based lint/format scripts are rejected for deploys.
+- JavaScript and TypeScript are frontend-only. API routes, SSR handlers,
+  middleware, and server logic must move to the Rust backend.
 
 Plain static frontend contract:
 
@@ -66,6 +68,8 @@ Fullstack contract:
 - `[frontend].root` points to the static frontend.
 - The frontend calls same-origin `/api`.
 - The backend health path is `/api/healthz`.
+- Backend build and runtime commands must use `cargo build --release` and a
+  `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
 
 Useful commands:
 

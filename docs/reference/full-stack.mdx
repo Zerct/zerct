@@ -53,6 +53,10 @@ output = "dist"
 The runtime serves frontend assets first. Requests to `/api` and `/api/*` proxy
 to the Rust backend without changing the hostname.
 
+Frontend JavaScript and TypeScript are browser/build inputs only. Tovuk rejects
+Next API routes, Astro server endpoints, Svelte `+server` handlers, middleware,
+SSR handlers, and backend commands that start Node, Bun, Deno, or TS runtimes.
+
 For split projects with separate frontend and backend deploys, configure CORS
 or use a same-origin custom domain.
 

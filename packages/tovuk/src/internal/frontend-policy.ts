@@ -7,6 +7,8 @@ import { readPackageJson, walkProjectFiles } from './project.ts'
 import type { DoctorCheck, FrontendSourceReport, PackageManifest } from './types.ts'
 
 const REQUIRED_FRONTEND_SCRIPTS = ['typecheck', 'lint'] as const
+const FRONTEND_PAGES_API_PREFIXES: readonly (readonly string[])[] = [['pages', 'api'], ['src', 'pages', 'api']]
+const FRONTEND_APP_API_PREFIXES: readonly (readonly string[])[] = [['app', 'api'], ['src', 'app', 'api']]
 type FrontendScriptName = typeof REQUIRED_FRONTEND_SCRIPTS[number]
 type CommandPredicate = (command: string) => boolean
 
@@ -95,18 +97,26 @@ function frontendSourceChecks(projectDir: string): DoctorCheck[] {
       message: report.typescript.length > 0 ? report.typescript.slice(0, 3).join(', ') : 'missing',
       agent_instruction: report.typescript.length > 0 ? null : 'Add browser source as .ts or .tsx under src, app, pages, routes, or components, then retry.'
     },
-    {
-      name: 'javascript source',
-      ok: report.javascript.length === 0,
-      message: report.javascript.length === 0 ? 'none found' : report.javascript.slice(0, 5).join(', '),
-      agent_instruction: report.javascript.length === 0 ? null : 'Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying.'
-    }
+    forbiddenSourceCheck('javascript source', report.javascript, 'Rename browser .js, .jsx, .mjs, or .cjs source files to .ts or .tsx and fix type errors before deploying.'),
+    forbiddenSourceCheck('frontend server routes', report.serverRoutes, 'Move API routes, SSR handlers, middleware, and server logic to the Rust backend; static frontend source may only contain browser code.')
   ]
 }
 
+function forbiddenSourceCheck(name: string, files: readonly string[], instruction: string): DoctorCheck {
+  return {
+    name,
+    ok: files.length === 0,
+    message: files.length === 0 ? 'none found' : files.slice(0, 5).join(', '),
+    agent_instruction: files.length === 0 ? null : instruction
+  }
+}
+
 function frontendSourceReport(projectDir: string): FrontendSourceReport {
-  const report: FrontendSourceReport = { typescript: [], javascript: [] }
+  const report: FrontendSourceReport = { typescript: [], javascript: [], serverRoutes: [] }
   walkProjectFiles(projectDir, (_file, relative) => {
+    if (isFrontendServerRoute(relative)) {
+      report.serverRoutes.push(relative)
+    }
     const sourceKind = frontendSourceKind(relative)
     if (sourceKind) {
       report[sourceKind].push(relative)
@@ -136,6 +146,28 @@ function isFrontendTypescriptSource(relative: string): boolean {
 
 function isFrontendJavascriptSource(relative: string): boolean {
   return FRONTEND_JAVASCRIPT_EXTENSIONS.some((extension) => relative.endsWith(extension))
+}
+
+function isFrontendServerRoute(relative: string): boolean {
+  if (!isFrontendTypescriptSource(relative) && !isFrontendJavascriptSource(relative)) {
+    return false
+  }
+  const parts = relative.toLowerCase().split('/')
+  const file = parts.at(-1) ?? ''
+  return isFrontendServerHandlerFile(file) || isFrontendApiRoute(parts, file)
+}
+
+function isFrontendServerHandlerFile(file: string): boolean {
+  return file.startsWith('+server.') || file.startsWith('middleware.')
+}
+
+function isFrontendApiRoute(pathParts: readonly string[], file: string): boolean {
+  return FRONTEND_PAGES_API_PREFIXES.some((prefix) => pathStartsWith(pathParts, prefix))
+    || (file.startsWith('route.') && FRONTEND_APP_API_PREFIXES.some((prefix) => pathStartsWith(pathParts, prefix)))
+}
+
+function pathStartsWith(pathParts: readonly string[], prefix: readonly string[]): boolean {
+  return pathParts.length >= prefix.length && prefix.every((part, index) => pathParts[index] === part)
 }
 
 function packageScriptValue(manifest: PackageManifest | null, script: string): string {

@@ -4,7 +4,7 @@ import { doctorCheck } from './checks.ts'
 import { agentError } from './errors.ts'
 import { parseTovukToml, validateConfig } from './config.ts'
 import { discoverDeployProjects } from './workspace.ts'
-import { printJson } from './project.ts'
+import { printJson, walkProjectFiles } from './project.ts'
 import { rustDoctorChecks, unsafeCheck } from './rust-doctor.ts'
 import { frontendLockfileExists, frontendScriptChecks, frontendSourceChecks, isPlainStaticFrontend } from './frontend-policy.ts'
 import type { DoctorCheck, DoctorReport, WorkspaceDoctorReport, TovukConfig } from './types.ts'
@@ -67,6 +67,7 @@ function runDoctor(projectDir: string): DoctorReport {
   if (kind === 'static_frontend') {
     checks.push(...staticFrontendChecks(projectDir, configResult.valid))
   } else {
+    checks.push(backendJavascriptSourceCheck(projectDir))
     checks.push(...rustDoctorChecks(projectDir, configResult.valid))
   }
 
@@ -151,6 +152,7 @@ function fullstackChecks(projectDir: string, config: TovukConfig, configValid: b
   const frontendDir = path.join(projectDir, frontendRoot)
   return [
     ...requiredFilesAt(backendDir, backendRoot, ['Cargo.toml', 'Cargo.lock']),
+    backendJavascriptSourceCheck(backendDir, backendRoot),
     ...rustDoctorChecks(backendDir, configValid),
     ...requiredFilesAt(frontendDir, frontendRoot, isPlainStaticFrontend(frontendDir) ? ['index.html'] : ['package.json']),
     ...staticFrontendChecks(frontendDir, configValid)
@@ -179,6 +181,29 @@ function staticFrontendChecks(projectDir: string, configValid: boolean): DoctorC
 function frontendLockfileCheck(projectDir: string): DoctorCheck {
   const ok = frontendLockfileExists(projectDir)
   return doctorCheck('frontend lockfile', ok, 'found', 'missing', 'Commit package-lock.json, pnpm-lock.yaml, yarn.lock, bun.lock, or bun.lockb, then retry.')
+}
+
+function backendJavascriptSourceCheck(projectDir: string, label = ''): DoctorCheck {
+  const matches: string[] = []
+  walkProjectFiles(projectDir, (_file, relative) => {
+    if (isBackendJavascriptOrTypescriptSource(relative)) {
+      matches.push(label ? `${label}/${relative}` : relative)
+    }
+  })
+  return doctorCheck(
+    'rust backend js/ts server source',
+    matches.length === 0,
+    'none found',
+    matches.slice(0, 5).join(', '),
+    'Move API routes, SSR handlers, middleware, and server logic to Rust. Keep JS/TS only in static frontend roots.'
+  )
+}
+
+function isBackendJavascriptOrTypescriptSource(relative: string): boolean {
+  if (relative.endsWith('.d.ts') || !/\.(?:cjs|js|jsx|mjs|ts|tsx)$/iu.test(relative)) {
+    return false
+  }
+  return relative.split('/').some((component) => ['api', 'app', 'pages', 'routes', 'server', 'src'].includes(component))
 }
 
 function isWorkspaceDoctorReport(report: DoctorReport | WorkspaceDoctorReport): report is WorkspaceDoctorReport {
