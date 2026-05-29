@@ -19,14 +19,14 @@ const pyInit = readFileSync('packages/tovuk-py/src/tovuk/__init__.py', 'utf8')
 const pythonCli = readFileSync('packages/tovuk-py/src/tovuk/cli.py', 'utf8')
 const cargoToml = readFileSync('crates/tovuk/Cargo.toml', 'utf8')
 const cargoLock = readFileSync('crates/tovuk/Cargo.lock', 'utf8')
-const cargoCli = readFileSync('crates/tovuk/src/main.rs', 'utf8')
+const cargoCliConstants = readFileSync('crates/tovuk/src/cli/constants.rs', 'utf8')
 const formula = readFileSync('Formula/tovuk.rb', 'utf8')
 
 const pyprojectVersion = match(pyproject, /^version = "([^"]+)"/mu, 'PyPI project version')
 const pyInitVersion = match(pyInit, /__version__ = "([^"]+)"/u, 'Python package version')
 const cargoTomlVersion = match(cargoToml, /^version = "([^"]+)"/mu, 'Cargo.toml version')
 const cargoLockVersion = match(cargoLock, /name = "tovuk"\nversion = "([^"]+)"/u, 'Cargo.lock version')
-const cargoCliVersion = match(cargoCli, /const VERSION: &str = "([^"]+)"/u, 'Cargo CLI version')
+const cargoCliVersion = match(cargoCliConstants, /const VERSION: &str = "([^"]+)"/u, 'Cargo CLI version')
 
 for (const [label, version] of [
   ['PyPI project', pyprojectVersion],
