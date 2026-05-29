@@ -22,11 +22,9 @@ const forbiddenLifecycleScripts = [
 const requiredRuntimeDependencies = ['tsx']
 const requiredDevelopmentDependencies = [
   '@types/node',
-  '@typescript/native-preview',
   'fallow',
   'oxlint',
-  'oxlint-tsgolint',
-  'typescript'
+  'oxlint-tsgolint'
 ]
 
 const requiredPackageScripts = {
@@ -39,7 +37,7 @@ const requiredPackageScripts = {
   'lint:health': 'fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity --format json | jq -e \'[.findings[] | select(.severity == "critical")] | length == 0\' >/dev/null && fallow health --production --score --format json | jq -e \'.health_score.score >= 90\' >/dev/null',
   'pack:dry': 'npm pack --dry-run',
   runtime: 'src/tovuk.ts --version',
-  typecheck: 'tsgo --noEmit -p tsconfig.json'
+  typecheck: 'oxlint src --deny-warnings --type-aware --type-check --tsconfig tsconfig.json'
 }
 
 const requiredCompilerOptions = {

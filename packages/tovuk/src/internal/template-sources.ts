@@ -6,7 +6,7 @@ function frontendPackageJson(name: string): string {
     private: true,
     type: 'module',
     scripts: {
-      typecheck: 'tsgo --noEmit',
+      typecheck: 'oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json',
       lint: 'oxlint src vite.config.ts --deny-warnings && fallow dead-code --production --include-dupes --include-entry-exports --fail-on-issues && fallow dupes --production --mode semantic --threshold 1 --ignore-imports --fail-on-issues && fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity',
       build: 'vite build',
       preview: 'vite preview --host 0.0.0.0'
@@ -20,11 +20,10 @@ function frontendPackageJson(name: string): string {
       '@types/node': '^25.9.1',
       '@types/react': '^19.2.15',
       '@types/react-dom': '^19.2.3',
-      '@typescript/native-preview': '^7.0.0-dev.20260527.2',
       '@vitejs/plugin-react': '^6.0.2',
       fallow: '^2.84.0',
       oxlint: '^1.67.0',
-      typescript: '^6.0.3',
+      'oxlint-tsgolint': '^0.23.0',
       vite: '^8.0.14'
     }
   })

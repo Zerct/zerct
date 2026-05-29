@@ -112,7 +112,7 @@ cat >"$policy_fixture/package.json" <<'EOF'
 {
   "scripts": {
     "build": "vite build",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
     "lint": "oxlint src && prettier --check src"
   }
 }
@@ -136,7 +136,7 @@ cat >"$policy_fixture/package.json" <<'EOF'
 {
   "scripts": {
     "build": "vite build",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
     "lint": "oxlint src vite.config.ts --deny-warnings"
   }
 }

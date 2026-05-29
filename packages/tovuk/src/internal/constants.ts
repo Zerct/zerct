@@ -126,7 +126,7 @@ Usage:
 
 Agent contract:
   - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
-  - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, tsgo typecheck, native lint, and Fallow quality gates.
+  - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
   - Run deploy from a repo root with nested tovuk.toml files to deploy the whole workspace in one command.
   - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.

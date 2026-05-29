@@ -44,8 +44,8 @@ Static frontend contract:
 - Browser source is `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
   `components`.
 - `package.json` has `typecheck`, `lint`, and `build` scripts.
-- `typecheck` runs `tsgo --noEmit` with `@typescript/native-preview`
-  installed.
+- `typecheck` runs stable native type-aware TypeScript checks such as
+  `oxlint --type-aware --type-check`.
 - `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`.
 - `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health` gates.
 - `[build].check` installs dependencies and runs package scripts for typecheck
