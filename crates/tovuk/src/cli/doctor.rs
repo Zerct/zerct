@@ -5,12 +5,13 @@ use super::{
     errors::{
         AgentErrorPayload, CliError, CliFailure, Result, agent_error, internal_error, print_json,
     },
-    frontend_checks::{backend_javascript_source_check, static_frontend_checks},
+    frontend_checks::static_frontend_checks,
     project::walk_project_files,
     project_kind::ProjectKind,
     project_layout::{
         fullstack_backend_required_files, fullstack_frontend_required_files, required_files,
     },
+    source_policy::backend_javascript_or_typescript_sources,
 };
 use serde::Serialize;
 use std::{
@@ -307,6 +308,29 @@ pub(crate) fn required_file_checks(project_dir: &Path, kind: ProjectKind) -> Vec
             )
         })
         .collect()
+}
+
+pub(crate) fn backend_javascript_source_check(project_dir: &Path, label: &str) -> DoctorCheck {
+    let matches = backend_javascript_or_typescript_sources(project_dir, label);
+    DoctorCheck {
+        name: "rust backend js/ts server source".to_owned(),
+        ok: matches.is_empty(),
+        message: if matches.is_empty() {
+            "none found".to_owned()
+        } else {
+            matches
+                .iter()
+                .take(5)
+                .cloned()
+                .collect::<Vec<_>>()
+                .join(", ")
+        },
+        agent_instruction: if matches.is_empty() {
+            None
+        } else {
+            Some("Move API routes, SSR handlers, middleware, and server logic to Rust. Keep JS/TS only in static frontend roots.".to_owned())
+        },
+    }
 }
 
 pub(crate) fn fullstack_checks(
