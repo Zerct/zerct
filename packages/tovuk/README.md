@@ -9,7 +9,9 @@ tovuk doctor --json
 tovuk deploy --wait --json
 ```
 
-`tovuk` is the public npm command.
+The npm package installs the native Tovuk binary for the current platform.
+Node is required by npm to install the package, but the `tovuk` command itself
+does not delegate to `npx`, `tsx`, or any JavaScript runtime.
 
 Rust backends expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
@@ -65,6 +67,7 @@ tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app 
 When the issue is fixed, resolve the ticket:
 
 ```sh
+tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 

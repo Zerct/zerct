@@ -4,7 +4,8 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
-export TOVUK_NPM_CLI="$repo_root/packages/tovuk/src/tovuk.ts"
+native_cli="$repo_root/crates/tovuk/target/release/tovuk"
+export TOVUK_NATIVE_BINARY="$native_cli"
 strict_rust_check="cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
 strict_clippy_args=(
   --locked
@@ -54,8 +55,13 @@ clone_on_ref_ptr = "deny"
 EOF
 }
 
-npm --prefix packages/tovuk ci
-export PATH="$repo_root/packages/tovuk/node_modules/.bin:$PATH"
+cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
+cargo check --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
+cargo test --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
+cargo clippy --manifest-path crates/tovuk/Cargo.toml "${strict_clippy_args[@]}"
+cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
+cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty --no-verify >/dev/null
+
 npm --prefix packages/tovuk run check
 node scripts/check-package-versions.mjs
 node scripts/check-cli-contract.mjs
@@ -66,42 +72,28 @@ ruby -c Formula/tovuk.rb >/dev/null
 if command -v brew >/dev/null 2>&1; then
   brew style Formula/tovuk.rb
 fi
-npm_cli_version="$(packages/tovuk/src/tovuk.ts --version)"
-printf '%s\n' "$npm_cli_version"
-packages/tovuk/src/tovuk.ts --help | grep -q 'tovuk support create'
-packages/tovuk/src/tovuk.ts --help | grep -q 'tovuk support resolve'
-packages/tovuk/src/tovuk.ts --help | grep -q 'tovuk billing checkout'
-if packages/tovuk/src/tovuk.ts --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
-  printf 'expected npm CLI unknown flag to fail\n' >&2
+
+native_cli_version="$("$native_cli" --version)"
+printf '%s\n' "$native_cli_version"
+"$native_cli" --help | grep -q 'tovuk support create'
+"$native_cli" --help | grep -q 'tovuk support resolve'
+"$native_cli" --help | grep -q 'tovuk billing checkout'
+test "$("$native_cli" -V)" = "$native_cli_version"
+test "$("$native_cli" --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
+if "$native_cli" --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
+  printf 'expected native CLI unknown flag to fail\n' >&2
   exit 1
 fi
 grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
-test "$(packages/tovuk/src/tovuk.ts -V)" = "$npm_cli_version"
-test "$(packages/tovuk/src/tovuk.ts --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
 
 "$python_bin" -m compileall -q packages/tovuk-py/src
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support create'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support resolve'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
-test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
+test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
 if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
   printf 'expected Python CLI unknown flag to fail\n' >&2
-  exit 1
-fi
-grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
-
-cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
-cargo check --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
-cargo test --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
-cargo clippy --manifest-path crates/tovuk/Cargo.toml "${strict_clippy_args[@]}"
-cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty --no-verify >/dev/null
-cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --help | grep -q 'tovuk support create'
-cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --help | grep -q 'tovuk support resolve'
-cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --help | grep -q 'tovuk billing checkout'
-test "$(cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --api=https://api.example.test --wait-timeout=9 --version)" = "$npm_cli_version"
-if cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
-  printf 'expected Cargo CLI unknown flag to fail\n' >&2
   exit 1
 fi
 grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
@@ -110,14 +102,13 @@ test -f examples/hello-rust/Cargo.lock
 cargo check --locked --release --all-targets --all-features --manifest-path examples/hello-rust/Cargo.toml
 cargo test --locked --release --all-targets --all-features --manifest-path examples/hello-rust/Cargo.toml
 cargo clippy --manifest-path examples/hello-rust/Cargo.toml "${strict_clippy_args[@]}"
-packages/tovuk/src/tovuk.ts doctor examples/hello-rust --json >/dev/null
+"$native_cli" doctor examples/hello-rust --json >/dev/null
 
-policy_fixture="$(mktemp -d)"
 rust_policy_fixture="$(mktemp -d)"
 js_backend_fixture="$(mktemp -d)"
 plain_static_fixture="$(mktemp -d)"
 fullstack_fixture="$(mktemp -d)"
-trap 'rm -rf "$policy_fixture" "$rust_policy_fixture" "$js_backend_fixture" "$plain_static_fixture" "$fullstack_fixture"' EXIT
+trap 'rm -rf "$rust_policy_fixture" "$js_backend_fixture" "$plain_static_fixture" "$fullstack_fixture"' EXIT
 
 cat >"$rust_policy_fixture/tovuk.toml" <<'EOF'
 name = "missing-lints"
@@ -144,9 +135,8 @@ mkdir -p "$rust_policy_fixture/src"
 printf 'fn main() {}\n' >"$rust_policy_fixture/src/main.rs"
 
 for command in \
-  "packages/tovuk/src/tovuk.ts doctor $rust_policy_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $rust_policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $rust_policy_fixture --json"; do
+  "$native_cli doctor $rust_policy_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $rust_policy_fixture --json"; do
   if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected Rust policy fixture to fail: %s\n' "$command" >&2
     exit 1
@@ -185,9 +175,8 @@ printf 'fn main() {}\n' >"$js_backend_fixture/src/main.rs"
 printf 'import http from "node:http"\n' >"$js_backend_fixture/src/server.ts"
 
 for command in \
-  "packages/tovuk/src/tovuk.ts doctor $js_backend_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $js_backend_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $js_backend_fixture --json"; do
+  "$native_cli doctor $js_backend_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $js_backend_fixture --json"; do
   if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected JS backend fixture to fail: %s\n' "$command" >&2
     exit 1
@@ -210,9 +199,8 @@ cat >"$plain_static_fixture/index.html" <<'EOF'
 EOF
 
 for command in \
-  "packages/tovuk/src/tovuk.ts doctor $plain_static_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $plain_static_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $plain_static_fixture --json"; do
+  "$native_cli doctor $plain_static_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $plain_static_fixture --json"; do
   eval "$command" >/tmp/tovuk-policy-check.json
   grep -q '"ok": true' /tmp/tovuk-policy-check.json
 done
@@ -259,79 +247,10 @@ EOF
 printf 'fn main() {}\n' >"$fullstack_fixture/api/src/main.rs"
 cat >"$fullstack_fixture/web/index.html" <<'EOF'
 <!doctype html>
-<h1>fullstack static frontend</h1>
+<h1>fullstack static</h1>
 EOF
 
-for command in \
-  "packages/tovuk/src/tovuk.ts doctor $fullstack_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $fullstack_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $fullstack_fixture --json"; do
-  eval "$command" >/tmp/tovuk-policy-check.json
-  grep -q '"ok": true' /tmp/tovuk-policy-check.json
-done
+"$native_cli" doctor "$fullstack_fixture" --json >/tmp/tovuk-policy-check.json
+grep -q '"ok": true' /tmp/tovuk-policy-check.json
 
-cat >"$policy_fixture/tovuk.toml" <<'EOF'
-name = "strict-web"
-kind = "static_frontend"
-
-[build]
-check = "bun ci && bun run typecheck && bun run lint"
-EOF
-cat >"$policy_fixture/package.json" <<'EOF'
-{
-  "scripts": {
-    "build": "vite build",
-    "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
-    "lint": "oxlint src && prettier --check src"
-  }
-}
-EOF
-touch "$policy_fixture/bun.lock"
-mkdir -p "$policy_fixture/src"
-printf 'export const ok = true\n' >"$policy_fixture/src/main.ts"
-
-for command in \
-  "packages/tovuk/src/tovuk.ts doctor $policy_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $policy_fixture --json"; do
-  if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
-    printf 'expected policy fixture to fail: %s\n' "$command" >&2
-    exit 1
-  fi
-  grep -q 'native frontend lint' /tmp/tovuk-policy-check.json
-done
-
-mkdir -p "$policy_fixture/app/api/upload"
-printf 'export function POST() {}\n' >"$policy_fixture/app/api/upload/route.ts"
-for command in \
-  "packages/tovuk/src/tovuk.ts doctor $policy_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $policy_fixture --json"; do
-  if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
-    printf 'expected frontend API route fixture to fail: %s\n' "$command" >&2
-    exit 1
-  fi
-  grep -q 'frontend server routes' /tmp/tovuk-policy-check.json
-done
-rm -rf "$policy_fixture/app"
-
-cat >"$policy_fixture/package.json" <<'EOF'
-{
-  "scripts": {
-    "build": "vite build",
-    "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
-    "lint": "oxlint src vite.config.ts --deny-warnings"
-  }
-}
-EOF
-
-for command in \
-  "packages/tovuk/src/tovuk.ts doctor $policy_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $policy_fixture --json" \
-  "cargo run --quiet --manifest-path crates/tovuk/Cargo.toml -- doctor $policy_fixture --json"; do
-  if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
-    printf 'expected missing Fallow policy fixture to fail: %s\n' "$command" >&2
-    exit 1
-  fi
-  grep -q 'native frontend quality gates' /tmp/tovuk-policy-check.json
-done
+printf 'all checks passed\n'

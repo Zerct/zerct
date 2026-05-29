@@ -2,8 +2,8 @@
 
 Rust CLI package for deploying Rust backends, static frontends, and fullstack
 apps to Tovuk.
-It delegates to the npm Tovuk CLI so Cargo stays aligned with the primary
-agent command surface.
+This is the native source of truth for the Tovuk CLI. It does not require
+Node.js, npm, `npx`, `tsx`, or Python at runtime.
 
 ```sh
 cargo install tovuk
@@ -23,13 +23,11 @@ type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
 or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health
 gates.
 
-The primary first-run path remains:
+The npm package is also available:
 
 ```sh
 tovuk deploy
 ```
-
-Cargo installs require Node.js 18+ with `npx` available at runtime.
 
 The Cargo package exposes the same agent command surface as npm:
 

@@ -8,6 +8,8 @@ on:
     paths:
       - "packages/tovuk-py/pyproject.toml"
       - "packages/tovuk-py/src/tovuk/__init__.py"
+      - "packages/tovuk-py/src/tovuk/cli.py"
+      - "crates/tovuk/**"
 
 permissions:
   contents: read
@@ -24,6 +26,7 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
+      - uses: dtolnay/rust-toolchain@stable
       - name: Verify unscoped PyPI project name
         run: |
           python3 - <<'PY'
@@ -74,6 +77,15 @@ jobs:
           PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
       - if: steps.version.outputs.exists == 'false'
         run: node scripts/check-prose-style.mjs
+      - if: steps.version.outputs.exists == 'false'
+        run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
+      - if: steps.version.outputs.exists == 'false'
+        run: |
+          python3 -m compileall -q packages/tovuk-py/src
+          PYTHONPATH=packages/tovuk-py/src python3 -m tovuk --help >/tmp/tovuk-help.txt
+          grep -q 'tovuk support create' /tmp/tovuk-help.txt
+        env:
+          TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
       - uses: actions/setup-python@v6
         if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         with:

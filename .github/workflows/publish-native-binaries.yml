@@ -1,0 +1,68 @@
+name: Publish native binaries
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "crates/tovuk/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: blacksmith-2vcpu-ubuntu-2404
+            target: x86_64-unknown-linux-gnu
+            binary: tovuk
+          - runner: macos-15
+            target: aarch64-apple-darwin
+            binary: tovuk
+          - runner: macos-15
+            target: x86_64-apple-darwin
+            binary: tovuk
+          - runner: windows-2025
+            target: x86_64-pc-windows-msvc
+            binary: tovuk.exe
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          version="$(awk -F '"' '/^version = / { print $2; exit }' crates/tovuk/Cargo.toml)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Build
+        shell: bash
+        run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
+      - name: Prepare asset
+        id: asset
+        shell: bash
+        run: |
+          asset="tovuk-${{ steps.version.outputs.version }}-${{ matrix.target }}"
+          if [[ "${{ matrix.binary }}" == *.exe ]]; then
+            asset="${asset}.exe"
+          fi
+          cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "$asset"
+          chmod +x "$asset" || true
+          echo "name=$asset" >> "$GITHUB_OUTPUT"
+      - name: Upload release asset
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tag="v${{ steps.version.outputs.version }}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag"
+          fi
+          gh release upload "$tag" "${{ steps.asset.outputs.name }}" --clobber

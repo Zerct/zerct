@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "Tovuk native binary was not installed. Reinstall with npm scripts enabled, or install from https://github.com/tovuk/tovuk/releases." >&2
+exit 1
