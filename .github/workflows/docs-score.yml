@@ -8,16 +8,29 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   score:
     name: score docs
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
           package-manager-cache: false
+      - uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-mintlify-4.2.578
+          restore-keys: |
+            ${{ runner.os }}-npm-mintlify-
       - name: Check prose style
         run: node scripts/check-prose-style.mjs
       - name: Check public agent readiness
@@ -43,7 +56,7 @@ jobs:
           mkdir -p "$HOME/.config/mintlify"
           printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
           npx --yes mint@4.2.578 score https://docs.tovuk.com --format json > mint-score.json
-          node -e '
+          node <<'NODE'
             const fs = require("node:fs");
             const score = JSON.parse(fs.readFileSync("mint-score.json", "utf8"));
             const value = Number(score.score ?? score.overallScore ?? 0);
@@ -54,7 +67,7 @@ jobs:
               process.exit(1);
             }
             console.log(`Mintlify score is ${value}/100`);
-          '
+          NODE
         env:
           MINTLIFY_CLI_CONFIG_JSON: ${{ secrets.MINTLIFY_CLI_CONFIG_JSON }}
           MINTLIFY_SCORE_MIN: ${{ vars.MINTLIFY_SCORE_MIN }}

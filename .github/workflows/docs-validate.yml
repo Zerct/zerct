@@ -12,16 +12,29 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     name: validate docs
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
           package-manager-cache: false
+      - uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-mintlify-4.2.578
+          restore-keys: |
+            ${{ runner.os }}-npm-mintlify-
       - run: node scripts/check-docs.mjs
       - run: node scripts/check-prose-style.mjs
       - name: Validate Mintlify build

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$repo_root"
+
+workflow_dir=".github/workflows"
+if [ ! -d "$workflow_dir" ]; then
+  printf 'missing %s\n' "$workflow_dir" >&2
+  exit 1
+fi
+
+status=0
+
+reject_match() {
+  local pattern="$1"
+  local message="$2"
+  if rg -n --glob '*.yml' --glob '*.yaml' "$pattern" "$workflow_dir"; then
+    printf '%s\n' "$message" >&2
+    status=1
+  fi
+}
+
+reject_match 'runs-on:\s*(ubuntu|macos|windows)-' \
+  'workflows must use Blacksmith runner labels instead of generic GitHub-hosted labels'
+reject_match 'useblacksmith/(cache|setup-(go|node|python|ruby|java)|rust-cache)' \
+  'deprecated Blacksmith cache forks are forbidden; use official cache-aware actions on Blacksmith runners'
+reject_match 'actions/cache@(v[0-4]|main|master)' \
+  'actions/cache must stay on the latest stable major'
+
+for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
+  [ -e "$workflow" ] || continue
+
+  if ! rg -q '^permissions:' "$workflow"; then
+    printf '%s: missing explicit permissions block\n' "$workflow" >&2
+    status=1
+  fi
+
+  if ! rg -q '^concurrency:' "$workflow"; then
+    printf '%s: missing explicit concurrency block\n' "$workflow" >&2
+    status=1
+  fi
+
+  if rg -q 'actions/checkout@' "$workflow" && ! rg -q 'persist-credentials: false' "$workflow"; then
+    printf '%s: checkout must set persist-credentials: false\n' "$workflow" >&2
+    status=1
+  fi
+
+  if rg -q 'cargo (build|check|test|clippy|package|publish)' "$workflow" \
+    && ! rg -q 'actions/cache@v5' "$workflow"; then
+    printf '%s: Rust jobs must use Blacksmith-backed actions/cache@v5\n' "$workflow" >&2
+    status=1
+  fi
+done
+
+if ! rg -q 'blacksmith-' "$workflow_dir"; then
+  printf 'no Blacksmith runner labels found in workflows\n' >&2
+  status=1
+fi
+
+exit "$status"

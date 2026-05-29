@@ -67,6 +67,7 @@ node scripts/check-package-versions.mjs
 node scripts/check-cli-contract.mjs
 node scripts/check-docs.mjs
 node scripts/check-prose-style.mjs
+scripts/check-github-actions.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb >/dev/null
 if command -v brew >/dev/null 2>&1; then

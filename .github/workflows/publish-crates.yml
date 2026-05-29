@@ -13,13 +13,20 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: publish tovuk to crates.io
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
     environment: crates
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Check registry version
         id: version
         run: |
@@ -44,6 +51,16 @@ jobs:
         run: node scripts/check-prose-style.mjs
       - uses: dtolnay/rust-toolchain@stable
         if: steps.version.outputs.exists == 'false'
+      - uses: actions/cache@v5
+        if: steps.version.outputs.exists == 'false'
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            crates/tovuk/target
+          key: ${{ runner.os }}-cargo-tovuk-crates-${{ hashFiles('crates/tovuk/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-tovuk-crates-
       - if: steps.version.outputs.exists == 'false'
         run: cargo package --locked
         working-directory: crates/tovuk
@@ -52,3 +69,22 @@ jobs:
         working-directory: crates/tovuk
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Verify crates.io package
+        if: steps.version.outputs.exists == 'false'
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          for delay in 0 10 10 10 10 10; do
+            if [ "$delay" != 0 ]; then
+              sleep "$delay"
+            fi
+            status="$(curl -sS -o /tmp/tovuk-crate.json -w "%{http_code}" \
+              -H "Accept: application/json" \
+              -H "User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)" \
+              "https://crates.io/api/v1/crates/tovuk/$version")"
+            if [ "$status" = "200" ]; then
+              exit 0
+            fi
+          done
+          cat /tmp/tovuk-crate.json >&2 || true
+          echo "tovuk@$version was not visible on crates.io after publish" >&2
+          exit 1
