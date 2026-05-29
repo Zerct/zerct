@@ -16,19 +16,36 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: publish tovuk to npm
     runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 20
     environment: npm
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
-          package-manager-cache: false
+          cache: npm
+          cache-dependency-path: packages/tovuk/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            crates/tovuk/target
+          key: ${{ runner.os }}-cargo-tovuk-npm-${{ hashFiles('crates/tovuk/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-tovuk-npm-
       - name: Check unscoped publishing gate
         id: gate
         run: |
@@ -71,3 +88,18 @@ jobs:
         working-directory: packages/tovuk
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Verify npm package
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          for delay in 0 10 10 10 10 10; do
+            if [ "$delay" != 0 ]; then
+              sleep "$delay"
+            fi
+            published="$(npm view "tovuk@$version" version --registry=https://registry.npmjs.org 2>/dev/null || true)"
+            if [ "$published" = "$version" ]; then
+              exit 0
+            fi
+          done
+          echo "tovuk@$version was not visible on npm after publish" >&2
+          exit 1

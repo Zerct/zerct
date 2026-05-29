@@ -11,9 +11,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: build ${{ matrix.target }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -21,21 +26,32 @@ jobs:
           - runner: blacksmith-2vcpu-ubuntu-2404
             target: x86_64-unknown-linux-gnu
             binary: tovuk
-          - runner: macos-15
+          - runner: blacksmith-6vcpu-macos-15
             target: aarch64-apple-darwin
             binary: tovuk
-          - runner: macos-15
+          - runner: blacksmith-6vcpu-macos-15
             target: x86_64-apple-darwin
             binary: tovuk
-          - runner: windows-2025
+          - runner: blacksmith-2vcpu-windows-2025
             target: x86_64-pc-windows-msvc
             binary: tovuk.exe
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            crates/tovuk/target/${{ matrix.target }}
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-native-${{ hashFiles('crates/tovuk/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.target }}-cargo-native-
       - name: Read version
         id: version
         shell: bash
@@ -50,9 +66,9 @@ jobs:
         shell: bash
         run: |
           asset="tovuk-${{ steps.version.outputs.version }}-${{ matrix.target }}"
-          if [[ "${{ matrix.binary }}" == *.exe ]]; then
-            asset="${asset}.exe"
-          fi
+          case "${{ matrix.binary }}" in
+            *.exe) asset="${asset}.exe" ;;
+          esac
           cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "$asset"
           chmod +x "$asset" || true
           echo "name=$asset" >> "$GITHUB_OUTPUT"
@@ -66,3 +82,12 @@ jobs:
             gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag"
           fi
           gh release upload "$tag" "${{ steps.asset.outputs.name }}" --clobber
+      - name: Verify release asset
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tag="v${{ steps.version.outputs.version }}"
+          gh release view "$tag" --json assets \
+            --jq '.assets[].name' \
+            | grep -Fx "${{ steps.asset.outputs.name }}"
