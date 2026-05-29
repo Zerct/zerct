@@ -34,7 +34,7 @@ pub(crate) fn login_and_store(cli: &CliOptions) -> Result<String> {
             "login_failed",
             "Tovuk login did not return a browser URL.",
             "Retry `tovuk login`. If it keeps failing, check Tovuk status.",
-            cli.json,
+            cli.output.json,
         ));
     }
     open_url(&login_url);
@@ -58,7 +58,7 @@ pub(crate) fn login_and_store(cli: &CliOptions) -> Result<String> {
             "login_failed",
             "Tovuk login did not return a session token.",
             "Run `tovuk login` again and complete the browser login.",
-            cli.json,
+            cli.output.json,
         ));
     }
     write_session_token(&token)?;
@@ -83,7 +83,7 @@ pub(crate) fn poll_login(cli: &CliOptions, device_code: &str, start: &Value) -> 
             "login_failed",
             "Tovuk login did not return a device code.",
             "Retry `tovuk login`. If it keeps failing, check Tovuk status.",
-            cli.json,
+            cli.output.json,
         ));
     }
 
@@ -120,7 +120,7 @@ pub(crate) fn login_expired(cli: &CliOptions) -> Result<Value> {
         "login_expired",
         "Tovuk login expired before it completed.",
         "Run `tovuk login` again and finish the browser login in the newly opened tab.",
-        cli.json,
+        cli.output.json,
     ))
 }
 

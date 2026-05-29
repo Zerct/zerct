@@ -1,4 +1,13 @@
-use super::*;
+use super::{
+    ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, BASE64, CliOptions, Compression, DirEntry, Duration,
+    GzEncoder, Method, Path, PathBuf, Result, Stdio, Value, WALK_EXCLUDED_DIRS,
+    WORKSPACE_EXCLUDED_DIRS, WalkDir, agent_error, api_request, encode_component, ensure_directory,
+    json, nested_string, number_field, parse_tovuk_toml, path_relative,
+    payment_required_agent_error, print_json, progress, read_or_login_token, run_doctor,
+    string_field,
+};
+use base64::Engine as _;
+use std::{collections::BTreeSet, fs, process::Command, thread, time::Instant};
 
 #[derive(Clone, Debug)]
 pub(crate) struct DeployProjectInfo {
@@ -21,13 +30,13 @@ pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
             "missing_project_contract",
             "No tovuk.toml was found.",
             "Run `tovuk init` in each app directory, or pass a project path.",
-            cli.json,
+            cli.output.json,
         ));
     }
     let token = read_or_login_token(cli)?;
     let plan = create_deploy_plan(&projects, cli, &token)?;
     let mut results = deploy_projects(&plan, cli, &token)?;
-    if cli.wait {
+    if cli.deployment.wait {
         wait_for_workspace_builds(cli, &token, &mut results)?;
     }
     if results.len() == 1 {
@@ -51,15 +60,15 @@ pub(crate) fn deploy_projects(
 ) -> Result<Vec<WorkspaceDeployResult>> {
     let mut results = Vec::new();
     let workspace_deploy = plan.len() > 1;
-    if workspace_deploy && !cli.json {
+    if workspace_deploy && !cli.output.json {
         println!("deploying {} projects", plan.len());
     }
     for item in plan {
-        if workspace_deploy && !cli.json {
+        if workspace_deploy && !cli.output.json {
             println!("checking {}", item.project.relative);
         }
         let response = deploy_project(&item.project.dir, cli, token, item.wants_database)?;
-        if workspace_deploy && !cli.json {
+        if workspace_deploy && !cli.output.json {
             println!(
                 "{} queued {}",
                 item.project.relative,
@@ -99,20 +108,20 @@ pub(crate) fn deploy_project(
             "doctor_failed",
             "Tovuk doctor failed.",
             instruction,
-            cli.json,
+            cli.output.json,
         ));
     }
     let body = json!({
         "config": report.config,
         "commit_sha": git_commit_sha(project_dir),
         "wants_database": wants_database,
-        "source_archive_base64": create_archive_base64(project_dir, cli.json)?,
+        "source_archive_base64": create_archive_base64(project_dir, cli.output.json)?,
     });
     api_request(cli, Method::POST, "/v1/deploy", Some(token), Some(body))
 }
 
 pub(crate) fn print_deploy_result(response: &Value, cli: &CliOptions) -> Result<()> {
-    if cli.json {
+    if cli.output.json {
         return print_json(response);
     }
     println!("queued {}", nested_string(response, &["build_job", "id"]));
@@ -130,7 +139,7 @@ pub(crate) fn print_workspace_deploy_results(
     results: &[WorkspaceDeployResult],
     cli: &CliOptions,
 ) -> Result<()> {
-    if cli.json {
+    if cli.output.json {
         let deploys = results
             .iter()
             .map(|result| {
@@ -174,7 +183,7 @@ pub(crate) fn wait_for_workspace_builds(
 }
 
 pub(crate) fn wait_for_build(cli: &CliOptions, token: &str, build_id: &str) -> Result<Value> {
-    let deadline = Instant::now() + Duration::from_secs(cli.wait_timeout_seconds);
+    let deadline = Instant::now() + Duration::from_secs(cli.deployment.wait_timeout_seconds);
     let mut last_status = String::new();
     while Instant::now() <= deadline {
         let response = api_request(
@@ -191,7 +200,7 @@ pub(crate) fn wait_for_build(cli: &CliOptions, token: &str, build_id: &str) -> R
                 "build_status_unavailable",
                 "Build status is unavailable.",
                 format!("Retry with `tovuk logs --build {build_id}`."),
-                cli.json,
+                cli.output.json,
             ));
         }
         if status != last_status {
@@ -210,7 +219,7 @@ pub(crate) fn wait_for_build(cli: &CliOptions, token: &str, build_id: &str) -> R
         "build_wait_timeout",
         format!("Timed out waiting for build {build_id}."),
         format!("Run `tovuk logs --build {build_id}` to continue watching."),
-        cli.json,
+        cli.output.json,
     ))
 }
 
@@ -223,7 +232,7 @@ pub(crate) fn create_deploy_plan(
         .iter()
         .map(|project| DeployPlanProject {
             project: project.clone(),
-            wants_database: cli.database
+            wants_database: cli.deployment.database
                 && (project.kind == "rust_backend" || project.kind == "fullstack"),
         })
         .collect::<Vec<_>>();
@@ -236,7 +245,7 @@ pub(crate) fn reject_invalid_database_targets(
     plan: &[DeployPlanProject],
     cli: &CliOptions,
 ) -> Result<()> {
-    if cli.database
+    if cli.deployment.database
         && plan.len() == 1
         && plan
             .first()
@@ -246,7 +255,7 @@ pub(crate) fn reject_invalid_database_targets(
             "invalid_database_target",
             "Static frontends cannot attach managed Postgres directly.",
             "Deploy a Rust backend with managed Postgres and call it from the frontend.",
-            cli.json,
+            cli.output.json,
         ));
     }
     Ok(())

@@ -192,7 +192,7 @@ pub(crate) fn open_url(url: &str) {
 }
 
 pub(crate) fn progress(cli: &CliOptions, message: &str) {
-    if cli.json {
+    if cli.output.json {
         eprintln!("{message}");
     } else {
         println!("{message}");

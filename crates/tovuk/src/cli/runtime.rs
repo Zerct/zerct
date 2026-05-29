@@ -18,11 +18,11 @@ pub(crate) fn runtime_entrypoint() -> ExitCode {
 pub(crate) fn run() -> Result<ExitCode> {
     let argv = env::args().skip(1).collect::<Vec<_>>();
     let cli = parse_args(&argv)?;
-    if cli.help {
+    if cli.output.help {
         println!("{}", help_text());
         return Ok(ExitCode::SUCCESS);
     }
-    if cli.version {
+    if cli.output.version {
         println!("{VERSION}");
         return Ok(ExitCode::SUCCESS);
     }
@@ -30,7 +30,7 @@ pub(crate) fn run() -> Result<ExitCode> {
     match cli.command.as_str() {
         "init" => init_project(&project_path(cli.args.first())?, &cli.template),
         "install" => install_project(&project_path(cli.args.first())?, &cli.template),
-        "doctor" => doctor_project(&project_path(cli.args.first())?, cli.json),
+        "doctor" => doctor_project(&project_path(cli.args.first())?, cli.output.json),
         "preview" => preview_project(&project_path(cli.args.first())?, cli.port),
         "login" => login(&cli),
         "deploy" => deploy(&project_path(cli.args.first())?, &cli),
@@ -54,7 +54,7 @@ pub(crate) fn run() -> Result<ExitCode> {
             "unknown_command",
             "Unknown Tovuk command.",
             "Run `tovuk --help` and retry with a supported command.",
-            cli.json,
+            cli.output.json,
         )),
     }?;
 
