@@ -23,8 +23,12 @@ ambiguous to run.
 - Rust backends must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
+- Free app object storage includes 512 MiB total, 200 objects, and a 64 MiB
+  single-object limit.
+- Pro app object storage includes 10 GiB total, 5000 objects, and a 256 MiB
+  single-object limit.
 
-## Planned guardrails
+## Plan limit recovery
 
 When a free-tier account reaches a plan limit, agents can create a hosted
 subscription link without dashboard work:

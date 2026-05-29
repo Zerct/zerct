@@ -1,0 +1,50 @@
+---
+title: "Object Storage"
+description: "Agent-ready app files and media storage."
+---
+
+Tovuk object storage is scoped to an app and is available through the native
+CLI, SDK-compatible HTTP API, and presigned upload/download URLs. Agents should
+prefer JSON output so paths, public URLs, byte counts, and error recovery
+instructions can be parsed without dashboard access.
+
+## CLI
+
+```sh
+tovuk storage list --app app_1 --json
+tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
+tovuk storage url --app app_1 uploads/logo.png --json
+tovuk storage delete --app app_1 uploads/logo.png --json
+```
+
+`tovuk files` and `tovuk media` are aliases for the same command group. Omit
+`--public` for private files. Use `--content-type <mime>` when the CLI cannot
+infer the media type from the extension.
+
+Public files return a CDN URL on `media.tovuk.app`. Private files use
+short-lived download URLs.
+
+## Limits
+
+Free plan:
+
+- 512 MiB total object storage
+- 200 objects
+- 64 MiB per object
+
+Pro plan:
+
+- 10 GiB total object storage
+- 5000 objects
+- 256 MiB per object
+
+When a storage limit blocks work, run:
+
+```sh
+tovuk billing checkout "Object storage limit reached" --json
+```
+
+Show the returned Checkout URL to the user. If the command fails for a platform
+reason after retrying, create a support ticket with the app id, storage path,
+failed command, and first actionable error.

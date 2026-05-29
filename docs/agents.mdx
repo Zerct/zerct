@@ -14,12 +14,14 @@ Use this page when an AI coding agent is deploying with Tovuk.
 5. If the build fails, run `npx tovuk logs --build <build_id> --json`.
 6. Fix the first actionable error from the logs.
 7. Redeploy with the same deploy command.
-8. If a plan limit blocks the deploy, run
+8. For app files or media, use `npx tovuk storage ... --json` instead of the
+   dashboard.
+9. If a plan limit blocks the deploy or storage action, run
    `npx tovuk billing checkout --json` and show the returned
    `checkout.url` to the human.
-9. If Tovuk itself needs help, create a support ticket with the exact command,
+10. If Tovuk itself needs help, create a support ticket with the exact command,
    app id, build id, deploy id, and first actionable log line.
-10. Resolve the support ticket after the agent fixes the issue.
+11. Resolve the support ticket after the agent fixes the issue.
 
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
 typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
@@ -76,6 +78,18 @@ When a limit is the blocker, create a hosted Stripe subscription checkout link:
 npx tovuk billing checkout "Project limit reached" --json
 ```
 
+## Storage commands
+
+```sh
+npx tovuk storage list --app app_1 --json
+npx tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
+npx tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
+npx tovuk storage delete --app app_1 uploads/logo.png --json
+```
+
+Use `--public` only when the app needs a CDN URL. Use `--content-type <mime>`
+when the extension is missing or ambiguous.
+
 ## Starter prompt
 
 ```txt
@@ -95,6 +109,7 @@ npx tovuk builds --app app_1 --json
 npx tovuk logs --build job_1 --json
 npx tovuk logs --deploy deploy_1 --json
 npx tovuk logs --app app_1 --json
+npx tovuk storage list --app app_1 --json
 npx tovuk billing checkout --json
 npx tovuk support list --json
 npx tovuk support resolve ticket_0123456789abcdef0123 --json

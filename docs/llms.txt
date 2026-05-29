@@ -93,6 +93,10 @@ npx tovuk logs --build <build_id> --json
 npx tovuk logs --app <app> --json
 npx tovuk env list --app <app> --json
 npx tovuk domains list --app <app> --json
+npx tovuk storage list --app <app> --json
+npx tovuk storage upload --app <app> ./file.png uploads/file.png --public --json
+npx tovuk storage download --app <app> uploads/file.png ./file.png --json
+npx tovuk storage delete --app <app> uploads/file.png --json
 npx tovuk billing checkout --json
 npx tovuk support list --json
 npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app <app> --build <build_id> --deploy <deploy_id> --failing-command "npx tovuk deploy --wait --json" --first-log-line "first actionable log line" --json

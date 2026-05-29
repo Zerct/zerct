@@ -48,6 +48,10 @@
     {
       "name": "Health",
       "description": "API availability endpoints. Context: tags.3."
+    },
+    {
+      "name": "Storage",
+      "description": "App object storage and media endpoints. Context: tags.Storage."
     }
   ],
   "paths": {
@@ -2003,6 +2007,315 @@
           }
         }
       }
+    },
+    "/v1/apps/{app_id}/storage": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "List app storage objects",
+        "description": "List files and media stored for an app. Context: paths./v1/apps/{app_id}/storage.get.",
+        "operationId": "listAppStorageObjects",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageObjectsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage.get.parameters.app_id.",
+            "example": "app_1"
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Delete app storage object",
+        "description": "Delete one app-local storage object by path. Context: paths./v1/apps/{app_id}/storage.delete.",
+        "operationId": "deleteAppStorageObject",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageObjectDeleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage.delete.parameters.app_id.",
+            "example": "app_1"
+          },
+          {
+            "name": "path",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+              "examples": [
+                "uploads/logo.png"
+              ]
+            },
+            "description": "App-local object path. Context: paths./v1/apps/{app_id}/storage.delete.parameters.path.",
+            "example": "uploads/logo.png"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/storage/upload-url": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Create storage upload URL",
+        "description": "Create a short-lived direct upload URL for an app file or media object. Context: paths./v1/apps/{app_id}/storage/upload-url.post.",
+        "operationId": "createAppStorageUploadUrl",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageUploadUrlCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage/upload-url.post.parameters.app_id.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageUploadUrlRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/storage/upload-url",
+                  "value": {
+                    "path": "uploads/logo.png",
+                    "contentType": "image/png",
+                    "sizeBytes": 24812,
+                    "publicRead": true
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/storage/upload-url. Context: paths.POST /v1/apps/{app_id}/storage/upload-url.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/storage/complete": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Complete storage upload",
+        "description": "Validate and mark a direct app object upload complete. Context: paths./v1/apps/{app_id}/storage/complete.post.",
+        "operationId": "completeAppStorageUpload",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageObjectCompleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage/complete.post.parameters.app_id.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageCompleteRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/storage/complete",
+                  "value": {
+                    "path": "uploads/logo.png"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/storage/complete. Context: paths.POST /v1/apps/{app_id}/storage/complete.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/storage/download-url": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Create storage download URL",
+        "description": "Create a short-lived direct download URL for an uploaded app object. Context: paths./v1/apps/{app_id}/storage/download-url.post.",
+        "operationId": "createAppStorageDownloadUrl",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageDownloadUrlCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage/download-url.post.parameters.app_id.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageDownloadUrlRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/storage/download-url",
+                  "value": {
+                    "path": "uploads/logo.png"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/storage/download-url. Context: paths.POST /v1/apps/{app_id}/storage/download-url.requestBody."
+        }
+      }
     }
   },
   "components": {
@@ -2521,7 +2834,9 @@
                     "deployCount": 3,
                     "monthlyDeployCount": 3,
                     "monthlyBuildMinutes": 5,
-                    "customDomainCount": 1
+                    "customDomainCount": 1,
+                    "storageObjectCount": 2,
+                    "objectStorageMib": 24
                   },
                   "limits": {
                     "projects": 3,
@@ -2535,7 +2850,11 @@
                     "maxBuildDurationSeconds": 600,
                     "customDomains": 10,
                     "alwaysOnApps": 0,
-                    "logRetentionDays": 3
+                    "logRetentionDays": 3,
+                    "postgresConnectionsPerDatabase": 2,
+                    "objectStorageMib": 512,
+                    "storageObjects": 200,
+                    "storageObjectMaxMib": 64
                   }
                 }
               }
@@ -3300,7 +3619,9 @@
                     "deployCount": 3,
                     "monthlyDeployCount": 3,
                     "monthlyBuildMinutes": 5,
-                    "customDomainCount": 1
+                    "customDomainCount": 1,
+                    "storageObjectCount": 2,
+                    "objectStorageMib": 24
                   },
                   "limits": {
                     "projects": 3,
@@ -3314,7 +3635,11 @@
                     "maxBuildDurationSeconds": 600,
                     "customDomains": 10,
                     "alwaysOnApps": 0,
-                    "logRetentionDays": 3
+                    "logRetentionDays": 3,
+                    "postgresConnectionsPerDatabase": 2,
+                    "objectStorageMib": 512,
+                    "storageObjects": 200,
+                    "storageObjectMaxMib": 64
                   }
                 }
               }
@@ -3366,7 +3691,9 @@
                     "deployCount": 3,
                     "monthlyDeployCount": 3,
                     "monthlyBuildMinutes": 5,
-                    "customDomainCount": 1
+                    "customDomainCount": 1,
+                    "storageObjectCount": 2,
+                    "objectStorageMib": 24
                   },
                   "limits": {
                     "projects": 3,
@@ -3380,7 +3707,11 @@
                     "maxBuildDurationSeconds": 600,
                     "customDomains": 10,
                     "alwaysOnApps": 0,
-                    "logRetentionDays": 3
+                    "logRetentionDays": 3,
+                    "postgresConnectionsPerDatabase": 2,
+                    "objectStorageMib": 512,
+                    "storageObjects": 200,
+                    "storageObjectMaxMib": 64
                   },
                   "apps": [
                     {
@@ -3870,6 +4201,235 @@
             }
           }
         }
+      },
+      "PaymentRequired": {
+        "description": "A paid plan or reduced usage is required. Context: components.responses.PaymentRequired.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "planLimit": {
+                "summary": "Plan limit reached",
+                "value": {
+                  "code": "payment_required",
+                  "message": "Object storage limit reached.",
+                  "agent_instruction": "Delete unused app files with `tovuk storage delete --app <app> <path>`, or open the returned Stripe Checkout URL.",
+                  "docs_url": "https://docs.tovuk.com/pricing",
+                  "checkout_url": "https://checkout.stripe.com/c/pay/cs_test_123"
+                }
+              }
+            }
+          }
+        }
+      },
+      "StorageObjectsLoaded": {
+        "description": "Storage objects loaded. Context: components.responses.StorageObjectsLoaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageObjectsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Storage objects loaded.",
+                "value": {
+                  "objects": [
+                    {
+                      "path": "uploads/logo.png",
+                      "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                      "contentType": "image/png",
+                      "sizeBytes": 24812,
+                      "status": "uploaded",
+                      "publicRead": true,
+                      "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png",
+                      "createdAt": "2026-05-25T12:00:00.000Z",
+                      "updatedAt": "2026-05-25T12:00:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StorageUploadUrlCreated": {
+        "description": "Storage upload URL created. Context: components.responses.StorageUploadUrlCreated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageUrlResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Storage upload URL created.",
+                "value": {
+                  "method": "PUT",
+                  "url": "https://object-storage.example/upload-signature",
+                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "path": "uploads/logo.png",
+                  "expiresSeconds": 900,
+                  "contentType": "image/png",
+                  "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StorageObjectCompleted": {
+        "description": "Storage object upload completed. Context: components.responses.StorageObjectCompleted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageObject"
+            },
+            "examples": {
+              "example": {
+                "summary": "Storage object upload completed.",
+                "value": {
+                  "path": "uploads/logo.png",
+                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "contentType": "image/png",
+                  "sizeBytes": 24812,
+                  "status": "uploaded",
+                  "publicRead": true,
+                  "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png",
+                  "createdAt": "2026-05-25T12:00:00.000Z",
+                  "updatedAt": "2026-05-25T12:00:00.000Z"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StorageDownloadUrlCreated": {
+        "description": "Storage download URL created. Context: components.responses.StorageDownloadUrlCreated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageUrlResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Storage download URL created.",
+                "value": {
+                  "method": "GET",
+                  "url": "https://object-storage.example/upload-signature",
+                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "path": "uploads/logo.png",
+                  "expiresSeconds": 900,
+                  "contentType": null,
+                  "publicUrl": null
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StorageObjectDeleted": {
+        "description": "Storage object deleted. Context: components.responses.StorageObjectDeleted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageDeleteResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Storage object deleted.",
+                "value": {
+                  "path": "uploads/logo.png",
+                  "deleted": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
       }
     },
     "schemas": {
@@ -4347,7 +4907,8 @@
               "payment_required",
               "policy_rejected",
               "database_unavailable",
-              "missing_source_archive"
+              "missing_source_archive",
+              "rate_limited"
             ],
             "examples": [
               "policy_rejected"
@@ -4661,10 +5222,16 @@
                 "deployCount": 3
               }
             ],
-            "$ref": "#/components/schemas/AccountDashboardUsage"
+            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "storageObjectCount": 2,
+            "objectStorageMib": 24
           },
           "limits": {
-            "$ref": "#/components/schemas/PlanLimits"
+            "$ref": "#/components/schemas/PlanLimits",
+            "postgresConnectionsPerDatabase": 2,
+            "objectStorageMib": 512,
+            "storageObjects": 200,
+            "storageObjectMaxMib": 64
           }
         },
         "examples": [
@@ -4689,7 +5256,9 @@
               "deployCount": 3,
               "monthlyDeployCount": 3,
               "monthlyBuildMinutes": 5,
-              "customDomainCount": 1
+              "customDomainCount": 1,
+              "storageObjectCount": 2,
+              "objectStorageMib": 24
             },
             "limits": {
               "projects": 3,
@@ -4703,7 +5272,11 @@
               "maxBuildDurationSeconds": 600,
               "customDomains": 10,
               "alwaysOnApps": 0,
-              "logRetentionDays": 3
+              "logRetentionDays": 3,
+              "postgresConnectionsPerDatabase": 2,
+              "objectStorageMib": 512,
+              "storageObjects": 200,
+              "storageObjectMaxMib": 64
             }
           }
         ]
@@ -4878,7 +5451,9 @@
           "databaseCount",
           "monthlyDeployCount",
           "monthlyBuildMinutes",
-          "customDomainCount"
+          "customDomainCount",
+          "storageObjectCount",
+          "objectStorageMib"
         ],
         "properties": {
           "appCount": {
@@ -4980,6 +5555,26 @@
             "examples": [
               1
             ]
+          },
+          "storageObjectCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Number of app storage objects, including pending direct uploads. Context: components.schemas.AccountDashboardUsage.properties.storageObjectCount.",
+            "examples": [
+              2
+            ]
+          },
+          "objectStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576000,
+            "description": "App object storage used in MiB, rounded up from bytes. Context: components.schemas.AccountDashboardUsage.properties.objectStorageMib.",
+            "examples": [
+              24
+            ]
           }
         },
         "examples": [
@@ -4993,7 +5588,9 @@
             "deployCount": 3,
             "monthlyDeployCount": 3,
             "monthlyBuildMinutes": 5,
-            "customDomainCount": 1
+            "customDomainCount": 1,
+            "storageObjectCount": 2,
+            "objectStorageMib": 24
           }
         ]
       },
@@ -7323,10 +7920,16 @@
             "$ref": "#/components/schemas/AccountProfileResponse"
           },
           "usage": {
-            "$ref": "#/components/schemas/AccountDashboardUsage"
+            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "storageObjectCount": 2,
+            "objectStorageMib": 24
           },
           "limits": {
-            "$ref": "#/components/schemas/PlanLimits"
+            "$ref": "#/components/schemas/PlanLimits",
+            "postgresConnectionsPerDatabase": 2,
+            "objectStorageMib": 512,
+            "storageObjects": 200,
+            "storageObjectMaxMib": 64
           }
         },
         "examples": [
@@ -7350,7 +7953,9 @@
               "deployCount": 3,
               "monthlyDeployCount": 3,
               "monthlyBuildMinutes": 5,
-              "customDomainCount": 1
+              "customDomainCount": 1,
+              "storageObjectCount": 2,
+              "objectStorageMib": 24
             },
             "limits": {
               "projects": 3,
@@ -7364,7 +7969,11 @@
               "maxBuildDurationSeconds": 600,
               "customDomains": 10,
               "alwaysOnApps": 0,
-              "logRetentionDays": 3
+              "logRetentionDays": 3,
+              "postgresConnectionsPerDatabase": 2,
+              "objectStorageMib": 512,
+              "storageObjects": 200,
+              "storageObjectMaxMib": 64
             }
           }
         ]
@@ -7385,7 +7994,11 @@
           "maxBuildDurationSeconds",
           "customDomains",
           "alwaysOnApps",
-          "logRetentionDays"
+          "logRetentionDays",
+          "postgresConnectionsPerDatabase",
+          "objectStorageMib",
+          "storageObjects",
+          "storageObjectMaxMib"
         ],
         "properties": {
           "projects": {
@@ -7507,6 +8120,46 @@
             "examples": [
               3
             ]
+          },
+          "postgresConnectionsPerDatabase": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Direct Postgres backend connections per managed database. Context: components.schemas.PlanLimits.properties.postgresConnectionsPerDatabase.",
+            "examples": [
+              2
+            ]
+          },
+          "objectStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576000,
+            "description": "Included total object storage in MiB. Context: components.schemas.PlanLimits.properties.objectStorageMib.",
+            "examples": [
+              512
+            ]
+          },
+          "storageObjects": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "description": "Included app object count. Context: components.schemas.PlanLimits.properties.storageObjects.",
+            "examples": [
+              200
+            ]
+          },
+          "storageObjectMaxMib": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1048576000,
+            "description": "Maximum single object size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib.",
+            "examples": [
+              64
+            ]
           }
         },
         "examples": [
@@ -7522,7 +8175,11 @@
             "maxBuildDurationSeconds": 600,
             "customDomains": 10,
             "alwaysOnApps": 0,
-            "logRetentionDays": 3
+            "logRetentionDays": 3,
+            "postgresConnectionsPerDatabase": 2,
+            "objectStorageMib": 512,
+            "storageObjects": 200,
+            "storageObjectMaxMib": 64
           }
         ]
       },
@@ -7544,10 +8201,16 @@
             "$ref": "#/components/schemas/AccountProfileResponse"
           },
           "usage": {
-            "$ref": "#/components/schemas/AccountDashboardUsage"
+            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "storageObjectCount": 2,
+            "objectStorageMib": 24
           },
           "limits": {
-            "$ref": "#/components/schemas/PlanLimits"
+            "$ref": "#/components/schemas/PlanLimits",
+            "postgresConnectionsPerDatabase": 2,
+            "objectStorageMib": 512,
+            "storageObjects": 200,
+            "storageObjectMaxMib": 64
           },
           "apps": {
             "type": "array",
@@ -7650,7 +8313,9 @@
               "deployCount": 3,
               "monthlyDeployCount": 3,
               "monthlyBuildMinutes": 5,
-              "customDomainCount": 1
+              "customDomainCount": 1,
+              "storageObjectCount": 2,
+              "objectStorageMib": 24
             },
             "limits": {
               "projects": 3,
@@ -7664,7 +8329,11 @@
               "maxBuildDurationSeconds": 600,
               "customDomains": 10,
               "alwaysOnApps": 0,
-              "logRetentionDays": 3
+              "logRetentionDays": 3,
+              "postgresConnectionsPerDatabase": 2,
+              "objectStorageMib": 512,
+              "storageObjects": 200,
+              "storageObjectMaxMib": 64
             },
             "apps": [
               {
@@ -8531,6 +9200,433 @@
               "limitPerDay": 10,
               "remainingDay": 9
             }
+          }
+        ]
+      },
+      "StorageUploadUrlRequest": {
+        "type": "object",
+        "description": "Request a direct app object upload URL. Context: components.schemas.StorageUploadUrlRequest.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "contentType",
+          "sizeBytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "App-local object path. Context: components.schemas.StorageUploadUrlRequest.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/logo.png"
+            ]
+          },
+          "contentType": {
+            "type": "string",
+            "description": "Object content type. Context: components.schemas.StorageUploadUrlRequest.properties.contentType.",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}$",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10737418240,
+            "description": "Expected upload size in bytes. Context: components.schemas.StorageUploadUrlRequest.properties.sizeBytes.",
+            "examples": [
+              24812
+            ]
+          },
+          "publicRead": {
+            "type": "boolean",
+            "description": "Whether the object should be served through the public Tovuk media CDN. Context: components.schemas.StorageUploadUrlRequest.properties.publicRead.",
+            "default": false,
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/logo.png",
+            "contentType": "image/png",
+            "sizeBytes": 24812,
+            "publicRead": true
+          }
+        ]
+      },
+      "StorageDownloadUrlRequest": {
+        "type": "object",
+        "description": "Request a direct app object download URL. Context: components.schemas.StorageDownloadUrlRequest.",
+        "additionalProperties": false,
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "App-local object path. Context: components.schemas.StorageDownloadUrlRequest.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/logo.png"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/logo.png"
+          }
+        ]
+      },
+      "StorageCompleteRequest": {
+        "type": "object",
+        "description": "Mark a direct object upload complete after the presigned PUT succeeds. Context: components.schemas.StorageCompleteRequest.",
+        "additionalProperties": false,
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "App-local object path. Context: components.schemas.StorageCompleteRequest.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/logo.png"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/logo.png"
+          }
+        ]
+      },
+      "StorageObject": {
+        "type": "object",
+        "description": "App storage object metadata. Context: components.schemas.StorageObject.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "objectKey",
+          "contentType",
+          "sizeBytes",
+          "status",
+          "publicRead",
+          "publicUrl",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "App-local object path. Context: components.schemas.StorageObject.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/logo.png"
+            ]
+          },
+          "objectKey": {
+            "type": "string",
+            "description": "Internal object storage key. Context: components.schemas.StorageObject.properties.objectKey.",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "examples": [
+              "accounts/acct_01HW/apps/app_1/uploads/logo.png"
+            ]
+          },
+          "contentType": {
+            "type": "string",
+            "description": "Object content type. Context: components.schemas.StorageObject.properties.contentType.",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}$",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10737418240,
+            "description": "Object size in bytes. Context: components.schemas.StorageObject.properties.sizeBytes.",
+            "examples": [
+              24812
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Object upload lifecycle status. Context: components.schemas.StorageObject.properties.status.",
+            "enum": [
+              "pending",
+              "uploaded"
+            ],
+            "examples": [
+              "uploaded"
+            ]
+          },
+          "publicRead": {
+            "type": "boolean",
+            "description": "Whether the object is publicly served through Tovuk media CDN. Context: components.schemas.StorageObject.properties.publicRead.",
+            "examples": [
+              true
+            ]
+          },
+          "publicUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "description": "Public CDN URL. Context: components.schemas.StorageObject.properties.publicUrl.anyOf.0.",
+                "examples": [
+                  "https://media.tovuk.app/hello-rust/uploads/logo.png"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "https://media.tovuk.app/hello-rust/uploads/logo.png"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC creation timestamp. Context: components.schemas.StorageObject.properties.createdAt.",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC update timestamp. Context: components.schemas.StorageObject.properties.updatedAt.",
+            "examples": [
+              "2026-05-25T12:00:00.000Z"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/logo.png",
+            "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+            "contentType": "image/png",
+            "sizeBytes": 24812,
+            "status": "uploaded",
+            "publicRead": true,
+            "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png",
+            "createdAt": "2026-05-25T12:00:00.000Z",
+            "updatedAt": "2026-05-25T12:00:00.000Z"
+          }
+        ]
+      },
+      "StorageObjectsResponse": {
+        "type": "object",
+        "description": "Stored app objects. Context: components.schemas.StorageObjectsResponse.",
+        "additionalProperties": false,
+        "required": [
+          "objects"
+        ],
+        "properties": {
+          "objects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageObject"
+            },
+            "maxItems": 5000,
+            "examples": [
+              [
+                {
+                  "path": "uploads/logo.png",
+                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "contentType": "image/png",
+                  "sizeBytes": 24812,
+                  "status": "uploaded",
+                  "publicRead": true,
+                  "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png",
+                  "createdAt": "2026-05-25T12:00:00.000Z",
+                  "updatedAt": "2026-05-25T12:00:00.000Z"
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "objects": [
+              {
+                "path": "uploads/logo.png",
+                "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                "contentType": "image/png",
+                "sizeBytes": 24812,
+                "status": "uploaded",
+                "publicRead": true,
+                "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png",
+                "createdAt": "2026-05-25T12:00:00.000Z",
+                "updatedAt": "2026-05-25T12:00:00.000Z"
+              }
+            ]
+          }
+        ]
+      },
+      "StorageDeleteResponse": {
+        "type": "object",
+        "description": "App storage object delete response. Context: components.schemas.StorageDeleteResponse.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "deleted"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "App-local object path. Context: components.schemas.StorageDeleteResponse.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/logo.png"
+            ]
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Whether the object existed and was deleted. Context: components.schemas.StorageDeleteResponse.properties.deleted.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/logo.png",
+            "deleted": true
+          }
+        ]
+      },
+      "StorageUrlResponse": {
+        "type": "object",
+        "description": "Short-lived direct object storage URL. Context: components.schemas.StorageUrlResponse.",
+        "additionalProperties": false,
+        "required": [
+          "method",
+          "url",
+          "objectKey",
+          "path",
+          "expiresSeconds",
+          "contentType",
+          "publicUrl"
+        ],
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method to use with the presigned URL. Context: components.schemas.StorageUrlResponse.properties.method.",
+            "enum": [
+              "PUT",
+              "GET"
+            ],
+            "examples": [
+              "PUT"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Short-lived presigned URL. Context: components.schemas.StorageUrlResponse.properties.url.",
+            "examples": [
+              "https://object-storage.example/upload-signature"
+            ]
+          },
+          "objectKey": {
+            "type": "string",
+            "description": "Internal object storage key. Context: components.schemas.StorageUrlResponse.properties.objectKey.",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "examples": [
+              "accounts/acct_01HW/apps/app_1/uploads/logo.png"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "App-local object path. Context: components.schemas.StorageUrlResponse.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/logo.png"
+            ]
+          },
+          "expiresSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "URL lifetime in seconds. Context: components.schemas.StorageUrlResponse.properties.expiresSeconds.",
+            "examples": [
+              900
+            ]
+          },
+          "contentType": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160,
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}$",
+                "description": "Required upload content type. Context: components.schemas.StorageUrlResponse.properties.contentType.anyOf.0.",
+                "examples": [
+                  "image/png"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
+          },
+          "publicUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "description": "Public CDN URL when public serving is enabled. Context: components.schemas.StorageUrlResponse.properties.publicUrl.anyOf.0.",
+                "examples": [
+                  "https://media.tovuk.app/hello-rust/uploads/logo.png"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "https://media.tovuk.app/hello-rust/uploads/logo.png"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "method": "PUT",
+            "url": "https://object-storage.example/upload-signature",
+            "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+            "path": "uploads/logo.png",
+            "expiresSeconds": 900,
+            "contentType": "image/png",
+            "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png"
           }
         ]
       }

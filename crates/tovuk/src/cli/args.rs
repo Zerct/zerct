@@ -14,6 +14,7 @@ pub(crate) struct CliOptions {
     pub(crate) deploy: String,
     pub(crate) limit: String,
     pub(crate) cursor: String,
+    pub(crate) content_type: String,
     pub(crate) failing_command: String,
     pub(crate) first_log_line: String,
     pub(crate) token: String,
@@ -21,6 +22,7 @@ pub(crate) struct CliOptions {
     pub(crate) severity: String,
     pub(crate) port: u16,
     pub(crate) deployment: DeploymentOptions,
+    pub(crate) storage: StorageOptions,
     pub(crate) output: OutputOptions,
 }
 
@@ -29,6 +31,11 @@ pub(crate) struct DeploymentOptions {
     pub(crate) database: bool,
     pub(crate) wait: bool,
     pub(crate) wait_timeout_seconds: u64,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct StorageOptions {
+    pub(crate) public_read: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -49,6 +56,7 @@ impl Default for CliOptions {
             deploy: String::new(),
             limit: String::new(),
             cursor: String::new(),
+            content_type: String::new(),
             failing_command: String::new(),
             first_log_line: String::new(),
             token: String::new(),
@@ -60,6 +68,7 @@ impl Default for CliOptions {
                 wait: false,
                 wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
             },
+            storage: StorageOptions { public_read: false },
             output: OutputOptions {
                 json: false,
                 help: false,
@@ -127,46 +136,67 @@ pub(crate) fn apply_flag(
     index: usize,
 ) -> Result<usize> {
     let json_output = cli.output.json;
+    if let Some(consumed) = apply_boolean_flag(cli, name, inline.as_ref(), json_output)? {
+        return Ok(consumed);
+    }
+    apply_value_flag(cli, name, inline, argv, index)
+}
+
+fn apply_boolean_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<&String>,
+    json_output: bool,
+) -> Result<Option<usize>> {
     match name {
-        "--help" | "-h" => set_boolean_flag(
-            inline.as_ref(),
-            || cli.output.help = true,
-            name,
-            json_output,
-        ),
-        "--version" | "-v" | "-V" => set_boolean_flag(
-            inline.as_ref(),
-            || cli.output.version = true,
-            name,
-            json_output,
-        ),
-        "--json" => set_boolean_flag(
-            inline.as_ref(),
-            || cli.output.json = true,
-            name,
-            json_output,
-        ),
-        "--database" => set_boolean_flag(
-            inline.as_ref(),
-            || cli.deployment.database = true,
-            name,
-            json_output,
-        ),
+        "--help" | "-h" => set_boolean_flag(inline, || cli.output.help = true, name, json_output),
+        "--version" | "-v" | "-V" => {
+            set_boolean_flag(inline, || cli.output.version = true, name, json_output)
+        }
+        "--json" => set_boolean_flag(inline, || cli.output.json = true, name, json_output),
+        "--database" => {
+            set_boolean_flag(inline, || cli.deployment.database = true, name, json_output)
+        }
         "--no-database" => set_boolean_flag(
-            inline.as_ref(),
+            inline,
             || cli.deployment.database = false,
             name,
             json_output,
         ),
-        "--wait" => set_boolean_flag(
-            inline.as_ref(),
-            || cli.deployment.wait = true,
+        "--wait" => set_boolean_flag(inline, || cli.deployment.wait = true, name, json_output),
+        "--public" => {
+            set_boolean_flag(inline, || cli.storage.public_read = true, name, json_output)
+        }
+        "--private" => set_boolean_flag(
+            inline,
+            || cli.storage.public_read = false,
             name,
             json_output,
         ),
+        _ => return Ok(None),
+    }
+    .map(Some)
+}
+
+fn apply_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
         "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.output.json),
         "--app" => set_string_flag(&mut cli.app, name, inline, argv, index, cli.output.json),
         "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.output.json),
+        "--content-type" => set_string_flag(
+            &mut cli.content_type,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
         "--deploy" => set_string_flag(&mut cli.deploy, name, inline, argv, index, cli.output.json),
         "--failing-command" => set_string_flag(
             &mut cli.failing_command,

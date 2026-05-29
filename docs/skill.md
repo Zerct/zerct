@@ -108,6 +108,18 @@ For fullstack apps, `--database` applies to the Rust backend inside the same
 deployment. For workspaces with multiple `tovuk.toml` files, `npx tovuk deploy`
 still deploys all discovered projects in one command.
 
+Manage app files and media without dashboard access:
+
+```sh
+npx tovuk storage list --app <app_id> --json
+npx tovuk storage upload --app <app_id> ./logo.png uploads/logo.png --public --json
+npx tovuk storage download --app <app_id> uploads/logo.png ./logo.png --json
+npx tovuk storage delete --app <app_id> uploads/logo.png --json
+```
+
+Use `--public` only when the app needs a CDN URL for the object. Use
+`--content-type <mime>` when the file extension is missing or ambiguous.
+
 Use a persistent CLI:
 
 ```sh

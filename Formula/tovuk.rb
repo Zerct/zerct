@@ -1,7 +1,7 @@
 class Tovuk < Formula
   desc "Deploy Rust backends, static frontends, and fullstack apps to Tovuk"
   homepage "https://tovuk.com"
-  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.58"
+  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.59"
   license "MIT"
 
   depends_on "rust" => :build
@@ -14,6 +14,10 @@ class Tovuk < Formula
     assert_match version.to_s, shell_output("#{bin}/tovuk --version")
     help = shell_output("#{bin}/tovuk --help")
     assert_match "tovuk billing [checkout|portal]", help
+    assert_match "tovuk storage list", help
+    assert_match "tovuk storage upload", help
+    assert_match "tovuk storage download", help
+    assert_match "tovuk storage delete", help
     assert_match "tovuk billing checkout --json", help
     assert_match "tovuk support create", help
     assert_match "tovuk support list", help

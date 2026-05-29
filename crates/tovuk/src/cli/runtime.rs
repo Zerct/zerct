@@ -2,7 +2,7 @@ use super::{
     api_commands::{
         app_get_command, app_route, billing_command, builds_command, capabilities, deploys_command,
         domains_command, env_command, logs_command, print_authenticated, print_paged_authenticated,
-        support_command,
+        storage_command, support_command,
     },
     args::{parse_args, project_path},
     auth::login,
@@ -59,6 +59,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "db" | "database" => app_get_command(&cli, "database"),
         "env" => env_command(&cli),
         "domains" => domains_command(&cli),
+        "storage" | "files" | "media" => storage_command(&cli),
         "billing" => billing_command(&cli),
         "support" => support_command(&cli),
         _ => Err(agent_error(

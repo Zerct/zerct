@@ -14,7 +14,7 @@ Cargo, and Homebrew wrappers.
 
 All official package CLIs expose the same agent commands for login, doctor,
 preview, deploy, wait, capabilities, account usage, apps, deploys, builds,
-logs, env, domains, billing, and support.
+logs, env, domains, storage, billing, and support.
 
 The agent repair loop is the same on every package surface:
 
@@ -22,6 +22,10 @@ The agent repair loop is the same on every package surface:
 tovuk doctor --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
+tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage list --app app_1 --json
+tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --app app_1 uploads/logo.png --json
 tovuk billing checkout --json
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
@@ -45,6 +49,8 @@ pipx install tovuk
 tovuk deploy --wait
 tovuk logs --build job_1 --json
 tovuk domains verify --app app_1 api.example.com
+tovuk storage list --app app_1 --json
+tovuk storage upload --app app_1 ./media.png media/media.png --public --json
 tovuk billing checkout --json
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
@@ -56,6 +62,7 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 cargo install tovuk
 tovuk deploy --wait
 tovuk logs --deploy deploy_1 --json
+tovuk storage download --app app_1 media/media.png ./media.png --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
