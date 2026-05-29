@@ -1,12 +1,20 @@
 use super::{
-    DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_RUST_CHECK_COMMAND, PROJECT_TEMPLATES, Path,
-    Result, agent_error, detect_fullstack_roots, doctor_project, ensure_directory, env,
-    frontend_build_command, frontend_check_command, frontend_package_json, frontend_source,
-    frontend_ts_config, frontend_vite_env_source, fs, infer_project_kind, internal_error,
-    is_plain_static_frontend, path_relative, rust_api_source, rust_template_cargo_lock,
-    rust_template_cargo_toml, service_name_from_cargo, service_name_from_dir,
-    service_name_from_package,
+    constants::{
+        DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_RUST_CHECK_COMMAND, PROJECT_TEMPLATES,
+    },
+    doctor::doctor_project,
+    errors::{Result, agent_error, internal_error},
+    frontend_checks::{frontend_build_command, frontend_check_command, is_plain_static_frontend},
+    project::{
+        detect_fullstack_roots, ensure_directory, infer_project_kind, path_relative,
+        service_name_from_cargo, service_name_from_dir, service_name_from_package,
+    },
+    template_sources::{
+        frontend_package_json, frontend_source, frontend_ts_config, frontend_vite_env_source,
+        rust_api_source, rust_template_cargo_lock, rust_template_cargo_toml,
+    },
 };
+use std::{env, fs, path::Path};
 
 pub(crate) fn init_project(project_dir: &Path, template: &str) -> Result<()> {
     if !template.is_empty() {

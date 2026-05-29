@@ -1,4 +1,4 @@
-use super::VERSION;
+use super::constants::VERSION;
 
 pub(crate) fn help_text() -> String {
     format!(

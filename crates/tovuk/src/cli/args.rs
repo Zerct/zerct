@@ -1,7 +1,8 @@
 use super::{
-    DEFAULT_API_URL, DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS, PathBuf, Result, agent_error, env,
-    internal_error,
+    constants::{DEFAULT_API_URL, DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS},
+    errors::{Result, agent_error, internal_error},
 };
+use std::{env, path::PathBuf};
 
 #[derive(Clone, Debug)]
 pub(crate) struct CliOptions {

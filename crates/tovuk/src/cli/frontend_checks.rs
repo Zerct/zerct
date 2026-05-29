@@ -1,8 +1,17 @@
 use super::{
-    BTreeSet, Command, DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND,
-    DoctorCheck, FRONTEND_INSTALL_COMMANDS, FRONTEND_JAVASCRIPT_EXTENSIONS,
-    FRONTEND_PACKAGE_MANAGERS, FRONTEND_SOURCE_ROOTS, JAVASCRIPT_LINTERS, Path, Stdio, Value,
-    doctor_check, first_output_line, read_package_json, walk_project_files,
+    constants::{
+        DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND,
+        FRONTEND_INSTALL_COMMANDS, FRONTEND_JAVASCRIPT_EXTENSIONS, FRONTEND_PACKAGE_MANAGERS,
+        FRONTEND_SOURCE_ROOTS, JAVASCRIPT_LINTERS,
+    },
+    doctor::{DoctorCheck, doctor_check, first_output_line},
+    project::{read_package_json, walk_project_files},
+};
+use serde_json::Value;
+use std::{
+    collections::BTreeSet,
+    path::Path,
+    process::{Command, Stdio},
 };
 
 pub(crate) fn static_frontend_checks(project_dir: &Path, run_scripts: bool) -> Vec<DoctorCheck> {

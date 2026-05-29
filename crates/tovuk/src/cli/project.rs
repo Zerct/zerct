@@ -1,8 +1,17 @@
 use super::{
-    CliOptions, Command, DirEntry, Path, Result, Stdio, Value, WALK_EXCLUDED_DIRS, WalkDir,
-    agent_error, env, fs,
+    args::CliOptions,
+    constants::WALK_EXCLUDED_DIRS,
+    errors::{Result, agent_error},
 };
-use std::fmt::Write as _;
+use serde_json::Value;
+use std::{
+    env,
+    fmt::Write as _,
+    fs,
+    path::Path,
+    process::{Command, Stdio},
+};
+use walkdir::{DirEntry, WalkDir};
 
 pub(crate) fn ensure_directory(dir: &Path) -> Result<()> {
     if dir.is_dir() {

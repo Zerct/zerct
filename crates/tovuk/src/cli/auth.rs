@@ -1,9 +1,24 @@
 use super::{
-    CliOptions, Command, DEFAULT_LOGIN_EXPIRES_SECONDS, DEFAULT_LOGIN_INTERVAL_SECONDS, Duration,
-    Instant, Method, Path, PathBuf, Result, SESSION_ACCOUNT, SESSION_DIR, SESSION_FILE,
-    SESSION_LABEL, SESSION_SERVICE, Stdio, Value, Write, agent_error, api_request,
-    encode_component, env, fs, has_command, internal_error, number_alias, open_url, progress,
-    string_alias, string_field, thread,
+    api_commands::api_request,
+    args::CliOptions,
+    constants::{
+        DEFAULT_LOGIN_EXPIRES_SECONDS, DEFAULT_LOGIN_INTERVAL_SECONDS, SESSION_ACCOUNT,
+        SESSION_DIR, SESSION_FILE, SESSION_LABEL, SESSION_SERVICE,
+    },
+    errors::{Result, agent_error, internal_error},
+    project::{
+        encode_component, has_command, number_alias, open_url, progress, string_alias, string_field,
+    },
+};
+use reqwest::Method;
+use serde_json::Value;
+use std::{
+    env, fs,
+    io::Write,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+    thread,
+    time::{Duration, Instant},
 };
 
 pub(crate) fn read_or_login_token(cli: &CliOptions) -> Result<String> {

@@ -1,8 +1,14 @@
 use super::{
-    AgentErrorPayload, BILLING_CHECKOUT_ROUTE, CliError, CliFailure, CliOptions, Client, Map,
-    Method, Result, VERSION, Value, agent_error, encode_component, internal_error, json, open_url,
-    print_json, read_or_login_token, string_field,
+    args::CliOptions,
+    auth::read_or_login_token,
+    constants::{BILLING_CHECKOUT_ROUTE, VERSION},
+    errors::{
+        AgentErrorPayload, CliError, CliFailure, Result, agent_error, internal_error, print_json,
+    },
+    project::{encode_component, open_url, string_field},
 };
+use reqwest::{Method, blocking::Client};
+use serde_json::{Map, Value, json};
 
 pub(crate) fn capabilities(cli: &CliOptions) -> Result<()> {
     let response = api_request(cli, Method::GET, "/v1/capabilities", None, None)?;
