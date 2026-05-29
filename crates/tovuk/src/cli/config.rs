@@ -1,10 +1,11 @@
 use super::{
-    constants::{
-        DEFAULT_RUST_CHECK_COMMAND, JAVASCRIPT_BACKEND_RUNTIMES, RUST_STRICT_CLIPPY_DENY_LINTS,
+    command_policy::{
+        command_name_from_token, command_tokens, is_noop_command, uses_javascript_backend_runtime,
     },
+    constants::{DEFAULT_RUST_CHECK_COMMAND, RUST_STRICT_CLIPPY_DENY_LINTS},
     frontend_checks::{
-        command_name_from_token, command_tokens, frontend_build_command, frontend_check_command,
-        has_frontend_install_command, has_frontend_script_run, uses_javascript_linter,
+        frontend_build_command, frontend_check_command, has_frontend_install_command,
+        has_frontend_script_run, uses_javascript_linter,
     },
     project::{is_dns_safe_name, is_safe_relative_directory, is_safe_relative_path},
     project_kind::ProjectKind,
@@ -527,17 +528,6 @@ pub(crate) fn validate_frontend_check_command(command: &str) -> std::result::Res
     } else {
         Err("[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`".to_owned())
     }
-}
-
-pub(crate) fn uses_javascript_backend_runtime(command: &str) -> bool {
-    command_tokens(command)
-        .iter()
-        .any(|token| JAVASCRIPT_BACKEND_RUNTIMES.contains(&command_name_from_token(token).as_str()))
-}
-
-pub(crate) fn is_noop_command(command: &str) -> bool {
-    let command = command.trim();
-    command == ":" || command == "true"
 }
 
 pub(crate) fn memory_to_mib(value: &str) -> std::result::Result<u32, String> {

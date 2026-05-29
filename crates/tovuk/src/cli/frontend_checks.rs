@@ -1,4 +1,5 @@
 use super::{
+    command_policy::{command_name_from_token, command_tokens},
     constants::{
         DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_NPM_FRONTEND_CHECK_COMMAND,
         FRONTEND_INSTALL_COMMANDS, FRONTEND_JAVASCRIPT_EXTENSIONS, FRONTEND_PACKAGE_MANAGERS,
@@ -413,19 +414,6 @@ pub(crate) fn script_name_after_run(tokens: &[String], start: usize) -> Option<S
         index += 1;
     }
     tokens.get(index).cloned()
-}
-
-pub(crate) fn command_tokens(command: &str) -> Vec<String> {
-    command
-        .replace(['&', '|', ';', '(', ')'], " ")
-        .split_whitespace()
-        .map(|token| token.trim_matches(['"', '\'']).to_owned())
-        .filter(|token| !token.is_empty())
-        .collect()
-}
-
-pub(crate) fn command_name_from_token(token: &str) -> String {
-    token.rsplit('/').next().unwrap_or_default().to_owned()
 }
 
 pub(crate) fn has_frontend_install_command(tokens: &[String]) -> bool {

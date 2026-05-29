@@ -1,6 +1,7 @@
 mod api_commands;
 mod args;
 mod auth;
+mod command_policy;
 mod config;
 mod constants;
 mod deploy;
