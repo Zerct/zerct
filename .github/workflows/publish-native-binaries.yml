@@ -58,10 +58,7 @@ jobs:
         run: |
           version="$(awk -F '"' '/^version = / { print $2; exit }' crates/tovuk/Cargo.toml)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-      - name: Build
-        shell: bash
-        run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
-      - name: Prepare asset
+      - name: Name release asset
         id: asset
         shell: bash
         run: |
@@ -69,19 +66,42 @@ jobs:
           case "${{ matrix.binary }}" in
             *.exe) asset="${asset}.exe" ;;
           esac
-          cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "$asset"
-          chmod +x "$asset" || true
           echo "name=$asset" >> "$GITHUB_OUTPUT"
+      - name: Check release version
+        id: release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tag="v${{ steps.version.outputs.version }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$tag already exists; verifying existing native asset without overwriting it."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build
+        if: steps.release.outputs.exists == 'false'
+        shell: bash
+        run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
+      - name: Prepare asset
+        if: steps.release.outputs.exists == 'false'
+        shell: bash
+        run: |
+          cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "${{ steps.asset.outputs.name }}"
+          chmod +x "${{ steps.asset.outputs.name }}" || true
       - name: Upload release asset
+        if: steps.release.outputs.exists == 'false'
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           tag="v${{ steps.version.outputs.version }}"
           if ! gh release view "$tag" >/dev/null 2>&1; then
-            gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag"
+            gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag" \
+              || gh release view "$tag" >/dev/null
           fi
-          gh release upload "$tag" "${{ steps.asset.outputs.name }}" --clobber
+          gh release upload "$tag" "${{ steps.asset.outputs.name }}"
       - name: Verify release asset
         shell: bash
         env:
