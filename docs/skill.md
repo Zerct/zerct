@@ -1,6 +1,6 @@
 ---
 name: tovuk
-description: Deploy Rust backends and static frontends to Tovuk.
+description: Deploy Rust backends, static frontends, and fullstack apps to Tovuk.
 license: MIT
 compatibility: Requires tovuk.toml. Fullstack apps use one root tovuk.toml with backend and frontend roots. Rust backends require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
 metadata:

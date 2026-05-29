@@ -1,6 +1,6 @@
 ---
 name: tovuk
-description: Deploy Rust backends and static frontends to Tovuk with `tovuk`.
+description: Deploy Rust backends, static frontends, and fullstack apps to Tovuk with `tovuk`.
 ---
 
 # Tovuk
