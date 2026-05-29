@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
 
 function fail(message) {
   console.error(`CLI contract check failed: ${message}`)
@@ -17,7 +18,14 @@ function rejectSnippet(source, snippet, label) {
   }
 }
 
-const cargoCli = readFileSync('crates/tovuk/src/main.rs', 'utf8')
+const cargoCli = [
+  readFileSync('crates/tovuk/src/main.rs', 'utf8'),
+  readFileSync('crates/tovuk/src/cli.rs', 'utf8'),
+  ...readdirSync('crates/tovuk/src/cli')
+    .filter((entry) => entry.endsWith('.rs'))
+    .sort()
+    .map((entry) => readFileSync(join('crates/tovuk/src/cli', entry), 'utf8'))
+].join('\n')
 const cargoReadme = readFileSync('crates/tovuk/README.md', 'utf8')
 const npmPackage = JSON.parse(readFileSync('packages/tovuk/package.json', 'utf8'))
 const npmInstall = readFileSync('packages/tovuk/install.mjs', 'utf8')
