@@ -2208,7 +2208,7 @@
                   },
                   "deploy_plan": {
                     "kind": "rust_backend",
-                    "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                    "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
                     "build_command": "cargo build --release",
                     "build_output_dir": "dist",
                     "run_command": "./target/release/api",
@@ -4223,7 +4223,7 @@
             "examples": [
               {
                 "kind": "rust_backend",
-                "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
                 "build_command": "cargo build --release",
                 "build_output_dir": "dist",
                 "run_command": "./target/release/api",
@@ -4289,7 +4289,7 @@
             },
             "deploy_plan": {
               "kind": "rust_backend",
-              "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+              "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
               "build_command": "cargo build --release",
               "build_output_dir": "dist",
               "run_command": "./target/release/api",
@@ -5249,10 +5249,10 @@
           "check_command": {
             "type": "string",
             "description": "Pre-build check command. Context: components.schemas.DeployPlan.properties.check_command.",
-            "pattern": "^[\\s\\S]{1,512}$",
-            "maxLength": 512,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "maxLength": 1024,
             "examples": [
-              "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+              "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
             ]
           },
           "build_command": {
@@ -5364,7 +5364,7 @@
         "examples": [
           {
             "kind": "rust_backend",
-            "check_command": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+            "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
             "build_command": "cargo build --release",
             "build_output_dir": "dist",
             "run_command": "./target/release/api",
@@ -6517,10 +6517,10 @@
               {
                 "type": "string",
                 "description": "Cheap pre-build validation command. Context: components.schemas.TovukBuildConfig.properties.check.anyOf.0.",
-                "pattern": "^[\\s\\S]{1,512}$",
-                "maxLength": 512,
+                "pattern": "^[\\s\\S]{1,1024}$",
+                "maxLength": 1024,
                 "examples": [
-                  "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+                  "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
                 ]
               },
               {
@@ -6528,7 +6528,7 @@
               }
             ],
             "examples": [
-              "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+              null
             ]
           },
           "command": {
@@ -6637,8 +6637,8 @@
           "check": {
             "type": "string",
             "description": "Frontend validation command run inside root.",
-            "pattern": "^[\\s\\S]{1,512}$",
-            "maxLength": 512,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "maxLength": 1024,
             "examples": [
               "bun ci && bun run typecheck && bun run lint"
             ]
@@ -6688,10 +6688,10 @@
           "check": {
             "type": "string",
             "description": "Backend validation command run inside root.",
-            "pattern": "^[\\s\\S]{1,512}$",
-            "maxLength": 512,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "maxLength": 1024,
             "examples": [
-              "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+              "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
             ]
           },
           "build": {
@@ -6735,7 +6735,7 @@
         "examples": [
           {
             "root": "api",
-            "check": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+            "check": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
             "build": "cargo build --release",
             "command": "./target/release/api",
             "port": 3000,
@@ -6750,7 +6750,7 @@
         "properties": {
           "memory": {
             "type": "string",
-            "description": "Runtime memory declaration. Context: components.schemas.TovukResourceConfig.properties.memory.",
+            "description": "Runtime memory declaration from 128mb through 2gb. Agents should choose the smallest working value. Context: components.schemas.TovukResourceConfig.properties.memory.",
             "pattern": "^[0-9]{2,5}(mb|gb)$",
             "maxLength": 16,
             "examples": [
@@ -6759,7 +6759,7 @@
           },
           "cpu": {
             "type": "string",
-            "description": "Runtime CPU declaration in vCPU units. Context: components.schemas.TovukResourceConfig.properties.cpu.",
+            "description": "Runtime CPU declaration in vCPU units from 0.05 through 2. Agents should choose the smallest working value. Context: components.schemas.TovukResourceConfig.properties.cpu.",
             "pattern": "^[0-9]+(\\.[0-9]+)?$",
             "maxLength": 16,
             "examples": [
@@ -6770,8 +6770,8 @@
             "type": "integer",
             "format": "int64",
             "minimum": 1,
-            "maximum": 10080,
-            "description": "Idle timeout in minutes. Context: components.schemas.TovukResourceConfig.properties.idle_timeout_minutes. Context: components.schemas.TovukResourceConfig.properties.idle_timeout_minutes.",
+            "maximum": 60,
+            "description": "Runtime idle timeout in minutes from 1 through 60. Context: components.schemas.TovukResourceConfig.properties.idle_timeout_minutes. Context: components.schemas.TovukResourceConfig.properties.idle_timeout_minutes.",
             "examples": [
               15
             ]
@@ -6843,7 +6843,7 @@
             "examples": [
               {
                 "root": "api",
-                "check": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                "check": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
                 "build": "cargo build --release",
                 "command": "./target/release/api",
                 "port": 3000,

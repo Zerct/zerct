@@ -24,9 +24,13 @@ For Rust backends, require:
 - `Cargo.toml`
 - `Cargo.lock`
 - passing `cargo fmt --all --check`
-- passing `cargo check --locked`
-- passing `cargo clippy --locked --all-targets --all-features -- -D warnings`
-- a `[build].check` command that includes formatting plus those locked Rust checks
+- passing locked release-mode `cargo check`, `cargo test`, and all-target,
+  all-feature Clippy
+- strict Clippy deny lints for `all`, `pedantic`, panic/unwrap bans, and
+  resource-sensitive lints such as `large_futures`, `large_stack_frames`,
+  `mem_forget`, and `redundant_clone`
+- a `[build].check` command that includes formatting plus those locked release
+  Rust checks
 
 The server must listen on `0.0.0.0:$PORT` and expose the configured health path.
 

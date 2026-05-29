@@ -12,8 +12,8 @@ tovuk deploy --wait --json
 `tovuk` is the public npm command.
 
 Rust backends expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
-pass `cargo fmt --all --check`, locked Cargo checks, listen on
-`0.0.0.0:$PORT`, and expose the configured health endpoint.
+pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
+listen on `0.0.0.0:$PORT`, and expose the configured health endpoint.
 
 Static frontends must use TypeScript browser source, stable native type-aware
 TypeScript checks, native linting such as `oxlint`, `biome check`, or

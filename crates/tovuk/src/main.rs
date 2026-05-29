@@ -6,9 +6,9 @@ use std::{
     process::{Command, ExitCode},
 };
 
-const VERSION: &str = "0.1.49";
+const VERSION: &str = "0.1.50";
 const NPM_PACKAGE: &str = "tovuk";
-const NPM_PACKAGE_VERSION: &str = "0.1.49";
+const NPM_PACKAGE_VERSION: &str = "0.1.50";
 
 fn main() -> ExitCode {
     match run() {

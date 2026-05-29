@@ -1,4 +1,4 @@
-import { JAVASCRIPT_BACKEND_RUNTIMES, PROJECT_KINDS } from './constants.ts'
+import { JAVASCRIPT_BACKEND_RUNTIMES, PROJECT_KINDS, RUST_STRICT_CLIPPY_DENY_LINTS } from './constants.ts'
 import { commandTokens, hasFrontendInstallCommand, hasFrontendScriptRun, usesJavascriptLinter } from './frontend-policy.ts'
 import { isSafeRelativePath } from './project.ts'
 import type { ProjectKind, TovukConfig } from './types.ts'
@@ -108,11 +108,16 @@ function validateOutput(value: string | undefined, field: string): void {
 }
 
 function validateResourceConfig(config: TovukConfig): void {
-  if (!/^\d+\s*(mb|mib|gb|gib)$/iu.test(config.resources.memory)) {
-    throw new Error('[resources].memory must look like 512mb or 1gb')
+  const memoryMib = memoryToMib(config.resources.memory)
+  if (memoryMib < 128 || memoryMib > 2048) {
+    throw new Error('[resources].memory must be between 128mb and 2gb; use the smallest working value')
   }
-  if (!/^\d+(?:\.\d{1,3})?$/u.test(config.resources.cpu)) {
-    throw new Error('[resources].cpu must look like 0.25, 0.5, 1, or 2')
+  const cpuMillis = cpuToMillis(config.resources.cpu)
+  if (cpuMillis < 50 || cpuMillis > 2000) {
+    throw new Error('[resources].cpu must be between 0.05 and 2; use the smallest working value')
+  }
+  if (!Number.isInteger(config.resources.idle_timeout_minutes) || config.resources.idle_timeout_minutes < 1 || config.resources.idle_timeout_minutes > 60) {
+    throw new Error('[resources].idle_timeout_minutes must be between 1 and 60')
   }
 }
 
@@ -126,11 +131,18 @@ function validateCheckCommand(kind: ProjectKind, command: string): void {
 }
 
 function validateRustCheckCommand(command: string): void {
-  const required = ['cargo fmt --all --check', 'cargo check --locked', 'cargo clippy --locked', '--all-targets', '--all-features', '-D warnings']
+  const required = [
+    'cargo fmt --all --check',
+    'cargo check --locked --release --all-targets --all-features',
+    'cargo test --locked --release --all-targets --all-features',
+    'cargo clippy --locked --release --all-targets --all-features',
+    '-D warnings',
+    ...RUST_STRICT_CLIPPY_DENY_LINTS.map((lint) => `-D ${lint}`)
+  ]
   if (required.every((fragment) => command.includes(fragment))) {
     return
   }
-  throw new Error('[build].check must include cargo fmt --all --check, cargo check --locked, and cargo clippy --locked --all-targets --all-features -- -D warnings')
+  throw new Error('[build].check must run rustfmt, locked release-mode cargo check, locked release-mode tests, and strict Clippy resource lints')
 }
 
 function validateRustBuildCommand(command: string): void {
@@ -188,6 +200,22 @@ function isNoopCommand(command: string): boolean {
 
 function commandNameFromToken(token: string): string {
   return token.split('/').pop() ?? ''
+}
+
+function memoryToMib(value: string): number {
+  const match = value.trim().toLowerCase().match(/^(\d+)\s*(mb|mib|gb|gib)$/u)
+  if (!match) {
+    throw new Error('[resources].memory must look like 256mb, 512mb, or 1gb')
+  }
+  const amount = Number.parseInt(match[1] ?? '', 10)
+  return amount * ((match[2] ?? '').startsWith('g') ? 1024 : 1)
+}
+
+function cpuToMillis(value: string): number {
+  if (!/^\d+(?:\.\d{1,3})?$/u.test(value.trim())) {
+    throw new Error('[resources].cpu must look like 0.25, 0.5, 1, or 2')
+  }
+  return Math.round(Number.parseFloat(value) * 1000)
 }
 
 export { validateConfig }

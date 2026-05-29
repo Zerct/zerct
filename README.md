@@ -36,7 +36,7 @@ kind = "fullstack"
 
 [backend]
 root = "api"
-check = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+check = "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
 build = "cargo build --release"
 command = "./target/release/api"
 port = 3000
@@ -78,8 +78,9 @@ bun add -d oxlint oxlint-tsgolint fallow
 }
 ```
 
-Rust backend checks must include `cargo fmt --all --check`, locked
-`cargo check`, and locked all-target, all-feature Clippy with `-D warnings`.
+Rust backend checks must include `cargo fmt --all --check`, locked release-mode
+`cargo check`, locked release-mode tests, and strict all-target, all-feature
+Clippy with panic/unwrap bans plus resource-sensitive lints.
 Frontend checks must install dependencies, run stable native type-aware
 TypeScript checks, and run native linting plus Fallow dead-code, semantic
 duplicate-code, and health gates before build work is queued. Frontend browser

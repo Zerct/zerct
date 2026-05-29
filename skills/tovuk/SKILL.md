@@ -10,7 +10,7 @@ Use when a user wants to deploy a Rust backend or static frontend to Tovuk.
 ## Workflow
 
 1. Ensure the project has `tovuk.toml`.
-2. For Rust backends, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint, `cargo fmt --all --check`, and the strict locked Cargo checks.
+2. For Rust backends, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint, `cargo fmt --all --check`, locked release-mode check/test/Clippy gates, strict Clippy resource lints, and small declared runtime resources.
 3. For static frontends, set `kind = "static_frontend"` and ensure `package.json`, TypeScript browser source, stable native type-aware typechecking, native linting, Fallow quality gates, a lockfile, and a strict frontend check command.
 4. For plain static frontends without a package manager, set `kind = "static_frontend"`, require `index.html`, use `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
 5. For fullstack apps, set `kind = "fullstack"` in one root `tovuk.toml`, configure `[backend].root` and `[frontend].root`, serve the frontend at `/`, and route API calls through same-origin `/api`.
@@ -25,9 +25,10 @@ Use when a user wants to deploy a Rust backend or static frontend to Tovuk.
 ## Contract
 
 Rust backends must listen on `0.0.0.0:$PORT`, expose the configured health
-endpoint, pass `cargo fmt --all --check`, run locked `cargo check`, run locked
-all-target/all-feature Clippy with `-D warnings`, and avoid direct `unsafe` in
-workspace source. Static
+endpoint, pass `cargo fmt --all --check`, run locked release-mode `cargo check`
+and `cargo test`, run strict all-target/all-feature Clippy with panic/unwrap
+bans and resource-sensitive lints, and avoid direct `unsafe` in workspace
+source. Static
 frontends must use `.ts` or `.tsx` browser source under `src`, `app`, `pages`,
 `routes`, or `components`; install dependencies, run stable native type-aware
 TypeScript checks, run native linting plus Fallow dead-code, semantic

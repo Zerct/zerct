@@ -29,9 +29,18 @@ Rust backend contract:
 
 - `Cargo.toml`, `Cargo.lock`, and `tovuk.toml` are committed.
 - `[build].check` includes `cargo fmt --all --check`.
-- `[build].check` includes `cargo check --locked`.
+- `[build].check` includes release-mode
+  `cargo check --locked --release --all-targets --all-features`.
+- `[build].check` includes release-mode
+  `cargo test --locked --release --all-targets --all-features`.
 - `[build].check` includes
-  `cargo clippy --locked --all-targets --all-features -- -D warnings`.
+  `cargo clippy --locked --release --all-targets --all-features` with
+  `-D warnings`, `-D clippy::all`, `-D clippy::pedantic`, panic/unwrap bans,
+  and resource lints such as `large_futures`, `large_stack_frames`,
+  `mem_forget`, and `redundant_clone`.
+- `[resources].memory` stays between `128mb` and `2gb`.
+- `[resources].cpu` stays between `0.05` and `2`.
+- `[resources].idle_timeout_minutes` stays between `1` and `60`.
 - The server listens on `0.0.0.0:$PORT`.
 - The configured health path returns HTTP 200.
 - Direct `unsafe` is not allowed in workspace source.
