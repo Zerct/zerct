@@ -16,10 +16,10 @@ guessing.
    backends.
 6. Tovuk exposes the app on a `tovuk.app` deployment hostname.
 
-For full-stack repos, run `tovuk deploy` from the repo root. The CLI discovers
-nested `tovuk.toml` files, deploys Rust backends first, then static frontends.
-Use `--database` to request managed Postgres for Rust backends in that
-workspace.
+For fullstack repos, run `tovuk deploy` from the repo root. The CLI reads the
+root `tovuk.toml`, builds the configured backend and frontend roots, serves the
+frontend at `/`, and routes `/api/*` to the Rust backend. Use `--database` to
+request managed Postgres for the backend.
 
 ## Local preview
 
@@ -29,7 +29,8 @@ tovuk preview
 
 For Rust backends, preview builds the release binary and starts it with `PORT`.
 For static frontends, preview builds the frontend and serves the output
-directory.
+directory. For fullstack apps, preview builds both roots, runs the backend, and
+serves the frontend with a local `/api/*` proxy.
 
 ## Runtime contract
 

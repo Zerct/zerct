@@ -15,6 +15,10 @@ function frontendLockfileExists(projectDir: string): boolean {
     .some((file) => existsSync(path.join(projectDir, file)))
 }
 
+function isPlainStaticFrontend(projectDir: string): boolean {
+  return !existsSync(path.join(projectDir, 'package.json')) && existsSync(path.join(projectDir, 'index.html'))
+}
+
 function frontendPackageManager(projectDir: string): 'bun' | 'npm' {
   return existsSync(path.join(projectDir, 'bun.lock')) || existsSync(path.join(projectDir, 'bun.lockb'))
     ? 'bun'
@@ -22,12 +26,18 @@ function frontendPackageManager(projectDir: string): 'bun' | 'npm' {
 }
 
 function frontendCheckCommand(projectDir: string): string {
+  if (isPlainStaticFrontend(projectDir)) {
+    return ':'
+  }
   return frontendPackageManager(projectDir) === 'bun'
     ? DEFAULT_BUN_FRONTEND_CHECK_COMMAND
     : DEFAULT_NPM_FRONTEND_CHECK_COMMAND
 }
 
 function frontendBuildCommand(projectDir: string): string {
+  if (isPlainStaticFrontend(projectDir)) {
+    return ':'
+  }
   return frontendPackageManager(projectDir) === 'bun'
     ? 'bun run build'
     : 'npm run build'
@@ -269,4 +279,4 @@ function packageScriptCheck(projectDir: string, script: string): DoctorCheck {
   }
 }
 
-export { frontendLockfileExists, frontendCheckCommand, frontendBuildCommand, frontendScriptChecks, frontendSourceChecks, usesJavascriptLinter, commandTokens, hasFrontendInstallCommand, hasFrontendScriptRun }
+export { frontendLockfileExists, isPlainStaticFrontend, frontendCheckCommand, frontendBuildCommand, frontendScriptChecks, frontendSourceChecks, usesJavascriptLinter, commandTokens, hasFrontendInstallCommand, hasFrontendScriptRun }

@@ -32,6 +32,25 @@ as `oxlint --type-aware --type-check`. `lint` must run native tooling such as
 `oxlint`, `biome check`, or `deno lint`, plus Fallow `dead-code`, semantic
 `dupes`, and `health` gates.
 
+Plain static frontend:
+
+```txt
+index.html
+tovuk.toml
+```
+
+Plain static frontends do not need a package manager. Use `check = ":"`,
+`command = ":"`, and `output = "."`.
+
+Fullstack app:
+
+```txt
+tovuk.toml
+api/Cargo.toml
+api/Cargo.lock
+web/package.json or web/index.html
+```
+
 ## Rust tovuk.toml
 
 ```toml
@@ -59,6 +78,27 @@ command = "bun run build"
 output = "dist"
 ```
 
+## Fullstack tovuk.toml
+
+```toml
+name = "my-app"
+kind = "fullstack"
+
+[backend]
+root = "api"
+check = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+build = "cargo build --release"
+command = "./target/release/api"
+port = 3000
+health = "/api/healthz"
+
+[frontend]
+root = "web"
+check = "bun ci && bun run typecheck && bun run lint"
+build = "bun run build"
+output = "dist"
+```
+
 ## Rust runtime behavior
 
 - Bind to `0.0.0.0:$PORT`
@@ -66,5 +106,5 @@ output = "dist"
 - Keep secrets in server-side environment variables
 - Avoid build steps that require interactive input
 
-Static frontends do not run server code on Tovuk. They call Rust backends for
-dynamic behavior.
+Static frontends do not run server code on Tovuk. Fullstack apps keep the
+frontend static and proxy `/api/*` to the Rust backend inside the same app URL.

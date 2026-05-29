@@ -5,6 +5,11 @@ import { WALK_EXCLUDED_DIRS } from './constants.ts'
 import { agentError } from './errors.ts'
 import type { CliOptions, FileVisitor, JsonValue, PackageManifest, PathVisitor, ProjectKind } from './types.ts'
 
+interface FullstackRoots {
+  backend: string
+  frontend: string
+}
+
 function hasCommand(command: string): boolean {
   return (process.env['PATH'] ?? '')
     .split(path.delimiter)
@@ -72,13 +77,24 @@ function serviceNameFromValue(value: string): string {
 }
 
 function inferProjectKind(projectDir: string): ProjectKind {
+  if (detectFullstackRoots(projectDir)) {
+    return 'fullstack'
+  }
   if (existsSync(path.join(projectDir, 'Cargo.toml'))) {
     return 'rust_backend'
   }
-  if (existsSync(path.join(projectDir, 'package.json'))) {
+  if (existsSync(path.join(projectDir, 'package.json')) || existsSync(path.join(projectDir, 'index.html'))) {
     return 'static_frontend'
   }
   return 'rust_backend'
+}
+
+function detectFullstackRoots(projectDir: string): FullstackRoots | null {
+  const backendRoot = ['api', 'backend', 'server']
+    .find((root) => existsSync(path.join(projectDir, root, 'Cargo.toml')))
+  const frontendRoot = ['web', 'frontend', 'app', 'site']
+    .find((root) => existsSync(path.join(projectDir, root, 'package.json')) || existsSync(path.join(projectDir, root, 'index.html')))
+  return backendRoot && frontendRoot ? { backend: backendRoot, frontend: frontendRoot } : null
 }
 
 function readPackageJson(projectDir: string): PackageManifest | null {
@@ -132,4 +148,4 @@ function progress(cli: CliOptions, message: string): void {
   console.log(message)
 }
 
-export { hasCommand, isSafeRelativePath, walkProjectFiles, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, inferProjectKind, readPackageJson, printJson, openUrl, sleep, progress }
+export { hasCommand, isSafeRelativePath, walkProjectFiles, ensureDirectory, serviceNameFromDir, serviceNameFromCargo, serviceNameFromPackage, inferProjectKind, detectFullstackRoots, readPackageJson, printJson, openUrl, sleep, progress }

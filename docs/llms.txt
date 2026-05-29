@@ -1,8 +1,8 @@
 # Tovuk agent guide
 
-Tovuk deploys Rust backends and static frontends. Dynamic server logic belongs
-in the Rust backend. Static frontends call Rust backend HTTPS endpoints for API,
-database, auth, media, and server-side work.
+Tovuk deploys Rust backends, static frontends, and fullstack apps. Fullstack
+apps use one root tovuk.toml, serve the frontend at `/`, and route `/api/*` to
+the Rust backend.
 
 Use the npm CLI unless the user already installed a persistent CLI:
 
@@ -52,6 +52,20 @@ Static frontend contract:
   and lint.
 - Weak typecheck, fake lint, missing Fallow quality gates, and
   JavaScript-based lint/format scripts are rejected for deploys.
+
+Plain static frontend contract:
+
+- `index.html` is committed.
+- `kind = "static_frontend"` is set in `tovuk.toml`.
+- `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
+
+Fullstack contract:
+
+- One root `tovuk.toml` sets `kind = "fullstack"`.
+- `[backend].root` points to the Rust backend.
+- `[frontend].root` points to the static frontend.
+- The frontend calls same-origin `/api`.
+- The backend health path is `/api/healthz`.
 
 Useful commands:
 

@@ -5,7 +5,7 @@ export interface JsonObject {
 }
 
 export type ApiMethod = 'DELETE' | 'GET' | 'POST' | 'PUT'
-export type ProjectKind = 'rust_backend' | 'static_frontend'
+export type ProjectKind = 'fullstack' | 'rust_backend' | 'static_frontend'
 export type DiscoveredProjectKind = ProjectKind | 'unknown'
 export type TemplateName = 'fullstack-rust-tanstack' | 'rust-api' | 'tanstack-static-frontend'
 
@@ -47,8 +47,18 @@ export interface PackageManifest {
 
 export type BuildConfig = JsonObject & { command: string; check: string; output?: string }
 export type RunConfig = JsonObject & { command?: string; port: number; health: string }
+export type FrontendConfig = JsonObject & { root?: string; check?: string; build?: string; output?: string }
+export type BackendConfig = JsonObject & { root?: string; check?: string; build?: string; command?: string; port?: number; health?: string }
 export type ResourceConfig = JsonObject & { memory: string; cpu: string; idle_timeout_minutes: number }
-export type TovukConfig = JsonObject & { name?: string; kind: ProjectKind; build: BuildConfig; run: RunConfig; resources: ResourceConfig }
+export type TovukConfig = JsonObject & {
+  name?: string
+  kind: ProjectKind
+  build: BuildConfig
+  run: RunConfig
+  frontend: FrontendConfig
+  backend: BackendConfig
+  resources: ResourceConfig
+}
 export type DoctorCheck = JsonObject & { name: string; ok: boolean; message: string; agent_instruction: string | null }
 export type DoctorReport = JsonObject & { ok: boolean; project: string; config: TovukConfig | null; checks: DoctorCheck[] }
 export type ProjectDoctorReport = DoctorReport & { relative: string }

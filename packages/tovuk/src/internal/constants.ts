@@ -18,7 +18,7 @@ export const DEFAULT_LOGIN_INTERVAL_SECONDS: number = 5
 export const DEFAULT_RUST_CHECK_COMMAND: string = 'cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
 export const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: string = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
 export const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: string = 'bun ci && bun run typecheck && bun run lint'
-export const PROJECT_KINDS: ReadonlySet<string> = new Set(['rust_backend', 'static_frontend'])
+export const PROJECT_KINDS: ReadonlySet<string> = new Set(['fullstack', 'rust_backend', 'static_frontend'])
 export const PROJECT_TEMPLATES: ReadonlySet<string> = new Set(['rust-api', 'tanstack-static-frontend', 'fullstack-rust-tanstack'])
 export const JAVASCRIPT_LINTERS: ReadonlySet<string> = new Set(['eslint', 'eslint_d', 'jscs', 'jshint', 'prettier', 'prettierd', 'standard', 'xo'])
 export const FRONTEND_SOURCE_ROOTS: ReadonlySet<string> = new Set(['src', 'app', 'pages', 'routes', 'components'])
@@ -125,11 +125,13 @@ Usage:
   tovuk support resolve <ticket_id> [--api <url>] [--json]
 
 Agent contract:
+  - Fullstack apps set kind = "fullstack", keep backend and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust API under /api.
   - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
+  - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - Frontends call Rust backends for APIs, managed Postgres, and server-side logic.
-  - Run deploy from a repo root with nested tovuk.toml files to deploy the whole workspace in one command.
-  - When a frontend calls a backend on another hostname, configure backend CORS or use a same-origin custom domain.
+  - Run deploy from a fullstack repo root with one tovuk.toml to build backend and frontend together.
+  - When split frontend and backend apps use different hostnames, configure backend CORS or use a same-origin custom domain.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - Create support tickets only with command output, app id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.

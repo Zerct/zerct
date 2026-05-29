@@ -2,9 +2,9 @@
 
 Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Tovuk hosts Rust backends and static frontends. Frontends can be fully dynamic
-in the browser by calling Rust backend deploys for APIs and managed Postgres,
-without keeping a Node or Bun server alive.
+Tovuk hosts Rust backends, static frontends, and fullstack apps. A fullstack app
+uses one `tovuk.toml`, one deployment URL, a static frontend at `/`, and a Rust
+backend under `/api/*`.
 
 ## Install
 
@@ -17,17 +17,37 @@ tovuk preview
 tovuk deploy
 ```
 
-Create a full-stack starter:
+Create a fullstack starter:
 
 ```sh
 tovuk init my-app --template fullstack-rust-tanstack
 cd my-app/web && bun install && cd ..
 ```
 
-From a full-stack repo root, `tovuk deploy --database` discovers
-nested `tovuk.toml` projects and deploys the whole workspace in one command.
-Rust backends deploy first. Static frontends deploy after them. Managed
-Postgres is requested only for Rust backends.
+From a fullstack repo root, `tovuk deploy --database` reads
+the single root `tovuk.toml`, builds `api` and `web`, attaches managed
+Postgres to the Rust backend, and returns one app URL.
+
+Fullstack deploys use this `tovuk.toml` shape:
+
+```toml
+name = "my-app"
+kind = "fullstack"
+
+[backend]
+root = "api"
+check = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+build = "cargo build --release"
+command = "./target/release/api"
+port = 3000
+health = "/api/healthz"
+
+[frontend]
+root = "web"
+check = "bun ci && bun run typecheck && bun run lint"
+build = "bun run build"
+output = "dist"
+```
 
 Static frontend deploys use the same command with this `tovuk.toml`:
 
@@ -68,6 +88,10 @@ source must be `.ts` or `.tsx` under
 `.mjs`, and `.cjs` source is rejected. Bun projects should commit `bun.lock`
 for the fastest Tovuk build path. Existing npm projects can still deploy with a
 committed npm lockfile and npm-based build commands.
+
+Plain static HTML/CSS/JS sites can deploy without a package manager by setting
+`kind = "static_frontend"`, `[build].check = ":"`, `[build].command = ":"`, and
+`[build].output = "."`.
 
 Use Homebrew for a persistent developer CLI:
 

@@ -6,7 +6,7 @@ import { parseTovukToml, validateConfig } from './config.ts'
 import { discoverDeployProjects } from './workspace.ts'
 import { printJson } from './project.ts'
 import { rustDoctorChecks, unsafeCheck } from './rust-doctor.ts'
-import { frontendLockfileExists, frontendScriptChecks, frontendSourceChecks } from './frontend-policy.ts'
+import { frontendLockfileExists, frontendScriptChecks, frontendSourceChecks, isPlainStaticFrontend } from './frontend-policy.ts'
 import type { DoctorCheck, DoctorReport, WorkspaceDoctorReport, TovukConfig } from './types.ts'
 
 function doctorProject(projectDir: string, json: boolean): void {
@@ -58,11 +58,14 @@ function runDoctor(projectDir: string): DoctorReport {
   const configResult = readConfig(projectDir)
   const checks: DoctorCheck[] = [configResult.check]
   const kind = configResult.config?.kind || 'rust_backend'
+  if (kind === 'fullstack' && configResult.config) {
+    checks.push(...fullstackChecks(projectDir, configResult.config, configResult.valid))
+    return doctorReport(projectDir, configResult.config, checks)
+  }
+
   checks.push(...requiredFileChecks(projectDir, kind))
   if (kind === 'static_frontend') {
-    checks.push(frontendLockfileCheck(projectDir))
-    checks.push(...frontendSourceChecks(projectDir))
-    checks.push(...frontendScriptChecks(projectDir, configResult.valid))
+    checks.push(...staticFrontendChecks(projectDir, configResult.valid))
   } else {
     checks.push(...rustDoctorChecks(projectDir, configResult.valid))
   }
@@ -71,10 +74,14 @@ function runDoctor(projectDir: string): DoctorReport {
     checks.push(unsafeCheck(projectDir))
   }
 
+  return doctorReport(projectDir, configResult.config, checks)
+}
+
+function doctorReport(projectDir: string, config: TovukConfig | null, checks: DoctorCheck[]): DoctorReport {
   return {
     ok: checks.every((check) => check.ok),
     project: projectDir,
-    config: configResult.config,
+    config,
     checks
   }
 }
@@ -124,14 +131,49 @@ function readConfig(projectDir: string): { check: DoctorCheck; config: TovukConf
 }
 
 function requiredFileChecks(projectDir: string, kind: TovukConfig['kind']): DoctorCheck[] {
-  return requiredFiles(kind).map((file) => {
+  return requiredFiles(projectDir, kind).map((file) => {
     const ok = existsSync(path.join(projectDir, file))
     return doctorCheck(file, ok, 'found', 'missing', `Create and commit ${file}, then retry.`)
   })
 }
 
-function requiredFiles(kind: TovukConfig['kind']): string[] {
-  return kind === 'static_frontend' ? ['package.json'] : ['Cargo.toml', 'Cargo.lock']
+function requiredFiles(projectDir: string, kind: TovukConfig['kind']): string[] {
+  if (kind === 'static_frontend') {
+    return isPlainStaticFrontend(projectDir) ? ['index.html'] : ['package.json']
+  }
+  return ['Cargo.toml', 'Cargo.lock']
+}
+
+function fullstackChecks(projectDir: string, config: TovukConfig, configValid: boolean): DoctorCheck[] {
+  const backendRoot = config.backend.root || ''
+  const frontendRoot = config.frontend.root || ''
+  const backendDir = path.join(projectDir, backendRoot)
+  const frontendDir = path.join(projectDir, frontendRoot)
+  return [
+    ...requiredFilesAt(backendDir, backendRoot, ['Cargo.toml', 'Cargo.lock']),
+    ...rustDoctorChecks(backendDir, configValid),
+    ...requiredFilesAt(frontendDir, frontendRoot, isPlainStaticFrontend(frontendDir) ? ['index.html'] : ['package.json']),
+    ...staticFrontendChecks(frontendDir, configValid)
+  ]
+}
+
+function requiredFilesAt(projectDir: string, label: string, files: string[]): DoctorCheck[] {
+  return files.map((file) => {
+    const display = label ? `${label}/${file}` : file
+    const ok = existsSync(path.join(projectDir, file))
+    return doctorCheck(display, ok, 'found', 'missing', `Create and commit ${display}, then retry.`)
+  })
+}
+
+function staticFrontendChecks(projectDir: string, configValid: boolean): DoctorCheck[] {
+  if (isPlainStaticFrontend(projectDir)) {
+    return []
+  }
+  return [
+    frontendLockfileCheck(projectDir),
+    ...frontendSourceChecks(projectDir),
+    ...frontendScriptChecks(projectDir, configValid)
+  ]
 }
 
 function frontendLockfileCheck(projectDir: string): DoctorCheck {

@@ -108,7 +108,7 @@ fn handle(mut stream: TcpStream) -> std::io::Result<()> {
         return write_response(&mut stream, "204 No Content", "", &cors_origin);
     }
 
-    let body = if path == "/healthz" {
+    let body = if path == "/healthz" || path == "/api/healthz" {
         r#"{"ok":true}"#
     } else {
         r#"{"message":"hello from tovuk","backend":"rust"}"#

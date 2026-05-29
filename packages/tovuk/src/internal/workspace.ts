@@ -52,10 +52,13 @@ function kindOrder(kind: DiscoveredProjectKind): number {
   if (kind === 'rust_backend') {
     return 0
   }
-  if (kind === 'static_frontend') {
+  if (kind === 'fullstack') {
     return 1
   }
-  return 2
+  if (kind === 'static_frontend') {
+    return 2
+  }
+  return 3
 }
 
 export { discoverDeployProjects }

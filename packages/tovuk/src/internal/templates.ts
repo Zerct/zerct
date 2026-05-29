@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { DEFAULT_RUST_CHECK_COMMAND, PROJECT_TEMPLATES } from './constants.ts'
+import { DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_RUST_CHECK_COMMAND, PROJECT_TEMPLATES } from './constants.ts'
 import { agentError } from './errors.ts'
 import { doctorProject } from './doctor.ts'
-import { frontendBuildCommand, frontendCheckCommand } from './frontend-policy.ts'
-import { ensureDirectory, inferProjectKind, serviceNameFromCargo, serviceNameFromDir, serviceNameFromPackage } from './project.ts'
+import { frontendBuildCommand, frontendCheckCommand, isPlainStaticFrontend } from './frontend-policy.ts'
+import { detectFullstackRoots, ensureDirectory, inferProjectKind, serviceNameFromCargo, serviceNameFromDir, serviceNameFromPackage } from './project.ts'
 import { frontendPackageJson, frontendSource, frontendTsConfig, frontendViteEnvSource, rustApiSource } from './template-sources.ts'
 import type { TemplateName } from './types.ts'
 
@@ -15,8 +15,7 @@ const TEMPLATE_WRITERS: Readonly<Record<TemplateName, TemplateWriter>> = {
   'rust-api': (projectDir): void => writeRustApiTemplate(projectDir, serviceNameFromDir(projectDir)),
   'tanstack-static-frontend': (projectDir): void => writeFrontendTemplate(projectDir, serviceNameFromDir(projectDir), '/api'),
   'fullstack-rust-tanstack': (projectDir): void => {
-    writeRustApiTemplate(path.join(projectDir, 'api'), 'api')
-    writeFrontendTemplate(path.join(projectDir, 'web'), 'web', 'http://localhost:3000')
+    writeFullstackTemplate(projectDir)
   }
 }
 
@@ -35,9 +34,7 @@ function initProject(projectDir: string, template = ''): void {
   }
 
   const kind = inferProjectKind(projectDir)
-  const source = kind === 'static_frontend'
-    ? frontendConfig(projectDir)
-    : rustBackendConfig(projectDir)
+  const source = initConfig(projectDir, kind)
 
   writeFileSync(configPath, source, { mode: 0o644 })
   console.log(`created ${path.relative(process.cwd(), configPath)}`)
@@ -52,9 +49,15 @@ function createTemplate(projectDir: string, template: string): void {
   console.log(`created ${template} template`)
 }
 
-function writeRustApiTemplate(projectDir: string, name: string): void {
+function writeFullstackTemplate(projectDir: string): void {
+  writeRustApiTemplate(path.join(projectDir, 'api'), 'api', false)
+  writeFrontendTemplate(path.join(projectDir, 'web'), 'web', '/api', false)
+  writeNewFile(path.join(projectDir, 'tovuk.toml'), fullstackConfig(projectDir, { backend: 'api', frontend: 'web' }, true))
+}
+
+function writeRustApiTemplate(projectDir: string, name: string, includeConfig = true): void {
   mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
-  const files: readonly TemplateFile[] = [
+  const files: TemplateFile[] = [
     ['Cargo.toml', `[package]
 name = "${name}"
 version = "0.1.0"
@@ -72,24 +75,28 @@ version = 4
 name = "${name}"
 version = "0.1.0"
 `],
-    ['src/main.rs', rustApiSource()],
-    ['tovuk.toml', rustBackendConfig(projectDir)]
+    ['src/main.rs', rustApiSource()]
   ]
+  if (includeConfig) {
+    files.push(['tovuk.toml', rustBackendConfig(projectDir)])
+  }
   writeTemplateFiles(projectDir, files)
 }
 
-function writeFrontendTemplate(projectDir: string, name: string, apiBaseUrl: string): void {
+function writeFrontendTemplate(projectDir: string, name: string, apiBaseUrl: string, includeConfig = true): void {
   mkdirSync(path.join(projectDir, 'src'), { recursive: true, mode: 0o755 })
-  const files: readonly TemplateFile[] = [
+  const files: TemplateFile[] = [
     ['package.json', frontendPackageJson(name)],
     ['index.html', '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n'],
     ['src/styles.css', 'body{margin:0;font-family:system-ui,sans-serif}main{min-height:100svh;display:grid;place-items:center;padding:2rem}code{font-family:ui-monospace,monospace}\n'],
     ['src/vite-env.d.ts', frontendViteEnvSource()],
     ['src/main.tsx', frontendSource(apiBaseUrl)],
     ['tsconfig.json', frontendTsConfig()],
-    ['vite.config.ts', 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n'],
-    ['tovuk.toml', frontendConfig(projectDir)]
+    ['vite.config.ts', 'import react from "@vitejs/plugin-react";\nimport { defineConfig } from "vite";\n\nexport default defineConfig({ plugins: [react()] });\n']
   ]
+  if (includeConfig) {
+    files.push(['tovuk.toml', frontendConfig(projectDir, true)])
+  }
   writeTemplateFiles(projectDir, files)
   console.log('run package install in the frontend directory before doctor: bun install or npm install')
 }
@@ -105,6 +112,19 @@ function writeNewFile(file: string, source: string): void {
     throw agentError('file_exists', `Refusing to overwrite ${path.relative(process.cwd(), file)}.`, 'Move the existing file or choose an empty directory, then retry.', false)
   }
   writeFileSync(file, source, { mode: 0o644 })
+}
+
+function initConfig(projectDir: string, kind: ReturnType<typeof inferProjectKind>): string {
+  if (kind === 'fullstack') {
+    const roots = detectFullstackRoots(projectDir)
+    if (!roots) {
+      throw agentError('fullstack_roots_missing', 'Could not find fullstack roots.', 'Create api/Cargo.toml and web/package.json or web/index.html, then retry.', false)
+    }
+    return fullstackConfig(projectDir, roots)
+  }
+  return kind === 'static_frontend'
+    ? frontendConfig(projectDir)
+    : rustBackendConfig(projectDir)
 }
 
 function rustBackendConfig(projectDir: string): string {
@@ -127,16 +147,56 @@ idle_timeout_minutes = 15
 `
 }
 
-function frontendConfig(projectDir: string): string {
+function frontendConfig(projectDir: string, preferBun = false): string {
   const name = serviceNameFromPackage(projectDir) || serviceNameFromDir(projectDir)
+  const frontend = frontendBuildSettings(projectDir, preferBun)
   return `name = "${name}"
 kind = "static_frontend"
 
 [build]
-check = "${frontendCheckCommand(projectDir)}"
-command = "${frontendBuildCommand(projectDir)}"
-output = "dist"
+check = "${frontend.check}"
+command = "${frontend.build}"
+output = "${frontend.output}"
 `
+}
+
+function fullstackConfig(projectDir: string, roots: { backend: string; frontend: string }, preferBun = false): string {
+  const name = serviceNameFromDir(projectDir)
+  const backendDir = path.join(projectDir, roots.backend)
+  const frontendDir = path.join(projectDir, roots.frontend)
+  const backendName = serviceNameFromCargo(backendDir) || serviceNameFromDir(backendDir)
+  const frontend = frontendBuildSettings(frontendDir, preferBun)
+  return `name = "${name}"
+kind = "fullstack"
+
+[backend]
+root = "${roots.backend}"
+check = "${DEFAULT_RUST_CHECK_COMMAND}"
+build = "cargo build --release"
+command = "./target/release/${backendName}"
+port = 3000
+health = "/api/healthz"
+
+[frontend]
+root = "${roots.frontend}"
+check = "${frontend.check}"
+build = "${frontend.build}"
+output = "${frontend.output}"
+
+[resources]
+memory = "512mb"
+cpu = "0.25"
+idle_timeout_minutes = 15
+`
+}
+
+function frontendBuildSettings(projectDir: string, preferBun: boolean): { check: string; build: string; output: string } {
+  const output = isPlainStaticFrontend(projectDir) ? '.' : 'dist'
+  return {
+    check: preferBun && output !== '.' ? DEFAULT_BUN_FRONTEND_CHECK_COMMAND : frontendCheckCommand(projectDir),
+    build: preferBun && output !== '.' ? 'bun run build' : frontendBuildCommand(projectDir),
+    output
+  }
 }
 
 function installProject(projectDir: string, template = ''): void {
