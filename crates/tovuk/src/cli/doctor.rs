@@ -1,5 +1,5 @@
 use super::{
-    config::{ProjectKind, TovukConfig, parse_tovuk_toml, validate_config},
+    config::{TovukConfig, parse_tovuk_toml, validate_config},
     constants::RUST_STRICT_CLIPPY_DENY_LINTS,
     deploy::discover_deploy_projects,
     errors::{
@@ -9,6 +9,7 @@ use super::{
         backend_javascript_source_check, is_plain_static_frontend, static_frontend_checks,
     },
     project::walk_project_files,
+    project_kind::ProjectKind,
 };
 use serde::Serialize;
 use std::{

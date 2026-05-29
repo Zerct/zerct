@@ -10,6 +10,7 @@ mod frontend_checks;
 mod help;
 mod preview;
 mod project;
+mod project_kind;
 mod runtime;
 mod template_sources;
 mod templates;
