@@ -180,7 +180,7 @@ if (javascriptFiles.length > 0) {
 
 assertEqual(packageJson.name, 'tovuk', 'package name')
 assertEqual(packageJson.type, 'module', 'package type')
-assertEqual(packageJson.description, 'Deploy Rust backends and static frontends to Tovuk.', 'package description')
+assertEqual(packageJson.description, 'Deploy Rust backends, static frontends, and fullstack apps to Tovuk.', 'package description')
 assertEqual(packageJson.homepage, 'https://tovuk.com', 'package homepage')
 assertEqual(packageJson.license, 'MIT', 'package license')
 assertEqual(packageJson.private, undefined, 'package private flag')
