@@ -36,7 +36,6 @@ pub(crate) const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
 pub(crate) const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str =
     "bun ci && bun run typecheck && bun run lint";
 
-pub(crate) const PROJECT_KINDS: &[&str] = &["fullstack", "rust_backend", "static_frontend"];
 pub(crate) const PROJECT_TEMPLATES: &[&str] = &[
     "rust-api",
     "tanstack-static-frontend",

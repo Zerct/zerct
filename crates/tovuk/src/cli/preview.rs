@@ -54,7 +54,7 @@ pub(crate) fn preview_validated_project(
     config: &TovukConfig,
     port: u16,
 ) -> Result<()> {
-    if config.kind == "fullstack" {
+    if config.kind.is_fullstack() {
         return preview_fullstack(project_dir, config, port);
     }
     run_shell(
@@ -62,7 +62,7 @@ pub(crate) fn preview_validated_project(
         project_dir,
         "Build failed before preview.",
     )?;
-    if config.kind == "static_frontend" {
+    if config.kind.is_static_frontend() {
         return preview_static(
             project_dir,
             config.build.output.as_deref().unwrap_or("dist"),

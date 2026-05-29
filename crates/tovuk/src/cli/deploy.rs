@@ -2,7 +2,7 @@ use super::{
     api_commands::{api_request, payment_required_agent_error},
     args::CliOptions,
     auth::read_or_login_token,
-    config::parse_tovuk_toml,
+    config::{ProjectKind, parse_tovuk_toml},
     constants::{
         ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, WALK_EXCLUDED_DIRS, WORKSPACE_EXCLUDED_DIRS,
     },
@@ -32,7 +32,7 @@ pub(crate) struct DeployProjectInfo {
     pub(crate) dir: PathBuf,
     pub(crate) relative: String,
     pub(crate) name: String,
-    pub(crate) kind: String,
+    pub(crate) kind: Option<ProjectKind>,
 }
 
 #[derive(Clone, Debug)]
@@ -163,7 +163,7 @@ pub(crate) fn print_workspace_deploy_results(
             .map(|result| {
                 json!({
                     "path": result.project.relative,
-                    "kind": result.project.kind,
+                    "kind": result.project.kind.map_or("invalid", ProjectKind::as_str),
                     "wants_database": result.wants_database,
                     "app": result.response.get("app").cloned().unwrap_or(Value::Null),
                     "build_job": result.response.get("build_job").cloned().unwrap_or(Value::Null),
@@ -251,7 +251,7 @@ pub(crate) fn create_deploy_plan(
         .map(|project| DeployPlanProject {
             project: project.clone(),
             wants_database: cli.deployment.database
-                && (project.kind == "rust_backend" || project.kind == "fullstack"),
+                && project.kind.is_some_and(ProjectKind::supports_database),
         })
         .collect::<Vec<_>>();
     reject_invalid_database_targets(&plan, cli)?;
@@ -265,9 +265,11 @@ pub(crate) fn reject_invalid_database_targets(
 ) -> Result<()> {
     if cli.deployment.database
         && plan.len() == 1
-        && plan
-            .first()
-            .is_some_and(|item| item.project.kind == "static_frontend")
+        && plan.first().is_some_and(|item| {
+            item.project
+                .kind
+                .is_some_and(ProjectKind::is_static_frontend)
+        })
     {
         return Err(agent_error(
             "invalid_database_target",
@@ -341,7 +343,7 @@ pub(crate) fn requested_new_resources(
     let mut projects = 0u64;
     let mut databases = 0u64;
     for target in plan {
-        if target.project.name.is_empty() || target.project.kind == "unknown" {
+        if target.project.name.is_empty() || target.project.kind.is_none() {
             continue;
         }
         if !existing_apps.contains(&target.project.name) {
@@ -369,8 +371,8 @@ pub(crate) fn discover_deploy_projects(root_dir: &Path) -> Result<Vec<DeployProj
         .map(|dir| deploy_project_info(dir, root_dir))
         .collect::<Vec<_>>();
     projects.sort_by(|left, right| {
-        kind_order(&left.kind)
-            .cmp(&kind_order(&right.kind))
+        kind_order(left.kind)
+            .cmp(&kind_order(right.kind))
             .then_with(|| left.relative.cmp(&right.relative))
     });
     Ok(projects)
@@ -406,24 +408,19 @@ pub(crate) fn deploy_project_info(dir: &Path, root_dir: &Path) -> DeployProjectI
             dir: dir.to_path_buf(),
             relative,
             name: config.name.unwrap_or_default(),
-            kind: config.kind,
+            kind: Some(config.kind),
         };
     }
     DeployProjectInfo {
         dir: dir.to_path_buf(),
         relative,
         name: String::new(),
-        kind: "unknown".to_owned(),
+        kind: None,
     }
 }
 
-pub(crate) fn kind_order(kind: &str) -> u8 {
-    match kind {
-        "rust_backend" => 0,
-        "fullstack" => 1,
-        "static_frontend" => 2,
-        _ => 3,
-    }
+pub(crate) fn kind_order(kind: Option<ProjectKind>) -> u8 {
+    kind.map_or(3, ProjectKind::sort_order)
 }
 
 pub(crate) fn create_archive_base64(project_dir: &Path, json_output: bool) -> Result<String> {
