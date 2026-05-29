@@ -74,6 +74,7 @@ go run scripts/check-prose-style.go
 scripts/check-github-actions.sh
 scripts/check-shell-style.sh
 scripts/check-toml-style.sh
+scripts/check-go-style.sh
 scripts/check-typos.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb >/dev/null
