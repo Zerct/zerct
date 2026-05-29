@@ -2,7 +2,7 @@ use super::{
     api_commands::{api_request, payment_required_agent_error},
     args::CliOptions,
     auth::read_or_login_token,
-    config::{ProjectKind, parse_tovuk_toml},
+    config::parse_tovuk_toml,
     constants::{
         ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, WALK_EXCLUDED_DIRS, WORKSPACE_EXCLUDED_DIRS,
     },
@@ -12,6 +12,7 @@ use super::{
         encode_component, ensure_directory, nested_string, number_field, path_relative, progress,
         string_field,
     },
+    project_kind::ProjectKind,
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use flate2::{Compression, write::GzEncoder};

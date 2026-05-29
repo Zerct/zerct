@@ -1,8 +1,8 @@
-use super::config::ProjectKind;
 use super::{
     args::CliOptions,
     constants::WALK_EXCLUDED_DIRS,
     errors::{Result, agent_error},
+    project_kind::ProjectKind,
 };
 use serde_json::Value;
 use std::{
