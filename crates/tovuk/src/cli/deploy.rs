@@ -3,9 +3,7 @@ use super::{
     args::CliOptions,
     auth::read_or_login_token,
     config::parse_tovuk_toml,
-    constants::{
-        ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, WALK_EXCLUDED_DIRS, WORKSPACE_EXCLUDED_DIRS,
-    },
+    constants::{ARCHIVE_EXCLUDES, ARCHIVE_LIMIT_BYTES, WALK_EXCLUDED_DIRS},
     doctor::run_doctor,
     errors::{Result, agent_error, print_json},
     project::{
@@ -13,6 +11,7 @@ use super::{
         string_field,
     },
     project_kind::ProjectKind,
+    project_layout::{discover_project_dirs, kind_order},
 };
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use flate2::{Compression, write::GzEncoder};
@@ -379,28 +378,6 @@ pub(crate) fn discover_deploy_projects(root_dir: &Path) -> Result<Vec<DeployProj
     Ok(projects)
 }
 
-pub(crate) fn discover_project_dirs(dir: &Path, project_dirs: &mut Vec<PathBuf>) {
-    let Ok(entries) = fs::read_dir(dir) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if !path.is_dir()
-            || entry
-                .file_name()
-                .to_str()
-                .is_some_and(|name| WORKSPACE_EXCLUDED_DIRS.contains(&name))
-        {
-            continue;
-        }
-        if path.join("tovuk.toml").exists() {
-            project_dirs.push(path);
-        } else {
-            discover_project_dirs(&path, project_dirs);
-        }
-    }
-}
-
 pub(crate) fn deploy_project_info(dir: &Path, root_dir: &Path) -> DeployProjectInfo {
     let relative = path_relative(dir, root_dir);
     let source = fs::read_to_string(dir.join("tovuk.toml")).unwrap_or_default();
@@ -418,10 +395,6 @@ pub(crate) fn deploy_project_info(dir: &Path, root_dir: &Path) -> DeployProjectI
         name: String::new(),
         kind: None,
     }
-}
-
-pub(crate) fn kind_order(kind: Option<ProjectKind>) -> u8 {
-    kind.map_or(3, ProjectKind::sort_order)
 }
 
 pub(crate) fn create_archive_base64(project_dir: &Path, json_output: bool) -> Result<String> {

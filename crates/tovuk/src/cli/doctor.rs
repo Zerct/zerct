@@ -5,11 +5,12 @@ use super::{
     errors::{
         AgentErrorPayload, CliError, CliFailure, Result, agent_error, internal_error, print_json,
     },
-    frontend_checks::{
-        backend_javascript_source_check, is_plain_static_frontend, static_frontend_checks,
-    },
+    frontend_checks::{backend_javascript_source_check, static_frontend_checks},
     project::walk_project_files,
     project_kind::ProjectKind,
+    project_layout::{
+        fullstack_backend_required_files, fullstack_frontend_required_files, required_files,
+    },
 };
 use serde::Serialize;
 use std::{
@@ -308,18 +309,6 @@ pub(crate) fn required_file_checks(project_dir: &Path, kind: ProjectKind) -> Vec
         .collect()
 }
 
-pub(crate) fn required_files(project_dir: &Path, kind: ProjectKind) -> Vec<&'static str> {
-    if kind.is_static_frontend() {
-        if is_plain_static_frontend(project_dir) {
-            vec!["index.html"]
-        } else {
-            vec!["package.json"]
-        }
-    } else {
-        vec!["Cargo.toml", "Cargo.lock"]
-    }
-}
-
 pub(crate) fn fullstack_checks(
     project_dir: &Path,
     config: &TovukConfig,
@@ -333,18 +322,14 @@ pub(crate) fn fullstack_checks(
     checks.extend(required_files_at(
         &backend_dir,
         &backend_root,
-        &["Cargo.toml", "Cargo.lock"],
+        fullstack_backend_required_files(),
     ));
     checks.push(backend_javascript_source_check(&backend_dir, &backend_root));
     checks.extend(rust_doctor_checks(&backend_dir, config_valid));
     checks.extend(required_files_at(
         &frontend_dir,
         &frontend_root,
-        if is_plain_static_frontend(&frontend_dir) {
-            &["index.html"][..]
-        } else {
-            &["package.json"][..]
-        },
+        fullstack_frontend_required_files(&frontend_dir),
     ));
     checks.extend(static_frontend_checks(&frontend_dir, config_valid));
     checks

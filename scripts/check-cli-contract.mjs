@@ -18,6 +18,10 @@ function rejectSnippet(source, snippet, label) {
   }
 }
 
+function retiredOrgScope() {
+  return String.fromCharCode(64, 122, 101, 114, 99, 116)
+}
+
 const cargoCli = [
   readFileSync('crates/tovuk/src/main.rs', 'utf8'),
   readFileSync('crates/tovuk/src/cli.rs', 'utf8'),
@@ -88,10 +92,10 @@ if (npmPackage.dependencies || npmPackage.devDependencies) {
 }
 
 for (const source of [cargoCli, npmInstall, pythonCli, cargoReadme, npmReadme, pythonReadme, homebrewFormula]) {
-  rejectSnippet(source, 'TOVUK_NPM_CLI', 'legacy npm delegation')
-  rejectSnippet(source, 'NPM_PACKAGE_VERSION', 'legacy npm package pin')
-  rejectSnippet(source, 'npx -y', 'legacy npx delegation')
-  rejectSnippet(source, `@${'zer'}${'ct'}`, 'legacy org scope')
+  rejectSnippet(source, 'TOVUK_NPM_CLI', 'retired npm delegation')
+  rejectSnippet(source, 'NPM_PACKAGE_VERSION', 'retired npm package pin')
+  rejectSnippet(source, 'npx -y', 'retired npx delegation')
+  rejectSnippet(source, retiredOrgScope(), 'retired org scope')
 }
 
 console.log('Checked native CLI command and package contract.')

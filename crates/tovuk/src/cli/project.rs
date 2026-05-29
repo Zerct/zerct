@@ -2,7 +2,6 @@ use super::{
     args::CliOptions,
     constants::WALK_EXCLUDED_DIRS,
     errors::{Result, agent_error},
-    project_kind::ProjectKind,
 };
 use serde_json::Value;
 use std::{
@@ -130,29 +129,6 @@ pub(crate) fn service_name_from_value(value: &str) -> Option<String> {
     } else {
         Some(result)
     }
-}
-
-pub(crate) fn infer_project_kind(project_dir: &Path) -> ProjectKind {
-    if detect_fullstack_roots(project_dir).is_some() {
-        ProjectKind::Fullstack
-    } else if project_dir.join("Cargo.toml").exists() {
-        ProjectKind::RustBackend
-    } else if project_dir.join("package.json").exists() || project_dir.join("index.html").exists() {
-        ProjectKind::StaticFrontend
-    } else {
-        ProjectKind::RustBackend
-    }
-}
-
-pub(crate) fn detect_fullstack_roots(project_dir: &Path) -> Option<(String, String)> {
-    let backend = ["api", "backend", "server"]
-        .iter()
-        .find(|root| project_dir.join(root).join("Cargo.toml").exists())?;
-    let frontend = ["web", "frontend", "app", "site"].iter().find(|root| {
-        project_dir.join(root).join("package.json").exists()
-            || project_dir.join(root).join("index.html").exists()
-    })?;
-    Some(((*backend).to_owned(), (*frontend).to_owned()))
 }
 
 pub(crate) fn is_dns_safe_name(value: &str) -> bool {
