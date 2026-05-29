@@ -10,7 +10,7 @@ on:
       - "packages/tovuk/install.mjs"
       - "packages/tovuk/bin/tovuk"
       - "crates/tovuk/**"
-      - "scripts/check-public-contracts.go"
+      - "scripts/check-public-contracts/**"
 
 permissions:
   contents: read
@@ -64,7 +64,7 @@ jobs:
         id: version
         if: steps.gate.outputs.enabled == 'true'
         run: |
-          version="$(go run scripts/check-public-contracts.go npm-version)"
+          version="$(go run scripts/check-public-contracts/*.go npm-version)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
           if npm view "tovuk@$version" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then

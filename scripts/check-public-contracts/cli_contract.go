@@ -1,0 +1,65 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func checkCLIContract() {
+	cargoCLI := strings.Join(append(
+		[]string{
+			readText("crates/tovuk/src/main.rs"),
+			readText("crates/tovuk/src/cli.rs"),
+		},
+		readSortedTexts("crates/tovuk/src/cli", ".rs")...,
+	), "\n")
+
+	cargoReadme := readText("crates/tovuk/README.md")
+	npmPackage := readPackageJSON("packages/tovuk/package.json")
+	npmInstall := readText("packages/tovuk/install.mjs")
+	npmReadme := readText("packages/tovuk/README.md")
+	pythonCLI := readText("packages/tovuk-py/src/tovuk/cli.py")
+	pythonReadme := readText("packages/tovuk-py/README.md")
+	homebrewFormula := readText("Formula/tovuk.rb")
+
+	for _, command := range []string{
+		"init", "install", "doctor", "preview", "login", "deploy", "capabilities",
+		"me", "usage", "activity", "apps", "overview", "deploys", "builds", "logs",
+		"status", "inspect", "db", "database", "env", "domains", "billing", "support",
+	} {
+		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
+	}
+
+	for _, source := range []string{cargoCLI, cargoReadme, npmReadme, pythonReadme, homebrewFormula} {
+		requireContains(source, "tovuk billing checkout --json", "agentic billing checkout command")
+		requireContains(source, "tovuk support create", "agentic support create command")
+		requireContains(source, "tovuk support list", "agentic support list command")
+		requireContains(source, "tovuk support resolve", "agentic support resolve command")
+	}
+
+	requireContains(cargoCLI, "fullstack-rust-tanstack", "fullstack template option")
+	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
+	requireContains(cargoCLI, "rust-api", "Rust template option")
+	requireContains(cargoCLI, "JavaScript and TypeScript are frontend-only on Tovuk", "Rust-only backend policy")
+	requireContains(npmInstall, "TOVUK_NATIVE_BINARY", "npm local native binary override")
+	requireContains(pythonCLI, "TOVUK_NATIVE_BINARY", "PyPI local native binary override")
+	requireContains(homebrewFormula, `depends_on "rust" => :build`, "Homebrew builds native Rust CLI")
+	requireContains(homebrewFormula, "crates/tovuk", "Homebrew installs Rust crate path")
+
+	if npmPackage.Bin["tovuk"] != "bin/tovuk" {
+		fail("npm package must expose bin/tovuk")
+	}
+	if len(npmPackage.Dependencies) > 0 || len(npmPackage.DevDependencies) > 0 {
+		fail("npm package must not ship runtime JavaScript dependencies")
+	}
+
+	retiredOrgScope := string([]byte{64, 122, 101, 114, 99, 116})
+	for _, source := range []string{cargoCLI, npmInstall, pythonCLI, cargoReadme, npmReadme, pythonReadme, homebrewFormula} {
+		rejectContains(source, "TOVUK_NPM_CLI", "retired npm delegation")
+		rejectContains(source, "NPM_PACKAGE_VERSION", "retired npm package pin")
+		rejectContains(source, "npx -y", "retired npx delegation")
+		rejectContains(source, retiredOrgScope, "retired org scope")
+	}
+
+	fmt.Println("Checked native CLI command and package contract.")
+}

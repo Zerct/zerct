@@ -20,6 +20,21 @@ if [[ -n "$unformatted" ]]; then
   exit 1
 fi
 
+standalone_go_files=()
 for file in "${go_files[@]}"; do
-  go vet "$file"
+  case "$file" in
+    ./scripts/check-public-contracts/*)
+      ;;
+    *)
+      standalone_go_files+=("$file")
+      ;;
+  esac
 done
+
+if ((${#standalone_go_files[@]} > 0)); then
+  go vet "${standalone_go_files[@]}"
+fi
+
+if compgen -G './scripts/check-public-contracts/*.go' >/dev/null; then
+  go vet ./scripts/check-public-contracts/*.go
+fi
