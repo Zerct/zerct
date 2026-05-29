@@ -4,7 +4,6 @@ use super::{
 };
 
 #[derive(Clone, Debug)]
-#[allow(clippy::struct_excessive_bools)]
 pub(crate) struct CliOptions {
     pub(crate) command: String,
     pub(crate) args: Vec<String>,
@@ -20,10 +19,20 @@ pub(crate) struct CliOptions {
     pub(crate) template: String,
     pub(crate) severity: String,
     pub(crate) port: u16,
-    pub(crate) wait_timeout_seconds: u64,
-    pub(crate) json: bool,
+    pub(crate) deployment: DeploymentOptions,
+    pub(crate) output: OutputOptions,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct DeploymentOptions {
     pub(crate) database: bool,
     pub(crate) wait: bool,
+    pub(crate) wait_timeout_seconds: u64,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct OutputOptions {
+    pub(crate) json: bool,
     pub(crate) help: bool,
     pub(crate) version: bool,
 }
@@ -45,12 +54,16 @@ impl Default for CliOptions {
             template: String::new(),
             severity: String::new(),
             port: 0,
-            wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
-            json: false,
-            database: false,
-            wait: false,
-            help: false,
-            version: false,
+            deployment: DeploymentOptions {
+                database: false,
+                wait: false,
+                wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
+            },
+            output: OutputOptions {
+                json: false,
+                help: false,
+                version: false,
+            },
         }
     }
 }
@@ -74,7 +87,7 @@ pub(crate) fn parse_args(argv: &[String]) -> Result<CliOptions> {
                 "unknown_argument",
                 format!("Unknown Tovuk option: {arg}."),
                 "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
-                cli.json,
+                cli.output.json,
             ));
         } else {
             positional.push(arg);
@@ -112,54 +125,97 @@ pub(crate) fn apply_flag(
     argv: &[String],
     index: usize,
 ) -> Result<usize> {
-    let json_output = cli.json;
+    let json_output = cli.output.json;
     match name {
-        "--help" | "-h" => set_boolean_flag(inline.as_ref(), || cli.help = true, name, json_output),
-        "--version" | "-v" | "-V" => {
-            set_boolean_flag(inline.as_ref(), || cli.version = true, name, json_output)
-        }
-        "--json" => set_boolean_flag(inline.as_ref(), || cli.json = true, name, json_output),
-        "--database" => {
-            set_boolean_flag(inline.as_ref(), || cli.database = true, name, json_output)
-        }
-        "--no-database" => {
-            set_boolean_flag(inline.as_ref(), || cli.database = false, name, json_output)
-        }
-        "--wait" => set_boolean_flag(inline.as_ref(), || cli.wait = true, name, json_output),
-        "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.json),
-        "--app" => set_string_flag(&mut cli.app, name, inline, argv, index, cli.json),
-        "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.json),
-        "--deploy" => set_string_flag(&mut cli.deploy, name, inline, argv, index, cli.json),
+        "--help" | "-h" => set_boolean_flag(
+            inline.as_ref(),
+            || cli.output.help = true,
+            name,
+            json_output,
+        ),
+        "--version" | "-v" | "-V" => set_boolean_flag(
+            inline.as_ref(),
+            || cli.output.version = true,
+            name,
+            json_output,
+        ),
+        "--json" => set_boolean_flag(
+            inline.as_ref(),
+            || cli.output.json = true,
+            name,
+            json_output,
+        ),
+        "--database" => set_boolean_flag(
+            inline.as_ref(),
+            || cli.deployment.database = true,
+            name,
+            json_output,
+        ),
+        "--no-database" => set_boolean_flag(
+            inline.as_ref(),
+            || cli.deployment.database = false,
+            name,
+            json_output,
+        ),
+        "--wait" => set_boolean_flag(
+            inline.as_ref(),
+            || cli.deployment.wait = true,
+            name,
+            json_output,
+        ),
+        "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.output.json),
+        "--app" => set_string_flag(&mut cli.app, name, inline, argv, index, cli.output.json),
+        "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.output.json),
+        "--deploy" => set_string_flag(&mut cli.deploy, name, inline, argv, index, cli.output.json),
         "--failing-command" => set_string_flag(
             &mut cli.failing_command,
             name,
             inline,
             argv,
             index,
-            cli.json,
+            cli.output.json,
         ),
-        "--first-log-line" => {
-            set_string_flag(&mut cli.first_log_line, name, inline, argv, index, cli.json)
-        }
-        "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.json),
-        "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.json),
-        "--severity" => set_string_flag(&mut cli.severity, name, inline, argv, index, cli.json),
-        "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.json),
-        "--template" => set_string_flag(&mut cli.template, name, inline, argv, index, cli.json),
-        "--port" => set_u16_flag(&mut cli.port, name, inline, argv, index, cli.json),
-        "--wait-timeout" => set_u64_flag(
-            &mut cli.wait_timeout_seconds,
+        "--first-log-line" => set_string_flag(
+            &mut cli.first_log_line,
             name,
             inline,
             argv,
             index,
-            cli.json,
+            cli.output.json,
+        ),
+        "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.output.json),
+        "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
+        "--severity" => set_string_flag(
+            &mut cli.severity,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.output.json),
+        "--template" => set_string_flag(
+            &mut cli.template,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--port" => set_u16_flag(&mut cli.port, name, inline, argv, index, cli.output.json),
+        "--wait-timeout" => set_u64_flag(
+            &mut cli.deployment.wait_timeout_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
         ),
         _ => Err(agent_error(
             "unknown_argument",
             format!("Unknown Tovuk option: {name}."),
             "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
-            cli.json,
+            cli.output.json,
         )),
     }
 }

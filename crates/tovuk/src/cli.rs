@@ -1,4 +1,4 @@
-use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use base64::engine::general_purpose::STANDARD as BASE64;
 use flate2::{Compression, write::GzEncoder};
 use reqwest::{Method, StatusCode, blocking::Client};
 use serde::{Deserialize, Serialize};

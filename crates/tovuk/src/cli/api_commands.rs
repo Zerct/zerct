@@ -89,7 +89,7 @@ pub(crate) fn logs_command(cli: &CliOptions) -> Result<()> {
         )
     };
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
-    if cli.json {
+    if cli.output.json {
         return print_json(&response);
     }
 
@@ -128,7 +128,7 @@ pub(crate) fn env_command(cli: &CliOptions) -> Result<()> {
                     "invalid_env",
                     "Environment assignment must be KEY=value.",
                     "Pass one uppercase shell-safe environment assignment, for example `API_KEY=value`.",
-                    cli.json,
+                    cli.output.json,
                 ));
             }
             let name = &assignment[..separator];
@@ -158,7 +158,7 @@ pub(crate) fn env_command(cli: &CliOptions) -> Result<()> {
             "unknown_command",
             "Unknown env command.",
             "Use `tovuk env list`, `env set`, or `env delete`.",
-            cli.json,
+            cli.output.json,
         )),
     }
 }
@@ -222,7 +222,7 @@ pub(crate) fn domains_command(cli: &CliOptions) -> Result<()> {
             "unknown_command",
             "Unknown domains command.",
             "Use `domains list`, `domains add`, `domains verify`, or `domains delete`.",
-            cli.json,
+            cli.output.json,
         )),
     }
 }
@@ -238,7 +238,7 @@ pub(crate) fn billing_command(cli: &CliOptions) -> Result<()> {
                 "unknown_billing_command",
                 "Unknown billing command.",
                 "Use `tovuk billing checkout --json` or `tovuk billing portal`.",
-                cli.json,
+                cli.output.json,
             ));
         }
     };
@@ -258,7 +258,7 @@ pub(crate) fn billing_command(cli: &CliOptions) -> Result<()> {
         None
     };
     let response = api_request(cli, Method::POST, route, Some(&token), body)?;
-    if cli.json {
+    if cli.output.json {
         return print_json(&response);
     }
     let url = response
@@ -298,7 +298,7 @@ pub(crate) fn support_command(cli: &CliOptions) -> Result<()> {
             "unknown_command",
             "Unknown support command.",
             "Use `tovuk support list --json` or `support create` with subject and details.",
-            cli.json,
+            cli.output.json,
         )),
     }
 }
@@ -317,7 +317,7 @@ pub(crate) fn support_create(cli: &CliOptions) -> Result<()> {
             "invalid_support_ticket",
             "Support ticket subject and details are required.",
             "Use `tovuk support create \"Short subject\" \"Command, app id, build id, deploy id, and first actionable log line\" --json`.",
-            cli.json,
+            cli.output.json,
         ));
     }
 
@@ -378,7 +378,7 @@ pub(crate) fn command_arg(
         .get(1)
         .cloned()
         .filter(|value| !value.is_empty())
-        .ok_or_else(|| agent_error(code, message, instruction, cli.json))
+        .ok_or_else(|| agent_error(code, message, instruction, cli.output.json))
 }
 
 pub(crate) fn require_app(cli: &CliOptions) -> Result<String> {
@@ -387,7 +387,7 @@ pub(crate) fn require_app(cli: &CliOptions) -> Result<String> {
             "missing_app",
             "App is required.",
             "Pass `--app <app>` using either the app name from tovuk.toml or the app id printed by deploy.",
-            cli.json,
+            cli.output.json,
         ));
     }
     Ok(cli.app.clone())
@@ -443,7 +443,7 @@ pub(crate) fn api_request(
             "api_unreachable",
             format!("Could not reach Tovuk API: {error}"),
             "Retry the command. If it keeps failing, check Tovuk status before changing your project.",
-            cli.json,
+            cli.output.json,
         )
     })?;
     let status = response.status();
@@ -466,7 +466,7 @@ pub(crate) fn api_request(
     enrich_agent_error_payload(cli, route, token, &mut payload);
     Err(CliError::new(CliFailure {
         payload,
-        json: cli.json,
+        json: cli.output.json,
         exit_code: if status.is_server_error() { 2 } else { 1 },
     }))
 }
@@ -536,7 +536,7 @@ pub(crate) fn payment_required_agent_error(
     enrich_agent_error_payload(cli, "local:preflight", Some(token), &mut payload);
     CliError::new(CliFailure {
         payload,
-        json: cli.json,
+        json: cli.output.json,
         exit_code: 1,
     })
 }
