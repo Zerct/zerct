@@ -163,7 +163,7 @@ pub(crate) fn run_doctor(project_dir: &Path) -> DoctorReport {
         return doctor_report(project_dir, config_result.config, checks);
     }
 
-    checks.extend(required_file_checks(project_dir, kind.as_str()));
+    checks.extend(required_file_checks(project_dir, kind));
     if kind.is_static_frontend() {
         checks.extend(static_frontend_checks(project_dir, config_result.valid));
         checks.push(unsafe_check(project_dir));
@@ -291,7 +291,7 @@ pub(crate) fn doctor_check(
     }
 }
 
-pub(crate) fn required_file_checks(project_dir: &Path, kind: &str) -> Vec<DoctorCheck> {
+pub(crate) fn required_file_checks(project_dir: &Path, kind: ProjectKind) -> Vec<DoctorCheck> {
     required_files(project_dir, kind)
         .iter()
         .map(|file| {
@@ -307,8 +307,8 @@ pub(crate) fn required_file_checks(project_dir: &Path, kind: &str) -> Vec<Doctor
         .collect()
 }
 
-pub(crate) fn required_files(project_dir: &Path, kind: &str) -> Vec<&'static str> {
-    if kind == "static_frontend" {
+pub(crate) fn required_files(project_dir: &Path, kind: ProjectKind) -> Vec<&'static str> {
+    if kind.is_static_frontend() {
         if is_plain_static_frontend(project_dir) {
             vec!["index.html"]
         } else {
