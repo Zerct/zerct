@@ -39,7 +39,7 @@ jobs:
         run: go run scripts/check-prose-style.go
       - name: Check public agent readiness
         run: |
-          if node scripts/check-mintlify-agent-readiness.mjs https://docs.tovuk.com; then
+          if go run scripts/check-public-contracts.go mintlify-agent-readiness https://docs.tovuk.com; then
             exit 0
           fi
 
@@ -60,18 +60,7 @@ jobs:
           mkdir -p "$HOME/.config/mintlify"
           printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
           npx --yes mint@4.2.578 score https://docs.tovuk.com --format json > mint-score.json
-          node <<'NODE'
-            const fs = require("node:fs");
-            const score = JSON.parse(fs.readFileSync("mint-score.json", "utf8"));
-            const value = Number(score.score ?? score.overallScore ?? 0);
-            const configuredMinimum = process.env.MINTLIFY_SCORE_MIN?.trim();
-            const minimum = Number(configuredMinimum || "90");
-            if (value < minimum) {
-              console.error(`Mintlify score is ${value}/100; expected at least ${minimum}/100`);
-              process.exit(1);
-            }
-            console.log(`Mintlify score is ${value}/100`);
-          NODE
+          go run scripts/check-public-contracts.go mintlify-score mint-score.json
         env:
           MINTLIFY_CLI_CONFIG_JSON: ${{ secrets.MINTLIFY_CLI_CONFIG_JSON }}
           MINTLIFY_SCORE_MIN: ${{ vars.MINTLIFY_SCORE_MIN }}

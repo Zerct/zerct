@@ -37,8 +37,8 @@
   "scripts": {
     "postinstall": "node install.mjs",
     "check": "npm run check:policy && npm run runtime && npm run pack:dry",
-    "check:policy": "node ../../scripts/check-npm-cli-package.mjs",
-    "runtime": "node ../../scripts/check-npm-native-runtime.mjs",
+    "check:policy": "go run ../../scripts/check-public-contracts.go npm-cli-package",
+    "runtime": "go run ../../scripts/check-public-contracts.go npm-native-runtime",
     "pack:dry": "npm pack --dry-run"
   }
 }
