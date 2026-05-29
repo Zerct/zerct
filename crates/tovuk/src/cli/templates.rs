@@ -1,4 +1,5 @@
 use super::{
+    config::ProjectKind,
     constants::{
         DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_RUST_CHECK_COMMAND, PROJECT_TEMPLATES,
     },
@@ -29,13 +30,13 @@ pub(crate) fn init_project(project_dir: &Path, template: &str) -> Result<()> {
         return Ok(());
     }
     let kind = infer_project_kind(project_dir);
-    let source = init_config(project_dir, &kind)?;
+    let source = init_config(project_dir, kind)?;
     fs::write(&config_path, source).map_err(|error| internal_error(error.to_string()))?;
     println!(
         "created {}",
         path_relative(&config_path, &env::current_dir().unwrap_or_default())
     );
-    println!("detected {kind}");
+    println!("detected {}", kind.as_str());
     Ok(())
 }
 
@@ -166,22 +167,21 @@ pub(crate) fn write_new_file(path: &Path, source: &str) -> Result<()> {
     fs::write(path, source).map_err(|error| internal_error(error.to_string()))
 }
 
-pub(crate) fn init_config(project_dir: &Path, kind: &str) -> Result<String> {
-    if kind == "fullstack" {
-        if let Some((backend, frontend)) = detect_fullstack_roots(project_dir) {
-            return Ok(fullstack_config(project_dir, &backend, &frontend, false));
+pub(crate) fn init_config(project_dir: &Path, kind: ProjectKind) -> Result<String> {
+    match kind {
+        ProjectKind::Fullstack => {
+            if let Some((backend, frontend)) = detect_fullstack_roots(project_dir) {
+                return Ok(fullstack_config(project_dir, &backend, &frontend, false));
+            }
+            Err(agent_error(
+                "fullstack_roots_missing",
+                "Could not find fullstack roots.",
+                "Create api/Cargo.toml and web/package.json or web/index.html, then retry.",
+                false,
+            ))
         }
-        return Err(agent_error(
-            "fullstack_roots_missing",
-            "Could not find fullstack roots.",
-            "Create api/Cargo.toml and web/package.json or web/index.html, then retry.",
-            false,
-        ));
-    }
-    if kind == "static_frontend" {
-        Ok(frontend_config(project_dir, false))
-    } else {
-        Ok(rust_backend_config(project_dir))
+        ProjectKind::StaticFrontend => Ok(frontend_config(project_dir, false)),
+        ProjectKind::RustBackend => Ok(rust_backend_config(project_dir)),
     }
 }
 

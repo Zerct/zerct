@@ -1,3 +1,4 @@
+use super::config::ProjectKind;
 use super::{
     args::CliOptions,
     constants::WALK_EXCLUDED_DIRS,
@@ -131,15 +132,15 @@ pub(crate) fn service_name_from_value(value: &str) -> Option<String> {
     }
 }
 
-pub(crate) fn infer_project_kind(project_dir: &Path) -> String {
+pub(crate) fn infer_project_kind(project_dir: &Path) -> ProjectKind {
     if detect_fullstack_roots(project_dir).is_some() {
-        "fullstack".to_owned()
+        ProjectKind::Fullstack
     } else if project_dir.join("Cargo.toml").exists() {
-        "rust_backend".to_owned()
+        ProjectKind::RustBackend
     } else if project_dir.join("package.json").exists() || project_dir.join("index.html").exists() {
-        "static_frontend".to_owned()
+        ProjectKind::StaticFrontend
     } else {
-        "rust_backend".to_owned()
+        ProjectKind::RustBackend
     }
 }
 
