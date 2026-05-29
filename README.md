@@ -45,13 +45,13 @@ For new TanStack or Vite frontends, prefer fast native checks and avoid
 JavaScript-based lint, format, dead-code, or duplicate-code tooling:
 
 ```sh
-bun add -d @typescript/native-preview oxlint fallow
+bun add -d oxlint oxlint-tsgolint fallow
 ```
 
 ```json
 {
   "scripts": {
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
     "lint": "oxlint src vite.config.ts --deny-warnings && fallow dead-code --production --include-dupes --include-entry-exports --fail-on-issues && fallow dupes --production --mode semantic --threshold 1 --ignore-imports --fail-on-issues && fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity",
     "build": "vite build"
   }
@@ -60,9 +60,10 @@ bun add -d @typescript/native-preview oxlint fallow
 
 Rust backend checks must include `cargo fmt --all --check`, locked
 `cargo check`, and locked all-target, all-feature Clippy with `-D warnings`.
-Frontend checks must install dependencies, run `tsgo --noEmit`, and run native
-linting plus Fallow dead-code, semantic duplicate-code, and health gates before
-build work is queued. Frontend browser source must be `.ts` or `.tsx` under
+Frontend checks must install dependencies, run stable native type-aware
+TypeScript checks, and run native linting plus Fallow dead-code, semantic
+duplicate-code, and health gates before build work is queued. Frontend browser
+source must be `.ts` or `.tsx` under
 `src`, `app`, `pages`, `routes`, or `components`; browser `.js`, `.jsx`,
 `.mjs`, and `.cjs` source is rejected. Bun projects should commit `bun.lock`
 for the fastest Tovuk build path. Existing npm projects can still deploy with a

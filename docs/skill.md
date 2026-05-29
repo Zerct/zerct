@@ -38,16 +38,17 @@ For static frontends, require:
   `components`
 - `kind = "static_frontend"` in `tovuk.toml`
 - `typecheck` and `lint` scripts in `package.json`
-- `typecheck` runs `tsgo --noEmit` with `@typescript/native-preview`
+- `typecheck` runs stable native type-aware TypeScript checks such as
+  `oxlint --type-aware --type-check`
 - `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`
 - `lint` runs Fallow `dead-code`, semantic `dupes`, and `health` gates
 - a `[build].check` command that installs dependencies and runs typechecking
   plus linting
 
-For new TanStack or Vite frontends, prefer `tsgo --noEmit` for `typecheck` and
-`oxlint src vite.config.ts --deny-warnings` plus Fallow for `lint`, installed
-with Bun and committed with `bun.lock`. Avoid JavaScript-based lint, format,
-dead-code, or duplicate-code tooling. Keep the generic Tovuk contract
+For new TanStack or Vite frontends, prefer Oxlint type-aware type checking plus
+Fallow for `lint`, installed with Bun and committed with `bun.lock`. Avoid
+JavaScript-based lint, format, typecheck, dead-code, or duplicate-code tooling.
+Keep the generic Tovuk contract
 script-based so existing strict npm projects can still deploy with npm
 commands.
 

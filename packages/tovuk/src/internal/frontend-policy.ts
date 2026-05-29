@@ -60,7 +60,7 @@ function packageScriptExistsCheck(script: FrontendScriptName, command: string): 
 
 function strictTypecheckCheck(command: string): DoctorCheck {
   const ok = usesStrictFrontendTypechecker(command)
-  return doctorCheck('strict frontend typecheck', ok, 'accepted', 'tsgo --noEmit missing', 'Set package.json `typecheck` to `tsgo --noEmit`, install `@typescript/native-preview`, then retry.')
+  return doctorCheck('strict frontend typecheck', ok, 'accepted', 'native typecheck missing', 'Set package.json `typecheck` to `oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json`, then retry.')
 }
 
 function nativeLintCheck(manifest: PackageManifest | null): DoctorCheck {
@@ -146,7 +146,7 @@ function usesStrictFrontendTypechecker(command: string): boolean {
   const tokens = commandTokens(command)
   return tokens.some((token, index) => {
     const commandName = commandNameFromToken(token)
-    return (commandName === 'tsgo' && tokens.includes('--noEmit'))
+    return (commandName === 'oxlint' && tokens.includes('--type-aware') && tokens.includes('--type-check'))
       || (commandName === 'deno' && tokens[index + 1] === 'check')
   })
 }

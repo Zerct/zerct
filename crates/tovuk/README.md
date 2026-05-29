@@ -16,9 +16,10 @@ tovuk deploy --wait --json
 From a full-stack repo root, `tovuk deploy` discovers nested `tovuk.toml` files
 and deploys the whole workspace in one command.
 
-Static frontend deploys require TypeScript browser source, `tsgo --noEmit` for
-typecheck, native linting such as `oxlint`, `biome check`, or `deno lint`, and
-Fallow dead-code, semantic duplicate-code, and health gates.
+Static frontend deploys require TypeScript browser source, stable native
+type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
+or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health
+gates.
 
 The primary first-run path remains:
 
