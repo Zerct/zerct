@@ -67,7 +67,8 @@
               "agents",
               "support",
               "status",
-              "deploy"
+              "deploy",
+              "changelog"
             ]
           },
           {

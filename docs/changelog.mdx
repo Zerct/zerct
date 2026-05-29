@@ -1,0 +1,57 @@
+---
+title: "Changelog"
+description: "Recent product updates from Tovuk."
+---
+
+## Week of May 25, 2026
+
+### New
+
+- **Tovuk is the new name for the platform.** The CLI, packages, and Homebrew
+  formula now ship under `tovuk`. Install with `npx tovuk`, `brew install tovuk/tovuk/tovuk`,
+  `pipx install tovuk`, or `cargo install tovuk`. See [Packages](/reference/packages).
+- **One-URL full-stack deploys.** Ship a Rust backend and static frontend from
+  one repo with a single root `tovuk.toml`. Run `npx tovuk deploy --database`
+  to get one `*.tovuk.app` URL serving static assets at `/` and the backend at
+  `/api/*`. See [Full Stack](/reference/full-stack).
+- **Project templates and local preview.** Scaffold a Rust API, TanStack static
+  frontend, or full-stack project with `npx tovuk init`, then run
+  `npx tovuk preview` to test locally before deploying. See
+  [Templates](/templates).
+- **Custom domain verification.** Verify and connect custom domains from the
+  CLI without leaving your terminal.
+- **Agent and deploy inspection commands.** New `overview`, `builds`, and
+  `logs` commands return structured JSON for app, build, and deploy state so
+  agents can debug failed deploys end to end. See the
+  [Agent Loop](/agents#log-commands).
+- **Homebrew tap.** Install the CLI on macOS with
+  `brew tap tovuk/tovuk https://github.com/tovuk/tovuk && brew install tovuk`.
+- **Structured support tickets from the CLI.** Open, list, and resolve tickets
+  with `npx tovuk support` and attach app, build, deploy, and log context for
+  faster triage. See the [Support loop](/agents#support-loop).
+
+### Updates
+
+- **Deploy `--wait` mode in SDKs.** The npm, PyPI, and Cargo SDKs now wait for
+  builds to finish and stream a final status, with concurrent waits for
+  full-stack workspaces.
+- **Preflight deploy limits in SDKs.** Plan-limit checks now run before a
+  deploy starts, returning a Stripe checkout link via `tovuk billing checkout`
+  when an upgrade is needed.
+- **Actionable doctor feedback.** `npx tovuk doctor` now returns a concrete
+  `agent_instruction` for every failed check so agents can repair issues in
+  one loop. See the [Agent Loop](/agents#the-loop).
+- **Improved workspace doctor UX.** Faster checks and clearer output for
+  full-stack workspaces.
+- **Inline CLI flag values.** Flags now accept inline values
+  (`--app=app_1`) alongside the existing space-separated form.
+- **CLIs are aligned across npm, PyPI, and Cargo.** The same commands,
+  flags, and JSON responses are available from every package.
+
+### Fixes
+
+- **Reject unknown CLI flags.** The CLI now errors clearly instead of silently
+  ignoring typos.
+- **Stable npm signature verification.** Signature checks no longer fail
+  intermittently during scoped publishes.
+- **Fixed broken agent readiness link in `llms.txt`.**
