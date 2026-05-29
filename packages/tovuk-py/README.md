@@ -18,8 +18,9 @@ From a fullstack repo root, `tovuk deploy` reads one root `tovuk.toml`, builds
 the backend and frontend roots, and returns one app URL with `/api/*` routed to
 the Rust backend.
 
-Rust backend deploys require `cargo fmt --all --check`, locked `cargo check`,
-and locked all-target, all-feature Clippy with `-D warnings`.
+Rust backend deploys require `cargo fmt --all --check`, locked release-mode
+`cargo check`, locked release-mode tests, and strict all-target, all-feature
+Clippy with panic/unwrap bans plus resource-sensitive lints.
 
 Static frontend deploys require TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,

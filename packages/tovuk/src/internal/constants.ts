@@ -15,7 +15,30 @@ export const SESSION_ACCOUNT: string = 'session-token'
 export const SESSION_LABEL: string = 'Tovuk session'
 export const DEFAULT_LOGIN_EXPIRES_SECONDS: number = 600
 export const DEFAULT_LOGIN_INTERVAL_SECONDS: number = 5
-export const DEFAULT_RUST_CHECK_COMMAND: string = 'cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings'
+export const RUST_STRICT_CLIPPY_DENY_LINTS: readonly string[] = [
+  'clippy::all',
+  'clippy::pedantic',
+  'clippy::dbg_macro',
+  'clippy::todo',
+  'clippy::unimplemented',
+  'clippy::panic',
+  'clippy::unwrap_used',
+  'clippy::expect_used',
+  'clippy::large_futures',
+  'clippy::large_include_file',
+  'clippy::large_stack_frames',
+  'clippy::mem_forget',
+  'clippy::rc_buffer',
+  'clippy::rc_mutex',
+  'clippy::redundant_clone',
+  'clippy::clone_on_ref_ptr'
+]
+export const DEFAULT_RUST_CHECK_COMMAND: string = [
+  'cargo fmt --all --check',
+  'cargo check --locked --release --all-targets --all-features',
+  'cargo test --locked --release --all-targets --all-features',
+  `cargo clippy --locked --release --all-targets --all-features -- -D warnings ${RUST_STRICT_CLIPPY_DENY_LINTS.map((lint) => `-D ${lint}`).join(' ')}`
+].join(' && ')
 export const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: string = 'npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint'
 export const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: string = 'bun ci && bun run typecheck && bun run lint'
 export const PROJECT_KINDS: ReadonlySet<string> = new Set(['fullstack', 'rust_backend', 'static_frontend'])
@@ -127,7 +150,7 @@ Usage:
 
 Agent contract:
   - Fullstack apps set kind = "fullstack", keep backend and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust API under /api.
-  - Rust backends keep Cargo.lock committed, pass rustfmt, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
+  - Rust backends keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; backend build and runtime commands must be Cargo release builds and Rust release binaries.
@@ -138,6 +161,7 @@ Agent contract:
   - Create support tickets only with command output, app id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Keep direct unsafe out of Rust source.
+  - Keep Rust backend resources small: 128mb-2gb memory, 0.05-2 CPU, and 1-60 minute idle timeout.
 `
 
 function packageVersion(): string {

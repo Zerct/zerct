@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { RUST_STRICT_CLIPPY_DENY_LINTS } from './constants.ts'
 import { walkProjectFiles } from './project.ts'
 import type { DoctorCheck } from './types.ts'
 
@@ -14,7 +15,7 @@ interface CargoCheckSpec {
 function rustDoctorChecks(projectDir: string, configValid: boolean): DoctorCheck[] {
   const checks = [cargoLints(projectDir), unsafeCheck(projectDir)]
   if (configValid) {
-    checks.push(cargoFmt(projectDir), cargoCheck(projectDir), cargoClippy(projectDir))
+    checks.push(cargoFmt(projectDir), cargoCheck(projectDir), cargoTest(projectDir), cargoClippy(projectDir))
   }
   return checks
 }
@@ -46,9 +47,18 @@ function scanUnsafe(projectDir: string): string[] {
 function cargoCheck(projectDir: string): DoctorCheck {
   return cargoCommandCheck(projectDir, {
     name: 'cargo check',
-    args: ['check', '--locked', '--quiet'],
-    missing: 'Install Rust and Cargo, then run `cargo check --locked` locally before deploying.',
-    failed: 'Run `cargo check --locked`, fix every compiler error and warning, then redeploy.'
+    args: ['check', '--locked', '--release', '--all-targets', '--all-features', '--quiet'],
+    missing: 'Install Rust and Cargo, then run `cargo check --locked --release --all-targets --all-features` locally before deploying.',
+    failed: 'Run `cargo check --locked --release --all-targets --all-features`, fix every compiler error and warning, then redeploy.'
+  })
+}
+
+function cargoTest(projectDir: string): DoctorCheck {
+  return cargoCommandCheck(projectDir, {
+    name: 'cargo test',
+    args: ['test', '--locked', '--release', '--all-targets', '--all-features', '--quiet'],
+    missing: 'Install Rust and Cargo, then run `cargo test --locked --release --all-targets --all-features` locally before deploying.',
+    failed: 'Run `cargo test --locked --release --all-targets --all-features`, fix every failed test, then redeploy.'
   })
 }
 
@@ -64,9 +74,9 @@ function cargoFmt(projectDir: string): DoctorCheck {
 function cargoClippy(projectDir: string): DoctorCheck {
   return cargoCommandCheck(projectDir, {
     name: 'cargo clippy',
-    args: ['clippy', '--locked', '--all-targets', '--all-features', '--quiet', '--', '-D', 'warnings'],
-    missing: 'Install Rust clippy, then run `cargo clippy --locked --all-targets --all-features -- -D warnings` before deploying.',
-    failed: 'Run `cargo clippy --locked --all-targets --all-features -- -D warnings`, fix every warning, then redeploy.'
+    args: ['clippy', '--locked', '--release', '--all-targets', '--all-features', '--quiet', '--', '-D', 'warnings', ...RUST_STRICT_CLIPPY_DENY_LINTS.flatMap((lint) => ['-D', lint])],
+    missing: 'Install Rust clippy, then run Tovuk strict Clippy checks before deploying.',
+    failed: 'Run the strict Tovuk Clippy command from tovuk.toml, fix every warning, panic/unwrap issue, and resource lint, then redeploy.'
   })
 }
 
@@ -110,17 +120,19 @@ function cargoLints(projectDir: string): DoctorCheck {
     }
   }
 
-  const ok = cargoLintLevel(source, 'unsafe_code') === 'forbid' &&
-    cargoLintLevel(source, 'warnings') === 'deny'
+  const requiredClippyLints = RUST_STRICT_CLIPPY_DENY_LINTS.map((lint) => lint.replace(/^clippy::/u, ''))
+  const ok = cargoLintLevel(source, 'rust', 'unsafe_code') === 'forbid' &&
+    cargoLintLevel(source, 'rust', 'warnings') === 'deny' &&
+    requiredClippyLints.every((lint) => cargoLintLevel(source, 'clippy', lint) === 'deny')
   return {
     name: 'cargo lints',
     ok,
-    message: ok ? 'strict' : 'missing unsafe_code=forbid or warnings=deny',
-    agent_instruction: ok ? null : 'Add `[lints.rust]` with `unsafe_code = "forbid"` and `warnings = "deny"`, then retry.'
+    message: ok ? 'strict' : 'missing strict Rust or Clippy resource lints',
+    agent_instruction: ok ? null : 'Add `[lints.rust]` with `unsafe_code = "forbid"` and `warnings = "deny"`, plus `[lints.clippy]` deny entries for all, pedantic, panic/unwrap bans, and resource lints, then retry.'
   }
 }
 
-function cargoLintLevel(source: string, lintName: string): string {
+function cargoLintLevel(source: string, lintGroup: 'clippy' | 'rust', lintName: string): string {
   let section = ''
   for (const rawLine of source.split(/\r?\n/u)) {
     const line = rawLine.replace(/#.*/u, '').trim()
@@ -129,7 +141,7 @@ function cargoLintLevel(source: string, lintName: string): string {
       section = nextSection
       continue
     }
-    if (!isRustLintSection(section)) {
+    if (!isLintSection(section, lintGroup)) {
       continue
     }
     const level = lintAssignmentLevel(line, lintName)
@@ -145,8 +157,8 @@ function tomlSection(line: string): string | null {
   return line.match(/^\[([^\]]+)\]$/u)?.[1] ?? null
 }
 
-function isRustLintSection(section: string): boolean {
-  return section === 'lints.rust' || section === 'workspace.lints.rust'
+function isLintSection(section: string, lintGroup: 'clippy' | 'rust'): boolean {
+  return section === `lints.${lintGroup}` || section === `workspace.lints.${lintGroup}`
 }
 
 function lintAssignmentLevel(line: string, lintName: string): string {
