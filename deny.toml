@@ -1,7 +1,5 @@
 [graph]
-targets = [
-  { triple = "x86_64-unknown-linux-gnu" },
-]
+targets = [{ triple = "x86_64-unknown-linux-gnu" }]
 all-features = true
 
 [advisories]
