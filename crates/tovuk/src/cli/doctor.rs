@@ -1,5 +1,5 @@
 use super::{
-    config::{TovukConfig, parse_tovuk_toml, validate_config},
+    config::{ProjectKind, TovukConfig, parse_tovuk_toml, validate_config},
     constants::RUST_STRICT_CLIPPY_DENY_LINTS,
     deploy::discover_deploy_projects,
     errors::{
@@ -154,18 +154,17 @@ pub(crate) fn run_doctor(project_dir: &Path) -> DoctorReport {
     let kind = config_result
         .config
         .as_ref()
-        .map_or("rust_backend", |config| config.kind.as_str())
-        .to_owned();
+        .map_or(ProjectKind::RustBackend, |config| config.kind);
 
-    if kind == "fullstack" {
+    if kind.is_fullstack() {
         if let Some(config) = config_result.config.as_ref() {
             checks.extend(fullstack_checks(project_dir, config, config_result.valid));
         }
         return doctor_report(project_dir, config_result.config, checks);
     }
 
-    checks.extend(required_file_checks(project_dir, &kind));
-    if kind == "static_frontend" {
+    checks.extend(required_file_checks(project_dir, kind.as_str()));
+    if kind.is_static_frontend() {
         checks.extend(static_frontend_checks(project_dir, config_result.valid));
         checks.push(unsafe_check(project_dir));
     } else {

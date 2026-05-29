@@ -1,7 +1,6 @@
 use super::{
     constants::{
-        DEFAULT_RUST_CHECK_COMMAND, JAVASCRIPT_BACKEND_RUNTIMES, PROJECT_KINDS,
-        RUST_STRICT_CLIPPY_DENY_LINTS,
+        DEFAULT_RUST_CHECK_COMMAND, JAVASCRIPT_BACKEND_RUNTIMES, RUST_STRICT_CLIPPY_DENY_LINTS,
     },
     frontend_checks::{
         command_name_from_token, command_tokens, frontend_build_command, frontend_check_command,
@@ -9,14 +8,73 @@ use super::{
     },
     project::{is_dns_safe_name, is_safe_relative_directory, is_safe_relative_path},
 };
-use serde::Serialize;
+use serde::{Serialize, Serializer};
 use std::path::Path;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ProjectKind {
+    Fullstack,
+    RustBackend,
+    StaticFrontend,
+}
+
+impl ProjectKind {
+    pub(crate) fn parse(value: &str) -> std::result::Result<Self, String> {
+        match value {
+            "fullstack" => Ok(Self::Fullstack),
+            "rust_backend" => Ok(Self::RustBackend),
+            "static_frontend" => Ok(Self::StaticFrontend),
+            _ => Err("kind must be fullstack, rust_backend, or static_frontend".to_owned()),
+        }
+    }
+
+    pub(crate) const fn as_str(self) -> &'static str {
+        match self {
+            Self::Fullstack => "fullstack",
+            Self::RustBackend => "rust_backend",
+            Self::StaticFrontend => "static_frontend",
+        }
+    }
+
+    pub(crate) const fn sort_order(self) -> u8 {
+        match self {
+            Self::RustBackend => 0,
+            Self::Fullstack => 1,
+            Self::StaticFrontend => 2,
+        }
+    }
+
+    pub(crate) const fn supports_database(self) -> bool {
+        matches!(self, Self::Fullstack | Self::RustBackend)
+    }
+
+    pub(crate) const fn is_fullstack(self) -> bool {
+        matches!(self, Self::Fullstack)
+    }
+
+    pub(crate) const fn is_static_frontend(self) -> bool {
+        matches!(self, Self::StaticFrontend)
+    }
+
+    pub(crate) const fn is_rust_backend(self) -> bool {
+        matches!(self, Self::RustBackend)
+    }
+}
+
+impl Serialize for ProjectKind {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.as_str())
+    }
+}
 
 #[derive(Clone, Debug, Serialize)]
 pub(crate) struct TovukConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) name: Option<String>,
-    pub(crate) kind: String,
+    pub(crate) kind: ProjectKind,
     pub(crate) build: BuildConfig,
     pub(crate) run: RunConfig,
     pub(crate) frontend: FrontendConfig,
@@ -99,22 +157,18 @@ pub(crate) fn parse_tovuk_toml(
 
     Ok(TovukConfig {
         name: get_string(&table, "name")?,
-        build: parse_build_config(&build_table, &kind, project_dir)?,
+        build: parse_build_config(&build_table, kind, project_dir)?,
         run: parse_run_config(&run_table)?,
-        frontend: parse_frontend_config(&frontend_table, &kind, project_dir)?,
-        backend: parse_backend_config(&backend_table, &kind)?,
+        frontend: parse_frontend_config(&frontend_table, kind, project_dir)?,
+        backend: parse_backend_config(&backend_table, kind)?,
         resources: parse_resource_config(&resources_table)?,
         kind,
     })
 }
 
-fn parse_project_kind(table: &toml::Table) -> std::result::Result<String, String> {
+fn parse_project_kind(table: &toml::Table) -> std::result::Result<ProjectKind, String> {
     let kind = get_string(table, "kind")?.unwrap_or_else(|| "rust_backend".to_owned());
-    if PROJECT_KINDS.contains(&kind.as_str()) {
-        Ok(kind)
-    } else {
-        Err("kind must be fullstack, rust_backend, or static_frontend".to_owned())
-    }
+    ProjectKind::parse(&kind)
 }
 
 fn reject_unknown_config_sections(
@@ -141,7 +195,7 @@ fn reject_unknown_config_sections(
 
 fn parse_build_config(
     table: &toml::Table,
-    kind: &str,
+    kind: ProjectKind,
     project_dir: &Path,
 ) -> std::result::Result<BuildConfig, String> {
     Ok(BuildConfig {
@@ -149,7 +203,7 @@ fn parse_build_config(
             .unwrap_or_else(|| default_check_command(kind, project_dir)),
         command: get_section_string(table, "command")?
             .unwrap_or_else(|| default_build_command(kind, project_dir)),
-        output: if kind == "static_frontend" {
+        output: if kind.is_static_frontend() {
             Some(get_section_string(table, "output")?.unwrap_or_else(|| "dist".to_owned()))
         } else {
             get_section_string(table, "output")?
@@ -167,10 +221,10 @@ fn parse_run_config(table: &toml::Table) -> std::result::Result<RunConfig, Strin
 
 fn parse_frontend_config(
     table: &toml::Table,
-    kind: &str,
+    kind: ProjectKind,
     project_dir: &Path,
 ) -> std::result::Result<FrontendConfig, String> {
-    if kind != "fullstack" {
+    if !kind.is_fullstack() {
         return Ok(FrontendConfig::default());
     }
     let root = get_section_string(table, "root")?;
@@ -193,9 +247,9 @@ fn parse_frontend_config(
 
 fn parse_backend_config(
     table: &toml::Table,
-    kind: &str,
+    kind: ProjectKind,
 ) -> std::result::Result<BackendConfig, String> {
-    if kind != "fullstack" {
+    if !kind.is_fullstack() {
         return Ok(BackendConfig::default());
     }
     Ok(BackendConfig {
@@ -304,16 +358,16 @@ pub(crate) fn get_section_u16(
     })
 }
 
-pub(crate) fn default_check_command(kind: &str, project_dir: &Path) -> String {
-    if kind == "static_frontend" {
+pub(crate) fn default_check_command(kind: ProjectKind, project_dir: &Path) -> String {
+    if kind.is_static_frontend() {
         frontend_check_command(project_dir)
     } else {
         DEFAULT_RUST_CHECK_COMMAND.to_owned()
     }
 }
 
-pub(crate) fn default_build_command(kind: &str, project_dir: &Path) -> String {
-    if kind == "static_frontend" {
+pub(crate) fn default_build_command(kind: ProjectKind, project_dir: &Path) -> String {
+    if kind.is_static_frontend() {
         frontend_build_command(project_dir)
     } else {
         "cargo build --release".to_owned()
@@ -325,14 +379,11 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
     if !is_dns_safe_name(name) {
         return Err("name must be lowercase DNS-safe text up to 48 characters".to_owned());
     }
-    if !PROJECT_KINDS.contains(&config.kind.as_str()) {
-        return Err("kind must be fullstack, rust_backend, or static_frontend".to_owned());
-    }
-    if config.kind == "fullstack" {
+    if config.kind.is_fullstack() {
         validate_fullstack_config(config)?;
     } else {
         validate_build_config(config)?;
-        if config.kind == "static_frontend" {
+        if config.kind.is_static_frontend() {
             validate_output(config.build.output.as_deref(), "[build].output")?;
         } else {
             validate_rust_backend_config(config)?;
@@ -348,8 +399,8 @@ pub(crate) fn validate_build_config(config: &TovukConfig) -> std::result::Result
     if config.build.check.trim().is_empty() {
         return Err("[build].check is required".to_owned());
     }
-    validate_check_command(&config.kind, &config.build.check)?;
-    if config.kind == "rust_backend" {
+    validate_check_command(config.kind, &config.build.check)?;
+    if config.kind.is_rust_backend() {
         validate_rust_build_command(&config.build.command)?;
     }
     Ok(())
@@ -466,8 +517,11 @@ pub(crate) fn validate_resource_config(config: &TovukConfig) -> std::result::Res
     Ok(())
 }
 
-pub(crate) fn validate_check_command(kind: &str, command: &str) -> std::result::Result<(), String> {
-    if kind == "static_frontend" {
+pub(crate) fn validate_check_command(
+    kind: ProjectKind,
+    command: &str,
+) -> std::result::Result<(), String> {
+    if kind.is_static_frontend() {
         validate_frontend_check_command(command)
     } else {
         validate_rust_check_command(command)
