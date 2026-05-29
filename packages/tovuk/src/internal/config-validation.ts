@@ -5,6 +5,10 @@ import type { ProjectKind, TovukConfig } from './types.ts'
 
 function validateConfig(config: TovukConfig): void {
   validateIdentity(config)
+  if (config.kind === 'fullstack') {
+    validateFullstackConfig(config)
+    return
+  }
   validateBuildConfig(config)
   if (config.kind === 'static_frontend') {
     validateStaticFrontendConfig(config)
@@ -18,7 +22,7 @@ function validateIdentity(config: TovukConfig): void {
     throw new Error('name must be lowercase DNS-safe text up to 48 characters')
   }
   if (!PROJECT_KINDS.has(config.kind)) {
-    throw new Error('kind must be rust_backend or static_frontend')
+    throw new Error('kind must be fullstack, rust_backend, or static_frontend')
   }
 }
 
@@ -33,25 +37,70 @@ function validateBuildConfig(config: TovukConfig): void {
 }
 
 function validateStaticFrontendConfig(config: TovukConfig): void {
-  if (typeof config.build.output !== 'string' || !isSafeRelativePath(config.build.output)) {
-    throw new Error('[build].output must be a safe relative directory like dist')
-  }
+  validateOutput(config.build.output, '[build].output')
 }
 
 function validateRustBackendConfig(config: TovukConfig): void {
   if (config.build.output) {
     throw new Error('[build].output is only valid for static_frontend')
   }
-  if (!config.run.command?.trim()) {
-    throw new Error('[run].command is required')
-  }
-  if (!Number.isInteger(config.run.port) || config.run.port < 1 || config.run.port > 65535) {
-    throw new Error('[run].port must be between 1 and 65535')
-  }
-  if (!config.run.health.startsWith('/')) {
-    throw new Error('[run].health must be an absolute path')
-  }
+  requireCommand(config.run.command, '[run].command')
+  validatePort(config.run.port, '[run].port')
+  validateHealth(config.run.health, '[run].health')
   validateResourceConfig(config)
+}
+
+function validateFullstackConfig(config: TovukConfig): void {
+  const backendRoot = validateRoot(config.backend.root, '[backend].root')
+  const frontendRoot = validateRoot(config.frontend.root, '[frontend].root')
+  if (backendRoot === frontendRoot) {
+    throw new Error('[backend].root and [frontend].root must be different directories')
+  }
+  validateFullstackSections(config)
+  validateResourceConfig(config)
+}
+
+function validateFullstackSections(config: TovukConfig): void {
+  validateRustCheckCommand(requireCommand(config.backend.check, '[backend].check'))
+  requireCommand(config.backend.build, '[backend].build')
+  requireCommand(config.backend.command, '[backend].command')
+  validatePort(config.backend.port, '[backend].port')
+  validateHealth(config.backend.health, '[backend].health')
+  validateFrontendCheckCommand(requireCommand(config.frontend.check, '[frontend].check'))
+  requireCommand(config.frontend.build, '[frontend].build')
+  validateOutput(config.frontend.output, '[frontend].output')
+}
+
+function validateRoot(value: string | undefined, field: string): string {
+  if (!value || !isSafeRelativePath(value)) {
+    throw new Error(`${field} must be a safe relative directory such as api or web`)
+  }
+  return value
+}
+
+function requireCommand(value: string | undefined, field: string): string {
+  if (!value?.trim()) {
+    throw new Error(`${field} is required`)
+  }
+  return value
+}
+
+function validatePort(value: number | undefined, field: string): void {
+  if (!Number.isInteger(value) || (value ?? 0) < 1 || (value ?? 0) > 65535) {
+    throw new Error(`${field} must be between 1 and 65535`)
+  }
+}
+
+function validateHealth(value: string | undefined, field: string): void {
+  if (!value?.startsWith('/')) {
+    throw new Error(`${field} must be an absolute path`)
+  }
+}
+
+function validateOutput(value: string | undefined, field: string): void {
+  if (typeof value !== 'string' || !isSafeRelativeDirectory(value)) {
+    throw new Error(`${field} must be a safe relative directory like dist or .`)
+  }
 }
 
 function validateResourceConfig(config: TovukConfig): void {
@@ -69,6 +118,10 @@ function validateCheckCommand(kind: ProjectKind, command: string): void {
     return
   }
 
+  validateRustCheckCommand(command)
+}
+
+function validateRustCheckCommand(command: string): void {
   const required = ['cargo fmt --all --check', 'cargo check --locked', 'cargo clippy --locked', '--all-targets', '--all-features', '-D warnings']
   if (required.every((fragment) => command.includes(fragment))) {
     return
@@ -77,6 +130,9 @@ function validateCheckCommand(kind: ProjectKind, command: string): void {
 }
 
 function validateFrontendCheckCommand(command: string): void {
+  if (isNoopCommand(command)) {
+    return
+  }
   if (usesJavascriptLinter(command)) {
     throw new Error('[build].check must not run JavaScript-based lint or format tooling; use oxlint, biome, or deno lint')
   }
@@ -89,6 +145,14 @@ function validateFrontendCheckCommand(command: string): void {
     return
   }
   throw new Error('[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`')
+}
+
+function isSafeRelativeDirectory(value: string): boolean {
+  return value === '.' || isSafeRelativePath(value)
+}
+
+function isNoopCommand(command: string): boolean {
+  return command.trim() === ':' || command.trim() === 'true'
 }
 
 export { validateConfig }

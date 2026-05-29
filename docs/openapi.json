@@ -5001,6 +5001,7 @@
         "type": "string",
         "description": "Tovuk project kind. Context: components.schemas.ProjectKind.",
         "enum": [
+          "fullstack",
           "rust_backend",
           "static_frontend"
         ],
@@ -6619,6 +6620,129 @@
           }
         ]
       },
+      "TovukFrontendConfig": {
+        "type": "object",
+        "description": "Frontend settings for kind = fullstack. Context: components.schemas.TovukFrontendConfig.",
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Frontend project directory relative to tovuk.toml.",
+            "pattern": "^[A-Za-z0-9_./-]{1,160}$",
+            "maxLength": 160,
+            "examples": [
+              "web"
+            ]
+          },
+          "check": {
+            "type": "string",
+            "description": "Frontend validation command run inside root.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "bun ci && bun run typecheck && bun run lint"
+            ]
+          },
+          "build": {
+            "type": "string",
+            "description": "Frontend build command run inside root.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "bun run build"
+            ]
+          },
+          "output": {
+            "type": "string",
+            "description": "Static output directory relative to frontend root.",
+            "pattern": "^[A-Za-z0-9_./-]{1,160}$",
+            "maxLength": 160,
+            "examples": [
+              "dist"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "root": "web",
+            "check": "bun ci && bun run typecheck && bun run lint",
+            "build": "bun run build",
+            "output": "dist"
+          }
+        ]
+      },
+      "TovukBackendConfig": {
+        "type": "object",
+        "description": "Backend settings for kind = fullstack. Context: components.schemas.TovukBackendConfig.",
+        "additionalProperties": false,
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Rust backend project directory relative to tovuk.toml.",
+            "pattern": "^[A-Za-z0-9_./-]{1,160}$",
+            "maxLength": 160,
+            "examples": [
+              "api"
+            ]
+          },
+          "check": {
+            "type": "string",
+            "description": "Backend validation command run inside root.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+            ]
+          },
+          "build": {
+            "type": "string",
+            "description": "Backend release build command run inside root.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "cargo build --release"
+            ]
+          },
+          "command": {
+            "type": "string",
+            "description": "Backend runtime command run inside root.",
+            "pattern": "^[\\s\\S]{1,512}$",
+            "maxLength": 512,
+            "examples": [
+              "./target/release/api"
+            ]
+          },
+          "port": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 65535,
+            "description": "Internal backend HTTP port.",
+            "examples": [
+              3000
+            ]
+          },
+          "health": {
+            "type": "string",
+            "description": "Backend health endpoint path.",
+            "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
+            "maxLength": 160,
+            "examples": [
+              "/api/healthz"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "root": "api",
+            "check": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+            "build": "cargo build --release",
+            "command": "./target/release/api",
+            "port": 3000,
+            "health": "/api/healthz"
+          }
+        ]
+      },
       "TovukResourceConfig": {
         "type": "object",
         "description": "Runtime resource limits from tovuk.toml. Context: components.schemas.TovukResourceConfig.",
@@ -6703,6 +6827,30 @@
               }
             ],
             "$ref": "#/components/schemas/TovukRunConfig"
+          },
+          "frontend": {
+            "examples": [
+              {
+                "root": "web",
+                "check": "bun ci && bun run typecheck && bun run lint",
+                "build": "bun run build",
+                "output": "dist"
+              }
+            ],
+            "$ref": "#/components/schemas/TovukFrontendConfig"
+          },
+          "backend": {
+            "examples": [
+              {
+                "root": "api",
+                "check": "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings",
+                "build": "cargo build --release",
+                "command": "./target/release/api",
+                "port": 3000,
+                "health": "/api/healthz"
+              }
+            ],
+            "$ref": "#/components/schemas/TovukBackendConfig"
           },
           "resources": {
             "examples": [

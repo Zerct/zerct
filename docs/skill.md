@@ -2,7 +2,7 @@
 name: tovuk
 description: Deploy Rust backends and static frontends to Tovuk.
 license: MIT
-compatibility: Requires tovuk.toml. Rust backends require Cargo.toml and Cargo.lock. Static frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile.
+compatibility: Requires tovuk.toml. Fullstack apps use one root tovuk.toml with backend and frontend roots. Rust backends require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
 metadata:
   author: Tovuk
   version: "0.1"
@@ -45,6 +45,23 @@ For static frontends, require:
 - a `[build].check` command that installs dependencies and runs typechecking
   plus linting
 
+For plain static frontends, require:
+
+- `index.html`
+- `kind = "static_frontend"` in `tovuk.toml`
+- `[build].check = ":"`
+- `[build].command = ":"`
+- `[build].output = "."`
+
+For fullstack apps, require one root `tovuk.toml` with:
+
+- `kind = "fullstack"`
+- `[backend].root`, `[backend].check`, `[backend].build`, `[backend].command`,
+  `[backend].port`, and `[backend].health = "/api/healthz"`
+- `[frontend].root`, `[frontend].check`, `[frontend].build`, and
+  `[frontend].output`
+- a frontend that calls same-origin `/api`
+
 For new TanStack or Vite frontends, prefer Oxlint type-aware type checking plus
 Fallow for `lint`, installed with Bun and committed with `bun.lock`. Avoid
 JavaScript-based lint, format, typecheck, dead-code, or duplicate-code tooling.
@@ -52,10 +69,10 @@ Keep the generic Tovuk contract
 script-based so existing strict npm projects can still deploy with npm
 commands.
 
-When a browser frontend calls a Rust backend on another hostname, configure
-backend CORS for that frontend origin or put both apps behind a same-origin
-custom domain. Tovuk keeps frontend and backend deployments as separate HTTPS
-origins by default.
+Fullstack apps deploy to one URL. Tovuk serves the frontend at `/` and proxies
+`/api/*` to the Rust backend. When a browser frontend calls a separate backend
+deployment on another hostname, configure backend CORS for that frontend origin
+or put both apps behind a same-origin custom domain.
 
 ## Commands
 
@@ -65,17 +82,16 @@ Check the project:
 npx tovuk doctor --json
 ```
 
-Create a full-stack starter:
+Create a fullstack starter:
 
 ```sh
 npx tovuk init my-app --template fullstack-rust-tanstack
 ```
 
-Preview one project:
+Preview:
 
 ```sh
-npx tovuk preview api
-npx tovuk preview web
+npx tovuk preview
 ```
 
 Deploy:
@@ -84,9 +100,9 @@ Deploy:
 npx tovuk deploy --wait --json
 ```
 
-From a repo root, `npx tovuk deploy` must discover nested
-`tovuk.toml` files and deploy the workspace in one command. Rust backends deploy
-before static frontends. `--database` applies to Rust backends only.
+For fullstack apps, `--database` applies to the Rust backend inside the same
+deployment. For workspaces with multiple `tovuk.toml` files, `npx tovuk deploy`
+still deploys all discovered projects in one command.
 
 Use a persistent CLI:
 

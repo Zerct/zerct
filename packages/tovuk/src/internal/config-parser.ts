@@ -1,30 +1,48 @@
 import { DEFAULT_RUST_CHECK_COMMAND, PROJECT_KINDS } from './constants.ts'
 import { frontendBuildCommand, frontendCheckCommand } from './frontend-policy.ts'
-import type { BuildConfig, ProjectKind, ResourceConfig, RunConfig, TovukConfig } from './types.ts'
+import type { BackendConfig, BuildConfig, FrontendConfig, ProjectKind, ResourceConfig, RunConfig, TovukConfig } from './types.ts'
 
-type SectionName = 'build' | 'resources' | 'root' | 'run'
+type SectionName = 'backend' | 'build' | 'frontend' | 'resources' | 'root' | 'run'
 type TomlValue = boolean | number | string
 type SectionAssigner = (config: MutableTovukConfig, key: string, value: TomlValue) => void
+
+interface MutableSection {
+  [key: string]: number | string | undefined
+}
 
 interface MutableTovukConfig {
   name?: string
   kind?: ProjectKind
-  build: Partial<BuildConfig>
-  run: Partial<RunConfig>
-  resources: Partial<ResourceConfig>
+  build: MutableSection
+  run: MutableSection
+  frontend: MutableSection
+  backend: MutableSection
+  resources: MutableSection
+}
+
+const SECTION_FIELD_TYPES: Readonly<Record<Exclude<SectionName, 'root'>, { strings: ReadonlySet<string>; numbers: ReadonlySet<string> }>> = {
+  backend: fieldTypes(['root', 'check', 'build', 'command', 'health'], ['port']),
+  build: fieldTypes(['command', 'check', 'output'], []),
+  frontend: fieldTypes(['root', 'check', 'build', 'output'], []),
+  resources: fieldTypes(['memory', 'cpu'], ['idle_timeout_minutes']),
+  run: fieldTypes(['command', 'health'], ['port'])
 }
 
 const SECTION_ASSIGNERS: Readonly<Record<SectionName, SectionAssigner>> = {
-  build: (config, key, value): void => assignBuildValue(config.build, key, value),
-  resources: (config, key, value): void => assignResourceValue(config.resources, key, value),
+  backend: (config, key, value): void => assignSectionValue(config.backend, key, value, 'backend'),
+  build: (config, key, value): void => assignSectionValue(config.build, key, value, 'build'),
+  frontend: (config, key, value): void => assignSectionValue(config.frontend, key, value, 'frontend'),
+  resources: (config, key, value): void => assignSectionValue(config.resources, key, value, 'resources'),
   root: assignRootValue,
-  run: (config, key, value): void => assignRunValue(config.run, key, value)
+  run: (config, key, value): void => assignSectionValue(config.run, key, value, 'run')
 }
 
 function parseTovukToml(source: string, projectDir: string): TovukConfig {
   const config: MutableTovukConfig = {
     build: {},
     run: {},
+    frontend: {},
+    backend: {},
     resources: {}
   }
   let section: SectionName = 'root'
@@ -50,6 +68,8 @@ function tovukConfig(config: MutableTovukConfig, projectDir: string): TovukConfi
     kind,
     build: buildConfig(config, kind, projectDir),
     run: runConfig(config),
+    frontend: frontendConfig(config, kind, projectDir),
+    backend: backendConfig(config, kind),
     resources: resourceConfig(config)
   }
   if (config.name) {
@@ -75,7 +95,7 @@ function parseTomlLine(rawLine: string): { kind: 'section'; section: SectionName
 }
 
 function parseSection(value: string): SectionName {
-  if (value === 'build' || value === 'run' || value === 'resources') {
+  if (value === 'backend' || value === 'build' || value === 'frontend' || value === 'run' || value === 'resources') {
     return value
   }
   throw new Error(`unsupported section [${value}]`)
@@ -97,36 +117,24 @@ function assignRootValue(config: MutableTovukConfig, key: string, value: TomlVal
   throw new Error(`unsupported root key ${key}`)
 }
 
-function assignBuildValue(build: Partial<BuildConfig>, key: string, value: TomlValue): void {
-  if (key === 'command' || key === 'check' || key === 'output') {
-    build[key] = expectString(key, value)
+function assignSectionValue(sectionValues: MutableSection, key: string, value: TomlValue, section: Exclude<SectionName, 'root'>): void {
+  const schema = SECTION_FIELD_TYPES[section]
+  if (schema.strings.has(key)) {
+    sectionValues[key] = expectString(key, value)
     return
   }
-  throw new Error(`unsupported [build] key ${key}`)
+  if (schema.numbers.has(key)) {
+    sectionValues[key] = expectNumber(key, value)
+    return
+  }
+  throw new Error(`unsupported [${section}] key ${key}`)
 }
 
-function assignRunValue(run: Partial<RunConfig>, key: string, value: TomlValue): void {
-  if (key === 'command' || key === 'health') {
-    run[key] = expectString(key, value)
-    return
+function fieldTypes(strings: readonly string[], numbers: readonly string[]): { strings: ReadonlySet<string>; numbers: ReadonlySet<string> } {
+  return {
+    strings: new Set(strings),
+    numbers: new Set(numbers)
   }
-  if (key === 'port') {
-    run.port = expectNumber(key, value)
-    return
-  }
-  throw new Error(`unsupported [run] key ${key}`)
-}
-
-function assignResourceValue(resources: Partial<ResourceConfig>, key: string, value: TomlValue): void {
-  if (key === 'memory' || key === 'cpu') {
-    resources[key] = expectString(key, value)
-    return
-  }
-  if (key === 'idle_timeout_minutes') {
-    resources.idle_timeout_minutes = expectNumber(key, value)
-    return
-  }
-  throw new Error(`unsupported [resources] key ${key}`)
 }
 
 function expectString(key: string, value: TomlValue): string {
@@ -147,7 +155,7 @@ function expectProjectKind(value: string): ProjectKind {
   if (isProjectKind(value)) {
     return value
   }
-  throw new Error('kind must be rust_backend or static_frontend')
+  throw new Error('kind must be fullstack, rust_backend, or static_frontend')
 }
 
 function isProjectKind(value: string): value is ProjectKind {
@@ -173,12 +181,12 @@ function parseTomlValue(raw: string): TomlValue {
 
 function buildConfig(config: MutableTovukConfig, kind: ProjectKind, projectDir: string): BuildConfig {
   const build: BuildConfig = {
-    check: config.build.check ?? defaultCheckCommand(kind, projectDir),
-    command: config.build.command ?? defaultBuildCommand(kind, projectDir)
+    check: optionalString(config.build['check']) ?? defaultCheckCommand(kind, projectDir),
+    command: optionalString(config.build['command']) ?? defaultBuildCommand(kind, projectDir)
   }
   const output = kind === 'static_frontend'
-    ? config.build.output ?? 'dist'
-    : config.build.output
+    ? optionalString(config.build['output']) ?? 'dist'
+    : optionalString(config.build['output'])
   if (typeof output === 'string') {
     build.output = output
   }
@@ -193,22 +201,68 @@ function defaultBuildCommand(kind: ProjectKind, projectDir: string): string {
   return kind === 'static_frontend' ? frontendBuildCommand(projectDir) : 'cargo build --release'
 }
 
+function frontendConfig(config: MutableTovukConfig, kind: ProjectKind, projectDir: string): FrontendConfig {
+  if (kind !== 'fullstack') {
+    return {}
+  }
+  const root = optionalString(config.frontend['root'])
+  const frontendDir = root ? pathJoin(projectDir, root) : projectDir
+  const result: FrontendConfig = {
+    check: optionalString(config.frontend['check']) ?? frontendCheckCommand(frontendDir),
+    build: optionalString(config.frontend['build']) ?? frontendBuildCommand(frontendDir),
+    output: optionalString(config.frontend['output']) ?? 'dist'
+  }
+  assignIfPresent(root, (value) => { result.root = value })
+  return result
+}
+
+function backendConfig(config: MutableTovukConfig, kind: ProjectKind): BackendConfig {
+  if (kind !== 'fullstack') {
+    return {}
+  }
+  const result: BackendConfig = {
+    check: optionalString(config.backend['check']) ?? DEFAULT_RUST_CHECK_COMMAND,
+    build: optionalString(config.backend['build']) ?? 'cargo build --release',
+    port: optionalNumber(config.backend['port']) ?? 3000,
+    health: optionalString(config.backend['health']) ?? '/api/healthz'
+  }
+  assignIfPresent(optionalString(config.backend['root']), (value) => { result.root = value })
+  assignIfPresent(optionalString(config.backend['command']), (value) => { result.command = value })
+  return result
+}
+
+function pathJoin(root: string, relative: string): string {
+  return `${root.replace(/\/+$/u, '')}/${relative.replace(/^\/+/u, '')}`
+}
+
 function runConfig(config: MutableTovukConfig): RunConfig {
   const run: RunConfig = {
-    port: config.run.port ?? 3000,
-    health: config.run.health ?? '/healthz'
+    port: optionalNumber(config.run['port']) ?? 3000,
+    health: optionalString(config.run['health']) ?? '/healthz'
   }
-  if (typeof config.run.command === 'string') {
-    run.command = config.run.command
-  }
+  assignIfPresent(optionalString(config.run['command']), (value) => { run.command = value })
   return run
 }
 
 function resourceConfig(config: MutableTovukConfig): ResourceConfig {
   return {
-    memory: config.resources.memory ?? '512mb',
-    cpu: config.resources.cpu ?? '0.25',
-    idle_timeout_minutes: config.resources.idle_timeout_minutes ?? 15
+    memory: optionalString(config.resources['memory']) ?? '512mb',
+    cpu: optionalString(config.resources['cpu']) ?? '0.25',
+    idle_timeout_minutes: optionalNumber(config.resources['idle_timeout_minutes']) ?? 15
+  }
+}
+
+function optionalString(value: number | string | undefined): string | undefined {
+  return typeof value === 'string' ? value : undefined
+}
+
+function optionalNumber(value: number | string | undefined): number | undefined {
+  return typeof value === 'number' ? value : undefined
+}
+
+function assignIfPresent(value: string | undefined, assign: (value: string) => void): void {
+  if (value) {
+    assign(value)
   }
 }
 

@@ -1,6 +1,6 @@
 # tovuk
 
-Deploy Rust backends and static frontends to Tovuk.
+Deploy Rust backends, static frontends, and fullstack apps to Tovuk.
 
 ```sh
 npx tovuk init my-app --template fullstack-rust-tanstack
@@ -19,8 +19,9 @@ Static frontends must use TypeScript browser source, stable native type-aware
 TypeScript checks, native linting such as `oxlint`, `biome check`, or
 `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
 
-From a full-stack repo root, the same deploy command discovers nested
-`tovuk.toml` files and deploys the whole workspace in one command.
+From a fullstack repo root, the same deploy command reads one root `tovuk.toml`,
+builds the backend and frontend roots, and returns one app URL with `/api/*`
+routed to the Rust backend.
 
 Preview before deploying:
 

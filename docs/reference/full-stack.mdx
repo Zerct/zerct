@@ -3,19 +3,21 @@ title: "Full Stack"
 description: "How Tovuk combines Rust backends with static frontends."
 ---
 
-Tovuk full-stack apps use two deployable projects:
+Tovuk fullstack apps use one deployable project:
 
 - Rust backend: APIs, auth callbacks, writes, server-side rules, managed
   Postgres.
 - Static frontend: TanStack, Vite, or another TypeScript app built to files.
+- One URL: frontend files at `/`, Rust backend requests under `/api/*`.
 
 ## One Command
 
-Put a `tovuk.toml` in each app directory:
+Put one `tovuk.toml` in the repo root:
 
 ```txt
-api/tovuk.toml
-web/tovuk.toml
+tovuk.toml
+api/Cargo.toml
+web/package.json
 ```
 
 Deploy from the repo root:
@@ -24,17 +26,35 @@ Deploy from the repo root:
 npx tovuk deploy --database
 ```
 
-Tovuk deploys Rust backends first, then static frontends. Managed Postgres is
-attached only to Rust backends.
+Tovuk builds the backend and frontend together, attaches managed Postgres to
+the backend when requested, and returns one `*.tovuk.app` URL.
 
-## CORS
+```toml
+name = "my-app"
+kind = "fullstack"
 
-When frontend and backend use different hostnames, the Rust backend must allow
-the frontend origin. The starter Rust API handles `OPTIONS` and sends CORS
-headers.
+[backend]
+root = "api"
+check = "cargo fmt --all --check && cargo check --locked && cargo clippy --locked --all-targets --all-features -- -D warnings"
+build = "cargo build --release"
+command = "./target/release/api"
+port = 3000
+health = "/api/healthz"
 
-For production, prefer setting an explicit frontend origin in an environment
-variable. The starter reads `FRONTEND_ORIGIN`.
+[frontend]
+root = "web"
+check = "bun ci && bun run typecheck && bun run lint"
+build = "bun run build"
+output = "dist"
+```
+
+## Routing
+
+The runtime serves frontend assets first. Requests to `/api` and `/api/*` proxy
+to the Rust backend without changing the hostname.
+
+For split projects with separate frontend and backend deploys, configure CORS
+or use a same-origin custom domain.
 
 ```sh
 npx tovuk env set --app api FRONTEND_ORIGIN=https://web.tovuk.app

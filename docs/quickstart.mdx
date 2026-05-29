@@ -35,11 +35,10 @@ npx tovuk doctor --json
 Fix the first failed check before deploying. Tovuk errors include
 `agent_instruction`, so agents can make the exact code change and rerun doctor.
 
-Preview one project locally:
+Preview locally:
 
 ```sh
-npx tovuk preview api
-npx tovuk preview web
+npx tovuk preview
 ```
 
 ## Deploy
@@ -60,16 +59,14 @@ npx tovuk logs --build <build_id> --json
 
 Fix the first actionable error, rerun doctor, then redeploy.
 
-## Full-stack repos
+## Fullstack repos
 
-Put one `tovuk.toml` in each deployable app directory, then run one command from
-the repo root:
+Put one `tovuk.toml` in the repo root, with `[backend]` and `[frontend]`
+sections. Run one command from the repo root:
 
 ```sh
 npx tovuk deploy --database
 ```
 
-Tovuk discovers every nested project contract, deploys Rust backends first,
-deploys static frontends next, and requests managed Postgres for Rust backends.
-If the frontend calls the backend from the browser, configure backend CORS for
-the frontend origin or use a same-origin custom domain.
+Tovuk builds both roots, requests managed Postgres for the Rust backend, serves
+the frontend at `/`, and routes `/api/*` to the backend on the same app URL.

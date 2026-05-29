@@ -1,6 +1,7 @@
 # tovuk
 
-Rust CLI package for deploying Rust backends and static frontends to Tovuk.
+Rust CLI package for deploying Rust backends, static frontends, and fullstack
+apps to Tovuk.
 It delegates to the npm Tovuk CLI so Cargo stays aligned with the primary
 agent command surface.
 
@@ -13,8 +14,9 @@ tovuk preview
 tovuk deploy --wait --json
 ```
 
-From a full-stack repo root, `tovuk deploy` discovers nested `tovuk.toml` files
-and deploys the whole workspace in one command.
+From a fullstack repo root, `tovuk deploy` reads one root `tovuk.toml`, builds
+the backend and frontend roots, and returns one app URL with `/api/*` routed to
+the Rust backend.
 
 Static frontend deploys require TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,

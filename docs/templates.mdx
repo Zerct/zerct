@@ -31,6 +31,6 @@ npx tovuk doctor
 npx tovuk deploy --database
 ```
 
-The full-stack template creates `api/` and `web/`. The Rust API owns dynamic
-server behavior, managed Postgres, and CORS. The TanStack frontend builds to
-static files and calls the Rust API.
+The fullstack template creates `api/`, `web/`, and one root `tovuk.toml`. The
+Rust API owns dynamic server behavior and managed Postgres. The TanStack
+frontend builds to static files and calls same-origin `/api`.

@@ -8,7 +8,7 @@ import type { AppSummary, CliOptions, DeployPlanProject, DeployProjectInfo } fro
 async function createDeployPlan(projects: DeployProjectInfo[], cli: CliOptions, token: string): Promise<DeployPlanProject[]> {
   const plan = projects.map((project) => ({
     project,
-    wantsDatabase: cli.database && project.kind === 'rust_backend'
+    wantsDatabase: cli.database && (project.kind === 'rust_backend' || project.kind === 'fullstack')
   }))
   rejectInvalidDatabaseTargets(plan, cli)
   await preflightDeployLimits(plan, cli, token)
