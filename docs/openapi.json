@@ -2316,6 +2316,496 @@
           "description": "Request body for POST /v1/apps/{app_id}/storage/download-url. Context: paths.POST /v1/apps/{app_id}/storage/download-url.requestBody."
         }
       }
+    },
+    "/v1/apps/{app_id}/platform": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List platform resources",
+        "description": "List worker platform resources for one app. Context: paths./v1/apps/{app_id}/platform.get.",
+        "operationId": "getAppPlatformResources",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/platform.get.parameters.0.",
+            "example": "app_1"
+          }
+        ]
+      }
+    },
+    "/v1/apps/{app_id}/sqlite/databases": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create SQLite database",
+        "description": "Create an app SQLite database binding. Context: paths./v1/apps/{app_id}/sqlite/databases.post.",
+        "operationId": "createAppSqliteDatabase",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/sqlite/databases.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SqliteDatabaseCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/sqlite/databases",
+                  "value": {
+                    "name": "DB"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/sqlite/databases. Context: paths./v1/apps/{app_id}/sqlite/databases.post.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/kv/namespaces": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create KV namespace",
+        "description": "Create an app KV namespace binding. Context: paths./v1/apps/{app_id}/kv/namespaces.post.",
+        "operationId": "createAppKvNamespace",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/kv/namespaces.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KvNamespaceCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/kv/namespaces",
+                  "value": {
+                    "name": "CACHE"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/kv/namespaces. Context: paths./v1/apps/{app_id}/kv/namespaces.post.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/queues": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create queue",
+        "description": "Create an app queue for background work. Context: paths./v1/apps/{app_id}/queues.post.",
+        "operationId": "createAppQueue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/queues.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueueCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/queues",
+                  "value": {
+                    "name": "jobs"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/queues. Context: paths./v1/apps/{app_id}/queues.post.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/cron": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create cron trigger",
+        "description": "Create an app cron trigger. Context: paths./v1/apps/{app_id}/cron.post.",
+        "operationId": "createAppCronTrigger",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/cron.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CronTriggerCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/cron",
+                  "value": {
+                    "name": "nightly",
+                    "cronExpression": "0 0 * * *"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/cron. Context: paths./v1/apps/{app_id}/cron.post.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/durable-objects/namespaces": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create Durable Object namespace",
+        "description": "Create an app Durable Object namespace. Context: paths./v1/apps/{app_id}/durable-objects/namespaces.post.",
+        "operationId": "createAppDurableObjectNamespace",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/durable-objects/namespaces.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DurableObjectNamespaceCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/durable-objects/namespaces",
+                  "value": {
+                    "className": "Room"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/durable-objects/namespaces. Context: paths./v1/apps/{app_id}/durable-objects/namespaces.post.requestBody."
+        }
+      }
+    },
+    "/v1/apps/{app_id}/service-bindings": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create service binding",
+        "description": "Create a private service binding to another app. Context: paths./v1/apps/{app_id}/service-bindings.post.",
+        "operationId": "createAppServiceBinding",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "app_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/service-bindings.post.parameters.0.",
+            "example": "app_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceBindingCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/apps/{app_id}/service-bindings",
+                  "value": {
+                    "bindingName": "AUTH_SERVICE",
+                    "targetApp": "auth-app"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/apps/{app_id}/service-bindings. Context: paths./v1/apps/{app_id}/service-bindings.post.requestBody."
+        }
+      }
+    },
+    "/v1/usage/caps/{metric}": {
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Set usage cap",
+        "description": "Set an account usage cap for one meter. Context: paths./v1/usage/caps/{metric}.put.",
+        "operationId": "setUsageCap",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UsageCapUpdated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z_]{3,64}$",
+              "maxLength": 64,
+              "examples": [
+                "worker_requests"
+              ]
+            },
+            "description": "Usage metric. Context: paths./v1/usage/caps/{metric}.put.parameters.0.",
+            "example": "worker_requests"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsageCapSetRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for PUT /v1/usage/caps/{metric}",
+                  "value": {
+                    "period": "day",
+                    "capValue": 100000,
+                    "hardStop": true,
+                    "notifyAtPercent": 80
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for PUT /v1/usage/caps/{metric}. Context: paths./v1/usage/caps/{metric}.put.requestBody."
+        }
+      }
     }
   },
   "components": {
@@ -4528,6 +5018,191 @@
                 "value": {
                   "path": "uploads/logo.png",
                   "deleted": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "PlatformResourcesLoaded": {
+        "description": "Platform resources loaded. Context: components.responses.PlatformResourcesLoaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PlatformResourcesResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Platform resources loaded.",
+                "value": {
+                  "appId": "app_1",
+                  "plan": "free",
+                  "limits": {
+                    "projects": 100,
+                    "sqliteDatabases": 10,
+                    "sqliteStorageMib": 5120,
+                    "sqliteStorageMibPerDatabase": 500,
+                    "sqliteRowsReadPerDay": 5000000,
+                    "sqliteRowsReadPerMonth": null,
+                    "sqliteRowsWrittenPerDay": 100000,
+                    "sqliteRowsWrittenPerMonth": null,
+                    "sqliteQueryTimeoutSeconds": 30,
+                    "sqliteTimeTravelDays": 7,
+                    "workers": 100,
+                    "workerRequestsPerDay": 100000,
+                    "workerRequestsPerMonth": null,
+                    "workerCpuMsPerRequest": 10,
+                    "workerCpuMsPerMonth": null,
+                    "workerMemoryMib": 128,
+                    "workerSubrequestsPerRequest": 50,
+                    "workerOutgoingConnectionsPerRequest": 6,
+                    "workerEnvVars": 64,
+                    "workerEnvVarSizeKib": 5,
+                    "workerCompressedSizeMib": 3,
+                    "workerStartupTimeMs": 1000,
+                    "cronTriggers": 5,
+                    "staticAssetFilesPerVersion": 20000,
+                    "staticAssetFileSizeMib": 25,
+                    "kvStorageMib": 1024,
+                    "kvReadsPerDay": 100000,
+                    "kvReadsPerMonth": null,
+                    "kvWritesPerDay": 1000,
+                    "kvWritesPerMonth": null,
+                    "kvDeletesPerDay": 1000,
+                    "kvDeletesPerMonth": null,
+                    "kvListsPerDay": 1000,
+                    "kvListsPerMonth": null,
+                    "queueOperationsPerDay": 10000,
+                    "queueOperationsPerMonth": null,
+                    "durableObjectRequestsPerDay": 100000,
+                    "durableObjectRequestsPerMonth": null,
+                    "durableObjectSqliteStorageMib": 5120,
+                    "objectStorageMib": 10240,
+                    "storageObjects": 100000,
+                    "storageObjectMaxMib": 100,
+                    "dataTransferGib": 100,
+                    "monthlyBuildMinutes": 3000,
+                    "monthlyDeployments": 0,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 1200,
+                    "buildCpuMillis": 2000,
+                    "buildMemoryMib": 8192,
+                    "buildDiskMib": 20480,
+                    "customDomains": 100,
+                    "alwaysOnApps": 0,
+                    "logRetentionDays": 3,
+                    "apiTokens": 10,
+                    "supportTicketsPerDay": 3
+                  },
+                  "sqliteDatabases": [
+                    {
+                      "id": "sqlite_1",
+                      "name": "DB",
+                      "storageLimitMib": 500,
+                      "storageUsedMib": 0,
+                      "quotaState": "ok",
+                      "timeTravelDays": 7,
+                      "queryTimeoutSeconds": 30
+                    }
+                  ],
+                  "kvNamespaces": [
+                    {
+                      "id": "kv_1",
+                      "name": "CACHE",
+                      "storageLimitMib": 1024
+                    }
+                  ],
+                  "queues": [
+                    {
+                      "id": "queue_1",
+                      "name": "jobs",
+                      "maxRetries": 3,
+                      "retentionSeconds": 345600
+                    }
+                  ],
+                  "cronTriggers": [
+                    {
+                      "id": "cron_1",
+                      "name": "nightly",
+                      "cronExpression": "0 0 * * *",
+                      "enabled": true
+                    }
+                  ],
+                  "durableObjectNamespaces": [
+                    {
+                      "id": "durable_1",
+                      "className": "Room",
+                      "storageLimitMib": 5120
+                    }
+                  ],
+                  "serviceBindings": [
+                    {
+                      "bindingName": "AUTH_SERVICE",
+                      "targetAppId": "app_2"
+                    }
+                  ],
+                  "usageCaps": [
+                    {
+                      "metric": "worker_requests",
+                      "period": "day",
+                      "capValue": 100000,
+                      "hardStop": true,
+                      "notifyAtPercent": 80
+                    }
+                  ],
+                  "nextActions": [
+                    "Run tovuk deploy --wait --json after resources are configured."
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "UsageCapUpdated": {
+        "description": "Usage cap updated. Context: components.responses.UsageCapUpdated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UsageCap"
+            },
+            "examples": {
+              "example": {
+                "summary": "Usage cap updated.",
+                "value": {
+                  "metric": "worker_requests",
+                  "period": "day",
+                  "capValue": 100000,
+                  "hardStop": true,
+                  "notifyAtPercent": 80
                 }
               }
             }
@@ -8673,7 +9348,66 @@
           }
         },
         "additionalProperties": false,
-        "description": "Included account-level limits for a billing plan. Context: components.schemas.PlanLimits."
+        "description": "Included account-level limits for a billing plan. Context: components.schemas.PlanLimits.",
+        "examples": [
+          {
+            "projects": 100,
+            "sqliteDatabases": 10,
+            "sqliteStorageMib": 5120,
+            "sqliteStorageMibPerDatabase": 500,
+            "sqliteRowsReadPerDay": 5000000,
+            "sqliteRowsReadPerMonth": null,
+            "sqliteRowsWrittenPerDay": 100000,
+            "sqliteRowsWrittenPerMonth": null,
+            "sqliteQueryTimeoutSeconds": 30,
+            "sqliteTimeTravelDays": 7,
+            "workers": 100,
+            "workerRequestsPerDay": 100000,
+            "workerRequestsPerMonth": null,
+            "workerCpuMsPerRequest": 10,
+            "workerCpuMsPerMonth": null,
+            "workerMemoryMib": 128,
+            "workerSubrequestsPerRequest": 50,
+            "workerOutgoingConnectionsPerRequest": 6,
+            "workerEnvVars": 64,
+            "workerEnvVarSizeKib": 5,
+            "workerCompressedSizeMib": 3,
+            "workerStartupTimeMs": 1000,
+            "cronTriggers": 5,
+            "staticAssetFilesPerVersion": 20000,
+            "staticAssetFileSizeMib": 25,
+            "kvStorageMib": 1024,
+            "kvReadsPerDay": 100000,
+            "kvReadsPerMonth": null,
+            "kvWritesPerDay": 1000,
+            "kvWritesPerMonth": null,
+            "kvDeletesPerDay": 1000,
+            "kvDeletesPerMonth": null,
+            "kvListsPerDay": 1000,
+            "kvListsPerMonth": null,
+            "queueOperationsPerDay": 10000,
+            "queueOperationsPerMonth": null,
+            "durableObjectRequestsPerDay": 100000,
+            "durableObjectRequestsPerMonth": null,
+            "durableObjectSqliteStorageMib": 5120,
+            "objectStorageMib": 10240,
+            "storageObjects": 100000,
+            "storageObjectMaxMib": 100,
+            "dataTransferGib": 100,
+            "monthlyBuildMinutes": 3000,
+            "monthlyDeployments": 0,
+            "concurrentBuilds": 1,
+            "maxBuildDurationSeconds": 1200,
+            "buildCpuMillis": 2000,
+            "buildMemoryMib": 8192,
+            "buildDiskMib": 20480,
+            "customDomains": 100,
+            "alwaysOnApps": 0,
+            "logRetentionDays": 3,
+            "apiTokens": 10,
+            "supportTicketsPerDay": 3
+          }
+        ]
       },
       "AccountActivityResponse": {
         "type": "object",
@@ -10159,6 +10893,1359 @@
             "publicUrl": "https://media.tovuk.app/hello-rust/uploads/logo.png"
           }
         ]
+      },
+      "SqliteDatabaseBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "storageLimitMib",
+          "storageUsedMib",
+          "quotaState",
+          "timeTravelDays",
+          "queryTimeoutSeconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "SQLite database id. Context: components.schemas.SqliteDatabaseBinding.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^sqlite_[0-9]+$",
+            "examples": [
+              "sqlite_1"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Binding name. Context: components.schemas.SqliteDatabaseBinding.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+            "examples": [
+              "DB"
+            ]
+          },
+          "storageLimitMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage limit in MiB. Context: components.schemas.SqliteDatabaseBinding.properties.storageLimitMib.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              500
+            ]
+          },
+          "storageUsedMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Current storage used in MiB. Context: components.schemas.SqliteDatabaseBinding.properties.storageUsedMib.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              0
+            ]
+          },
+          "quotaState": {
+            "type": "string",
+            "description": "Quota state. Context: components.schemas.SqliteDatabaseBinding.properties.quotaState.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^(ok|soft_limit|read_only)$",
+            "examples": [
+              "ok"
+            ]
+          },
+          "timeTravelDays": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Restore window in days. Context: components.schemas.SqliteDatabaseBinding.properties.timeTravelDays.",
+            "minimum": 0,
+            "maximum": 365,
+            "examples": [
+              7
+            ]
+          },
+          "queryTimeoutSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Query timeout in seconds. Context: components.schemas.SqliteDatabaseBinding.properties.queryTimeoutSeconds.",
+            "minimum": 0,
+            "maximum": 3600,
+            "examples": [
+              30
+            ]
+          }
+        },
+        "description": "SQLite database binding metadata. Context: components.schemas.SqliteDatabaseBinding."
+      },
+      "KvNamespaceBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "storageLimitMib"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "KV namespace id. Context: components.schemas.KvNamespaceBinding.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^kv_[0-9]+$",
+            "examples": [
+              "kv_1"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Binding name. Context: components.schemas.KvNamespaceBinding.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+            "examples": [
+              "CACHE"
+            ]
+          },
+          "storageLimitMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage limit in MiB. Context: components.schemas.KvNamespaceBinding.properties.storageLimitMib.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              1024
+            ]
+          }
+        },
+        "description": "KV namespace binding metadata. Context: components.schemas.KvNamespaceBinding."
+      },
+      "QueueBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "maxRetries",
+          "retentionSeconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Queue id. Context: components.schemas.QueueBinding.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^queue_[0-9]+$",
+            "examples": [
+              "queue_1"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Queue name. Context: components.schemas.QueueBinding.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "examples": [
+              "jobs"
+            ]
+          },
+          "maxRetries": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum retry count. Context: components.schemas.QueueBinding.properties.maxRetries.",
+            "minimum": 0,
+            "maximum": 100,
+            "examples": [
+              3
+            ]
+          },
+          "retentionSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Message retention in seconds. Context: components.schemas.QueueBinding.properties.retentionSeconds.",
+            "minimum": 0,
+            "maximum": 1209600,
+            "examples": [
+              345600
+            ]
+          }
+        },
+        "description": "Queue binding metadata. Context: components.schemas.QueueBinding."
+      },
+      "CronTrigger": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "cronExpression",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Cron trigger id. Context: components.schemas.CronTrigger.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^cron_[0-9]+$",
+            "examples": [
+              "cron_1"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Cron trigger name. Context: components.schemas.CronTrigger.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "examples": [
+              "nightly"
+            ]
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "UTC cron expression. Context: components.schemas.CronTrigger.properties.cronExpression.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\n\\r]{1,120}$",
+            "examples": [
+              "0 0 * * *"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the trigger is enabled. Context: components.schemas.CronTrigger.properties.enabled.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "description": "Cron trigger metadata. Context: components.schemas.CronTrigger."
+      },
+      "DurableObjectNamespace": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "className",
+          "storageLimitMib"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Durable Object namespace id. Context: components.schemas.DurableObjectNamespace.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^durable_[0-9]+$",
+            "examples": [
+              "durable_1"
+            ]
+          },
+          "className": {
+            "type": "string",
+            "description": "Rust actor class name. Context: components.schemas.DurableObjectNamespace.properties.className.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Za-z0-9_]{0,63}$",
+            "examples": [
+              "Room"
+            ]
+          },
+          "storageLimitMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage limit in MiB. Context: components.schemas.DurableObjectNamespace.properties.storageLimitMib.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              5120
+            ]
+          }
+        },
+        "description": "Durable Object namespace metadata. Context: components.schemas.DurableObjectNamespace."
+      },
+      "ServiceBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bindingName",
+          "targetAppId"
+        ],
+        "properties": {
+          "bindingName": {
+            "type": "string",
+            "description": "Service binding name. Context: components.schemas.ServiceBinding.properties.bindingName.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+            "examples": [
+              "AUTH_SERVICE"
+            ]
+          },
+          "targetAppId": {
+            "type": "string",
+            "description": "Target app id. Context: components.schemas.ServiceBinding.properties.targetAppId.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^app_[a-z0-9_]{1,60}$",
+            "examples": [
+              "app_1"
+            ]
+          }
+        },
+        "description": "Private service binding metadata. Context: components.schemas.ServiceBinding."
+      },
+      "UsageCap": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "metric",
+          "period",
+          "capValue",
+          "hardStop",
+          "notifyAtPercent"
+        ],
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "Meter name. Context: components.schemas.UsageCap.properties.metric.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[a-z_]{3,64}$",
+            "examples": [
+              "worker_requests"
+            ]
+          },
+          "period": {
+            "type": "string",
+            "description": "Meter period. Context: components.schemas.UsageCap.properties.period.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^(day|month)$",
+            "examples": [
+              "day"
+            ]
+          },
+          "capValue": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Cap value. Context: components.schemas.UsageCap.properties.capValue.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              100000
+            ]
+          },
+          "hardStop": {
+            "type": "boolean",
+            "description": "Whether to stop usage when the cap is reached. Context: components.schemas.UsageCap.properties.hardStop.",
+            "examples": [
+              true
+            ]
+          },
+          "notifyAtPercent": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Notification threshold percentage. Context: components.schemas.UsageCap.properties.notifyAtPercent.",
+            "minimum": 0,
+            "maximum": 100,
+            "examples": [
+              80
+            ]
+          }
+        },
+        "description": "Usage cap metadata. Context: components.schemas.UsageCap."
+      },
+      "PlatformResourcesResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "appId",
+          "plan",
+          "limits",
+          "sqliteDatabases",
+          "kvNamespaces",
+          "queues",
+          "cronTriggers",
+          "durableObjectNamespaces",
+          "serviceBindings",
+          "usageCaps",
+          "nextActions"
+        ],
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "App id. Context: components.schemas.PlatformResourcesResponse.properties.appId.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^app_[a-z0-9_]{1,60}$",
+            "examples": [
+              "app_1"
+            ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          },
+          "limits": {
+            "type": "object",
+            "required": [
+              "projects",
+              "sqliteDatabases",
+              "sqliteStorageMib",
+              "sqliteStorageMibPerDatabase",
+              "sqliteRowsReadPerDay",
+              "sqliteRowsReadPerMonth",
+              "sqliteRowsWrittenPerDay",
+              "sqliteRowsWrittenPerMonth",
+              "sqliteQueryTimeoutSeconds",
+              "sqliteTimeTravelDays",
+              "workers",
+              "workerRequestsPerDay",
+              "workerRequestsPerMonth",
+              "workerCpuMsPerRequest",
+              "workerCpuMsPerMonth",
+              "workerMemoryMib",
+              "workerSubrequestsPerRequest",
+              "workerOutgoingConnectionsPerRequest",
+              "workerEnvVars",
+              "workerEnvVarSizeKib",
+              "workerCompressedSizeMib",
+              "workerStartupTimeMs",
+              "cronTriggers",
+              "staticAssetFilesPerVersion",
+              "staticAssetFileSizeMib",
+              "kvStorageMib",
+              "kvReadsPerDay",
+              "kvReadsPerMonth",
+              "kvWritesPerDay",
+              "kvWritesPerMonth",
+              "kvDeletesPerDay",
+              "kvDeletesPerMonth",
+              "kvListsPerDay",
+              "kvListsPerMonth",
+              "queueOperationsPerDay",
+              "queueOperationsPerMonth",
+              "durableObjectRequestsPerDay",
+              "durableObjectRequestsPerMonth",
+              "durableObjectSqliteStorageMib",
+              "objectStorageMib",
+              "storageObjects",
+              "storageObjectMaxMib",
+              "dataTransferGib",
+              "monthlyBuildMinutes",
+              "monthlyDeployments",
+              "concurrentBuilds",
+              "maxBuildDurationSeconds",
+              "buildCpuMillis",
+              "buildMemoryMib",
+              "buildDiskMib",
+              "customDomains",
+              "alwaysOnApps",
+              "logRetentionDays",
+              "apiTokens",
+              "supportTicketsPerDay"
+            ],
+            "properties": {
+              "projects": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Hosted projects. Context: components.schemas.PlanLimits.properties.projects. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.projects.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteDatabases": {
+                "type": "integer",
+                "format": "int64",
+                "description": "SQLite databases allowed for the account. Context: components.schemas.PlanLimits.properties.sqliteDatabases. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteDatabases.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteStorageMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Total SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.sqliteStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteStorageMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteStorageMibPerDatabase": {
+                "type": "integer",
+                "format": "int64",
+                "description": "SQLite storage in MiB for each database. Context: components.schemas.PlanLimits.properties.sqliteStorageMibPerDatabase. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteStorageMibPerDatabase.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteRowsReadPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily SQLite rows read limit, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsReadPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsReadPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteRowsReadPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly SQLite rows read allowance, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsReadPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsReadPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteRowsWrittenPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily SQLite rows written limit, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsWrittenPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsWrittenPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteRowsWrittenPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly SQLite rows written allowance, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsWrittenPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsWrittenPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteQueryTimeoutSeconds": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum SQLite query duration in seconds. Context: components.schemas.PlanLimits.properties.sqliteQueryTimeoutSeconds. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteQueryTimeoutSeconds.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "sqliteTimeTravelDays": {
+                "type": "integer",
+                "format": "int64",
+                "description": "SQLite restore window in days. Context: components.schemas.PlanLimits.properties.sqliteTimeTravelDays. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteTimeTravelDays.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workers": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Rust workers allowed for the account. Context: components.schemas.PlanLimits.properties.workers. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workers.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerRequestsPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily worker request limit, when set. Context: components.schemas.PlanLimits.properties.workerRequestsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerRequestsPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerRequestsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly included worker requests, when set. Context: components.schemas.PlanLimits.properties.workerRequestsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerRequestsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerCpuMsPerRequest": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum worker CPU time for one request in milliseconds. Context: components.schemas.PlanLimits.properties.workerCpuMsPerRequest. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerCpuMsPerRequest.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerCpuMsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly included worker CPU time in milliseconds. Context: components.schemas.PlanLimits.properties.workerCpuMsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerCpuMsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerMemoryMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Worker memory limit in MiB. Context: components.schemas.PlanLimits.properties.workerMemoryMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerMemoryMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerSubrequestsPerRequest": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Subrequests allowed during one worker invocation. Context: components.schemas.PlanLimits.properties.workerSubrequestsPerRequest. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerSubrequestsPerRequest.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerOutgoingConnectionsPerRequest": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Simultaneous outgoing connections per worker invocation. Context: components.schemas.PlanLimits.properties.workerOutgoingConnectionsPerRequest. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerOutgoingConnectionsPerRequest.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerEnvVars": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Environment variables allowed per worker. Context: components.schemas.PlanLimits.properties.workerEnvVars. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerEnvVars.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerEnvVarSizeKib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum environment variable size in KiB. Context: components.schemas.PlanLimits.properties.workerEnvVarSizeKib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerEnvVarSizeKib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerCompressedSizeMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum compressed worker artifact size in MiB. Context: components.schemas.PlanLimits.properties.workerCompressedSizeMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerCompressedSizeMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "workerStartupTimeMs": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum worker startup time in milliseconds. Context: components.schemas.PlanLimits.properties.workerStartupTimeMs. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerStartupTimeMs.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "cronTriggers": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Cron triggers allowed for the account. Context: components.schemas.PlanLimits.properties.cronTriggers. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.cronTriggers.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "staticAssetFilesPerVersion": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Static asset files allowed per deploy version. Context: components.schemas.PlanLimits.properties.staticAssetFilesPerVersion. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.staticAssetFilesPerVersion.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "staticAssetFileSizeMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum static asset file size in MiB. Context: components.schemas.PlanLimits.properties.staticAssetFileSizeMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.staticAssetFileSizeMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvStorageMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "KV storage in MiB. Context: components.schemas.PlanLimits.properties.kvStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvStorageMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvReadsPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily KV read limit, when set. Context: components.schemas.PlanLimits.properties.kvReadsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvReadsPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvReadsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly KV read allowance, when set. Context: components.schemas.PlanLimits.properties.kvReadsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvReadsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvWritesPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily KV write limit, when set. Context: components.schemas.PlanLimits.properties.kvWritesPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvWritesPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvWritesPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly KV write allowance, when set. Context: components.schemas.PlanLimits.properties.kvWritesPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvWritesPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvDeletesPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily KV delete limit, when set. Context: components.schemas.PlanLimits.properties.kvDeletesPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvDeletesPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvDeletesPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly KV delete allowance, when set. Context: components.schemas.PlanLimits.properties.kvDeletesPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvDeletesPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvListsPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily KV list limit, when set. Context: components.schemas.PlanLimits.properties.kvListsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvListsPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "kvListsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly KV list allowance, when set. Context: components.schemas.PlanLimits.properties.kvListsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvListsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "queueOperationsPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily queue operation limit, when set. Context: components.schemas.PlanLimits.properties.queueOperationsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.queueOperationsPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "queueOperationsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly queue operation allowance, when set. Context: components.schemas.PlanLimits.properties.queueOperationsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.queueOperationsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "durableObjectRequestsPerDay": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Daily Durable Object request limit, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.durableObjectRequestsPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "durableObjectRequestsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly Durable Object request allowance, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.durableObjectRequestsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "durableObjectSqliteStorageMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Durable Object SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.durableObjectSqliteStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.durableObjectSqliteStorageMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "objectStorageMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Object storage in MiB. Context: components.schemas.PlanLimits.properties.objectStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.objectStorageMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "storageObjects": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Stored objects allowed. Context: components.schemas.PlanLimits.properties.storageObjects. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.storageObjects.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "storageObjectMaxMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum single object size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.storageObjectMaxMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "dataTransferGib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Included monthly data transfer in GiB. Context: components.schemas.PlanLimits.properties.dataTransferGib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.dataTransferGib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "monthlyBuildMinutes": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Included monthly build minutes. Context: components.schemas.PlanLimits.properties.monthlyBuildMinutes. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.monthlyBuildMinutes.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "monthlyDeployments": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Included monthly deploy count. Context: components.schemas.PlanLimits.properties.monthlyDeployments. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.monthlyDeployments.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "concurrentBuilds": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Concurrent builds allowed. Context: components.schemas.PlanLimits.properties.concurrentBuilds. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.concurrentBuilds.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "maxBuildDurationSeconds": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Maximum build duration in seconds. Context: components.schemas.PlanLimits.properties.maxBuildDurationSeconds. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.maxBuildDurationSeconds.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "buildCpuMillis": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Build CPU limit in millis. Context: components.schemas.PlanLimits.properties.buildCpuMillis. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.buildCpuMillis.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "buildMemoryMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Build memory limit in MiB. Context: components.schemas.PlanLimits.properties.buildMemoryMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.buildMemoryMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "buildDiskMib": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Build disk limit in MiB. Context: components.schemas.PlanLimits.properties.buildDiskMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.buildDiskMib.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "customDomains": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Custom domains allowed. Context: components.schemas.PlanLimits.properties.customDomains. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.customDomains.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "alwaysOnApps": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Always-on apps allowed. Context: components.schemas.PlanLimits.properties.alwaysOnApps. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.alwaysOnApps.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "logRetentionDays": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Log retention in days. Context: components.schemas.PlanLimits.properties.logRetentionDays. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.logRetentionDays.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "apiTokens": {
+                "type": "integer",
+                "format": "int64",
+                "description": "API tokens allowed. Context: components.schemas.PlanLimits.properties.apiTokens. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.apiTokens.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "supportTicketsPerDay": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Support tickets allowed per day. Context: components.schemas.PlanLimits.properties.supportTicketsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.supportTicketsPerDay.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              }
+            },
+            "additionalProperties": false,
+            "description": "Plan limits attached to this platform resources response. Context: components.schemas.PlatformResourcesResponse.properties.limits.",
+            "examples": [
+              {
+                "projects": 100,
+                "sqliteDatabases": 10,
+                "sqliteStorageMib": 5120,
+                "sqliteStorageMibPerDatabase": 500,
+                "sqliteRowsReadPerDay": 5000000,
+                "sqliteRowsReadPerMonth": null,
+                "sqliteRowsWrittenPerDay": 100000,
+                "sqliteRowsWrittenPerMonth": null,
+                "sqliteQueryTimeoutSeconds": 30,
+                "sqliteTimeTravelDays": 7,
+                "workers": 100,
+                "workerRequestsPerDay": 100000,
+                "workerRequestsPerMonth": null,
+                "workerCpuMsPerRequest": 10,
+                "workerCpuMsPerMonth": null,
+                "workerMemoryMib": 128,
+                "workerSubrequestsPerRequest": 50,
+                "workerOutgoingConnectionsPerRequest": 6,
+                "workerEnvVars": 64,
+                "workerEnvVarSizeKib": 5,
+                "workerCompressedSizeMib": 3,
+                "workerStartupTimeMs": 1000,
+                "cronTriggers": 5,
+                "staticAssetFilesPerVersion": 20000,
+                "staticAssetFileSizeMib": 25,
+                "kvStorageMib": 1024,
+                "kvReadsPerDay": 100000,
+                "kvReadsPerMonth": null,
+                "kvWritesPerDay": 1000,
+                "kvWritesPerMonth": null,
+                "kvDeletesPerDay": 1000,
+                "kvDeletesPerMonth": null,
+                "kvListsPerDay": 1000,
+                "kvListsPerMonth": null,
+                "queueOperationsPerDay": 10000,
+                "queueOperationsPerMonth": null,
+                "durableObjectRequestsPerDay": 100000,
+                "durableObjectRequestsPerMonth": null,
+                "durableObjectSqliteStorageMib": 5120,
+                "objectStorageMib": 10240,
+                "storageObjects": 100000,
+                "storageObjectMaxMib": 100,
+                "dataTransferGib": 100,
+                "monthlyBuildMinutes": 3000,
+                "monthlyDeployments": 0,
+                "concurrentBuilds": 1,
+                "maxBuildDurationSeconds": 1200,
+                "buildCpuMillis": 2000,
+                "buildMemoryMib": 8192,
+                "buildDiskMib": 20480,
+                "customDomains": 100,
+                "alwaysOnApps": 0,
+                "logRetentionDays": 3,
+                "apiTokens": 10,
+                "supportTicketsPerDay": 3
+              }
+            ],
+            "example": {
+              "projects": 100,
+              "sqliteDatabases": 10,
+              "sqliteStorageMib": 5120,
+              "sqliteStorageMibPerDatabase": 500,
+              "sqliteRowsReadPerDay": 5000000,
+              "sqliteRowsReadPerMonth": null,
+              "sqliteRowsWrittenPerDay": 100000,
+              "sqliteRowsWrittenPerMonth": null,
+              "sqliteQueryTimeoutSeconds": 30,
+              "sqliteTimeTravelDays": 7,
+              "workers": 100,
+              "workerRequestsPerDay": 100000,
+              "workerRequestsPerMonth": null,
+              "workerCpuMsPerRequest": 10,
+              "workerCpuMsPerMonth": null,
+              "workerMemoryMib": 128,
+              "workerSubrequestsPerRequest": 50,
+              "workerOutgoingConnectionsPerRequest": 6,
+              "workerEnvVars": 64,
+              "workerEnvVarSizeKib": 5,
+              "workerCompressedSizeMib": 3,
+              "workerStartupTimeMs": 1000,
+              "cronTriggers": 5,
+              "staticAssetFilesPerVersion": 20000,
+              "staticAssetFileSizeMib": 25,
+              "kvStorageMib": 1024,
+              "kvReadsPerDay": 100000,
+              "kvReadsPerMonth": null,
+              "kvWritesPerDay": 1000,
+              "kvWritesPerMonth": null,
+              "kvDeletesPerDay": 1000,
+              "kvDeletesPerMonth": null,
+              "kvListsPerDay": 1000,
+              "kvListsPerMonth": null,
+              "queueOperationsPerDay": 10000,
+              "queueOperationsPerMonth": null,
+              "durableObjectRequestsPerDay": 100000,
+              "durableObjectRequestsPerMonth": null,
+              "durableObjectSqliteStorageMib": 5120,
+              "objectStorageMib": 10240,
+              "storageObjects": 100000,
+              "storageObjectMaxMib": 100,
+              "dataTransferGib": 100,
+              "monthlyBuildMinutes": 3000,
+              "monthlyDeployments": 0,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 1200,
+              "buildCpuMillis": 2000,
+              "buildMemoryMib": 8192,
+              "buildDiskMib": 20480,
+              "customDomains": 100,
+              "alwaysOnApps": 0,
+              "logRetentionDays": 3,
+              "apiTokens": 10,
+              "supportTicketsPerDay": 3
+            }
+          },
+          "sqliteDatabases": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/SqliteDatabaseBinding"
+            },
+            "description": "SQLite database bindings. Context: components.schemas.PlatformResourcesResponse.properties.sqliteDatabases.",
+            "examples": [
+              [
+                {
+                  "id": "sqlite_1",
+                  "name": "DB",
+                  "storageLimitMib": 500,
+                  "storageUsedMib": 0,
+                  "quotaState": "ok",
+                  "timeTravelDays": 7,
+                  "queryTimeoutSeconds": 30
+                }
+              ]
+            ]
+          },
+          "kvNamespaces": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/KvNamespaceBinding"
+            },
+            "description": "KV namespace bindings. Context: components.schemas.PlatformResourcesResponse.properties.kvNamespaces.",
+            "examples": [
+              [
+                {
+                  "id": "kv_1",
+                  "name": "CACHE",
+                  "storageLimitMib": 1024
+                }
+              ]
+            ]
+          },
+          "queues": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/QueueBinding"
+            },
+            "description": "Queue bindings. Context: components.schemas.PlatformResourcesResponse.properties.queues.",
+            "examples": [
+              [
+                {
+                  "id": "queue_1",
+                  "name": "jobs",
+                  "maxRetries": 3,
+                  "retentionSeconds": 345600
+                }
+              ]
+            ]
+          },
+          "cronTriggers": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/CronTrigger"
+            },
+            "description": "Cron triggers. Context: components.schemas.PlatformResourcesResponse.properties.cronTriggers.",
+            "examples": [
+              [
+                {
+                  "id": "cron_1",
+                  "name": "nightly",
+                  "cronExpression": "0 0 * * *",
+                  "enabled": true
+                }
+              ]
+            ]
+          },
+          "durableObjectNamespaces": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/DurableObjectNamespace"
+            },
+            "description": "Durable Object namespaces. Context: components.schemas.PlatformResourcesResponse.properties.durableObjectNamespaces.",
+            "examples": [
+              [
+                {
+                  "id": "durable_1",
+                  "className": "Room",
+                  "storageLimitMib": 5120
+                }
+              ]
+            ]
+          },
+          "serviceBindings": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/ServiceBinding"
+            },
+            "description": "Service bindings. Context: components.schemas.PlatformResourcesResponse.properties.serviceBindings.",
+            "examples": [
+              [
+                {
+                  "bindingName": "AUTH_SERVICE",
+                  "targetAppId": "app_2"
+                }
+              ]
+            ]
+          },
+          "usageCaps": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "#/components/schemas/UsageCap"
+            },
+            "description": "Usage caps. Context: components.schemas.PlatformResourcesResponse.properties.usageCaps.",
+            "examples": [
+              [
+                {
+                  "metric": "worker_requests",
+                  "period": "day",
+                  "capValue": 100000,
+                  "hardStop": true,
+                  "notifyAtPercent": 80
+                }
+              ]
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 32,
+            "items": {
+              "type": "string",
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{1,512}$"
+            },
+            "description": "Recommended next commands. Context: components.schemas.PlatformResourcesResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Run tovuk deploy --wait --json after resources are configured."
+              ]
+            ]
+          }
+        },
+        "description": "App platform resources exposed to agents. Context: components.schemas.PlatformResourcesResponse."
+      },
+      "SqliteDatabaseCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "SQLite binding name. Context: components.schemas.SqliteDatabaseCreateRequest.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+            "examples": [
+              "DB"
+            ]
+          }
+        },
+        "description": "SqliteDatabaseCreateRequest. Context: components.schemas.SqliteDatabaseCreateRequest."
+      },
+      "KvNamespaceCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "KV binding name. Context: components.schemas.KvNamespaceCreateRequest.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+            "examples": [
+              "CACHE"
+            ]
+          }
+        },
+        "description": "KvNamespaceCreateRequest. Context: components.schemas.KvNamespaceCreateRequest."
+      },
+      "QueueCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Queue name. Context: components.schemas.QueueCreateRequest.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "examples": [
+              "jobs"
+            ]
+          }
+        },
+        "description": "QueueCreateRequest. Context: components.schemas.QueueCreateRequest."
+      },
+      "CronTriggerCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "cronExpression"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Cron trigger name. Context: components.schemas.CronTriggerCreateRequest.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "examples": [
+              "nightly"
+            ]
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "UTC cron expression. Context: components.schemas.CronTriggerCreateRequest.properties.cronExpression.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\n\\r]{1,120}$",
+            "examples": [
+              "0 0 * * *"
+            ]
+          }
+        },
+        "description": "CronTriggerCreateRequest. Context: components.schemas.CronTriggerCreateRequest."
+      },
+      "DurableObjectNamespaceCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "className"
+        ],
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "Rust actor class name. Context: components.schemas.DurableObjectNamespaceCreateRequest.properties.className.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Za-z0-9_]{0,63}$",
+            "examples": [
+              "Room"
+            ]
+          }
+        },
+        "description": "DurableObjectNamespaceCreateRequest. Context: components.schemas.DurableObjectNamespaceCreateRequest."
+      },
+      "ServiceBindingCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "bindingName",
+          "targetApp"
+        ],
+        "properties": {
+          "bindingName": {
+            "type": "string",
+            "description": "Service binding name. Context: components.schemas.ServiceBindingCreateRequest.properties.bindingName.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
+            "examples": [
+              "AUTH_SERVICE"
+            ]
+          },
+          "targetApp": {
+            "type": "string",
+            "description": "Target app id or app name. Context: components.schemas.ServiceBindingCreateRequest.properties.targetApp.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "examples": [
+              "auth-app"
+            ]
+          }
+        },
+        "description": "ServiceBindingCreateRequest. Context: components.schemas.ServiceBindingCreateRequest."
+      },
+      "UsageCapSetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "period",
+          "capValue",
+          "hardStop",
+          "notifyAtPercent"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "description": "Meter period. Context: components.schemas.UsageCapSetRequest.properties.period.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^(day|month)$",
+            "examples": [
+              "day"
+            ]
+          },
+          "capValue": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Cap value. Context: components.schemas.UsageCapSetRequest.properties.capValue.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              100000
+            ]
+          },
+          "hardStop": {
+            "type": "boolean",
+            "description": "Whether to stop usage when the cap is reached. Context: components.schemas.UsageCapSetRequest.properties.hardStop.",
+            "examples": [
+              true
+            ]
+          },
+          "notifyAtPercent": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Notification threshold percentage. Context: components.schemas.UsageCapSetRequest.properties.notifyAtPercent.",
+            "minimum": 0,
+            "maximum": 100,
+            "examples": [
+              80
+            ]
+          }
+        },
+        "description": "UsageCapSetRequest. Context: components.schemas.UsageCapSetRequest."
       }
     }
   }
