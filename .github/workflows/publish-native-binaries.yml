@@ -44,14 +44,14 @@ jobs:
         with:
           targets: ${{ matrix.target }}
       - uses: actions/cache@v5
+        continue-on-error: true
         with:
           path: |
             ~/.cargo/git
             ~/.cargo/registry
-            crates/tovuk/target/${{ matrix.target }}
-          key: ${{ runner.os }}-${{ matrix.target }}-cargo-native-${{ hashFiles('crates/tovuk/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-registry-${{ hashFiles('crates/tovuk/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.target }}-cargo-native-
+            ${{ runner.os }}-${{ matrix.target }}-cargo-registry-
       - name: Read version
         id: version
         shell: bash
