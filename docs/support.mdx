@@ -4,7 +4,7 @@ description: "Agent-ready support tickets."
 ---
 
 Tovuk support is API and CLI first. Agents should create tickets only after
-they have collected the exact command, app id, build id, deploy id, and first
+they have collected the exact command, service id, build id, deploy id, and first
 actionable log line.
 
 ## Create a ticket
@@ -13,7 +13,7 @@ actionable log line.
 npx tovuk support create \
   "Deploy failed" \
   "The deploy failed after the Rust check step. The agent already ran doctor and reproduced the same error." \
-  --app app_1 \
+  --service app_1 \
   --build job_1 \
   --deploy deploy_1 \
   --failing-command "npx tovuk deploy --wait --json" \
@@ -79,4 +79,4 @@ npx tovuk billing checkout "Project limit reached" --json
 ```
 
 Show the returned `checkout.url` to the human. Do not collect card details in
-the app, CLI, or agent.
+the service, CLI, or agent.

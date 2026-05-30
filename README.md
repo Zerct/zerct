@@ -2,8 +2,8 @@
 
 Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Tovuk hosts Rust workers, static frontends, and worker-static apps. A
-worker-static app uses one `tovuk.toml`, one deployment URL, static files at
+Tovuk hosts Rust workers, static frontends, and worker-static services. A
+worker-static service uses one `tovuk.toml`, one deployment URL, static files at
 `/`, and a Rust worker under `/api/*`.
 
 ## Install
@@ -25,7 +25,7 @@ cd my-app/web && bun install && cd ..
 ```
 
 From a worker-static repo root, `npx tovuk deploy` reads the single root
-`tovuk.toml`, builds `api` and `web`, and returns one app URL. Create
+`tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
 databases, KV namespaces, queues, cron triggers, Durable Object namespaces,
 service bindings, and usage caps through CLI resource commands.
 
@@ -119,7 +119,7 @@ Run `npx tovuk doctor --json`. Fix the first failed check by following
 error, rerun doctor, and redeploy. If a plan limit blocks work, run
 `npx tovuk billing checkout --json` and show the returned URL to the
 human. If Tovuk support is needed, run `npx tovuk support create` with
-`--failing-command`, `--app`, `--build`, `--deploy`, and `--first-log-line`.
+`--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
 Resolve the support ticket after the issue is fixed.
 ```
 
@@ -158,19 +158,22 @@ npx tovuk capabilities
 npx tovuk me
 npx tovuk usage
 npx tovuk activity --json
-npx tovuk apps
-npx tovuk overview --app app_1 --json
+npx tovuk service list
+npx tovuk service show app_1 --json
 npx tovuk deploys
-npx tovuk builds --app app_1
-npx tovuk logs --app app_1 --limit 100 --json
+npx tovuk builds --service app_1
+npx tovuk logs --service app_1 --limit 100 --json
 npx tovuk logs --deploy deploy_1 --json
 npx tovuk logs --build job_1 --json
-npx tovuk env list --app app_1
-npx tovuk domains list --app app_1
-npx tovuk domains verify --app app_1 api.example.com
+npx tovuk env list --service app_1
+npx tovuk domains list --service app_1
+npx tovuk domains verify --service app_1 api.example.com
+npx tovuk kv put --service app_1 CACHE user:1 '{"name":"Ada"}' --json
+npx tovuk kv get --service app_1 CACHE user:1 --json
+npx tovuk queue send --service app_1 jobs '{"task":"sync"}' --json
 npx tovuk billing checkout --json
 npx tovuk billing portal
-npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 npx tovuk support list --json
 npx tovuk support resolve ticket_0123456789abcdef0123 --json
 ```

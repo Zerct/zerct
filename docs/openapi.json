@@ -2806,6 +2806,546 @@
           "description": "Request body for PUT /v1/usage/caps/{metric}. Context: paths./v1/usage/caps/{metric}.put.requestBody."
         }
       }
+    },
+    "/v1/services/{service_id}/kv/{namespace}/keys": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List KV keys",
+        "description": "List keys in one service KV namespace. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.",
+        "operationId": "listServiceKvKeys",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvKeysLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.1.",
+            "example": "CACHE"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 1000,
+              "examples": [
+                100
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.2.",
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:1"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Cursor from the previous response. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.3.",
+            "example": "user:1"
+          },
+          {
+            "name": "prefix",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "KV key prefix filter. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.4.",
+            "example": "user:"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/kv/{namespace}/values/{key}": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read KV value",
+        "description": "Read one KV value from a service namespace. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.get.",
+        "operationId": "getServiceKvValue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvEntryLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.get.parameters.1.",
+            "example": "CACHE"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "user:1"
+              ]
+            },
+            "description": "KV key. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.get.parameters.2.",
+            "example": "user:1"
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Write KV value",
+        "description": "Write one KV value to a service namespace. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.put.",
+        "operationId": "putServiceKvValue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvEntryLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.put.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.put.parameters.1.",
+            "example": "CACHE"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "user:1"
+              ]
+            },
+            "description": "KV key. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.put.parameters.2.",
+            "example": "user:1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KvEntryPutRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for PUT /v1/services/{service_id}/kv/{namespace}/values/{key}",
+                  "value": {
+                    "value": "{\"name\":\"Ada\"}",
+                    "encoding": "text",
+                    "metadata": {
+                      "source": "agent"
+                    },
+                    "expirationTtlSeconds": 3600
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for PUT /v1/services/{service_id}/kv/{namespace}/values/{key}. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.put.requestBody."
+        }
+      },
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete KV value",
+        "description": "Delete one KV value from a service namespace. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.delete.",
+        "operationId": "deleteServiceKvValue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvKeysLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.delete.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.delete.parameters.1.",
+            "example": "CACHE"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "user:1"
+              ]
+            },
+            "description": "KV key. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.delete.parameters.2.",
+            "example": "user:1"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/queues/{queue}/messages": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List queue messages",
+        "description": "List recent queue messages for one service queue. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.",
+        "operationId": "listServiceQueueMessages",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueueMessagesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "queue",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "jobs"
+              ]
+            },
+            "description": "Queue id or queue name. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.parameters.1.",
+            "example": "jobs"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 1000,
+              "examples": [
+                100
+              ]
+            },
+            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.parameters.2.",
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:1"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Cursor from the previous response. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.parameters.3.",
+            "example": "user:1"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "queued",
+                "inflight",
+                "done",
+                "dead"
+              ],
+              "examples": [
+                "queued"
+              ]
+            },
+            "description": "Queue message status filter. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.parameters.4.",
+            "example": "queued"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Send queue message",
+        "description": "Send one message to a service queue. Context: paths./v1/services/{service_id}/queues/{queue}/messages.post.",
+        "operationId": "sendServiceQueueMessage",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueueMessageSent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "app_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}/messages.post.parameters.0.",
+            "example": "app_1"
+          },
+          {
+            "name": "queue",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "jobs"
+              ]
+            },
+            "description": "Queue id or queue name. Context: paths./v1/services/{service_id}/queues/{queue}/messages.post.parameters.1.",
+            "example": "jobs"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueueMessageSendRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/queues/{queue}/messages",
+                  "value": {
+                    "body": "{\"task\":\"sync\"}",
+                    "encoding": "text",
+                    "delaySeconds": 60
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/services/{service_id}/queues/{queue}/messages. Context: paths./v1/services/{service_id}/queues/{queue}/messages.post.requestBody."
+        }
+      }
     }
   },
   "components": {
@@ -5123,7 +5663,8 @@
                     {
                       "id": "kv_1",
                       "name": "CACHE",
-                      "storageLimitMib": 1024
+                      "storageLimitMib": 1024,
+                      "storageUsedBytes": 14
                     }
                   ],
                   "queues": [
@@ -5220,6 +5761,210 @@
           },
           "Retry-After": {
             "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "KvKeysLoaded": {
+        "description": "KV keys loaded. Context: components.responses.KvKeysLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/KvKeysResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "KV keys loaded",
+                "value": {
+                  "namespace": {
+                    "id": "kv_1",
+                    "name": "CACHE",
+                    "storageLimitMib": 1024,
+                    "storageUsedBytes": 14
+                  },
+                  "keys": [
+                    {
+                      "key": "user:1",
+                      "valueSizeBytes": 14,
+                      "metadata": {
+                        "source": "agent"
+                      },
+                      "expiresAt": null,
+                      "createdAt": "2026-06-01 12:00:00Z",
+                      "updatedAt": "2026-06-01 12:00:00Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "nextActions": [
+                    "Use KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "KvEntryLoaded": {
+        "description": "KV entry loaded. Context: components.responses.KvEntryLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/KvEntryResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "KV entry loaded",
+                "value": {
+                  "namespace": {
+                    "id": "kv_1",
+                    "name": "CACHE",
+                    "storageLimitMib": 1024,
+                    "storageUsedBytes": 14
+                  },
+                  "entry": {
+                    "key": "user:1",
+                    "valueSizeBytes": 14,
+                    "metadata": {
+                      "source": "agent"
+                    },
+                    "expiresAt": null,
+                    "createdAt": "2026-06-01 12:00:00Z",
+                    "updatedAt": "2026-06-01 12:00:00Z"
+                  },
+                  "valueBase64": "eyJuYW1lIjoiQWRhIn0=",
+                  "valueText": "{\"name\":\"Ada\"}",
+                  "nextActions": [
+                    "Use SQLite when values need relational queries."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueueMessagesLoaded": {
+        "description": "Queue messages loaded. Context: components.responses.QueueMessagesLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QueueMessagesResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Queue messages loaded",
+                "value": {
+                  "queue": {
+                    "id": "queue_1",
+                    "name": "jobs",
+                    "maxRetries": 3,
+                    "retentionSeconds": 345600
+                  },
+                  "messages": [
+                    {
+                      "id": "qmsg_1",
+                      "status": "queued",
+                      "attempts": 0,
+                      "bodySizeBytes": 15,
+                      "visibleAt": "2026-06-01 12:00:00Z",
+                      "createdAt": "2026-06-01 12:00:00Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "nextActions": [
+                    "Use queues for background work."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueueMessageSent": {
+        "description": "Queue message sent. Context: components.responses.QueueMessageSent.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QueueMessageSendResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Queue message sent",
+                "value": {
+                  "queue": {
+                    "id": "queue_1",
+                    "name": "jobs",
+                    "maxRetries": 3,
+                    "retentionSeconds": 345600
+                  },
+                  "message": {
+                    "id": "qmsg_1",
+                    "status": "queued",
+                    "attempts": 0,
+                    "bodySizeBytes": 15,
+                    "visibleAt": "2026-06-01 12:00:00Z",
+                    "createdAt": "2026-06-01 12:00:00Z"
+                  },
+                  "nextActions": [
+                    "Inspect messages with tovuk queue messages."
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -10986,7 +11731,8 @@
         "required": [
           "id",
           "name",
-          "storageLimitMib"
+          "storageLimitMib",
+          "storageUsedBytes"
         ],
         "properties": {
           "id": {
@@ -11017,6 +11763,16 @@
             "maximum": 1000000000000,
             "examples": [
               1024
+            ]
+          },
+          "storageUsedBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "description": "Current storage usage in bytes. Context: components.schemas.KvNamespaceBinding.properties.storageUsedBytes.",
+            "examples": [
+              14
             ]
           }
         },
@@ -11944,7 +12700,8 @@
                 {
                   "id": "kv_1",
                   "name": "CACHE",
-                  "storageLimitMib": 1024
+                  "storageLimitMib": 1024,
+                  "storageUsedBytes": 14
                 }
               ]
             ]
@@ -12246,6 +13003,608 @@
           }
         },
         "description": "UsageCapSetRequest. Context: components.schemas.UsageCapSetRequest."
+      },
+      "KvEntrySummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "valueSizeBytes",
+          "metadata",
+          "expiresAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "description": "KV key metadata. Context: components.schemas.KvEntrySummary.",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "KV key. Context: components.schemas.KvEntrySummary.properties.key.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "user:1"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "valueSizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Stored value size in bytes. Context: components.schemas.KvEntrySummary.properties.valueSizeBytes.",
+            "examples": [
+              14
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "User metadata object. Context: components.schemas.KvEntrySummary.properties.metadata.",
+            "examples": [
+              {}
+            ],
+            "maxProperties": 0
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTC expiry timestamp when present. Context: components.schemas.KvEntrySummary.properties.expiresAt.",
+            "examples": [
+              "2026-06-01 12:00:00Z"
+            ],
+            "maxLength": 512,
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC creation timestamp. Context: components.schemas.KvEntrySummary.properties.createdAt.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "2026-06-01 12:00:00Z"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "UTC update timestamp. Context: components.schemas.KvEntrySummary.properties.updatedAt.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "2026-06-01 12:00:00Z"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          }
+        },
+        "examples": [
+          {
+            "key": "user:1",
+            "valueSizeBytes": 14,
+            "metadata": {
+              "source": "agent"
+            },
+            "expiresAt": null,
+            "createdAt": "2026-06-01 12:00:00Z",
+            "updatedAt": "2026-06-01 12:00:00Z"
+          }
+        ]
+      },
+      "KvKeysResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "namespace",
+          "keys",
+          "nextCursor",
+          "nextActions"
+        ],
+        "description": "KV key listing response. Context: components.schemas.KvKeysResponse.",
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/KvNamespaceBinding"
+          },
+          "keys": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/KvEntrySummary"
+            },
+            "description": "Listed KV keys. Context: components.schemas.KvKeysResponse.properties.keys.",
+            "examples": [
+              [
+                {
+                  "key": "user:1",
+                  "valueSizeBytes": 14,
+                  "metadata": {
+                    "source": "agent"
+                  },
+                  "expiresAt": null,
+                  "createdAt": "2026-06-01 12:00:00Z",
+                  "updatedAt": "2026-06-01 12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Cursor for the next page when present. Context: components.schemas.KvKeysResponse.properties.nextCursor.",
+            "examples": [
+              "user:1"
+            ],
+            "maxLength": 512,
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable next actions. Context: components.schemas.KvKeysResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Use KV for small cached values."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "namespace": {
+              "id": "kv_1",
+              "name": "CACHE",
+              "storageLimitMib": 1024,
+              "storageUsedBytes": 14
+            },
+            "keys": [
+              {
+                "key": "user:1",
+                "valueSizeBytes": 14,
+                "metadata": {
+                  "source": "agent"
+                },
+                "expiresAt": null,
+                "createdAt": "2026-06-01 12:00:00Z",
+                "updatedAt": "2026-06-01 12:00:00Z"
+              }
+            ],
+            "nextCursor": null,
+            "nextActions": [
+              "Use KV for small cached values."
+            ]
+          }
+        ]
+      },
+      "KvEntryResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "namespace",
+          "entry",
+          "valueBase64",
+          "valueText",
+          "nextActions"
+        ],
+        "description": "KV value response. Context: components.schemas.KvEntryResponse.",
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/KvNamespaceBinding"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/KvEntrySummary"
+          },
+          "valueBase64": {
+            "type": "string",
+            "description": "Base64 encoded value. Context: components.schemas.KvEntryResponse.properties.valueBase64.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "eyJuYW1lIjoiQWRhIn0="
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "valueText": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTF-8 value text when valid. Context: components.schemas.KvEntryResponse.properties.valueText.",
+            "examples": [
+              "{\"name\":\"Ada\"}"
+            ],
+            "maxLength": 512,
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable next actions. Context: components.schemas.KvEntryResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Use SQLite when values need relational queries."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "namespace": {
+              "id": "kv_1",
+              "name": "CACHE",
+              "storageLimitMib": 1024,
+              "storageUsedBytes": 14
+            },
+            "entry": {
+              "key": "user:1",
+              "valueSizeBytes": 14,
+              "metadata": {
+                "source": "agent"
+              },
+              "expiresAt": null,
+              "createdAt": "2026-06-01 12:00:00Z",
+              "updatedAt": "2026-06-01 12:00:00Z"
+            },
+            "valueBase64": "eyJuYW1lIjoiQWRhIn0=",
+            "valueText": "{\"name\":\"Ada\"}",
+            "nextActions": [
+              "Use SQLite when values need relational queries."
+            ]
+          }
+        ]
+      },
+      "KvEntryPutRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ],
+        "description": "KV put request. Context: components.schemas.KvEntryPutRequest.",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Value text or base64 bytes. Context: components.schemas.KvEntryPutRequest.properties.value.",
+            "minLength": 1,
+            "maxLength": 26214400,
+            "examples": [
+              "{\"name\":\"Ada\"}"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "text",
+              "base64"
+            ],
+            "description": "Value encoding. Context: components.schemas.KvEntryPutRequest.properties.encoding.",
+            "examples": [
+              "text"
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "User metadata object. Context: components.schemas.KvEntryPutRequest.properties.metadata.",
+            "examples": [
+              {}
+            ],
+            "maxProperties": 0
+          },
+          "expirationTtlSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 31536000,
+            "description": "Optional TTL in seconds. Context: components.schemas.KvEntryPutRequest.properties.expirationTtlSeconds.",
+            "examples": [
+              3600
+            ]
+          }
+        },
+        "examples": [
+          {
+            "value": "{\"name\":\"Ada\"}",
+            "encoding": "text",
+            "metadata": {
+              "source": "agent"
+            },
+            "expirationTtlSeconds": 3600
+          }
+        ]
+      },
+      "QueueMessageSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "attempts",
+          "bodySizeBytes",
+          "visibleAt",
+          "createdAt"
+        ],
+        "description": "Queue message metadata. Context: components.schemas.QueueMessageSummary.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Queue message id. Context: components.schemas.QueueMessageSummary.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "qmsg_1"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "inflight",
+              "done",
+              "dead"
+            ],
+            "description": "Message delivery status. Context: components.schemas.QueueMessageSummary.properties.status.",
+            "examples": [
+              "queued"
+            ]
+          },
+          "attempts": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Delivery attempt count. Context: components.schemas.QueueMessageSummary.properties.attempts.",
+            "examples": [
+              0
+            ]
+          },
+          "bodySizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Message body size in bytes. Context: components.schemas.QueueMessageSummary.properties.bodySizeBytes.",
+            "examples": [
+              15
+            ]
+          },
+          "visibleAt": {
+            "type": "string",
+            "description": "UTC visibility timestamp. Context: components.schemas.QueueMessageSummary.properties.visibleAt.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "2026-06-01 12:00:00Z"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC creation timestamp. Context: components.schemas.QueueMessageSummary.properties.createdAt.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "2026-06-01 12:00:00Z"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          }
+        },
+        "examples": [
+          {
+            "id": "qmsg_1",
+            "status": "queued",
+            "attempts": 0,
+            "bodySizeBytes": 15,
+            "visibleAt": "2026-06-01 12:00:00Z",
+            "createdAt": "2026-06-01 12:00:00Z"
+          }
+        ]
+      },
+      "QueueMessagesResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "queue",
+          "messages",
+          "nextCursor",
+          "nextActions"
+        ],
+        "description": "Queue message listing response. Context: components.schemas.QueueMessagesResponse.",
+        "properties": {
+          "queue": {
+            "$ref": "#/components/schemas/QueueBinding"
+          },
+          "messages": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/QueueMessageSummary"
+            },
+            "description": "Listed queue messages. Context: components.schemas.QueueMessagesResponse.properties.messages.",
+            "examples": [
+              [
+                {
+                  "id": "qmsg_1",
+                  "status": "queued",
+                  "attempts": 0,
+                  "bodySizeBytes": 15,
+                  "visibleAt": "2026-06-01 12:00:00Z",
+                  "createdAt": "2026-06-01 12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Cursor for the next page when present. Context: components.schemas.QueueMessagesResponse.properties.nextCursor.",
+            "examples": [
+              "qmsg_1"
+            ],
+            "maxLength": 512,
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable next actions. Context: components.schemas.QueueMessagesResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Use queues for background work."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "queue": {
+              "id": "queue_1",
+              "name": "jobs",
+              "maxRetries": 3,
+              "retentionSeconds": 345600
+            },
+            "messages": [
+              {
+                "id": "qmsg_1",
+                "status": "queued",
+                "attempts": 0,
+                "bodySizeBytes": 15,
+                "visibleAt": "2026-06-01 12:00:00Z",
+                "createdAt": "2026-06-01 12:00:00Z"
+              }
+            ],
+            "nextCursor": null,
+            "nextActions": [
+              "Use queues for background work."
+            ]
+          }
+        ]
+      },
+      "QueueMessageSendRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "body"
+        ],
+        "description": "Queue send request. Context: components.schemas.QueueMessageSendRequest.",
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "Message body text or base64 bytes. Context: components.schemas.QueueMessageSendRequest.properties.body.",
+            "minLength": 1,
+            "maxLength": 26214400,
+            "examples": [
+              "{\"task\":\"sync\"}"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "text",
+              "base64"
+            ],
+            "description": "Message body encoding. Context: components.schemas.QueueMessageSendRequest.properties.encoding.",
+            "examples": [
+              "text"
+            ]
+          },
+          "delaySeconds": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 43200,
+            "description": "Optional visibility delay in seconds. Context: components.schemas.QueueMessageSendRequest.properties.delaySeconds.",
+            "examples": [
+              60
+            ]
+          }
+        },
+        "examples": [
+          {
+            "body": "{\"task\":\"sync\"}",
+            "encoding": "text",
+            "delaySeconds": 60
+          }
+        ]
+      },
+      "QueueMessageSendResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "queue",
+          "message",
+          "nextActions"
+        ],
+        "description": "Queue send response. Context: components.schemas.QueueMessageSendResponse.",
+        "properties": {
+          "queue": {
+            "$ref": "#/components/schemas/QueueBinding"
+          },
+          "message": {
+            "$ref": "#/components/schemas/QueueMessageSummary"
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable next actions. Context: components.schemas.QueueMessageSendResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Inspect messages with tovuk queue messages."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "queue": {
+              "id": "queue_1",
+              "name": "jobs",
+              "maxRetries": 3,
+              "retentionSeconds": 345600
+            },
+            "message": {
+              "id": "qmsg_1",
+              "status": "queued",
+              "attempts": 0,
+              "bodySizeBytes": 15,
+              "visibleAt": "2026-06-01 12:00:00Z",
+              "createdAt": "2026-06-01 12:00:00Z"
+            },
+            "nextActions": [
+              "Inspect messages with tovuk queue messages."
+            ]
+          }
+        ]
       }
     }
   }

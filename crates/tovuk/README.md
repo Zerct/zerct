@@ -15,7 +15,7 @@ tovuk deploy --wait --json
 ```
 
 From a worker-static repo root, `tovuk deploy` reads one root `tovuk.toml`,
-builds the worker and frontend roots, and returns one app URL with `/api/*`
+builds the worker and frontend roots, and returns one service URL with `/api/*`
 routed to the Rust worker.
 
 Static frontend deploys require TypeScript browser source, stable native
@@ -36,31 +36,34 @@ tovuk capabilities
 tovuk me
 tovuk usage
 tovuk activity --json
-tovuk apps
-tovuk overview --app app_1 --json
-tovuk deploys --app app_1
+tovuk service list
+tovuk service show app_1 --json
+tovuk deploys --service app_1
 tovuk builds
 tovuk logs --build job_1 --limit 100 --json
-tovuk env list --app app_1
-tovuk env set --app app_1 API_KEY=value
-tovuk env delete --app app_1 API_KEY
-tovuk domains add --app app_1 api.example.com
-tovuk domains verify --app app_1 api.example.com
-tovuk storage list --app app_1 --json
-tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --app app_1 uploads/logo.png --json
-tovuk platform --app app_1 --json
-tovuk sqlite create --app app_1 DB --json
-tovuk kv create --app app_1 CACHE --json
-tovuk queue create --app app_1 jobs --json
-tovuk cron create --app app_1 nightly "0 0 * * *" --json
-tovuk durable create --app app_1 Room --json
-tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
-tovuk caps set worker_requests --period day --value 100000 --json
+tovuk env list --service app_1
+tovuk env set --service app_1 API_KEY=value
+tovuk env delete --service app_1 API_KEY
+tovuk domains add --service app_1 api.example.com
+tovuk domains verify --service app_1 api.example.com
+tovuk storage list --service app_1 --json
+tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service app_1 uploads/logo.png --json
+tovuk platform --service app_1 --json
+tovuk database create --service app_1 DB --json
+tovuk kv create --service app_1 CACHE --json
+tovuk kv put --service app_1 CACHE user:1 '{"name":"Ada"}' --json
+tovuk kv get --service app_1 CACHE user:1 --json
+tovuk queue create --service app_1 jobs --json
+tovuk queue send --service app_1 jobs '{"task":"sync"}' --json
+tovuk cron create --service app_1 nightly "0 0 * * *" --json
+tovuk durable-object create --service app_1 Room --json
+tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+tovuk limit set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
 tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```

@@ -18,7 +18,7 @@ pub(crate) use generic::{
     app_get_command, capabilities, print_authenticated, print_paged_authenticated,
 };
 pub(crate) use http::{api_request, payment_required_agent_error};
-pub(crate) use lists::{builds_command, deploys_command};
+pub(crate) use lists::{builds_command, deploys_command, service_command};
 pub(crate) use logs::logs_command;
 pub(crate) use platform::{
     binding_command, caps_command, cron_command, durable_command, kv_command, platform_command,

@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tovuk"
 version = "0.1.60"
-description = "Deploy Rust workers, static frontends, and worker-static apps to Tovuk."
+description = "Deploy Rust workers, static frontends, and worker-static services to Tovuk."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

@@ -106,8 +106,8 @@ output = "dist"
 - Keep secrets in server-side environment variables
 - Avoid build steps that require interactive input
 
-Static frontends do not run server code on Tovuk. Worker-static apps keep the
-frontend static and proxy `/api/*` to the Rust worker inside the same app URL.
+Static frontends do not run server code on Tovuk. Worker-static services keep the
+frontend static and proxy `/api/*` to the Rust worker inside the same service URL.
 JavaScript and TypeScript are frontend-only: Next API routes, Astro server
 endpoints, Svelte `+server` handlers, middleware, SSR handlers, and Node/Bun
 servers are rejected. Put that logic in Rust under the worker root.

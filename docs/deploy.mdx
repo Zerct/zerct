@@ -14,7 +14,7 @@ guessing.
 4. Run `tovuk deploy --wait --json`.
 5. Tovuk queues the build, runs checks, and verifies the health route for Rust
    workers.
-6. Tovuk exposes the app on a `tovuk.app` deployment hostname.
+6. Tovuk exposes the service on a `tovuk.app` deployment hostname.
 
 For worker-static repos, run `tovuk deploy` from the repo root. The CLI reads
 the root `tovuk.toml`, builds the configured worker and frontend roots, serves
@@ -28,7 +28,7 @@ npx tovuk preview
 
 For Rust workers, preview builds the release binary and starts it with `PORT`.
 For static frontends, preview builds the frontend and serves the output
-directory. For worker-static apps, preview builds both roots, runs the worker, and
+directory. For worker-static services, preview builds both roots, runs the worker, and
 serves the frontend with a local `/api/*` proxy.
 
 ## Runtime contract
@@ -47,12 +47,12 @@ need a runtime process; they call Rust workers for dynamic behavior.
 Use CLI commands to create runtime resources without dashboard work:
 
 ```sh
-npx tovuk sqlite create --app app_1 DB --json
-npx tovuk kv create --app app_1 CACHE --json
-npx tovuk queue create --app app_1 jobs --json
-npx tovuk cron create --app app_1 nightly "0 0 * * *" --json
-npx tovuk durable create --app app_1 Room --json
-npx tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
+npx tovuk database create --service app_1 DB --json
+npx tovuk kv create --service app_1 CACHE --json
+npx tovuk queue create --service app_1 jobs --json
+npx tovuk cron create --service app_1 nightly "0 0 * * *" --json
+npx tovuk durable-object create --service app_1 Room --json
+npx tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
 ```
 
 ## Agent-ready errors

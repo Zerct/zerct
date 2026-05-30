@@ -1,5 +1,5 @@
 class Tovuk < Formula
-  desc "Deploy Rust workers, static frontends, and worker-static apps to Tovuk"
+  desc "Deploy Rust workers, static frontends, and worker-static services to Tovuk"
   homepage "https://tovuk.com"
   url "https://github.com/tovuk/tovuk.git", tag: "v0.1.60"
   license "MIT"
@@ -18,6 +18,9 @@ class Tovuk < Formula
     assert_match "tovuk storage upload", help
     assert_match "tovuk storage download", help
     assert_match "tovuk storage delete", help
+    assert_match "tovuk kv put", help
+    assert_match "tovuk kv get", help
+    assert_match "tovuk queue send", help
     assert_match "tovuk billing checkout --json", help
     assert_match "tovuk support create", help
     assert_match "tovuk support list", help

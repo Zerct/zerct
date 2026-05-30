@@ -27,9 +27,9 @@ pub(crate) fn command_arg(
 pub(crate) fn require_app(cli: &CliOptions) -> Result<String> {
     if cli.app.is_empty() {
         return Err(agent_error(
-            "missing_app",
-            "App is required.",
-            "Pass `--app <app>` using either the app name from tovuk.toml or the app id printed by deploy.",
+            "missing_service",
+            "Service is required.",
+            "Pass `--service <service>` using either the service name from tovuk.toml or the service id printed by deploy.",
             cli.output.json,
         ));
     }
@@ -38,7 +38,7 @@ pub(crate) fn require_app(cli: &CliOptions) -> Result<String> {
 
 pub(crate) fn app_route(cli: &CliOptions, suffix: &str) -> Result<String> {
     Ok(format!(
-        "/v1/apps/{}/{}",
+        "/v1/services/{}/{}",
         encode_component(&require_app(cli)?),
         suffix
     ))

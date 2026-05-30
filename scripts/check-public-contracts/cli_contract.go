@@ -24,9 +24,9 @@ func checkCLIContract() {
 
 	for _, command := range []string{
 		"init", "install", "doctor", "preview", "login", "deploy", "capabilities",
-		"me", "usage", "activity", "apps", "overview", "deploys", "builds", "logs",
-		"status", "inspect", "platform", "sqlite", "kv", "queue", "cron", "durable",
-		"binding", "caps", "db", "database", "env", "domains", "storage", "files", "media",
+		"me", "usage", "activity", "service", "services", "overview", "deploys", "builds", "logs",
+		"status", "inspect", "platform", "kv", "queue", "cron", "durable-object",
+		"binding", "limit", "database", "env", "domains", "storage", "files", "media",
 		"billing", "support",
 	} {
 		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
@@ -37,6 +37,9 @@ func checkCLIContract() {
 		requireContains(source, "tovuk storage upload", "agentic storage upload command")
 		requireContains(source, "tovuk storage download", "agentic storage download command")
 		requireContains(source, "tovuk storage delete", "agentic storage delete command")
+		requireContains(source, "tovuk kv put", "agentic kv put command")
+		requireContains(source, "tovuk kv get", "agentic kv get command")
+		requireContains(source, "tovuk queue send", "agentic queue send command")
 		requireContains(source, "tovuk billing checkout --json", "agentic billing checkout command")
 		requireContains(source, "tovuk support create", "agentic support create command")
 		requireContains(source, "tovuk support list", "agentic support list command")

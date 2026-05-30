@@ -23,9 +23,9 @@ ambiguous to run.
 - Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
-- Free app object storage includes 512 MiB total, 200 objects, and a 64 MiB
+- Free service object storage includes 512 MiB total, 200 objects, and a 64 MiB
   single-object limit.
-- Pro app object storage includes 10 GiB total, 5000 objects, and a 256 MiB
+- Pro service object storage includes 10 GiB total, 5000 objects, and a 256 MiB
   single-object limit.
 - Free worker requests: 100 thousand per day.
 - Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
@@ -47,7 +47,7 @@ Show the returned `checkout.url` to the human. If the issue is not a payment
 problem, create a support ticket with command output and ids:
 
 ```sh
-npx tovuk support create "Limit issue" "Agent could not proceed after checking usage." --app app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
+npx tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service app_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
 ```
 
 Resolve the ticket after the issue is fixed:

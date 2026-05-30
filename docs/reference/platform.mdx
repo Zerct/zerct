@@ -9,19 +9,19 @@ need dashboard access.
 ## Commands
 
 ```sh
-npx tovuk platform --app app_1 --json
-npx tovuk sqlite create --app app_1 DB --json
-npx tovuk kv create --app app_1 CACHE --json
-npx tovuk queue create --app app_1 jobs --json
-npx tovuk cron create --app app_1 nightly "0 0 * * *" --json
-npx tovuk durable create --app app_1 Room --json
-npx tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
-npx tovuk caps set worker_requests --period day --value 100000 --json
+npx tovuk platform --service app_1 --json
+npx tovuk database create --service app_1 DB --json
+npx tovuk kv create --service app_1 CACHE --json
+npx tovuk queue create --service app_1 jobs --json
+npx tovuk cron create --service app_1 nightly "0 0 * * *" --json
+npx tovuk durable-object create --service app_1 Room --json
+npx tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+npx tovuk limit set worker_requests --period day --value 100000 --json
 ```
 
 ## Resource model
 
-- SQLite: app data with row and storage meters.
+- SQLite: service data with row and storage meters.
 - KV: small config, sessions, feature flags, and cache metadata.
 - Queues: background jobs, retries, emails, and webhook processing.
 - Cron triggers: scheduled cleanup, polling, and reports.
@@ -29,11 +29,11 @@ npx tovuk caps set worker_requests --period day --value 100000 --json
 - Service bindings: private worker-to-worker calls without public URLs.
 - Usage caps: hard stops and notification thresholds for predictable spend.
 
-Use object storage commands for app files and media:
+Use object storage commands for service files and media:
 
 ```sh
-npx tovuk storage list --app app_1 --json
-npx tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
-npx tovuk storage delete --app app_1 uploads/logo.png --json
+npx tovuk storage list --service app_1 --json
+npx tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
+npx tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
+npx tovuk storage delete --service app_1 uploads/logo.png --json
 ```
