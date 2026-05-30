@@ -396,8 +396,8 @@ fn default_download_path(remote_path: &str) -> Result<PathBuf> {
 }
 
 fn storage_content_type(cli: &CliOptions, local_path: &Path) -> String {
-    if !cli.content_type.is_empty() {
-        return cli.content_type.clone();
+    if !cli.storage.content_type.is_empty() {
+        return cli.storage.content_type.clone();
     }
     match local_path
         .extension()

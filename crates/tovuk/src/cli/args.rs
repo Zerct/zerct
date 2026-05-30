@@ -14,7 +14,6 @@ pub(crate) struct CliOptions {
     pub(crate) deploy: String,
     pub(crate) limit: String,
     pub(crate) cursor: String,
-    pub(crate) content_type: String,
     pub(crate) failing_command: String,
     pub(crate) first_log_line: String,
     pub(crate) token: String,
@@ -35,6 +34,7 @@ pub(crate) struct DeploymentOptions {
 
 #[derive(Clone, Debug)]
 pub(crate) struct StorageOptions {
+    pub(crate) content_type: String,
     pub(crate) public_read: bool,
 }
 
@@ -56,7 +56,6 @@ impl Default for CliOptions {
             deploy: String::new(),
             limit: String::new(),
             cursor: String::new(),
-            content_type: String::new(),
             failing_command: String::new(),
             first_log_line: String::new(),
             token: String::new(),
@@ -68,7 +67,10 @@ impl Default for CliOptions {
                 wait: false,
                 wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
             },
-            storage: StorageOptions { public_read: false },
+            storage: StorageOptions {
+                content_type: String::new(),
+                public_read: false,
+            },
             output: OutputOptions {
                 json: false,
                 help: false,
@@ -190,7 +192,7 @@ fn apply_value_flag(
         "--app" => set_string_flag(&mut cli.app, name, inline, argv, index, cli.output.json),
         "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.output.json),
         "--content-type" => set_string_flag(
-            &mut cli.content_type,
+            &mut cli.storage.content_type,
             name,
             inline,
             argv,
