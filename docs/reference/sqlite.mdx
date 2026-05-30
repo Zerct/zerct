@@ -3,12 +3,12 @@ title: "SQLite"
 description: "D1-style SQLite databases for Rust workers."
 ---
 
-Tovuk app databases are SQLite databases owned by an app and attached to Rust
+Tovuk service databases are SQLite databases owned by an service and attached to Rust
 workers as explicit resources.
 
 ```sh
-tovuk sqlite create --app app_1 DB --json
-tovuk platform --app app_1 --json
+tovuk database create --service app_1 DB --json
+tovuk platform --service app_1 --json
 ```
 
 Agents should create databases before a deploy needs them, then keep schema
@@ -19,7 +19,7 @@ migrations in source control.
 Recommended pattern:
 
 1. Keep migrations in a tracked `migrations/` directory.
-2. Acquire one migration lock per app database.
+2. Acquire one migration lock per service database.
 3. Apply pending migrations before serving traffic.
 4. Keep request handlers free of schema changes and long backfills.
 
@@ -33,7 +33,7 @@ Agents should reject database code that:
 
 ## Limits
 
-Free plans follow Cloudflare-style SQLite limits: 10 app databases, 5 GiB total
+Free plans follow Cloudflare-style SQLite limits: 10 service databases, 5 GiB total
 storage, 500 MiB per database, 5 million rows read per day, and 100 thousand
 rows written per day.
 

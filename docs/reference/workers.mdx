@@ -3,7 +3,7 @@ title: "Workers"
 description: "How Tovuk combines Rust workers with static frontends."
 ---
 
-Tovuk worker-static apps use one deployable project:
+Tovuk worker-static services use one deployable project:
 
 - Rust worker: APIs, auth callbacks, writes, webhooks, and server-side rules.
 - Static frontend: TanStack, Vite, Astro, Svelte, plain HTML, or another build
@@ -61,10 +61,10 @@ TypeScript servers.
 Use CLI resource commands for platform features:
 
 ```sh
-tovuk sqlite create --app app_1 DB --json
-tovuk kv create --app app_1 CACHE --json
-tovuk queue create --app app_1 jobs --json
-tovuk cron create --app app_1 nightly "0 0 * * *" --json
-tovuk durable create --app app_1 Room --json
-tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
+tovuk database create --service app_1 DB --json
+tovuk kv create --service app_1 CACHE --json
+tovuk queue create --service app_1 jobs --json
+tovuk cron create --service app_1 nightly "0 0 * * *" --json
+tovuk durable-object create --service app_1 Room --json
+tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
 ```

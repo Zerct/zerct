@@ -14,13 +14,13 @@ Use this page when an AI coding agent is deploying with Tovuk.
 5. If the build fails, run `tovuk logs --build <build_id> --json`.
 6. Fix the first actionable error from the logs.
 7. Redeploy with the same deploy command.
-8. For app files or media, use `tovuk storage ... --json` instead of the
+8. For service files or media, use `tovuk storage ... --json` instead of the
    dashboard.
 9. If a plan limit blocks the deploy or storage action, run
    `tovuk billing checkout --json` and show the returned
    `checkout.url` to the human.
 10. If Tovuk itself needs help, create a support ticket with the exact command,
-   app id, build id, deploy id, and first actionable log line.
+   service id, build id, deploy id, and first actionable log line.
 11. Resolve the support ticket after the agent fixes the issue.
 
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
@@ -51,7 +51,7 @@ operator agent to act:
 tovuk support create \
   "Deploy failed" \
   "Agent already ran doctor and retried deploy." \
-  --app app_1 \
+  --service app_1 \
   --build job_1 \
   --deploy deploy_1 \
   --failing-command "tovuk deploy --wait --json" \
@@ -81,13 +81,13 @@ tovuk billing checkout "Project limit reached" --json
 ## Storage commands
 
 ```sh
-tovuk storage list --app app_1 --json
-tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --app app_1 uploads/logo.png --json
+tovuk storage list --service app_1 --json
+tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service app_1 uploads/logo.png --json
 ```
 
-Use `--public` only when the app needs a CDN URL. Use `--content-type <mime>`
+Use `--public` only when the service needs a CDN URL. Use `--content-type <mime>`
 when the extension is missing or ambiguous.
 
 ## Starter prompt
@@ -104,24 +104,24 @@ then deploy from the repo root.
 ## Log commands
 
 ```sh
-tovuk overview --app app_1 --json
-tovuk builds --app app_1 --json
+tovuk service show app_1 --json
+tovuk builds --service app_1 --json
 tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json
-tovuk logs --app app_1 --json
-tovuk storage list --app app_1 --json
-tovuk platform --app app_1 --json
-tovuk sqlite create --app app_1 DB --json
-tovuk kv create --app app_1 CACHE --json
-tovuk queue create --app app_1 jobs --json
-tovuk cron create --app app_1 nightly "0 0 * * *" --json
-tovuk durable create --app app_1 Room --json
-tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
-tovuk caps set worker_requests --period day --value 100000 --json
+tovuk logs --service app_1 --json
+tovuk storage list --service app_1 --json
+tovuk platform --service app_1 --json
+tovuk database create --service app_1 DB --json
+tovuk kv create --service app_1 CACHE --json
+tovuk queue create --service app_1 jobs --json
+tovuk cron create --service app_1 nightly "0 0 * * *" --json
+tovuk durable-object create --service app_1 Room --json
+tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+tovuk limit set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 `logs --build` is the best first command after a failed deploy. Use
-`logs --app` when you need the latest runtime and deploy context for one app.
+`logs --service` when you need the latest runtime and deploy context for one service.

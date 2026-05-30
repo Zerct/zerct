@@ -1,9 +1,9 @@
 ---
 title: "Object Storage"
-description: "Agent-ready app files and media storage."
+description: "Agent-ready service files and media storage."
 ---
 
-Tovuk object storage is scoped to an app and is available through the native
+Tovuk object storage is scoped to an service and is available through the native
 CLI, SDK-compatible HTTP API, and presigned upload/download URLs. Agents should
 prefer JSON output so paths, public URLs, byte counts, and error recovery
 instructions can be parsed without dashboard access.
@@ -11,11 +11,11 @@ instructions can be parsed without dashboard access.
 ## CLI
 
 ```sh
-tovuk storage list --app app_1 --json
-tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
-tovuk storage url --app app_1 uploads/logo.png --json
-tovuk storage delete --app app_1 uploads/logo.png --json
+tovuk storage list --service app_1 --json
+tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
+tovuk storage url --service app_1 uploads/logo.png --json
+tovuk storage delete --service app_1 uploads/logo.png --json
 ```
 
 `tovuk files` and `tovuk media` are aliases for the same command group. Omit
@@ -46,5 +46,5 @@ tovuk billing checkout "Object storage limit reached" --json
 ```
 
 Show the returned Checkout URL to the user. If the command fails for a platform
-reason after retrying, create a support ticket with the app id, storage path,
+reason after retrying, create a support ticket with the service id, storage path,
 failed command, and first actionable error.

@@ -23,7 +23,7 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             cli,
             "sqlite_binding_required",
             "SQLite binding name is required.",
-            "Use `tovuk sqlite create --app <app> DB --json`.",
+            "Use `tovuk database create --service <service> DB --json`.",
             "sqlite/databases",
             "name",
         ),
@@ -38,10 +38,14 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
             cli,
             "kv_binding_required",
             "KV binding name is required.",
-            "Use `tovuk kv create --app <app> CACHE --json`.",
+            "Use `tovuk kv create --service <service> CACHE --json`.",
             "kv/namespaces",
             "name",
         ),
+        "keys" => kv_keys(cli),
+        "get" => kv_get(cli),
+        "put" => kv_put(cli),
+        "delete" | "del" | "rm" => kv_delete(cli),
         _ => unknown_platform_command(cli, "kv"),
     }
 }
@@ -53,10 +57,12 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
             cli,
             "queue_name_required",
             "Queue name is required.",
-            "Use `tovuk queue create --app <app> jobs --json`.",
+            "Use `tovuk queue create --service <service> jobs --json`.",
             "queues",
             "name",
         ),
+        "messages" => queue_messages(cli),
+        "send" => queue_send(cli),
         _ => unknown_platform_command(cli, "queue"),
     }
 }
@@ -76,7 +82,7 @@ pub(crate) fn durable_command(cli: &CliOptions) -> Result<()> {
             cli,
             "durable_class_required",
             "Durable Object class name is required.",
-            "Use `tovuk durable create --app <app> Room --json`.",
+            "Use `tovuk durable-object create --service <service> Room --json`.",
             "durable-objects/namespaces",
             "className",
         ),
@@ -123,13 +129,190 @@ fn create_app_resource(
     )
 }
 
+fn kv_keys(cli: &CliOptions) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv keys --service <service> CACHE --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let route = format!(
+        "{}/kv/{}/keys",
+        app_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&namespace)
+    );
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
+    print_json(&response)
+}
+
+fn kv_get(cli: &CliOptions) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv get --service <service> CACHE user:1 --json`.",
+    )?;
+    let key = required_arg(
+        cli,
+        2,
+        "kv_key_required",
+        "KV key is required.",
+        "Use `tovuk kv get --service <service> CACHE user:1 --json`.",
+    )?;
+    print_authenticated_mutation(
+        cli,
+        Method::GET,
+        &kv_value_route(cli, &namespace, &key)?,
+        None,
+    )
+}
+
+fn kv_put(cli: &CliOptions) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv put --service <service> CACHE user:1 '{\"name\":\"Ada\"}' --json`.",
+    )?;
+    let key = required_arg(
+        cli,
+        2,
+        "kv_key_required",
+        "KV key is required.",
+        "Use `tovuk kv put --service <service> CACHE user:1 '{\"name\":\"Ada\"}' --json`.",
+    )?;
+    let value = if cli.value.is_empty() {
+        cli.args
+            .iter()
+            .skip(3)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        cli.value.clone()
+    };
+    if value.is_empty() {
+        return Err(agent_error(
+            "kv_value_required",
+            "KV value is required.",
+            "Pass the value as the final argument or with `--value <value>`.",
+            cli.output.json,
+        ));
+    }
+    print_authenticated_mutation(
+        cli,
+        Method::PUT,
+        &kv_value_route(cli, &namespace, &key)?,
+        Some(json!({
+            "value": value,
+            "encoding": "text",
+        })),
+    )
+}
+
+fn kv_delete(cli: &CliOptions) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv delete --service <service> CACHE user:1 --json`.",
+    )?;
+    let key = required_arg(
+        cli,
+        2,
+        "kv_key_required",
+        "KV key is required.",
+        "Use `tovuk kv delete --service <service> CACHE user:1 --json`.",
+    )?;
+    print_authenticated_mutation(
+        cli,
+        Method::DELETE,
+        &kv_value_route(cli, &namespace, &key)?,
+        None,
+    )
+}
+
+fn queue_messages(cli: &CliOptions) -> Result<()> {
+    let queue = required_arg(
+        cli,
+        1,
+        "queue_name_required",
+        "Queue name is required.",
+        "Use `tovuk queue messages --service <service> jobs --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let route = format!(
+        "{}/queues/{}/messages",
+        app_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&queue)
+    );
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
+    print_json(&response)
+}
+
+fn queue_send(cli: &CliOptions) -> Result<()> {
+    let queue = required_arg(
+        cli,
+        1,
+        "queue_name_required",
+        "Queue name is required.",
+        "Use `tovuk queue send --service <service> jobs '{\"task\":\"sync\"}' --json`.",
+    )?;
+    let body = if cli.value.is_empty() {
+        cli.args
+            .iter()
+            .skip(2)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        cli.value.clone()
+    };
+    if body.is_empty() {
+        return Err(agent_error(
+            "queue_body_required",
+            "Queue message body is required.",
+            "Pass the body as the final argument or with `--value <value>`.",
+            cli.output.json,
+        ));
+    }
+    let route = format!(
+        "{}/queues/{}/messages",
+        app_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&queue)
+    );
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &route,
+        Some(json!({
+            "body": body,
+            "encoding": "text",
+        })),
+    )
+}
+
+fn kv_value_route(cli: &CliOptions, namespace: &str, key: &str) -> Result<String> {
+    Ok(format!(
+        "{}/kv/{}/values/{}",
+        app_route(cli, "")?.trim_end_matches('/'),
+        encode_component(namespace),
+        encode_component(key)
+    ))
+}
+
 fn create_cron(cli: &CliOptions) -> Result<()> {
     let name = required_arg(
         cli,
         1,
         "cron_name_required",
         "Cron trigger name is required.",
-        "Use `tovuk cron create --app <app> nightly \"0 0 * * *\" --json`.",
+        "Use `tovuk cron create --service <service> nightly \"0 0 * * *\" --json`.",
     )?;
     let cron_expression = cli
         .args
@@ -142,7 +325,7 @@ fn create_cron(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "cron_expression_required",
             "Cron expression is required.",
-            "Use `tovuk cron create --app <app> nightly \"0 0 * * *\" --json`.",
+            "Use `tovuk cron create --service <service> nightly \"0 0 * * *\" --json`.",
             cli.output.json,
         ));
     }
@@ -163,7 +346,7 @@ fn create_service_binding(cli: &CliOptions) -> Result<()> {
         1,
         "binding_name_required",
         "Service binding name is required.",
-        "Use `tovuk binding create --app <app> AUTH_SERVICE --target <target_app> --json`.",
+        "Use `tovuk binding create --service <service> AUTH_SERVICE --target <target_service> --json`.",
     )?;
     let target_app = if cli.target.is_empty() {
         required_arg(
@@ -171,7 +354,7 @@ fn create_service_binding(cli: &CliOptions) -> Result<()> {
             2,
             "binding_target_required",
             "Service binding target app is required.",
-            "Use `tovuk binding create --app <app> AUTH_SERVICE --target <target_app> --json`.",
+            "Use `tovuk binding create --service <service> AUTH_SERVICE --target <target_service> --json`.",
         )?
     } else {
         cli.target.clone()

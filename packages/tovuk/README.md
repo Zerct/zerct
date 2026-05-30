@@ -1,6 +1,6 @@
 # tovuk
 
-Deploy Rust workers, static frontends, and worker-static apps to Tovuk.
+Deploy Rust workers, static frontends, and worker-static services to Tovuk.
 
 ```sh
 tovuk init my-app --template worker-static-rust-tanstack
@@ -22,7 +22,7 @@ TypeScript checks, native linting such as `oxlint`, `biome check`, or
 `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
 
 From a worker-static repo root, the same deploy command reads one root
-`tovuk.toml`, builds the worker and frontend roots, and returns one app URL
+`tovuk.toml`, builds the worker and frontend roots, and returns one service URL
 with `/api/*` routed to the Rust worker.
 
 Preview before deploying:
@@ -42,23 +42,26 @@ tovuk logs --build job_1 --json
 Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
 fix the first actionable log error, rerun doctor, then redeploy.
 
-Agents can create app SQLite databases, KV namespaces, queues, cron triggers,
+Agents can create service SQLite databases, KV namespaces, queues, cron triggers,
 Durable Object namespaces, service bindings, and usage caps through the CLI.
 
 Agents can also inspect API capabilities, account identity, usage, account
-activity, apps, complete app overviews, deploys, builds, app/deploy/build logs,
-env metadata, custom domains, domain verification, app storage files and media,
+activity, services, complete service overviews, deploys, builds, app/deploy/build logs,
+env metadata, custom domains, domain verification, service storage files and media,
 billing checkout links, billing portal links, and support ticket create, list,
 and resolve actions
 through the same CLI.
 
-Manage app files and media without dashboard access:
+Manage service files and media without dashboard access:
 
 ```sh
-tovuk storage list --app app_1 --json
-tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --app app_1 uploads/logo.png --json
+tovuk storage list --service app_1 --json
+tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service app_1 uploads/logo.png --json
+tovuk kv put --service app_1 CACHE user:1 '{"name":"Ada"}' --json
+tovuk kv get --service app_1 CACHE user:1 --json
+tovuk queue send --service app_1 jobs '{"task":"sync"}' --json
 ```
 
 When a free-tier limit blocks work, run:
@@ -70,7 +73,7 @@ tovuk billing checkout --json
 When Tovuk support is needed, include enough evidence for a support agent:
 
 ```sh
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 ```
 
 When the issue is fixed, resolve the ticket:

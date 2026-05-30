@@ -1,7 +1,7 @@
 # Tovuk agent guide
 
-Tovuk deploys Rust workers, static frontends, and worker-static apps.
-Worker-static apps use one root tovuk.toml, serve the frontend at `/`, and route
+Tovuk deploys Rust workers, static frontends, and worker-static services.
+Worker-static services use one root tovuk.toml, serve the frontend at `/`, and route
 `/api/*` to the Rust worker.
 
 Use the npm CLI unless the user already installed a persistent CLI:
@@ -80,28 +80,28 @@ Useful commands:
 tovuk capabilities --json
 curl https://api.tovuk.com/v1/status
 tovuk activity --json
-tovuk apps --json
-tovuk overview --app <app> --json
-tovuk builds --app <app> --json
+tovuk service list --json
+tovuk service show <service> --json
+tovuk builds --service <app> --json
 tovuk logs --build <build_id> --json
-tovuk logs --app <app> --json
-tovuk env list --app <app> --json
-tovuk domains list --app <app> --json
-tovuk platform --app <app> --json
-tovuk sqlite create --app <app> DB --json
-tovuk kv create --app <app> CACHE --json
-tovuk queue create --app <app> jobs --json
-tovuk cron create --app <app> nightly "0 0 * * *" --json
-tovuk durable create --app <app> Room --json
-tovuk binding create --app <app> AUTH_SERVICE --target auth-app --json
-tovuk caps set worker_requests --period day --value 100000 --json
-tovuk storage list --app <app> --json
-tovuk storage upload --app <app> ./file.png uploads/file.png --public --json
-tovuk storage download --app <app> uploads/file.png ./file.png --json
-tovuk storage delete --app <app> uploads/file.png --json
+tovuk logs --service <app> --json
+tovuk env list --service <app> --json
+tovuk domains list --service <app> --json
+tovuk platform --service <app> --json
+tovuk database create --service <app> DB --json
+tovuk kv create --service <app> CACHE --json
+tovuk queue create --service <app> jobs --json
+tovuk cron create --service <app> nightly "0 0 * * *" --json
+tovuk durable-object create --service <app> Room --json
+tovuk binding create --service <app> AUTH_SERVICE --target auth-app --json
+tovuk limit set worker_requests --period day --value 100000 --json
+tovuk storage list --service <app> --json
+tovuk storage upload --service <app> ./file.png uploads/file.png --public --json
+tovuk storage download --service <app> uploads/file.png ./file.png --json
+tovuk storage delete --service <app> uploads/file.png --json
 tovuk billing checkout --json
 tovuk support list --json
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app <app> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
 tovuk support resolve <ticket_id> --json
 ```
 
@@ -110,11 +110,11 @@ available and a deploy fails, inspect build logs instead of changing status
 checks.
 
 Never print or commit secrets. Put secrets in Tovuk env vars with
-`tovuk env set --app <app> KEY=value`.
+`tovuk env set --service <app> KEY=value`.
 
 When a free-tier limit blocks work, run `tovuk billing checkout --json` and
 show the returned URL to the human. When Tovuk support is needed, create a
-ticket only after collecting the failing command, app id, build id, deploy id,
+ticket only after collecting the failing command, service id, build id, deploy id,
 first actionable log line, and what the agent already tried. Resolve the ticket
 when the issue is fixed so future agents do not duplicate the same support
 work.

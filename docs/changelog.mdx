@@ -21,13 +21,13 @@ description: "Recent product updates from Tovuk."
 - **Custom domain verification.** Verify and connect custom domains from the
   CLI without leaving your terminal.
 - **Agent and deploy inspection commands.** New `overview`, `builds`, and
-  `logs` commands return structured JSON for app, build, and deploy state so
+  `logs` commands return structured JSON for service, build, and deploy state so
   agents can debug failed deploys end to end. See the
   [Agent Loop](/agents#log-commands).
 - **Homebrew tap.** Install the CLI on macOS with
   `brew tap tovuk/tovuk https://github.com/tovuk/tovuk && brew install tovuk`.
 - **Structured support tickets from the CLI.** Open, list, and resolve tickets
-  with `tovuk support` and attach app, build, deploy, and log context for
+  with `tovuk support` and attach service, build, deploy, and log context for
   faster triage. See the [Support loop](/agents#support-loop).
 - **Agent-ready object storage.** Upload, list, download, share, and delete app
   files and media with `tovuk storage` and JSON responses. See
@@ -47,7 +47,7 @@ description: "Recent product updates from Tovuk."
 - **Improved workspace doctor UX.** Faster checks and clearer output for
   worker-static workspaces.
 - **Inline CLI flag values.** Flags now accept inline values
-  (`--app=app_1`) alongside the existing space-separated form.
+  (`--service=app_1`) alongside the existing space-separated form.
 - **CLIs are aligned across npm, PyPI, and Cargo.** The same commands,
   flags, and JSON responses are available from every package.
 

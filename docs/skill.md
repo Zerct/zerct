@@ -1,8 +1,8 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and worker-static apps to Tovuk.
+description: Deploy Rust workers, static frontends, and worker-static services to Tovuk.
 license: MIT
-compatibility: Requires tovuk.toml. Worker-static apps use one root tovuk.toml with worker and frontend roots. Rust workers require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
+compatibility: Requires tovuk.toml. Worker-static services use one root tovuk.toml with worker and frontend roots. Rust workers require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
 metadata:
   author: Tovuk
   version: "0.1"
@@ -26,7 +26,7 @@ source, native type-aware typechecking, native linting, Fallow dead-code and
 duplicate-code gates, and a lockfile. Plain static frontends can use
 `index.html`, `check = ":"`, `command = ":"`, and `output = "."`.
 
-For worker-static apps, require one root `tovuk.toml` with:
+For worker-static services, require one root `tovuk.toml` with:
 
 - `kind = "worker_static"`
 - `[worker].root`, `[worker].check`, `[worker].build`, `[worker].command`,
@@ -51,23 +51,23 @@ tovuk logs --build <build_id> --json
 Manage platform resources without dashboard access:
 
 ```sh
-tovuk platform --app <app_id> --json
-tovuk sqlite create --app <app_id> DB --json
-tovuk kv create --app <app_id> CACHE --json
-tovuk queue create --app <app_id> jobs --json
-tovuk cron create --app <app_id> nightly "0 0 * * *" --json
-tovuk durable create --app <app_id> Room --json
-tovuk binding create --app <app_id> AUTH_SERVICE --target auth-app --json
-tovuk caps set worker_requests --period day --value 100000 --json
+tovuk platform --service <app_id> --json
+tovuk database create --service <app_id> DB --json
+tovuk kv create --service <app_id> CACHE --json
+tovuk queue create --service <app_id> jobs --json
+tovuk cron create --service <app_id> nightly "0 0 * * *" --json
+tovuk durable-object create --service <app_id> Room --json
+tovuk binding create --service <app_id> AUTH_SERVICE --target auth-app --json
+tovuk limit set worker_requests --period day --value 100000 --json
 ```
 
-Manage app files and media without dashboard access:
+Manage service files and media without dashboard access:
 
 ```sh
-tovuk storage list --app <app_id> --json
-tovuk storage upload --app <app_id> ./logo.png uploads/logo.png --public --json
-tovuk storage download --app <app_id> uploads/logo.png ./logo.png --json
-tovuk storage delete --app <app_id> uploads/logo.png --json
+tovuk storage list --service <app_id> --json
+tovuk storage upload --service <app_id> ./logo.png uploads/logo.png --public --json
+tovuk storage download --service <app_id> uploads/logo.png ./logo.png --json
+tovuk storage delete --service <app_id> uploads/logo.png --json
 ```
 
 When a plan limit blocks work:
@@ -77,5 +77,5 @@ tovuk billing checkout "Plan limit reached" --json
 ```
 
 When Tovuk support is needed, create a ticket only after collecting the failing
-command, app id, build id, deploy id, first actionable log line, and what the
+command, service id, build id, deploy id, first actionable log line, and what the
 agent already tried. Resolve the ticket when the issue is fixed.

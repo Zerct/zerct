@@ -2,8 +2,8 @@
 
 Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Tovuk hosts Rust workers, static frontends, and worker-static apps. A
-worker-static app uses one `tovuk.toml`, one deployment URL, static files at
+Tovuk hosts Rust workers, static frontends, and worker-static services. A
+worker-static service uses one `tovuk.toml`, one deployment URL, static files at
 `/`, and a Rust worker under `/api/*`.
 
 ## Install
@@ -25,7 +25,7 @@ cd my-app/web && bun install && cd ..
 ```
 
 From a worker-static repo root, `tovuk deploy` reads the single root
-`tovuk.toml`, builds `api` and `web`, and returns one app URL. Create
+`tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
 databases, KV namespaces, queues, cron triggers, Durable Object namespaces,
 service bindings, and usage caps through CLI resource commands.
 
@@ -119,7 +119,7 @@ Run `tovuk doctor --json`. Fix the first failed check by following
 error, rerun doctor, and redeploy. If a plan limit blocks work, run
 `tovuk billing checkout --json` and show the returned URL to the
 human. If Tovuk support is needed, run `tovuk support create` with
-`--failing-command`, `--app`, `--build`, `--deploy`, and `--first-log-line`.
+`--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
 Resolve the support ticket after the issue is fixed.
 ```
 
@@ -158,19 +158,22 @@ tovuk capabilities
 tovuk me
 tovuk usage
 tovuk activity --json
-tovuk apps
-tovuk overview --app app_1 --json
+tovuk service list
+tovuk service show app_1 --json
 tovuk deploys
-tovuk builds --app app_1
-tovuk logs --app app_1 --limit 100 --json
+tovuk builds --service app_1
+tovuk logs --service app_1 --limit 100 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --build job_1 --json
-tovuk env list --app app_1
-tovuk domains list --app app_1
-tovuk domains verify --app app_1 api.example.com
+tovuk env list --service app_1
+tovuk domains list --service app_1
+tovuk domains verify --service app_1 api.example.com
+tovuk kv put --service app_1 CACHE user:1 '{"name":"Ada"}' --json
+tovuk kv get --service app_1 CACHE user:1 --json
+tovuk queue send --service app_1 jobs '{"task":"sync"}' --json
 tovuk billing checkout --json
 tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --app app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
