@@ -1,7 +1,7 @@
 class Tovuk < Formula
   desc "Deploy Rust backends, static frontends, and fullstack apps to Tovuk"
   homepage "https://tovuk.com"
-  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.59"
+  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.60"
   license "MIT"
 
   depends_on "rust" => :build
