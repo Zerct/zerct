@@ -80,7 +80,7 @@ fn proxy_to_backend(stream: &mut TcpStream, method: &str, path: &str, port: u16)
             stream,
             StatusCode::BAD_GATEWAY,
             "text/plain; charset=utf-8",
-            b"backend unavailable",
+            b"worker unavailable",
         ),
     }
 }

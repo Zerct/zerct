@@ -25,8 +25,9 @@ func checkCLIContract() {
 	for _, command := range []string{
 		"init", "install", "doctor", "preview", "login", "deploy", "capabilities",
 		"me", "usage", "activity", "apps", "overview", "deploys", "builds", "logs",
-		"status", "inspect", "db", "database", "env", "domains", "storage", "files",
-		"media", "billing", "support",
+		"status", "inspect", "platform", "sqlite", "kv", "queue", "cron", "durable",
+		"binding", "caps", "db", "database", "env", "domains", "storage", "files", "media",
+		"billing", "support",
 	} {
 		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
 	}
@@ -42,10 +43,10 @@ func checkCLIContract() {
 		requireContains(source, "tovuk support resolve", "agentic support resolve command")
 	}
 
-	requireContains(cargoCLI, "fullstack-rust-tanstack", "fullstack template option")
+	requireContains(cargoCLI, "worker-static-rust-tanstack", "worker-static template option")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
-	requireContains(cargoCLI, "rust-api", "Rust template option")
-	requireContains(cargoCLI, "JavaScript and TypeScript are frontend-only on Tovuk", "Rust-only backend policy")
+	requireContains(cargoCLI, "rust-worker", "Rust worker template option")
+	requireContains(cargoCLI, "JavaScript and TypeScript are frontend-only on Tovuk", "Rust-only runtime policy")
 	requireContains(npmInstall, "TOVUK_NATIVE_BINARY", "npm local native binary override")
 	requireContains(pythonCLI, "TOVUK_NATIVE_BINARY", "PyPI local native binary override")
 	requireContains(homebrewFormula, `depends_on "rust" => :build`, "Homebrew builds native Rust CLI")

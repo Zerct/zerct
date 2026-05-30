@@ -5,7 +5,7 @@ use std::path::Path;
 pub(super) fn backend_javascript_source_check(project_dir: &Path, label: &str) -> DoctorCheck {
     let matches = backend_javascript_or_typescript_sources(project_dir, label);
     DoctorCheck {
-        name: "rust backend js/ts server source".to_owned(),
+        name: "rust worker js/ts server source".to_owned(),
         ok: matches.is_empty(),
         message: if matches.is_empty() {
             "none found".to_owned()

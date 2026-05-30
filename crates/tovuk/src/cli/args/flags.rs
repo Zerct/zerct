@@ -105,6 +105,9 @@ fn apply_value_flag(
         ),
         "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.output.json),
         "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
+        "--period" => set_string_flag(&mut cli.period, name, inline, argv, index, cli.output.json),
+        "--value" => set_string_flag(&mut cli.value, name, inline, argv, index, cli.output.json),
+        "--target" => set_string_flag(&mut cli.target, name, inline, argv, index, cli.output.json),
         "--severity" => set_string_flag(
             &mut cli.severity,
             name,

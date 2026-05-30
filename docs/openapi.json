@@ -5,7 +5,7 @@
     "title": "Tovuk API",
     "summary": "Control-plane API for Tovuk deploys.",
     "version": "0.1.0",
-    "description": "Use the Tovuk API to authenticate, create Rust backend deploys, manage account onboarding, and inspect deploy health. Context: info.",
+    "description": "Use the Tovuk API to authenticate, create Rust worker deploys, manage account onboarding, and inspect deploy health. Context: info.",
     "termsOfService": "https://tovuk.com/legal/terms",
     "contact": {
       "name": "Tovuk",
@@ -331,7 +331,7 @@
                   "value": {
                     "config": {
                       "name": "hello-rust",
-                      "kind": "rust_backend",
+                      "kind": "rust_worker",
                       "run": {
                         "command": "./target/release/api",
                         "port": 3000,
@@ -339,7 +339,7 @@
                       }
                     },
                     "commit_sha": null,
-                    "wants_database": true,
+                    "wants_database": false,
                     "source_archive_base64": "H4sIAAAAAAAA"
                   }
                 }
@@ -788,8 +788,8 @@
         "tags": [
           "Deploy"
         ],
-        "summary": "Get managed Postgres",
-        "description": "Get managed Postgres for GET /v1/apps/{app_id}/database. Context: paths./v1/apps/{app_id}/database.get.",
+        "summary": "Get SQLite",
+        "description": "Get SQLite for GET /v1/apps/{app_id}/database. Context: paths./v1/apps/{app_id}/database.get.",
         "operationId": "getAppDatabase",
         "responses": {
           "200": {
@@ -2501,7 +2501,7 @@
                     "id": "app_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
-                    "kind": "rust_backend",
+                    "kind": "rust_worker",
                     "plan": "free",
                     "runtime_status": "running",
                     "url": "https://hello-rust.tovuk.app"
@@ -2520,7 +2520,7 @@
                     "message": "Build queued."
                   },
                   "deploy_plan": {
-                    "kind": "rust_backend",
+                    "kind": "rust_worker",
                     "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
                     "build_command": "cargo build --release",
                     "build_output_dir": "dist",
@@ -2839,22 +2839,61 @@
                     "objectStorageMib": 24
                   },
                   "limits": {
-                    "projects": 3,
-                    "managedDatabases": 1,
-                    "postgresStorageMib": 512,
-                    "postgresStorageMibPerDatabase": 512,
-                    "dataTransferGib": 25,
-                    "monthlyBuildMinutes": 300,
-                    "monthlyDeployments": 200,
-                    "concurrentBuilds": 2,
-                    "maxBuildDurationSeconds": 600,
-                    "customDomains": 10,
+                    "projects": 100,
+                    "dataTransferGib": 100,
+                    "monthlyBuildMinutes": 3000,
+                    "monthlyDeployments": 0,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 1200,
+                    "customDomains": 100,
                     "alwaysOnApps": 0,
                     "logRetentionDays": 3,
-                    "postgresConnectionsPerDatabase": 2,
-                    "objectStorageMib": 512,
-                    "storageObjects": 200,
-                    "storageObjectMaxMib": 64
+                    "objectStorageMib": 10240,
+                    "storageObjects": 100000,
+                    "storageObjectMaxMib": 100,
+                    "sqliteDatabases": 10,
+                    "sqliteStorageMib": 5120,
+                    "sqliteStorageMibPerDatabase": 500,
+                    "sqliteRowsReadPerDay": 5000000,
+                    "sqliteRowsReadPerMonth": null,
+                    "sqliteRowsWrittenPerDay": 100000,
+                    "sqliteRowsWrittenPerMonth": null,
+                    "sqliteQueryTimeoutSeconds": 30,
+                    "sqliteTimeTravelDays": 7,
+                    "workers": 100,
+                    "workerRequestsPerDay": 100000,
+                    "workerRequestsPerMonth": null,
+                    "workerCpuMsPerRequest": 10,
+                    "workerCpuMsPerMonth": null,
+                    "workerMemoryMib": 128,
+                    "workerSubrequestsPerRequest": 50,
+                    "workerOutgoingConnectionsPerRequest": 6,
+                    "workerEnvVars": 64,
+                    "workerEnvVarSizeKib": 5,
+                    "workerCompressedSizeMib": 3,
+                    "workerStartupTimeMs": 1000,
+                    "cronTriggers": 5,
+                    "staticAssetFilesPerVersion": 20000,
+                    "staticAssetFileSizeMib": 25,
+                    "kvStorageMib": 1024,
+                    "kvReadsPerDay": 100000,
+                    "kvReadsPerMonth": null,
+                    "kvWritesPerDay": 1000,
+                    "kvWritesPerMonth": null,
+                    "kvDeletesPerDay": 1000,
+                    "kvDeletesPerMonth": null,
+                    "kvListsPerDay": 1000,
+                    "kvListsPerMonth": null,
+                    "queueOperationsPerDay": 10000,
+                    "queueOperationsPerMonth": null,
+                    "durableObjectRequestsPerDay": 100000,
+                    "durableObjectRequestsPerMonth": null,
+                    "durableObjectSqliteStorageMib": 5120,
+                    "buildCpuMillis": 2000,
+                    "buildMemoryMib": 8192,
+                    "buildDiskMib": 20480,
+                    "apiTokens": 10,
+                    "supportTicketsPerDay": 3
                   }
                 }
               }
@@ -2925,7 +2964,7 @@
                     "id": "app_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
-                    "kind": "rust_backend",
+                    "kind": "rust_worker",
                     "plan": "free",
                     "runtime_status": "running",
                     "url": "https://hello-rust.tovuk.app"
@@ -3018,7 +3057,7 @@
                     "id": "app_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
-                    "kind": "rust_backend",
+                    "kind": "rust_worker",
                     "plan": "free",
                     "runtime_status": "running",
                     "url": "https://hello-rust.tovuk.app"
@@ -3149,7 +3188,7 @@
                     "id": "app_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
-                    "kind": "rust_backend",
+                    "kind": "rust_worker",
                     "plan": "free",
                     "runtime_status": "running",
                     "url": "https://hello-rust.tovuk.app"
@@ -3550,8 +3589,8 @@
                   "auth": "Use device login once, then a bearer token.",
                   "agent_workflow": [
                     "Call GET /v1/capabilities first.",
-                    "Use Rust backends for dynamic APIs, Postgres, and server-side logic.",
-                    "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
+                    "Use Rust workers for dynamic APIs, SQLite, and server-side logic.",
+                    "When a static frontend calls a Rust worker on another hostname, configure worker CORS or use a same-origin custom domain."
                   ],
                   "endpoints": [
                     {
@@ -3624,22 +3663,61 @@
                     "objectStorageMib": 24
                   },
                   "limits": {
-                    "projects": 3,
-                    "managedDatabases": 1,
-                    "postgresStorageMib": 512,
-                    "postgresStorageMibPerDatabase": 512,
-                    "dataTransferGib": 25,
-                    "monthlyBuildMinutes": 300,
-                    "monthlyDeployments": 200,
-                    "concurrentBuilds": 2,
-                    "maxBuildDurationSeconds": 600,
-                    "customDomains": 10,
+                    "projects": 100,
+                    "dataTransferGib": 100,
+                    "monthlyBuildMinutes": 3000,
+                    "monthlyDeployments": 0,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 1200,
+                    "customDomains": 100,
                     "alwaysOnApps": 0,
                     "logRetentionDays": 3,
-                    "postgresConnectionsPerDatabase": 2,
-                    "objectStorageMib": 512,
-                    "storageObjects": 200,
-                    "storageObjectMaxMib": 64
+                    "objectStorageMib": 10240,
+                    "storageObjects": 100000,
+                    "storageObjectMaxMib": 100,
+                    "sqliteDatabases": 10,
+                    "sqliteStorageMib": 5120,
+                    "sqliteStorageMibPerDatabase": 500,
+                    "sqliteRowsReadPerDay": 5000000,
+                    "sqliteRowsReadPerMonth": null,
+                    "sqliteRowsWrittenPerDay": 100000,
+                    "sqliteRowsWrittenPerMonth": null,
+                    "sqliteQueryTimeoutSeconds": 30,
+                    "sqliteTimeTravelDays": 7,
+                    "workers": 100,
+                    "workerRequestsPerDay": 100000,
+                    "workerRequestsPerMonth": null,
+                    "workerCpuMsPerRequest": 10,
+                    "workerCpuMsPerMonth": null,
+                    "workerMemoryMib": 128,
+                    "workerSubrequestsPerRequest": 50,
+                    "workerOutgoingConnectionsPerRequest": 6,
+                    "workerEnvVars": 64,
+                    "workerEnvVarSizeKib": 5,
+                    "workerCompressedSizeMib": 3,
+                    "workerStartupTimeMs": 1000,
+                    "cronTriggers": 5,
+                    "staticAssetFilesPerVersion": 20000,
+                    "staticAssetFileSizeMib": 25,
+                    "kvStorageMib": 1024,
+                    "kvReadsPerDay": 100000,
+                    "kvReadsPerMonth": null,
+                    "kvWritesPerDay": 1000,
+                    "kvWritesPerMonth": null,
+                    "kvDeletesPerDay": 1000,
+                    "kvDeletesPerMonth": null,
+                    "kvListsPerDay": 1000,
+                    "kvListsPerMonth": null,
+                    "queueOperationsPerDay": 10000,
+                    "queueOperationsPerMonth": null,
+                    "durableObjectRequestsPerDay": 100000,
+                    "durableObjectRequestsPerMonth": null,
+                    "durableObjectSqliteStorageMib": 5120,
+                    "buildCpuMillis": 2000,
+                    "buildMemoryMib": 8192,
+                    "buildDiskMib": 20480,
+                    "apiTokens": 10,
+                    "supportTicketsPerDay": 3
                   }
                 }
               }
@@ -3696,22 +3774,61 @@
                     "objectStorageMib": 24
                   },
                   "limits": {
-                    "projects": 3,
-                    "managedDatabases": 1,
-                    "postgresStorageMib": 512,
-                    "postgresStorageMibPerDatabase": 512,
-                    "dataTransferGib": 25,
-                    "monthlyBuildMinutes": 300,
-                    "monthlyDeployments": 200,
-                    "concurrentBuilds": 2,
-                    "maxBuildDurationSeconds": 600,
-                    "customDomains": 10,
+                    "projects": 100,
+                    "dataTransferGib": 100,
+                    "monthlyBuildMinutes": 3000,
+                    "monthlyDeployments": 0,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 1200,
+                    "customDomains": 100,
                     "alwaysOnApps": 0,
                     "logRetentionDays": 3,
-                    "postgresConnectionsPerDatabase": 2,
-                    "objectStorageMib": 512,
-                    "storageObjects": 200,
-                    "storageObjectMaxMib": 64
+                    "objectStorageMib": 10240,
+                    "storageObjects": 100000,
+                    "storageObjectMaxMib": 100,
+                    "sqliteDatabases": 10,
+                    "sqliteStorageMib": 5120,
+                    "sqliteStorageMibPerDatabase": 500,
+                    "sqliteRowsReadPerDay": 5000000,
+                    "sqliteRowsReadPerMonth": null,
+                    "sqliteRowsWrittenPerDay": 100000,
+                    "sqliteRowsWrittenPerMonth": null,
+                    "sqliteQueryTimeoutSeconds": 30,
+                    "sqliteTimeTravelDays": 7,
+                    "workers": 100,
+                    "workerRequestsPerDay": 100000,
+                    "workerRequestsPerMonth": null,
+                    "workerCpuMsPerRequest": 10,
+                    "workerCpuMsPerMonth": null,
+                    "workerMemoryMib": 128,
+                    "workerSubrequestsPerRequest": 50,
+                    "workerOutgoingConnectionsPerRequest": 6,
+                    "workerEnvVars": 64,
+                    "workerEnvVarSizeKib": 5,
+                    "workerCompressedSizeMib": 3,
+                    "workerStartupTimeMs": 1000,
+                    "cronTriggers": 5,
+                    "staticAssetFilesPerVersion": 20000,
+                    "staticAssetFileSizeMib": 25,
+                    "kvStorageMib": 1024,
+                    "kvReadsPerDay": 100000,
+                    "kvReadsPerMonth": null,
+                    "kvWritesPerDay": 1000,
+                    "kvWritesPerMonth": null,
+                    "kvDeletesPerDay": 1000,
+                    "kvDeletesPerMonth": null,
+                    "kvListsPerDay": 1000,
+                    "kvListsPerMonth": null,
+                    "queueOperationsPerDay": 10000,
+                    "queueOperationsPerMonth": null,
+                    "durableObjectRequestsPerDay": 100000,
+                    "durableObjectRequestsPerMonth": null,
+                    "durableObjectSqliteStorageMib": 5120,
+                    "buildCpuMillis": 2000,
+                    "buildMemoryMib": 8192,
+                    "buildDiskMib": 20480,
+                    "apiTokens": 10,
+                    "supportTicketsPerDay": 3
                   },
                   "apps": [
                     {
@@ -3786,7 +3903,7 @@
                       "id": "app_1",
                       "account_id": "acct_1",
                       "name": "hello-rust",
-                      "kind": "rust_backend",
+                      "kind": "rust_worker",
                       "plan": "free",
                       "runtime_status": "running",
                       "url": "https://hello-rust.tovuk.app"
@@ -4663,7 +4780,6 @@
         "required": [
           "config",
           "commit_sha",
-          "wants_database",
           "source_archive_base64"
         ],
         "properties": {
@@ -4671,7 +4787,7 @@
             "examples": [
               {
                 "name": "hello-rust",
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "run": {
                   "command": "./target/release/api",
                   "port": 3000,
@@ -4695,10 +4811,9 @@
           },
           "wants_database": {
             "type": "boolean",
-            "description": "Whether managed Postgres should be attached. Context: components.schemas.DeployRequest.properties.wants_database.",
-            "examples": [
-              true
-            ]
+            "deprecated": true,
+            "default": false,
+            "description": "Deprecated deploy-time database flag. Create SQLite databases through platform APIs instead."
           },
           "source_archive_base64": {
             "type": [
@@ -4717,7 +4832,7 @@
           {
             "config": {
               "name": "hello-rust",
-              "kind": "rust_backend",
+              "kind": "rust_worker",
               "run": {
                 "command": "./target/release/api",
                 "port": 3000,
@@ -4725,7 +4840,7 @@
               }
             },
             "commit_sha": null,
-            "wants_database": true,
+            "wants_database": false,
             "source_archive_base64": "H4sIAAAAAAAA"
           }
         ]
@@ -4748,7 +4863,7 @@
                 "id": "app_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "plan": "free",
                 "runtime_status": "running",
                 "url": "https://hello-rust.tovuk.app"
@@ -4782,7 +4897,7 @@
           "deploy_plan": {
             "examples": [
               {
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
                 "build_command": "cargo build --release",
                 "build_output_dir": "dist",
@@ -4829,7 +4944,7 @@
               "id": "app_1",
               "account_id": "acct_1",
               "name": "hello-rust",
-              "kind": "rust_backend",
+              "kind": "rust_worker",
               "plan": "free",
               "runtime_status": "running",
               "url": "https://hello-rust.tovuk.app"
@@ -4848,7 +4963,7 @@
               "message": "Build queued."
             },
             "deploy_plan": {
-              "kind": "rust_backend",
+              "kind": "rust_worker",
               "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
               "build_command": "cargo build --release",
               "build_output_dir": "dist",
@@ -5228,7 +5343,6 @@
           },
           "limits": {
             "$ref": "#/components/schemas/PlanLimits",
-            "postgresConnectionsPerDatabase": 2,
             "objectStorageMib": 512,
             "storageObjects": 200,
             "storageObjectMaxMib": 64
@@ -5261,22 +5375,61 @@
               "objectStorageMib": 24
             },
             "limits": {
-              "projects": 3,
-              "managedDatabases": 1,
-              "postgresStorageMib": 512,
-              "postgresStorageMibPerDatabase": 512,
-              "dataTransferGib": 25,
-              "monthlyBuildMinutes": 300,
-              "monthlyDeployments": 200,
-              "concurrentBuilds": 2,
-              "maxBuildDurationSeconds": 600,
-              "customDomains": 10,
+              "projects": 100,
+              "dataTransferGib": 100,
+              "monthlyBuildMinutes": 3000,
+              "monthlyDeployments": 0,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 1200,
+              "customDomains": 100,
               "alwaysOnApps": 0,
               "logRetentionDays": 3,
-              "postgresConnectionsPerDatabase": 2,
-              "objectStorageMib": 512,
-              "storageObjects": 200,
-              "storageObjectMaxMib": 64
+              "objectStorageMib": 10240,
+              "storageObjects": 100000,
+              "storageObjectMaxMib": 100,
+              "sqliteDatabases": 10,
+              "sqliteStorageMib": 5120,
+              "sqliteStorageMibPerDatabase": 500,
+              "sqliteRowsReadPerDay": 5000000,
+              "sqliteRowsReadPerMonth": null,
+              "sqliteRowsWrittenPerDay": 100000,
+              "sqliteRowsWrittenPerMonth": null,
+              "sqliteQueryTimeoutSeconds": 30,
+              "sqliteTimeTravelDays": 7,
+              "workers": 100,
+              "workerRequestsPerDay": 100000,
+              "workerRequestsPerMonth": null,
+              "workerCpuMsPerRequest": 10,
+              "workerCpuMsPerMonth": null,
+              "workerMemoryMib": 128,
+              "workerSubrequestsPerRequest": 50,
+              "workerOutgoingConnectionsPerRequest": 6,
+              "workerEnvVars": 64,
+              "workerEnvVarSizeKib": 5,
+              "workerCompressedSizeMib": 3,
+              "workerStartupTimeMs": 1000,
+              "cronTriggers": 5,
+              "staticAssetFilesPerVersion": 20000,
+              "staticAssetFileSizeMib": 25,
+              "kvStorageMib": 1024,
+              "kvReadsPerDay": 100000,
+              "kvReadsPerMonth": null,
+              "kvWritesPerDay": 1000,
+              "kvWritesPerMonth": null,
+              "kvDeletesPerDay": 1000,
+              "kvDeletesPerMonth": null,
+              "kvListsPerDay": 1000,
+              "kvListsPerMonth": null,
+              "queueOperationsPerDay": 10000,
+              "queueOperationsPerMonth": null,
+              "durableObjectRequestsPerDay": 100000,
+              "durableObjectRequestsPerMonth": null,
+              "durableObjectSqliteStorageMib": 5120,
+              "buildCpuMillis": 2000,
+              "buildMemoryMib": 8192,
+              "buildDiskMib": 20480,
+              "apiTokens": 10,
+              "supportTicketsPerDay": 3
             }
           }
         ]
@@ -5389,7 +5542,7 @@
               "integer",
               "null"
             ],
-            "description": "Managed Postgres storage limit in MiB when enabled. Context: components.schemas.AccountDashboardApp.properties.databaseStorageMib.",
+            "description": "SQLite storage limit in MiB when enabled. Context: components.schemas.AccountDashboardApp.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -5498,7 +5651,7 @@
           },
           "databaseStorageMib": {
             "type": "integer",
-            "description": "Sum of managed database storage limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.databaseStorageMib.",
+            "description": "Sum of app SQLite database storage limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -5521,7 +5674,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
-            "description": "Number of managed databases.",
+            "description": "Number of app SQLite databases.",
             "examples": [
               1
             ]
@@ -5598,12 +5751,12 @@
         "type": "string",
         "description": "Tovuk project kind. Context: components.schemas.ProjectKind.",
         "enum": [
-          "fullstack",
-          "rust_backend",
+          "worker_static",
+          "rust_worker",
           "static_frontend"
         ],
         "examples": [
-          "rust_backend"
+          "rust_worker"
         ]
       },
       "App": {
@@ -5649,7 +5802,7 @@
           },
           "kind": {
             "examples": [
-              "rust_backend"
+              "rust_worker"
             ],
             "$ref": "#/components/schemas/ProjectKind"
           },
@@ -5679,7 +5832,7 @@
             "id": "app_1",
             "account_id": "acct_1",
             "name": "hello-rust",
-            "kind": "rust_backend",
+            "kind": "rust_worker",
             "plan": "free",
             "runtime_status": "running",
             "url": "https://hello-rust.tovuk.app"
@@ -5839,7 +5992,7 @@
         "properties": {
           "kind": {
             "examples": [
-              "rust_backend"
+              "rust_worker"
             ],
             "$ref": "#/components/schemas/ProjectKind"
           },
@@ -5960,7 +6113,7 @@
         },
         "examples": [
           {
-            "kind": "rust_backend",
+            "kind": "rust_worker",
             "check_command": "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr",
             "build_command": "cargo build --release",
             "build_output_dir": "dist",
@@ -6104,7 +6257,7 @@
                 "id": "app_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "plan": "free",
                 "runtime_status": "running",
                 "url": "https://hello-rust.tovuk.app"
@@ -6149,7 +6302,7 @@
               "id": "app_1",
               "account_id": "acct_1",
               "name": "hello-rust",
-              "kind": "rust_backend",
+              "kind": "rust_worker",
               "plan": "free",
               "runtime_status": "running",
               "url": "https://hello-rust.tovuk.app"
@@ -6270,7 +6423,7 @@
                 "id": "app_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "plan": "free",
                 "runtime_status": "running",
                 "url": "https://hello-rust.tovuk.app"
@@ -6303,7 +6456,7 @@
               "id": "app_1",
               "account_id": "acct_1",
               "name": "hello-rust",
-              "kind": "rust_backend",
+              "kind": "rust_worker",
               "plan": "free",
               "runtime_status": "running",
               "url": "https://hello-rust.tovuk.app"
@@ -6421,7 +6574,7 @@
       },
       "Database": {
         "type": "object",
-        "description": "Managed Postgres metadata. Context: components.schemas.Database.",
+        "description": "SQLite metadata. Context: components.schemas.Database.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -6492,7 +6645,7 @@
       },
       "DatabaseResponse": {
         "type": "object",
-        "description": "Managed Postgres status. Context: components.schemas.DatabaseResponse.",
+        "description": "SQLite status. Context: components.schemas.DatabaseResponse.",
         "additionalProperties": false,
         "required": [
           "database",
@@ -6969,7 +7122,7 @@
                 "id": "app_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "plan": "free",
                 "runtime_status": "running",
                 "url": "https://hello-rust.tovuk.app"
@@ -7021,7 +7174,7 @@
               "id": "app_1",
               "account_id": "acct_1",
               "name": "hello-rust",
-              "kind": "rust_backend",
+              "kind": "rust_worker",
               "plan": "free",
               "runtime_status": "running",
               "url": "https://hello-rust.tovuk.app"
@@ -7182,7 +7335,7 @@
         "properties": {
           "command": {
             "type": "string",
-            "description": "Runtime command for Rust backends. Context: components.schemas.TovukRunConfig.properties.command.",
+            "description": "Runtime command for Rust workers. Context: components.schemas.TovukRunConfig.properties.command.",
             "pattern": "^[\\s\\S]{0,512}$",
             "maxLength": 512,
             "examples": [
@@ -7219,7 +7372,7 @@
       },
       "TovukFrontendConfig": {
         "type": "object",
-        "description": "Frontend settings for kind = fullstack. Context: components.schemas.TovukFrontendConfig.",
+        "description": "Frontend settings for kind = worker_static. Context: components.schemas.TovukFrontendConfig.",
         "additionalProperties": false,
         "properties": {
           "root": {
@@ -7268,14 +7421,14 @@
           }
         ]
       },
-      "TovukBackendConfig": {
+      "TovukWorkerConfig": {
         "type": "object",
-        "description": "Backend settings for kind = fullstack. Context: components.schemas.TovukBackendConfig.",
+        "description": "Worker settings for kind = worker_static. Context: components.schemas.TovukWorkerConfig.",
         "additionalProperties": false,
         "properties": {
           "root": {
             "type": "string",
-            "description": "Rust backend project directory relative to tovuk.toml.",
+            "description": "Rust worker project directory relative to tovuk.toml.",
             "pattern": "^[A-Za-z0-9_./-]{1,160}$",
             "maxLength": 160,
             "examples": [
@@ -7284,7 +7437,7 @@
           },
           "check": {
             "type": "string",
-            "description": "Backend validation command run inside root.",
+            "description": "Worker validation command run inside root.",
             "pattern": "^[\\s\\S]{1,1024}$",
             "maxLength": 1024,
             "examples": [
@@ -7293,7 +7446,7 @@
           },
           "build": {
             "type": "string",
-            "description": "Backend release build command run inside root.",
+            "description": "Worker release build command run inside root.",
             "pattern": "^[\\s\\S]{1,512}$",
             "maxLength": 512,
             "examples": [
@@ -7302,7 +7455,7 @@
           },
           "command": {
             "type": "string",
-            "description": "Backend runtime command run inside root.",
+            "description": "Worker runtime command run inside root.",
             "pattern": "^[\\s\\S]{1,512}$",
             "maxLength": 512,
             "examples": [
@@ -7314,14 +7467,14 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 65535,
-            "description": "Internal backend HTTP port.",
+            "description": "Internal worker HTTP port.",
             "examples": [
               3000
             ]
           },
           "health": {
             "type": "string",
-            "description": "Backend health endpoint path.",
+            "description": "Worker health endpoint path.",
             "pattern": "^/[A-Za-z0-9_./-]{0,160}$",
             "maxLength": 160,
             "examples": [
@@ -7401,7 +7554,7 @@
           },
           "kind": {
             "examples": [
-              "rust_backend"
+              "rust_worker"
             ],
             "$ref": "#/components/schemas/ProjectKind"
           },
@@ -7436,7 +7589,7 @@
             ],
             "$ref": "#/components/schemas/TovukFrontendConfig"
           },
-          "backend": {
+          "worker": {
             "examples": [
               {
                 "root": "api",
@@ -7447,7 +7600,7 @@
                 "health": "/api/healthz"
               }
             ],
-            "$ref": "#/components/schemas/TovukBackendConfig"
+            "$ref": "#/components/schemas/TovukWorkerConfig"
           },
           "resources": {
             "examples": [
@@ -7463,7 +7616,7 @@
         "examples": [
           {
             "name": "hello-rust",
-            "kind": "rust_backend",
+            "kind": "rust_worker",
             "run": {
               "command": "./target/release/api",
               "port": 3000,
@@ -7854,15 +8007,15 @@
               "maxLength": 500,
               "examples": [
                 "Call GET /v1/capabilities first.",
-                "Use Rust backends for dynamic APIs, Postgres, and server-side logic.",
-                "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
+                "Use Rust workers for dynamic APIs, SQLite, and server-side logic.",
+                "When a static frontend calls a Rust worker on another hostname, configure worker CORS or use a same-origin custom domain."
               ]
             },
             "examples": [
               [
                 "Call GET /v1/capabilities first.",
-                "Use Rust backends for dynamic APIs, Postgres, and server-side logic.",
-                "When a static frontend calls a Rust backend on another hostname, configure backend CORS or use a same-origin custom domain."
+                "Use Rust workers for dynamic APIs, SQLite, and server-side logic.",
+                "When a static frontend calls a Rust worker on another hostname, configure worker CORS or use a same-origin custom domain."
               ]
             ]
           },
@@ -7926,7 +8079,6 @@
           },
           "limits": {
             "$ref": "#/components/schemas/PlanLimits",
-            "postgresConnectionsPerDatabase": 2,
             "objectStorageMib": 512,
             "storageObjects": 200,
             "storageObjectMaxMib": 64
@@ -7958,230 +8110,570 @@
               "objectStorageMib": 24
             },
             "limits": {
-              "projects": 3,
-              "managedDatabases": 1,
-              "postgresStorageMib": 512,
-              "postgresStorageMibPerDatabase": 512,
-              "dataTransferGib": 25,
-              "monthlyBuildMinutes": 300,
-              "monthlyDeployments": 200,
-              "concurrentBuilds": 2,
-              "maxBuildDurationSeconds": 600,
-              "customDomains": 10,
+              "projects": 100,
+              "dataTransferGib": 100,
+              "monthlyBuildMinutes": 3000,
+              "monthlyDeployments": 0,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 1200,
+              "customDomains": 100,
               "alwaysOnApps": 0,
               "logRetentionDays": 3,
-              "postgresConnectionsPerDatabase": 2,
-              "objectStorageMib": 512,
-              "storageObjects": 200,
-              "storageObjectMaxMib": 64
+              "objectStorageMib": 10240,
+              "storageObjects": 100000,
+              "storageObjectMaxMib": 100,
+              "sqliteDatabases": 10,
+              "sqliteStorageMib": 5120,
+              "sqliteStorageMibPerDatabase": 500,
+              "sqliteRowsReadPerDay": 5000000,
+              "sqliteRowsReadPerMonth": null,
+              "sqliteRowsWrittenPerDay": 100000,
+              "sqliteRowsWrittenPerMonth": null,
+              "sqliteQueryTimeoutSeconds": 30,
+              "sqliteTimeTravelDays": 7,
+              "workers": 100,
+              "workerRequestsPerDay": 100000,
+              "workerRequestsPerMonth": null,
+              "workerCpuMsPerRequest": 10,
+              "workerCpuMsPerMonth": null,
+              "workerMemoryMib": 128,
+              "workerSubrequestsPerRequest": 50,
+              "workerOutgoingConnectionsPerRequest": 6,
+              "workerEnvVars": 64,
+              "workerEnvVarSizeKib": 5,
+              "workerCompressedSizeMib": 3,
+              "workerStartupTimeMs": 1000,
+              "cronTriggers": 5,
+              "staticAssetFilesPerVersion": 20000,
+              "staticAssetFileSizeMib": 25,
+              "kvStorageMib": 1024,
+              "kvReadsPerDay": 100000,
+              "kvReadsPerMonth": null,
+              "kvWritesPerDay": 1000,
+              "kvWritesPerMonth": null,
+              "kvDeletesPerDay": 1000,
+              "kvDeletesPerMonth": null,
+              "kvListsPerDay": 1000,
+              "kvListsPerMonth": null,
+              "queueOperationsPerDay": 10000,
+              "queueOperationsPerMonth": null,
+              "durableObjectRequestsPerDay": 100000,
+              "durableObjectRequestsPerMonth": null,
+              "durableObjectSqliteStorageMib": 5120,
+              "buildCpuMillis": 2000,
+              "buildMemoryMib": 8192,
+              "buildDiskMib": 20480,
+              "apiTokens": 10,
+              "supportTicketsPerDay": 3
             }
           }
         ]
       },
       "PlanLimits": {
         "type": "object",
-        "description": "Included account limits for the current billing plan. Context: components.schemas.PlanLimits.",
-        "additionalProperties": false,
         "required": [
           "projects",
-          "managedDatabases",
-          "postgresStorageMib",
-          "postgresStorageMibPerDatabase",
+          "sqliteDatabases",
+          "sqliteStorageMib",
+          "sqliteStorageMibPerDatabase",
+          "sqliteRowsReadPerDay",
+          "sqliteRowsReadPerMonth",
+          "sqliteRowsWrittenPerDay",
+          "sqliteRowsWrittenPerMonth",
+          "sqliteQueryTimeoutSeconds",
+          "sqliteTimeTravelDays",
+          "workers",
+          "workerRequestsPerDay",
+          "workerRequestsPerMonth",
+          "workerCpuMsPerRequest",
+          "workerCpuMsPerMonth",
+          "workerMemoryMib",
+          "workerSubrequestsPerRequest",
+          "workerOutgoingConnectionsPerRequest",
+          "workerEnvVars",
+          "workerEnvVarSizeKib",
+          "workerCompressedSizeMib",
+          "workerStartupTimeMs",
+          "cronTriggers",
+          "staticAssetFilesPerVersion",
+          "staticAssetFileSizeMib",
+          "kvStorageMib",
+          "kvReadsPerDay",
+          "kvReadsPerMonth",
+          "kvWritesPerDay",
+          "kvWritesPerMonth",
+          "kvDeletesPerDay",
+          "kvDeletesPerMonth",
+          "kvListsPerDay",
+          "kvListsPerMonth",
+          "queueOperationsPerDay",
+          "queueOperationsPerMonth",
+          "durableObjectRequestsPerDay",
+          "durableObjectRequestsPerMonth",
+          "durableObjectSqliteStorageMib",
+          "objectStorageMib",
+          "storageObjects",
+          "storageObjectMaxMib",
           "dataTransferGib",
           "monthlyBuildMinutes",
           "monthlyDeployments",
           "concurrentBuilds",
           "maxBuildDurationSeconds",
+          "buildCpuMillis",
+          "buildMemoryMib",
+          "buildDiskMib",
           "customDomains",
           "alwaysOnApps",
           "logRetentionDays",
-          "postgresConnectionsPerDatabase",
-          "objectStorageMib",
-          "storageObjects",
-          "storageObjectMaxMib"
+          "apiTokens",
+          "supportTicketsPerDay"
         ],
         "properties": {
           "projects": {
             "type": "integer",
             "format": "int64",
+            "description": "Hosted projects. Context: components.schemas.PlanLimits.properties.projects.",
             "minimum": 0,
-            "maximum": 1000000,
-            "description": "Included hosted projects. Context: components.schemas.PlanLimits.properties.projects.",
-            "examples": [
-              3
-            ]
+            "maximum": 1000000000000
           },
-          "managedDatabases": {
+          "sqliteDatabases": {
             "type": "integer",
             "format": "int64",
+            "description": "SQLite databases allowed for the account. Context: components.schemas.PlanLimits.properties.sqliteDatabases.",
             "minimum": 0,
-            "maximum": 1000000,
-            "description": "Included managed Postgres databases. Context: components.schemas.PlanLimits.properties.managedDatabases.",
-            "examples": [
-              1
-            ]
+            "maximum": 1000000000000
           },
-          "postgresStorageMib": {
+          "sqliteStorageMib": {
             "type": "integer",
             "format": "int64",
+            "description": "Total SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.sqliteStorageMib.",
             "minimum": 0,
-            "maximum": 1048576000,
-            "description": "Included total Postgres storage in MiB. Context: components.schemas.PlanLimits.properties.postgresStorageMib.",
-            "examples": [
-              512
-            ]
+            "maximum": 1000000000000
           },
-          "postgresStorageMibPerDatabase": {
+          "sqliteStorageMibPerDatabase": {
             "type": "integer",
             "format": "int64",
+            "description": "SQLite storage in MiB for each database. Context: components.schemas.PlanLimits.properties.sqliteStorageMibPerDatabase.",
             "minimum": 0,
-            "maximum": 1048576000,
-            "description": "Included Postgres storage per database in MiB. Context: components.schemas.PlanLimits.properties.postgresStorageMibPerDatabase.",
-            "examples": [
-              512
-            ]
+            "maximum": 1000000000000
           },
-          "dataTransferGib": {
+          "sqliteRowsReadPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily SQLite rows read limit, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsReadPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteRowsReadPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly SQLite rows read allowance, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsReadPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteRowsWrittenPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily SQLite rows written limit, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsWrittenPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteRowsWrittenPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly SQLite rows written allowance, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsWrittenPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteQueryTimeoutSeconds": {
             "type": "integer",
             "format": "int64",
+            "description": "Maximum SQLite query duration in seconds. Context: components.schemas.PlanLimits.properties.sqliteQueryTimeoutSeconds.",
             "minimum": 0,
-            "maximum": 1048576,
-            "description": "Included monthly data transfer in GiB. Context: components.schemas.PlanLimits.properties.dataTransferGib.",
-            "examples": [
-              25
-            ]
+            "maximum": 1000000000000
           },
-          "monthlyBuildMinutes": {
+          "sqliteTimeTravelDays": {
             "type": "integer",
             "format": "int64",
+            "description": "SQLite restore window in days. Context: components.schemas.PlanLimits.properties.sqliteTimeTravelDays.",
             "minimum": 0,
-            "maximum": 1000000,
-            "description": "Included monthly build minutes. Context: components.schemas.PlanLimits.properties.monthlyBuildMinutes.",
-            "examples": [
-              300
-            ]
+            "maximum": 1000000000000
           },
-          "monthlyDeployments": {
+          "workers": {
             "type": "integer",
             "format": "int64",
+            "description": "Rust workers allowed for the account. Context: components.schemas.PlanLimits.properties.workers.",
             "minimum": 0,
-            "maximum": 1000000,
-            "description": "Included monthly deploy records. Context: components.schemas.PlanLimits.properties.monthlyDeployments.",
-            "examples": [
-              200
-            ]
+            "maximum": 1000000000000
           },
-          "concurrentBuilds": {
+          "workerRequestsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily worker request limit, when set. Context: components.schemas.PlanLimits.properties.workerRequestsPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "workerRequestsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly included worker requests, when set. Context: components.schemas.PlanLimits.properties.workerRequestsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "workerCpuMsPerRequest": {
             "type": "integer",
             "format": "int64",
+            "description": "Maximum worker CPU time for one request in milliseconds. Context: components.schemas.PlanLimits.properties.workerCpuMsPerRequest.",
             "minimum": 0,
-            "maximum": 1000,
-            "description": "Included concurrent build capacity. Context: components.schemas.PlanLimits.properties.concurrentBuilds.",
-            "examples": [
-              1
-            ]
+            "maximum": 1000000000000
           },
-          "maxBuildDurationSeconds": {
+          "workerCpuMsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly included worker CPU time in milliseconds. Context: components.schemas.PlanLimits.properties.workerCpuMsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "workerMemoryMib": {
             "type": "integer",
             "format": "int64",
+            "description": "Worker memory limit in MiB. Context: components.schemas.PlanLimits.properties.workerMemoryMib.",
             "minimum": 0,
-            "maximum": 86400,
-            "description": "Max single build duration in seconds. Context: components.schemas.PlanLimits.properties.maxBuildDurationSeconds.",
-            "examples": [
-              600
-            ]
+            "maximum": 1000000000000
           },
-          "customDomains": {
+          "workerSubrequestsPerRequest": {
             "type": "integer",
             "format": "int64",
+            "description": "Subrequests allowed during one worker invocation. Context: components.schemas.PlanLimits.properties.workerSubrequestsPerRequest.",
             "minimum": 0,
-            "maximum": 100000,
-            "description": "Included custom domains. Context: components.schemas.PlanLimits.properties.customDomains.",
-            "examples": [
-              10
-            ]
+            "maximum": 1000000000000
           },
-          "alwaysOnApps": {
+          "workerOutgoingConnectionsPerRequest": {
             "type": "integer",
             "format": "int64",
+            "description": "Simultaneous outgoing connections per worker invocation. Context: components.schemas.PlanLimits.properties.workerOutgoingConnectionsPerRequest.",
             "minimum": 0,
-            "maximum": 100000,
-            "description": "Included always-on apps. Context: components.schemas.PlanLimits.properties.alwaysOnApps.",
-            "examples": [
-              0
-            ]
+            "maximum": 1000000000000
           },
-          "logRetentionDays": {
+          "workerEnvVars": {
             "type": "integer",
             "format": "int64",
+            "description": "Environment variables allowed per worker. Context: components.schemas.PlanLimits.properties.workerEnvVars.",
             "minimum": 0,
-            "maximum": 3650,
-            "description": "Included log retention in days. Context: components.schemas.PlanLimits.properties.logRetentionDays.",
-            "examples": [
-              3
-            ]
+            "maximum": 1000000000000
           },
-          "postgresConnectionsPerDatabase": {
+          "workerEnvVarSizeKib": {
             "type": "integer",
             "format": "int64",
+            "description": "Maximum environment variable size in KiB. Context: components.schemas.PlanLimits.properties.workerEnvVarSizeKib.",
             "minimum": 0,
-            "maximum": 10000,
-            "description": "Direct Postgres backend connections per managed database. Context: components.schemas.PlanLimits.properties.postgresConnectionsPerDatabase.",
-            "examples": [
-              2
-            ]
+            "maximum": 1000000000000
+          },
+          "workerCompressedSizeMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum compressed worker artifact size in MiB. Context: components.schemas.PlanLimits.properties.workerCompressedSizeMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "workerStartupTimeMs": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum worker startup time in milliseconds. Context: components.schemas.PlanLimits.properties.workerStartupTimeMs.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "cronTriggers": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Cron triggers allowed for the account. Context: components.schemas.PlanLimits.properties.cronTriggers.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetFilesPerVersion": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Static asset files allowed per deploy version. Context: components.schemas.PlanLimits.properties.staticAssetFilesPerVersion.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetFileSizeMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum static asset file size in MiB. Context: components.schemas.PlanLimits.properties.staticAssetFileSizeMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "KV storage in MiB. Context: components.schemas.PlanLimits.properties.kvStorageMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvReadsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily KV read limit, when set. Context: components.schemas.PlanLimits.properties.kvReadsPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvReadsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly KV read allowance, when set. Context: components.schemas.PlanLimits.properties.kvReadsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvWritesPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily KV write limit, when set. Context: components.schemas.PlanLimits.properties.kvWritesPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvWritesPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly KV write allowance, when set. Context: components.schemas.PlanLimits.properties.kvWritesPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvDeletesPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily KV delete limit, when set. Context: components.schemas.PlanLimits.properties.kvDeletesPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvDeletesPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly KV delete allowance, when set. Context: components.schemas.PlanLimits.properties.kvDeletesPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvListsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily KV list limit, when set. Context: components.schemas.PlanLimits.properties.kvListsPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "kvListsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly KV list allowance, when set. Context: components.schemas.PlanLimits.properties.kvListsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "queueOperationsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily queue operation limit, when set. Context: components.schemas.PlanLimits.properties.queueOperationsPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "queueOperationsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly queue operation allowance, when set. Context: components.schemas.PlanLimits.properties.queueOperationsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectRequestsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily Durable Object request limit, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectRequestsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly Durable Object request allowance, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectSqliteStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Durable Object SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.durableObjectSqliteStorageMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
           },
           "objectStorageMib": {
             "type": "integer",
             "format": "int64",
+            "description": "Object storage in MiB. Context: components.schemas.PlanLimits.properties.objectStorageMib.",
             "minimum": 0,
-            "maximum": 1048576000,
-            "description": "Included total object storage in MiB. Context: components.schemas.PlanLimits.properties.objectStorageMib.",
-            "examples": [
-              512
-            ]
+            "maximum": 1000000000000
           },
           "storageObjects": {
             "type": "integer",
             "format": "int64",
+            "description": "Stored objects allowed. Context: components.schemas.PlanLimits.properties.storageObjects.",
             "minimum": 0,
-            "maximum": 1000000,
-            "description": "Included app object count. Context: components.schemas.PlanLimits.properties.storageObjects.",
-            "examples": [
-              200
-            ]
+            "maximum": 1000000000000
           },
           "storageObjectMaxMib": {
             "type": "integer",
             "format": "int64",
-            "minimum": 0,
-            "maximum": 1048576000,
             "description": "Maximum single object size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib.",
-            "examples": [
-              64
-            ]
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "dataTransferGib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included monthly data transfer in GiB. Context: components.schemas.PlanLimits.properties.dataTransferGib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "monthlyBuildMinutes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included monthly build minutes. Context: components.schemas.PlanLimits.properties.monthlyBuildMinutes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "monthlyDeployments": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included monthly deploy count. Context: components.schemas.PlanLimits.properties.monthlyDeployments.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "concurrentBuilds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Concurrent builds allowed. Context: components.schemas.PlanLimits.properties.concurrentBuilds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "maxBuildDurationSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum build duration in seconds. Context: components.schemas.PlanLimits.properties.maxBuildDurationSeconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "buildCpuMillis": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Build CPU limit in millis. Context: components.schemas.PlanLimits.properties.buildCpuMillis.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "buildMemoryMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Build memory limit in MiB. Context: components.schemas.PlanLimits.properties.buildMemoryMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "buildDiskMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Build disk limit in MiB. Context: components.schemas.PlanLimits.properties.buildDiskMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "customDomains": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Custom domains allowed. Context: components.schemas.PlanLimits.properties.customDomains.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "alwaysOnApps": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Always-on apps allowed. Context: components.schemas.PlanLimits.properties.alwaysOnApps.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "logRetentionDays": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Log retention in days. Context: components.schemas.PlanLimits.properties.logRetentionDays.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "apiTokens": {
+            "type": "integer",
+            "format": "int64",
+            "description": "API tokens allowed. Context: components.schemas.PlanLimits.properties.apiTokens.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "supportTicketsPerDay": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Support tickets allowed per day. Context: components.schemas.PlanLimits.properties.supportTicketsPerDay.",
+            "minimum": 0,
+            "maximum": 1000000000000
           }
         },
-        "examples": [
-          {
-            "projects": 3,
-            "managedDatabases": 1,
-            "postgresStorageMib": 512,
-            "postgresStorageMibPerDatabase": 512,
-            "dataTransferGib": 25,
-            "monthlyBuildMinutes": 300,
-            "monthlyDeployments": 200,
-            "concurrentBuilds": 2,
-            "maxBuildDurationSeconds": 600,
-            "customDomains": 10,
-            "alwaysOnApps": 0,
-            "logRetentionDays": 3,
-            "postgresConnectionsPerDatabase": 2,
-            "objectStorageMib": 512,
-            "storageObjects": 200,
-            "storageObjectMaxMib": 64
-          }
-        ]
+        "additionalProperties": false,
+        "description": "Included account-level limits for a billing plan. Context: components.schemas.PlanLimits."
       },
       "AccountActivityResponse": {
         "type": "object",
@@ -8207,7 +8699,6 @@
           },
           "limits": {
             "$ref": "#/components/schemas/PlanLimits",
-            "postgresConnectionsPerDatabase": 2,
             "objectStorageMib": 512,
             "storageObjects": 200,
             "storageObjectMaxMib": 64
@@ -8318,22 +8809,61 @@
               "objectStorageMib": 24
             },
             "limits": {
-              "projects": 3,
-              "managedDatabases": 1,
-              "postgresStorageMib": 512,
-              "postgresStorageMibPerDatabase": 512,
-              "dataTransferGib": 25,
-              "monthlyBuildMinutes": 300,
-              "monthlyDeployments": 200,
-              "concurrentBuilds": 2,
-              "maxBuildDurationSeconds": 600,
-              "customDomains": 10,
+              "projects": 100,
+              "dataTransferGib": 100,
+              "monthlyBuildMinutes": 3000,
+              "monthlyDeployments": 0,
+              "concurrentBuilds": 1,
+              "maxBuildDurationSeconds": 1200,
+              "customDomains": 100,
               "alwaysOnApps": 0,
               "logRetentionDays": 3,
-              "postgresConnectionsPerDatabase": 2,
-              "objectStorageMib": 512,
-              "storageObjects": 200,
-              "storageObjectMaxMib": 64
+              "objectStorageMib": 10240,
+              "storageObjects": 100000,
+              "storageObjectMaxMib": 100,
+              "sqliteDatabases": 10,
+              "sqliteStorageMib": 5120,
+              "sqliteStorageMibPerDatabase": 500,
+              "sqliteRowsReadPerDay": 5000000,
+              "sqliteRowsReadPerMonth": null,
+              "sqliteRowsWrittenPerDay": 100000,
+              "sqliteRowsWrittenPerMonth": null,
+              "sqliteQueryTimeoutSeconds": 30,
+              "sqliteTimeTravelDays": 7,
+              "workers": 100,
+              "workerRequestsPerDay": 100000,
+              "workerRequestsPerMonth": null,
+              "workerCpuMsPerRequest": 10,
+              "workerCpuMsPerMonth": null,
+              "workerMemoryMib": 128,
+              "workerSubrequestsPerRequest": 50,
+              "workerOutgoingConnectionsPerRequest": 6,
+              "workerEnvVars": 64,
+              "workerEnvVarSizeKib": 5,
+              "workerCompressedSizeMib": 3,
+              "workerStartupTimeMs": 1000,
+              "cronTriggers": 5,
+              "staticAssetFilesPerVersion": 20000,
+              "staticAssetFileSizeMib": 25,
+              "kvStorageMib": 1024,
+              "kvReadsPerDay": 100000,
+              "kvReadsPerMonth": null,
+              "kvWritesPerDay": 1000,
+              "kvWritesPerMonth": null,
+              "kvDeletesPerDay": 1000,
+              "kvDeletesPerMonth": null,
+              "kvListsPerDay": 1000,
+              "kvListsPerMonth": null,
+              "queueOperationsPerDay": 10000,
+              "queueOperationsPerMonth": null,
+              "durableObjectRequestsPerDay": 100000,
+              "durableObjectRequestsPerMonth": null,
+              "durableObjectSqliteStorageMib": 5120,
+              "buildCpuMillis": 2000,
+              "buildMemoryMib": 8192,
+              "buildDiskMib": 20480,
+              "apiTokens": 10,
+              "supportTicketsPerDay": 3
             },
             "apps": [
               {
@@ -8470,7 +9000,7 @@
                 "type": "null"
               }
             ],
-            "description": "Managed Postgres database metadata, when attached. Context: components.schemas.AppOverviewResponse.properties.database.",
+            "description": "SQLite database metadata, when attached. Context: components.schemas.AppOverviewResponse.properties.database.",
             "examples": [
               null
             ]
@@ -8498,7 +9028,7 @@
                 "id": "app_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
-                "kind": "rust_backend",
+                "kind": "rust_worker",
                 "plan": "free",
                 "runtime_status": "running",
                 "url": "https://hello-rust.tovuk.app"

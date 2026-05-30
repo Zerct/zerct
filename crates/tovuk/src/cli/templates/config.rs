@@ -10,19 +10,19 @@ use std::path::Path;
 
 pub(super) fn init_config(project_dir: &Path, kind: ProjectKind) -> Result<String> {
     match kind {
-        ProjectKind::Fullstack => {
+        ProjectKind::WorkerStatic => {
             if let Some((backend, frontend)) = detect_fullstack_roots(project_dir) {
                 return Ok(fullstack_config(project_dir, &backend, &frontend, false));
             }
             Err(agent_error(
-                "fullstack_roots_missing",
-                "Could not find fullstack roots.",
+                "worker_static_roots_missing",
+                "Could not find worker-static roots.",
                 "Create api/Cargo.toml and web/package.json or web/index.html, then retry.",
                 false,
             ))
         }
         ProjectKind::StaticFrontend => Ok(frontend_config(project_dir, false)),
-        ProjectKind::RustBackend => Ok(rust_backend_config(project_dir)),
+        ProjectKind::RustWorker => Ok(rust_backend_config(project_dir)),
     }
 }
 
@@ -60,7 +60,7 @@ pub(super) fn fullstack_config(
         .unwrap_or_else(|| service_name_from_dir(&backend_dir));
     let settings = frontend_build_settings(&frontend_dir, prefer_bun);
     format!(
-        "name = \"{name}\"\nkind = \"fullstack\"\n\n[backend]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"512mb\"\ncpu = \"0.25\"\nidle_timeout_minutes = 15\n",
+        "name = \"{name}\"\nkind = \"worker_static\"\n\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"512mb\"\ncpu = \"0.25\"\nidle_timeout_minutes = 15\n",
         settings.check, settings.build, settings.output
     )
 }

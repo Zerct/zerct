@@ -9,7 +9,7 @@ ambiguous to run.
 ## Current guardrails
 
 - `Cargo.lock` is required.
-- Rust backends run locked release-mode `cargo check`, locked release-mode
+- Rust workers run locked release-mode `cargo check`, locked release-mode
   tests, and strict all-target, all-feature Clippy with panic/unwrap bans and
   resource-sensitive lints.
 - Runtime memory must be between `128mb` and `2gb`.
@@ -19,14 +19,20 @@ ambiguous to run.
   native linting before build work starts.
 - Frontend browser source must use `.ts` or `.tsx`; `.js`, `.jsx`,
   `.mjs`, and `.cjs` browser source is rejected.
-- A health endpoint is required for Rust backends.
-- Rust backends must bind to `0.0.0.0:$PORT`.
+- A health endpoint is required for Rust workers.
+- Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
 - Free app object storage includes 512 MiB total, 200 objects, and a 64 MiB
   single-object limit.
 - Pro app object storage includes 10 GiB total, 5000 objects, and a 256 MiB
   single-object limit.
+- Free worker requests: 100 thousand per day.
+- Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
+- Free support tickets: 3 per day.
+- Pro support tickets: 20 per day.
+- Free API tokens: 10.
+- Pro API tokens: 100.
 
 ## Plan limit recovery
 

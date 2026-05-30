@@ -1,7 +1,7 @@
 {
   "name": "tovuk",
   "version": "0.1.60",
-  "description": "Deploy Rust backends, static frontends, and fullstack apps to Tovuk.",
+  "description": "Deploy Rust workers, static frontends, and worker-static apps to Tovuk.",
   "type": "module",
   "bin": {
     "tovuk": "bin/tovuk"
@@ -21,7 +21,7 @@
     "tovuk",
     "rust",
     "deploy",
-    "backend",
+    "worker",
     "hosting"
   ],
   "homepage": "https://tovuk.com",

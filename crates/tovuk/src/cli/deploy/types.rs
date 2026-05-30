@@ -13,12 +13,10 @@ pub(crate) struct DeployProjectInfo {
 #[derive(Clone, Debug)]
 pub(crate) struct DeployPlanProject {
     pub(crate) project: DeployProjectInfo,
-    pub(crate) wants_database: bool,
 }
 
 pub(crate) struct WorkspaceDeployResult {
     pub(crate) project: DeployProjectInfo,
-    pub(crate) wants_database: bool,
     pub(crate) response: Value,
     pub(crate) final_build: Option<Value>,
 }

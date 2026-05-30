@@ -125,7 +125,7 @@ fn handle(mut stream: TcpStream) -> std::io::Result<()> {
     let body = if path == "/healthz" || path == "/api/healthz" {
         r#"{"ok":true}"#
     } else {
-        r#"{"message":"hello from tovuk","backend":"rust"}"#
+        r#"{"message":"hello from tovuk","worker":"rust"}"#
     };
     write_response(&mut stream, "200 OK", body, &cors_origin)
 }
@@ -156,7 +156,7 @@ fn write_response(
 
 pub(crate) fn frontend_source(api_base_url: &str) -> String {
     format!(
-        "import {{ createRootRoute, createRouter, RouterProvider }} from '@tanstack/react-router'\nimport {{ createRoot }} from 'react-dom/client'\nimport './styles.css'\n\nconst apiBaseUrl = import.meta.env.VITE_API_URL ?? '{api_base_url}'\n\nfunction App() {{\n  return (\n    <main>\n      <section>\n        <h1>Tovuk TanStack Frontend</h1>\n        <p>Static runtime, dynamic Rust backend calls.</p>\n        <code>{{apiBaseUrl}}</code>\n      </section>\n    </main>\n  )\n}}\n\nconst rootRoute = createRootRoute({{ component: App }})\nconst router = createRouter({{ routeTree: rootRoute }})\n\ndeclare module '@tanstack/react-router' {{\n  interface Register {{\n    router: typeof router\n  }}\n}}\n\nconst rootElement = document.getElementById('root')\nif (rootElement === null) {{\n  throw new Error('missing root element')\n}}\n\ncreateRoot(rootElement).render(<RouterProvider router={{router}} />)\n"
+        "import {{ createRootRoute, createRouter, RouterProvider }} from '@tanstack/react-router'\nimport {{ createRoot }} from 'react-dom/client'\nimport './styles.css'\n\nconst apiBaseUrl = import.meta.env.VITE_API_URL ?? '{api_base_url}'\n\nfunction App() {{\n  return (\n    <main>\n      <section>\n        <h1>Tovuk TanStack Frontend</h1>\n        <p>Static runtime, dynamic Rust worker calls.</p>\n        <code>{{apiBaseUrl}}</code>\n      </section>\n    </main>\n  )\n}}\n\nconst rootRoute = createRootRoute({{ component: App }})\nconst router = createRouter({{ routeTree: rootRoute }})\n\ndeclare module '@tanstack/react-router' {{\n  interface Register {{\n    router: typeof router\n  }}\n}}\n\nconst rootElement = document.getElementById('root')\nif (rootElement === null) {{\n  throw new Error('missing root element')\n}}\n\ncreateRoot(rootElement).render(<RouterProvider router={{router}} />)\n"
     )
 }
 

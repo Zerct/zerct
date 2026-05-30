@@ -23,7 +23,7 @@ pub(crate) fn parse_tovuk_toml(
     let build_table = get_section(&table, "build")?;
     let run_table = get_section(&table, "run")?;
     let frontend_table = get_section(&table, "frontend")?;
-    let backend_table = get_section(&table, "backend")?;
+    let backend_table = get_section(&table, "worker")?;
     let resources_table = get_section(&table, "resources")?;
     reject_unknown_config_sections(
         &build_table,
@@ -45,7 +45,7 @@ pub(crate) fn parse_tovuk_toml(
 }
 
 fn parse_project_kind(table: &toml::Table) -> std::result::Result<ProjectKind, String> {
-    let kind = get_string(table, "kind")?.unwrap_or_else(|| "rust_backend".to_owned());
+    let kind = get_string(table, "kind")?.unwrap_or_else(|| "rust_worker".to_owned());
     ProjectKind::parse(&kind)
 }
 
@@ -61,7 +61,7 @@ fn reject_unknown_config_sections(
     reject_unknown_section_keys(frontend, "frontend", &["root", "check", "build", "output"])?;
     reject_unknown_section_keys(
         backend,
-        "backend",
+        "worker",
         &["root", "check", "build", "command", "port", "health"],
     )?;
     reject_unknown_section_keys(
@@ -102,7 +102,7 @@ fn parse_frontend_config(
     kind: ProjectKind,
     project_dir: &Path,
 ) -> std::result::Result<FrontendConfig, String> {
-    if !kind.is_fullstack() {
+    if !kind.is_worker_static() {
         return Ok(FrontendConfig::default());
     }
     let root = get_string(table, "root")?;
@@ -125,7 +125,7 @@ fn parse_backend_config(
     table: &toml::Table,
     kind: ProjectKind,
 ) -> std::result::Result<BackendConfig, String> {
-    if !kind.is_fullstack() {
+    if !kind.is_worker_static() {
         return Ok(BackendConfig::default());
     }
     Ok(BackendConfig {
@@ -151,7 +151,7 @@ fn reject_unknown_root_keys(
         "build",
         "run",
         "frontend",
-        "backend",
+        "worker",
         "resources",
     ];
     for key in table.keys() {

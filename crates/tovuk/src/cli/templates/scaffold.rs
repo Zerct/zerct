@@ -22,7 +22,7 @@ pub(super) fn create_template(project_dir: &Path, template: &str) -> Result<()> 
         ));
     }
     match template {
-        "rust-api" => {
+        "rust-worker" => {
             write_rust_api_template(project_dir, &service_name_from_dir(project_dir), true)?;
         }
         "tanstack-static-frontend" => {
@@ -33,7 +33,7 @@ pub(super) fn create_template(project_dir: &Path, template: &str) -> Result<()> 
                 true,
             )?;
         }
-        "fullstack-rust-tanstack" => write_fullstack_template(project_dir)?,
+        "worker-static-rust-tanstack" => write_fullstack_template(project_dir)?,
         _ => {}
     }
     println!("created {template} template");

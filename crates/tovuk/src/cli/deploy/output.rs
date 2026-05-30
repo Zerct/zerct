@@ -36,7 +36,6 @@ pub(super) fn print_workspace_deploy_results(
                 json!({
                     "path": result.project.relative,
                     "kind": result.project.kind.map_or("invalid", ProjectKind::as_str),
-                    "wants_database": result.wants_database,
                     "app": result.response.get("app").cloned().unwrap_or(Value::Null),
                     "build_job": result.response.get("build_job").cloned().unwrap_or(Value::Null),
                     "final_build": result.final_build.clone().unwrap_or(Value::Null),

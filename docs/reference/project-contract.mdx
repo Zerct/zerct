@@ -7,7 +7,7 @@ Tovuk deploys projects that are explicit and reproducible.
 
 ## Required files
 
-Rust backend:
+Rust worker:
 
 ```txt
 Cargo.toml
@@ -42,7 +42,7 @@ tovuk.toml
 Plain static frontends do not need a package manager. Use `check = ":"`,
 `command = ":"`, and `output = "."`.
 
-Fullstack app:
+Worker-static app:
 
 ```txt
 tovuk.toml
@@ -78,13 +78,13 @@ command = "bun run build"
 output = "dist"
 ```
 
-## Fullstack tovuk.toml
+## Worker-static tovuk.toml
 
 ```toml
 name = "my-app"
-kind = "fullstack"
+kind = "worker_static"
 
-[backend]
+[worker]
 root = "api"
 check = "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
 build = "cargo build --release"
@@ -106,8 +106,8 @@ output = "dist"
 - Keep secrets in server-side environment variables
 - Avoid build steps that require interactive input
 
-Static frontends do not run server code on Tovuk. Fullstack apps keep the
-frontend static and proxy `/api/*` to the Rust backend inside the same app URL.
+Static frontends do not run server code on Tovuk. Worker-static apps keep the
+frontend static and proxy `/api/*` to the Rust worker inside the same app URL.
 JavaScript and TypeScript are frontend-only: Next API routes, Astro server
 endpoints, Svelte `+server` handlers, middleware, SSR handlers, and Node/Bun
-servers are rejected. Put that logic in Rust under the backend root.
+servers are rejected. Put that logic in Rust under the worker root.

@@ -8,29 +8,29 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const FULLSTACK_BACKEND_ROOTS: &[&str] = &["api", "backend", "server"];
-const FULLSTACK_FRONTEND_ROOTS: &[&str] = &["web", "frontend", "app", "site"];
+const WORKER_STATIC_WORKER_ROOTS: &[&str] = &["api", "worker", "server"];
+const WORKER_STATIC_FRONTEND_ROOTS: &[&str] = &["web", "frontend", "app", "site"];
 const RUST_REQUIRED_FILES: &[&str] = &["Cargo.toml", "Cargo.lock"];
 const FRONTEND_PACKAGE_REQUIRED_FILES: &[&str] = &["package.json"];
 const PLAIN_STATIC_REQUIRED_FILES: &[&str] = &["index.html"];
 
 pub(crate) fn infer_project_kind(project_dir: &Path) -> ProjectKind {
     if detect_fullstack_roots(project_dir).is_some() {
-        ProjectKind::Fullstack
+        ProjectKind::WorkerStatic
     } else if project_dir.join("Cargo.toml").exists() {
-        ProjectKind::RustBackend
+        ProjectKind::RustWorker
     } else if project_dir.join("package.json").exists() || project_dir.join("index.html").exists() {
         ProjectKind::StaticFrontend
     } else {
-        ProjectKind::RustBackend
+        ProjectKind::RustWorker
     }
 }
 
 pub(crate) fn detect_fullstack_roots(project_dir: &Path) -> Option<(String, String)> {
-    let backend = FULLSTACK_BACKEND_ROOTS
+    let backend = WORKER_STATIC_WORKER_ROOTS
         .iter()
         .find(|root| project_dir.join(root).join("Cargo.toml").exists())?;
-    let frontend = FULLSTACK_FRONTEND_ROOTS.iter().find(|root| {
+    let frontend = WORKER_STATIC_FRONTEND_ROOTS.iter().find(|root| {
         project_dir.join(root).join("package.json").exists()
             || project_dir.join(root).join("index.html").exists()
     })?;
@@ -39,7 +39,7 @@ pub(crate) fn detect_fullstack_roots(project_dir: &Path) -> Option<(String, Stri
 
 pub(crate) fn required_files(project_dir: &Path, kind: ProjectKind) -> &'static [&'static str] {
     match kind {
-        ProjectKind::Fullstack | ProjectKind::RustBackend => RUST_REQUIRED_FILES,
+        ProjectKind::WorkerStatic | ProjectKind::RustWorker => RUST_REQUIRED_FILES,
         ProjectKind::StaticFrontend if is_plain_static_frontend(project_dir) => {
             PLAIN_STATIC_REQUIRED_FILES
         }

@@ -87,9 +87,9 @@ pub(crate) fn run_doctor(project_dir: &Path) -> DoctorReport {
     let kind = config_result
         .config
         .as_ref()
-        .map_or(ProjectKind::RustBackend, |config| config.kind);
+        .map_or(ProjectKind::RustWorker, |config| config.kind);
 
-    if kind.is_fullstack() {
+    if kind.is_worker_static() {
         if let Some(config) = config_result.config.as_ref() {
             checks.extend(fullstack_checks(project_dir, config, config_result.valid));
         }

@@ -4,7 +4,6 @@ use super::{
         args::CliOptions,
         errors::{Result, agent_error},
         project::number_field,
-        project_kind::ProjectKind,
     },
     types::{DeployPlanProject, DeployProjectInfo},
 };
@@ -17,32 +16,23 @@ pub(super) fn create_deploy_plan(
     cli: &CliOptions,
     token: &str,
 ) -> Result<Vec<DeployPlanProject>> {
+    reject_legacy_database_flag(cli)?;
     let plan = projects
         .iter()
         .map(|project| DeployPlanProject {
             project: project.clone(),
-            wants_database: cli.deployment.database
-                && project.kind.is_some_and(ProjectKind::supports_database),
         })
         .collect::<Vec<_>>();
-    reject_invalid_database_targets(&plan, cli)?;
     preflight_deploy_limits(&plan, cli, token)?;
     Ok(plan)
 }
 
-fn reject_invalid_database_targets(plan: &[DeployPlanProject], cli: &CliOptions) -> Result<()> {
-    if cli.deployment.database
-        && plan.len() == 1
-        && plan.first().is_some_and(|item| {
-            item.project
-                .kind
-                .is_some_and(ProjectKind::is_static_frontend)
-        })
-    {
+fn reject_legacy_database_flag(cli: &CliOptions) -> Result<()> {
+    if cli.deployment.database {
         return Err(agent_error(
-            "invalid_database_target",
-            "Static frontends cannot attach managed Postgres directly.",
-            "Deploy a Rust backend with managed Postgres and call it from the frontend.",
+            "deploy_database_flag_removed",
+            "The deploy-time database flag is no longer supported.",
+            "Create app SQLite databases with `tovuk sqlite create --app <app> DB --json` and bind them through worker platform resources.",
             cli.output.json,
         ));
     }
@@ -62,8 +52,6 @@ fn preflight_deploy_limits(
     let limits = usage_response.get("limits").unwrap_or(&Value::Null);
     let used_projects = number_field(usage, "appCount");
     let project_limit = number_field(limits, "projects");
-    let used_databases = number_field(usage, "databaseCount");
-    let database_limit = number_field(limits, "managedDatabases");
 
     if requested.projects > 0 && used_projects + requested.projects > project_limit {
         return Err(payment_required_agent_error(
@@ -75,22 +63,11 @@ fn preflight_deploy_limits(
             "Redeploy an existing app by reusing its `name` in tovuk.toml, or open the returned Stripe Checkout URL before creating another project.",
         ));
     }
-    if requested.databases > 0 && used_databases + requested.databases > database_limit {
-        return Err(payment_required_agent_error(
-            cli,
-            token,
-            format!(
-                "Managed Postgres limit reached: {used_databases}/{database_limit} databases are already used."
-            ),
-            "Redeploy an app that already has managed Postgres, deploy without `--database`, or open the returned Stripe Checkout URL.",
-        ));
-    }
     Ok(())
 }
 
 struct RequestedResources {
     projects: u64,
-    databases: u64,
 }
 
 fn app_name_set(response: &Value) -> BTreeSet<String> {
@@ -109,20 +86,13 @@ fn requested_new_resources(
     existing_apps: &BTreeSet<String>,
 ) -> RequestedResources {
     let mut projects = 0u64;
-    let mut databases = 0u64;
     for target in plan {
         if target.project.name.is_empty() || target.project.kind.is_none() {
             continue;
         }
         if !existing_apps.contains(&target.project.name) {
             projects += 1;
-            if target.wants_database {
-                databases += 1;
-            }
         }
     }
-    RequestedResources {
-        projects,
-        databases,
-    }
+    RequestedResources { projects }
 }

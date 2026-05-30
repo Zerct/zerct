@@ -8,7 +8,7 @@ Use templates when you want Tovuk to create the project shape.
 ## Rust API
 
 ```sh
-npx tovuk init api --template rust-api
+npx tovuk init api --template rust-worker
 npx tovuk doctor
 npx tovuk preview
 ```
@@ -22,15 +22,15 @@ npx tovuk doctor
 npx tovuk preview
 ```
 
-## Full Stack
+## Worker Static
 
 ```sh
-npx tovuk init my-app --template fullstack-rust-tanstack
+npx tovuk init my-app --template worker-static-rust-tanstack
 cd my-app/web && bun install && cd ..
 npx tovuk doctor
-npx tovuk deploy --database
+npx tovuk deploy --wait --json
 ```
 
-The fullstack template creates `api/`, `web/`, and one root `tovuk.toml`. The
-Rust API owns dynamic server behavior and managed Postgres. The TanStack
-frontend builds to static files and calls same-origin `/api`.
+The worker-static template creates `api/`, `web/`, and one root `tovuk.toml`.
+The Rust worker owns dynamic server behavior. The TanStack frontend builds to
+static files and calls same-origin `/api`.

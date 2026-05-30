@@ -1,9 +1,9 @@
 # tovuk
 
-Deploy Rust backends, static frontends, and fullstack apps to Tovuk.
+Deploy Rust workers, static frontends, and worker-static apps to Tovuk.
 
 ```sh
-npx tovuk init my-app --template fullstack-rust-tanstack
+npx tovuk init my-app --template worker-static-rust-tanstack
 cd my-app/web && bun install && cd ..
 npx tovuk doctor --json
 npx tovuk deploy --wait --json
@@ -13,7 +13,7 @@ The npm package installs the native Tovuk binary for the current platform.
 Node is required by npm to install the package, but the `tovuk` command itself
 does not delegate to `npx`, `tsx`, or any JavaScript runtime.
 
-Rust backends expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
+Rust workers expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
 listen on `0.0.0.0:$PORT`, and expose the configured health endpoint.
 
@@ -21,9 +21,9 @@ Static frontends must use TypeScript browser source, stable native type-aware
 TypeScript checks, native linting such as `oxlint`, `biome check`, or
 `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
 
-From a fullstack repo root, the same deploy command reads one root `tovuk.toml`,
-builds the backend and frontend roots, and returns one app URL with `/api/*`
-routed to the Rust backend.
+From a worker-static repo root, the same deploy command reads one root
+`tovuk.toml`, builds the worker and frontend roots, and returns one app URL
+with `/api/*` routed to the Rust worker.
 
 Preview before deploying:
 
@@ -42,9 +42,8 @@ npx tovuk logs --build job_1 --json
 Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
 fix the first actionable log error, rerun doctor, then redeploy.
 
-Managed Postgres apps receive `DATABASE_URL`, `TOVUK_DATABASE_URL`, and
-`TOVUK_DATABASE_CONNECTION_LIMIT`. Use that limit as the max size for your
-database pool.
+Agents can create app SQLite databases, KV namespaces, queues, cron triggers,
+Durable Object namespaces, service bindings, and usage caps through the CLI.
 
 Agents can also inspect API capabilities, account identity, usage, account
 activity, apps, complete app overviews, deploys, builds, app/deploy/build logs,

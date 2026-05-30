@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "luma",
   "name": "Tovuk",
-  "description": "Free Rust backend cloud for agents.",
+  "description": "Free Rust worker cloud for agents.",
   "colors": {
     "primary": "#FFFFFF",
     "light": "#FFFFFF",
@@ -75,8 +75,9 @@
             "group": "Reference",
             "pages": [
               "reference/project-contract",
-              "reference/full-stack",
-              "reference/postgres",
+              "reference/workers",
+              "reference/sqlite",
+              "reference/platform",
               "reference/storage",
               "reference/packages",
               "reference/limits"

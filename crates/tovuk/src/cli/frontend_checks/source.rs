@@ -32,7 +32,7 @@ pub(super) fn frontend_source_checks(project_dir: &Path) -> Vec<DoctorCheck> {
         forbidden_source_check(
             "frontend server routes",
             &report.server_routes,
-            "Move API routes, SSR handlers, middleware, and server logic to the Rust backend; static frontend source may only contain browser code.",
+            "Move API routes, SSR handlers, middleware, and server logic to the Rust worker; static frontend source may only contain browser code.",
         ),
     ]
 }

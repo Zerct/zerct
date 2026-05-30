@@ -2,9 +2,9 @@
 
 Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Tovuk hosts Rust backends, static frontends, and fullstack apps. A fullstack app
-uses one `tovuk.toml`, one deployment URL, a static frontend at `/`, and a Rust
-backend under `/api/*`.
+Tovuk hosts Rust workers, static frontends, and worker-static apps. A
+worker-static app uses one `tovuk.toml`, one deployment URL, static files at
+`/`, and a Rust worker under `/api/*`.
 
 ## Install
 
@@ -17,24 +17,25 @@ npx tovuk preview
 npx tovuk deploy
 ```
 
-Create a fullstack starter:
+Create a worker-static starter:
 
 ```sh
-npx tovuk init my-app --template fullstack-rust-tanstack
+npx tovuk init my-app --template worker-static-rust-tanstack
 cd my-app/web && bun install && cd ..
 ```
 
-From a fullstack repo root, `npx tovuk deploy --database` reads
-the single root `tovuk.toml`, builds `api` and `web`, attaches managed
-Postgres to the Rust backend, and returns one app URL.
+From a worker-static repo root, `npx tovuk deploy` reads the single root
+`tovuk.toml`, builds `api` and `web`, and returns one app URL. Create
+databases, KV namespaces, queues, cron triggers, Durable Object namespaces,
+service bindings, and usage caps through CLI resource commands.
 
-Fullstack deploys use this `tovuk.toml` shape:
+Worker-static deploys use this `tovuk.toml` shape:
 
 ```toml
 name = "my-app"
-kind = "fullstack"
+kind = "worker_static"
 
-[backend]
+[worker]
 root = "api"
 check = "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
 build = "cargo build --release"
@@ -78,7 +79,7 @@ bun add -d oxlint oxlint-tsgolint fallow
 }
 ```
 
-Rust backend checks must include `cargo fmt --all --check`, locked release-mode
+Rust worker checks must include `cargo fmt --all --check`, locked release-mode
 `cargo check`, locked release-mode tests, and strict all-target, all-feature
 Clippy with panic/unwrap bans plus resource-sensitive lints.
 Frontend checks must install dependencies, run stable native type-aware

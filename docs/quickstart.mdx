@@ -1,17 +1,17 @@
 ---
 title: "Quickstart"
-description: "Deploy a Rust backend with Tovuk."
+description: "Deploy a Rust worker with Tovuk."
 ---
 
 ## Requirements
 
 - A GitHub or Google login
-- A Rust backend with a committed `Cargo.lock`
+- A Rust worker with a committed `Cargo.lock`
 - A server that reads the `PORT` environment variable
 
 ## Create the project contract
 
-From your backend directory:
+From your worker directory:
 
 ```sh
 npx tovuk init
@@ -22,7 +22,7 @@ This creates `tovuk.toml`.
 For a new project, start from a template:
 
 ```sh
-npx tovuk init my-app --template fullstack-rust-tanstack
+npx tovuk init my-app --template worker-static-rust-tanstack
 cd my-app/web && bun install && cd ..
 ```
 
@@ -48,7 +48,7 @@ npx tovuk deploy --wait --json
 ```
 
 On first deploy, the CLI opens browser login for GitHub or Google, stores the
-Tovuk session, then continues automatically. Tovuk builds the backend, verifies
+Tovuk session, then continues automatically. Tovuk builds the worker, verifies
 health, and returns the deployment URL.
 
 If the build fails, inspect the build logs:
@@ -59,14 +59,14 @@ npx tovuk logs --build <build_id> --json
 
 Fix the first actionable error, rerun doctor, then redeploy.
 
-## Fullstack repos
+## Worker-static repos
 
-Put one `tovuk.toml` in the repo root, with `[backend]` and `[frontend]`
+Put one `tovuk.toml` in the repo root, with `[worker]` and `[frontend]`
 sections. Run one command from the repo root:
 
 ```sh
-npx tovuk deploy --database
+npx tovuk deploy --wait --json
 ```
 
-Tovuk builds both roots, requests managed Postgres for the Rust backend, serves
-the frontend at `/`, and routes `/api/*` to the backend on the same app URL.
+Tovuk builds both roots, serves the frontend at `/`, and routes `/api/*` to the
+Rust worker on the same app URL.

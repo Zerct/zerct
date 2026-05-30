@@ -37,9 +37,9 @@ pub(crate) const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str =
     "bun ci && bun run typecheck && bun run lint";
 
 pub(crate) const PROJECT_TEMPLATES: &[&str] = &[
-    "rust-api",
+    "rust-worker",
     "tanstack-static-frontend",
-    "fullstack-rust-tanstack",
+    "worker-static-rust-tanstack",
 ];
 pub(crate) const JAVASCRIPT_LINTERS: &[&str] = &[
     "eslint",

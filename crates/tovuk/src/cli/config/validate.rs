@@ -20,14 +20,14 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
     if !is_dns_safe_name(name) {
         return Err("name must be lowercase DNS-safe text up to 48 characters".to_owned());
     }
-    if config.kind.is_fullstack() {
+    if config.kind.is_worker_static() {
         validate_fullstack_config(config)?;
     } else {
         validate_build_config(config)?;
         if config.kind.is_static_frontend() {
             validate_output(config.build.output.as_deref(), "[build].output")?;
         } else {
-            validate_rust_backend_config(config)?;
+            validate_rust_worker_config(config)?;
         }
     }
     Ok(())
@@ -41,13 +41,13 @@ fn validate_build_config(config: &TovukConfig) -> std::result::Result<(), String
         return Err("[build].check is required".to_owned());
     }
     validate_check_command(config.kind, &config.build.check)?;
-    if config.kind.is_rust_backend() {
+    if config.kind.is_rust_worker() {
         validate_rust_build_command(&config.build.command)?;
     }
     Ok(())
 }
 
-fn validate_rust_backend_config(config: &TovukConfig) -> std::result::Result<(), String> {
+fn validate_rust_worker_config(config: &TovukConfig) -> std::result::Result<(), String> {
     if config.build.output.is_some() {
         return Err("[build].output is only valid for static_frontend".to_owned());
     }
@@ -58,24 +58,24 @@ fn validate_rust_backend_config(config: &TovukConfig) -> std::result::Result<(),
 }
 
 fn validate_fullstack_config(config: &TovukConfig) -> std::result::Result<(), String> {
-    let backend_root = validate_root(config.backend.root.as_deref(), "[backend].root")?;
+    let backend_root = validate_root(config.backend.root.as_deref(), "[worker].root")?;
     let frontend_root = validate_root(config.frontend.root.as_deref(), "[frontend].root")?;
     if backend_root == frontend_root {
-        return Err("[backend].root and [frontend].root must be different directories".to_owned());
+        return Err("[worker].root and [frontend].root must be different directories".to_owned());
     }
     validate_rust_check_command(require_config_command(
         config.backend.check.as_deref(),
-        "[backend].check",
+        "[worker].check",
     )?)?;
     validate_rust_build_command(require_config_command(
         config.backend.build.as_deref(),
-        "[backend].build",
+        "[worker].build",
     )?)?;
     validate_rust_run_command(config.backend.command.as_deref())?;
-    validate_port(config.backend.port.unwrap_or(0), "[backend].port")?;
+    validate_port(config.backend.port.unwrap_or(0), "[worker].port")?;
     validate_health(
         config.backend.health.as_deref().unwrap_or_default(),
-        "[backend].health",
+        "[worker].health",
     )?;
     validate_frontend_check_command(require_config_command(
         config.frontend.check.as_deref(),
@@ -162,7 +162,7 @@ fn validate_rust_check_command(command: &str) -> std::result::Result<(), String>
 fn validate_rust_build_command(command: &str) -> std::result::Result<(), String> {
     if uses_javascript_backend_runtime(command) {
         return Err(
-            "Rust backend build commands cannot invoke JavaScript or TypeScript runtimes; use cargo build --release"
+            "Rust worker build commands cannot invoke JavaScript or TypeScript runtimes; use cargo build --release"
                 .to_owned(),
         );
     }
@@ -175,7 +175,7 @@ fn validate_rust_build_command(command: &str) -> std::result::Result<(), String>
     {
         Ok(())
     } else {
-        Err("Rust backend build commands must run cargo build --release".to_owned())
+        Err("Rust worker build commands must run cargo build --release".to_owned())
     }
 }
 
@@ -183,7 +183,7 @@ fn validate_rust_run_command(command: Option<&str>) -> std::result::Result<(), S
     let value = command.unwrap_or_default();
     if uses_javascript_backend_runtime(value) {
         return Err(
-            "Rust backend runtime commands cannot invoke JavaScript or TypeScript runtimes; run ./target/release/<binary> instead"
+            "Rust worker runtime commands cannot invoke JavaScript or TypeScript runtimes; run ./target/release/<binary> instead"
                 .to_owned(),
         );
     }
@@ -193,7 +193,7 @@ fn validate_rust_run_command(command: Option<&str>) -> std::result::Result<(), S
     {
         Ok(())
     } else {
-        Err("Rust backend runtime commands must start a binary under ./target/release/".to_owned())
+        Err("Rust worker runtime commands must start a binary under ./target/release/".to_owned())
     }
 }
 
