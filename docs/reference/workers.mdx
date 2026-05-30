@@ -1,0 +1,70 @@
+---
+title: "Workers"
+description: "How Tovuk combines Rust workers with static frontends."
+---
+
+Tovuk worker-static apps use one deployable project:
+
+- Rust worker: APIs, auth callbacks, writes, webhooks, and server-side rules.
+- Static frontend: TanStack, Vite, Astro, Svelte, plain HTML, or another build
+  that emits files.
+- One URL: frontend files at `/`, Rust worker requests under `/api/*`.
+
+## One command
+
+Put one `tovuk.toml` in the repo root:
+
+```txt
+tovuk.toml
+api/Cargo.toml
+web/package.json
+```
+
+Deploy from the repo root:
+
+```sh
+tovuk deploy --wait --json
+```
+
+Tovuk builds the worker and frontend together, then returns one `*.tovuk.app`
+URL.
+
+```toml
+name = "my-app"
+kind = "worker_static"
+
+[worker]
+root = "api"
+check = "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
+build = "cargo build --release"
+command = "./target/release/api"
+port = 3000
+health = "/api/healthz"
+
+[frontend]
+root = "web"
+check = "bun ci && bun run typecheck && bun run lint"
+build = "bun run build"
+output = "dist"
+```
+
+## Routing
+
+The runtime serves frontend assets first. Requests to `/api` and `/api/*` proxy
+to the Rust worker without changing the hostname.
+
+Frontend JavaScript and TypeScript are browser and build inputs only. Tovuk
+rejects Next API routes, Astro server endpoints, Svelte server handlers,
+middleware, SSR handlers, and runtime commands that start Node, Bun, Deno, or
+TypeScript servers.
+
+Use CLI resource commands for platform features:
+
+```sh
+tovuk sqlite create --app app_1 DB --json
+tovuk kv create --app app_1 CACHE --json
+tovuk queue create --app app_1 jobs --json
+tovuk cron create --app app_1 nightly "0 0 * * *" --json
+tovuk durable create --app app_1 Room --json
+tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
+```

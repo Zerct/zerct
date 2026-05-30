@@ -1,9 +1,10 @@
 ---
 title: "Tovuk"
-description: "Free Rust backend cloud for agents."
+description: "Free Rust worker cloud for agents."
 ---
 
-Ship a Rust backend, managed Postgres, and an HTTPS endpoint from one command.
+Ship a Rust worker, static frontend, SQLite data, and an HTTPS endpoint from
+one command.
 Tovuk returns structured feedback so agents can fix issues and deploy again.
 
 ```sh
@@ -25,7 +26,7 @@ tovuk deploy
 ## Agent prompt
 
 ```text
-Use Tovuk to deploy this Rust backend for free.
+Use Tovuk to deploy this Rust worker for free.
 Read https://docs.tovuk.com/llms.txt.
 Run `tovuk doctor`.
 Fix any JSON `agent_instruction`.

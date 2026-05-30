@@ -63,7 +63,7 @@ fn deploy_projects(
         if workspace_deploy && !cli.output.json {
             println!("checking {}", item.project.relative);
         }
-        let response = deploy_project(&item.project.dir, cli, token, item.wants_database)?;
+        let response = deploy_project(&item.project.dir, cli, token)?;
         if workspace_deploy && !cli.output.json {
             println!(
                 "{} queued {}",
@@ -78,7 +78,6 @@ fn deploy_projects(
         }
         results.push(WorkspaceDeployResult {
             project: item.project.clone(),
-            wants_database: item.wants_database,
             response,
             final_build: None,
         });
@@ -86,12 +85,7 @@ fn deploy_projects(
     Ok(results)
 }
 
-fn deploy_project(
-    project_dir: &Path,
-    cli: &CliOptions,
-    token: &str,
-    wants_database: bool,
-) -> Result<Value> {
+fn deploy_project(project_dir: &Path, cli: &CliOptions, token: &str) -> Result<Value> {
     let report = run_doctor(project_dir);
     if !report.ok {
         let instruction = report
@@ -110,7 +104,6 @@ fn deploy_project(
     let body = json!({
         "config": report.config,
         "commit_sha": git_commit_sha(project_dir),
-        "wants_database": wants_database,
         "source_archive_base64": create_archive_base64(project_dir, cli.output.json)?,
     });
     api_request(cli, Method::POST, "/v1/deploy", Some(token), Some(body))

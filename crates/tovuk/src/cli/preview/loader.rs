@@ -11,7 +11,7 @@ pub(super) fn preview_config(project_dir: &Path) -> Result<TovukConfig> {
         return Err(agent_error(
             "workspace_preview_unsupported",
             "Preview one project at a time.",
-            "Run `tovuk preview <project-dir>` for one discovered project, or use a fullstack root tovuk.toml.",
+            "Run `tovuk preview <project-dir>` for one discovered project, or use a worker-static root tovuk.toml.",
             false,
         ));
     }

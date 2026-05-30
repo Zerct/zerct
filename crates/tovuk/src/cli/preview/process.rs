@@ -38,7 +38,7 @@ pub(super) fn spawn_preview_backend(command: &str, project_dir: &Path, port: u16
         .map_err(|error| {
             agent_error(
                 "preview_failed",
-                "Backend preview command failed.",
+                "Worker preview command failed.",
                 error.to_string(),
                 false,
             )

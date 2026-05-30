@@ -15,7 +15,7 @@ pub(crate) fn preview_project(project_dir: &Path, port: u16) -> Result<()> {
 }
 
 fn preview_validated_project(project_dir: &Path, config: &TovukConfig, port: u16) -> Result<()> {
-    if config.kind.is_fullstack() {
+    if config.kind.is_worker_static() {
         return preview_fullstack(project_dir, config, port);
     }
     run_shell(
@@ -44,7 +44,7 @@ fn preview_fullstack(project_dir: &Path, config: &TovukConfig, port: u16) -> Res
     run_shell(
         config.backend.build.as_deref().unwrap_or_default(),
         &backend_dir,
-        "Backend build failed before preview.",
+        "Worker build failed before preview.",
     )?;
     run_shell(
         config.frontend.build.as_deref().unwrap_or_default(),

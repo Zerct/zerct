@@ -1,0 +1,39 @@
+---
+title: "Platform Resources"
+description: "Agent-ready commands for worker platform resources."
+---
+
+Tovuk platform resources are managed through the CLI and API so agents do not
+need dashboard access.
+
+## Commands
+
+```sh
+tovuk platform --app app_1 --json
+tovuk sqlite create --app app_1 DB --json
+tovuk kv create --app app_1 CACHE --json
+tovuk queue create --app app_1 jobs --json
+tovuk cron create --app app_1 nightly "0 0 * * *" --json
+tovuk durable create --app app_1 Room --json
+tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
+tovuk caps set worker_requests --period day --value 100000 --json
+```
+
+## Resource model
+
+- SQLite: app data with row and storage meters.
+- KV: small config, sessions, feature flags, and cache metadata.
+- Queues: background jobs, retries, emails, and webhook processing.
+- Cron triggers: scheduled cleanup, polling, and reports.
+- Durable Objects: keyed stateful Rust actors for realtime coordination.
+- Service bindings: private worker-to-worker calls without public URLs.
+- Usage caps: hard stops and notification thresholds for predictable spend.
+
+Use object storage commands for app files and media:
+
+```sh
+tovuk storage list --app app_1 --json
+tovuk storage upload --app app_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --app app_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --app app_1 uploads/logo.png --json
+```

@@ -1,8 +1,8 @@
 # Tovuk agent guide
 
-Tovuk deploys Rust backends, static frontends, and fullstack apps. Fullstack
-apps use one root tovuk.toml, serve the frontend at `/`, and route `/api/*` to
-the Rust backend.
+Tovuk deploys Rust workers, static frontends, and worker-static apps.
+Worker-static apps use one root tovuk.toml, serve the frontend at `/`, and route
+`/api/*` to the Rust worker.
 
 Use the npm CLI unless the user already installed a persistent CLI:
 
@@ -25,7 +25,7 @@ Agent repair loop:
 8. Fix the first actionable log error.
 9. Rerun doctor before redeploying.
 
-Rust backend contract:
+Rust worker contract:
 
 - `Cargo.toml`, `Cargo.lock`, and `tovuk.toml` are committed.
 - `[build].check` includes `cargo fmt --all --check`.
@@ -59,25 +59,19 @@ Static frontend contract:
 - `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health` gates.
 - `[build].check` installs dependencies and runs package scripts for typecheck
   and lint.
-- Weak typecheck, fake lint, missing Fallow quality gates, and
-  JavaScript-based lint/format scripts are rejected for deploys.
+- Weak typecheck, fake lint, missing Fallow quality gates, and JavaScript-based
+  lint/format scripts are rejected for deploys.
 - JavaScript and TypeScript are frontend-only. API routes, SSR handlers,
-  middleware, and server logic must move to the Rust backend.
+  middleware, and server logic must move to the Rust worker.
 
-Plain static frontend contract:
+Worker-static contract:
 
-- `index.html` is committed.
-- `kind = "static_frontend"` is set in `tovuk.toml`.
-- `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
-
-Fullstack contract:
-
-- One root `tovuk.toml` sets `kind = "fullstack"`.
-- `[backend].root` points to the Rust backend.
+- One root `tovuk.toml` sets `kind = "worker_static"`.
+- `[worker].root` points to the Rust worker.
 - `[frontend].root` points to the static frontend.
 - The frontend calls same-origin `/api`.
-- The backend health path is `/api/healthz`.
-- Backend build and runtime commands must use `cargo build --release` and a
+- The worker health path is `/api/healthz`.
+- Worker build and runtime commands must use `cargo build --release` and a
   `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
 
 Useful commands:
@@ -93,6 +87,14 @@ tovuk logs --build <build_id> --json
 tovuk logs --app <app> --json
 tovuk env list --app <app> --json
 tovuk domains list --app <app> --json
+tovuk platform --app <app> --json
+tovuk sqlite create --app <app> DB --json
+tovuk kv create --app <app> CACHE --json
+tovuk queue create --app <app> jobs --json
+tovuk cron create --app <app> nightly "0 0 * * *" --json
+tovuk durable create --app <app> Room --json
+tovuk binding create --app <app> AUTH_SERVICE --target auth-app --json
+tovuk caps set worker_requests --period day --value 100000 --json
 tovuk storage list --app <app> --json
 tovuk storage upload --app <app> ./file.png uploads/file.png --public --json
 tovuk storage download --app <app> uploads/file.png ./file.png --json
@@ -110,9 +112,9 @@ checks.
 Never print or commit secrets. Put secrets in Tovuk env vars with
 `tovuk env set --app <app> KEY=value`.
 
-When a free-tier limit blocks work, run
-`tovuk billing checkout --json` and show the returned URL to the
-human. When Tovuk support is needed, create a ticket only after collecting the
-failing command, app id, build id, deploy id, first actionable log line, and
-what the agent already tried. Resolve the ticket when the issue is fixed so
-future agents do not duplicate the same support work.
+When a free-tier limit blocks work, run `tovuk billing checkout --json` and
+show the returned URL to the human. When Tovuk support is needed, create a
+ticket only after collecting the failing command, app id, build id, deploy id,
+first actionable log line, and what the agent already tried. Resolve the ticket
+when the issue is fixed so future agents do not duplicate the same support
+work.

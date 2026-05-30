@@ -26,7 +26,7 @@ Use this page when an AI coding agent is deploying with Tovuk.
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
 typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
 checks.
-Do not create JavaScript or TypeScript backends. Keep JS/TS in static frontend
+Do not create JavaScript or TypeScript servers. Keep JS/TS in static frontend
 browser code only; move API routes, SSR handlers, middleware, and server logic
 to Rust.
 
@@ -38,8 +38,8 @@ Run `tovuk doctor --json`. Fix the first failed check by following
 `agent_instruction`, then rerun doctor. Deploy with
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable
-error, and redeploy. Use `--database` only when the Rust backend needs managed
-Postgres.
+error, and redeploy. Use platform resource commands for SQLite, KV, queues,
+cron triggers, Durable Objects, service bindings, and usage caps.
 ```
 
 ## Support loop
@@ -93,9 +93,9 @@ when the extension is missing or ambiguous.
 ## Starter prompt
 
 ```txt
-Create a Tovuk fullstack project. Run
-`tovuk init my-app --template fullstack-rust-tanstack`, then install
-frontend packages in `my-app/web`. Keep dynamic server logic in the Rust backend.
+Create a Tovuk worker-static project. Run
+`tovuk init my-app --template worker-static-rust-tanstack`, then install
+frontend packages in `my-app/web`. Keep dynamic server logic in the Rust worker.
 Keep the TanStack frontend static at runtime and call same-origin `/api`. Run
 doctor in JSON mode, preview from the repo root when local tools are installed,
 then deploy from the repo root.
@@ -110,6 +110,14 @@ tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --app app_1 --json
 tovuk storage list --app app_1 --json
+tovuk platform --app app_1 --json
+tovuk sqlite create --app app_1 DB --json
+tovuk kv create --app app_1 CACHE --json
+tovuk queue create --app app_1 jobs --json
+tovuk cron create --app app_1 nightly "0 0 * * *" --json
+tovuk durable create --app app_1 Room --json
+tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
+tovuk caps set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json

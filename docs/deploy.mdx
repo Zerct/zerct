@@ -1,6 +1,6 @@
 ---
 title: "Deploy"
-description: "How Tovuk deploys Rust backends and frontends."
+description: "How Tovuk deploys Rust workers and frontends."
 ---
 
 Tovuk uses a small project contract so humans and agents can deploy without
@@ -13,13 +13,12 @@ guessing.
 3. Run `tovuk preview` for local verification.
 4. Run `tovuk deploy --wait --json`.
 5. Tovuk queues the build, runs checks, and verifies the health route for Rust
-   backends.
+   workers.
 6. Tovuk exposes the app on a `tovuk.app` deployment hostname.
 
-For fullstack repos, run `tovuk deploy` from the repo root. The CLI reads the
-root `tovuk.toml`, builds the configured backend and frontend roots, serves the
-frontend at `/`, and routes `/api/*` to the Rust backend. Use `--database` to
-request managed Postgres for the backend.
+For worker-static repos, run `tovuk deploy` from the repo root. The CLI reads
+the root `tovuk.toml`, builds the configured worker and frontend roots, serves
+the frontend at `/`, and routes `/api/*` to the Rust worker.
 
 ## Local preview
 
@@ -27,30 +26,34 @@ request managed Postgres for the backend.
 tovuk preview
 ```
 
-For Rust backends, preview builds the release binary and starts it with `PORT`.
+For Rust workers, preview builds the release binary and starts it with `PORT`.
 For static frontends, preview builds the frontend and serves the output
-directory. For fullstack apps, preview builds both roots, runs the backend, and
+directory. For worker-static apps, preview builds both roots, runs the worker, and
 serves the frontend with a local `/api/*` proxy.
 
 ## Runtime contract
 
-Rust backends must listen on:
+Rust workers must listen on:
 
 ```sh
 0.0.0.0:$PORT
 ```
 
 Do not hardcode the port. Tovuk injects it at runtime. Static frontends do not
-need a runtime process; they call Rust backends for dynamic behavior.
+need a runtime process; they call Rust workers for dynamic behavior.
 
-## Managed Postgres
+## Platform Resources
 
-When `--database` is used, Tovuk injects `DATABASE_URL` and
-`TOVUK_DATABASE_URL`. It also injects `TOVUK_DATABASE_CONNECTION_LIMIT`,
-`TOVUK_POSTGRES_CONNECTION_LIMIT`, and `TOVUK_POSTGRES_POOL_MODE`.
+Use CLI commands to create runtime resources without dashboard work:
 
-Use the connection limit as the max size of your app's database pool. This keeps
-database work fast and predictable for busy apps while matching the plan limit.
+```sh
+tovuk sqlite create --app app_1 DB --json
+tovuk kv create --app app_1 CACHE --json
+tovuk queue create --app app_1 jobs --json
+tovuk cron create --app app_1 nightly "0 0 * * *" --json
+tovuk durable create --app app_1 Room --json
+tovuk binding create --app app_1 AUTH_SERVICE --target auth-app --json
+```
 
 ## Agent-ready errors
 
