@@ -18,6 +18,7 @@ mod runtime;
 mod source_policy;
 mod template_sources;
 mod templates;
+mod toml_values;
 
 /// Runs the native Tovuk CLI.
 pub(crate) fn entrypoint() -> std::process::ExitCode {

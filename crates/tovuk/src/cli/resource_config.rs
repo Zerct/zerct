@@ -1,3 +1,4 @@
+use super::toml_values::{get_string, get_u16};
 use serde::Serialize;
 
 #[derive(Clone, Debug, Serialize)]
@@ -11,9 +12,9 @@ pub(crate) fn parse_resource_config(
     table: &toml::Table,
 ) -> std::result::Result<ResourceConfig, String> {
     Ok(ResourceConfig {
-        memory: get_section_string(table, "memory")?.unwrap_or_else(|| "512mb".to_owned()),
-        cpu: get_section_string(table, "cpu")?.unwrap_or_else(|| "0.25".to_owned()),
-        idle_timeout_minutes: get_section_u16(table, "idle_timeout_minutes")?.unwrap_or(15),
+        memory: get_string(table, "memory")?.unwrap_or_else(|| "512mb".to_owned()),
+        cpu: get_string(table, "cpu")?.unwrap_or_else(|| "0.25".to_owned()),
+        idle_timeout_minutes: get_u16(table, "idle_timeout_minutes")?.unwrap_or(15),
     })
 }
 
@@ -37,33 +38,6 @@ pub(crate) fn validate_resource_config(
         return Err("[resources].idle_timeout_minutes must be between 1 and 60".to_owned());
     }
     Ok(())
-}
-
-fn get_section_string(
-    table: &toml::map::Map<String, toml::Value>,
-    key: &str,
-) -> std::result::Result<Option<String>, String> {
-    table.get(key).map_or(Ok(None), |value| {
-        value
-            .as_str()
-            .map(|value| Some(value.to_owned()))
-            .ok_or_else(|| format!("{key} must be a string"))
-    })
-}
-
-fn get_section_u16(
-    table: &toml::map::Map<String, toml::Value>,
-    key: &str,
-) -> std::result::Result<Option<u16>, String> {
-    table.get(key).map_or(Ok(None), |value| {
-        let integer = value
-            .as_integer()
-            .ok_or_else(|| format!("{key} must be a number"))?;
-        u16::try_from(integer)
-            .ok()
-            .map(Some)
-            .ok_or_else(|| format!("{key} must be between 0 and 65535"))
-    })
 }
 
 fn memory_to_mib(value: &str) -> std::result::Result<u32, String> {
