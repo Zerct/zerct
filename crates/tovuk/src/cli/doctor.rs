@@ -557,11 +557,24 @@ pub(crate) fn cargo_lints(project_dir: &Path) -> DoctorCheck {
         .iter()
         .map(|lint| lint.trim_start_matches("clippy::"))
         .collect::<Vec<_>>();
-    let ok = cargo_lint_level(&source, "rust", "unsafe_code") == "forbid"
-        && cargo_lint_level(&source, "rust", "warnings") == "deny"
+    let cargo_toml = match source.parse::<toml::Table>() {
+        Ok(cargo_toml) => cargo_toml,
+        Err(error) => {
+            return DoctorCheck {
+                name: "cargo lints".to_owned(),
+                ok: false,
+                message: error.to_string(),
+                agent_instruction: Some(
+                    "Fix Cargo.toml syntax, then add strict Rust lints and retry.".to_owned(),
+                ),
+            };
+        }
+    };
+    let ok = cargo_lint_level(&cargo_toml, "rust", "unsafe_code") == Some("forbid")
+        && cargo_lint_level(&cargo_toml, "rust", "warnings") == Some("deny")
         && required_clippy_lints
             .iter()
-            .all(|lint| cargo_lint_level(&source, "clippy", lint) == "deny");
+            .all(|lint| cargo_lint_level(&cargo_toml, "clippy", lint) == Some("deny"));
     DoctorCheck {
         name: "cargo lints".to_owned(),
         ok,
@@ -578,47 +591,96 @@ pub(crate) fn cargo_lints(project_dir: &Path) -> DoctorCheck {
     }
 }
 
-pub(crate) fn cargo_lint_level(source: &str, lint_group: &str, lint_name: &str) -> String {
-    let mut section = String::new();
-    for raw_line in source.lines() {
-        let line = raw_line.split('#').next().unwrap_or_default().trim();
-        if let Some(next_section) = toml_section(line) {
-            section = next_section;
-            continue;
-        }
-        if section != format!("lints.{lint_group}")
-            && section != format!("workspace.lints.{lint_group}")
-        {
-            continue;
-        }
-        if let Some(level) = lint_assignment_level(line, lint_name) {
-            return level;
-        }
-    }
-    String::new()
+pub(crate) fn cargo_lint_level<'a>(
+    cargo_toml: &'a toml::Table,
+    lint_group: &str,
+    lint_name: &str,
+) -> Option<&'a str> {
+    lint_group_table(cargo_toml, &["lints", lint_group])
+        .or_else(|| lint_group_table(cargo_toml, &["workspace", "lints", lint_group]))
+        .and_then(|table| table.get(lint_name))
+        .and_then(lint_assignment_level)
 }
 
-pub(crate) fn toml_section(line: &str) -> Option<String> {
-    line.strip_prefix('[')
-        .and_then(|value| value.strip_suffix(']'))
-        .map(str::to_owned)
+pub(crate) fn lint_group_table<'a>(
+    cargo_toml: &'a toml::Table,
+    path: &[&str],
+) -> Option<&'a toml::Table> {
+    let mut table = cargo_toml;
+    for segment in path {
+        table = table.get(*segment)?.as_table()?;
+    }
+    Some(table)
 }
 
-pub(crate) fn lint_assignment_level(line: &str, lint_name: &str) -> Option<String> {
-    let (key, value) = line.split_once('=')?;
-    if key.trim() != lint_name {
-        return None;
-    }
-    let value = value.trim();
-    if let Some(value) = value
-        .strip_prefix('"')
-        .and_then(|value| value.split('"').next())
-    {
-        return Some(value.to_owned());
+pub(crate) fn lint_assignment_level(value: &toml::Value) -> Option<&str> {
+    if let Some(level) = value.as_str() {
+        return Some(level);
     }
     value
-        .split("level")
-        .nth(1)
-        .and_then(|value| value.split('"').nth(1))
-        .map(str::to_owned)
+        .as_table()
+        .and_then(|table| table.get("level"))
+        .and_then(toml::Value::as_str)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{cargo_lint_level, lint_assignment_level};
+
+    #[test]
+    fn cargo_lint_level_reads_string_and_inline_table_levels() {
+        let parsed = r#"
+[lints.rust]
+unsafe_code = "forbid"
+warnings = "deny"
+
+[lints.clippy]
+unwrap_used = { level = "deny", priority = -1 }
+"#
+        .parse::<toml::Table>();
+        let cargo_toml = match parsed {
+            Ok(cargo_toml) => cargo_toml,
+            Err(error) => {
+                let message = error.to_string();
+                assert!(message.is_empty(), "{message}");
+                return;
+            }
+        };
+
+        assert_eq!(
+            cargo_lint_level(&cargo_toml, "rust", "unsafe_code"),
+            Some("forbid")
+        );
+        assert_eq!(
+            cargo_lint_level(&cargo_toml, "clippy", "unwrap_used"),
+            Some("deny")
+        );
+    }
+
+    #[test]
+    fn cargo_lint_level_falls_back_to_workspace_lints() {
+        let parsed = r#"
+[workspace.lints.clippy]
+panic = "deny"
+"#
+        .parse::<toml::Table>();
+        let cargo_toml = match parsed {
+            Ok(cargo_toml) => cargo_toml,
+            Err(error) => {
+                let message = error.to_string();
+                assert!(message.is_empty(), "{message}");
+                return;
+            }
+        };
+
+        assert_eq!(
+            cargo_lint_level(&cargo_toml, "clippy", "panic"),
+            Some("deny")
+        );
+    }
+
+    #[test]
+    fn lint_assignment_level_rejects_unstructured_values() {
+        assert_eq!(lint_assignment_level(&toml::Value::Boolean(true)), None);
+    }
 }
