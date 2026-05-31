@@ -145,6 +145,9 @@ tovuk limit set object_storage_class_a_operations --period month --value 1000000
 tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
 ```
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 Queue messages are capped at 128 KB total. Tovuk reserves 100 bytes for
 Tovuk queue metadata, so the maximum user body is 127900 bytes. Store
 larger payloads in object storage and send the storage path in the queue

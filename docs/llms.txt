@@ -131,6 +131,9 @@ tovuk support create "Deploy failed" "Agent retried deploy after doctor." --serv
 tovuk support resolve <ticket_id> --json
 ```
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 Before load tests, production launch, or paid usage, run
 `tovuk pricing --json` and set hard usage caps with `tovuk limit set`.
 Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,

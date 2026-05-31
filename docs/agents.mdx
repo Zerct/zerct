@@ -102,6 +102,8 @@ tovuk storage delete --service service_1 uploads/logo.png --json
 
 Use `--public` only when the service needs a public media URL. Use `--content-type <mime>`
 when the extension is missing or ambiguous.
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
 
 ## Starter prompt
 

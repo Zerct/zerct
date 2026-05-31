@@ -108,6 +108,9 @@ tovuk storage url --service <service> uploads/logo.png --json
 tovuk storage delete --service <service> uploads/logo.png --json
 ```
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 Use `tovuk capabilities --json` to inspect product choices, meters, limit
 fields, and plan prices before selecting Worker, State, SQLite, KV, queues,
 cron, service bindings, or object storage.

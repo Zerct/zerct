@@ -88,7 +88,7 @@ Agent contract:
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
-  - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a public media URL is intended.
+  - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json before heavy work, then set usage caps for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.

@@ -2251,6 +2251,220 @@
         }
       }
     },
+    "/v1/services/{service_id}/storage/multipart/create": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Create multipart storage upload",
+        "description": "Start a multipart service object upload and return short-lived part upload URLs. Context: paths./v1/services/{service_id}/storage/multipart/create.post.",
+        "operationId": "createServiceStorageMultipartUpload",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageMultipartUploadCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage/multipart/create.post.parameters.service_id.",
+            "example": "service_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageMultipartCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/storage/multipart/create",
+                  "value": {
+                    "path": "uploads/video.mp4",
+                    "contentType": "video/mp4",
+                    "sizeBytes": 157286400,
+                    "partSizeBytes": 104857600,
+                    "publicRead": true
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/services/{service_id}/storage/multipart/create. Context: paths.POST /v1/services/{service_id}/storage/multipart/create.requestBody."
+        }
+      }
+    },
+    "/v1/services/{service_id}/storage/multipart/complete": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Complete multipart storage upload",
+        "description": "Complete a multipart service object upload from uploaded part ETags. Context: paths./v1/services/{service_id}/storage/multipart/complete.post.",
+        "operationId": "completeServiceStorageMultipartUpload",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageObjectCompleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage/multipart/complete.post.parameters.service_id.",
+            "example": "service_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageMultipartCompleteRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/storage/multipart/complete",
+                  "value": {
+                    "path": "uploads/video.mp4",
+                    "uploadId": "upload_123",
+                    "parts": [
+                      {
+                        "partNumber": 1,
+                        "etag": "\"etag-1\""
+                      },
+                      {
+                        "partNumber": 2,
+                        "etag": "\"etag-2\""
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/services/{service_id}/storage/multipart/complete. Context: paths.POST /v1/services/{service_id}/storage/multipart/complete.requestBody."
+        }
+      }
+    },
+    "/v1/services/{service_id}/storage/multipart/abort": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "summary": "Abort multipart storage upload",
+        "description": "Abort a multipart service object upload and remove its pending metadata. Context: paths./v1/services/{service_id}/storage/multipart/abort.post.",
+        "operationId": "abortServiceStorageMultipartUpload",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StorageMultipartUploadAborted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage/multipart/abort.post.parameters.service_id.",
+            "example": "service_1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageMultipartAbortRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/storage/multipart/abort",
+                  "value": {
+                    "path": "uploads/video.mp4",
+                    "uploadId": "upload_123"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/services/{service_id}/storage/multipart/abort. Context: paths.POST /v1/services/{service_id}/storage/multipart/abort.requestBody."
+        }
+      }
+    },
     "/v1/services/{service_id}/storage/download-url": {
       "post": {
         "tags": [
@@ -9325,6 +9539,94 @@
                 }
               }
             }
+          }
+        }
+      },
+      "StorageMultipartUploadCreated": {
+        "description": "Multipart storage upload created. Context: components.responses.StorageMultipartUploadCreated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageMultipartCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Multipart storage upload created.",
+                "value": {
+                  "uploadId": "upload_123",
+                  "objectKey": "objects/acct_01HW/services/service_1/uploads/video.mp4",
+                  "path": "uploads/video.mp4",
+                  "partSizeBytes": 104857600,
+                  "partCount": 2,
+                  "parts": [
+                    {
+                      "partNumber": 1,
+                      "offsetBytes": 0,
+                      "sizeBytes": 104857600,
+                      "method": "PUT",
+                      "url": "https://object-storage.example/part-1-signature",
+                      "expiresSeconds": 900
+                    },
+                    {
+                      "partNumber": 2,
+                      "offsetBytes": 104857600,
+                      "sizeBytes": 52428800,
+                      "method": "PUT",
+                      "url": "https://object-storage.example/part-2-signature",
+                      "expiresSeconds": 900
+                    }
+                  ],
+                  "publicUrl": "https://media.tovuk.app/hello-rust/uploads/video.mp4"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StorageMultipartUploadAborted": {
+        "description": "Multipart storage upload aborted. Context: components.responses.StorageMultipartUploadAborted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StorageMultipartAbortResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Multipart storage upload aborted.",
+                "value": {
+                  "path": "uploads/video.mp4",
+                  "aborted": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
           }
         }
       }
@@ -16947,6 +17249,422 @@
         "examples": [
           {
             "path": "uploads/logo.png"
+          }
+        ]
+      },
+      "StorageMultipartCreateRequest": {
+        "type": "object",
+        "description": "Request a multipart service object upload. Context: components.schemas.StorageMultipartCreateRequest.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "contentType",
+          "sizeBytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Service-local object path. Context: components.schemas.StorageMultipartCreateRequest.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/video.mp4"
+            ]
+          },
+          "contentType": {
+            "type": "string",
+            "description": "Object content type. Context: components.schemas.StorageMultipartCreateRequest.properties.contentType.",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}/[A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,120}$",
+            "examples": [
+              "video/mp4"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 5492189429760,
+            "description": "Expected final object size in bytes. Context: components.schemas.StorageMultipartCreateRequest.properties.sizeBytes.",
+            "examples": [
+              157286400
+            ]
+          },
+          "partSizeBytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 5242880,
+                "maximum": 5368709120,
+                "description": "Preferred part size in bytes. Tovuk may raise this to fit part limits. Context: components.schemas.StorageMultipartCreateRequest.properties.partSizeBytes.anyOf.0.",
+                "examples": [
+                  104857600
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "publicRead": {
+            "type": "boolean",
+            "description": "Whether the object should be served through the public Tovuk media. Context: components.schemas.StorageMultipartCreateRequest.properties.publicRead.",
+            "default": false,
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/video.mp4",
+            "contentType": "video/mp4",
+            "sizeBytes": 157286400,
+            "partSizeBytes": 104857600,
+            "publicRead": true
+          }
+        ]
+      },
+      "StorageMultipartPartUrl": {
+        "type": "object",
+        "description": "Presigned multipart upload part URL. Context: components.schemas.StorageMultipartPartUrl.",
+        "additionalProperties": false,
+        "required": [
+          "partNumber",
+          "offsetBytes",
+          "sizeBytes",
+          "method",
+          "url",
+          "expiresSeconds"
+        ],
+        "properties": {
+          "partNumber": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "One-based part number. Context: components.schemas.StorageMultipartPartUrl.properties.partNumber.",
+            "examples": [
+              1
+            ]
+          },
+          "offsetBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5492189429760,
+            "description": "First byte offset in the local file. Context: components.schemas.StorageMultipartPartUrl.properties.offsetBytes.",
+            "examples": [
+              0
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 5368709120,
+            "description": "Number of bytes to upload for this part. Context: components.schemas.StorageMultipartPartUrl.properties.sizeBytes.",
+            "examples": [
+              104857600
+            ]
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ],
+            "description": "HTTP method clients should use. Context: components.schemas.StorageMultipartPartUrl.properties.method.",
+            "examples": [
+              "PUT"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Short-lived presigned upload URL. Context: components.schemas.StorageMultipartPartUrl.properties.url.",
+            "examples": [
+              "https://object-storage.example/part-1-signature"
+            ]
+          },
+          "expiresSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "URL lifetime in seconds. Context: components.schemas.StorageMultipartPartUrl.properties.expiresSeconds.",
+            "examples": [
+              900
+            ]
+          }
+        }
+      },
+      "StorageMultipartCreateResponse": {
+        "type": "object",
+        "description": "Multipart upload creation response. Context: components.schemas.StorageMultipartCreateResponse.",
+        "additionalProperties": false,
+        "required": [
+          "uploadId",
+          "objectKey",
+          "path",
+          "partSizeBytes",
+          "partCount",
+          "parts",
+          "publicUrl"
+        ],
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "description": "Provider upload id. Context: components.schemas.StorageMultipartCreateResponse.properties.uploadId.",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "examples": [
+              "upload_123"
+            ]
+          },
+          "objectKey": {
+            "type": "string",
+            "description": "Internal object storage key. Context: components.schemas.StorageMultipartCreateResponse.properties.objectKey.",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "examples": [
+              "objects/acct_01HW/services/service_1/uploads/video.mp4"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "description": "Service-local object path. Context: components.schemas.StorageMultipartCreateResponse.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/video.mp4"
+            ]
+          },
+          "partSizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 5242880,
+            "maximum": 5368709120,
+            "description": "Part size chosen for this upload. Context: components.schemas.StorageMultipartCreateResponse.properties.partSizeBytes.",
+            "examples": [
+              104857600
+            ]
+          },
+          "partCount": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "Number of parts to upload. Context: components.schemas.StorageMultipartCreateResponse.properties.partCount.",
+            "examples": [
+              2
+            ]
+          },
+          "parts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/StorageMultipartPartUrl"
+            },
+            "description": "Presigned upload part URLs. Context: components.schemas.StorageMultipartCreateResponse.properties.parts.",
+            "examples": [
+              [
+                {
+                  "partNumber": 1,
+                  "offsetBytes": 0,
+                  "sizeBytes": 104857600,
+                  "method": "PUT",
+                  "url": "https://object-storage.example/part-1-signature",
+                  "expiresSeconds": 900
+                }
+              ]
+            ]
+          },
+          "publicUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "description": "Public media URL when public serving is enabled. Context: components.schemas.StorageMultipartCreateResponse.properties.publicUrl.anyOf.0.",
+                "examples": [
+                  "https://media.tovuk.app/hello-rust/uploads/video.mp4"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "https://media.tovuk.app/hello-rust/uploads/video.mp4"
+            ]
+          }
+        }
+      },
+      "StorageMultipartCompletedPart": {
+        "type": "object",
+        "description": "Completed multipart upload part. Context: components.schemas.StorageMultipartCompletedPart.",
+        "additionalProperties": false,
+        "required": [
+          "partNumber",
+          "etag"
+        ],
+        "properties": {
+          "partNumber": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 10000,
+            "description": "One-based part number. Context: components.schemas.StorageMultipartCompletedPart.properties.partNumber.",
+            "examples": [
+              1
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[\\s\\S]{1,512}$",
+            "description": "ETag returned by the object storage provider. Context: components.schemas.StorageMultipartCompletedPart.properties.etag.",
+            "examples": [
+              "\"etag-1\""
+            ]
+          }
+        },
+        "examples": [
+          {
+            "partNumber": 1,
+            "etag": "\"etag-1\""
+          }
+        ]
+      },
+      "StorageMultipartCompleteRequest": {
+        "type": "object",
+        "description": "Complete a multipart service object upload. Context: components.schemas.StorageMultipartCompleteRequest.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "uploadId",
+          "parts"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Service-local object path. Context: components.schemas.StorageMultipartCompleteRequest.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/video.mp4"
+            ]
+          },
+          "uploadId": {
+            "type": "string",
+            "description": "Provider upload id returned by multipart create. Context: components.schemas.StorageMultipartCompleteRequest.properties.uploadId.",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "examples": [
+              "upload_123"
+            ]
+          },
+          "parts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/StorageMultipartCompletedPart"
+            },
+            "description": "Completed parts and their ETags. Context: components.schemas.StorageMultipartCompleteRequest.properties.parts."
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/video.mp4",
+            "uploadId": "upload_123",
+            "parts": [
+              {
+                "partNumber": 1,
+                "etag": "\"etag-1\""
+              }
+            ]
+          }
+        ]
+      },
+      "StorageMultipartAbortRequest": {
+        "type": "object",
+        "description": "Abort a multipart service object upload. Context: components.schemas.StorageMultipartAbortRequest.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "uploadId"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Service-local object path. Context: components.schemas.StorageMultipartAbortRequest.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/video.mp4"
+            ]
+          },
+          "uploadId": {
+            "type": "string",
+            "description": "Provider upload id returned by multipart create. Context: components.schemas.StorageMultipartAbortRequest.properties.uploadId.",
+            "minLength": 1,
+            "maxLength": 1024,
+            "pattern": "^[\\s\\S]{1,1024}$",
+            "examples": [
+              "upload_123"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/video.mp4",
+            "uploadId": "upload_123"
+          }
+        ]
+      },
+      "StorageMultipartAbortResponse": {
+        "type": "object",
+        "description": "Multipart abort response. Context: components.schemas.StorageMultipartAbortResponse.",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "aborted"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Service-local object path. Context: components.schemas.StorageMultipartAbortResponse.properties.path.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
+            "examples": [
+              "uploads/video.mp4"
+            ]
+          },
+          "aborted": {
+            "type": "boolean",
+            "description": "Whether the multipart upload was aborted. Context: components.schemas.StorageMultipartAbortResponse.properties.aborted.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "path": "uploads/video.mp4",
+            "aborted": true
           }
         ]
       },

@@ -84,6 +84,9 @@ tovuk state put --service service_1 Room room-1 counter 1 --json
 tovuk state get --service service_1 Room room-1 counter --json
 ```
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 When a free-tier limit blocks work, run:
 
 ```sh
