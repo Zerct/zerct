@@ -4964,7 +4964,7 @@
                   },
                   "limits": {
                     "projects": 100,
-                    "dataTransferGib": 100,
+                    "dataTransferGib": null,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
                     "concurrentBuilds": 1,
@@ -5925,7 +5925,7 @@
                         "storageObjectMaxMib": 5237760,
                         "objectStorageClassAOperationsPerMonth": 1000000,
                         "objectStorageClassBOperationsPerMonth": 10000000,
-                        "dataTransferGib": 100,
+                        "dataTransferGib": null,
                         "monthlyBuildMinutes": 3000,
                         "monthlyDeployments": 0,
                         "concurrentBuilds": 1,
@@ -6124,7 +6124,7 @@
                         "storageObjectMaxMib": 5237760,
                         "objectStorageClassAOperationsPerMonth": 1000000,
                         "objectStorageClassBOperationsPerMonth": 10000000,
-                        "dataTransferGib": 1024,
+                        "dataTransferGib": null,
                         "monthlyBuildMinutes": 6000,
                         "monthlyDeployments": 0,
                         "concurrentBuilds": 6,
@@ -6332,7 +6332,7 @@
                   },
                   "limits": {
                     "projects": 100,
-                    "dataTransferGib": 100,
+                    "dataTransferGib": null,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
                     "concurrentBuilds": 1,
@@ -6587,7 +6587,7 @@
                   },
                   "limits": {
                     "projects": 100,
-                    "dataTransferGib": 100,
+                    "dataTransferGib": null,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
                     "concurrentBuilds": 1,
@@ -7560,7 +7560,7 @@
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
-                    "dataTransferGib": 100,
+                    "dataTransferGib": null,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
                     "concurrentBuilds": 1,
@@ -9419,7 +9419,7 @@
             },
             "limits": {
               "projects": 100,
-              "dataTransferGib": 100,
+              "dataTransferGib": null,
               "monthlyBuildMinutes": 3000,
               "monthlyDeployments": 0,
               "concurrentBuilds": 1,
@@ -12348,7 +12348,7 @@
                     "storageObjectMaxMib": 5237760,
                     "objectStorageClassAOperationsPerMonth": 1000000,
                     "objectStorageClassBOperationsPerMonth": 10000000,
-                    "dataTransferGib": 100,
+                    "dataTransferGib": null,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
                     "concurrentBuilds": 1,
@@ -12547,7 +12547,7 @@
                     "storageObjectMaxMib": 5237760,
                     "objectStorageClassAOperationsPerMonth": 1000000,
                     "objectStorageClassBOperationsPerMonth": 10000000,
-                    "dataTransferGib": 1024,
+                    "dataTransferGib": null,
                     "monthlyBuildMinutes": 6000,
                     "monthlyDeployments": 0,
                     "concurrentBuilds": 6,
@@ -12898,7 +12898,7 @@
             },
             "limits": {
               "projects": 100,
-              "dataTransferGib": 100,
+              "dataTransferGib": null,
               "monthlyBuildMinutes": 3000,
               "monthlyDeployments": 0,
               "concurrentBuilds": 1,
@@ -13616,7 +13616,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Object storage in MiB, when capped. Null means no account-level storage cap. Context: components.schemas.PlanLimits.properties.objectStorageMib.",
+            "description": "Included object storage in MiB. Null means no default storage hard cap. Context: components.schemas.PlanLimits.properties.objectStorageMib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -13638,9 +13638,12 @@
             "maximum": 1000000000000
           },
           "dataTransferGib": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int64",
-            "description": "Included monthly data transfer in GiB. Context: components.schemas.PlanLimits.properties.dataTransferGib.",
+            "description": "Monthly data transfer plan cap in GiB. Null means no default plan transfer cap. Context: components.schemas.PlanLimits.properties.dataTransferGib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -14285,7 +14288,7 @@
             "objectStorageMib": 9536,
             "storageObjects": null,
             "storageObjectMaxMib": 5237760,
-            "dataTransferGib": 100,
+            "dataTransferGib": null,
             "monthlyBuildMinutes": 3000,
             "monthlyDeployments": 0,
             "concurrentBuilds": 1,
@@ -14651,7 +14654,7 @@
             },
             "limits": {
               "projects": 100,
-              "dataTransferGib": 100,
+              "dataTransferGib": null,
               "monthlyBuildMinutes": 3000,
               "monthlyDeployments": 0,
               "concurrentBuilds": 1,
