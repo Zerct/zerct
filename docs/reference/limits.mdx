@@ -37,8 +37,9 @@ ambiguous to run.
   least 30 seconds.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
   or delete chunk.
-- Queue messages are limited to 128 KB, send delay is limited to 24 hours, and
-  retries are limited to 100.
+- Queue messages are limited to 128 KB total. Tovuk reserves 100 bytes for
+  Cloudflare-compatible metadata, so the maximum user body is 127900 bytes.
+  Send delay is limited to 24 hours, and retries are limited to 100.
 - Free queue retention is fixed at 24 hours. Pro queue retention defaults to
   4 days and can be configured up to 14 days.
 - Queue deliveries are sent to `POST /.tovuk/queues/<queue>` in batches of up
