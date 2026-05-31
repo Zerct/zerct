@@ -196,6 +196,9 @@ pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_cron(cli),
+        "update" | "set" => update_cron(cli),
+        "enable" => set_cron_enabled(cli, true),
+        "disable" => set_cron_enabled(cli, false),
         "delete" | "del" | "rm" => delete_app_resource(
             cli,
             1,
@@ -206,6 +209,55 @@ pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
         ),
         _ => unknown_platform_command(cli, "cron"),
     }
+}
+
+fn update_cron(cli: &CliOptions) -> Result<()> {
+    let trigger = required_arg(
+        cli,
+        1,
+        "cron_name_required",
+        "Cron trigger name is required.",
+        "Use `tovuk cron update --service <service> nightly \"*/15 * * * *\" --json`.",
+    )?;
+    let cron_expression = if cli.value.trim().is_empty() {
+        cli.args
+            .iter()
+            .skip(2)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        cli.value.clone()
+    };
+    if cron_expression.trim().is_empty() {
+        return Err(agent_error(
+            "cron_expression_required",
+            "Cron expression is required.",
+            "Pass a five-field UTC cron expression such as `*/15 * * * *`.",
+            cli.output.json,
+        ));
+    }
+    cron_update_request(cli, &trigger, json!({ "cronExpression": cron_expression }))
+}
+
+fn set_cron_enabled(cli: &CliOptions, enabled: bool) -> Result<()> {
+    let trigger = required_arg(
+        cli,
+        1,
+        "cron_name_required",
+        "Cron trigger name is required.",
+        "Use `tovuk cron enable --service <service> nightly --json` or `tovuk cron disable --service <service> nightly --json`.",
+    )?;
+    cron_update_request(cli, &trigger, json!({ "enabled": enabled }))
+}
+
+fn cron_update_request(cli: &CliOptions, trigger: &str, body: Value) -> Result<()> {
+    let route = format!(
+        "{}/cron/{}",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(trigger)
+    );
+    print_authenticated_mutation(cli, Method::PUT, &route, Some(body))
 }
 
 pub(crate) fn durable_command(cli: &CliOptions) -> Result<()> {

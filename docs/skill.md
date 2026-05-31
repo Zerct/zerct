@@ -67,6 +67,9 @@ npx tovuk queue update --service <service> jobs --max-batch-size 25 --json
 npx tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
 npx tovuk queue delete --service <service> jobs --json
 npx tovuk cron create --service <service> nightly "0 0 * * *" --json
+npx tovuk cron update --service <service> nightly "*/15 * * * *" --json
+npx tovuk cron disable --service <service> nightly --json
+npx tovuk cron enable --service <service> nightly --json
 npx tovuk cron delete --service <service> nightly --json
 npx tovuk durable-object create --service <service> Room --json
 npx tovuk durable-object delete --service <service> Room --json

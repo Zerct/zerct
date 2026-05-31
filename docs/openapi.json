@@ -3765,6 +3765,91 @@
             "example": "nightly"
           }
         ]
+      },
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Update cron trigger",
+        "description": "Update a service cron trigger expression, name, or enabled state. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/cron/{trigger}.put.",
+        "operationId": "updateServiceCronTrigger",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name for the cron update request. Context: updateServiceCronTrigger.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "trigger",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(cron_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "nightly"
+              ]
+            },
+            "description": "Cron trigger id or name for the cron update request. Context: updateServiceCronTrigger.parameters.trigger.",
+            "example": "nightly"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CronTriggerUpdateRequest"
+              },
+              "examples": {
+                "expression": {
+                  "summary": "Update cron expression",
+                  "value": {
+                    "cronExpression": "*/15 * * * *"
+                  }
+                },
+                "disable": {
+                  "summary": "Disable cron trigger",
+                  "value": {
+                    "enabled": false
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for PUT /v1/services/{service_id}/cron/{trigger}. Context: paths./v1/services/{service_id}/cron/{trigger}.put.requestBody."
+        }
       }
     },
     "/v1/services/{service_id}/durable-objects/namespaces/{namespace}": {
@@ -16564,7 +16649,7 @@
             "description": "Cron trigger name. Context: components.schemas.CronTriggerCreateRequest.properties.name.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "pattern": "^[a-z][a-z0-9_]{0,62}$",
             "examples": [
               "nightly"
             ]
@@ -18896,6 +18981,52 @@
             ]
           }
         }
+      },
+      "CronTriggerUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Optional replacement cron trigger name. Context: components.schemas.CronTriggerUpdateRequest.properties.name.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[a-z][a-z0-9_]{0,62}$",
+            "examples": [
+              "nightly_fast"
+            ]
+          },
+          "cronExpression": {
+            "type": "string",
+            "description": "Optional replacement UTC cron expression. Context: components.schemas.CronTriggerUpdateRequest.properties.cronExpression.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^[^\\n\\r]{1,120}$",
+            "examples": [
+              "*/15 * * * *"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Optional enabled state for pausing or resuming the trigger. Context: components.schemas.CronTriggerUpdateRequest.properties.enabled.",
+            "examples": [
+              false
+            ]
+          }
+        },
+        "description": "Cron trigger update request. Context: components.schemas.CronTriggerUpdateRequest.",
+        "examples": [
+          {
+            "cronExpression": "*/15 * * * *"
+          },
+          {
+            "enabled": false
+          },
+          {
+            "enabled": true
+          }
+        ]
       }
     }
   }
