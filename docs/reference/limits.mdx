@@ -16,6 +16,13 @@ ambiguous to run.
 - Runtime CPU allocation is fixed at `1`; usage is controlled by metered
   `worker_cpu_ms` caps.
 - Runtime idle timeout must be between `1` and `60` minutes.
+- Static assets follow Cloudflare-style limits: Free allows 20 thousand files
+  per deployed version, Pro allows 100 thousand files per deployed version, and
+  every individual static asset is capped at 25 MiB.
+- Static output rejects symlinks and non-file, non-directory entries.
+- `_headers` supports up to 100 header rules with 2000 characters per line.
+- `_redirects` supports up to 2000 static redirects, 100 dynamic redirects,
+  2100 total redirects, and 1000 characters per rule.
 - Static frontend projects run stable native type-aware TypeScript checks and
   native linting before build work starts.
 - Frontend browser source must use `.ts` or `.tsx`; `.js`, `.jsx`,
