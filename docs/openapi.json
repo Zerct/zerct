@@ -6824,7 +6824,8 @@
                       "best_for": [
                         "Public HTTP APIs under /api/*",
                         "Webhooks, auth callbacks, and form handlers",
-                        "Queue and cron event handlers"
+                        "Queue and cron event handlers",
+                        "Server-side validation and policy logic"
                       ],
                       "avoid_for": [
                         "Browser rendering and static assets",
@@ -6832,6 +6833,7 @@
                         "Single-key serialized state"
                       ],
                       "commands": [
+                        "tovuk init hello-service --template worker-static-rust-tanstack",
                         "tovuk deploy --wait --json",
                         "tovuk logs --service <service> --json"
                       ],
@@ -6844,9 +6846,28 @@
                         "workers",
                         "workerRequestsPerDay",
                         "workerRequestsPerMonth",
+                        "workerDefaultCpuMsPerRequest",
                         "workerCpuMsPerRequest",
                         "workerCpuMsPerMonth",
-                        "workerMemoryMib"
+                        "workerMemoryMib",
+                        "workerSubrequestsPerRequest",
+                        "workerInternalSubrequestsPerRequest",
+                        "workerOutgoingConnectionsPerRequest",
+                        "workerBindingsPerService",
+                        "workerEnvVars",
+                        "workerEnvVarSizeKib",
+                        "workerUncompressedSizeMib",
+                        "workerCompressedSizeMib",
+                        "workerStartupTimeMs",
+                        "workerUrlSizeKib",
+                        "workerRequestHeaderSizeKib",
+                        "workerResponseHeaderSizeKib",
+                        "workerRequestBodySizeMib",
+                        "workerWaitUntilSeconds",
+                        "workerHttpDurationSeconds",
+                        "workerCronDurationSeconds",
+                        "workerQueueConsumerDurationSeconds",
+                        "workerWebsocketMessageMib"
                       ]
                     }
                   ]
@@ -13645,7 +13666,8 @@
                   "best_for": [
                     "Public HTTP APIs under /api/*",
                     "Webhooks, auth callbacks, and form handlers",
-                    "Queue and cron event handlers"
+                    "Queue and cron event handlers",
+                    "Server-side validation and policy logic"
                   ],
                   "avoid_for": [
                     "Browser rendering and static assets",
@@ -13653,6 +13675,7 @@
                     "Single-key serialized state"
                   ],
                   "commands": [
+                    "tovuk init hello-service --template worker-static-rust-tanstack",
                     "tovuk deploy --wait --json",
                     "tovuk logs --service <service> --json"
                   ],
@@ -13665,9 +13688,28 @@
                     "workers",
                     "workerRequestsPerDay",
                     "workerRequestsPerMonth",
+                    "workerDefaultCpuMsPerRequest",
                     "workerCpuMsPerRequest",
                     "workerCpuMsPerMonth",
-                    "workerMemoryMib"
+                    "workerMemoryMib",
+                    "workerSubrequestsPerRequest",
+                    "workerInternalSubrequestsPerRequest",
+                    "workerOutgoingConnectionsPerRequest",
+                    "workerBindingsPerService",
+                    "workerEnvVars",
+                    "workerEnvVarSizeKib",
+                    "workerUncompressedSizeMib",
+                    "workerCompressedSizeMib",
+                    "workerStartupTimeMs",
+                    "workerUrlSizeKib",
+                    "workerRequestHeaderSizeKib",
+                    "workerResponseHeaderSizeKib",
+                    "workerRequestBodySizeMib",
+                    "workerWaitUntilSeconds",
+                    "workerHttpDurationSeconds",
+                    "workerCronDurationSeconds",
+                    "workerQueueConsumerDurationSeconds",
+                    "workerWebsocketMessageMib"
                   ]
                 }
               ]
@@ -21585,7 +21627,8 @@
             "best_for": [
               "Public HTTP APIs under /api/*",
               "Webhooks, auth callbacks, and form handlers",
-              "Queue and cron event handlers"
+              "Queue and cron event handlers",
+              "Server-side validation and policy logic"
             ],
             "avoid_for": [
               "Browser rendering and static assets",
@@ -21593,6 +21636,7 @@
               "Single-key serialized state"
             ],
             "commands": [
+              "tovuk init hello-service --template worker-static-rust-tanstack",
               "tovuk deploy --wait --json",
               "tovuk logs --service <service> --json"
             ],
@@ -21605,9 +21649,28 @@
               "workers",
               "workerRequestsPerDay",
               "workerRequestsPerMonth",
+              "workerDefaultCpuMsPerRequest",
               "workerCpuMsPerRequest",
               "workerCpuMsPerMonth",
-              "workerMemoryMib"
+              "workerMemoryMib",
+              "workerSubrequestsPerRequest",
+              "workerInternalSubrequestsPerRequest",
+              "workerOutgoingConnectionsPerRequest",
+              "workerBindingsPerService",
+              "workerEnvVars",
+              "workerEnvVarSizeKib",
+              "workerUncompressedSizeMib",
+              "workerCompressedSizeMib",
+              "workerStartupTimeMs",
+              "workerUrlSizeKib",
+              "workerRequestHeaderSizeKib",
+              "workerResponseHeaderSizeKib",
+              "workerRequestBodySizeMib",
+              "workerWaitUntilSeconds",
+              "workerHttpDurationSeconds",
+              "workerCronDurationSeconds",
+              "workerQueueConsumerDurationSeconds",
+              "workerWebsocketMessageMib"
             ]
           }
         ]
