@@ -4401,7 +4401,7 @@
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 100,
+                    "storageObjectMaxMib": 10240,
                     "sqliteDatabases": 10,
                     "sqliteStorageMib": 5120,
                     "sqliteStorageMibPerDatabase": 500,
@@ -5225,7 +5225,7 @@
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 100,
+                    "storageObjectMaxMib": 10240,
                     "sqliteDatabases": 10,
                     "sqliteStorageMib": 5120,
                     "sqliteStorageMibPerDatabase": 500,
@@ -5336,7 +5336,7 @@
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 100,
+                    "storageObjectMaxMib": 10240,
                     "sqliteDatabases": 10,
                     "sqliteStorageMib": 5120,
                     "sqliteStorageMibPerDatabase": 500,
@@ -6154,7 +6154,7 @@
                     "durableObjectSqliteStorageMib": 5120,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 100,
+                    "storageObjectMaxMib": 10240,
                     "dataTransferGib": 100,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
@@ -7391,9 +7391,9 @@
           },
           "limits": {
             "$ref": "#/components/schemas/PlanLimits",
-            "objectStorageMib": 512,
-            "storageObjects": 200,
-            "storageObjectMaxMib": 64
+            "objectStorageMib": 10240,
+            "storageObjects": 100000,
+            "storageObjectMaxMib": 10240
           }
         },
         "examples": [
@@ -7434,7 +7434,7 @@
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 100,
+              "storageObjectMaxMib": 10240,
               "sqliteDatabases": 10,
               "sqliteStorageMib": 5120,
               "sqliteStorageMibPerDatabase": 500,
@@ -10127,9 +10127,9 @@
           },
           "limits": {
             "$ref": "#/components/schemas/PlanLimits",
-            "objectStorageMib": 512,
-            "storageObjects": 200,
-            "storageObjectMaxMib": 64
+            "objectStorageMib": 10240,
+            "storageObjects": 100000,
+            "storageObjectMaxMib": 10240
           }
         },
         "examples": [
@@ -10169,7 +10169,7 @@
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 100,
+              "storageObjectMaxMib": 10240,
               "sqliteDatabases": 10,
               "sqliteStorageMib": 5120,
               "sqliteStorageMibPerDatabase": 500,
@@ -10765,7 +10765,7 @@
             "durableObjectSqliteStorageMib": 5120,
             "objectStorageMib": 10240,
             "storageObjects": 100000,
-            "storageObjectMaxMib": 100,
+            "storageObjectMaxMib": 10240,
             "dataTransferGib": 100,
             "monthlyBuildMinutes": 3000,
             "monthlyDeployments": 0,
@@ -10806,9 +10806,9 @@
           },
           "limits": {
             "$ref": "#/components/schemas/PlanLimits",
-            "objectStorageMib": 512,
-            "storageObjects": 200,
-            "storageObjectMaxMib": 64
+            "objectStorageMib": 10240,
+            "storageObjects": 100000,
+            "storageObjectMaxMib": 10240
           },
           "services": {
             "type": "array",
@@ -10927,7 +10927,7 @@
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 100,
+              "storageObjectMaxMib": 10240,
               "sqliteDatabases": 10,
               "sqliteStorageMib": 5120,
               "sqliteStorageMibPerDatabase": 500,
@@ -13221,7 +13221,7 @@
                 "durableObjectSqliteStorageMib": 5120,
                 "objectStorageMib": 10240,
                 "storageObjects": 100000,
-                "storageObjectMaxMib": 100,
+                "storageObjectMaxMib": 10240,
                 "dataTransferGib": 100,
                 "monthlyBuildMinutes": 3000,
                 "monthlyDeployments": 0,
@@ -13279,7 +13279,7 @@
               "durableObjectSqliteStorageMib": 5120,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 100,
+              "storageObjectMaxMib": 10240,
               "dataTransferGib": 100,
               "monthlyBuildMinutes": 3000,
               "monthlyDeployments": 0,
@@ -13495,6 +13495,26 @@
             "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
             "examples": [
               "jobs"
+            ]
+          },
+          "maxRetries": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Optional maximum retry count. Context: components.schemas.QueueCreateRequest.properties.maxRetries.",
+            "examples": [
+              3
+            ]
+          },
+          "retentionSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 60,
+            "maximum": 1209600,
+            "description": "Optional message retention in seconds. Free is fixed at 86400. Pro defaults to 345600 and supports up to 1209600. Context: components.schemas.QueueCreateRequest.properties.retentionSeconds.",
+            "examples": [
+              86400
             ]
           }
         },
@@ -14141,9 +14161,9 @@
         "properties": {
           "body": {
             "type": "string",
-            "description": "Message body text or base64 bytes. Context: components.schemas.QueueMessageSendRequest.properties.body.",
+            "description": "Message body text or base64 bytes, capped at 128 KB. Context: components.schemas.QueueMessageSendRequest.properties.body.",
             "minLength": 1,
-            "maxLength": 26214400,
+            "maxLength": 128000,
             "examples": [
               "{\"task\":\"sync\"}"
             ],
@@ -14164,7 +14184,7 @@
             "type": "integer",
             "format": "int32",
             "minimum": 1,
-            "maximum": 43200,
+            "maximum": 86400,
             "description": "Optional visibility delay in seconds. Context: components.schemas.QueueMessageSendRequest.properties.delaySeconds.",
             "examples": [
               60

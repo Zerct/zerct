@@ -21,6 +21,7 @@ pub(crate) struct CliOptions {
     pub(crate) severity: String,
     pub(crate) port: u16,
     pub(crate) deployment: DeploymentOptions,
+    pub(crate) queue: QueueOptions,
     pub(crate) storage: StorageOptions,
     pub(crate) output: OutputOptions,
 }
@@ -30,6 +31,13 @@ pub(crate) struct DeploymentOptions {
     pub(crate) database: bool,
     pub(crate) wait: bool,
     pub(crate) wait_timeout_seconds: u64,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct QueueOptions {
+    pub(crate) max_retries: String,
+    pub(crate) retention_seconds: String,
+    pub(crate) delay_seconds: String,
 }
 
 #[derive(Clone, Debug)]
@@ -70,6 +78,11 @@ impl Default for CliOptions {
                 database: false,
                 wait: false,
                 wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
+            },
+            queue: QueueOptions {
+                max_retries: String::new(),
+                retention_seconds: String::new(),
+                delay_seconds: String::new(),
             },
             storage: StorageOptions {
                 content_type: String::new(),

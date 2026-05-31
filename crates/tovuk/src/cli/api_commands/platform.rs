@@ -71,14 +71,7 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
 pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
-        "create" => create_app_resource(
-            cli,
-            "queue_name_required",
-            "Queue name is required.",
-            "Use `tovuk queue create --service <service> jobs --json`.",
-            "queues",
-            "name",
-        ),
+        "create" => create_queue(cli),
         "messages" => queue_messages(cli),
         "send" => queue_send(cli),
         "delete" | "del" | "rm" => delete_app_resource(
@@ -91,6 +84,32 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
         ),
         _ => unknown_platform_command(cli, "queue"),
     }
+}
+
+fn create_queue(cli: &CliOptions) -> Result<()> {
+    let name = required_arg(
+        cli,
+        1,
+        "queue_name_required",
+        "Queue name is required.",
+        "Use `tovuk queue create --service <service> jobs --json`.",
+    )?;
+    let mut body = Map::new();
+    body.insert("name".to_owned(), Value::String(name));
+    if let Some(max_retries) = optional_u16(&cli.queue.max_retries, "--max-retries", cli)? {
+        body.insert("maxRetries".to_owned(), json!(max_retries));
+    }
+    if let Some(retention_seconds) =
+        optional_u32(&cli.queue.retention_seconds, "--retention-seconds", cli)?
+    {
+        body.insert("retentionSeconds".to_owned(), json!(retention_seconds));
+    }
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &service_route(cli, "queues")?,
+        Some(Value::Object(body)),
+    )
 }
 
 pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
@@ -440,15 +459,56 @@ fn queue_send(cli: &CliOptions) -> Result<()> {
         service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&queue)
     );
-    print_authenticated_mutation(
-        cli,
-        Method::POST,
-        &route,
-        Some(json!({
-            "body": body,
-            "encoding": "text",
-        })),
-    )
+    let mut payload = Map::new();
+    payload.insert("body".to_owned(), Value::String(body));
+    payload.insert("encoding".to_owned(), Value::String("text".to_owned()));
+    if let Some(delay_seconds) = optional_u32(&cli.queue.delay_seconds, "--delay-seconds", cli)? {
+        payload.insert("delaySeconds".to_owned(), json!(delay_seconds));
+    }
+    print_authenticated_mutation(cli, Method::POST, &route, Some(Value::Object(payload)))
+}
+
+fn optional_u16(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u16>> {
+    let Some(number) = optional_u64(value, flag, cli)? else {
+        return Ok(None);
+    };
+    u16::try_from(number).map(Some).map_err(|_error| {
+        agent_error(
+            "invalid_argument",
+            format!("{flag} is too large."),
+            format!("Pass {flag} within the documented queue limit."),
+            cli.output.json,
+        )
+    })
+}
+
+fn optional_u32(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u32>> {
+    let Some(number) = optional_u64(value, flag, cli)? else {
+        return Ok(None);
+    };
+    u32::try_from(number).map(Some).map_err(|_error| {
+        agent_error(
+            "invalid_argument",
+            format!("{flag} is too large."),
+            format!("Pass {flag} within the documented queue limit."),
+            cli.output.json,
+        )
+    })
+}
+
+fn optional_u64(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u64>> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Ok(None);
+    }
+    trimmed.parse::<u64>().map(Some).map_err(|_error| {
+        agent_error(
+            "invalid_argument",
+            format!("{flag} must be a non-negative integer."),
+            format!("Pass {flag} as seconds or a count."),
+            cli.output.json,
+        )
+    })
 }
 
 fn kv_value_route(cli: &CliOptions, namespace: &str, key: &str) -> Result<String> {

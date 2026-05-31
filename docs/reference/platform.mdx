@@ -15,7 +15,7 @@ tovuk database query --service service_1 DB "select 1" --json
 tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv namespace delete --service service_1 CACHE --json
-tovuk queue create --service service_1 jobs --json
+tovuk queue create --service service_1 jobs --max-retries 3 --retention-seconds 86400 --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk cron delete --service service_1 nightly --json
@@ -49,3 +49,6 @@ tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 ```
+
+Queue messages are capped at 128 KB. Store larger payloads in object storage and
+send the storage path in the queue message.
