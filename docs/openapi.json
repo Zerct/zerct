@@ -5536,7 +5536,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
+                    "stateSqliteStorageMib": 953,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -5673,6 +5673,10 @@
                     "staticAssets": {
                       "requestsFreeAndUnlimited": true,
                       "storageFree": true
+                    },
+                    "builds": {
+                      "includedMinutesPerMonth": 3000,
+                      "minuteOverageUsdMicros": null
                     },
                     "logs": {
                       "includedEventsPerMonth": null,
@@ -6442,7 +6446,7 @@
                         "queueOperationsPerMonth": null,
                         "stateRequestsPerDay": 100000,
                         "stateRequestsPerMonth": null,
-                        "stateSqliteStorageMib": 9536,
+                        "stateSqliteStorageMib": 953,
                         "objectStorageMib": 9536,
                         "storageObjects": null,
                         "storageObjectMaxMib": 5237760,
@@ -6590,6 +6594,10 @@
                         "staticAssets": {
                           "requestsFreeAndUnlimited": true,
                           "storageFree": true
+                        },
+                        "builds": {
+                          "includedMinutesPerMonth": 3000,
+                          "minuteOverageUsdMicros": null
                         },
                         "logs": {
                           "includedEventsPerMonth": null,
@@ -6795,6 +6803,10 @@
                           "requestsFreeAndUnlimited": true,
                           "storageFree": true
                         },
+                        "builds": {
+                          "includedMinutesPerMonth": 6000,
+                          "minuteOverageUsdMicros": 5000
+                        },
                         "logs": {
                           "includedEventsPerMonth": 20000000,
                           "eventOverageUsdMicrosPerMillion": 600000
@@ -6965,7 +6977,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
+                    "stateSqliteStorageMib": 953,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -7103,6 +7115,10 @@
                       "requestsFreeAndUnlimited": true,
                       "storageFree": true
                     },
+                    "builds": {
+                      "includedMinutesPerMonth": 3000,
+                      "minuteOverageUsdMicros": null
+                    },
                     "logs": {
                       "includedEventsPerMonth": null,
                       "eventOverageUsdMicrosPerMillion": null
@@ -7237,7 +7253,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
+                    "stateSqliteStorageMib": 953,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -7411,6 +7427,10 @@
                     "staticAssets": {
                       "requestsFreeAndUnlimited": true,
                       "storageFree": true
+                    },
+                    "builds": {
+                      "includedMinutesPerMonth": 3000,
+                      "minuteOverageUsdMicros": null
                     },
                     "logs": {
                       "includedEventsPerMonth": null,
@@ -8157,7 +8177,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
+                    "stateSqliteStorageMib": 953,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -8369,6 +8389,10 @@
                     "staticAssets": {
                       "requestsFreeAndUnlimited": true,
                       "storageFree": true
+                    },
+                    "builds": {
+                      "includedMinutesPerMonth": 3000,
+                      "minuteOverageUsdMicros": null
                     },
                     "logs": {
                       "includedEventsPerMonth": null,
@@ -10146,6 +10170,10 @@
                   "requestsFreeAndUnlimited": true,
                   "storageFree": true
                 },
+                "builds": {
+                  "includedMinutesPerMonth": 3000,
+                  "minuteOverageUsdMicros": null
+                },
                 "logs": {
                   "includedEventsPerMonth": null,
                   "eventOverageUsdMicrosPerMillion": null
@@ -10212,6 +10240,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -10321,7 +10353,7 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 9536,
+              "stateSqliteStorageMib": 953,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -10458,6 +10490,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -13212,7 +13248,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
+                    "stateSqliteStorageMib": 953,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -13360,6 +13396,10 @@
                     "staticAssets": {
                       "requestsFreeAndUnlimited": true,
                       "storageFree": true
+                    },
+                    "builds": {
+                      "includedMinutesPerMonth": 3000,
+                      "minuteOverageUsdMicros": null
                     },
                     "logs": {
                       "includedEventsPerMonth": null,
@@ -13565,6 +13605,10 @@
                       "requestsFreeAndUnlimited": true,
                       "storageFree": true
                     },
+                    "builds": {
+                      "includedMinutesPerMonth": 6000,
+                      "minuteOverageUsdMicros": 5000
+                    },
                     "logs": {
                       "includedEventsPerMonth": 20000000,
                       "eventOverageUsdMicrosPerMillion": 600000
@@ -13715,6 +13759,10 @@
                   "requestsFreeAndUnlimited": true,
                   "storageFree": true
                 },
+                "builds": {
+                  "includedMinutesPerMonth": 3000,
+                  "minuteOverageUsdMicros": null
+                },
                 "logs": {
                   "includedEventsPerMonth": null,
                   "eventOverageUsdMicrosPerMillion": null
@@ -13781,6 +13829,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -13889,7 +13941,7 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 9536,
+              "stateSqliteStorageMib": 953,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -14026,6 +14078,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -15266,7 +15322,7 @@
             "queueOperationsPerMonth": null,
             "stateRequestsPerDay": 100000,
             "stateRequestsPerMonth": null,
-            "stateSqliteStorageMib": 9536,
+            "stateSqliteStorageMib": 953,
             "objectStorageMib": 9536,
             "storageObjects": null,
             "storageObjectMaxMib": 5237760,
@@ -15533,6 +15589,10 @@
                   "requestsFreeAndUnlimited": true,
                   "storageFree": true
                 },
+                "builds": {
+                  "includedMinutesPerMonth": 3000,
+                  "minuteOverageUsdMicros": null
+                },
                 "logs": {
                   "includedEventsPerMonth": null,
                   "eventOverageUsdMicrosPerMillion": null
@@ -15599,6 +15659,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -15707,7 +15771,7 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 9536,
+              "stateSqliteStorageMib": 953,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -15881,6 +15945,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -17760,6 +17828,7 @@
               "state",
               "objectStorage",
               "staticAssets",
+              "builds",
               "logs"
             ],
             "properties": {
@@ -17794,6 +17863,9 @@
               },
               "staticAssets": {
                 "$ref": "#/components/schemas/StaticAssetPricing"
+              },
+              "builds": {
+                "$ref": "#/components/schemas/BuildPricing"
               },
               "logs": {
                 "$ref": "#/components/schemas/LogPricing"
@@ -17859,6 +17931,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
@@ -17926,6 +18002,10 @@
                 "staticAssets": {
                   "requestsFreeAndUnlimited": true,
                   "storageFree": true
+                },
+                "builds": {
+                  "includedMinutesPerMonth": 3000,
+                  "minuteOverageUsdMicros": null
                 },
                 "logs": {
                   "includedEventsPerMonth": null,
@@ -19760,6 +19840,34 @@
           }
         }
       },
+      "BuildPricing": {
+        "type": "object",
+        "description": "Build-minute pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedMinutesPerMonth",
+          "minuteOverageUsdMicros"
+        ],
+        "properties": {
+          "includedMinutesPerMonth": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included monthly build minutes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "minuteOverageUsdMicros": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per build minute.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          }
+        }
+      },
       "LogPricing": {
         "type": "object",
         "description": "Runtime log pricing.",
@@ -19805,6 +19913,7 @@
           "state",
           "objectStorage",
           "staticAssets",
+          "builds",
           "logs"
         ],
         "properties": {
@@ -19839,6 +19948,9 @@
           },
           "staticAssets": {
             "$ref": "#/components/schemas/StaticAssetPricing"
+          },
+          "builds": {
+            "$ref": "#/components/schemas/BuildPricing"
           },
           "logs": {
             "$ref": "#/components/schemas/LogPricing"
@@ -19923,6 +20035,10 @@
               "staticAssets": {
                 "requestsFreeAndUnlimited": true,
                 "storageFree": true
+              },
+              "builds": {
+                "includedMinutesPerMonth": 3000,
+                "minuteOverageUsdMicros": null
               },
               "logs": {
                 "includedEventsPerMonth": null,
