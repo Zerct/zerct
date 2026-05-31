@@ -28,9 +28,7 @@ pub(crate) fn validate_resource_config(
 ) -> std::result::Result<(), String> {
     let memory_mib = memory_to_mib(&resources.memory)?;
     if memory_mib != WORKER_MEMORY_MIB {
-        return Err(
-            "[resources].memory must be 128mb for Cloudflare-compatible workers".to_owned(),
-        );
+        return Err("[resources].memory must be 128mb for Tovuk workers".to_owned());
     }
     let cpu_millis = cpu_to_millis(&resources.cpu)?;
     if cpu_millis != WORKER_CPU_MILLIS {

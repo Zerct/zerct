@@ -89,7 +89,7 @@ Agent contract:
   - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Keep direct unsafe out of Rust source.
-  - Keep Rust worker resources Cloudflare-compatible: 128mb memory, CPU allocation 1, metered worker_cpu_ms caps, and 1-60 minute idle timeout.
+  - Keep Rust worker resources within Tovuk limits: 128mb memory, CPU allocation 1, metered worker_cpu_ms caps, and 1-60 minute idle timeout.
 "#
     )
 }
