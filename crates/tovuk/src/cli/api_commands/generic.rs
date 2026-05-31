@@ -7,11 +7,24 @@ use super::{
     http::api_request,
 };
 use reqwest::Method;
-use serde_json::Value;
+use serde_json::{Value, json};
 
 pub(crate) fn capabilities(cli: &CliOptions) -> Result<()> {
     let response = api_request(cli, Method::GET, "/v1/capabilities", None, None)?;
     print_json(&response)
+}
+
+pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
+    let response = api_request(cli, Method::GET, "/v1/capabilities", None, None)?;
+    let plans = response.get("plans").cloned().unwrap_or(Value::Null);
+    print_json(&json!({
+        "plans": plans,
+        "nextActions": [
+            "Use `tovuk usage --json` after login to compare current usage against these limits.",
+            "Use `tovuk limit set <metric> --period month --value <n> --json` to set a hard cap before paid overages.",
+            "Use `tovuk billing checkout --json` when an upgrade is required."
+        ]
+    }))
 }
 
 pub(crate) fn print_authenticated(cli: &CliOptions, route: &str) -> Result<()> {

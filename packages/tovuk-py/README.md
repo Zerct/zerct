@@ -38,6 +38,7 @@ The Python package exposes the same agent command surface as npm:
 
 ```sh
 tovuk capabilities
+tovuk pricing --json
 tovuk me
 tovuk usage
 tovuk activity --json

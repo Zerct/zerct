@@ -37,11 +37,12 @@ Free plan:
 
 Pro plan:
 
-- 10 GiB total object storage
+- 1 TiB account hard cap with 10 GiB included before paid storage overage
 - 1 million objects
 - 5115 MiB (4.995 GiB) per single-part object upload
-- 1 million Class A operations per month
-- 10 million Class B operations per month
+- 1 million Class A operations per month included, then paid overage
+- 10 million Class B operations per month included, then paid overage
+- free egress and free delete operations
 
 Use Class A caps for write/list-heavy workflows and Class B caps for
 read/download-heavy workflows:
@@ -49,6 +50,12 @@ read/download-heavy workflows:
 ```sh
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
 tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
+```
+
+Check the live storage prices and included usage before heavy media work:
+
+```sh
+tovuk pricing --json
 ```
 
 When a storage limit blocks work, run:

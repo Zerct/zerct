@@ -155,6 +155,7 @@ Useful agent commands:
 
 ```sh
 tovuk capabilities
+tovuk pricing --json
 tovuk me
 tovuk usage
 tovuk activity --json

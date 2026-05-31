@@ -48,9 +48,15 @@ Durable Object namespaces, service bindings, and usage caps through the CLI.
 Agents can also inspect API capabilities, account identity, usage, account
 activity, services, complete service overviews, deploys, builds, service/deploy/build logs,
 env metadata, custom domains, domain verification, service storage files and media,
-billing checkout links, billing portal links, and support ticket create, list,
-and resolve actions
-through the same CLI.
+pricing, billing checkout links, billing portal links, and support ticket create,
+list, and resolve actions through the same CLI.
+
+Before high-throughput work, read pricing and set hard caps:
+
+```sh
+tovuk pricing --json
+tovuk limit set worker_requests --period month --value 10000000 --json
+```
 
 Manage service files and media without dashboard access:
 

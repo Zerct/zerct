@@ -2,7 +2,7 @@ use super::{
     api_commands::{
         billing_command, binding_command, builds_command, capabilities, caps_command, cron_command,
         deploys_command, domains_command, durable_command, env_command, kv_command, logs_command,
-        platform_command, print_authenticated, print_paged_authenticated, queue_command,
+        platform_command, pricing, print_authenticated, print_paged_authenticated, queue_command,
         service_command, service_get_command, service_route, sqlite_command, storage_command,
         support_command,
     },
@@ -48,6 +48,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "login" => login(&cli),
         "deploy" => deploy(&project_path(cli.args.first())?, &cli),
         "capabilities" => capabilities(&cli),
+        "pricing" => pricing(&cli),
         "me" => print_authenticated(&cli, "/v1/me"),
         "usage" => print_authenticated(&cli, "/v1/usage"),
         "activity" => print_paged_authenticated(&cli, "/v1/activity"),

@@ -26,17 +26,26 @@ ambiguous to run.
 - Free service object storage includes 10 GiB total, 100 thousand objects, a
   5115 MiB (4.995 GiB) single-part object upload limit, 1 million Class A
   operations per month, and 10 million Class B operations per month.
-- Pro service object storage includes 10 GiB total, 1 million objects, a
-  5115 MiB (4.995 GiB) single-part object upload limit, 1 million Class A
-  operations per month, and 10 million Class B operations per month.
+- Pro service object storage has a 1 TiB account hard cap, includes 10 GiB,
+  allows 1 million objects, has a 5115 MiB (4.995 GiB) single-part object upload
+  limit, includes 1 million Class A operations and 10 million Class B operations
+  per month, and exposes R2-style paid overage rates in `tovuk pricing --json`.
 - Free worker requests: 100 thousand per day.
 - Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
+- Pro SQLite databases: 50 thousand, with a 1 TiB account hard cap and 10 GiB
+  per database. The first 25 billion rows read, 50 million rows written, and
+  5 GiB storage are included each month before paid overage pricing.
 - Free KV meters: 100 thousand reads per day, 1000 writes per day, 1000
   deletes per day, and 1000 lists per day.
+- Pro KV has a 1 TiB account hard cap. The first 10 million reads, 1 million
+  writes, 1 million deletes, 1 million lists, and 1 GiB storage are included
+  each month before paid overage pricing.
 - KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
   least 30 seconds.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
   or delete chunk.
+- Pro queue operations: 1 million per month included before paid overage
+  pricing.
 - Queue messages are limited to 128 KB total. Tovuk reserves 100 bytes for
   Cloudflare-compatible metadata, so the maximum user body is 127900 bytes.
   Send delay is limited to 24 hours, and retries are limited to 100.
@@ -47,7 +56,11 @@ ambiguous to run.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
 - Durable Object SQLite storage is 1 GiB per object on Free and 10 GiB per
-  object on Pro.
+  object on Pro. Free also has a 5 GiB account storage cap. Pro includes
+  1 million requests and 400 thousand GB-s duration per month before paid
+  overage pricing.
+- Free logs include 200 thousand events per day with 3 day retention. Pro logs
+  include 20 million events per month with 7 day retention.
 - Free support tickets: 3 per day.
 - Pro support tickets: 20 per day.
 - Free API tokens: 10.
@@ -73,4 +86,15 @@ Resolve the ticket after the issue is fixed:
 
 ```sh
 tovuk support resolve ticket_0123456789abcdef0123 --json
+```
+
+## Paid usage caps
+
+Pro included monthly usage is billing metadata, not the default hard stop.
+Agents should set explicit hard caps before high-throughput tests or launch:
+
+```sh
+tovuk pricing --json
+tovuk limit set worker_requests --period month --value 10000000 --json
+tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 ```

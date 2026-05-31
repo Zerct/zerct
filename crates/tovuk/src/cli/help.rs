@@ -12,6 +12,7 @@ Usage:
   tovuk login [--token <token>] [--api <url>]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
   tovuk capabilities [--api <url>] [--json]
+  tovuk pricing [--api <url>] [--json]
   tovuk me [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
   tovuk activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
@@ -70,6 +71,7 @@ Agent contract:
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a CDN URL is intended.
+  - Use tovuk pricing --json before heavy work, then set usage caps before paid overages.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Prefer same-origin worker-static services over split services.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
