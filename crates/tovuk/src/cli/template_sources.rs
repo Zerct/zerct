@@ -135,7 +135,8 @@ fn handle(mut stream: TcpStream) -> std::io::Result<()> {
 }
 
 fn allowed_origin(request_origin: &str) -> String {
-    let configured = std::env::var("FRONTEND_ORIGIN").unwrap_or_else(|_error| request_origin.to_owned());
+    let configured =
+        std::env::var("FRONTEND_ORIGIN").unwrap_or_else(|_error| request_origin.to_owned());
     if configured == "*" || configured == request_origin {
         configured
     } else {
