@@ -139,9 +139,9 @@ Useful cap metrics include `worker_requests`, `worker_cpu_ms`,
 `object_storage_bytes`, `object_storage_class_a_operations`, and
 `object_storage_class_b_operations`.
 
-`npx tovuk capabilities --json` exposes a `products` catalog. Use each
-product's `meters` and `limit_fields` before load tests, media uploads, or paid
-usage.
+`npx tovuk capabilities --json` and `npx tovuk pricing --json` expose a
+`products` catalog. Use each product's `meters` and `limit_fields` before load
+tests, media uploads, or paid usage.
 
 Use `GET /v1/status` only when Tovuk itself appears unavailable. If the API is
 available and a deploy fails, inspect build logs instead of changing status

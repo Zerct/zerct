@@ -84,6 +84,10 @@ tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+`tovuk pricing --json` includes plan pricing and product meter metadata, so
+agents can choose the correct product and cap the right meters before heavy
+work.
+
 Agent repair loop:
 
 ```sh

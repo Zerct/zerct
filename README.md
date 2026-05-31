@@ -191,6 +191,10 @@ npx tovuk support list --json
 npx tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+`npx tovuk pricing --json` returns both plan pricing and product meter metadata,
+so agents can choose Worker, Static Frontend, SQLite, Object Storage, State,
+KV, Queue, or Cron and set the matching usage caps before heavy work.
+
 The same commands are available through PyPI and Cargo after installation:
 
 ```sh
