@@ -5538,7 +5538,6 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -5613,7 +5612,8 @@
                     "stateSqliteRowsReadPerMonth": null,
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
-                    "stateKeyValueSizeMib": 2
+                    "stateKeyValueSizeMib": 2,
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -6448,7 +6448,6 @@
                         "queueOperationsPerMonth": null,
                         "stateRequestsPerDay": 100000,
                         "stateRequestsPerMonth": null,
-                        "stateSqliteStorageMib": 9536,
                         "objectStorageMib": 9536,
                         "storageObjects": null,
                         "storageObjectMaxMib": 5237760,
@@ -6534,7 +6533,8 @@
                         "stateSqliteRowsReadPerMonth": null,
                         "stateSqliteRowsWrittenPerDay": 100000,
                         "stateSqliteRowsWrittenPerMonth": null,
-                        "stateKeyValueSizeMib": 2
+                        "stateKeyValueSizeMib": 2,
+                        "stateSqliteStorageMibPerObject": 953
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 0,
@@ -6656,7 +6656,6 @@
                         "queueOperationsPerMonth": 1000000,
                         "stateRequestsPerDay": null,
                         "stateRequestsPerMonth": 1000000,
-                        "stateSqliteStorageMib": 9536,
                         "objectStorageMib": null,
                         "storageObjects": null,
                         "storageObjectMaxMib": 5237760,
@@ -6742,7 +6741,8 @@
                         "stateSqliteRowsReadPerMonth": 25000000000,
                         "stateSqliteRowsWrittenPerDay": null,
                         "stateSqliteRowsWrittenPerMonth": 50000000,
-                        "stateKeyValueSizeMib": 2
+                        "stateKeyValueSizeMib": 2,
+                        "stateSqliteStorageMibPerObject": 9536
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 500,
@@ -7002,7 +7002,6 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -7077,7 +7076,8 @@
                     "stateSqliteRowsReadPerMonth": null,
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
-                    "stateKeyValueSizeMib": 2
+                    "stateKeyValueSizeMib": 2,
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -7280,7 +7280,6 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -7355,7 +7354,8 @@
                     "stateSqliteRowsReadPerMonth": null,
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
-                    "stateKeyValueSizeMib": 2
+                    "stateKeyValueSizeMib": 2,
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "services": [
                     {
@@ -8204,7 +8204,6 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -8290,7 +8289,8 @@
                     "stateSqliteRowsReadPerMonth": null,
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
-                    "stateKeyValueSizeMib": 2
+                    "stateKeyValueSizeMib": 2,
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "sqliteDatabases": [
                     {
@@ -8335,7 +8335,7 @@
                     {
                       "id": "state_namespace_1",
                       "className": "Room",
-                      "storageLimitMib": 9536
+                      "storageLimitMib": 953
                     }
                   ],
                   "serviceBindings": [
@@ -9126,7 +9126,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "objects": [
                     {
@@ -9181,7 +9181,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "object": {
                     "id": "state_object_1",
@@ -9243,7 +9243,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "object": {
                     "id": "state_object_1",
@@ -9303,7 +9303,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "object": {
                     "id": "state_object_1",
@@ -10382,7 +10382,6 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 9536,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -10457,7 +10456,8 @@
               "stateSqliteRowsReadPerMonth": null,
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
-              "stateKeyValueSizeMib": 2
+              "stateKeyValueSizeMib": 2,
+              "stateSqliteStorageMibPerObject": 953
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -13279,7 +13279,6 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 9536,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -13365,7 +13364,8 @@
                     "stateSqliteRowsReadPerMonth": null,
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
-                    "stateKeyValueSizeMib": 2
+                    "stateKeyValueSizeMib": 2,
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -13487,7 +13487,6 @@
                     "queueOperationsPerMonth": 1000000,
                     "stateRequestsPerDay": null,
                     "stateRequestsPerMonth": 1000000,
-                    "stateSqliteStorageMib": 9536,
                     "objectStorageMib": null,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -13573,7 +13572,8 @@
                     "stateSqliteRowsReadPerMonth": 25000000000,
                     "stateSqliteRowsWrittenPerDay": null,
                     "stateSqliteRowsWrittenPerMonth": 50000000,
-                    "stateKeyValueSizeMib": 2
+                    "stateKeyValueSizeMib": 2,
+                    "stateSqliteStorageMibPerObject": 9536
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 500,
@@ -13995,7 +13995,6 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 9536,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -14070,7 +14069,8 @@
               "stateSqliteRowsReadPerMonth": null,
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
-              "stateKeyValueSizeMib": 2
+              "stateKeyValueSizeMib": 2,
+              "stateSqliteStorageMibPerObject": 953
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -14194,7 +14194,7 @@
           "queueOperationsPerMonth",
           "stateRequestsPerDay",
           "stateRequestsPerMonth",
-          "stateSqliteStorageMib",
+          "stateSqliteStorageMibPerObject",
           "objectStorageMib",
           "storageObjects",
           "storageObjectMaxMib",
@@ -14662,13 +14662,6 @@
             ],
             "format": "int64",
             "description": "Monthly State request allowance, when set. Context: components.schemas.PlanLimits.properties.stateRequestsPerMonth.",
-            "minimum": 0,
-            "maximum": 1000000000000
-          },
-          "stateSqliteStorageMib": {
-            "type": "integer",
-            "format": "int64",
-            "description": "State SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.stateSqliteStorageMib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -15324,6 +15317,13 @@
             "description": "Writes allowed per second to one object storage key. Context: components.schemas.PlanLimits.properties.storageSameKeyWritesPerSecond.",
             "minimum": 0,
             "maximum": 1000000000000
+          },
+          "stateSqliteStorageMibPerObject": {
+            "type": "integer",
+            "format": "int64",
+            "description": "State SQLite storage per object in MiB. Context: components.schemas.PlanLimits.properties.stateSqliteStorageMibPerObject.",
+            "minimum": 0,
+            "maximum": 1000000000000
           }
         },
         "additionalProperties": false,
@@ -15376,7 +15376,6 @@
             "queueOperationsPerMonth": null,
             "stateRequestsPerDay": 100000,
             "stateRequestsPerMonth": null,
-            "stateSqliteStorageMib": 9536,
             "objectStorageMib": 9536,
             "storageObjects": null,
             "storageObjectMaxMib": 5237760,
@@ -15462,7 +15461,8 @@
             "stateSqliteRowsReadPerMonth": null,
             "stateSqliteRowsWrittenPerDay": 100000,
             "stateSqliteRowsWrittenPerMonth": null,
-            "stateKeyValueSizeMib": 2
+            "stateKeyValueSizeMib": 2,
+            "stateSqliteStorageMibPerObject": 953
           }
         ]
       },
@@ -15827,7 +15827,6 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 9536,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -15902,7 +15901,8 @@
               "stateSqliteRowsReadPerMonth": null,
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
-              "stateKeyValueSizeMib": 2
+              "stateKeyValueSizeMib": 2,
+              "stateSqliteStorageMibPerObject": 953
             },
             "services": [
               {
@@ -17815,7 +17815,7 @@
                 {
                   "id": "state_namespace_1",
                   "className": "Room",
-                  "storageLimitMib": 9536
+                  "storageLimitMib": 953
                 }
               ]
             ]
