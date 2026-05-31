@@ -133,7 +133,7 @@ tovuk support resolve <ticket_id> --json
 
 Before load tests, production launch, or paid usage, run
 `tovuk pricing --json` and set hard usage caps with `tovuk limit set`.
-Useful cap metrics include `worker_requests`, `worker_cpu_ms`,
+Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `sqlite_rows_read`, `sqlite_rows_written`, `kv_reads`, `queue_operations`,
 `state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
 `state_sqlite_rows_written`,

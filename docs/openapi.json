@@ -2777,7 +2777,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|build_minutes|log_events)$",
               "maxLength": 64,
               "examples": [
                 "worker_requests"
@@ -4160,7 +4160,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|build_minutes|log_events)$",
               "maxLength": 128,
               "examples": [
                 "worker_requests"
@@ -5469,12 +5469,14 @@
                       "day": {
                         "worker_requests": 240,
                         "worker_cpu_ms": 35,
-                        "static_transfer_bytes": 2048
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
                       },
                       "month": {
                         "worker_requests": 240,
                         "worker_cpu_ms": 35,
-                        "static_transfer_bytes": 2048
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
                       }
                     }
                   },
@@ -6910,12 +6912,14 @@
                       "day": {
                         "worker_requests": 240,
                         "worker_cpu_ms": 35,
-                        "static_transfer_bytes": 2048
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
                       },
                       "month": {
                         "worker_requests": 240,
                         "worker_cpu_ms": 35,
-                        "static_transfer_bytes": 2048
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
                       }
                     }
                   },
@@ -7186,12 +7190,14 @@
                       "day": {
                         "worker_requests": 240,
                         "worker_cpu_ms": 35,
-                        "static_transfer_bytes": 2048
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
                       },
                       "month": {
                         "worker_requests": 240,
                         "worker_cpu_ms": 35,
-                        "static_transfer_bytes": 2048
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
                       }
                     }
                   },
@@ -10286,12 +10292,14 @@
                 "day": {
                   "worker_requests": 240,
                   "worker_cpu_ms": 35,
-                  "static_transfer_bytes": 2048
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
                 },
                 "month": {
                   "worker_requests": 240,
                   "worker_cpu_ms": 35,
-                  "static_transfer_bytes": 2048
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
                 }
               }
             },
@@ -10866,12 +10874,14 @@
               "day": {
                 "worker_requests": 240,
                 "worker_cpu_ms": 35,
-                "static_transfer_bytes": 2048
+                "static_transfer_bytes": 2048,
+                "build_minutes": 1
               },
               "month": {
                 "worker_requests": 240,
                 "worker_cpu_ms": 35,
-                "static_transfer_bytes": 2048
+                "static_transfer_bytes": 2048,
+                "build_minutes": 1
               }
             }
           }
@@ -13874,12 +13884,14 @@
                 "day": {
                   "worker_requests": 240,
                   "worker_cpu_ms": 35,
-                  "static_transfer_bytes": 2048
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
                 },
                 "month": {
                   "worker_requests": 240,
                   "worker_cpu_ms": 35,
-                  "static_transfer_bytes": 2048
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
                 }
               }
             },
@@ -15704,12 +15716,14 @@
                 "day": {
                   "worker_requests": 240,
                   "worker_cpu_ms": 35,
-                  "static_transfer_bytes": 2048
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
                 },
                 "month": {
                   "worker_requests": 240,
                   "worker_cpu_ms": 35,
-                  "static_transfer_bytes": 2048
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
                 }
               }
             },
@@ -17593,7 +17607,7 @@
             "description": "Meter name. Context: components.schemas.UsageCap.properties.metric.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|build_minutes|log_events)$",
             "examples": [
               "worker_requests"
             ]
@@ -19304,7 +19318,7 @@
             "description": "Meter name. Context: components.schemas.UsageCapDeleteResponse.properties.metric.",
             "minLength": 1,
             "maxLength": 128,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|build_minutes|log_events)$",
             "examples": [
               "worker_requests"
             ]
@@ -21619,12 +21633,14 @@
             "day": {
               "worker_requests": 240,
               "worker_cpu_ms": 35,
-              "static_transfer_bytes": 2048
+              "static_transfer_bytes": 2048,
+              "build_minutes": 1
             },
             "month": {
               "worker_requests": 240,
               "worker_cpu_ms": 35,
-              "static_transfer_bytes": 2048
+              "static_transfer_bytes": 2048,
+              "build_minutes": 1
             }
           }
         ]
@@ -21781,6 +21797,13 @@
             "maximum": 9007199254740991,
             "description": "Current usage for the static_transfer_bytes meter."
           },
+          "build_minutes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the build_minutes meter."
+          },
           "log_events": {
             "type": "integer",
             "format": "int64",
@@ -21793,7 +21816,8 @@
           {
             "worker_requests": 240,
             "worker_cpu_ms": 35,
-            "static_transfer_bytes": 2048
+            "static_transfer_bytes": 2048,
+            "build_minutes": 1
           }
         ]
       }
