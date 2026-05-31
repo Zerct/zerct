@@ -55,7 +55,11 @@ npx tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-
 npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
 npx tovuk state create --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+npx tovuk service delete service_1 --json
 ```
+
+Use `service delete` for smoke-test and preview services that should not keep
+runtime, storage, queue, State, KV, SQLite, or domain resources.
 
 ## Agent-ready errors
 

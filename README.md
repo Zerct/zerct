@@ -162,6 +162,7 @@ npx tovuk usage
 npx tovuk activity --json
 npx tovuk service list
 npx tovuk service show service_1 --json
+npx tovuk service delete service_1 --json
 npx tovuk deploys
 npx tovuk builds --service service_1
 npx tovuk logs --service service_1 --limit 100 --json

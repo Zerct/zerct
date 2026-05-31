@@ -91,6 +91,7 @@ curl https://api.tovuk.com/v1/status
 npx tovuk activity --json
 npx tovuk service list --json
 npx tovuk service show <service> --json
+npx tovuk service delete <service> --json
 npx tovuk builds --service <service> --json
 npx tovuk logs --build <build_id> --json
 npx tovuk logs --service <service> --json
