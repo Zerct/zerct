@@ -53,6 +53,11 @@ output = "dist"
 The runtime serves frontend assets first. Requests to `/api` and `/api/*` proxy
 to the Rust worker without changing the hostname.
 
+Static frontend output supports Cloudflare-style `_headers` and `_redirects`
+files in the build output root. Redirects run before headers, rule files are
+not served as assets, `200` rewrite rules can render another same-site asset,
+and `301`, `302`, `303`, `307`, and `308` rules return a `Location` response.
+
 Frontend JavaScript and TypeScript are browser and build inputs only. Tovuk
 rejects Next API routes, Astro server endpoints, Svelte server handlers,
 middleware, SSR handlers, and runtime commands that start Node, Bun, Deno, or

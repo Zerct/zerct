@@ -111,3 +111,6 @@ frontend static and proxy `/api/*` to the Rust worker inside the same service UR
 JavaScript and TypeScript are frontend-only: Next API routes, Astro server
 endpoints, Svelte `+server` handlers, middleware, SSR handlers, and Node/Bun
 servers are rejected. Put that logic in Rust under the worker root.
+
+Optional `_headers` and `_redirects` files belong in the built static output
+root, not the source root unless the frontend build copies them there.
