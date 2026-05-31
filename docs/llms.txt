@@ -73,6 +73,13 @@ Worker-static contract:
 - The worker health path is `/api/healthz`.
 - Worker build and runtime commands must use `cargo build --release` and a
   `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
+- Queue handlers are Rust worker routes at `POST /.tovuk/queues/<queue>`.
+- Queue handler payloads contain base64 message bodies. Return `2xx` only after
+  the batch is safely handled.
+- Cron handlers are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
+- Cron handlers must be idempotent because schedules can overlap with retries
+  or manual agent actions.
+- WebSocket upgrades on worker routes are proxied to Rust workers.
 
 Useful commands:
 
