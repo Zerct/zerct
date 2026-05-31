@@ -25,7 +25,8 @@ tovuk usage --json
 - Projects: `100`.
 - Rust Workers: `100,000` requests per day, `10 ms` CPU per invocation,
   `128 MiB` memory, `50` subrequests per request, `64 MiB` artifact size
-  before compression, and `3 MiB` compressed artifact size.
+  before compression, `3 MiB` compressed artifact size, and `5,000` resource
+  bindings per service.
 - Static assets: free and unlimited requests, free asset storage, `20,000`
   files per Worker version, `25 MiB` per file.
 - Transfer: metered for visibility with no default plan cap. Agents can set
@@ -54,7 +55,7 @@ tovuk usage --json
   million requests. CPU includes `30 million ms` per month, then `$0.02` per
   million CPU ms. Per-invocation CPU can be up to `300,000 ms`. Worker
   artifacts are capped at `64 MiB` before compression and `10 MiB` after
-  compression.
+  compression, with `5,000` resource bindings per service.
 - Static assets: free and unlimited requests, free asset storage, `100,000`
   files per Worker version, `25 MiB` per file.
 - Transfer: metered for visibility with no default plan cap. Agents can set
