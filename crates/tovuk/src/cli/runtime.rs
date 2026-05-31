@@ -1,9 +1,9 @@
 use super::{
     api_commands::{
         billing_command, binding_command, builds_command, capabilities, caps_command, cron_command,
-        deploys_command, domains_command, durable_command, env_command, kv_command, logs_command,
-        platform_command, pricing, print_authenticated, print_paged_authenticated, queue_command,
-        service_command, service_get_command, service_route, sqlite_command, storage_command,
+        deploys_command, domains_command, env_command, kv_command, logs_command, platform_command,
+        pricing, print_authenticated, print_paged_authenticated, queue_command, service_command,
+        service_get_command, service_route, sqlite_command, state_command, storage_command,
         support_command,
     },
     args::{parse_args, project_path},
@@ -65,7 +65,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "kv" => kv_command(&cli),
         "queue" | "queues" => queue_command(&cli),
         "cron" => cron_command(&cli),
-        "durable-object" | "durable-objects" => durable_command(&cli),
+        "state" => state_command(&cli),
         "binding" | "bindings" => binding_command(&cli),
         "limit" | "limits" => caps_command(&cli),
         "env" => env_command(&cli),

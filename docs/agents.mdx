@@ -45,7 +45,7 @@ Run `tovuk doctor --json`. Fix the first failed check by following
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable
 error, and redeploy. Use platform resource commands for SQLite, KV, queues,
-cron triggers, Durable Objects, service bindings, and usage caps.
+cron triggers, State, service bindings, and usage caps.
 Before load tests or production launch, run `tovuk pricing --json` and set
 hard usage caps with `tovuk limit set`.
 For queue handlers, implement `POST /.tovuk/queues/<queue>` and return `2xx`
@@ -98,7 +98,7 @@ tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 ```
 
-Use `--public` only when the service needs a CDN URL. Use `--content-type <mime>`
+Use `--public` only when the service needs a public media URL. Use `--content-type <mime>`
 when the extension is missing or ambiguous.
 
 ## Starter prompt
@@ -132,11 +132,13 @@ tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-time
 tovuk queue update --service service_1 jobs --max-batch-size 25 --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
-tovuk durable-object create --service service_1 Room --json
+tovuk state create --service service_1 Room --json
+tovuk state put --service service_1 Room room-1 counter 1 --json
+tovuk state get --service service_1 Room room-1 counter --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk limit set worker_requests --period day --value 100000 --json
-tovuk limit set durable_object_requests --period month --value 1000000 --json
-tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json

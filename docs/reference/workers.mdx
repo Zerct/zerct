@@ -71,7 +71,9 @@ tovuk database query --service service_1 DB "select 1" --json
 tovuk kv create --service service_1 CACHE --json
 tovuk queue create --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
-tovuk durable-object create --service service_1 Room --json
+tovuk state create --service service_1 Room --json
+tovuk state put --service service_1 Room room-1 counter 1 --json
+tovuk state get --service service_1 Room room-1 counter --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```

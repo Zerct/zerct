@@ -74,13 +74,15 @@ tovuk cron update --service <service> nightly "*/15 * * * *" --json
 tovuk cron disable --service <service> nightly --json
 tovuk cron enable --service <service> nightly --json
 tovuk cron delete --service <service> nightly --json
-tovuk durable-object create --service <service> Room --json
-tovuk durable-object delete --service <service> Room --json
+tovuk state create --service <service> Room --json
+tovuk state put --service <service> Room room-1 counter 1 --json
+tovuk state get --service <service> Room room-1 counter --json
+tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
 tovuk limit set worker_requests --period day --value 100000 --json
-tovuk limit set durable_object_requests --period month --value 1000000 --json
-tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit delete worker_requests --period day --json
 ```
 
@@ -90,8 +92,8 @@ Before high-throughput work or paid usage, read pricing and set hard caps:
 tovuk pricing --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-tovuk limit set durable_object_requests --period month --value 1000000 --json
-tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 ```
 
 Manage service files and media without dashboard access:

@@ -26,7 +26,7 @@ cd hello-service/web && bun install && cd ..
 
 From a worker-static repo root, `tovuk deploy` reads the single root
 `tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
-databases, KV namespaces, queues, cron triggers, Durable Object namespaces,
+databases, KV namespaces, queues, cron triggers, State namespaces,
 service bindings, and usage caps through CLI resource commands.
 
 Worker-static deploys use this `tovuk.toml` shape:

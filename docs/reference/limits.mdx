@@ -16,7 +16,7 @@ ambiguous to run.
 - Runtime CPU allocation is fixed at `1`; usage is controlled by metered
   `worker_cpu_ms` caps.
 - One service can bind up to 5000 platform resources, including SQLite
-  databases, KV namespaces, queues, Durable Object namespaces, and private
+  databases, KV namespaces, queues, State namespaces, and private
   service bindings.
 - Rust worker artifacts are capped at 64 MiB before compression, 3 MiB after
   compression on Free, and 10 MiB after compression on Pro.
@@ -24,8 +24,8 @@ ambiguous to run.
 - Static assets follow Tovuk limits: Free allows 20 thousand files
   per deployed version, Pro allows 100 thousand files per deployed version, and
   every individual static asset is capped at 25 MiB.
-- Static responses meter `cdn_transfer_bytes`; Rust worker responses meter
-  `origin_transfer_bytes`. Tovuk does not set a default plan transfer cap.
+- Static responses meter `static_transfer_bytes`; Rust worker responses meter
+  `worker_transfer_bytes`. Tovuk does not set a default plan transfer cap.
   Agents should set explicit hard caps before high-throughput launches.
 - Static output rejects symlinks and non-file, non-directory entries.
 - `_headers` supports up to 100 header rules with 2000 characters per line.
@@ -90,12 +90,12 @@ ambiguous to run.
   configured dead-letter queue after retries are exhausted.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
-- Durable Object SQLite storage is 1 GB per object on Free and 10 GB per
+- State SQLite storage is 1 GB per object on Free and 10 GB per
   object on Pro. Free also has a 5 GB account storage cap, 5 million SQLite
   rows read per day, and 100 thousand SQLite rows written per day. Pro includes
   1 million requests, 400 thousand GB-s duration, 25 billion SQLite rows read,
   and 50 million SQLite rows written per month before paid overage pricing.
-- Durable Object key and value payloads are limited to 2 MiB combined.
+- State key and value payloads are limited to 2 MiB combined.
 - Free logs include 200 thousand events per day with 3 day retention. Pro logs
   include 20 million events per month with 7 day retention.
 - Free support tickets: 3 per day.
@@ -134,10 +134,10 @@ Agents should set explicit hard caps before high-throughput tests or launch:
 tovuk pricing --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-tovuk limit set cdn_transfer_bytes --period month --value 107374182400 --json
-tovuk limit set origin_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set static_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set worker_transfer_bytes --period month --value 107374182400 --json
 tovuk limit set object_storage_bytes --period month --value 10000000000 --json
-tovuk limit set durable_object_requests --period month --value 1000000 --json
-tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set log_events --period month --value 20000000 --json
 ```
