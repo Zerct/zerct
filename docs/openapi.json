@@ -3351,6 +3351,95 @@
         }
       }
     },
+    "/v1/services/{service_id}/queues/{queue}/messages/batch": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Send queue message batch",
+        "description": "Send up to 100 messages to a service queue in one Cloudflare-style batch. Context: paths./v1/services/{service_id}/queues/{queue}/messages/batch.post.",
+        "operationId": "sendServiceQueueMessageBatch",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueueMessageBatchSent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}/messages/batch.post.parameters.0.",
+            "example": "service_1"
+          },
+          {
+            "name": "queue",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "jobs"
+              ]
+            },
+            "description": "Queue id or queue name. Context: paths./v1/services/{service_id}/queues/{queue}/messages/batch.post.parameters.1.",
+            "example": "jobs"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueueMessageBatchSendRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/queues/{queue}/messages/batch",
+                  "value": {
+                    "messages": [
+                      {
+                        "body": "{\"task\":\"sync\"}",
+                        "encoding": "text"
+                      },
+                      {
+                        "body": "{\"task\":\"index\"}",
+                        "encoding": "text",
+                        "delaySeconds": 60
+                      }
+                    ],
+                    "delaySeconds": 0
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/services/{service_id}/queues/{queue}/messages/batch. Context: paths./v1/services/{service_id}/queues/{queue}/messages/batch.post.requestBody."
+        }
+      }
+    },
     "/v1/services/{service_id}/sqlite/{database}/query": {
       "post": {
         "tags": [
@@ -8125,6 +8214,69 @@
                   ],
                   "nextActions": [
                     "Use KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueueMessageBatchSent": {
+        "description": "Queue message batch sent. Context: components.responses.QueueMessageBatchSent.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QueueMessageBatchSendResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Queue message batch sent",
+                "value": {
+                  "queue": {
+                    "id": "queue_1",
+                    "name": "jobs",
+                    "maxRetries": 3,
+                    "retentionSeconds": 345600,
+                    "maxBatchSize": 10,
+                    "maxBatchTimeoutSeconds": 5,
+                    "deadLetterQueueId": null,
+                    "deadLetterQueueName": null
+                  },
+                  "messages": [
+                    {
+                      "id": "qmsg_1",
+                      "status": "queued",
+                      "attempts": 0,
+                      "bodySizeBytes": 15,
+                      "visibleAt": "2026-06-01 12:00:00Z",
+                      "createdAt": "2026-06-01 12:00:00Z"
+                    },
+                    {
+                      "id": "qmsg_2",
+                      "status": "queued",
+                      "attempts": 0,
+                      "bodySizeBytes": 16,
+                      "visibleAt": "2026-06-01 12:00:00Z",
+                      "createdAt": "2026-06-01 12:00:00Z"
+                    }
+                  ],
+                  "successfulMessageCount": 2,
+                  "nextActions": [
+                    "Inspect messages with tovuk queue messages."
                   ]
                 }
               }
@@ -17281,9 +17433,9 @@
         "properties": {
           "body": {
             "type": "string",
-            "description": "Message body text or base64 bytes, capped at 128 KB. Context: components.schemas.QueueMessageSendRequest.properties.body.",
+            "description": "Message body text or base64 bytes, capped at 127900 bytes after Cloudflare-compatible metadata overhead. Context: components.schemas.QueueMessageSendRequest.properties.body.",
             "minLength": 1,
-            "maxLength": 128000,
+            "maxLength": 127900,
             "examples": [
               "{\"task\":\"sync\"}"
             ],
@@ -17303,7 +17455,7 @@
           "delaySeconds": {
             "type": "integer",
             "format": "int32",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 86400,
             "description": "Optional visibility delay in seconds. Context: components.schemas.QueueMessageSendRequest.properties.delaySeconds.",
             "examples": [
@@ -19025,6 +19177,213 @@
           },
           {
             "enabled": true
+          }
+        ]
+      },
+      "QueueMessageBatchItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "body"
+        ],
+        "description": "One queue batch send item. Context: components.schemas.QueueMessageBatchItem.",
+        "properties": {
+          "body": {
+            "type": "string",
+            "description": "Message body text or base64 bytes, capped at 127900 bytes after Cloudflare-compatible metadata overhead. Context: components.schemas.QueueMessageBatchItem.properties.body.",
+            "minLength": 1,
+            "maxLength": 127900,
+            "examples": [
+              "{\"task\":\"sync\"}"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "text",
+              "base64"
+            ],
+            "description": "Message body encoding. Context: components.schemas.QueueMessageBatchItem.properties.encoding.",
+            "examples": [
+              "text"
+            ]
+          },
+          "delaySeconds": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "Optional visibility delay in seconds for this message. Context: components.schemas.QueueMessageBatchItem.properties.delaySeconds.",
+            "examples": [
+              60
+            ]
+          }
+        },
+        "examples": [
+          {
+            "body": "{\"task\":\"sync\"}",
+            "encoding": "text",
+            "delaySeconds": 60
+          }
+        ]
+      },
+      "QueueMessageBatchSendRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "messages"
+        ],
+        "description": "Queue batch send request with Cloudflare-style 100 message and 256 KB total limits. Context: components.schemas.QueueMessageBatchSendRequest.",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/QueueMessageBatchItem"
+            },
+            "description": "Messages to send in one queue batch. Context: components.schemas.QueueMessageBatchSendRequest.properties.messages.",
+            "examples": [
+              [
+                {
+                  "body": "{\"task\":\"sync\"}",
+                  "encoding": "text"
+                }
+              ]
+            ]
+          },
+          "delaySeconds": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "Optional visibility delay applied to messages without their own delay. Context: components.schemas.QueueMessageBatchSendRequest.properties.delaySeconds.",
+            "examples": [
+              0
+            ]
+          }
+        },
+        "examples": [
+          {
+            "messages": [
+              {
+                "body": "{\"task\":\"sync\"}",
+                "encoding": "text"
+              },
+              {
+                "body": "{\"task\":\"index\"}",
+                "encoding": "text",
+                "delaySeconds": 60
+              }
+            ],
+            "delaySeconds": 0
+          }
+        ]
+      },
+      "QueueMessageBatchSendResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "queue",
+          "messages",
+          "successfulMessageCount",
+          "nextActions"
+        ],
+        "description": "Queue batch send response. Context: components.schemas.QueueMessageBatchSendResponse.",
+        "properties": {
+          "queue": {
+            "$ref": "#/components/schemas/QueueBinding"
+          },
+          "messages": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/QueueMessageSummary"
+            },
+            "description": "Created messages. Context: components.schemas.QueueMessageBatchSendResponse.properties.messages.",
+            "examples": [
+              [
+                {
+                  "id": "qmsg_1",
+                  "status": "queued",
+                  "attempts": 0,
+                  "bodySizeBytes": 15,
+                  "visibleAt": "2026-06-01 12:00:00Z",
+                  "createdAt": "2026-06-01 12:00:00Z"
+                },
+                {
+                  "id": "qmsg_2",
+                  "status": "queued",
+                  "attempts": 0,
+                  "bodySizeBytes": 16,
+                  "visibleAt": "2026-06-01 12:00:00Z",
+                  "createdAt": "2026-06-01 12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "successfulMessageCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Number of messages accepted. Context: components.schemas.QueueMessageBatchSendResponse.properties.successfulMessageCount.",
+            "examples": [
+              2
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable next actions. Context: components.schemas.QueueMessageBatchSendResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Inspect messages with tovuk queue messages."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "queue": {
+              "id": "queue_1",
+              "name": "jobs",
+              "maxRetries": 3,
+              "retentionSeconds": 345600,
+              "maxBatchSize": 10,
+              "maxBatchTimeoutSeconds": 5,
+              "deadLetterQueueId": null,
+              "deadLetterQueueName": null
+            },
+            "messages": [
+              {
+                "id": "qmsg_1",
+                "status": "queued",
+                "attempts": 0,
+                "bodySizeBytes": 15,
+                "visibleAt": "2026-06-01 12:00:00Z",
+                "createdAt": "2026-06-01 12:00:00Z"
+              },
+              {
+                "id": "qmsg_2",
+                "status": "queued",
+                "attempts": 0,
+                "bodySizeBytes": 16,
+                "visibleAt": "2026-06-01 12:00:00Z",
+                "createdAt": "2026-06-01 12:00:00Z"
+              }
+            ],
+            "successfulMessageCount": 2,
+            "nextActions": [
+              "Inspect messages with tovuk queue messages."
+            ]
           }
         ]
       }

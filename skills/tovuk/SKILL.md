@@ -48,6 +48,8 @@ npx tovuk kv create --service <service> CACHE --json
 npx tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
 npx tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
 npx tovuk queue create --service <service> jobs --json
+npx tovuk queue send --service <service> jobs '{"task":"sync"}' --json
+npx tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 npx tovuk cron create --service <service> nightly "0 0 * * *" --json
 npx tovuk cron update --service <service> nightly "*/15 * * * *" --json
 npx tovuk cron disable --service <service> nightly --json

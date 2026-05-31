@@ -65,6 +65,8 @@ npx tovuk queue create --service <service> failed_jobs --json
 npx tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 npx tovuk queue update --service <service> jobs --max-batch-size 25 --json
 npx tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
+npx tovuk queue send --service <service> jobs '{"task":"sync"}' --json
+npx tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 npx tovuk queue delete --service <service> jobs --json
 npx tovuk cron create --service <service> nightly "0 0 * * *" --json
 npx tovuk cron update --service <service> nightly "*/15 * * * *" --json
