@@ -86,7 +86,7 @@ fn apply_value_flag(
             apply_common_value_flag(cli, name, inline, argv, index)
         }
         "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
-        "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
+        "--expiration" | "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
             apply_kv_value_flag(cli, name, inline, argv, index)
         }
         "--delay-seconds"
@@ -169,6 +169,14 @@ fn apply_kv_value_flag(
     index: usize,
 ) -> Result<usize> {
     match name {
+        "--expiration" => set_string_flag(
+            &mut cli.kv.expiration,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
         "--expiration-ttl-seconds" | "--ttl" => set_string_flag(
             &mut cli.kv.expiration_ttl_seconds,
             name,

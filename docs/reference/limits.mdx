@@ -56,7 +56,8 @@ ambiguous to run.
   reads, 1 million writes, 1 million deletes, 1 million lists, and 1 GiB
   storage are included each month before paid overage pricing.
 - KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
-  least 30 seconds. KV keys are limited to 512 bytes and values to 25 MiB.
+  least 60 seconds, and KV `expiration` must be at least 60 seconds in the
+  future. KV keys are limited to 512 bytes and values to 25 MiB.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
   or delete chunk.
 - Pro queue operations: 1 million per month included before paid overage

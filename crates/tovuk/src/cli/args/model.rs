@@ -48,6 +48,7 @@ pub(crate) struct QueueOptions {
 #[derive(Clone, Debug)]
 pub(crate) struct KvOptions {
     pub(crate) metadata: String,
+    pub(crate) expiration: String,
     pub(crate) expiration_ttl_seconds: String,
 }
 
@@ -92,6 +93,7 @@ impl Default for CliOptions {
             },
             kv: KvOptions {
                 metadata: String::new(),
+                expiration: String::new(),
                 expiration_ttl_seconds: String::new(),
             },
             queue: QueueOptions {

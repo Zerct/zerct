@@ -15,6 +15,7 @@ tovuk database query --service service_1 DB "select 1" --json
 tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
+tovuk kv put --service service_1 CACHE session:1 '{"ok":true}' --expiration 1780272000 --json
 tovuk kv get --service service_1 CACHE user:1 --json
 tovuk kv keys --service service_1 CACHE --json
 tovuk kv namespace delete --service service_1 CACHE --json

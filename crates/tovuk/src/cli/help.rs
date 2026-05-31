@@ -32,7 +32,7 @@ Usage:
   tovuk kv namespace delete --service <service> CACHE [--api <url>] [--json]
   tovuk kv keys --service <service> CACHE [--api <url>] [--json]
   tovuk kv get --service <service> CACHE <key> [--api <url>] [--json]
-  tovuk kv put --service <service> CACHE <key> <value> [--metadata <json>] [--ttl <seconds>] [--api <url>] [--json]
+  tovuk kv put --service <service> CACHE <key> <value> [--metadata <json>] [--expiration <unix_seconds>] [--ttl <seconds>] [--api <url>] [--json]
   tovuk kv delete --service <service> CACHE <key> [--api <url>] [--json]
   tovuk kv bulk put --service <service> CACHE '[{{"key":"a","value":"1"}}]' [--api <url>] [--json]
   tovuk kv bulk get --service <service> CACHE key-a key-b [--api <url>] [--json]
