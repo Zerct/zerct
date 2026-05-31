@@ -24,15 +24,16 @@ ambiguous to run.
 - Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
-- Free service object storage includes 10 GiB total, 100 thousand objects, a
-  5115 GiB R2-style object size ceiling, a 5115 MiB (4.995 GiB) single-part
-  upload limit, 10 thousand multipart upload parts, 1 million Class A
-  operations per month, and 10 million Class B operations per month.
+- Free service object storage includes 10 GiB total, no object-count cap, a
+  5 TiB R2-style object size ceiling, a 5120 MiB (5 GiB) single-part upload
+  limit, a 5115 GiB (4.995 TiB) multipart upload limit, 10 thousand multipart
+  upload parts, 1 million Class A operations per month, and 10 million Class B
+  operations per month.
 - Pro service object storage has a 1 TiB account hard cap, includes 10 GiB,
-  allows 1 million objects, has the same 5115 GiB object ceiling and 5115 MiB
-  single-part upload limit, includes 1 million Class A operations and
-  10 million Class B operations per month, and exposes R2-style paid overage
-  rates in `tovuk pricing --json`.
+  has no object-count cap, has the same 5 TiB object ceiling, 5120 MiB
+  single-part upload limit, and 5115 GiB multipart upload limit, includes
+  1 million Class A operations and 10 million Class B operations per month,
+  and exposes R2-style paid overage rates in `tovuk pricing --json`.
 - Free worker requests: 100 thousand per day.
 - Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
 - Pro SQLite databases: 50 thousand, with a 1 TiB account hard cap and 10 GiB
