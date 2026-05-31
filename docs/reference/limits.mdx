@@ -41,6 +41,9 @@ ambiguous to run.
   single-part upload limit, and 5115 GiB multipart upload limit, includes
   1 million Class A operations and 10 million Class B operations per month,
   and exposes R2-style paid overage rates in `tovuk pricing --json`.
+- Object storage upload URL creation reserves requested bytes until the object
+  is completed or deleted, so agents can avoid concurrent upload overages
+  without dashboard cleanup.
 - Free worker requests: 100 thousand per day.
 - Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
 - Pro SQLite databases: 50 thousand, with a 1 TiB account hard cap and 10 GiB
@@ -123,6 +126,7 @@ Agents should set explicit hard caps before high-throughput tests or launch:
 npx tovuk pricing --json
 npx tovuk limit set worker_requests --period month --value 10000000 --json
 npx tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+npx tovuk limit set object_storage_bytes --period month --value 10737418240 --json
 npx tovuk limit set durable_object_requests --period month --value 1000000 --json
 npx tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 ```
