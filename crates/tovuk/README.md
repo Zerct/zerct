@@ -59,7 +59,10 @@ tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 tovuk kv get --service service_1 CACHE user:1 --json
 tovuk kv namespace delete --service service_1 CACHE --json
-tovuk queue create --service service_1 jobs --json
+tovuk queue create --service service_1 failed_jobs --json
+tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service service_1 jobs --max-batch-size 25 --json
+tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json

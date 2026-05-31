@@ -62,6 +62,12 @@ fn apply_boolean_flag(
             name,
             json_output,
         ),
+        "--clear-dead-letter-queue" => set_boolean_flag(
+            inline,
+            || cli.queue.clear_dead_letter_queue = true,
+            name,
+            json_output,
+        ),
         _ => return Ok(None),
     }
     .map(Some)
@@ -83,9 +89,12 @@ fn apply_value_flag(
         "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
             apply_kv_value_flag(cli, name, inline, argv, index)
         }
-        "--delay-seconds" | "--max-retries" | "--retention-seconds" => {
-            apply_queue_value_flag(cli, name, inline, argv, index)
-        }
+        "--delay-seconds"
+        | "--max-retries"
+        | "--retention-seconds"
+        | "--max-batch-size"
+        | "--max-batch-timeout-seconds"
+        | "--dead-letter-queue" => apply_queue_value_flag(cli, name, inline, argv, index),
         "--failing-command" | "--first-log-line" | "--severity" => {
             apply_support_value_flag(cli, name, inline, argv, index)
         }
@@ -198,6 +207,30 @@ fn apply_queue_value_flag(
         ),
         "--max-retries" => set_string_flag(
             &mut cli.queue.max_retries,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--max-batch-size" => set_string_flag(
+            &mut cli.queue.max_batch_size,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--max-batch-timeout-seconds" => set_string_flag(
+            &mut cli.queue.max_batch_timeout_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--dead-letter-queue" => set_string_flag(
+            &mut cli.queue.dead_letter_queue,
             name,
             inline,
             argv,

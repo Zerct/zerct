@@ -58,7 +58,10 @@ npx tovuk database query --service <service> DB "select 1" --json
 npx tovuk database delete --service <service> DB --json
 npx tovuk kv create --service <service> CACHE --json
 npx tovuk kv namespace delete --service <service> CACHE --json
-npx tovuk queue create --service <service> jobs --json
+npx tovuk queue create --service <service> failed_jobs --json
+npx tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+npx tovuk queue update --service <service> jobs --max-batch-size 25 --json
+npx tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
 npx tovuk queue delete --service <service> jobs --json
 npx tovuk cron create --service <service> nightly "0 0 * * *" --json
 npx tovuk cron delete --service <service> nightly --json

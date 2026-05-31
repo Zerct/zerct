@@ -72,6 +72,7 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_queue(cli),
+        "update" | "set" => update_queue(cli),
         "messages" => queue_messages(cli),
         "send" => queue_send(cli),
         "delete" | "del" | "rm" => delete_app_resource(
@@ -96,6 +97,42 @@ fn create_queue(cli: &CliOptions) -> Result<()> {
     )?;
     let mut body = Map::new();
     body.insert("name".to_owned(), Value::String(name));
+    apply_queue_policy_options(cli, &mut body)?;
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &service_route(cli, "queues")?,
+        Some(Value::Object(body)),
+    )
+}
+
+fn update_queue(cli: &CliOptions) -> Result<()> {
+    let queue = required_arg(
+        cli,
+        1,
+        "queue_name_required",
+        "Queue name is required.",
+        "Use `tovuk queue update --service <service> jobs --max-batch-size 25 --json`.",
+    )?;
+    let mut body = Map::new();
+    apply_queue_policy_options(cli, &mut body)?;
+    if body.is_empty() {
+        return Err(agent_error(
+            "queue_update_empty",
+            "Queue update has no changes.",
+            "Pass at least one of `--max-retries`, `--retention-seconds`, `--max-batch-size`, `--max-batch-timeout-seconds`, or `--dead-letter-queue`.",
+            cli.output.json,
+        ));
+    }
+    let route = format!(
+        "{}/queues/{}",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&queue)
+    );
+    print_authenticated_mutation(cli, Method::PUT, &route, Some(Value::Object(body)))
+}
+
+fn apply_queue_policy_options(cli: &CliOptions, body: &mut Map<String, Value>) -> Result<()> {
     if let Some(max_retries) = optional_u16(&cli.queue.max_retries, "--max-retries", cli)? {
         body.insert("maxRetries".to_owned(), json!(max_retries));
     }
@@ -104,12 +141,37 @@ fn create_queue(cli: &CliOptions) -> Result<()> {
     {
         body.insert("retentionSeconds".to_owned(), json!(retention_seconds));
     }
-    print_authenticated_mutation(
+    if let Some(max_batch_size) = optional_u16(&cli.queue.max_batch_size, "--max-batch-size", cli)?
+    {
+        body.insert("maxBatchSize".to_owned(), json!(max_batch_size));
+    }
+    if let Some(max_batch_timeout_seconds) = optional_u16(
+        &cli.queue.max_batch_timeout_seconds,
+        "--max-batch-timeout-seconds",
         cli,
-        Method::POST,
-        &service_route(cli, "queues")?,
-        Some(Value::Object(body)),
-    )
+    )? {
+        body.insert(
+            "maxBatchTimeoutSeconds".to_owned(),
+            json!(max_batch_timeout_seconds),
+        );
+    }
+    if cli.queue.clear_dead_letter_queue && !cli.queue.dead_letter_queue.is_empty() {
+        return Err(agent_error(
+            "queue_dead_letter_conflict",
+            "Queue dead-letter options conflict.",
+            "Use either `--dead-letter-queue <queue>` or `--clear-dead-letter-queue`, not both.",
+            cli.output.json,
+        ));
+    }
+    if cli.queue.clear_dead_letter_queue {
+        body.insert("deadLetterQueue".to_owned(), Value::Null);
+    } else if !cli.queue.dead_letter_queue.is_empty() {
+        body.insert(
+            "deadLetterQueue".to_owned(),
+            Value::String(cli.queue.dead_letter_queue.clone()),
+        );
+    }
+    Ok(())
 }
 
 pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {

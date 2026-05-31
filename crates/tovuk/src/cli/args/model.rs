@@ -38,6 +38,10 @@ pub(crate) struct DeploymentOptions {
 pub(crate) struct QueueOptions {
     pub(crate) max_retries: String,
     pub(crate) retention_seconds: String,
+    pub(crate) max_batch_size: String,
+    pub(crate) max_batch_timeout_seconds: String,
+    pub(crate) dead_letter_queue: String,
+    pub(crate) clear_dead_letter_queue: bool,
     pub(crate) delay_seconds: String,
 }
 
@@ -93,6 +97,10 @@ impl Default for CliOptions {
             queue: QueueOptions {
                 max_retries: String::new(),
                 retention_seconds: String::new(),
+                max_batch_size: String::new(),
+                max_batch_timeout_seconds: String::new(),
+                dead_letter_queue: String::new(),
+                clear_dead_letter_queue: false,
                 delay_seconds: String::new(),
             },
             storage: StorageOptions {

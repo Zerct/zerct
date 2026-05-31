@@ -2493,7 +2493,7 @@
           "Deploy"
         ],
         "summary": "Create queue",
-        "description": "Create a service queue for background work. Context: paths./v1/services/{service_id}/queues.post.",
+        "description": "Create a service queue for background work with Cloudflare-style retry, batch, retention, and dead-letter controls. Context: paths./v1/services/{service_id}/queues.post.",
         "operationId": "createServiceQueue",
         "responses": {
           "200": {
@@ -2540,7 +2540,11 @@
                 "example": {
                   "summary": "Request example for POST /v1/services/{service_id}/queues",
                   "value": {
-                    "name": "jobs"
+                    "name": "jobs",
+                    "maxRetries": 3,
+                    "maxBatchSize": 10,
+                    "maxBatchTimeoutSeconds": 5,
+                    "deadLetterQueue": "failed_jobs"
                   }
                 }
               }
@@ -3618,6 +3622,87 @@
             "example": "jobs"
           }
         ]
+      },
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Update queue",
+        "description": "Update queue retry, retention, batch, and dead-letter controls. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/queues/{queue}.put.",
+        "operationId": "updateServiceQueue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}.put.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "queue",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "jobs"
+              ]
+            },
+            "description": "Queue id or name. Context: paths./v1/services/{service_id}/queues/{queue}.put.parameters.queue.",
+            "example": "jobs"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueueUpdateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for PUT /v1/services/{service_id}/queues/{queue}",
+                  "value": {
+                    "maxBatchSize": 25,
+                    "maxBatchTimeoutSeconds": 10,
+                    "deadLetterQueue": "failed_jobs"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for PUT /v1/services/{service_id}/queues/{queue}. Context: paths./v1/services/{service_id}/queues/{queue}.put.requestBody."
+        }
       }
     },
     "/v1/services/{service_id}/cron/{trigger}": {
@@ -7055,7 +7140,11 @@
                       "id": "queue_1",
                       "name": "jobs",
                       "maxRetries": 3,
-                      "retentionSeconds": 345600
+                      "retentionSeconds": 345600,
+                      "maxBatchSize": 10,
+                      "maxBatchTimeoutSeconds": 5,
+                      "deadLetterQueueId": null,
+                      "deadLetterQueueName": null
                     }
                   ],
                   "cronTriggers": [
@@ -7347,7 +7436,11 @@
                     "id": "queue_1",
                     "name": "jobs",
                     "maxRetries": 3,
-                    "retentionSeconds": 345600
+                    "retentionSeconds": 345600,
+                    "maxBatchSize": 10,
+                    "maxBatchTimeoutSeconds": 5,
+                    "deadLetterQueueId": null,
+                    "deadLetterQueueName": null
                   },
                   "messages": [
                     {
@@ -7398,7 +7491,11 @@
                     "id": "queue_1",
                     "name": "jobs",
                     "maxRetries": 3,
-                    "retentionSeconds": 345600
+                    "retentionSeconds": 345600,
+                    "maxBatchSize": 10,
+                    "maxBatchTimeoutSeconds": 5,
+                    "deadLetterQueueId": null,
+                    "deadLetterQueueName": null
                   },
                   "message": {
                     "id": "qmsg_1",
@@ -15272,7 +15369,11 @@
           "id",
           "name",
           "maxRetries",
-          "retentionSeconds"
+          "retentionSeconds",
+          "maxBatchSize",
+          "maxBatchTimeoutSeconds",
+          "deadLetterQueueId",
+          "deadLetterQueueName"
         ],
         "properties": {
           "id": {
@@ -15290,7 +15391,7 @@
             "description": "Queue name. Context: components.schemas.QueueBinding.properties.name.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "pattern": "^[a-z][a-z0-9_]{0,62}$",
             "examples": [
               "jobs"
             ]
@@ -15313,6 +15414,48 @@
             "maximum": 1209600,
             "examples": [
               345600
+            ]
+          },
+          "maxBatchSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum messages delivered in one consumer batch. Context: components.schemas.QueueBinding.properties.maxBatchSize.",
+            "minimum": 1,
+            "maximum": 100,
+            "examples": [
+              10
+            ]
+          },
+          "maxBatchTimeoutSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum seconds to wait before delivering a partial batch. Context: components.schemas.QueueBinding.properties.maxBatchTimeoutSeconds.",
+            "minimum": 0,
+            "maximum": 60,
+            "examples": [
+              5
+            ]
+          },
+          "deadLetterQueueId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Dead letter queue id, when configured. Context: components.schemas.QueueBinding.properties.deadLetterQueueId.",
+            "pattern": "^queue_[0-9]+$",
+            "examples": [
+              "queue_2"
+            ]
+          },
+          "deadLetterQueueName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Dead letter queue name, when configured. Context: components.schemas.QueueBinding.properties.deadLetterQueueName.",
+            "pattern": "^[a-z][a-z0-9_]{0,62}$",
+            "examples": [
+              "failed_jobs"
             ]
           }
         },
@@ -15584,7 +15727,11 @@
                   "id": "queue_1",
                   "name": "jobs",
                   "maxRetries": 3,
-                  "retentionSeconds": 345600
+                  "retentionSeconds": 345600,
+                  "maxBatchSize": 10,
+                  "maxBatchTimeoutSeconds": 5,
+                  "deadLetterQueueId": null,
+                  "deadLetterQueueName": null
                 }
               ]
             ]
@@ -15917,7 +16064,7 @@
             "description": "Queue name. Context: components.schemas.QueueCreateRequest.properties.name.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$",
+            "pattern": "^[a-z][a-z0-9_]{0,62}$",
             "examples": [
               "jobs"
             ]
@@ -15941,9 +16088,42 @@
             "examples": [
               86400
             ]
+          },
+          "maxBatchSize": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Optional maximum messages per consumer batch. Context: components.schemas.QueueCreateRequest.properties.maxBatchSize.",
+            "examples": [
+              10
+            ]
+          },
+          "maxBatchTimeoutSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 60,
+            "description": "Optional maximum seconds to wait before delivering a partial batch. Context: components.schemas.QueueCreateRequest.properties.maxBatchTimeoutSeconds.",
+            "examples": [
+              5
+            ]
+          },
+          "deadLetterQueue": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+            "description": "Optional existing queue id or name for failed messages. Send null on update to clear. Context: components.schemas.QueueCreateRequest.properties.deadLetterQueue.",
+            "examples": [
+              "failed_jobs"
+            ]
           }
         },
-        "description": "QueueCreateRequest. Context: components.schemas.QueueCreateRequest."
+        "description": "Queue create request with Cloudflare-style retry, batch, retention, and dead-letter controls. Context: components.schemas.QueueCreateRequest."
       },
       "CronTriggerCreateRequest": {
         "type": "object",
@@ -16557,7 +16737,11 @@
               "id": "queue_1",
               "name": "jobs",
               "maxRetries": 3,
-              "retentionSeconds": 345600
+              "retentionSeconds": 345600,
+              "maxBatchSize": 10,
+              "maxBatchTimeoutSeconds": 5,
+              "deadLetterQueueId": null,
+              "deadLetterQueueName": null
             },
             "messages": [
               {
@@ -16663,7 +16847,11 @@
               "id": "queue_1",
               "name": "jobs",
               "maxRetries": 3,
-              "retentionSeconds": 345600
+              "retentionSeconds": 345600,
+              "maxBatchSize": 10,
+              "maxBatchTimeoutSeconds": 5,
+              "deadLetterQueueId": null,
+              "deadLetterQueueName": null
             },
             "message": {
               "id": "qmsg_1",
@@ -17742,6 +17930,66 @@
             }
           }
         }
+      },
+      "QueueUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "maxRetries": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Optional maximum retry count. Context: components.schemas.QueueUpdateRequest.properties.maxRetries.",
+            "examples": [
+              3
+            ]
+          },
+          "retentionSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 60,
+            "maximum": 1209600,
+            "description": "Optional message retention in seconds. Free is fixed at 86400. Pro defaults to 345600 and supports up to 1209600. Context: components.schemas.QueueUpdateRequest.properties.retentionSeconds.",
+            "examples": [
+              86400
+            ]
+          },
+          "maxBatchSize": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Optional maximum messages per consumer batch. Context: components.schemas.QueueUpdateRequest.properties.maxBatchSize.",
+            "examples": [
+              10
+            ]
+          },
+          "maxBatchTimeoutSeconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 60,
+            "description": "Optional maximum seconds to wait before delivering a partial batch. Context: components.schemas.QueueUpdateRequest.properties.maxBatchTimeoutSeconds.",
+            "examples": [
+              5
+            ]
+          },
+          "deadLetterQueue": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+            "description": "Optional existing queue id or name for failed messages. Send null on update to clear. Context: components.schemas.QueueUpdateRequest.properties.deadLetterQueue.",
+            "examples": [
+              "failed_jobs"
+            ]
+          }
+        },
+        "description": "Queue update request with optional retry, batch, retention, and dead-letter controls. Context: components.schemas.QueueUpdateRequest."
       }
     }
   }
