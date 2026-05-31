@@ -53,15 +53,22 @@ tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk platform --service service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
+tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv namespace delete --service service_1 CACHE --json
 tovuk queue create --service service_1 jobs --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
+tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron delete --service service_1 nightly --json
 tovuk durable-object create --service service_1 Room --json
+tovuk durable-object delete --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service service_1 AUTH_SERVICE --json
 tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limit delete worker_requests --period day --json
 tovuk billing checkout --json
 tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json

@@ -54,12 +54,19 @@ Manage platform resources without dashboard access:
 tovuk platform --service <service> --json
 tovuk database create --service <service> DB --json
 tovuk database query --service <service> DB "select 1" --json
+tovuk database delete --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
+tovuk kv namespace delete --service <service> CACHE --json
 tovuk queue create --service <service> jobs --json
+tovuk queue delete --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk cron delete --service <service> nightly --json
 tovuk durable-object create --service <service> Room --json
+tovuk durable-object delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service <service> AUTH_SERVICE --json
 tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limit delete worker_requests --period day --json
 ```
 
 Manage service files and media without dashboard access:

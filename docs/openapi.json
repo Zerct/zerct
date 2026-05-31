@@ -3433,6 +3433,440 @@
           "description": "Request body for POST /v1/services/{service_id}/sqlite/{database}/query. Context: paths./v1/services/{service_id}/sqlite/{database}/query.post.requestBody."
         }
       }
+    },
+    "/v1/services/{service_id}/sqlite/databases/{database}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete SQLite database",
+        "description": "Delete SQLite database. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/sqlite/databases/{database}.delete.",
+        "operationId": "deleteServiceSqliteDatabase",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/sqlite/databases/{database}.delete.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "database",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sqlite_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "DB"
+              ]
+            },
+            "description": "SQLite database id or binding name. Context: paths./v1/services/{service_id}/sqlite/databases/{database}.delete.parameters.database.",
+            "example": "DB"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/kv/namespaces/{namespace}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete KV namespace",
+        "description": "Delete KV namespace. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/kv/namespaces/{namespace}.delete.",
+        "operationId": "deleteServiceKvNamespace",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/namespaces/{namespace}.delete.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name. Context: paths./v1/services/{service_id}/kv/namespaces/{namespace}.delete.parameters.namespace.",
+            "example": "CACHE"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/queues/{queue}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete queue",
+        "description": "Delete queue. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/queues/{queue}.delete.",
+        "operationId": "deleteServiceQueue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}.delete.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "queue",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "jobs"
+              ]
+            },
+            "description": "Queue id or name. Context: paths./v1/services/{service_id}/queues/{queue}.delete.parameters.queue.",
+            "example": "jobs"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/cron/{trigger}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete cron trigger",
+        "description": "Delete cron trigger. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/cron/{trigger}.delete.",
+        "operationId": "deleteServiceCronTrigger",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/cron/{trigger}.delete.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "trigger",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(cron_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "nightly"
+              ]
+            },
+            "description": "Cron trigger id or name. Context: paths./v1/services/{service_id}/cron/{trigger}.delete.parameters.trigger.",
+            "example": "nightly"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/durable-objects/namespaces/{namespace}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete Durable Object namespace",
+        "description": "Delete Durable Object namespace. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/durable-objects/namespaces/{namespace}.delete.",
+        "operationId": "deleteServiceDurableObjectNamespace",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/durable-objects/namespaces/{namespace}.delete.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(durable_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "Durable Object namespace id or class name. Context: paths./v1/services/{service_id}/durable-objects/namespaces/{namespace}.delete.parameters.namespace.",
+            "example": "Room"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/service-bindings/{binding}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete service binding",
+        "description": "Delete service binding. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/service-bindings/{binding}.delete.",
+        "operationId": "deleteServiceBinding",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PlatformResourcesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/service-bindings/{binding}.delete.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "binding",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z0-9_]{0,62}$",
+              "maxLength": 128,
+              "examples": [
+                "AUTH_SERVICE"
+              ]
+            },
+            "description": "Service binding name. Context: paths./v1/services/{service_id}/service-bindings/{binding}.delete.parameters.binding.",
+            "example": "AUTH_SERVICE"
+          }
+        ]
+      }
+    },
+    "/v1/usage/caps/{metric}/{period}": {
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete usage cap",
+        "description": "Deletes an account usage cap. Context: paths./v1/usage/caps/{metric}/{period}.delete.",
+        "operationId": "deleteUsageCap",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UsageCapDeleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "metric",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
+              "maxLength": 128,
+              "examples": [
+                "worker_requests"
+              ]
+            },
+            "description": "Usage cap metric. Context: paths./v1/usage/caps/{metric}/{period}.delete.parameters.metric.",
+            "example": "worker_requests"
+          },
+          {
+            "name": "period",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(day|month)$",
+              "maxLength": 128,
+              "examples": [
+                "day"
+              ]
+            },
+            "description": "Usage cap period. Context: paths./v1/usage/caps/{metric}/{period}.delete.parameters.period.",
+            "example": "day"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -6117,6 +6551,44 @@
                   "nextActions": [
                     "Use parameterized SQL with params instead of interpolating user input.",
                     "Keep hot queries indexed and inspect rowsRead, vmSteps, and fullscanSteps in the response."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "UsageCapDeleted": {
+        "description": "Usage cap deleted. Context: components.responses.UsageCapDeleted.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/UsageCapDeleteResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Usage cap deleted.",
+                "value": {
+                  "metric": "worker_requests",
+                  "period": "day",
+                  "deleted": true,
+                  "nextActions": [
+                    "Run tovuk usage --json to confirm current account usage.",
+                    "Set a replacement cap before allowing paid overage traffic."
                   ]
                 }
               }
@@ -14102,6 +14574,64 @@
           }
         },
         "description": "SQLite query response. Context: components.schemas.SqliteQueryResponse."
+      },
+      "UsageCapDeleteResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "metric",
+          "period",
+          "deleted",
+          "nextActions"
+        ],
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "Meter name. Context: components.schemas.UsageCapDeleteResponse.properties.metric.",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z][a-z0-9_]{0,127}$",
+            "examples": [
+              "worker_requests"
+            ]
+          },
+          "period": {
+            "type": "string",
+            "description": "Meter period. Context: components.schemas.UsageCapDeleteResponse.properties.period.",
+            "enum": [
+              "day",
+              "month"
+            ],
+            "examples": [
+              "day"
+            ]
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Whether a cap was deleted. Context: components.schemas.UsageCapDeleteResponse.properties.deleted.",
+            "examples": [
+              true
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.UsageCapDeleteResponse.properties.nextActions.",
+            "minItems": 0,
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^.{1,512}$"
+            },
+            "examples": [
+              [
+                "Run tovuk usage --json to confirm current account usage."
+              ]
+            ]
+          }
+        },
+        "description": "Usage cap deletion response. Context: components.schemas.UsageCapDeleteResponse."
       }
     }
   }

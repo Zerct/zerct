@@ -68,4 +68,5 @@ tovuk queue create --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk durable-object create --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```
