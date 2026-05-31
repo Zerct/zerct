@@ -4280,7 +4280,7 @@
           "Deploy"
         ],
         "summary": "Bulk read KV values",
-        "description": "Read up to 10000 KV values from a service namespace in requested key order. Each key counts as one KV read for metering. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk.post.",
+        "description": "Read up to 100 KV values from a service namespace in requested key order. Each key counts as one KV read for metering. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk.post.",
         "operationId": "bulkGetServiceKvValues",
         "responses": {
           "200": {
@@ -18918,7 +18918,7 @@
           "keys": {
             "type": "array",
             "minItems": 1,
-            "maxItems": 10000,
+            "maxItems": 100,
             "items": {
               "type": "string",
               "description": "KV key requested by the bulk read request.",
@@ -19071,7 +19071,7 @@
           },
           "values": {
             "type": "array",
-            "maxItems": 10000,
+            "maxItems": 100,
             "items": {
               "$ref": "#/components/schemas/KvBulkGetItem"
             },
@@ -19101,7 +19101,7 @@
             "type": "integer",
             "format": "int64",
             "minimum": 0,
-            "maximum": 10000,
+            "maximum": 100,
             "description": "Count of found keys. Context: components.schemas.KvBulkGetResponse.properties.successfulKeyCount.",
             "examples": [
               1
@@ -19109,7 +19109,7 @@
           },
           "missingKeys": {
             "type": "array",
-            "maxItems": 10000,
+            "maxItems": 100,
             "items": {
               "type": "string",
               "description": "KV key missing from the bulk read response.",
