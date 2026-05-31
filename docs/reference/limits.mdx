@@ -90,8 +90,8 @@ ambiguous to run.
   configured dead-letter queue after retries are exhausted.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
-- State SQLite storage is 1 GB per object on Free and 10 GB per
-  object on Pro. Free also has a 5 GB account storage cap, 5 million SQLite
+- State SQLite storage is 10 GB per object. Free also has a 5 GB account
+  storage cap, 5 million SQLite
   rows read per day, and 100 thousand SQLite rows written per day. Pro includes
   1 million requests, 400 thousand GB-s duration, 25 billion SQLite rows read,
   and 50 million SQLite rows written per month before paid overage pricing.

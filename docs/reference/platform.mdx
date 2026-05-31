@@ -123,8 +123,10 @@ tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 ```
 
 State usage is metered with Tovuk counters:
-`state_requests`, `state_duration_gb_seconds`, `state_sqlite_rows_read`,
+`state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
 `state_sqlite_rows_written`, and `state_sqlite_storage_bytes`.
+Duration is recorded in GB-milliseconds so agents can set precise integer caps
+without rounding short requests to full GB-seconds.
 
 State values are addressed by namespace, object key, and state key. Use workers
 for public HTTP APIs, then call State only when one key needs serialized
@@ -139,8 +141,8 @@ tovuk state delete-value --service service_1 Room room-1 counter --json
 ```
 
 State keys are capped at 512 bytes. The state key and value are
-capped at 2 MiB combined. Free services get 1 GB per object and a 5 GB account
-cap. Pro services get 10 GB per object.
+capped at 2 MiB combined. State objects get 10 GB per object. Free accounts
+also have a 5 GB account cap.
 
 ## Worker delivery
 
