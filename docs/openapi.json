@@ -5464,7 +5464,19 @@
                     "queueCount": 1,
                     "cronTriggerCount": 1,
                     "stateNamespaceCount": 1,
-                    "usageCapCount": 2
+                    "usageCapCount": 2,
+                    "meters": {
+                      "day": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048
+                      },
+                      "month": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048
+                      }
+                    }
                   },
                   "limits": {
                     "projects": 100,
@@ -6881,7 +6893,19 @@
                     "queueCount": 1,
                     "cronTriggerCount": 1,
                     "stateNamespaceCount": 1,
-                    "usageCapCount": 2
+                    "usageCapCount": 2,
+                    "meters": {
+                      "day": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048
+                      },
+                      "month": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048
+                      }
+                    }
                   },
                   "limits": {
                     "projects": 100,
@@ -7141,7 +7165,19 @@
                     "queueCount": 1,
                     "cronTriggerCount": 1,
                     "stateNamespaceCount": 1,
-                    "usageCapCount": 2
+                    "usageCapCount": 2,
+                    "meters": {
+                      "day": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048
+                      },
+                      "month": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048
+                      }
+                    }
                   },
                   "limits": {
                     "projects": 100,
@@ -10213,7 +10249,19 @@
               "queueCount": 1,
               "cronTriggerCount": 1,
               "stateNamespaceCount": 1,
-              "usageCapCount": 2
+              "usageCapCount": 2,
+              "meters": {
+                "day": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048
+                },
+                "month": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048
+                }
+              }
             },
             "limits": {
               "projects": 100,
@@ -10596,7 +10644,8 @@
           "queueCount",
           "cronTriggerCount",
           "stateNamespaceCount",
-          "usageCapCount"
+          "usageCapCount",
+          "meters"
         ],
         "properties": {
           "serviceCount": {
@@ -10753,6 +10802,9 @@
             "examples": [
               24
             ]
+          },
+          "meters": {
+            "$ref": "#/components/schemas/AccountUsageMeters"
           }
         },
         "examples": [
@@ -10773,7 +10825,19 @@
             "queueCount": 1,
             "cronTriggerCount": 1,
             "stateNamespaceCount": 1,
-            "usageCapCount": 2
+            "usageCapCount": 2,
+            "meters": {
+              "day": {
+                "worker_requests": 240,
+                "worker_cpu_ms": 35,
+                "static_transfer_bytes": 2048
+              },
+              "month": {
+                "worker_requests": 240,
+                "worker_cpu_ms": 35,
+                "static_transfer_bytes": 2048
+              }
+            }
           }
         ]
       },
@@ -13753,7 +13817,19 @@
               "queueCount": 1,
               "cronTriggerCount": 1,
               "stateNamespaceCount": 1,
-              "usageCapCount": 2
+              "usageCapCount": 2,
+              "meters": {
+                "day": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048
+                },
+                "month": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048
+                }
+              }
             },
             "limits": {
               "projects": 100,
@@ -15559,7 +15635,19 @@
               "queueCount": 1,
               "cronTriggerCount": 1,
               "stateNamespaceCount": 1,
-              "usageCapCount": 2
+              "usageCapCount": 2,
+              "meters": {
+                "day": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048
+                },
+                "month": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048
+                }
+              }
             },
             "limits": {
               "projects": 100,
@@ -21391,6 +21479,205 @@
               "workerCpuMsPerMonth",
               "workerMemoryMib"
             ]
+          }
+        ]
+      },
+      "AccountUsageMeters": {
+        "type": "object",
+        "description": "Current day and month usage-meter windows keyed by stable meter name. Context: components.schemas.AccountUsageMeters.",
+        "additionalProperties": false,
+        "required": [
+          "day",
+          "month"
+        ],
+        "properties": {
+          "day": {
+            "$ref": "#/components/schemas/AccountUsageMeterWindow"
+          },
+          "month": {
+            "$ref": "#/components/schemas/AccountUsageMeterWindow"
+          }
+        },
+        "examples": [
+          {
+            "day": {
+              "worker_requests": 240,
+              "worker_cpu_ms": 35,
+              "static_transfer_bytes": 2048
+            },
+            "month": {
+              "worker_requests": 240,
+              "worker_cpu_ms": 35,
+              "static_transfer_bytes": 2048
+            }
+          }
+        ]
+      },
+      "AccountUsageMeterWindow": {
+        "type": "object",
+        "description": "Usage-meter values for one current usage window. Context: components.schemas.AccountUsageMeterWindow.",
+        "additionalProperties": false,
+        "properties": {
+          "worker_requests": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the worker_requests meter."
+          },
+          "worker_cpu_ms": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the worker_cpu_ms meter."
+          },
+          "sqlite_rows_read": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the sqlite_rows_read meter."
+          },
+          "sqlite_rows_written": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the sqlite_rows_written meter."
+          },
+          "sqlite_storage_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the sqlite_storage_bytes meter."
+          },
+          "kv_reads": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the kv_reads meter."
+          },
+          "kv_writes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the kv_writes meter."
+          },
+          "kv_deletes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the kv_deletes meter."
+          },
+          "kv_lists": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the kv_lists meter."
+          },
+          "kv_storage_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the kv_storage_bytes meter."
+          },
+          "queue_operations": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the queue_operations meter."
+          },
+          "state_requests": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the state_requests meter."
+          },
+          "state_duration_gb_milliseconds": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the state_duration_gb_milliseconds meter."
+          },
+          "state_sqlite_rows_read": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the state_sqlite_rows_read meter."
+          },
+          "state_sqlite_rows_written": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the state_sqlite_rows_written meter."
+          },
+          "state_sqlite_storage_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the state_sqlite_storage_bytes meter."
+          },
+          "object_storage_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the object_storage_bytes meter."
+          },
+          "object_storage_class_a_operations": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the object_storage_class_a_operations meter."
+          },
+          "object_storage_class_b_operations": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the object_storage_class_b_operations meter."
+          },
+          "worker_transfer_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the worker_transfer_bytes meter."
+          },
+          "static_transfer_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the static_transfer_bytes meter."
+          },
+          "log_events": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Current usage for the log_events meter."
+          }
+        },
+        "examples": [
+          {
+            "worker_requests": 240,
+            "worker_cpu_ms": 35,
+            "static_transfer_bytes": 2048
           }
         ]
       }
