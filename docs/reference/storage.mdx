@@ -31,13 +31,25 @@ Free plan:
 
 - 10 GiB total object storage
 - 100 thousand objects
-- 10 GiB per object
+- 5 GiB per single-part object upload
+- 1 million Class A operations per month
+- 10 million Class B operations per month
 
 Pro plan:
 
 - 10 GiB total object storage
 - 1 million objects
-- 10 GiB per object
+- 5 GiB per single-part object upload
+- 1 million Class A operations per month
+- 10 million Class B operations per month
+
+Use Class A caps for write/list-heavy workflows and Class B caps for
+read/download-heavy workflows:
+
+```sh
+tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
+tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
+```
 
 When a storage limit blocks work, run:
 
