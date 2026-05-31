@@ -102,8 +102,13 @@ Manage service files and media without dashboard access:
 tovuk storage list --service <service> --json
 tovuk storage upload --service <service> ./logo.png uploads/logo.png --public --json
 tovuk storage download --service <service> uploads/logo.png ./logo.png --json
+tovuk storage url --service <service> uploads/logo.png --json
 tovuk storage delete --service <service> uploads/logo.png --json
 ```
+
+Use `tovuk capabilities --json` to inspect product choices, meters, limit
+fields, and plan prices before selecting Worker, State, SQLite, KV, queues,
+cron, service bindings, or object storage.
 
 When a plan limit blocks work:
 
