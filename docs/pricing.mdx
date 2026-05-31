@@ -27,6 +27,8 @@ tovuk usage --json
   `128 MiB` memory, `50` subrequests per request.
 - Static assets: free and unlimited requests, free asset storage, `20,000`
   files per Worker version, `25 MiB` per file.
+- Transfer: `100 GiB` per month across static CDN responses and Rust worker
+  origin responses.
 - SQLite: `10` databases, `5 GiB` total, `500 MiB` per database, `5 million`
   rows read per day, `100,000` rows written per day.
 - KV: `1,000` namespaces, `1 GiB` per account and namespace, `100,000`
@@ -52,6 +54,9 @@ tovuk usage --json
   million CPU ms. Per-invocation CPU can be up to `300,000 ms`.
 - Static assets: free and unlimited requests, free asset storage, `100,000`
   files per Worker version, `25 MiB` per file.
+- Transfer: `1 TiB` per month included across static CDN responses and Rust
+  worker origin responses. Set `cdn_transfer_bytes` and
+  `origin_transfer_bytes` hard caps before high-throughput launches.
 - SQLite: `50,000` databases, `1 TiB` account hard cap, `10 GiB` per database,
   `25 billion` rows read and `50 million` rows written per month included.
   Overage is `$0.001` per million rows read, `$1.00` per million rows written,
@@ -86,6 +91,8 @@ production launch, set hard caps:
 ```sh
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+tovuk limit set cdn_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set origin_transfer_bytes --period month --value 107374182400 --json
 tovuk limit set durable_object_requests --period month --value 1000000 --json
 tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
