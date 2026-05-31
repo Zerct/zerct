@@ -516,7 +516,10 @@ fn kv_put(cli: &CliOptions) -> Result<()> {
     if !cli.kv.metadata.trim().is_empty() {
         payload.insert("metadata".to_owned(), kv_metadata(cli)?);
     }
-    if let Some(ttl) = optional_u32(&cli.kv.expiration_ttl_seconds, "--ttl", cli)? {
+    if let Some(expiration) = optional_u64(&cli.kv.expiration, "--expiration", cli)? {
+        payload.insert("expiration".to_owned(), json!(expiration));
+    }
+    if let Some(ttl) = optional_u64(&cli.kv.expiration_ttl_seconds, "--ttl", cli)? {
         payload.insert("expirationTtlSeconds".to_owned(), json!(ttl));
     }
     print_authenticated_mutation(

@@ -3080,6 +3080,7 @@
                     "metadata": {
                       "source": "agent"
                     },
+                    "expiration": 1780272000,
                     "expirationTtlSeconds": 3600
                   }
                 }
@@ -4262,6 +4263,7 @@
                         "metadata": {
                           "source": "agent"
                         },
+                        "expiration": 1780272000,
                         "expirationTtlSeconds": 3600
                       }
                     ]
@@ -17329,12 +17331,22 @@
             ],
             "maxProperties": 0
           },
+          "expiration": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 253402300799,
+            "description": "Optional UNIX timestamp in seconds when the key expires. If expirationTtlSeconds is also set, expirationTtlSeconds wins. Context: components.schemas.KvEntryPutRequest.properties.expiration.",
+            "examples": [
+              1780272000
+            ]
+          },
           "expirationTtlSeconds": {
             "type": "integer",
-            "format": "int32",
-            "minimum": 30,
-            "maximum": 31536000,
-            "description": "Optional TTL in seconds. Context: components.schemas.KvEntryPutRequest.properties.expirationTtlSeconds.",
+            "format": "int64",
+            "minimum": 60,
+            "maximum": 253402300799,
+            "description": "Optional TTL in seconds from now. If expiration is also set, this value wins. Context: components.schemas.KvEntryPutRequest.properties.expirationTtlSeconds.",
             "examples": [
               3600
             ]
@@ -17347,6 +17359,7 @@
             "metadata": {
               "source": "agent"
             },
+            "expiration": 1780272000,
             "expirationTtlSeconds": 3600
           }
         ]
@@ -18812,12 +18825,22 @@
               }
             ]
           },
+          "expiration": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 253402300799,
+            "description": "Optional UNIX timestamp in seconds when the key expires. If expirationTtlSeconds is also set, expirationTtlSeconds wins. Context: components.schemas.KvBulkPutItem.properties.expiration.",
+            "examples": [
+              1780272000
+            ]
+          },
           "expirationTtlSeconds": {
             "type": "integer",
-            "format": "int32",
-            "minimum": 30,
-            "maximum": 31536000,
-            "description": "Optional TTL in seconds. Context: components.schemas.KvBulkPutItem.properties.expirationTtlSeconds.",
+            "format": "int64",
+            "minimum": 60,
+            "maximum": 253402300799,
+            "description": "Optional TTL in seconds from now. If expiration is also set, this value wins. Context: components.schemas.KvBulkPutItem.properties.expirationTtlSeconds.",
             "examples": [
               3600
             ]
@@ -18831,6 +18854,7 @@
             "metadata": {
               "source": "agent"
             },
+            "expiration": 1780272000,
             "expirationTtlSeconds": 3600
           }
         ]
@@ -18860,6 +18884,7 @@
                   "metadata": {
                     "source": "agent"
                   },
+                  "expiration": 1780272000,
                   "expirationTtlSeconds": 3600
                 }
               ]
@@ -18876,6 +18901,7 @@
                 "metadata": {
                   "source": "agent"
                 },
+                "expiration": 1780272000,
                 "expirationTtlSeconds": 3600
               }
             ]
