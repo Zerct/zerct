@@ -6219,7 +6219,7 @@
                         "durableObjectKeyValueSizeMib": 2
                       },
                       "pricing": {
-                        "subscriptionUsdCentsPerMonth": 2500,
+                        "subscriptionUsdCentsPerMonth": 500,
                         "paidOveragesEnabled": true,
                         "workers": {
                           "includedRequestsPerMonth": 10000000,
@@ -12672,7 +12672,7 @@
                     "durableObjectKeyValueSizeMib": 2
                   },
                   "pricing": {
-                    "subscriptionUsdCentsPerMonth": 2500,
+                    "subscriptionUsdCentsPerMonth": 500,
                     "paidOveragesEnabled": true,
                     "workers": {
                       "includedRequestsPerMonth": 10000000,
