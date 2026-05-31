@@ -67,6 +67,8 @@ func checkCLIContract() {
 		rejectContains(source, "TOVUK_NPM_CLI", "retired npm delegation")
 		rejectContains(source, "NPM_PACKAGE_VERSION", "retired npm package pin")
 		rejectContains(source, "npx -y", "retired npx delegation")
+		rejectContains(source, "--app", "retired app flag")
+		rejectContains(source, "/v1/apps", "retired apps API path")
 		rejectContains(source, retiredOrgScope, "retired org scope")
 	}
 

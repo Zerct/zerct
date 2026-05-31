@@ -13,7 +13,7 @@ actionable log line.
 npx tovuk support create \
   "Deploy failed" \
   "The deploy failed after the Rust check step. The agent already ran doctor and reproduced the same error." \
-  --service app_1 \
+  --service service_1 \
   --build job_1 \
   --deploy deploy_1 \
   --failing-command "npx tovuk deploy --wait --json" \
@@ -57,7 +57,7 @@ The create body is:
 {
   "subject": "Deploy failed",
   "details": "What the agent already tried and why the issue needs Tovuk support.",
-  "app_id": "app_1",
+  "service_id": "service_1",
   "build_id": "job_1",
   "deploy_id": "deploy_1",
   "failing_command": "npx tovuk deploy --wait --json",

@@ -57,7 +57,7 @@ fn support_create(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "invalid_support_ticket",
             "Support ticket subject and details are required.",
-            "Use `tovuk support create \"Short subject\" \"Command, app id, build id, deploy id, and first actionable log line\" --json`.",
+            "Use `tovuk support create \"Short subject\" \"Command, service id, build id, deploy id, and first actionable log line\" --json`.",
             cli.output.json,
         ));
     }
@@ -77,7 +77,7 @@ fn support_create(cli: &CliOptions) -> Result<()> {
             cli.severity.clone()
         }),
     );
-    insert_optional(&mut body, "app_id", &cli.app);
+    insert_optional(&mut body, "service_id", &cli.service);
     insert_optional(&mut body, "failing_command", &cli.failing_command);
     insert_optional(&mut body, "build_id", &cli.build);
     insert_optional(&mut body, "deploy_id", &cli.deploy);

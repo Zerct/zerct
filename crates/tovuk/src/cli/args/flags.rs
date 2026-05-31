@@ -76,8 +76,8 @@ fn apply_value_flag(
 ) -> Result<usize> {
     match name {
         "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.output.json),
-        "--app" | "--service" => {
-            set_string_flag(&mut cli.app, name, inline, argv, index, cli.output.json)
+        "--service" => {
+            set_string_flag(&mut cli.service, name, inline, argv, index, cli.output.json)
         }
         "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.output.json),
         "--content-type" => set_string_flag(

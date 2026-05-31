@@ -4,15 +4,15 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::{app_route, command_arg},
-    generic::{app_get_command, print_authenticated_mutation},
+    common::{command_arg, service_route},
+    generic::{print_authenticated_mutation, service_get_command},
 };
 use reqwest::Method;
 use serde_json::json;
 
 pub(crate) fn env_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => app_get_command(cli, "env"),
+        "list" => service_get_command(cli, "env"),
         "set" => env_set(cli),
         "delete" => env_delete(cli),
         _ => Err(agent_error(
@@ -40,7 +40,7 @@ fn env_set(cli: &CliOptions) -> Result<()> {
     print_authenticated_mutation(
         cli,
         Method::PUT,
-        &app_route(cli, "env")?,
+        &service_route(cli, "env")?,
         Some(json!({ "name": name, "value": value })),
     )
 }
@@ -50,12 +50,12 @@ fn env_delete(cli: &CliOptions) -> Result<()> {
         cli,
         "invalid_env",
         "Environment variable name is required.",
-        "Use `tovuk env delete --app <app> KEY`.",
+        "Use `tovuk env delete --service <service> KEY`.",
     )?;
     print_authenticated_mutation(
         cli,
         Method::DELETE,
-        &app_route(cli, &format!("env/{}", encode_component(&name)))?,
+        &service_route(cli, &format!("env/{}", encode_component(&name)))?,
         None,
     )
 }

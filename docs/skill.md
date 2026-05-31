@@ -42,7 +42,7 @@ handlers, middleware, and server logic to Rust workers.
 
 ```sh
 npx tovuk doctor --json
-npx tovuk init my-app --template worker-static-rust-tanstack
+npx tovuk init hello-service --template worker-static-rust-tanstack
 npx tovuk preview
 npx tovuk deploy --wait --json
 npx tovuk logs --build <build_id> --json
@@ -51,23 +51,23 @@ npx tovuk logs --build <build_id> --json
 Manage platform resources without dashboard access:
 
 ```sh
-npx tovuk platform --service <app_id> --json
-npx tovuk database create --service <app_id> DB --json
-npx tovuk kv create --service <app_id> CACHE --json
-npx tovuk queue create --service <app_id> jobs --json
-npx tovuk cron create --service <app_id> nightly "0 0 * * *" --json
-npx tovuk durable-object create --service <app_id> Room --json
-npx tovuk binding create --service <app_id> AUTH_SERVICE --target auth-app --json
+npx tovuk platform --service <service> --json
+npx tovuk database create --service <service> DB --json
+npx tovuk kv create --service <service> CACHE --json
+npx tovuk queue create --service <service> jobs --json
+npx tovuk cron create --service <service> nightly "0 0 * * *" --json
+npx tovuk durable-object create --service <service> Room --json
+npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
 ```
 
 Manage service files and media without dashboard access:
 
 ```sh
-npx tovuk storage list --service <app_id> --json
-npx tovuk storage upload --service <app_id> ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --service <app_id> uploads/logo.png ./logo.png --json
-npx tovuk storage delete --service <app_id> uploads/logo.png --json
+npx tovuk storage list --service <service> --json
+npx tovuk storage upload --service <service> ./logo.png uploads/logo.png --public --json
+npx tovuk storage download --service <service> uploads/logo.png ./logo.png --json
+npx tovuk storage delete --service <service> uploads/logo.png --json
 ```
 
 When a plan limit blocks work:

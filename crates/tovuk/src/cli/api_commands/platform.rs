@@ -5,15 +5,15 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::app_route,
-    generic::{app_get_command, print_authenticated_mutation},
+    common::service_route,
+    generic::{print_authenticated_mutation, service_get_command},
     http::api_request,
 };
 use reqwest::Method;
 use serde_json::{Map, Value, json};
 
 pub(crate) fn platform_command(cli: &CliOptions) -> Result<()> {
-    app_get_command(cli, "platform")
+    service_get_command(cli, "platform")
 }
 
 pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
@@ -124,7 +124,7 @@ fn create_app_resource(
     print_authenticated_mutation(
         cli,
         Method::POST,
-        &app_route(cli, suffix)?,
+        &service_route(cli, suffix)?,
         Some(Value::Object(body)),
     )
 }
@@ -140,7 +140,7 @@ fn kv_keys(cli: &CliOptions) -> Result<()> {
     let token = read_or_login_token(cli)?;
     let route = format!(
         "{}/kv/{}/keys",
-        app_route(cli, "")?.trim_end_matches('/'),
+        service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&namespace)
     );
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
@@ -248,7 +248,7 @@ fn queue_messages(cli: &CliOptions) -> Result<()> {
     let token = read_or_login_token(cli)?;
     let route = format!(
         "{}/queues/{}/messages",
-        app_route(cli, "")?.trim_end_matches('/'),
+        service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&queue)
     );
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
@@ -283,7 +283,7 @@ fn queue_send(cli: &CliOptions) -> Result<()> {
     }
     let route = format!(
         "{}/queues/{}/messages",
-        app_route(cli, "")?.trim_end_matches('/'),
+        service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&queue)
     );
     print_authenticated_mutation(
@@ -300,7 +300,7 @@ fn queue_send(cli: &CliOptions) -> Result<()> {
 fn kv_value_route(cli: &CliOptions, namespace: &str, key: &str) -> Result<String> {
     Ok(format!(
         "{}/kv/{}/values/{}",
-        app_route(cli, "")?.trim_end_matches('/'),
+        service_route(cli, "")?.trim_end_matches('/'),
         encode_component(namespace),
         encode_component(key)
     ))
@@ -332,7 +332,7 @@ fn create_cron(cli: &CliOptions) -> Result<()> {
     print_authenticated_mutation(
         cli,
         Method::POST,
-        &app_route(cli, "cron")?,
+        &service_route(cli, "cron")?,
         Some(json!({
             "name": name,
             "cronExpression": cron_expression,
@@ -348,12 +348,12 @@ fn create_service_binding(cli: &CliOptions) -> Result<()> {
         "Service binding name is required.",
         "Use `tovuk binding create --service <service> AUTH_SERVICE --target <target_service> --json`.",
     )?;
-    let target_app = if cli.target.is_empty() {
+    let target_service = if cli.target.is_empty() {
         required_arg(
             cli,
             2,
             "binding_target_required",
-            "Service binding target app is required.",
+            "Service binding target service is required.",
             "Use `tovuk binding create --service <service> AUTH_SERVICE --target <target_service> --json`.",
         )?
     } else {
@@ -362,10 +362,10 @@ fn create_service_binding(cli: &CliOptions) -> Result<()> {
     print_authenticated_mutation(
         cli,
         Method::POST,
-        &app_route(cli, "service-bindings")?,
+        &service_route(cli, "service-bindings")?,
         Some(json!({
             "bindingName": binding_name,
-            "targetApp": target_app,
+            "targetService": target_service,
         })),
     )
 }

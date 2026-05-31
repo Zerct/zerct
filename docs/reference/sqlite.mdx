@@ -3,12 +3,12 @@ title: "SQLite"
 description: "D1-style SQLite databases for Rust workers."
 ---
 
-Tovuk service databases are SQLite databases owned by an service and attached to Rust
+Tovuk service databases are SQLite databases owned by a service and attached to Rust
 workers as explicit resources.
 
 ```sh
-npx tovuk database create --service app_1 DB --json
-npx tovuk platform --service app_1 --json
+npx tovuk database create --service service_1 DB --json
+npx tovuk platform --service service_1 --json
 ```
 
 Agents should create databases before a deploy needs them, then keep schema

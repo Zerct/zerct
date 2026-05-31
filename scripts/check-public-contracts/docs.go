@@ -34,6 +34,21 @@ func checkDocs() {
 		fail("Missing Mintlify pages:\n%s", strings.Join(missingPages, "\n"))
 	}
 
+	openapi := readText("docs/openapi.json")
+	for _, retired := range []string{
+		"/v1/apps",
+		"--app",
+		"app_id",
+		"appId",
+		"app_",
+		"app_1",
+		"targetApp",
+		"alwaysOnApps",
+		"appCount",
+	} {
+		rejectContains(openapi, retired, "retired public app contract")
+	}
+
 	fmt.Printf("Checked %d Mintlify navigation entries.\n", len(pages))
 }
 

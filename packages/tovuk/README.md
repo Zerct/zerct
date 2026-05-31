@@ -3,8 +3,8 @@
 Deploy Rust workers, static frontends, and worker-static services to Tovuk.
 
 ```sh
-npx tovuk init my-app --template worker-static-rust-tanstack
-cd my-app/web && bun install && cd ..
+npx tovuk init hello-service --template worker-static-rust-tanstack
+cd hello-service/web && bun install && cd ..
 npx tovuk doctor --json
 npx tovuk deploy --wait --json
 ```
@@ -46,7 +46,7 @@ Agents can create service SQLite databases, KV namespaces, queues, cron triggers
 Durable Object namespaces, service bindings, and usage caps through the CLI.
 
 Agents can also inspect API capabilities, account identity, usage, account
-activity, services, complete service overviews, deploys, builds, app/deploy/build logs,
+activity, services, complete service overviews, deploys, builds, service/deploy/build logs,
 env metadata, custom domains, domain verification, service storage files and media,
 billing checkout links, billing portal links, and support ticket create, list,
 and resolve actions
@@ -55,13 +55,13 @@ through the same CLI.
 Manage service files and media without dashboard access:
 
 ```sh
-npx tovuk storage list --service app_1 --json
-npx tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
-npx tovuk storage delete --service app_1 uploads/logo.png --json
-npx tovuk kv put --service app_1 CACHE user:1 '{"name":"Ada"}' --json
-npx tovuk kv get --service app_1 CACHE user:1 --json
-npx tovuk queue send --service app_1 jobs '{"task":"sync"}' --json
+npx tovuk storage list --service service_1 --json
+npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+npx tovuk storage delete --service service_1 uploads/logo.png --json
+npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
+npx tovuk kv get --service service_1 CACHE user:1 --json
+npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 ```
 
 When a free-tier limit blocks work, run:
@@ -73,7 +73,7 @@ npx tovuk billing checkout --json
 When Tovuk support is needed, include enough evidence for a support agent:
 
 ```sh
-npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 ```
 
 When the issue is fixed, resolve the ticket:

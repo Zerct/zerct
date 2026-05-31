@@ -53,7 +53,7 @@ fn storage_upload(cli: &CliOptions) -> Result<()> {
         1,
         "missing_storage_file",
         "Local file path is required.",
-        "Use `tovuk storage upload --app <app> ./file.png uploads/file.png --public --json`.",
+        "Use `tovuk storage upload --service <service> ./file.png uploads/file.png --public --json`.",
     )?);
     let remote_path =
         args::optional_storage_arg(cli, 2).map_or_else(|| default_remote_path(&local_path), Ok)?;
@@ -104,7 +104,7 @@ fn storage_download(cli: &CliOptions) -> Result<()> {
         1,
         "missing_storage_path",
         "Storage path is required.",
-        "Use `tovuk storage download --app <app> uploads/file.png ./file.png --json`.",
+        "Use `tovuk storage download --service <service> uploads/file.png ./file.png --json`.",
     )?;
     let destination = args::optional_storage_arg(cli, 2).map_or_else(
         || default_download_path(&remote_path),
@@ -130,7 +130,7 @@ fn storage_delete(cli: &CliOptions) -> Result<()> {
         1,
         "missing_storage_path",
         "Storage path is required.",
-        "Use `tovuk storage delete --app <app> uploads/file.png --json`.",
+        "Use `tovuk storage delete --service <service> uploads/file.png --json`.",
     )?;
     let token = read_or_login_token(cli)?;
     let response = delete_response(cli, &token, &remote_path)?;
@@ -147,7 +147,7 @@ fn storage_download_url(cli: &CliOptions) -> Result<()> {
         1,
         "missing_storage_path",
         "Storage path is required.",
-        "Use `tovuk storage url --app <app> uploads/file.png --json`.",
+        "Use `tovuk storage url --service <service> uploads/file.png --json`.",
     )?;
     let response = download_url_response(cli, &remote_path)?;
     if cli.output.json {

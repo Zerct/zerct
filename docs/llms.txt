@@ -82,23 +82,23 @@ curl https://api.tovuk.com/v1/status
 npx tovuk activity --json
 npx tovuk service list --json
 npx tovuk service show <service> --json
-npx tovuk builds --service <app> --json
+npx tovuk builds --service <service> --json
 npx tovuk logs --build <build_id> --json
-npx tovuk logs --service <app> --json
-npx tovuk env list --service <app> --json
-npx tovuk domains list --service <app> --json
-npx tovuk platform --service <app> --json
-npx tovuk database create --service <app> DB --json
-npx tovuk kv create --service <app> CACHE --json
-npx tovuk queue create --service <app> jobs --json
-npx tovuk cron create --service <app> nightly "0 0 * * *" --json
-npx tovuk durable-object create --service <app> Room --json
-npx tovuk binding create --service <app> AUTH_SERVICE --target auth-app --json
+npx tovuk logs --service <service> --json
+npx tovuk env list --service <service> --json
+npx tovuk domains list --service <service> --json
+npx tovuk platform --service <service> --json
+npx tovuk database create --service <service> DB --json
+npx tovuk kv create --service <service> CACHE --json
+npx tovuk queue create --service <service> jobs --json
+npx tovuk cron create --service <service> nightly "0 0 * * *" --json
+npx tovuk durable-object create --service <service> Room --json
+npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
-npx tovuk storage list --service <app> --json
-npx tovuk storage upload --service <app> ./file.png uploads/file.png --public --json
-npx tovuk storage download --service <app> uploads/file.png ./file.png --json
-npx tovuk storage delete --service <app> uploads/file.png --json
+npx tovuk storage list --service <service> --json
+npx tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
+npx tovuk storage download --service <service> uploads/file.png ./file.png --json
+npx tovuk storage delete --service <service> uploads/file.png --json
 npx tovuk billing checkout --json
 npx tovuk support list --json
 npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "npx tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
@@ -110,7 +110,7 @@ available and a deploy fails, inspect build logs instead of changing status
 checks.
 
 Never print or commit secrets. Put secrets in Tovuk env vars with
-`npx tovuk env set --service <app> KEY=value`.
+`npx tovuk env set --service <service> KEY=value`.
 
 When a free-tier limit blocks work, run `npx tovuk billing checkout --json` and
 show the returned URL to the human. When Tovuk support is needed, create a

@@ -4,15 +4,15 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::{app_route, command_arg, require_app},
-    generic::{app_get_command, print_authenticated_mutation},
+    common::{command_arg, require_service, service_route},
+    generic::{print_authenticated_mutation, service_get_command},
 };
 use reqwest::Method;
 use serde_json::json;
 
 pub(crate) fn domains_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => app_get_command(cli, "domains"),
+        "list" => service_get_command(cli, "domains"),
         "add" => domain_add(cli),
         "verify" => domain_scoped_mutation(cli, "verify", Method::POST),
         "delete" => domain_scoped_mutation(cli, "", Method::DELETE),
@@ -30,14 +30,14 @@ fn domain_add(cli: &CliOptions) -> Result<()> {
     print_authenticated_mutation(
         cli,
         Method::POST,
-        &app_route(cli, "domains")?,
+        &service_route(cli, "domains")?,
         Some(json!({ "domain": domain })),
     )
 }
 
 fn domain_scoped_mutation(cli: &CliOptions, action: &str, method: Method) -> Result<()> {
     let domain = domain_arg(cli, if action.is_empty() { "delete" } else { action })?;
-    let app = require_app(cli)?;
+    let service = require_service(cli)?;
     let suffix = if action.is_empty() {
         String::new()
     } else {
@@ -47,8 +47,8 @@ fn domain_scoped_mutation(cli: &CliOptions, action: &str, method: Method) -> Res
         cli,
         method,
         &format!(
-            "/v1/apps/{}/domains/{}{}",
-            encode_component(&app),
+            "/v1/services/{}/domains/{}{}",
+            encode_component(&service),
             encode_component(&domain),
             suffix
         ),
@@ -61,6 +61,6 @@ fn domain_arg(cli: &CliOptions, command: &str) -> Result<String> {
         cli,
         "missing_domain",
         "Domain is required.",
-        &format!("Use `tovuk domains {command} --app <app> api.example.com`."),
+        &format!("Use `tovuk domains {command} --service <service> api.example.com`."),
     )
 }

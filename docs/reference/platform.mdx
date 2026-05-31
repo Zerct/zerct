@@ -9,13 +9,13 @@ need dashboard access.
 ## Commands
 
 ```sh
-npx tovuk platform --service app_1 --json
-npx tovuk database create --service app_1 DB --json
-npx tovuk kv create --service app_1 CACHE --json
-npx tovuk queue create --service app_1 jobs --json
-npx tovuk cron create --service app_1 nightly "0 0 * * *" --json
-npx tovuk durable-object create --service app_1 Room --json
-npx tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+npx tovuk platform --service service_1 --json
+npx tovuk database create --service service_1 DB --json
+npx tovuk kv create --service service_1 CACHE --json
+npx tovuk queue create --service service_1 jobs --json
+npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
+npx tovuk durable-object create --service service_1 Room --json
+npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
 ```
 
@@ -32,8 +32,8 @@ npx tovuk limit set worker_requests --period day --value 100000 --json
 Use object storage commands for service files and media:
 
 ```sh
-npx tovuk storage list --service app_1 --json
-npx tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
-npx tovuk storage delete --service app_1 uploads/logo.png --json
+npx tovuk storage list --service service_1 --json
+npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+npx tovuk storage delete --service service_1 uploads/logo.png --json
 ```

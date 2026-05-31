@@ -32,7 +32,7 @@ pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "missing_project_contract",
             "No tovuk.toml was found.",
-            "Run `tovuk init` in each app directory, or pass a project path.",
+            "Run `tovuk init` in each service directory, or pass a project path.",
             cli.output.json,
         ));
     }
@@ -73,7 +73,7 @@ fn deploy_projects(
             println!(
                 "{} url {}",
                 item.project.relative,
-                nested_string(&response, &["app", "url"])
+                nested_string(&response, &["service", "url"])
             );
         }
         results.push(WorkspaceDeployResult {
