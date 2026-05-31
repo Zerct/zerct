@@ -29,14 +29,14 @@ tovuk usage --json
   files per Worker version, `25 MiB` per file.
 - SQLite: `10` databases, `5 GiB` total, `500 MiB` per database, `5 million`
   rows read per day, `100,000` rows written per day.
-- KV: `1,000` namespaces, `1 GiB` per namespace, `100,000` reads per day,
-  `1,000` writes, deletes, and list requests per day.
+- KV: `1,000` namespaces, `1 GiB` per account and namespace, `100,000`
+  reads per day, `1,000` writes, deletes, and list requests per day.
 - Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
   `24 hour` retention.
 - Durable Objects: `100` classes, `100,000` requests per day, `13,000 GB-s`
   duration per day, `5 GiB` account SQLite storage, `1 GiB` per object.
-- Object storage: `10 GiB`, `100,000` objects, `1 million` Class A operations
-  per month, `10 million` Class B operations per month, free egress.
+- Object storage: `10 GiB`, no object-count cap, `1 million` Class A
+  operations per month, `10 million` Class B operations per month, free egress.
 - Logs: `200,000` events per day, `3 day` retention.
 - API tokens: `10`.
 - Support tickets: `3` per day.
@@ -54,7 +54,7 @@ tovuk usage --json
   `25 billion` rows read and `50 million` rows written per month included.
   Overage is `$0.001` per million rows read, `$1.00` per million rows written,
   and `$0.75` per GiB-month after the included `5 GiB`.
-- KV: `1,000` namespaces, `1 TiB` account hard cap, `10 million` reads and
+- KV: `1,000` namespaces, no storage hard cap, `10 million` reads and
   `1 million` writes, deletes, and lists per month included. Overage is `$0.50`
   per million reads, `$5.00` per million writes, deletes, or lists, and `$0.50`
   per GiB-month after the included `1 GiB`.
@@ -65,9 +65,9 @@ tovuk usage --json
   duration per month included. Overage is `$0.15` per million requests and
   `$12.50` per million GB-s. SQLite storage includes `5 GiB`, then `$0.20`
   per GiB-month.
-- Object storage: `1 TiB` account hard cap, `1 million` objects, `10 GiB`
-  included storage, `1 million` Class A operations, and `10 million` Class B
-  operations per month. Overage is `$0.015` per GiB-month, `$4.50` per million
+- Object storage: no storage or object-count hard cap, `10 GiB` included
+  storage, `1 million` Class A operations, and `10 million` Class B operations
+  per month. Overage is `$0.015` per GiB-month, `$4.50` per million
   Class A operations, and `$0.36` per million Class B operations. Egress and
   deletes are free.
 - Logs: `20 million` events per month, then `$0.60` per million events, `7 day`
