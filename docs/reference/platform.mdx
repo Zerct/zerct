@@ -40,21 +40,35 @@ npx tovuk limit delete worker_requests --period day --json
 
 ## Resource model
 
+- Worker: Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms,
+  queue consumers, and cron handlers.
+- Static frontend: browser UI at `/`, with dynamic work routed to same-origin
+  Rust APIs under `/api/*`.
 - SQLite: service data with row and storage meters.
 - SQLite query: migrations, smoke tests, and data inspection with metering.
+- Object storage: user uploads, images, videos, documents, generated files, and
+  downloads.
 - KV: small config, sessions, feature flags, and cache metadata.
 - Queues: background jobs, retries, emails, and webhook processing.
 - Cron triggers: scheduled cleanup, polling, and reports.
 - State: keyed state objects for realtime coordination, locks,
   counters, rooms, sessions, and per-tenant state.
 - Service bindings: private worker-to-worker calls without public URLs.
-- Usage caps: hard stops and notification thresholds for predictable spend.
-- Object storage: service files and media with Class A and Class B operation
-  meters.
+- Usage caps: hard stops and notification thresholds for predictable usage.
 
 Each service can bind up to 5000 platform resources. That count includes
 SQLite databases, KV namespaces, queues, State namespaces, and private
 service bindings.
+
+The machine-readable product catalog is available from:
+
+```sh
+npx tovuk capabilities --json
+```
+
+Use the `products` array to decide which resource fits a task, the `meters`
+array to set hard caps, and the plan `limits` and `pricing` objects to estimate
+free and paid usage before deployment.
 
 ## Custom domains
 

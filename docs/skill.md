@@ -102,8 +102,13 @@ Manage service files and media without dashboard access:
 npx tovuk storage list --service <service> --json
 npx tovuk storage upload --service <service> ./logo.png uploads/logo.png --public --json
 npx tovuk storage download --service <service> uploads/logo.png ./logo.png --json
+npx tovuk storage url --service <service> uploads/logo.png --json
 npx tovuk storage delete --service <service> uploads/logo.png --json
 ```
+
+Use `npx tovuk capabilities --json` to inspect product choices, meters, limit
+fields, and plan prices before selecting Worker, State, SQLite, KV, queues,
+cron, service bindings, or object storage.
 
 When a plan limit blocks work:
 

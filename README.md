@@ -27,7 +27,8 @@ cd hello-service/web && bun install && cd ..
 From a worker-static repo root, `npx tovuk deploy` reads the single root
 `tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
 databases, KV namespaces, queues, cron triggers, State namespaces,
-service bindings, and usage caps through CLI resource commands.
+service bindings, object storage objects, and usage caps through CLI resource
+commands.
 
 Worker-static deploys use this `tovuk.toml` shape:
 
@@ -178,6 +179,11 @@ npx tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 npx tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 npx tovuk queue metrics --service service_1 jobs --json
+npx tovuk storage list --service service_1 --json
+npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+npx tovuk storage url --service service_1 uploads/logo.png --json
+npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+npx tovuk storage delete --service service_1 uploads/logo.png --json
 npx tovuk billing checkout --json
 npx tovuk billing portal
 npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json

@@ -6789,6 +6789,40 @@
                         }
                       }
                     }
+                  ],
+                  "products": [
+                    {
+                      "key": "worker",
+                      "name": "Worker",
+                      "summary": "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers.",
+                      "best_for": [
+                        "Public HTTP APIs under /api/*",
+                        "Webhooks, auth callbacks, and form handlers",
+                        "Queue and cron event handlers"
+                      ],
+                      "avoid_for": [
+                        "Browser rendering and static assets",
+                        "Large binary file storage",
+                        "Single-key serialized state"
+                      ],
+                      "commands": [
+                        "npx tovuk deploy --wait --json",
+                        "npx tovuk logs --service <service> --json"
+                      ],
+                      "meters": [
+                        "worker_requests",
+                        "worker_cpu_ms",
+                        "worker_transfer_bytes"
+                      ],
+                      "limit_fields": [
+                        "workers",
+                        "workerRequestsPerDay",
+                        "workerRequestsPerMonth",
+                        "workerCpuMsPerRequest",
+                        "workerCpuMsPerMonth",
+                        "workerMemoryMib"
+                      ]
+                    }
                   ]
                 }
               }
@@ -12947,7 +12981,8 @@
           "agent_workflow",
           "endpoints",
           "commands",
-          "plans"
+          "plans",
+          "products"
         ],
         "properties": {
           "product": {
@@ -13471,6 +13506,51 @@
                       "eventOverageUsdMicrosPerMillion": 600000
                     }
                   }
+                }
+              ]
+            ]
+          },
+          "products": {
+            "type": "array",
+            "description": "Product choices, usage meters, limit fields, and CLI commands for agent planning.",
+            "minItems": 1,
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/ProductCatalogEntry"
+            },
+            "examples": [
+              [
+                {
+                  "key": "worker",
+                  "name": "Worker",
+                  "summary": "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers.",
+                  "best_for": [
+                    "Public HTTP APIs under /api/*",
+                    "Webhooks, auth callbacks, and form handlers",
+                    "Queue and cron event handlers"
+                  ],
+                  "avoid_for": [
+                    "Browser rendering and static assets",
+                    "Large binary file storage",
+                    "Single-key serialized state"
+                  ],
+                  "commands": [
+                    "npx tovuk deploy --wait --json",
+                    "npx tovuk logs --service <service> --json"
+                  ],
+                  "meters": [
+                    "worker_requests",
+                    "worker_cpu_ms",
+                    "worker_transfer_bytes"
+                  ],
+                  "limit_fields": [
+                    "workers",
+                    "workerRequestsPerDay",
+                    "workerRequestsPerMonth",
+                    "workerCpuMsPerRequest",
+                    "workerCpuMsPerMonth",
+                    "workerMemoryMib"
+                  ]
                 }
               ]
             ]
@@ -21128,6 +21208,191 @@
             ]
           }
         }
+      },
+      "ProductCatalogEntry": {
+        "type": "object",
+        "description": "Product choice guidance for coding agents.",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "name",
+          "summary",
+          "best_for",
+          "avoid_for",
+          "commands",
+          "meters",
+          "limit_fields"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Stable product key used in docs, usage meters, and support tickets.",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 64,
+            "examples": [
+              "worker"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Human-readable product name.",
+            "pattern": "^[A-Za-z0-9 /_-]{1,80}$",
+            "maxLength": 80,
+            "examples": [
+              "Worker"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short product summary for humans and coding agents.",
+            "pattern": "^[\\s\\S]{1,300}$",
+            "maxLength": 300,
+            "examples": [
+              "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers."
+            ]
+          },
+          "best_for": {
+            "type": "array",
+            "description": "Primary jobs this product should handle.",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,160}$",
+              "maxLength": 160,
+              "examples": [
+                "Public HTTP APIs under /api/*"
+              ]
+            },
+            "examples": [
+              [
+                "Public HTTP APIs under /api/*",
+                "Webhooks, auth callbacks, and form handlers",
+                "Queue and cron event handlers"
+              ]
+            ]
+          },
+          "avoid_for": {
+            "type": "array",
+            "description": "Jobs agents should route to another product.",
+            "minItems": 0,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,160}$",
+              "maxLength": 160,
+              "examples": [
+                "Large binary file storage"
+              ]
+            },
+            "examples": [
+              [
+                "Browser rendering and static assets",
+                "Large binary file storage",
+                "Single-key serialized state"
+              ]
+            ]
+          },
+          "commands": {
+            "type": "array",
+            "description": "CLI commands that manage this product.",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,220}$",
+              "maxLength": 220,
+              "examples": [
+                "npx tovuk deploy --wait --json"
+              ]
+            },
+            "examples": [
+              [
+                "npx tovuk deploy --wait --json",
+                "npx tovuk logs --service <service> --json"
+              ]
+            ]
+          },
+          "meters": {
+            "type": "array",
+            "description": "Usage meters relevant to this product.",
+            "minItems": 0,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,79}$",
+              "maxLength": 80,
+              "examples": [
+                "worker_requests"
+              ]
+            },
+            "examples": [
+              [
+                "worker_requests",
+                "worker_cpu_ms",
+                "worker_transfer_bytes"
+              ]
+            ]
+          },
+          "limit_fields": {
+            "type": "array",
+            "description": "Key limit fields in PlanLimits.",
+            "minItems": 0,
+            "maxItems": 40,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z][A-Za-z0-9]{0,79}$",
+              "maxLength": 80,
+              "examples": [
+                "workerRequestsPerDay"
+              ]
+            },
+            "examples": [
+              [
+                "workers",
+                "workerRequestsPerDay",
+                "workerRequestsPerMonth",
+                "workerCpuMsPerRequest",
+                "workerCpuMsPerMonth",
+                "workerMemoryMib"
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "key": "worker",
+            "name": "Worker",
+            "summary": "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers.",
+            "best_for": [
+              "Public HTTP APIs under /api/*",
+              "Webhooks, auth callbacks, and form handlers",
+              "Queue and cron event handlers"
+            ],
+            "avoid_for": [
+              "Browser rendering and static assets",
+              "Large binary file storage",
+              "Single-key serialized state"
+            ],
+            "commands": [
+              "npx tovuk deploy --wait --json",
+              "npx tovuk logs --service <service> --json"
+            ],
+            "meters": [
+              "worker_requests",
+              "worker_cpu_ms",
+              "worker_transfer_bytes"
+            ],
+            "limit_fields": [
+              "workers",
+              "workerRequestsPerDay",
+              "workerRequestsPerMonth",
+              "workerCpuMsPerRequest",
+              "workerCpuMsPerMonth",
+              "workerMemoryMib"
+            ]
+          }
+        ]
       }
     }
   }
