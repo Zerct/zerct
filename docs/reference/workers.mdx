@@ -78,6 +78,12 @@ tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --js
 tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```
 
+At runtime, workers receive `TOVUK_SERVICE_ID`, `TOVUK_SERVICE_SLUG`,
+`TOVUK_SERVICE_PLAN`, `TOVUK_API_BASE_URL`, `TOVUK_BINDINGS_VERSION`, and one
+`TOVUK_<RESOURCE>_<NAME>` variable per SQLite, KV, Queue, Cron, State, and
+private service binding. Agents should use those variables to discover the
+resources they created through the CLI/API.
+
 ## Runtime events
 
 Queues and cron triggers are delivered to the same Rust worker process. Tovuk

@@ -74,6 +74,28 @@ Both commands expose the `products` array. Use it to decide which resource fits
 a task, use each product's `meters` to set hard caps, and use the plan `limits`
 and `pricing` objects to estimate free and paid usage before deployment.
 
+## Runtime bindings
+
+Deployed Rust workers receive service-scoped environment variables at startup:
+
+```sh
+TOVUK_SERVICE_ID=service_1
+TOVUK_SERVICE_SLUG=my-service
+TOVUK_SERVICE_PLAN=free
+TOVUK_API_BASE_URL=https://api.tovuk.com
+TOVUK_BINDINGS_VERSION=1
+TOVUK_SQLITE_DB=sqlite_1
+TOVUK_KV_CACHE=kv_1
+TOVUK_QUEUE_JOBS=queue_1
+TOVUK_CRON_NIGHTLY=cron_1
+TOVUK_STATE_ROOM=state_namespace_1
+TOVUK_BINDING_AUTH_SERVICE=service_2
+```
+
+Agents should read these variables instead of hard-coding ids. Resource names
+are uppercased for environment suffixes, so a queue named `jobs` becomes
+`TOVUK_QUEUE_JOBS`, and a State class named `Room` becomes `TOVUK_STATE_ROOM`.
+
 ## Custom domains
 
 Custom domains use one DNS-only CNAME record:
