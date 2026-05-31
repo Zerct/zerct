@@ -69,7 +69,8 @@ verify cleanup immediately and continue without dashboard checks.
 
 KV keys follow the Tovuk 512 byte limit and may include path separators when
 the CLI or API client URL-encodes them. Use object storage for values larger
-than 25 MiB.
+than 25 MiB. Bulk KV reads accept 100 keys; bulk writes and deletes accept
+10000 keys, and bulk request bodies must fit 100 MB.
 
 Use object storage commands for service files and media:
 
