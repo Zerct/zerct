@@ -28,6 +28,8 @@ Use this page when an AI coding agent is deploying with Tovuk.
 13. If Tovuk itself needs help, create a support ticket with the exact command,
    service id, build id, deploy id, and first actionable log line.
 14. Resolve the support ticket after the agent fixes the issue.
+15. Delete throwaway smoke-test services with
+   `tovuk service delete <service> --json`.
 
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
 typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
@@ -116,6 +118,7 @@ then deploy from the repo root.
 
 ```sh
 tovuk service show service_1 --json
+tovuk service delete service_1 --json
 tovuk builds --service service_1 --json
 tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json

@@ -18,6 +18,7 @@ Usage:
   tovuk activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk service list [--api <url>] [--json]
   tovuk service show <service> [--api <url>] [--json]
+  tovuk service delete <service> [--api <url>] [--json]
   tovuk overview --service <service> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk deploys [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk builds [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
@@ -89,6 +90,7 @@ Agent contract:
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json before heavy work, then set usage caps for worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
+  - Delete unused test services with tovuk service delete <service> --json after smoke tests.
   - Prefer same-origin worker-static services over split services.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.

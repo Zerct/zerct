@@ -5,8 +5,9 @@ use super::super::{
 };
 use super::{
     common::{page_query, service_route},
-    generic::print_authenticated,
+    generic::{print_authenticated, print_authenticated_mutation},
 };
+use reqwest::Method;
 
 pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
@@ -20,10 +21,19 @@ pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
             };
             print_authenticated(cli, &route)
         }
+        "delete" | "del" | "rm" => {
+            let service = cli.args.get(1).cloned().filter(|value| !value.is_empty());
+            let route = if let Some(service) = service {
+                format!("/v1/services/{}", encode_component(&service))
+            } else {
+                service_route(cli, "")?
+            };
+            print_authenticated_mutation(cli, Method::DELETE, &route, None)
+        }
         _ => Err(agent_error(
             "unknown_command",
             "Unknown service command.",
-            "Use `tovuk service list --json` or `tovuk service show <service> --json`.",
+            "Use `tovuk service list --json`, `tovuk service show <service> --json`, or `tovuk service delete <service> --json`.",
             cli.output.json,
         )),
     }

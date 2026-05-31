@@ -48,8 +48,8 @@ State namespaces, service bindings, and usage caps through the CLI.
 Agents can also inspect API capabilities, account identity, usage, account
 activity, services, complete service overviews, deploys, builds, service/deploy/build logs,
 env metadata, custom domains, domain verification, service storage files and media,
-pricing, billing checkout links, billing portal links, and support ticket create,
-list, and resolve actions through the same CLI.
+pricing, billing checkout links, billing portal links, service deletion, and
+support ticket create, list, and resolve actions through the same CLI.
 
 Before high-throughput work, read pricing and set hard caps:
 
