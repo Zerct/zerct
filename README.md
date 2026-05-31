@@ -176,6 +176,7 @@ tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"e
 tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
 tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
+tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 tovuk billing checkout --json
 tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json

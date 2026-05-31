@@ -93,6 +93,7 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
         "update" | "set" => update_queue(cli),
         "messages" => queue_messages(cli),
         "send" => queue_send(cli),
+        "send-batch" | "batch-send" => queue_send_batch(cli),
         "delete" | "del" | "rm" => delete_app_resource(
             cli,
             1,
@@ -805,6 +806,111 @@ fn queue_send(cli: &CliOptions) -> Result<()> {
         payload.insert("delaySeconds".to_owned(), json!(delay_seconds));
     }
     print_authenticated_mutation(cli, Method::POST, &route, Some(Value::Object(payload)))
+}
+
+fn queue_send_batch(cli: &CliOptions) -> Result<()> {
+    let queue = required_arg(
+        cli,
+        1,
+        "queue_name_required",
+        "Queue name is required.",
+        "Use `tovuk queue send-batch --service <service> jobs '[{\"body\":{\"task\":\"sync\"}}]' --json`.",
+    )?;
+    let source = if cli.value.is_empty() {
+        cli.args
+            .iter()
+            .skip(2)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        cli.value.clone()
+    };
+    if source.is_empty() {
+        return Err(agent_error(
+            "queue_batch_required",
+            "Queue batch JSON is required.",
+            "Pass a JSON array such as `[{\"body\":{\"task\":\"sync\"}}]` or use `--value <json>`.",
+            cli.output.json,
+        ));
+    }
+    let mut payload = queue_batch_payload(&source, cli)?;
+    if let Some(delay_seconds) = optional_u32(&cli.queue.delay_seconds, "--delay-seconds", cli)? {
+        payload.insert("delaySeconds".to_owned(), json!(delay_seconds));
+    }
+    let route = format!(
+        "{}/queues/{}/messages/batch",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&queue)
+    );
+    print_authenticated_mutation(cli, Method::POST, &route, Some(Value::Object(payload)))
+}
+
+fn queue_batch_payload(source: &str, cli: &CliOptions) -> Result<Map<String, Value>> {
+    let value = serde_json::from_str::<Value>(source).map_err(|_error| {
+        agent_error(
+            "invalid_queue_batch",
+            "Queue batch JSON is invalid.",
+            "Pass an array such as `[{\"body\":{\"task\":\"sync\"}}]`.",
+            cli.output.json,
+        )
+    })?;
+    let mut payload = Map::new();
+    let messages = match value {
+        Value::Array(entries) => entries,
+        Value::Object(mut object) if object.contains_key("messages") => {
+            let messages = object.remove("messages").unwrap_or(Value::Null);
+            let Some(array) = messages.as_array() else {
+                return Err(agent_error(
+                    "invalid_queue_batch",
+                    "Queue batch messages must be an array.",
+                    "Pass an object like `{\"messages\":[{\"body\":\"sync\"}]}`.",
+                    cli.output.json,
+                ));
+            };
+            payload = object;
+            array.clone()
+        }
+        _other => {
+            return Err(agent_error(
+                "invalid_queue_batch",
+                "Queue batch must be a JSON array or object with messages.",
+                "Pass an array such as `[{\"body\":{\"task\":\"sync\"}}]`.",
+                cli.output.json,
+            ));
+        }
+    };
+    let entries = messages
+        .into_iter()
+        .map(queue_batch_item_payload)
+        .collect::<Vec<_>>();
+    payload.insert("messages".to_owned(), Value::Array(entries));
+    Ok(payload)
+}
+
+fn queue_batch_item_payload(value: Value) -> Value {
+    match value {
+        Value::Object(mut object) => {
+            if let Some(body) = object.remove("body") {
+                object.insert("body".to_owned(), queue_body_string(body));
+            }
+            if !object.contains_key("encoding") {
+                object.insert("encoding".to_owned(), Value::String("text".to_owned()));
+            }
+            Value::Object(object)
+        }
+        other => json!({
+            "body": queue_body_string(other),
+            "encoding": "text",
+        }),
+    }
+}
+
+fn queue_body_string(value: Value) -> Value {
+    match value {
+        Value::String(text) => Value::String(text),
+        other => Value::String(other.to_string()),
+    }
 }
 
 fn optional_u16(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u16>> {
