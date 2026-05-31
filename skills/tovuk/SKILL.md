@@ -50,6 +50,7 @@ tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
 tovuk queue create --service <service> jobs --json
 tovuk queue send --service <service> jobs '{"task":"sync"}' --json
 tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
+tovuk queue metrics --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
 tovuk cron update --service <service> nightly "*/15 * * * *" --json
 tovuk cron disable --service <service> nightly --json

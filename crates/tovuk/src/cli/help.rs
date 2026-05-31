@@ -40,6 +40,7 @@ Usage:
   tovuk queue create --service <service> jobs [--max-retries <n>] [--retention-seconds <seconds>] [--max-batch-size <n>] [--max-batch-timeout-seconds <seconds>] [--dead-letter-queue <queue>] [--api <url>] [--json]
   tovuk queue update --service <service> jobs [--max-retries <n>] [--retention-seconds <seconds>] [--max-batch-size <n>] [--max-batch-timeout-seconds <seconds>] [--dead-letter-queue <queue>|--clear-dead-letter-queue] [--api <url>] [--json]
   tovuk queue messages --service <service> jobs [--api <url>] [--json]
+  tovuk queue metrics --service <service> jobs [--api <url>] [--json]
   tovuk queue send --service <service> jobs <body> [--delay-seconds <seconds>] [--api <url>] [--json]
   tovuk queue send-batch --service <service> jobs '[{{"body":{{"task":"sync"}}}}]' [--delay-seconds <seconds>] [--api <url>] [--json]
   tovuk queue delete --service <service> jobs [--api <url>] [--json]

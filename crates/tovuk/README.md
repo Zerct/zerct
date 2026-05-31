@@ -68,6 +68,7 @@ tovuk queue update --service service_1 jobs --max-batch-size 25 --json
 tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
+tovuk queue metrics --service service_1 jobs --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk cron update --service service_1 nightly "*/15 * * * *" --json
