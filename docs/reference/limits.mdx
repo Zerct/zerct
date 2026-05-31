@@ -71,7 +71,7 @@ ambiguous to run.
   future. KV keys are limited to 512 bytes and values to 25 MiB.
 - KV key list pages default to 1000 keys and accept limits from 10 to 1000.
 - Bulk KV reads accept up to 100 keys per request. Bulk KV writes and deletes
-  accept up to 10000 keys per request.
+  accept up to 10000 keys per request. KV bulk request bodies must fit 100 MB.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
   or delete chunk.
 - Pro queue operations: 1 million per month included before paid overage
