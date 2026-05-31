@@ -12,8 +12,9 @@ ambiguous to run.
 - Rust workers run locked release-mode `cargo check`, locked release-mode
   tests, and strict all-target, all-feature Clippy with panic/unwrap bans and
   resource-sensitive lints.
-- Runtime memory must be between `128mb` and `2gb`.
-- Runtime CPU must be between `0.05` and `2`.
+- Runtime memory is fixed at `128mb`, matching Cloudflare Workers.
+- Runtime CPU allocation is fixed at `1`; usage is controlled by metered
+  `worker_cpu_ms` caps.
 - Runtime idle timeout must be between `1` and `60` minutes.
 - Static frontend projects run stable native type-aware TypeScript checks and
   native linting before build work starts.

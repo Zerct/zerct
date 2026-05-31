@@ -31,7 +31,7 @@ pub(super) fn rust_backend_config(project_dir: &Path) -> String {
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| service_name_from_dir(project_dir));
     format!(
-        "name = \"{name}\"\n\n[build]\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\ncommand = \"cargo build --release\"\n\n[run]\ncommand = \"./target/release/{name}\"\nport = 3000\nhealth = \"/healthz\"\n\n[resources]\nmemory = \"512mb\"\ncpu = \"0.25\"\nidle_timeout_minutes = 15\n"
+        "name = \"{name}\"\n\n[build]\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\ncommand = \"cargo build --release\"\n\n[run]\ncommand = \"./target/release/{name}\"\nport = 3000\nhealth = \"/healthz\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n"
     )
 }
 
@@ -60,7 +60,7 @@ pub(super) fn fullstack_config(
         .unwrap_or_else(|| service_name_from_dir(&backend_dir));
     let settings = frontend_build_settings(&frontend_dir, prefer_bun);
     format!(
-        "name = \"{name}\"\nkind = \"worker_static\"\n\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"512mb\"\ncpu = \"0.25\"\nidle_timeout_minutes = 15\n",
+        "name = \"{name}\"\nkind = \"worker_static\"\n\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n",
         settings.check, settings.build, settings.output
     )
 }

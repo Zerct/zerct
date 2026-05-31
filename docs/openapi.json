@@ -4084,8 +4084,8 @@
                       "timeout_seconds": 600
                     },
                     "runtime_limits": {
-                      "memory": 512,
-                      "cpu": 250,
+                      "memory": 128,
+                      "cpu": 1000,
                       "startup_timeout_seconds": 10
                     },
                     "cold_start_policy": "required",
@@ -7841,8 +7841,8 @@
                   "timeout_seconds": 600
                 },
                 "runtime_limits": {
-                  "memory": 512,
-                  "cpu": 250,
+                  "memory": 128,
+                  "cpu": 1000,
                   "startup_timeout_seconds": 10
                 },
                 "cold_start_policy": "required",
@@ -7907,8 +7907,8 @@
                 "timeout_seconds": 600
               },
               "runtime_limits": {
-                "memory": 512,
-                "cpu": 250,
+                "memory": 128,
+                "cpu": 1000,
                 "startup_timeout_seconds": 10
               },
               "cold_start_policy": "required",
@@ -9275,8 +9275,8 @@
           "runtime_limits": {
             "examples": [
               {
-                "memory": 512,
-                "cpu": 250,
+                "memory": 128,
+                "cpu": 1000,
                 "startup_timeout_seconds": 10
               }
             ],
@@ -9327,8 +9327,8 @@
               "timeout_seconds": 600
             },
             "runtime_limits": {
-              "memory": 512,
-              "cpu": 250,
+              "memory": 128,
+              "cpu": 1000,
               "startup_timeout_seconds": 10
             },
             "cold_start_policy": "required",
@@ -10701,20 +10701,20 @@
         "properties": {
           "memory": {
             "type": "string",
-            "description": "Runtime memory declaration from 128mb through 2gb. Agents should choose the smallest working value. Context: components.schemas.TovukResourceConfig.properties.memory.",
+            "description": "Runtime memory declaration. Cloudflare-compatible workers use 128mb. Context: components.schemas.TovukResourceConfig.properties.memory.",
             "pattern": "^[0-9]{2,5}(mb|gb)$",
             "maxLength": 16,
             "examples": [
-              "512mb"
+              "128mb"
             ]
           },
           "cpu": {
             "type": "string",
-            "description": "Runtime CPU declaration in vCPU units from 0.05 through 2. Agents should choose the smallest working value. Context: components.schemas.TovukResourceConfig.properties.cpu.",
+            "description": "Runtime CPU allocation declaration. Cloudflare-compatible workers use 1 and CPU budget is metered through worker_cpu_ms caps. Context: components.schemas.TovukResourceConfig.properties.cpu.",
             "pattern": "^[0-9]+(\\.[0-9]+)?$",
             "maxLength": 16,
             "examples": [
-              "0.25"
+              "1"
             ]
           },
           "idle_timeout_minutes": {
@@ -10730,8 +10730,8 @@
         },
         "examples": [
           {
-            "memory": "512mb",
-            "cpu": "0.25",
+            "memory": "128mb",
+            "cpu": "1",
             "idle_timeout_minutes": 15
           }
         ]
@@ -10806,8 +10806,8 @@
           "resources": {
             "examples": [
               {
-                "memory": "512mb",
-                "cpu": "0.25",
+                "memory": "128mb",
+                "cpu": "1",
                 "idle_timeout_minutes": 15
               }
             ],
@@ -10951,8 +10951,8 @@
         },
         "examples": [
           {
-            "memory": 512,
-            "cpu": 250,
+            "memory": 128,
+            "cpu": 1000,
             "startup_timeout_seconds": 10
           }
         ]
