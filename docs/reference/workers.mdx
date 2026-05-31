@@ -79,10 +79,15 @@ tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```
 
 At runtime, workers receive `TOVUK_SERVICE_ID`, `TOVUK_SERVICE_SLUG`,
-`TOVUK_SERVICE_PLAN`, `TOVUK_API_BASE_URL`, `TOVUK_BINDINGS_VERSION`, and one
-`TOVUK_<RESOURCE>_<NAME>` variable per SQLite, KV, Queue, Cron, State, and
-private service binding. Agents should use those variables to discover the
-resources they created through the CLI/API.
+`TOVUK_SERVICE_PLAN`, `TOVUK_API_BASE_URL`, `TOVUK_RUNTIME_TOKEN`,
+`TOVUK_BINDINGS_VERSION`, and one `TOVUK_<RESOURCE>_<NAME>` variable per
+SQLite, KV, Queue, Cron, State, and private service binding. Agents should use
+those variables to discover the resources they created through the CLI/API.
+
+Use `TOVUK_RUNTIME_TOKEN` only from Rust worker code. The token is scoped to the
+current `TOVUK_SERVICE_ID`, so worker code can query its own SQLite database,
+read and write KV, send queue messages, update State values, and manage object
+storage files without a dashboard or user token.
 
 ## Runtime events
 

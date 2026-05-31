@@ -83,6 +83,7 @@ TOVUK_SERVICE_ID=service_1
 TOVUK_SERVICE_SLUG=my-service
 TOVUK_SERVICE_PLAN=free
 TOVUK_API_BASE_URL=https://api.tovuk.com
+TOVUK_RUNTIME_TOKEN=tovuk_runtime_...
 TOVUK_BINDINGS_VERSION=1
 TOVUK_SQLITE_DB=sqlite_1
 TOVUK_KV_CACHE=kv_1
@@ -95,6 +96,21 @@ TOVUK_BINDING_AUTH_SERVICE=service_2
 Agents should read these variables instead of hard-coding ids. Resource names
 are uppercased for environment suffixes, so a queue named `jobs` becomes
 `TOVUK_QUEUE_JOBS`, and a State class named `Room` becomes `TOVUK_STATE_ROOM`.
+
+`TOVUK_RUNTIME_TOKEN` is injected only into the deployed Rust worker process.
+It can call Tovuk APIs for the current `TOVUK_SERVICE_ID`, including platform
+inspection, SQLite queries, KV reads and writes, queue sends and metrics, State
+values, and object storage operations. It cannot manage account settings,
+billing, domains, environment secrets, support tickets, or other services.
+Never print it, send it to browsers, place it in static frontend files, or
+store it in source control.
+
+Runtime API calls should use:
+
+```sh
+curl -fsS "$TOVUK_API_BASE_URL/v1/services/$TOVUK_SERVICE_ID/platform" \
+  -H "Authorization: Bearer $TOVUK_RUNTIME_TOKEN"
+```
 
 ## Custom domains
 
