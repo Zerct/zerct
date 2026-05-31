@@ -97,8 +97,8 @@ mod tests {
                 health: Some("/api/healthz".to_owned()),
             },
             resources: ResourceConfig {
-                memory: "512mb".to_owned(),
-                cpu: "0.25".to_owned(),
+                memory: "128mb".to_owned(),
+                cpu: "1".to_owned(),
                 idle_timeout_minutes: 15,
             },
         };

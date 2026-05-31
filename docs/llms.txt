@@ -38,8 +38,8 @@ Rust worker contract:
   `-D warnings`, `-D clippy::all`, `-D clippy::pedantic`, panic/unwrap bans,
   and resource lints such as `large_futures`, `large_stack_frames`,
   `mem_forget`, and `redundant_clone`.
-- `[resources].memory` stays between `128mb` and `2gb`.
-- `[resources].cpu` stays between `0.05` and `2`.
+- `[resources].memory` is `128mb`.
+- `[resources].cpu` is `1`; set `worker_cpu_ms` usage caps for CPU budget.
 - `[resources].idle_timeout_minutes` stays between `1` and `60`.
 - The server listens on `0.0.0.0:$PORT`.
 - The configured health path returns HTTP 200.
