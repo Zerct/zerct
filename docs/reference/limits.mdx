@@ -19,6 +19,10 @@ ambiguous to run.
 - Static assets follow Cloudflare-style limits: Free allows 20 thousand files
   per deployed version, Pro allows 100 thousand files per deployed version, and
   every individual static asset is capped at 25 MiB.
+- Static responses meter `cdn_transfer_bytes`; Rust worker responses meter
+  `origin_transfer_bytes`. Free includes 100 GiB monthly transfer as a hard
+  stop. Pro includes 1 TiB monthly transfer as billing metadata and uses
+  explicit hard caps for launch safety.
 - Static output rejects symlinks and non-file, non-directory entries.
 - `_headers` supports up to 100 header rules with 2000 characters per line.
 - `_redirects` supports up to 2000 static redirects, 100 dynamic redirects,
@@ -126,6 +130,8 @@ Agents should set explicit hard caps before high-throughput tests or launch:
 npx tovuk pricing --json
 npx tovuk limit set worker_requests --period month --value 10000000 --json
 npx tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+npx tovuk limit set cdn_transfer_bytes --period month --value 107374182400 --json
+npx tovuk limit set origin_transfer_bytes --period month --value 107374182400 --json
 npx tovuk limit set object_storage_bytes --period month --value 10737418240 --json
 npx tovuk limit set durable_object_requests --period month --value 1000000 --json
 npx tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
