@@ -46,6 +46,24 @@ npx tovuk limit delete worker_requests --period day --json
 - Object storage: service files and media with Class A and Class B operation
   meters.
 
+Each service can bind up to 5000 platform resources. That count includes
+SQLite databases, KV namespaces, queues, Durable Object namespaces, and private
+service bindings.
+
+## Custom domains
+
+Custom domains use one DNS-only CNAME record:
+
+```sh
+npx tovuk domain add --service service_1 api.example.com --json
+npx tovuk domain verify --service service_1 api.example.com --json
+```
+
+The API response includes `dns_record_type`, `dns_record_name`,
+`dns_record_value`, `dns_setup_url`, and `agent_instruction` so agents can
+configure DNS through the user's DNS provider API without dashboard access.
+Never point an A record at Tovuk origin hosts.
+
 Delete commands return the refreshed platform resource payload so agents can
 verify cleanup immediately and continue without dashboard checks.
 

@@ -4992,6 +4992,7 @@
                     "workerMemoryMib": 128,
                     "workerSubrequestsPerRequest": 50,
                     "workerOutgoingConnectionsPerRequest": 6,
+                    "workerBindingsPerService": 5000,
                     "workerEnvVars": 64,
                     "workerEnvVarSizeKib": 5,
                     "workerUncompressedSizeMib": 64,
@@ -5686,7 +5687,7 @@
                       "dns_record_type": "CNAME",
                       "dns_record_name": "api.example.com",
                       "dns_record_value": "cname.tovuk.app",
-                      "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                      "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
                       "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                     }
                   ]
@@ -5731,7 +5732,7 @@
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
                   "dns_record_value": "cname.tovuk.app",
-                  "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                  "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
                   "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                 }
               }
@@ -5894,6 +5895,7 @@
                         "workerMemoryMib": 128,
                         "workerSubrequestsPerRequest": 50,
                         "workerOutgoingConnectionsPerRequest": 6,
+                        "workerBindingsPerService": 5000,
                         "workerEnvVars": 64,
                         "workerEnvVarSizeKib": 5,
                         "workerUncompressedSizeMib": 64,
@@ -6094,6 +6096,7 @@
                         "workerMemoryMib": 128,
                         "workerSubrequestsPerRequest": 10000,
                         "workerOutgoingConnectionsPerRequest": 6,
+                        "workerBindingsPerService": 5000,
                         "workerEnvVars": 128,
                         "workerEnvVarSizeKib": 5,
                         "workerUncompressedSizeMib": 64,
@@ -6363,6 +6366,7 @@
                     "workerMemoryMib": 128,
                     "workerSubrequestsPerRequest": 50,
                     "workerOutgoingConnectionsPerRequest": 6,
+                    "workerBindingsPerService": 5000,
                     "workerEnvVars": 64,
                     "workerEnvVarSizeKib": 5,
                     "workerUncompressedSizeMib": 64,
@@ -6619,6 +6623,7 @@
                     "workerMemoryMib": 128,
                     "workerSubrequestsPerRequest": 50,
                     "workerOutgoingConnectionsPerRequest": 6,
+                    "workerBindingsPerService": 5000,
                     "workerEnvVars": 64,
                     "workerEnvVarSizeKib": 5,
                     "workerUncompressedSizeMib": 64,
@@ -6959,7 +6964,7 @@
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
                   "dns_record_value": "cname.tovuk.app",
-                  "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                  "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
                   "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                 }
               }
@@ -7535,6 +7540,7 @@
                     "workerMemoryMib": 128,
                     "workerSubrequestsPerRequest": 50,
                     "workerOutgoingConnectionsPerRequest": 6,
+                    "workerBindingsPerService": 5000,
                     "workerEnvVars": 64,
                     "workerEnvVarSizeKib": 5,
                     "workerUncompressedSizeMib": 64,
@@ -9453,6 +9459,7 @@
               "workerMemoryMib": 128,
               "workerSubrequestsPerRequest": 50,
               "workerOutgoingConnectionsPerRequest": 6,
+              "workerBindingsPerService": 5000,
               "workerEnvVars": 64,
               "workerEnvVarSizeKib": 5,
               "workerUncompressedSizeMib": 64,
@@ -11116,7 +11123,7 @@
           "dns_record_type",
           "dns_record_name",
           "dns_record_value",
-          "dns_dashboard_url",
+          "dns_setup_url",
           "agent_instruction"
         ],
         "properties": {
@@ -11215,12 +11222,12 @@
               "cname.tovuk.app"
             ]
           },
-          "dns_dashboard_url": {
+          "dns_setup_url": {
             "type": "string",
-            "description": "DNS dashboard URL. Context: components.schemas.ServiceDomain.properties.dns_dashboard_url.",
+            "description": "DNS setup guide URL. Context: components.schemas.ServiceDomain.properties.dns_setup_url.",
             "format": "uri",
             "examples": [
-              "https://dash.cloudflare.com/?to=/:account/:zone/dns/records"
+              "https://docs.tovuk.com/reference/platform#custom-domains"
             ]
           }
         },
@@ -11236,7 +11243,7 @@
             "dns_record_type": "CNAME",
             "dns_record_name": "api.example.com",
             "dns_record_value": "cname.tovuk.app",
-            "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+            "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
             "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
           }
         ]
@@ -12323,6 +12330,7 @@
                     "workerMemoryMib": 128,
                     "workerSubrequestsPerRequest": 50,
                     "workerOutgoingConnectionsPerRequest": 6,
+                    "workerBindingsPerService": 5000,
                     "workerEnvVars": 64,
                     "workerEnvVarSizeKib": 5,
                     "workerUncompressedSizeMib": 64,
@@ -12523,6 +12531,7 @@
                     "workerMemoryMib": 128,
                     "workerSubrequestsPerRequest": 10000,
                     "workerOutgoingConnectionsPerRequest": 6,
+                    "workerBindingsPerService": 5000,
                     "workerEnvVars": 128,
                     "workerEnvVarSizeKib": 5,
                     "workerUncompressedSizeMib": 64,
@@ -12935,6 +12944,7 @@
               "workerMemoryMib": 128,
               "workerSubrequestsPerRequest": 50,
               "workerOutgoingConnectionsPerRequest": 6,
+              "workerBindingsPerService": 5000,
               "workerEnvVars": 64,
               "workerEnvVarSizeKib": 5,
               "workerUncompressedSizeMib": 64,
@@ -13126,6 +13136,7 @@
           "workerMemoryMib",
           "workerSubrequestsPerRequest",
           "workerOutgoingConnectionsPerRequest",
+          "workerBindingsPerService",
           "workerEnvVars",
           "workerEnvVarSizeKib",
           "workerUncompressedSizeMib",
@@ -13383,6 +13394,13 @@
             "type": "integer",
             "format": "int64",
             "description": "Simultaneous outgoing connections per worker invocation. Context: components.schemas.PlanLimits.properties.workerOutgoingConnectionsPerRequest.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "workerBindingsPerService": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Resource bindings allowed on one service. Context: components.schemas.PlanLimits.properties.workerBindingsPerService.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -14276,6 +14294,7 @@
             "workerMemoryMib": 128,
             "workerSubrequestsPerRequest": 50,
             "workerOutgoingConnectionsPerRequest": 6,
+            "workerBindingsPerService": 5000,
             "workerEnvVars": 64,
             "workerEnvVarSizeKib": 5,
             "workerUncompressedSizeMib": 64,
@@ -14701,6 +14720,7 @@
               "workerMemoryMib": 128,
               "workerSubrequestsPerRequest": 50,
               "workerOutgoingConnectionsPerRequest": 6,
+              "workerBindingsPerService": 5000,
               "workerEnvVars": 64,
               "workerEnvVarSizeKib": 5,
               "workerUncompressedSizeMib": 64,

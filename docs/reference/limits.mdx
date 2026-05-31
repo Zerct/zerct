@@ -15,6 +15,9 @@ ambiguous to run.
 - Runtime memory is fixed at `128mb` for Tovuk workers.
 - Runtime CPU allocation is fixed at `1`; usage is controlled by metered
   `worker_cpu_ms` caps.
+- One service can bind up to 5000 platform resources, including SQLite
+  databases, KV namespaces, queues, Durable Object namespaces, and private
+  service bindings.
 - Rust worker artifacts are capped at 64 MiB before compression, 3 MiB after
   compression on Free, and 10 MiB after compression on Pro.
 - Runtime idle timeout must be between `1` and `60` minutes.
