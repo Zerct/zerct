@@ -92,6 +92,7 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
         "create" => create_queue(cli),
         "update" | "set" => update_queue(cli),
         "messages" => queue_messages(cli),
+        "metrics" => queue_metrics(cli),
         "send" => queue_send(cli),
         "send-batch" | "batch-send" => queue_send_batch(cli),
         "delete" | "del" | "rm" => delete_app_resource(
@@ -761,6 +762,24 @@ fn queue_messages(cli: &CliOptions) -> Result<()> {
     let token = read_or_login_token(cli)?;
     let route = format!(
         "{}/queues/{}/messages",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&queue)
+    );
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
+    print_json(&response)
+}
+
+fn queue_metrics(cli: &CliOptions) -> Result<()> {
+    let queue = required_arg(
+        cli,
+        1,
+        "queue_name_required",
+        "Queue name is required.",
+        "Use `tovuk queue metrics --service <service> jobs --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let route = format!(
+        "{}/queues/{}/metrics",
         service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&queue)
     );

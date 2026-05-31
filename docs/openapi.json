@@ -3351,6 +3351,65 @@
         }
       }
     },
+    "/v1/services/{service_id}/queues/{queue}/metrics": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read queue metrics",
+        "description": "Read realtime backlog count, backlog bytes, and oldest queued message timestamp for one service queue. Context: paths./v1/services/{service_id}/queues/{queue}/metrics.get.",
+        "operationId": "readServiceQueueMetrics",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/QueueMetricsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}/metrics.get.parameters.0.",
+            "example": "service_1"
+          },
+          {
+            "name": "queue",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(queue_[0-9]+|[a-z][a-z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "jobs"
+              ]
+            },
+            "description": "Queue id or queue name. Context: paths./v1/services/{service_id}/queues/{queue}/metrics.get.parameters.1.",
+            "example": "jobs"
+          }
+        ]
+      }
+    },
     "/v1/services/{service_id}/queues/{queue}/messages/batch": {
       "post": {
         "tags": [
@@ -8275,6 +8334,55 @@
                     }
                   ],
                   "successfulMessageCount": 2,
+                  "nextActions": [
+                    "Inspect messages with tovuk queue messages."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "QueueMetricsLoaded": {
+        "description": "Queue metrics loaded. Context: components.responses.QueueMetricsLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/QueueMetricsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Queue metrics loaded",
+                "value": {
+                  "queue": {
+                    "id": "queue_1",
+                    "name": "jobs",
+                    "maxRetries": 3,
+                    "retentionSeconds": 345600,
+                    "maxBatchSize": 10,
+                    "maxBatchTimeoutSeconds": 5,
+                    "deadLetterQueueId": null,
+                    "deadLetterQueueName": null
+                  },
+                  "metrics": {
+                    "backlogCount": 2,
+                    "backlogBytes": 31,
+                    "oldestMessageTimestamp": 1780315200000
+                  },
                   "nextActions": [
                     "Inspect messages with tovuk queue messages."
                   ]
@@ -19381,6 +19489,114 @@
               }
             ],
             "successfulMessageCount": 2,
+            "nextActions": [
+              "Inspect messages with tovuk queue messages."
+            ]
+          }
+        ]
+      },
+      "QueueMetrics": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "backlogCount",
+          "backlogBytes",
+          "oldestMessageTimestamp"
+        ],
+        "description": "Realtime Queue metrics. Context: components.schemas.QueueMetrics.",
+        "properties": {
+          "backlogCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Number of queued messages ready or waiting for delivery. Context: components.schemas.QueueMetrics.properties.backlogCount.",
+            "examples": [
+              2
+            ]
+          },
+          "backlogBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Total queued message body bytes. Context: components.schemas.QueueMetrics.properties.backlogBytes.",
+            "examples": [
+              31
+            ]
+          },
+          "oldestMessageTimestamp": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Oldest queued message timestamp in Unix milliseconds, or null when empty. Context: components.schemas.QueueMetrics.properties.oldestMessageTimestamp.",
+            "examples": [
+              1780315200000
+            ]
+          }
+        },
+        "examples": [
+          {
+            "backlogCount": 2,
+            "backlogBytes": 31,
+            "oldestMessageTimestamp": 1780315200000
+          }
+        ]
+      },
+      "QueueMetricsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "queue",
+          "metrics",
+          "nextActions"
+        ],
+        "description": "Queue metrics response. Context: components.schemas.QueueMetricsResponse.",
+        "properties": {
+          "queue": {
+            "$ref": "#/components/schemas/QueueBinding"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/QueueMetrics"
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable next actions. Context: components.schemas.QueueMetricsResponse.properties.nextActions.",
+            "examples": [
+              [
+                "Inspect messages with tovuk queue messages."
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "queue": {
+              "id": "queue_1",
+              "name": "jobs",
+              "maxRetries": 3,
+              "retentionSeconds": 345600,
+              "maxBatchSize": 10,
+              "maxBatchTimeoutSeconds": 5,
+              "deadLetterQueueId": null,
+              "deadLetterQueueName": null
+            },
+            "metrics": {
+              "backlogCount": 2,
+              "backlogBytes": 31,
+              "oldestMessageTimestamp": 1780315200000
+            },
             "nextActions": [
               "Inspect messages with tovuk queue messages."
             ]
