@@ -23,14 +23,18 @@ ambiguous to run.
 - Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
-- Free service object storage includes 10 GiB total, 100 thousand objects, and
-  a 10 GiB single-object limit.
-- Pro service object storage includes 10 GiB total, 1 million objects, and a
-  10 GiB single-object limit.
+- Free service object storage includes 10 GiB total, 100 thousand objects, a
+  5 GiB single-part object upload limit, 1 million Class A operations per
+  month, and 10 million Class B operations per month.
+- Pro service object storage includes 10 GiB total, 1 million objects, a
+  5 GiB single-part object upload limit, 1 million Class A operations per
+  month, and 10 million Class B operations per month.
 - Free worker requests: 100 thousand per day.
 - Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
 - Free KV meters: 100 thousand reads per day, 1000 writes per day, 1000
   deletes per day, and 1000 lists per day.
+- KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
+  least 30 seconds.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
   or delete chunk.
 - Queue messages are limited to 128 KB, send delay is limited to 24 hours, and

@@ -376,15 +376,41 @@ fn kv_put(cli: &CliOptions) -> Result<()> {
             cli.output.json,
         ));
     }
+    let mut payload = Map::new();
+    payload.insert("value".to_owned(), Value::String(value));
+    payload.insert("encoding".to_owned(), Value::String("text".to_owned()));
+    if !cli.kv.metadata.trim().is_empty() {
+        payload.insert("metadata".to_owned(), kv_metadata(cli)?);
+    }
+    if let Some(ttl) = optional_u32(&cli.kv.expiration_ttl_seconds, "--ttl", cli)? {
+        payload.insert("expirationTtlSeconds".to_owned(), json!(ttl));
+    }
     print_authenticated_mutation(
         cli,
         Method::PUT,
         &kv_value_route(cli, &namespace, &key)?,
-        Some(json!({
-            "value": value,
-            "encoding": "text",
-        })),
+        Some(Value::Object(payload)),
     )
+}
+
+fn kv_metadata(cli: &CliOptions) -> Result<Value> {
+    let value = serde_json::from_str::<Value>(&cli.kv.metadata).map_err(|_error| {
+        agent_error(
+            "invalid_kv_metadata",
+            "KV metadata must be valid JSON.",
+            "Pass metadata as JSON such as `--metadata '{\"cache\":\"user\"}'`.",
+            cli.output.json,
+        )
+    })?;
+    if !value.is_object() {
+        return Err(agent_error(
+            "invalid_kv_metadata",
+            "KV metadata must be a JSON object.",
+            "Pass metadata as JSON such as `--metadata '{\"cache\":\"user\"}'`.",
+            cli.output.json,
+        ));
+    }
+    Ok(value)
 }
 
 fn kv_delete(cli: &CliOptions) -> Result<()> {
@@ -476,7 +502,7 @@ fn optional_u16(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u16>
         agent_error(
             "invalid_argument",
             format!("{flag} is too large."),
-            format!("Pass {flag} within the documented queue limit."),
+            format!("Pass {flag} within the documented platform limit."),
             cli.output.json,
         )
     })
@@ -490,7 +516,7 @@ fn optional_u32(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u32>
         agent_error(
             "invalid_argument",
             format!("{flag} is too large."),
-            format!("Pass {flag} within the documented queue limit."),
+            format!("Pass {flag} within the documented platform limit."),
             cli.output.json,
         )
     })

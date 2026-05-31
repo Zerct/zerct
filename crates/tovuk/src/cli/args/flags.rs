@@ -75,11 +75,71 @@ fn apply_value_flag(
     index: usize,
 ) -> Result<usize> {
     match name {
+        "--api" | "--service" | "--build" | "--deploy" | "--limit" | "--cursor" | "--period"
+        | "--value" | "--params" | "--target" | "--token" | "--template" => {
+            apply_common_value_flag(cli, name, inline, argv, index)
+        }
+        "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
+        "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
+            apply_kv_value_flag(cli, name, inline, argv, index)
+        }
+        "--delay-seconds" | "--max-retries" | "--retention-seconds" => {
+            apply_queue_value_flag(cli, name, inline, argv, index)
+        }
+        "--failing-command" | "--first-log-line" | "--severity" => {
+            apply_support_value_flag(cli, name, inline, argv, index)
+        }
+        "--port" | "--wait-timeout" => apply_numeric_value_flag(cli, name, inline, argv, index),
+        _ => Err(agent_error(
+            "unknown_argument",
+            format!("Unknown Tovuk option: {name}."),
+            "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
+            cli.output.json,
+        )),
+    }
+}
+
+fn apply_common_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
         "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.output.json),
         "--service" => {
             set_string_flag(&mut cli.service, name, inline, argv, index, cli.output.json)
         }
         "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.output.json),
+        "--deploy" => set_string_flag(&mut cli.deploy, name, inline, argv, index, cli.output.json),
+        "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.output.json),
+        "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
+        "--period" => set_string_flag(&mut cli.period, name, inline, argv, index, cli.output.json),
+        "--value" => set_string_flag(&mut cli.value, name, inline, argv, index, cli.output.json),
+        "--params" => set_string_flag(&mut cli.params, name, inline, argv, index, cli.output.json),
+        "--target" => set_string_flag(&mut cli.target, name, inline, argv, index, cli.output.json),
+        "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.output.json),
+        "--template" => set_string_flag(
+            &mut cli.template,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_storage_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
         "--content-type" => set_string_flag(
             &mut cli.storage.content_type,
             name,
@@ -88,25 +148,46 @@ fn apply_value_flag(
             index,
             cli.output.json,
         ),
-        "--deploy" => set_string_flag(&mut cli.deploy, name, inline, argv, index, cli.output.json),
-        "--failing-command" => set_string_flag(
-            &mut cli.failing_command,
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_kv_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--expiration-ttl-seconds" | "--ttl" => set_string_flag(
+            &mut cli.kv.expiration_ttl_seconds,
             name,
             inline,
             argv,
             index,
             cli.output.json,
         ),
-        "--first-log-line" => set_string_flag(
-            &mut cli.first_log_line,
+        "--metadata" => set_string_flag(
+            &mut cli.kv.metadata,
             name,
             inline,
             argv,
             index,
             cli.output.json,
         ),
-        "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.output.json),
-        "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_queue_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
         "--delay-seconds" => set_string_flag(
             &mut cli.queue.delay_seconds,
             name,
@@ -123,7 +204,6 @@ fn apply_value_flag(
             index,
             cli.output.json,
         ),
-        "--period" => set_string_flag(&mut cli.period, name, inline, argv, index, cli.output.json),
         "--retention-seconds" => set_string_flag(
             &mut cli.queue.retention_seconds,
             name,
@@ -132,9 +212,34 @@ fn apply_value_flag(
             index,
             cli.output.json,
         ),
-        "--value" => set_string_flag(&mut cli.value, name, inline, argv, index, cli.output.json),
-        "--params" => set_string_flag(&mut cli.params, name, inline, argv, index, cli.output.json),
-        "--target" => set_string_flag(&mut cli.target, name, inline, argv, index, cli.output.json),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_support_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--failing-command" => set_string_flag(
+            &mut cli.failing_command,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--first-log-line" => set_string_flag(
+            &mut cli.first_log_line,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
         "--severity" => set_string_flag(
             &mut cli.severity,
             name,
@@ -143,15 +248,18 @@ fn apply_value_flag(
             index,
             cli.output.json,
         ),
-        "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.output.json),
-        "--template" => set_string_flag(
-            &mut cli.template,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_numeric_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
         "--port" => set_u16_flag(&mut cli.port, name, inline, argv, index, cli.output.json),
         "--wait-timeout" => set_u64_flag(
             &mut cli.deployment.wait_timeout_seconds,
@@ -161,11 +269,15 @@ fn apply_value_flag(
             index,
             cli.output.json,
         ),
-        _ => Err(agent_error(
-            "unknown_argument",
-            format!("Unknown Tovuk option: {name}."),
-            "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
-            cli.output.json,
-        )),
+        _ => invalid_value_flag_dispatch(cli, name),
     }
+}
+
+fn invalid_value_flag_dispatch(cli: &CliOptions, name: &str) -> Result<usize> {
+    Err(agent_error(
+        "unknown_argument",
+        format!("Unknown Tovuk option: {name}."),
+        "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
+        cli.output.json,
+    ))
 }

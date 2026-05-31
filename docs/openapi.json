@@ -2773,7 +2773,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes)$",
               "maxLength": 64,
               "examples": [
                 "worker_requests"
@@ -3841,7 +3841,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes)$",
               "maxLength": 128,
               "examples": [
                 "worker_requests"
@@ -4401,7 +4401,7 @@
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 10240,
+                    "storageObjectMaxMib": 5120,
                     "sqliteDatabases": 10,
                     "sqliteStorageMib": 5120,
                     "sqliteStorageMibPerDatabase": 500,
@@ -4444,7 +4444,9 @@
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
                     "apiTokens": 10,
-                    "supportTicketsPerDay": 3
+                    "supportTicketsPerDay": 3,
+                    "objectStorageClassAOperationsPerMonth": 1000000,
+                    "objectStorageClassBOperationsPerMonth": 10000000
                   }
                 }
               }
@@ -5225,7 +5227,7 @@
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 10240,
+                    "storageObjectMaxMib": 5120,
                     "sqliteDatabases": 10,
                     "sqliteStorageMib": 5120,
                     "sqliteStorageMibPerDatabase": 500,
@@ -5268,7 +5270,9 @@
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
                     "apiTokens": 10,
-                    "supportTicketsPerDay": 3
+                    "supportTicketsPerDay": 3,
+                    "objectStorageClassAOperationsPerMonth": 1000000,
+                    "objectStorageClassBOperationsPerMonth": 10000000
                   }
                 }
               }
@@ -5336,7 +5340,7 @@
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 10240,
+                    "storageObjectMaxMib": 5120,
                     "sqliteDatabases": 10,
                     "sqliteStorageMib": 5120,
                     "sqliteStorageMibPerDatabase": 500,
@@ -5379,7 +5383,9 @@
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
                     "apiTokens": 10,
-                    "supportTicketsPerDay": 3
+                    "supportTicketsPerDay": 3,
+                    "objectStorageClassAOperationsPerMonth": 1000000,
+                    "objectStorageClassBOperationsPerMonth": 10000000
                   },
                   "services": [
                     {
@@ -6154,7 +6160,7 @@
                     "durableObjectSqliteStorageMib": 1024,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
-                    "storageObjectMaxMib": 10240,
+                    "storageObjectMaxMib": 5120,
                     "dataTransferGib": 100,
                     "monthlyBuildMinutes": 3000,
                     "monthlyDeployments": 0,
@@ -6167,7 +6173,9 @@
                     "alwaysOnServices": 0,
                     "logRetentionDays": 3,
                     "apiTokens": 10,
-                    "supportTicketsPerDay": 3
+                    "supportTicketsPerDay": 3,
+                    "objectStorageClassAOperationsPerMonth": 1000000,
+                    "objectStorageClassBOperationsPerMonth": 10000000
                   },
                   "sqliteDatabases": [
                     {
@@ -7393,7 +7401,9 @@
             "$ref": "#/components/schemas/PlanLimits",
             "objectStorageMib": 10240,
             "storageObjects": 100000,
-            "storageObjectMaxMib": 10240
+            "storageObjectMaxMib": 5120,
+            "objectStorageClassAOperationsPerMonth": 1000000,
+            "objectStorageClassBOperationsPerMonth": 10000000
           }
         },
         "examples": [
@@ -7434,7 +7444,7 @@
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 10240,
+              "storageObjectMaxMib": 5120,
               "sqliteDatabases": 10,
               "sqliteStorageMib": 5120,
               "sqliteStorageMibPerDatabase": 500,
@@ -7477,7 +7487,9 @@
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
               "apiTokens": 10,
-              "supportTicketsPerDay": 3
+              "supportTicketsPerDay": 3,
+              "objectStorageClassAOperationsPerMonth": 1000000,
+              "objectStorageClassBOperationsPerMonth": 10000000
             }
           }
         ]
@@ -10129,7 +10141,9 @@
             "$ref": "#/components/schemas/PlanLimits",
             "objectStorageMib": 10240,
             "storageObjects": 100000,
-            "storageObjectMaxMib": 10240
+            "storageObjectMaxMib": 5120,
+            "objectStorageClassAOperationsPerMonth": 1000000,
+            "objectStorageClassBOperationsPerMonth": 10000000
           }
         },
         "examples": [
@@ -10169,7 +10183,7 @@
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 10240,
+              "storageObjectMaxMib": 5120,
               "sqliteDatabases": 10,
               "sqliteStorageMib": 5120,
               "sqliteStorageMibPerDatabase": 500,
@@ -10212,7 +10226,9 @@
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
               "apiTokens": 10,
-              "supportTicketsPerDay": 3
+              "supportTicketsPerDay": 3,
+              "objectStorageClassAOperationsPerMonth": 1000000,
+              "objectStorageClassBOperationsPerMonth": 10000000
             }
           }
         ]
@@ -10262,6 +10278,8 @@
           "objectStorageMib",
           "storageObjects",
           "storageObjectMaxMib",
+          "objectStorageClassAOperationsPerMonth",
+          "objectStorageClassBOperationsPerMonth",
           "dataTransferGib",
           "monthlyBuildMinutes",
           "monthlyDeployments",
@@ -10624,7 +10642,7 @@
           "storageObjectMaxMib": {
             "type": "integer",
             "format": "int64",
-            "description": "Maximum single object size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib.",
+            "description": "Maximum single-part object upload size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -10718,6 +10736,26 @@
             "description": "Support tickets allowed per day. Context: components.schemas.PlanLimits.properties.supportTicketsPerDay.",
             "minimum": 0,
             "maximum": 1000000000000
+          },
+          "objectStorageClassAOperationsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly included Class A object storage operations. Context: components.schemas.PlanLimits.properties.objectStorageClassAOperationsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "objectStorageClassBOperationsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly included Class B object storage operations. Context: components.schemas.PlanLimits.properties.objectStorageClassBOperationsPerMonth.",
+            "minimum": 0,
+            "maximum": 1000000000000
           }
         },
         "additionalProperties": false,
@@ -10765,7 +10803,7 @@
             "durableObjectSqliteStorageMib": 1024,
             "objectStorageMib": 10240,
             "storageObjects": 100000,
-            "storageObjectMaxMib": 10240,
+            "storageObjectMaxMib": 5120,
             "dataTransferGib": 100,
             "monthlyBuildMinutes": 3000,
             "monthlyDeployments": 0,
@@ -10778,7 +10816,9 @@
             "alwaysOnServices": 0,
             "logRetentionDays": 3,
             "apiTokens": 10,
-            "supportTicketsPerDay": 3
+            "supportTicketsPerDay": 3,
+            "objectStorageClassAOperationsPerMonth": 1000000,
+            "objectStorageClassBOperationsPerMonth": 10000000
           }
         ]
       },
@@ -10808,7 +10848,9 @@
             "$ref": "#/components/schemas/PlanLimits",
             "objectStorageMib": 10240,
             "storageObjects": 100000,
-            "storageObjectMaxMib": 10240
+            "storageObjectMaxMib": 5120,
+            "objectStorageClassAOperationsPerMonth": 1000000,
+            "objectStorageClassBOperationsPerMonth": 10000000
           },
           "services": {
             "type": "array",
@@ -10927,7 +10969,7 @@
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 10240,
+              "storageObjectMaxMib": 5120,
               "sqliteDatabases": 10,
               "sqliteStorageMib": 5120,
               "sqliteStorageMibPerDatabase": 500,
@@ -10970,7 +11012,9 @@
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
               "apiTokens": 10,
-              "supportTicketsPerDay": 3
+              "supportTicketsPerDay": 3,
+              "objectStorageClassAOperationsPerMonth": 1000000,
+              "objectStorageClassBOperationsPerMonth": 10000000
             },
             "services": [
               {
@@ -12598,7 +12642,7 @@
             "description": "Meter name. Context: components.schemas.UsageCap.properties.metric.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes)$",
             "examples": [
               "worker_requests"
             ]
@@ -12718,6 +12762,8 @@
               "objectStorageMib",
               "storageObjects",
               "storageObjectMaxMib",
+              "objectStorageClassAOperationsPerMonth",
+              "objectStorageClassBOperationsPerMonth",
               "dataTransferGib",
               "monthlyBuildMinutes",
               "monthlyDeployments",
@@ -13080,7 +13126,7 @@
               "storageObjectMaxMib": {
                 "type": "integer",
                 "format": "int64",
-                "description": "Maximum single object size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.storageObjectMaxMib.",
+                "description": "Maximum single-part object upload size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.storageObjectMaxMib.",
                 "minimum": 0,
                 "maximum": 1000000000000
               },
@@ -13174,6 +13220,26 @@
                 "description": "Support tickets allowed per day. Context: components.schemas.PlanLimits.properties.supportTicketsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.supportTicketsPerDay.",
                 "minimum": 0,
                 "maximum": 1000000000000
+              },
+              "objectStorageClassAOperationsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly included Class A object storage operations returned with platform resources. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.objectStorageClassAOperationsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "objectStorageClassBOperationsPerMonth": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "description": "Monthly included Class B object storage operations returned with platform resources. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.objectStorageClassBOperationsPerMonth.",
+                "minimum": 0,
+                "maximum": 1000000000000
               }
             },
             "additionalProperties": false,
@@ -13221,7 +13287,7 @@
                 "durableObjectSqliteStorageMib": 1024,
                 "objectStorageMib": 10240,
                 "storageObjects": 100000,
-                "storageObjectMaxMib": 10240,
+                "storageObjectMaxMib": 5120,
                 "dataTransferGib": 100,
                 "monthlyBuildMinutes": 3000,
                 "monthlyDeployments": 0,
@@ -13234,7 +13300,9 @@
                 "alwaysOnServices": 0,
                 "logRetentionDays": 3,
                 "apiTokens": 10,
-                "supportTicketsPerDay": 3
+                "supportTicketsPerDay": 3,
+                "objectStorageClassAOperationsPerMonth": 1000000,
+                "objectStorageClassBOperationsPerMonth": 10000000
               }
             ],
             "example": {
@@ -13279,7 +13347,7 @@
               "durableObjectSqliteStorageMib": 1024,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
-              "storageObjectMaxMib": 10240,
+              "storageObjectMaxMib": 5120,
               "dataTransferGib": 100,
               "monthlyBuildMinutes": 3000,
               "monthlyDeployments": 0,
@@ -13292,7 +13360,9 @@
               "alwaysOnServices": 0,
               "logRetentionDays": 3,
               "apiTokens": 10,
-              "supportTicketsPerDay": 3
+              "supportTicketsPerDay": 3,
+              "objectStorageClassAOperationsPerMonth": 1000000,
+              "objectStorageClassBOperationsPerMonth": 10000000
             }
           },
           "sqliteDatabases": {
@@ -13956,7 +14026,7 @@
           "expirationTtlSeconds": {
             "type": "integer",
             "format": "int32",
-            "minimum": 1,
+            "minimum": 30,
             "maximum": 31536000,
             "description": "Optional TTL in seconds. Context: components.schemas.KvEntryPutRequest.properties.expirationTtlSeconds.",
             "examples": [
@@ -14610,7 +14680,7 @@
             "description": "Meter name. Context: components.schemas.UsageCapDeleteResponse.properties.metric.",
             "minLength": 1,
             "maxLength": 128,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes)$",
             "examples": [
               "worker_requests"
             ]

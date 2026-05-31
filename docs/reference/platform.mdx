@@ -14,6 +14,9 @@ npx tovuk database create --service service_1 DB --json
 npx tovuk database query --service service_1 DB "select 1" --json
 npx tovuk database delete --service service_1 DB --json
 npx tovuk kv create --service service_1 CACHE --json
+npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
+npx tovuk kv get --service service_1 CACHE user:1 --json
+npx tovuk kv keys --service service_1 CACHE --json
 npx tovuk kv namespace delete --service service_1 CACHE --json
 npx tovuk queue create --service service_1 jobs --max-retries 3 --retention-seconds 86400 --json
 npx tovuk queue delete --service service_1 jobs --json
@@ -37,6 +40,8 @@ npx tovuk limit delete worker_requests --period day --json
 - Durable Objects: keyed stateful Rust actors for realtime coordination.
 - Service bindings: private worker-to-worker calls without public URLs.
 - Usage caps: hard stops and notification thresholds for predictable spend.
+- Object storage: service files and media with Class A and Class B operation
+  meters.
 
 Delete commands return the refreshed platform resource payload so agents can
 verify cleanup immediately and continue without dashboard checks.
@@ -48,6 +53,8 @@ npx tovuk storage list --service service_1 --json
 npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 npx tovuk storage delete --service service_1 uploads/logo.png --json
+npx tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
+npx tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
 ```
 
 Queue messages are capped at 128 KB. Store larger payloads in object storage and

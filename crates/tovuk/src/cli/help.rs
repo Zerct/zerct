@@ -31,7 +31,7 @@ Usage:
   tovuk kv namespace delete --service <service> CACHE [--api <url>] [--json]
   tovuk kv keys --service <service> CACHE [--api <url>] [--json]
   tovuk kv get --service <service> CACHE <key> [--api <url>] [--json]
-  tovuk kv put --service <service> CACHE <key> <value> [--api <url>] [--json]
+  tovuk kv put --service <service> CACHE <key> <value> [--metadata <json>] [--ttl <seconds>] [--api <url>] [--json]
   tovuk kv delete --service <service> CACHE <key> [--api <url>] [--json]
   tovuk queue create --service <service> jobs [--max-retries <n>] [--retention-seconds <seconds>] [--api <url>] [--json]
   tovuk queue messages --service <service> jobs [--api <url>] [--json]
