@@ -52,6 +52,10 @@ Pro plans have a 1 TiB account hard cap, 10 GiB per database, and monthly
 included row meters before paid overage pricing. Inspect the exact current
 limits and prices with:
 
+D1-style query limits are exposed in `tovuk pricing --json`: 30 second query
+timeouts, 50 queries per Worker invocation on Free, 1000 on Pro, 100 bound
+parameters, 100 KB SQL statements, 100 columns, and 2 MB row/blob/string values.
+
 ```sh
 tovuk usage --json
 tovuk pricing --json
