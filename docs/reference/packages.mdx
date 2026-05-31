@@ -32,6 +32,9 @@ tovuk support create "Deploy failed" "Agent retried deploy after doctor." --serv
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 Fix `agent_instruction` first. If a build fails, fix the first actionable log
 line, rerun doctor, then redeploy.
 

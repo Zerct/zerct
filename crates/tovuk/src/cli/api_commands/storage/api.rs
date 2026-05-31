@@ -49,6 +49,68 @@ pub(super) fn complete_upload_response(cli: &CliOptions, token: &str, path: &str
     )
 }
 
+pub(super) fn multipart_create_response(
+    cli: &CliOptions,
+    token: &str,
+    path: &str,
+    content_type: &str,
+    size_bytes: u64,
+    part_size_bytes: u64,
+    public_read: bool,
+) -> Result<Value> {
+    api_request(
+        cli,
+        Method::POST,
+        &service_route(cli, "storage/multipart/create")?,
+        Some(token),
+        Some(json!({
+            "path": path,
+            "contentType": content_type,
+            "sizeBytes": size_bytes,
+            "partSizeBytes": part_size_bytes,
+            "publicRead": public_read,
+        })),
+    )
+}
+
+pub(super) fn multipart_complete_response(
+    cli: &CliOptions,
+    token: &str,
+    path: &str,
+    upload_id: &str,
+    parts: &[Value],
+) -> Result<Value> {
+    api_request(
+        cli,
+        Method::POST,
+        &service_route(cli, "storage/multipart/complete")?,
+        Some(token),
+        Some(json!({
+            "path": path,
+            "uploadId": upload_id,
+            "parts": parts,
+        })),
+    )
+}
+
+pub(super) fn multipart_abort_response(
+    cli: &CliOptions,
+    token: &str,
+    path: &str,
+    upload_id: &str,
+) -> Result<Value> {
+    api_request(
+        cli,
+        Method::POST,
+        &service_route(cli, "storage/multipart/abort")?,
+        Some(token),
+        Some(json!({
+            "path": path,
+            "uploadId": upload_id,
+        })),
+    )
+}
+
 pub(super) fn download_url_response(cli: &CliOptions, remote_path: &str) -> Result<Value> {
     let token = read_or_login_token(cli)?;
     api_request(

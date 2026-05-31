@@ -94,6 +94,9 @@ tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 Agent repair loop:
 
 ```sh

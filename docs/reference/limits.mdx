@@ -49,6 +49,9 @@ ambiguous to run.
   single-part upload limit, and 4.995 TiB multipart upload limit, includes
   1 million Class A operations and 10 million Class B operations per month,
   and exposes object storage paid overage rates in `tovuk pricing --json`.
+- `tovuk storage upload` automatically switches to multipart upload above
+  100 MiB and plans upload parts before transfer so agents can fail early on
+  byte or operation caps.
 - Object storage upload URL creation reserves requested bytes until the object
   is completed or deleted, so agents can avoid concurrent upload overages
   without dashboard cleanup.

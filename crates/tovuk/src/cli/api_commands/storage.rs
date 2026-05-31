@@ -3,7 +3,10 @@ mod args;
 mod output;
 mod transfer;
 
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use serde_json::json;
 
@@ -14,13 +17,17 @@ use super::super::{
 };
 use api::{
     complete_upload_response, delete_response, download_url_response, list_response,
+    multipart_abort_response, multipart_complete_response, multipart_create_response,
     upload_url_response,
 };
 use args::{
     default_download_path, default_remote_path, required_storage_arg, storage_content_type,
 };
 use output::{print_delete_result, print_list_result, print_upload_result};
-use transfer::{download_presigned_file, upload_presigned_file};
+use transfer::{download_presigned_file, upload_multipart_file, upload_presigned_file};
+
+const MULTIPART_UPLOAD_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
+const DEFAULT_MULTIPART_PART_BYTES: u64 = 100 * 1024 * 1024;
 
 pub(crate) fn storage_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
@@ -76,6 +83,16 @@ fn storage_upload(cli: &CliOptions) -> Result<()> {
 
     let content_type = storage_content_type(cli, &local_path);
     let token = read_or_login_token(cli)?;
+    if metadata.len() > MULTIPART_UPLOAD_THRESHOLD_BYTES {
+        return storage_multipart_upload(
+            cli,
+            &token,
+            &local_path,
+            &remote_path,
+            &content_type,
+            metadata.len(),
+        );
+    }
     let upload = upload_url_response(
         cli,
         &token,
@@ -96,6 +113,43 @@ fn storage_upload(cli: &CliOptions) -> Result<()> {
     }
     print_upload_result(&completed);
     Ok(())
+}
+
+fn storage_multipart_upload(
+    cli: &CliOptions,
+    token: &str,
+    local_path: &Path,
+    remote_path: &str,
+    content_type: &str,
+    size_bytes: u64,
+) -> Result<()> {
+    let upload = multipart_create_response(
+        cli,
+        token,
+        remote_path,
+        content_type,
+        size_bytes,
+        DEFAULT_MULTIPART_PART_BYTES,
+        cli.storage.public_read,
+    )?;
+    let path = super::super::project::string_field(&upload, "path");
+    let upload_id = super::super::project::string_field(&upload, "uploadId");
+    match upload_multipart_file(cli, &upload, local_path) {
+        Ok(parts) => {
+            let completed = multipart_complete_response(cli, token, &path, &upload_id, &parts)?;
+            if cli.output.json {
+                return print_json(&completed);
+            }
+            print_upload_result(&completed);
+            Ok(())
+        }
+        Err(error) => {
+            if !path.is_empty() && !upload_id.is_empty() {
+                let _abort_result = multipart_abort_response(cli, token, &path, &upload_id);
+            }
+            Err(error)
+        }
+    }
 }
 
 fn storage_download(cli: &CliOptions) -> Result<()> {

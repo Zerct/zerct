@@ -90,6 +90,9 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 agents can choose the correct product and cap the right meters before heavy
 work.
 
+`tovuk storage upload` automatically switches to multipart transfer for files
+larger than 100 MiB.
+
 Agent repair loop:
 
 ```sh

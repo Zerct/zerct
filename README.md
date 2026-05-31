@@ -207,6 +207,9 @@ tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+`tovuk storage upload` automatically uses multipart transfer for files larger
+than 100 MiB, so agents can upload large media through the same command.
+
 `tovuk pricing --json` returns both plan pricing and product meter metadata,
 so agents can choose Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queue, Cron, or Builds and set the matching usage caps before heavy work.
