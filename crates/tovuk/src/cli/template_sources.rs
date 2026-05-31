@@ -98,8 +98,9 @@ const RUST_API_SOURCE: &str = r##"use std::{
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 
 const LISTEN_BACKLOG: i32 = 1024;
-const MIN_WORKER_THREADS: usize = 8;
+const MIN_WORKER_THREADS: usize = 64;
 const MAX_WORKER_THREADS: usize = 128;
+const WORKER_THREAD_STACK_BYTES: usize = 256 * 1024;
 
 fn main() -> std::io::Result<()> {
     let port = std::env::var("PORT")
@@ -114,7 +115,10 @@ fn main() -> std::io::Result<()> {
 
     for _index in 0..worker_count {
         let worker_listener = listener.try_clone()?;
-        workers.push(thread::spawn(move || accept_loop(&worker_listener)));
+        let worker = thread::Builder::new()
+            .stack_size(WORKER_THREAD_STACK_BYTES)
+            .spawn(move || accept_loop(&worker_listener))?;
+        workers.push(worker);
     }
 
     for worker in workers {
