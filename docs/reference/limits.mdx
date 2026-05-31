@@ -70,7 +70,7 @@ ambiguous to run.
   reads, 1 million writes, 1 million deletes, 1 million lists, and 1 GB
   storage are included each month before paid overage pricing.
 - KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
-  least 60 seconds, and KV `expiration` must be at least 60 seconds in the
+  least 30 seconds, and KV `expiration` must be at least 30 seconds in the
   future. KV keys are limited to 512 bytes and values to 25 MiB.
 - KV key list pages default to 1000 keys and accept limits from 10 to 1000.
 - Bulk KV reads accept up to 100 keys per request. Bulk KV writes and deletes
@@ -93,7 +93,7 @@ ambiguous to run.
   configured dead-letter queue after retries are exhausted.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
-- State SQLite storage is 10 GB per object on Free, with a 5 GB account storage
+- State SQLite storage is 1 GB per object on Free, with a 5 GB account storage
   cap, 5 million SQLite rows read per day, and 100 thousand SQLite rows written
   per day. Pro keeps each State object at 10 GB and includes 1 million
   requests, 400 thousand GB-s duration, 25 billion SQLite rows read, and
