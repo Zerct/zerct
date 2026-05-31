@@ -4999,6 +4999,12 @@
                     "cronTriggers": 5,
                     "staticAssetFilesPerVersion": 20000,
                     "staticAssetFileSizeMib": 25,
+                    "staticAssetHeaderRules": 100,
+                    "staticAssetHeaderLineChars": 2000,
+                    "staticAssetRedirectStaticRules": 2000,
+                    "staticAssetRedirectDynamicRules": 100,
+                    "staticAssetRedirectTotalRules": 2100,
+                    "staticAssetRedirectRuleChars": 1000,
                     "kvStorageMib": 953,
                     "kvReadsPerDay": 100000,
                     "kvReadsPerMonth": null,
@@ -5679,8 +5685,8 @@
                       "dns_record_type": "CNAME",
                       "dns_record_name": "api.example.com",
                       "dns_record_value": "cname.tovuk.app",
-                      "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-                      "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
+                      "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                      "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                     }
                   ]
                 }
@@ -5724,8 +5730,8 @@
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
                   "dns_record_value": "cname.tovuk.app",
-                  "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
+                  "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                  "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                 }
               }
             }
@@ -5894,6 +5900,12 @@
                         "cronTriggers": 5,
                         "staticAssetFilesPerVersion": 20000,
                         "staticAssetFileSizeMib": 25,
+                        "staticAssetHeaderRules": 100,
+                        "staticAssetHeaderLineChars": 2000,
+                        "staticAssetRedirectStaticRules": 2000,
+                        "staticAssetRedirectDynamicRules": 100,
+                        "staticAssetRedirectTotalRules": 2100,
+                        "staticAssetRedirectRuleChars": 1000,
                         "kvStorageMib": 953,
                         "kvReadsPerDay": 100000,
                         "kvReadsPerMonth": null,
@@ -6087,6 +6099,12 @@
                         "cronTriggers": 250,
                         "staticAssetFilesPerVersion": 100000,
                         "staticAssetFileSizeMib": 25,
+                        "staticAssetHeaderRules": 100,
+                        "staticAssetHeaderLineChars": 2000,
+                        "staticAssetRedirectStaticRules": 2000,
+                        "staticAssetRedirectDynamicRules": 100,
+                        "staticAssetRedirectTotalRules": 2100,
+                        "staticAssetRedirectRuleChars": 1000,
                         "kvStorageMib": null,
                         "kvReadsPerDay": null,
                         "kvReadsPerMonth": 10000000,
@@ -6349,6 +6367,12 @@
                     "cronTriggers": 5,
                     "staticAssetFilesPerVersion": 20000,
                     "staticAssetFileSizeMib": 25,
+                    "staticAssetHeaderRules": 100,
+                    "staticAssetHeaderLineChars": 2000,
+                    "staticAssetRedirectStaticRules": 2000,
+                    "staticAssetRedirectDynamicRules": 100,
+                    "staticAssetRedirectTotalRules": 2100,
+                    "staticAssetRedirectRuleChars": 1000,
                     "kvStorageMib": 953,
                     "kvReadsPerDay": 100000,
                     "kvReadsPerMonth": null,
@@ -6598,6 +6622,12 @@
                     "cronTriggers": 5,
                     "staticAssetFilesPerVersion": 20000,
                     "staticAssetFileSizeMib": 25,
+                    "staticAssetHeaderRules": 100,
+                    "staticAssetHeaderLineChars": 2000,
+                    "staticAssetRedirectStaticRules": 2000,
+                    "staticAssetRedirectDynamicRules": 100,
+                    "staticAssetRedirectTotalRules": 2100,
+                    "staticAssetRedirectRuleChars": 1000,
                     "kvStorageMib": 953,
                     "kvReadsPerDay": 100000,
                     "kvReadsPerMonth": null,
@@ -6924,8 +6954,8 @@
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
                   "dns_record_value": "cname.tovuk.app",
-                  "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-                  "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
+                  "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+                  "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                 }
               }
             }
@@ -7507,6 +7537,12 @@
                     "cronTriggers": 5,
                     "staticAssetFilesPerVersion": 20000,
                     "staticAssetFileSizeMib": 25,
+                    "staticAssetHeaderRules": 100,
+                    "staticAssetHeaderLineChars": 2000,
+                    "staticAssetRedirectStaticRules": 2000,
+                    "staticAssetRedirectDynamicRules": 100,
+                    "staticAssetRedirectTotalRules": 2100,
+                    "staticAssetRedirectRuleChars": 1000,
                     "kvStorageMib": 953,
                     "kvReadsPerDay": 100000,
                     "kvReadsPerMonth": null,
@@ -9418,6 +9454,12 @@
               "cronTriggers": 5,
               "staticAssetFilesPerVersion": 20000,
               "staticAssetFileSizeMib": 25,
+              "staticAssetHeaderRules": 100,
+              "staticAssetHeaderLineChars": 2000,
+              "staticAssetRedirectStaticRules": 2000,
+              "staticAssetRedirectDynamicRules": 100,
+              "staticAssetRedirectTotalRules": 2100,
+              "staticAssetRedirectRuleChars": 1000,
               "kvStorageMib": 953,
               "kvReadsPerDay": 100000,
               "kvReadsPerMonth": null,
@@ -11067,7 +11109,7 @@
           "dns_record_type",
           "dns_record_name",
           "dns_record_value",
-          "cloudflare_dns_url",
+          "dns_dashboard_url",
           "agent_instruction"
         ],
         "properties": {
@@ -11166,9 +11208,9 @@
               "cname.tovuk.app"
             ]
           },
-          "cloudflare_dns_url": {
+          "dns_dashboard_url": {
             "type": "string",
-            "description": "Cloudflare DNS dashboard URL. Context: components.schemas.ServiceDomain.properties.cloudflare_dns_url.",
+            "description": "DNS dashboard URL. Context: components.schemas.ServiceDomain.properties.dns_dashboard_url.",
             "format": "uri",
             "examples": [
               "https://dash.cloudflare.com/?to=/:account/:zone/dns/records"
@@ -11187,8 +11229,8 @@
             "dns_record_type": "CNAME",
             "dns_record_name": "api.example.com",
             "dns_record_value": "cname.tovuk.app",
-            "cloudflare_dns_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
-            "agent_instruction": "Create a CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk origin IP."
+            "dns_dashboard_url": "https://dash.cloudflare.com/?to=/:account/:zone/dns/records",
+            "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
           }
         ]
       },
@@ -12281,6 +12323,12 @@
                     "cronTriggers": 5,
                     "staticAssetFilesPerVersion": 20000,
                     "staticAssetFileSizeMib": 25,
+                    "staticAssetHeaderRules": 100,
+                    "staticAssetHeaderLineChars": 2000,
+                    "staticAssetRedirectStaticRules": 2000,
+                    "staticAssetRedirectDynamicRules": 100,
+                    "staticAssetRedirectTotalRules": 2100,
+                    "staticAssetRedirectRuleChars": 1000,
                     "kvStorageMib": 953,
                     "kvReadsPerDay": 100000,
                     "kvReadsPerMonth": null,
@@ -12474,6 +12522,12 @@
                     "cronTriggers": 250,
                     "staticAssetFilesPerVersion": 100000,
                     "staticAssetFileSizeMib": 25,
+                    "staticAssetHeaderRules": 100,
+                    "staticAssetHeaderLineChars": 2000,
+                    "staticAssetRedirectStaticRules": 2000,
+                    "staticAssetRedirectDynamicRules": 100,
+                    "staticAssetRedirectTotalRules": 2100,
+                    "staticAssetRedirectRuleChars": 1000,
                     "kvStorageMib": null,
                     "kvReadsPerDay": null,
                     "kvReadsPerMonth": 10000000,
@@ -12879,6 +12933,12 @@
               "cronTriggers": 5,
               "staticAssetFilesPerVersion": 20000,
               "staticAssetFileSizeMib": 25,
+              "staticAssetHeaderRules": 100,
+              "staticAssetHeaderLineChars": 2000,
+              "staticAssetRedirectStaticRules": 2000,
+              "staticAssetRedirectDynamicRules": 100,
+              "staticAssetRedirectTotalRules": 2100,
+              "staticAssetRedirectRuleChars": 1000,
               "kvStorageMib": 953,
               "kvReadsPerDay": 100000,
               "kvReadsPerMonth": null,
@@ -13063,6 +13123,12 @@
           "cronTriggers",
           "staticAssetFilesPerVersion",
           "staticAssetFileSizeMib",
+          "staticAssetHeaderRules",
+          "staticAssetHeaderLineChars",
+          "staticAssetRedirectStaticRules",
+          "staticAssetRedirectDynamicRules",
+          "staticAssetRedirectTotalRules",
+          "staticAssetRedirectRuleChars",
           "kvStorageMib",
           "kvReadsPerDay",
           "kvReadsPerMonth",
@@ -13355,6 +13421,48 @@
             "type": "integer",
             "format": "int64",
             "description": "Maximum static asset file size in MiB. Context: components.schemas.PlanLimits.properties.staticAssetFileSizeMib.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetHeaderRules": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Header rules allowed in one static _headers file. Context: components.schemas.PlanLimits.properties.staticAssetHeaderRules.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetHeaderLineChars": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum characters in one static _headers line. Context: components.schemas.PlanLimits.properties.staticAssetHeaderLineChars.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetRedirectStaticRules": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Static redirects allowed in one static _redirects file. Context: components.schemas.PlanLimits.properties.staticAssetRedirectStaticRules.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetRedirectDynamicRules": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Dynamic redirects allowed in one static _redirects file. Context: components.schemas.PlanLimits.properties.staticAssetRedirectDynamicRules.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetRedirectTotalRules": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total redirects allowed in one static _redirects file. Context: components.schemas.PlanLimits.properties.staticAssetRedirectTotalRules.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "staticAssetRedirectRuleChars": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum characters in one static _redirects line. Context: components.schemas.PlanLimits.properties.staticAssetRedirectRuleChars.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -14154,6 +14262,12 @@
             "cronTriggers": 5,
             "staticAssetFilesPerVersion": 20000,
             "staticAssetFileSizeMib": 25,
+            "staticAssetHeaderRules": 100,
+            "staticAssetHeaderLineChars": 2000,
+            "staticAssetRedirectStaticRules": 2000,
+            "staticAssetRedirectDynamicRules": 100,
+            "staticAssetRedirectTotalRules": 2100,
+            "staticAssetRedirectRuleChars": 1000,
             "kvStorageMib": 953,
             "kvReadsPerDay": 100000,
             "kvReadsPerMonth": null,
@@ -14572,6 +14686,12 @@
               "cronTriggers": 5,
               "staticAssetFilesPerVersion": 20000,
               "staticAssetFileSizeMib": 25,
+              "staticAssetHeaderRules": 100,
+              "staticAssetHeaderLineChars": 2000,
+              "staticAssetRedirectStaticRules": 2000,
+              "staticAssetRedirectDynamicRules": 100,
+              "staticAssetRedirectTotalRules": 2100,
+              "staticAssetRedirectRuleChars": 1000,
               "kvStorageMib": 953,
               "kvReadsPerDay": 100000,
               "kvReadsPerMonth": null,
