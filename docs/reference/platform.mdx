@@ -46,6 +46,10 @@ npx tovuk limit delete worker_requests --period day --json
 Delete commands return the refreshed platform resource payload so agents can
 verify cleanup immediately and continue without dashboard checks.
 
+KV keys follow Cloudflare's 512 byte limit and may include path separators when
+the CLI or API client URL-encodes them. Use object storage for values larger
+than 25 MiB.
+
 Use object storage commands for service files and media:
 
 ```sh
@@ -60,7 +64,11 @@ npx tovuk limit set object_storage_class_b_operations --period month --value 100
 Queue messages are capped at 128 KB total. Tovuk reserves 100 bytes for
 Cloudflare-compatible metadata, so the maximum user body is 127900 bytes. Store
 larger payloads in object storage and send the storage path in the queue
-message.
+message. Queue specs follow Cloudflare limits for 100 message consumer batches,
+100 message send batches, 256 KB send-batch payloads, 60 second batch waits,
+5000 messages per second per queue, 25 GB backlogs, 250 concurrent consumers,
+12 hour visibility timeouts, 24 hour send delays, and 15 minute consumer wall
+time.
 
 ## Worker delivery
 
