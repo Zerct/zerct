@@ -88,20 +88,52 @@ pub(crate) fn rust_api_source() -> &'static str {
     r##"use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
+    thread,
+    time::Duration,
 };
 
 fn main() -> std::io::Result<()> {
     let port = std::env::var("PORT").unwrap_or_else(|_error| "3000".to_owned());
     let listener = TcpListener::bind(format!("0.0.0.0:{port}"))?;
+    let worker_count = thread::available_parallelism().map_or(4, |count| count.get().clamp(4, 64));
+    let mut workers = Vec::with_capacity(worker_count);
 
+    for _index in 0..worker_count {
+        let worker_listener = listener.try_clone()?;
+        workers.push(thread::spawn(move || accept_loop(&worker_listener)));
+    }
+
+    for worker in workers {
+        match worker.join() {
+            Ok(Ok(())) => {}
+            Ok(Err(error)) => return Err(error),
+            Err(_panic) => return Err(std::io::Error::other("request worker thread failed")),
+        }
+    }
+
+    Ok(())
+}
+
+fn accept_loop(listener: &TcpListener) -> std::io::Result<()> {
     for stream in listener.incoming() {
-        handle(stream?)?;
+        match stream {
+            Ok(stream) => {
+                if let Err(error) = handle(stream) {
+                    eprintln!("request failed: {error}");
+                }
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
+            Err(error) => return Err(error),
+        }
     }
 
     Ok(())
 }
 
 fn handle(mut stream: TcpStream) -> std::io::Result<()> {
+    stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+    stream.set_write_timeout(Some(Duration::from_secs(5)))?;
+
     let mut buffer = [0_u8; 2048];
     let size = stream.read(&mut buffer)?;
     let request = String::from_utf8_lossy(&buffer[..size]);
