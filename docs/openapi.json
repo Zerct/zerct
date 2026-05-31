@@ -2874,14 +2874,14 @@
             "schema": {
               "type": "integer",
               "format": "int32",
-              "minimum": 1,
+              "minimum": 10,
               "maximum": 1000,
               "examples": [
-                100
+                1000
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.2.",
-            "example": 100
+            "description": "Maximum records to return. Defaults to 1000 and accepts 10 to 1000, matching Cloudflare KV list pages. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.2.",
+            "example": 1000
           },
           {
             "name": "cursor",
@@ -7828,6 +7828,7 @@
                       "updatedAt": "2026-06-01 12:00:00Z"
                     }
                   ],
+                  "listComplete": true,
                   "nextCursor": null,
                   "nextActions": [
                     "Use KV for small cached values."
@@ -17124,6 +17125,7 @@
         "required": [
           "namespace",
           "keys",
+          "listComplete",
           "nextCursor",
           "nextActions"
         ],
@@ -17152,6 +17154,13 @@
                   "updatedAt": "2026-06-01 12:00:00Z"
                 }
               ]
+            ]
+          },
+          "listComplete": {
+            "type": "boolean",
+            "description": "Whether the full key list has been returned. Agents should use this instead of checking whether keys is empty. Context: components.schemas.KvKeysResponse.properties.listComplete.",
+            "examples": [
+              true
             ]
           },
           "nextCursor": {
@@ -17200,9 +17209,10 @@
                 },
                 "expiresAt": null,
                 "createdAt": "2026-06-01 12:00:00Z",
-                "updatedAt": "2026-06-01 12:00:00Z"
+              "updatedAt": "2026-06-01 12:00:00Z"
               }
             ],
+            "listComplete": true,
             "nextCursor": null,
             "nextActions": [
               "Use KV for small cached values."
