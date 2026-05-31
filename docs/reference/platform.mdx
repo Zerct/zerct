@@ -32,6 +32,7 @@ tovuk state delete-value --service service_1 Room room-1 counter --json
 tovuk state delete --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
+tovuk limit set build_minutes --period month --value 6000 --json
 tovuk limit set worker_requests --period day --value 100000 --json
 tovuk limit set state_requests --period month --value 1000000 --json
 tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
@@ -51,6 +52,8 @@ tovuk limit delete worker_requests --period day --json
 - KV: small config, sessions, feature flags, and cache metadata.
 - Queues: background jobs, retries, emails, and webhook processing.
 - Cron triggers: scheduled cleanup, polling, and reports.
+- Builds: pre-deploy checks, release builds, build-minute metering, and deploy
+  promotion.
 - State: keyed state objects for realtime coordination, locks,
   counters, rooms, sessions, and per-tenant state.
 - Service bindings: private worker-to-worker calls without public URLs.

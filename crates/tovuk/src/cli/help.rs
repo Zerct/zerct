@@ -59,6 +59,7 @@ Usage:
   tovuk state delete --service <service> Room [--api <url>] [--json]
   tovuk binding create --service <service> AUTH_SERVICE --target <target_service> [--api <url>] [--json]
   tovuk binding delete --service <service> AUTH_SERVICE [--api <url>] [--json]
+  tovuk limit set build_minutes --period month --value 6000 [--api <url>] [--json]
   tovuk limit set worker_requests --period day --value 100000 [--api <url>] [--json]
   tovuk limit set state_requests --period month --value 1000000 [--api <url>] [--json]
   tovuk limit set state_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
@@ -88,7 +89,7 @@ Agent contract:
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a public media URL is intended.
-  - Use tovuk pricing --json before heavy work, then set usage caps for worker, SQLite, KV, queue, State, and object storage meters before paid overages.
+  - Use tovuk pricing --json before heavy work, then set usage caps for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.
   - Prefer same-origin worker-static services over split services.

@@ -132,6 +132,7 @@ Agents should set explicit hard caps before high-throughput tests or launch:
 
 ```sh
 tovuk pricing --json
+tovuk limit set build_minutes --period month --value 6000 --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 tovuk limit set static_transfer_bytes --period month --value 107374182400 --json

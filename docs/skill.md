@@ -80,6 +80,7 @@ tovuk state get --service <service> Room room-1 counter --json
 tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
+tovuk limit set build_minutes --period month --value 6000 --json
 tovuk limit set worker_requests --period day --value 100000 --json
 tovuk limit set state_requests --period month --value 1000000 --json
 tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
@@ -90,6 +91,7 @@ Before high-throughput work or paid usage, read pricing and set hard caps:
 
 ```sh
 tovuk pricing --json
+tovuk limit set build_minutes --period month --value 6000 --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 tovuk limit set state_requests --period month --value 1000000 --json
