@@ -8,23 +8,38 @@ worker-static service uses one `tovuk.toml`, one deployment URL, static files at
 
 ## Install
 
-Use npm for the lowest-friction agent path:
+Install the native CLI once, then run `tovuk` directly:
 
 ```sh
-npx tovuk init
-npx tovuk doctor
-npx tovuk preview
-npx tovuk deploy
+npm install -g tovuk
+```
+
+Other supported installers:
+
+```sh
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+pipx install tovuk
+cargo install tovuk
+```
+
+Agent commands should use the native binary:
+
+```sh
+tovuk init
+tovuk doctor
+tovuk preview
+tovuk deploy
 ```
 
 Create a worker-static starter:
 
 ```sh
-npx tovuk init hello-service --template worker-static-rust-tanstack
+tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 ```
 
-From a worker-static repo root, `npx tovuk deploy` reads the single root
+From a worker-static repo root, `tovuk deploy` reads the single root
 `tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
 databases, KV namespaces, queues, cron triggers, State namespaces,
 service bindings, object storage objects, and usage caps through CLI resource
@@ -113,13 +128,13 @@ Agent prompt:
 
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
-Run `npx tovuk doctor --json`. Fix the first failed check by following
+Run `tovuk doctor --json`. Fix the first failed check by following
 `agent_instruction`, then rerun doctor. Deploy with
-`npx tovuk deploy --wait --json`. If the build fails, read
-`npx tovuk logs --build <build_id> --json`, fix the first actionable
+`tovuk deploy --wait --json`. If the build fails, read
+`tovuk logs --build <build_id> --json`, fix the first actionable
 error, rerun doctor, and redeploy. If a plan limit blocks work, run
-`npx tovuk billing checkout --json` and show the returned URL to the
-human. If Tovuk support is needed, run `npx tovuk support create` with
+`tovuk billing checkout --json` and show the returned URL to the
+human. If Tovuk support is needed, run `tovuk support create` with
 `--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
 Resolve the support ticket after the issue is fixed.
 ```
@@ -144,8 +159,8 @@ does not drift.
 
 ```sh
 cd examples/hello-rust
-npx tovuk doctor
-npx tovuk deploy
+tovuk doctor
+tovuk deploy
 ```
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
@@ -155,44 +170,44 @@ the deploy. Later commands reuse that session.
 Useful agent commands:
 
 ```sh
-npx tovuk capabilities
-npx tovuk pricing --json
-npx tovuk me
-npx tovuk usage
-npx tovuk activity --json
-npx tovuk service list
-npx tovuk service show service_1 --json
-npx tovuk service delete service_1 --json
-npx tovuk deploys
-npx tovuk builds --service service_1
-npx tovuk logs --service service_1 --limit 100 --json
-npx tovuk logs --deploy deploy_1 --json
-npx tovuk logs --build job_1 --json
-npx tovuk env list --service service_1
-npx tovuk domains list --service service_1
-npx tovuk domains verify --service service_1 api.example.com
-npx tovuk database query --service service_1 DB "select 1" --json
-npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
-npx tovuk kv get --service service_1 CACHE user:1 --json
-npx tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
-npx tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
-npx tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
-npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
-npx tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
-npx tovuk queue metrics --service service_1 jobs --json
-npx tovuk storage list --service service_1 --json
-npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
-npx tovuk storage url --service service_1 uploads/logo.png --json
-npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
-npx tovuk storage delete --service service_1 uploads/logo.png --json
-npx tovuk billing checkout --json
-npx tovuk billing portal
-npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
-npx tovuk support list --json
-npx tovuk support resolve ticket_0123456789abcdef0123 --json
+tovuk capabilities
+tovuk pricing --json
+tovuk me
+tovuk usage
+tovuk activity --json
+tovuk service list
+tovuk service show service_1 --json
+tovuk service delete service_1 --json
+tovuk deploys
+tovuk builds --service service_1
+tovuk logs --service service_1 --limit 100 --json
+tovuk logs --deploy deploy_1 --json
+tovuk logs --build job_1 --json
+tovuk env list --service service_1
+tovuk domains list --service service_1
+tovuk domains verify --service service_1 api.example.com
+tovuk database query --service service_1 DB "select 1" --json
+tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
+tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
+tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
+tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
+tovuk queue metrics --service service_1 jobs --json
+tovuk storage list --service service_1 --json
+tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+tovuk storage url --service service_1 uploads/logo.png --json
+tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service service_1 uploads/logo.png --json
+tovuk billing checkout --json
+tovuk billing portal
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support list --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
-`npx tovuk pricing --json` returns both plan pricing and product meter metadata,
+`tovuk pricing --json` returns both plan pricing and product meter metadata,
 so agents can choose Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queue, or Cron and set the matching usage caps before heavy work.
 

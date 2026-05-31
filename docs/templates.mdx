@@ -8,27 +8,27 @@ Use templates when you want Tovuk to create the project shape.
 ## Rust API
 
 ```sh
-npx tovuk init api --template rust-worker
-npx tovuk doctor
-npx tovuk preview
+tovuk init api --template rust-worker
+tovuk doctor
+tovuk preview
 ```
 
 ## TanStack Static Frontend
 
 ```sh
-npx tovuk init web --template tanstack-static-frontend
+tovuk init web --template tanstack-static-frontend
 bun install
-npx tovuk doctor
-npx tovuk preview
+tovuk doctor
+tovuk preview
 ```
 
 ## Worker Static
 
 ```sh
-npx tovuk init hello-service --template worker-static-rust-tanstack
+tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
-npx tovuk doctor
-npx tovuk deploy --wait --json
+tovuk doctor
+tovuk deploy --wait --json
 ```
 
 The worker-static template creates `api/`, `web/`, and one root `tovuk.toml`.

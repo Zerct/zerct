@@ -14,7 +14,7 @@ description: "Deploy a Rust worker with Tovuk."
 From your worker directory:
 
 ```sh
-npx tovuk init
+tovuk init
 ```
 
 This creates `tovuk.toml`.
@@ -22,14 +22,14 @@ This creates `tovuk.toml`.
 For a new project, start from a template:
 
 ```sh
-npx tovuk init hello-service --template worker-static-rust-tanstack
+tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 ```
 
 ## Check locally
 
 ```sh
-npx tovuk doctor --json
+tovuk doctor --json
 ```
 
 Fix the first failed check before deploying. Tovuk errors include
@@ -38,13 +38,13 @@ Fix the first failed check before deploying. Tovuk errors include
 Preview locally:
 
 ```sh
-npx tovuk preview
+tovuk preview
 ```
 
 ## Deploy
 
 ```sh
-npx tovuk deploy --wait --json
+tovuk deploy --wait --json
 ```
 
 On first deploy, the CLI opens browser login for GitHub or Google, stores the
@@ -54,7 +54,7 @@ health, and returns the deployment URL.
 If the build fails, inspect the build logs:
 
 ```sh
-npx tovuk logs --build <build_id> --json
+tovuk logs --build <build_id> --json
 ```
 
 Fix the first actionable error, rerun doctor, then redeploy.
@@ -65,7 +65,7 @@ Put one `tovuk.toml` in the repo root, with `[worker]` and `[frontend]`
 sections. Run one command from the repo root:
 
 ```sh
-npx tovuk deploy --wait --json
+tovuk deploy --wait --json
 ```
 
 Tovuk builds both roots, serves the frontend at `/`, and routes `/api/*` to the

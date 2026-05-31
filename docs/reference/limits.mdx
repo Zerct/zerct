@@ -109,20 +109,20 @@ When a free-tier account reaches a plan limit, agents can create a hosted
 subscription link without dashboard work:
 
 ```sh
-npx tovuk billing checkout "Plan limit reached" --json
+tovuk billing checkout "Plan limit reached" --json
 ```
 
 Show the returned `checkout.url` to the human. If the issue is not a payment
 problem, create a support ticket with command output and ids:
 
 ```sh
-npx tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service service_1 --build job_1 --deploy deploy_1 --failing-command "npx tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
+tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
 ```
 
 Resolve the ticket after the issue is fixed:
 
 ```sh
-npx tovuk support resolve ticket_0123456789abcdef0123 --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 ## Paid usage caps
@@ -131,13 +131,13 @@ Pro included monthly usage is billing metadata, not the default hard stop.
 Agents should set explicit hard caps before high-throughput tests or launch:
 
 ```sh
-npx tovuk pricing --json
-npx tovuk limit set worker_requests --period month --value 10000000 --json
-npx tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-npx tovuk limit set static_transfer_bytes --period month --value 107374182400 --json
-npx tovuk limit set worker_transfer_bytes --period month --value 107374182400 --json
-npx tovuk limit set object_storage_bytes --period month --value 10000000000 --json
-npx tovuk limit set state_requests --period month --value 1000000 --json
-npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-npx tovuk limit set log_events --period month --value 20000000 --json
+tovuk pricing --json
+tovuk limit set worker_requests --period month --value 10000000 --json
+tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+tovuk limit set static_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set worker_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set object_storage_bytes --period month --value 10000000000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit set log_events --period month --value 20000000 --json
 ```

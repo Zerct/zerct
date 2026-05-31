@@ -23,7 +23,7 @@ the frontend at `/`, and routes `/api/*` to the Rust worker.
 ## Local preview
 
 ```sh
-npx tovuk preview
+tovuk preview
 ```
 
 For Rust workers, preview builds the release binary and starts it with `PORT`.
@@ -47,15 +47,15 @@ need a runtime process; they call Rust workers for dynamic behavior.
 Use CLI commands to create runtime resources without dashboard work:
 
 ```sh
-npx tovuk database create --service service_1 DB --json
-npx tovuk database query --service service_1 DB "select 1" --json
-npx tovuk kv create --service service_1 CACHE --json
-npx tovuk queue create --service service_1 failed_jobs --json
-npx tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
-npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
-npx tovuk state create --service service_1 Room --json
-npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-npx tovuk service delete service_1 --json
+tovuk database create --service service_1 DB --json
+tovuk database query --service service_1 DB "select 1" --json
+tovuk kv create --service service_1 CACHE --json
+tovuk queue create --service service_1 failed_jobs --json
+tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk state create --service service_1 Room --json
+tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+tovuk service delete service_1 --json
 ```
 
 Use `service delete` for smoke-test and preview services that should not keep
@@ -77,5 +77,5 @@ Agents should always fix the first failed check or first actionable log line,
 then rerun doctor before redeploying. After a failed build, start with:
 
 ```sh
-npx tovuk logs --build <build_id> --json
+tovuk logs --build <build_id> --json
 ```

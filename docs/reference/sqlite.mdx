@@ -7,11 +7,11 @@ Tovuk service databases are SQLite databases owned by a service and attached to 
 workers as explicit resources.
 
 ```sh
-npx tovuk database create --service service_1 DB --json
-npx tovuk database query --service service_1 DB "select 1" --json
-npx tovuk database query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
-npx tovuk database delete --service service_1 DB --json
-npx tovuk platform --service service_1 --json
+tovuk database create --service service_1 DB --json
+tovuk database query --service service_1 DB "select 1" --json
+tovuk database query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
+tovuk database delete --service service_1 DB --json
+tovuk platform --service service_1 --json
 ```
 
 Agents should create databases before a deploy needs them, then keep schema
@@ -60,6 +60,6 @@ Storage is also tracked through the `sqlite_storage_bytes` gauge meter for
 account caps and agent-readable usage APIs.
 
 ```sh
-npx tovuk usage --json
-npx tovuk pricing --json
+tovuk usage --json
+tovuk pricing --json
 ```

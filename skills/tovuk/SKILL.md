@@ -1,6 +1,6 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and worker-static apps to Tovuk with `npx tovuk`.
+description: Deploy Rust workers, static frontends, and worker-static apps to Tovuk with `tovuk`.
 ---
 
 # Tovuk
@@ -28,13 +28,13 @@ worker-static app to Tovuk.
    Fallow for new package frontends. Avoid JavaScript-based lint, format,
    typecheck, dead-code, or duplicate-code tooling.
 7. For a new worker-static project, run
-   `npx tovuk init my-app --template worker-static-rust-tanstack`.
-8. Run `npx tovuk doctor --json`.
-9. Run `npx tovuk preview` when local tools are available.
-10. Run `npx tovuk deploy --wait --json`.
+   `tovuk init my-app --template worker-static-rust-tanstack`.
+8. Run `tovuk doctor --json`.
+9. Run `tovuk preview` when local tools are available.
+10. Run `tovuk deploy --wait --json`.
 11. If Tovuk returns an `agent_instruction`, apply it, rerun doctor, and
     redeploy.
-12. If a build fails, run `npx tovuk logs --build <build_id> --json`, fix the
+12. If a build fails, run `tovuk logs --build <build_id> --json`, fix the
     first actionable log error, rerun doctor, and redeploy.
 
 ## Platform resources
@@ -42,21 +42,21 @@ worker-static app to Tovuk.
 Agents can manage runtime resources without dashboard access:
 
 ```sh
-npx tovuk platform --service <service> --json
-npx tovuk database create --service <service> DB --json
-npx tovuk kv create --service <service> CACHE --json
-npx tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
-npx tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
-npx tovuk queue create --service <service> jobs --json
-npx tovuk queue send --service <service> jobs '{"task":"sync"}' --json
-npx tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
-npx tovuk queue metrics --service <service> jobs --json
-npx tovuk cron create --service <service> nightly "0 0 * * *" --json
-npx tovuk cron update --service <service> nightly "*/15 * * * *" --json
-npx tovuk cron disable --service <service> nightly --json
-npx tovuk durable-object create --service <service> Room --json
-npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
-npx tovuk caps set worker_requests --period day --value 100000 --json
+tovuk platform --service <service> --json
+tovuk database create --service <service> DB --json
+tovuk kv create --service <service> CACHE --json
+tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
+tovuk queue create --service <service> jobs --json
+tovuk queue send --service <service> jobs '{"task":"sync"}' --json
+tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
+tovuk queue metrics --service <service> jobs --json
+tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk cron update --service <service> nightly "*/15 * * * *" --json
+tovuk cron disable --service <service> nightly --json
+tovuk durable-object create --service <service> Room --json
+tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
+tovuk caps set worker_requests --period day --value 100000 --json
 ```
 
 ## Contract

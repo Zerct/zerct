@@ -3,15 +3,19 @@
 Deploy Rust workers, static frontends, and worker-static services to Tovuk.
 
 ```sh
-npx tovuk init hello-service --template worker-static-rust-tanstack
+npm install -g tovuk
+```
+
+```sh
+tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
-npx tovuk doctor --json
-npx tovuk deploy --wait --json
+tovuk doctor --json
+tovuk deploy --wait --json
 ```
 
 The npm package installs the native Tovuk binary for the current platform.
-Node is required by npm to install the package, but the `tovuk` command itself
-does not delegate to `npx`, `tsx`, or any JavaScript runtime.
+Node is required by npm to install the package, but the installed `tovuk`
+command runs as a native binary.
 
 Rust workers expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
@@ -28,15 +32,15 @@ with `/api/*` routed to the Rust worker.
 Preview before deploying:
 
 ```sh
-npx tovuk preview
+tovuk preview
 ```
 
 Agent repair loop:
 
 ```sh
-npx tovuk doctor --json
-npx tovuk deploy --wait --json
-npx tovuk logs --build job_1 --json
+tovuk doctor --json
+tovuk deploy --wait --json
+tovuk logs --build job_1 --json
 ```
 
 Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
@@ -54,8 +58,8 @@ support ticket create, list, and resolve actions through the same CLI.
 Before high-throughput work, read pricing and set hard caps:
 
 ```sh
-npx tovuk pricing --json
-npx tovuk limit set worker_requests --period month --value 10000000 --json
+tovuk pricing --json
+tovuk limit set worker_requests --period month --value 10000000 --json
 ```
 
 The pricing response includes plan pricing and product meter metadata, so agents
@@ -64,39 +68,39 @@ can choose the correct product and cap the right meters in one flow.
 Manage service files and media without dashboard access:
 
 ```sh
-npx tovuk storage list --service service_1 --json
-npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
-npx tovuk storage delete --service service_1 uploads/logo.png --json
-npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
-npx tovuk kv get --service service_1 CACHE user:1 --json
-npx tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
-npx tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
-npx tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
-npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
-npx tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
-npx tovuk queue metrics --service service_1 jobs --json
-npx tovuk state put --service service_1 Room room-1 counter 1 --json
-npx tovuk state get --service service_1 Room room-1 counter --json
+tovuk storage list --service service_1 --json
+tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service service_1 uploads/logo.png --json
+tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
+tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
+tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
+tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
+tovuk queue metrics --service service_1 jobs --json
+tovuk state put --service service_1 Room room-1 counter 1 --json
+tovuk state get --service service_1 Room room-1 counter --json
 ```
 
 When a free-tier limit blocks work, run:
 
 ```sh
-npx tovuk billing checkout --json
+tovuk billing checkout --json
 ```
 
 When Tovuk support is needed, include enough evidence for a support agent:
 
 ```sh
-npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 ```
 
 When the issue is fixed, resolve the ticket:
 
 ```sh
-npx tovuk support list --json
-npx tovuk support resolve ticket_0123456789abcdef0123 --json
+tovuk support list --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores

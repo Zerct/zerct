@@ -41,79 +41,79 @@ handlers, middleware, and server logic to Rust workers.
 ## Commands
 
 ```sh
-npx tovuk doctor --json
-npx tovuk init hello-service --template worker-static-rust-tanstack
-npx tovuk preview
-npx tovuk deploy --wait --json
-npx tovuk pricing --json
-npx tovuk logs --build <build_id> --json
+tovuk doctor --json
+tovuk init hello-service --template worker-static-rust-tanstack
+tovuk preview
+tovuk deploy --wait --json
+tovuk pricing --json
+tovuk logs --build <build_id> --json
 ```
 
 Manage platform resources without dashboard access:
 
 ```sh
-npx tovuk platform --service <service> --json
-npx tovuk database create --service <service> DB --json
-npx tovuk database query --service <service> DB "select 1" --json
-npx tovuk database delete --service <service> DB --json
-npx tovuk kv create --service <service> CACHE --json
-npx tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
-npx tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
-npx tovuk kv bulk delete --service <service> CACHE feature:search old:key --json
-npx tovuk kv namespace delete --service <service> CACHE --json
-npx tovuk queue create --service <service> failed_jobs --json
-npx tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
-npx tovuk queue update --service <service> jobs --max-batch-size 25 --json
-npx tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
-npx tovuk queue send --service <service> jobs '{"task":"sync"}' --json
-npx tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
-npx tovuk queue metrics --service <service> jobs --json
-npx tovuk queue delete --service <service> jobs --json
-npx tovuk cron create --service <service> nightly "0 0 * * *" --json
-npx tovuk cron update --service <service> nightly "*/15 * * * *" --json
-npx tovuk cron disable --service <service> nightly --json
-npx tovuk cron enable --service <service> nightly --json
-npx tovuk cron delete --service <service> nightly --json
-npx tovuk state create --service <service> Room --json
-npx tovuk state put --service <service> Room room-1 counter 1 --json
-npx tovuk state get --service <service> Room room-1 counter --json
-npx tovuk state delete --service <service> Room --json
-npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
-npx tovuk binding delete --service <service> AUTH_SERVICE --json
-npx tovuk limit set worker_requests --period day --value 100000 --json
-npx tovuk limit set state_requests --period month --value 1000000 --json
-npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-npx tovuk limit delete worker_requests --period day --json
+tovuk platform --service <service> --json
+tovuk database create --service <service> DB --json
+tovuk database query --service <service> DB "select 1" --json
+tovuk database delete --service <service> DB --json
+tovuk kv create --service <service> CACHE --json
+tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
+tovuk kv bulk delete --service <service> CACHE feature:search old:key --json
+tovuk kv namespace delete --service <service> CACHE --json
+tovuk queue create --service <service> failed_jobs --json
+tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service <service> jobs --max-batch-size 25 --json
+tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
+tovuk queue send --service <service> jobs '{"task":"sync"}' --json
+tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
+tovuk queue metrics --service <service> jobs --json
+tovuk queue delete --service <service> jobs --json
+tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk cron update --service <service> nightly "*/15 * * * *" --json
+tovuk cron disable --service <service> nightly --json
+tovuk cron enable --service <service> nightly --json
+tovuk cron delete --service <service> nightly --json
+tovuk state create --service <service> Room --json
+tovuk state put --service <service> Room room-1 counter 1 --json
+tovuk state get --service <service> Room room-1 counter --json
+tovuk state delete --service <service> Room --json
+tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service <service> AUTH_SERVICE --json
+tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit delete worker_requests --period day --json
 ```
 
 Before high-throughput work or paid usage, read pricing and set hard caps:
 
 ```sh
-npx tovuk pricing --json
-npx tovuk limit set worker_requests --period month --value 10000000 --json
-npx tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-npx tovuk limit set state_requests --period month --value 1000000 --json
-npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk pricing --json
+tovuk limit set worker_requests --period month --value 10000000 --json
+tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 ```
 
 Manage service files and media without dashboard access:
 
 ```sh
-npx tovuk storage list --service <service> --json
-npx tovuk storage upload --service <service> ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --service <service> uploads/logo.png ./logo.png --json
-npx tovuk storage url --service <service> uploads/logo.png --json
-npx tovuk storage delete --service <service> uploads/logo.png --json
+tovuk storage list --service <service> --json
+tovuk storage upload --service <service> ./logo.png uploads/logo.png --public --json
+tovuk storage download --service <service> uploads/logo.png ./logo.png --json
+tovuk storage url --service <service> uploads/logo.png --json
+tovuk storage delete --service <service> uploads/logo.png --json
 ```
 
-Use `npx tovuk capabilities --json` to inspect product choices, meters, limit
+Use `tovuk capabilities --json` to inspect product choices, meters, limit
 fields, and plan prices before selecting Worker, State, SQLite, KV, queues,
 cron, service bindings, or object storage.
 
 When a plan limit blocks work:
 
 ```sh
-npx tovuk billing checkout "Plan limit reached" --json
+tovuk billing checkout "Plan limit reached" --json
 ```
 
 When Tovuk support is needed, create a ticket only after collecting the failing

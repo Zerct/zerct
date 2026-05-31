@@ -8,7 +8,7 @@ one command.
 Tovuk returns structured feedback so agents can fix issues and deploy again.
 
 ```sh
-npx tovuk deploy
+tovuk deploy
 ```
 
 ## Start
@@ -19,8 +19,8 @@ npx tovuk deploy
 - Deploy when the checks pass.
 
 ```sh
-npx tovuk doctor
-npx tovuk deploy
+tovuk doctor
+tovuk deploy
 ```
 
 ## Agent prompt
@@ -28,17 +28,18 @@ npx tovuk deploy
 ```text
 Use Tovuk to deploy this Rust worker for free.
 Read https://docs.tovuk.com/llms.txt.
-Run `npx tovuk doctor`.
+Run `tovuk doctor`.
 Fix any JSON `agent_instruction`.
-Run `npx tovuk deploy`.
+Run `tovuk deploy`.
 ```
 
 ## Packages
 
 ```sh
-npx tovuk deploy
+npm install -g tovuk
 brew tap tovuk/tovuk https://github.com/tovuk/tovuk
 brew install tovuk
 pipx install tovuk
 cargo install tovuk
+tovuk deploy
 ```

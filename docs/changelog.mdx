@@ -8,15 +8,16 @@ description: "Recent product updates from Tovuk."
 ### New
 
 - **Tovuk is the new name for the platform.** The CLI, packages, and Homebrew
-  formula now ship under `tovuk`. Install with `npx tovuk`, `brew install tovuk/tovuk/tovuk`,
-  `pipx install tovuk`, or `cargo install tovuk`. See [Packages](/reference/packages).
+  formula now ship under `tovuk`. Install with `npm install -g tovuk`,
+  `brew install tovuk/tovuk/tovuk`, `pipx install tovuk`, or
+  `cargo install tovuk`. See [Packages](/reference/packages).
 - **One-URL worker-static deploys.** Ship a Rust worker and static frontend
   from one repo with a single root `tovuk.toml`. Run
-  `npx tovuk deploy --wait --json` to get one `*.tovuk.app` URL serving static
+  `tovuk deploy --wait --json` to get one `*.tovuk.app` URL serving static
   assets at `/` and the worker at `/api/*`. See [Workers](/reference/workers).
 - **Project templates and local preview.** Scaffold a Rust API, TanStack static
-  frontend, or worker-static project with `npx tovuk init`, then run
-  `npx tovuk preview` to test locally before deploying. See
+  frontend, or worker-static project with `tovuk init`, then run
+  `tovuk preview` to test locally before deploying. See
   [Templates](/templates).
 - **Custom domain verification.** Verify and connect custom domains from the
   CLI without leaving your terminal.
@@ -27,10 +28,10 @@ description: "Recent product updates from Tovuk."
 - **Homebrew tap.** Install the CLI on macOS with
   `brew tap tovuk/tovuk https://github.com/tovuk/tovuk && brew install tovuk`.
 - **Structured support tickets from the CLI.** Open, list, and resolve tickets
-  with `npx tovuk support` and attach service, build, deploy, and log context for
+  with `tovuk support` and attach service, build, deploy, and log context for
   faster triage. See the [Support loop](/agents#support-loop).
 - **Agent-ready object storage.** Upload, list, download, share, and delete service
-  files and media with `npx tovuk storage` and JSON responses. See
+  files and media with `tovuk storage` and JSON responses. See
   [Object Storage](/reference/storage).
 
 ### Updates
@@ -41,7 +42,7 @@ description: "Recent product updates from Tovuk."
 - **Preflight deploy limits in SDKs.** Plan-limit checks now run before a
   deploy starts, returning a Stripe checkout link via `tovuk billing checkout`
   when an upgrade is needed.
-- **Actionable doctor feedback.** `npx tovuk doctor` now returns a concrete
+- **Actionable doctor feedback.** `tovuk doctor` now returns a concrete
   `agent_instruction` for every failed check so agents can repair issues in
   one loop. See the [Agent Loop](/agents#the-loop).
 - **Improved workspace doctor UX.** Faster checks and clearer output for

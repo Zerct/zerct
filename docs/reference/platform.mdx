@@ -9,33 +9,33 @@ need dashboard access.
 ## Commands
 
 ```sh
-npx tovuk platform --service service_1 --json
-npx tovuk database create --service service_1 DB --json
-npx tovuk database query --service service_1 DB "select 1" --json
-npx tovuk database delete --service service_1 DB --json
-npx tovuk kv create --service service_1 CACHE --json
-npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
-npx tovuk kv put --service service_1 CACHE session:1 '{"ok":true}' --expiration 1780272000 --json
-npx tovuk kv get --service service_1 CACHE user:1 --json
-npx tovuk kv keys --service service_1 CACHE --json
-npx tovuk kv namespace delete --service service_1 CACHE --json
-npx tovuk queue create --service service_1 jobs --max-retries 3 --retention-seconds 86400 --json
-npx tovuk queue delete --service service_1 jobs --json
-npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
-npx tovuk cron delete --service service_1 nightly --json
-npx tovuk state create --service service_1 Room --json
-npx tovuk state objects --service service_1 Room --json
-npx tovuk state keys --service service_1 Room room-1 --json
-npx tovuk state put --service service_1 Room room-1 counter 1 --json
-npx tovuk state get --service service_1 Room room-1 counter --json
-npx tovuk state delete-value --service service_1 Room room-1 counter --json
-npx tovuk state delete --service service_1 Room --json
-npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-npx tovuk binding delete --service service_1 AUTH_SERVICE --json
-npx tovuk limit set worker_requests --period day --value 100000 --json
-npx tovuk limit set state_requests --period month --value 1000000 --json
-npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-npx tovuk limit delete worker_requests --period day --json
+tovuk platform --service service_1 --json
+tovuk database create --service service_1 DB --json
+tovuk database query --service service_1 DB "select 1" --json
+tovuk database delete --service service_1 DB --json
+tovuk kv create --service service_1 CACHE --json
+tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
+tovuk kv put --service service_1 CACHE session:1 '{"ok":true}' --expiration 1780272000 --json
+tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv keys --service service_1 CACHE --json
+tovuk kv namespace delete --service service_1 CACHE --json
+tovuk queue create --service service_1 jobs --max-retries 3 --retention-seconds 86400 --json
+tovuk queue delete --service service_1 jobs --json
+tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron delete --service service_1 nightly --json
+tovuk state create --service service_1 Room --json
+tovuk state objects --service service_1 Room --json
+tovuk state keys --service service_1 Room room-1 --json
+tovuk state put --service service_1 Room room-1 counter 1 --json
+tovuk state get --service service_1 Room room-1 counter --json
+tovuk state delete-value --service service_1 Room room-1 counter --json
+tovuk state delete --service service_1 Room --json
+tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service service_1 AUTH_SERVICE --json
+tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit delete worker_requests --period day --json
 ```
 
 ## Resource model
@@ -63,8 +63,8 @@ service bindings.
 The machine-readable product catalog is available from:
 
 ```sh
-npx tovuk capabilities --json
-npx tovuk pricing --json
+tovuk capabilities --json
+tovuk pricing --json
 ```
 
 Both commands expose the `products` array. Use it to decide which resource fits
@@ -76,8 +76,8 @@ and `pricing` objects to estimate free and paid usage before deployment.
 Custom domains use one DNS-only CNAME record:
 
 ```sh
-npx tovuk domain add --service service_1 api.example.com --json
-npx tovuk domain verify --service service_1 api.example.com --json
+tovuk domain add --service service_1 api.example.com --json
+tovuk domain verify --service service_1 api.example.com --json
 ```
 
 The API response includes `dns_record_type`, `dns_record_name`,
@@ -96,12 +96,12 @@ than 25 MiB. Bulk KV reads accept 100 keys; bulk writes and deletes accept
 Use object storage commands for service files and media:
 
 ```sh
-npx tovuk storage list --service service_1 --json
-npx tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
-npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
-npx tovuk storage delete --service service_1 uploads/logo.png --json
-npx tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
-npx tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
+tovuk storage list --service service_1 --json
+tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service service_1 uploads/logo.png --json
+tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
+tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
 ```
 
 Queue messages are capped at 128 KB total. Tovuk reserves 100 bytes for
@@ -116,10 +116,10 @@ time.
 Agents can tune queue delivery without a dashboard:
 
 ```bash
-npx tovuk queue create --service service_1 failed_jobs --json
-npx tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
-npx tovuk queue update --service service_1 jobs --max-batch-size 25 --max-batch-timeout-seconds 10 --json
-npx tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
+tovuk queue create --service service_1 failed_jobs --json
+tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service service_1 jobs --max-batch-size 25 --max-batch-timeout-seconds 10 --json
+tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 ```
 
 State usage is metered with Tovuk counters:
@@ -133,11 +133,11 @@ for public HTTP APIs, then call State only when one key needs serialized
 coordination:
 
 ```sh
-npx tovuk state objects --service service_1 Room --json
-npx tovuk state keys --service service_1 Room room-1 --json
-npx tovuk state put --service service_1 Room room-1 counter 1 --json
-npx tovuk state get --service service_1 Room room-1 counter --json
-npx tovuk state delete-value --service service_1 Room room-1 counter --json
+tovuk state objects --service service_1 Room --json
+tovuk state keys --service service_1 Room room-1 --json
+tovuk state put --service service_1 Room room-1 counter 1 --json
+tovuk state get --service service_1 Room room-1 counter --json
+tovuk state delete-value --service service_1 Room room-1 counter --json
 ```
 
 State keys are capped at 512 bytes. The state key and value are

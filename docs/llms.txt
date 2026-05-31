@@ -4,24 +4,24 @@ Tovuk deploys Rust workers, static frontends, and worker-static services.
 Worker-static services use one root tovuk.toml, serve the frontend at `/`, and route
 `/api/*` to the Rust worker.
 
-Use the npm CLI unless the user already installed a persistent CLI:
+Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
 
 ```sh
-npx tovuk doctor --json
-npx tovuk deploy --wait --json
+tovuk doctor --json
+tovuk deploy --wait --json
 ```
 
 Reference: [Tovuk docs](https://docs.tovuk.com).
 
 Agent repair loop:
 
-1. Run `npx tovuk doctor --json`.
+1. Run `tovuk doctor --json`.
 2. If it fails, read the first failed check.
 3. Apply its `agent_instruction` exactly.
 4. Rerun doctor until it passes.
-5. Run `npx tovuk deploy --wait --json`.
+5. Run `tovuk deploy --wait --json`.
 6. If deploy fails, read `build_job.id` or the failed build id.
-7. Run `npx tovuk logs --build <build_id> --json`.
+7. Run `tovuk logs --build <build_id> --json`.
 8. Fix the first actionable log error.
 9. Rerun doctor before redeploying.
 
@@ -86,53 +86,53 @@ Worker-static contract:
 Useful commands:
 
 ```sh
-npx tovuk capabilities --json
+tovuk capabilities --json
 curl https://api.tovuk.com/v1/status
-npx tovuk activity --json
-npx tovuk service list --json
-npx tovuk service show <service> --json
-npx tovuk service delete <service> --json
-npx tovuk builds --service <service> --json
-npx tovuk logs --build <build_id> --json
-npx tovuk logs --service <service> --json
-npx tovuk env list --service <service> --json
-npx tovuk domains list --service <service> --json
-npx tovuk platform --service <service> --json
-npx tovuk database create --service <service> DB --json
-npx tovuk database query --service <service> DB "select 1" --json
-npx tovuk database delete --service <service> DB --json
-npx tovuk kv create --service <service> CACHE --json
-npx tovuk kv namespace delete --service <service> CACHE --json
-npx tovuk queue create --service <service> failed_jobs --json
-npx tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
-npx tovuk queue update --service <service> jobs --max-batch-size 25 --json
-npx tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
-npx tovuk queue delete --service <service> jobs --json
-npx tovuk cron create --service <service> nightly "0 0 * * *" --json
-npx tovuk cron delete --service <service> nightly --json
-npx tovuk state create --service <service> Room --json
-npx tovuk state put --service <service> Room room-1 counter 1 --json
-npx tovuk state get --service <service> Room room-1 counter --json
-npx tovuk state delete --service <service> Room --json
-npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
-npx tovuk binding delete --service <service> AUTH_SERVICE --json
-npx tovuk limit set worker_requests --period day --value 100000 --json
-npx tovuk limit set state_requests --period month --value 1000000 --json
-npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-npx tovuk limit delete worker_requests --period day --json
-npx tovuk storage list --service <service> --json
-npx tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
-npx tovuk storage download --service <service> uploads/file.png ./file.png --json
-npx tovuk storage url --service <service> uploads/file.png --json
-npx tovuk storage delete --service <service> uploads/file.png --json
-npx tovuk billing checkout --json
-npx tovuk support list --json
-npx tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "npx tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
-npx tovuk support resolve <ticket_id> --json
+tovuk activity --json
+tovuk service list --json
+tovuk service show <service> --json
+tovuk service delete <service> --json
+tovuk builds --service <service> --json
+tovuk logs --build <build_id> --json
+tovuk logs --service <service> --json
+tovuk env list --service <service> --json
+tovuk domains list --service <service> --json
+tovuk platform --service <service> --json
+tovuk database create --service <service> DB --json
+tovuk database query --service <service> DB "select 1" --json
+tovuk database delete --service <service> DB --json
+tovuk kv create --service <service> CACHE --json
+tovuk kv namespace delete --service <service> CACHE --json
+tovuk queue create --service <service> failed_jobs --json
+tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service <service> jobs --max-batch-size 25 --json
+tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
+tovuk queue delete --service <service> jobs --json
+tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk cron delete --service <service> nightly --json
+tovuk state create --service <service> Room --json
+tovuk state put --service <service> Room room-1 counter 1 --json
+tovuk state get --service <service> Room room-1 counter --json
+tovuk state delete --service <service> Room --json
+tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service <service> AUTH_SERVICE --json
+tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit delete worker_requests --period day --json
+tovuk storage list --service <service> --json
+tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
+tovuk storage download --service <service> uploads/file.png ./file.png --json
+tovuk storage url --service <service> uploads/file.png --json
+tovuk storage delete --service <service> uploads/file.png --json
+tovuk billing checkout --json
+tovuk support list --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
+tovuk support resolve <ticket_id> --json
 ```
 
 Before load tests, production launch, or paid usage, run
-`npx tovuk pricing --json` and set hard usage caps with `npx tovuk limit set`.
+`tovuk pricing --json` and set hard usage caps with `tovuk limit set`.
 Useful cap metrics include `worker_requests`, `worker_cpu_ms`,
 `sqlite_rows_read`, `sqlite_rows_written`, `kv_reads`, `queue_operations`,
 `state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
@@ -140,7 +140,7 @@ Useful cap metrics include `worker_requests`, `worker_cpu_ms`,
 `object_storage_bytes`, `object_storage_class_a_operations`, and
 `object_storage_class_b_operations`.
 
-`npx tovuk capabilities --json` and `npx tovuk pricing --json` expose a
+`tovuk capabilities --json` and `tovuk pricing --json` expose a
 `products` catalog. Use each product's `meters` and `limit_fields` before load
 tests, media uploads, or paid usage.
 
@@ -149,9 +149,9 @@ available and a deploy fails, inspect build logs instead of changing status
 checks.
 
 Never print or commit secrets. Put secrets in Tovuk env vars with
-`npx tovuk env set --service <service> KEY=value`.
+`tovuk env set --service <service> KEY=value`.
 
-When a free-tier limit blocks work, run `npx tovuk billing checkout --json` and
+When a free-tier limit blocks work, run `tovuk billing checkout --json` and
 show the returned URL to the human. When Tovuk support is needed, create a
 ticket only after collecting the failing command, service id, build id, deploy id,
 first actionable log line, and what the agent already tried. Resolve the ticket

@@ -1928,7 +1928,7 @@
                     "subject": "Deploy failed",
                     "details": "Agent retried deploy after doctor.",
                     "service_id": "service_1",
-                    "failing_command": "npx tovuk deploy --wait --json",
+                    "failing_command": "tovuk deploy --wait --json",
                     "build_id": "job_1",
                     "deploy_id": "deploy_1",
                     "first_log_line": "cargo check failed in src/main.rs",
@@ -5171,7 +5171,7 @@
                     },
                     "idle_timeout_minutes": 15
                   },
-                  "next_command": "npx tovuk logs --service service_1"
+                  "next_command": "tovuk logs --service service_1"
                 }
               }
             }
@@ -6376,7 +6376,7 @@
                   ],
                   "commands": [
                     {
-                      "command": "npx tovuk deploy",
+                      "command": "tovuk deploy",
                       "description": "Deploys the current repo. Context: components.responses.CapabilitiesLoaded.content.application/json.examples.example.value.commands.0."
                     }
                   ],
@@ -6806,8 +6806,8 @@
                         "Single-key serialized state"
                       ],
                       "commands": [
-                        "npx tovuk deploy --wait --json",
-                        "npx tovuk logs --service <service> --json"
+                        "tovuk deploy --wait --json",
+                        "tovuk logs --service <service> --json"
                       ],
                       "meters": [
                         "worker_requests",
@@ -7313,7 +7313,7 @@
                     }
                   ],
                   "next_actions": [
-                    "Use `npx tovuk overview --service <service>` for a compact service state snapshot."
+                    "Use `tovuk overview --service <service>` for a compact service state snapshot."
                   ],
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -7474,7 +7474,7 @@
                   "domains": [],
                   "database": null,
                   "next_actions": [
-                    "Watch the active build with `npx tovuk logs --service service_1`."
+                    "Watch the active build with `tovuk logs --service service_1`."
                   ]
                 }
               }
@@ -7664,10 +7664,10 @@
                     "details": "Agent retried deploy after doctor.",
                     "severity": "normal",
                     "status": "open",
-                    "agent_instruction": "Continue with npx tovuk overview --service service_1 --json.",
+                    "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                     "created_at": "2026-05-27T12:00:00Z",
                     "updated_at": "2026-05-27T12:00:00Z",
-                    "failing_command": "npx tovuk deploy --wait --json",
+                    "failing_command": "tovuk deploy --wait --json",
                     "build_id": "job_1",
                     "deploy_id": "deploy_1",
                     "first_log_line": "cargo check failed in src/main.rs"
@@ -7678,7 +7678,7 @@
                     "limitPerDay": 10,
                     "remainingDay": 9
                   },
-                  "next_command": "npx tovuk support list --json"
+                  "next_command": "tovuk support list --json"
                 }
               }
             }
@@ -7718,10 +7718,10 @@
                       "details": "Agent retried deploy after doctor.",
                       "severity": "normal",
                       "status": "open",
-                      "agent_instruction": "Continue with npx tovuk overview --service service_1 --json.",
+                      "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                       "created_at": "2026-05-27T12:00:00Z",
                       "updated_at": "2026-05-27T12:00:00Z",
-                      "failing_command": "npx tovuk deploy --wait --json",
+                      "failing_command": "tovuk deploy --wait --json",
                       "build_id": "job_1",
                       "deploy_id": "deploy_1",
                       "first_log_line": "cargo check failed in src/main.rs"
@@ -7770,10 +7770,10 @@
                   "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "resolved",
-                  "agent_instruction": "Ticket resolved. Run `npx tovuk support list --json` to confirm status, and create a new ticket only if the issue returns with fresh command output.",
+                  "agent_instruction": "Ticket resolved. Run `tovuk support list --json` to confirm status, and create a new ticket only if the issue returns with fresh command output.",
                   "created_at": "2026-05-27T12:00:00Z",
                   "updated_at": "2026-05-27T12:00:00Z",
-                  "failing_command": "npx tovuk deploy --wait --json",
+                  "failing_command": "tovuk deploy --wait --json",
                   "build_id": "job_1",
                   "deploy_id": "deploy_1",
                   "first_log_line": "cargo check failed in src/main.rs"
@@ -9625,7 +9625,7 @@
             "type": "string",
             "description": "Next command for humans and agents. Context: components.schemas.DeployResponse.properties.next_command.",
             "examples": [
-              "npx tovuk logs --service service_1"
+              "tovuk logs --service service_1"
             ],
             "pattern": "^[\\s\\S]{0,8192}$",
             "maxLength": 512
@@ -9684,7 +9684,7 @@
               },
               "idle_timeout_minutes": 15
             },
-            "next_command": "npx tovuk logs --service service_1"
+            "next_command": "tovuk logs --service service_1"
           }
         ]
       },
@@ -12948,7 +12948,7 @@
             "pattern": "^[\\s\\S]{1,160}$",
             "maxLength": 160,
             "examples": [
-              "npx tovuk deploy"
+              "tovuk deploy"
             ]
           },
           "description": {
@@ -12963,7 +12963,7 @@
         },
         "examples": [
           {
-            "command": "npx tovuk deploy",
+            "command": "tovuk deploy",
             "description": "Deploys the current repo. Context: components.schemas.CapabilityCommand.examples.0. Context: components.schemas.CapabilityCommand.examples.0."
           }
         ]
@@ -13083,7 +13083,7 @@
             "examples": [
               [
                 {
-                  "command": "npx tovuk deploy",
+                  "command": "tovuk deploy",
                   "description": "Deploys the current repo. Context: components.schemas.CapabilitiesResponse.properties.commands.examples.0.0. Context: components.schemas.CapabilitiesResponse.properties.commands.examples.0.0."
                 }
               ]
@@ -13535,8 +13535,8 @@
                     "Single-key serialized state"
                   ],
                   "commands": [
-                    "npx tovuk deploy --wait --json",
-                    "npx tovuk logs --service <service> --json"
+                    "tovuk deploy --wait --json",
+                    "tovuk logs --service <service> --json"
                   ],
                   "meters": [
                     "worker_requests",
@@ -15389,7 +15389,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Use `npx tovuk overview --service <service>` for a compact service state snapshot."
+                "Use `tovuk overview --service <service>` for a compact service state snapshot."
               ]
             ]
           },
@@ -15731,7 +15731,7 @@
               }
             ],
             "next_actions": [
-              "Use `npx tovuk overview --service <service>` for a compact service state snapshot."
+              "Use `tovuk overview --service <service>` for a compact service state snapshot."
             ],
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -15913,7 +15913,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Watch the active build with `npx tovuk logs --service service_1`."
+                "Watch the active build with `tovuk logs --service service_1`."
               ]
             ]
           }
@@ -15982,7 +15982,7 @@
             "domains": [],
             "database": null,
             "next_actions": [
-              "Watch the active build with `npx tovuk logs --service service_1`."
+              "Watch the active build with `tovuk logs --service service_1`."
             ]
           }
         ]
@@ -16228,7 +16228,7 @@
             "maxLength": 2000,
             "description": "Exact Tovuk command or SDK action that failed. Context: components.schemas.SupportTicketCreateRequest.properties.failing_command.",
             "examples": [
-              "npx tovuk deploy --wait --json"
+              "tovuk deploy --wait --json"
             ],
             "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
           },
@@ -16286,7 +16286,7 @@
             "subject": "Deploy failed",
             "details": "Agent retried deploy after doctor.",
             "service_id": "service_1",
-            "failing_command": "npx tovuk deploy --wait --json",
+            "failing_command": "tovuk deploy --wait --json",
             "build_id": "job_1",
             "deploy_id": "deploy_1",
             "first_log_line": "cargo check failed in src/main.rs",
@@ -16362,7 +16362,7 @@
             "maxLength": 2000,
             "description": "Exact Tovuk command or SDK action that failed. Context: components.schemas.SupportTicket.properties.failing_command.",
             "examples": [
-              "npx tovuk deploy --wait --json"
+              "tovuk deploy --wait --json"
             ],
             "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,2000}$"
           },
@@ -16413,7 +16413,7 @@
             "type": "string",
             "description": "Next step for the user agent. Context: components.schemas.SupportTicket.properties.agent_instruction.",
             "examples": [
-              "Continue with npx tovuk overview --service service_1 --json."
+              "Continue with tovuk overview --service service_1 --json."
             ],
             "pattern": "^[\\s\\S]{1,500}$",
             "maxLength": 500
@@ -16441,13 +16441,13 @@
             "service_id": "service_1",
             "subject": "Deploy failed",
             "details": "Agent retried deploy after doctor.",
-            "failing_command": "npx tovuk deploy --wait --json",
+            "failing_command": "tovuk deploy --wait --json",
             "build_id": "job_1",
             "deploy_id": "deploy_1",
             "first_log_line": "cargo check failed in src/main.rs",
             "severity": "normal",
             "status": "open",
-            "agent_instruction": "Continue with npx tovuk overview --service service_1 --json.",
+            "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
             "created_at": "2026-05-27T12:00:00Z",
             "updated_at": "2026-05-27T12:00:00Z"
           }
@@ -16534,7 +16534,7 @@
             "type": "string",
             "description": "Recommended next CLI command. Context: components.schemas.SupportTicketCreateResponse.properties.next_command.",
             "examples": [
-              "npx tovuk support list --json"
+              "tovuk support list --json"
             ],
             "pattern": "^[\\s\\S]{1,240}$",
             "maxLength": 240
@@ -16549,7 +16549,7 @@
               "details": "Command, ids, and first actionable log line.",
               "severity": "normal",
               "status": "open",
-              "agent_instruction": "Continue with npx tovuk overview --service service_1 --json.",
+              "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
               "created_at": "2026-05-27T12:00:00Z",
               "updated_at": "2026-05-27T12:00:00Z"
             },
@@ -16559,7 +16559,7 @@
               "limitPerDay": 10,
               "remainingDay": 9
             },
-            "next_command": "npx tovuk support list --json"
+            "next_command": "tovuk support list --json"
           }
         ]
       },
@@ -16587,10 +16587,10 @@
                   "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "open",
-                  "agent_instruction": "Continue with npx tovuk overview --service service_1 --json.",
+                  "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                   "created_at": "2026-05-27T12:00:00Z",
                   "updated_at": "2026-05-27T12:00:00Z",
-                  "failing_command": "npx tovuk deploy --wait --json",
+                  "failing_command": "tovuk deploy --wait --json",
                   "build_id": "job_1",
                   "deploy_id": "deploy_1",
                   "first_log_line": "cargo check failed in src/main.rs"
@@ -16612,10 +16612,10 @@
                 "details": "Agent retried deploy after doctor.",
                 "severity": "normal",
                 "status": "open",
-                "agent_instruction": "Continue with npx tovuk overview --service service_1 --json.",
+                "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                 "created_at": "2026-05-27T12:00:00Z",
                 "updated_at": "2026-05-27T12:00:00Z",
-                "failing_command": "npx tovuk deploy --wait --json",
+                "failing_command": "tovuk deploy --wait --json",
                 "build_id": "job_1",
                 "deploy_id": "deploy_1",
                 "first_log_line": "cargo check failed in src/main.rs"
@@ -21303,13 +21303,13 @@
               "pattern": "^[\\s\\S]{1,220}$",
               "maxLength": 220,
               "examples": [
-                "npx tovuk deploy --wait --json"
+                "tovuk deploy --wait --json"
               ]
             },
             "examples": [
               [
-                "npx tovuk deploy --wait --json",
-                "npx tovuk logs --service <service> --json"
+                "tovuk deploy --wait --json",
+                "tovuk logs --service <service> --json"
               ]
             ]
           },
@@ -21375,8 +21375,8 @@
               "Single-key serialized state"
             ],
             "commands": [
-              "npx tovuk deploy --wait --json",
-              "npx tovuk logs --service <service> --json"
+              "tovuk deploy --wait --json",
+              "tovuk logs --service <service> --json"
             ],
             "meters": [
               "worker_requests",
