@@ -35,6 +35,9 @@ func checkDocs() {
 	}
 
 	openapi := readText("docs/openapi.json")
+	pricing := readText("docs/pricing.mdx")
+	limits := readText("docs/reference/limits.mdx")
+	platform := readText("docs/reference/platform.mdx")
 	for _, retired := range []string{
 		"/v1/apps",
 		"--app",
@@ -48,6 +51,13 @@ func checkDocs() {
 	} {
 		rejectContains(openapi, retired, "retired public app contract")
 	}
+
+	requireContains(pricing, "`1 GB` per object", "Free State per-object storage docs")
+	requireContains(limits, "State SQLite storage is 1 GB per object on Free", "State Free storage limit docs")
+	requireContains(platform, "Free State objects get 1 GB per object", "platform State Free storage docs")
+	rejectContains(pricing, "`10 GB` per object,\n  and `2 MiB`", "stale Free State storage docs")
+	rejectContains(limits, "State SQLite storage is 10 GB per object. Free", "stale State storage docs")
+	rejectContains(platform, "State objects get 10 GB per object. Free", "stale platform State storage docs")
 
 	fmt.Printf("Checked %d Mintlify navigation entries.\n", len(pages))
 }
