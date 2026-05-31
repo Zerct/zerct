@@ -67,6 +67,9 @@ tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 tovuk queue create --service service_1 jobs --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron update --service service_1 nightly "*/15 * * * *" --json
+tovuk cron disable --service service_1 nightly --json
+tovuk cron enable --service service_1 nightly --json
 tovuk durable-object create --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk limit set worker_requests --period day --value 100000 --json

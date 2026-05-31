@@ -49,6 +49,8 @@ tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"e
 tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
 tovuk queue create --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk cron update --service <service> nightly "*/15 * * * *" --json
+tovuk cron disable --service <service> nightly --json
 tovuk durable-object create --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk caps set worker_requests --period day --value 100000 --json

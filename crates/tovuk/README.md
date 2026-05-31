@@ -69,6 +69,9 @@ tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron update --service service_1 nightly "*/15 * * * *" --json
+tovuk cron disable --service service_1 nightly --json
+tovuk cron enable --service service_1 nightly --json
 tovuk cron delete --service service_1 nightly --json
 tovuk durable-object create --service service_1 Room --json
 tovuk durable-object delete --service service_1 Room --json
