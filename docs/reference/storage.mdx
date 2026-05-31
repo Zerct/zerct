@@ -51,12 +51,18 @@ Pro plan:
 - free egress and free delete operations
 
 Use Class A caps for write/list-heavy workflows and Class B caps for
-read/download-heavy workflows:
+read/download-heavy workflows. Use `object_storage_bytes` to cap total stored
+bytes across the account:
 
 ```sh
+tovuk limit set object_storage_bytes --period month --value 10737418240 --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
 tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
 ```
+
+Upload URL creation reserves the requested bytes before returning the presigned
+URL. Agents should call `tovuk storage delete --service <service> <path> --json`
+to release a pending upload reservation when an upload is abandoned.
 
 Check the live storage prices and included usage before heavy media work:
 
