@@ -1,6 +1,6 @@
 ---
 title: "SQLite"
-description: "D1-style SQLite databases for Rust workers."
+description: "SQLite databases for Rust workers."
 ---
 
 Tovuk service databases are SQLite databases owned by a service and attached to Rust
@@ -16,7 +16,7 @@ tovuk platform --service service_1 --json
 
 Agents should create databases before a deploy needs them, then keep schema
 migrations in source control. Query responses include `rowsRead`,
-`rowsWritten`, `vmSteps`, `fullscanSteps`, and D1-style `meta.duration`,
+`rowsWritten`, `vmSteps`, `fullscanSteps`, and `meta.duration`,
 `meta.size_after`, `meta.rows_read`, and `meta.rows_written` fields so agents
 can fix slow or expensive queries without dashboard access.
 
@@ -45,15 +45,15 @@ Agents should reject database code that:
 
 ## Limits
 
-Free plans follow Cloudflare-style SQLite limits: 10 service databases, 5 GiB total
-storage, 500 MiB per database, 5 million rows read per day, and 100 thousand
+Free plans follow Tovuk SQLite limits: 10 service databases, 5 GB total
+storage, 500 MB per database, 5 million rows read per day, and 100 thousand
 rows written per day.
 
-Pro plans have a 1 TiB account hard cap, 10 GiB per database, and monthly
+Pro plans have a 1 TB account hard cap, 10 GB per database, and monthly
 included row meters before paid overage pricing. Inspect the exact current
 limits and prices with:
 
-D1-style query limits are exposed in `tovuk pricing --json`: 30 second query
+SQLite query limits are exposed in `tovuk pricing --json`: 30 second query
 timeouts, 50 queries per Worker invocation on Free, 1000 on Pro, 100 bound
 parameters, 100 KB SQL statements, 100 columns, and 2 MB row/blob/string values.
 Storage is also tracked through the `sqlite_storage_bytes` gauge meter for

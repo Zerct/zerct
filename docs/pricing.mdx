@@ -3,8 +3,8 @@ title: "Pricing"
 description: "Free and Pro limits for agent-ready deploys."
 ---
 
-Tovuk uses Cloudflare-style meters so agents can predict cost before they
-deploy. Free plans hard-stop at the free limits. Pro costs `$25/month`, includes
+Tovuk uses usage meters so agents can predict cost before they deploy. Free
+plans hard-stop at the free limits. Pro costs `$25/month`, includes
 the monthly allowances below, and lets agents set hard usage caps before paid
 overages.
 
@@ -29,17 +29,17 @@ tovuk usage --json
   files per Worker version, `25 MiB` per file.
 - Transfer: `100 GiB` per month across static CDN responses and Rust worker
   origin responses.
-- SQLite: `10` databases, `5 GiB` total, `500 MiB` per database, `5 million`
+- SQLite: `10` databases, `5 GB` total, `500 MB` per database, `5 million`
   rows read per day, `100,000` rows written per day.
-- KV: `1,000` namespaces, `1 GiB` per account and namespace, `100,000`
+- KV: `1,000` namespaces, `1 GB` per account and namespace, `100,000`
   reads per day, `1,000` writes, deletes, and list requests per day.
 - Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
   `24 hour` retention, configurable batches, and dead-letter queues.
 - Durable Objects: `100` classes, `100,000` requests per day, `13,000 GB-s`
   duration per day, `5 million` SQLite rows read per day, `100,000` SQLite
-  rows written per day, `5 GiB` account SQLite storage, `1 GiB` per object,
+  rows written per day, `5 GB` account SQLite storage, `1 GB` per object,
   and `2 MiB` key/value payloads.
-- Object storage: `10 GiB`, no object-count cap, `1 million` Class A
+- Object storage: `10 GB`, no object-count cap, `1 million` Class A
   operations per month, `10 million` Class B operations per month, free egress.
 - Logs: `200,000` events per day, `3 day` retention.
 - API tokens: `10`.
@@ -57,25 +57,25 @@ tovuk usage --json
 - Transfer: `1 TiB` per month included across static CDN responses and Rust
   worker origin responses. Set `cdn_transfer_bytes` and
   `origin_transfer_bytes` hard caps before high-throughput launches.
-- SQLite: `50,000` databases, `1 TiB` account hard cap, `10 GiB` per database,
+- SQLite: `50,000` databases, `1 TB` account hard cap, `10 GB` per database,
   `25 billion` rows read and `50 million` rows written per month included.
   Overage is `$0.001` per million rows read, `$1.00` per million rows written,
-  and `$0.75` per GiB-month after the included `5 GiB`.
+  and `$0.75` per GB-month after the included `5 GB`.
 - KV: `1,000` namespaces, no storage hard cap, `10 million` reads and
   `1 million` writes, deletes, and lists per month included. Overage is `$0.50`
   per million reads, `$5.00` per million writes, deletes, or lists, and `$0.50`
-  per GiB-month after the included `1 GiB`.
+  per GB-month after the included `1 GB`.
 - Queues: `10,000` queues, `1 million` operations per month included, then
   `$0.40` per million operations. Default retention is `4 days`, configurable
   up to `14 days`.
 - Durable Objects: `500` classes, `1 million` requests and `400,000 GB-s`
   duration per month included. SQLite includes `25 billion` rows read,
-  `50 million` rows written, and `5 GiB` storage per month. Overage is `$0.15`
+  `50 million` rows written, and `5 GB` storage per month. Overage is `$0.15`
   per million requests, `$12.50` per million GB-s, `$0.001` per million rows
-  read, `$1.00` per million rows written, and `$0.20` per GiB-month.
-- Object storage: no storage or object-count hard cap, `10 GiB` included
+  read, `$1.00` per million rows written, and `$0.20` per GB-month.
+- Object storage: no storage or object-count hard cap, `10 GB` included
   storage, `1 million` Class A operations, and `10 million` Class B operations
-  per month. Overage is `$0.015` per GiB-month, `$4.50` per million
+  per month. Overage is `$0.015` per GB-month, `$4.50` per million
   Class A operations, and `$0.36` per million Class B operations. Egress and
   deletes are free.
 - Logs: `20 million` events per month, then `$0.60` per million events, `7 day`
@@ -100,17 +100,4 @@ tovuk limit set object_storage_class_a_operations --period month --value 1000000
 
 Tovuk reports prices in API JSON as USD micro-units. `1,000,000` means `$1.00`.
 
-## Sources
-
-These limits follow Cloudflare product docs for [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/),
-[Workers limits](https://developers.cloudflare.com/workers/platform/limits/),
-[D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/),
-[D1 limits](https://developers.cloudflare.com/d1/platform/limits/),
-[KV pricing](https://developers.cloudflare.com/kv/platform/pricing/),
-[KV limits](https://developers.cloudflare.com/kv/platform/limits/),
-[Queues pricing](https://developers.cloudflare.com/queues/platform/pricing/),
-[Queues limits](https://developers.cloudflare.com/queues/platform/limits/),
-[Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/),
-[Durable Objects limits](https://developers.cloudflare.com/durable-objects/platform/limits/),
-[R2 pricing](https://developers.cloudflare.com/r2/pricing/), and
-[Static Assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/).
+The live API catalog is the source of truth for current limits and prices.

@@ -12,11 +12,11 @@ ambiguous to run.
 - Rust workers run locked release-mode `cargo check`, locked release-mode
   tests, and strict all-target, all-feature Clippy with panic/unwrap bans and
   resource-sensitive lints.
-- Runtime memory is fixed at `128mb`, matching Cloudflare Workers.
+- Runtime memory is fixed at `128mb` for Tovuk workers.
 - Runtime CPU allocation is fixed at `1`; usage is controlled by metered
   `worker_cpu_ms` caps.
 - Runtime idle timeout must be between `1` and `60` minutes.
-- Static assets follow Cloudflare-style limits: Free allows 20 thousand files
+- Static assets follow Tovuk limits: Free allows 20 thousand files
   per deployed version, Pro allows 100 thousand files per deployed version, and
   every individual static asset is capped at 25 MiB.
 - Static responses meter `cdn_transfer_bytes`; Rust worker responses meter
@@ -35,32 +35,32 @@ ambiguous to run.
 - Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
-- Free service object storage includes 10 GiB total, no object-count cap, a
-  5 TiB R2-style object size ceiling, a 5120 MiB (5 GiB) single-part upload
+- Free service object storage includes 10 GB total, no object-count cap, a
+  5 TiB object storage object size ceiling, a 5120 MiB (5 GiB) single-part upload
   limit, a 5115 GiB (4.995 TiB) multipart upload limit, 10 thousand multipart
   upload parts, 1 million Class A operations per month, and 10 million Class B
   operations per month.
 - Pro service object storage has no storage or object-count hard cap, includes
-  10 GiB, has the same 5 TiB object ceiling, 5120 MiB
+  10 GB, has the same 5 TiB object ceiling, 5120 MiB
   single-part upload limit, and 5115 GiB multipart upload limit, includes
   1 million Class A operations and 10 million Class B operations per month,
-  and exposes R2-style paid overage rates in `tovuk pricing --json`.
+  and exposes object storage paid overage rates in `tovuk pricing --json`.
 - Object storage upload URL creation reserves requested bytes until the object
   is completed or deleted, so agents can avoid concurrent upload overages
   without dashboard cleanup.
 - Free worker requests: 100 thousand per day.
-- Free SQLite databases: 10, with 5 GiB total storage and 500 MiB per database.
-- Pro SQLite databases: 50 thousand, with a 1 TiB account hard cap and 10 GiB
+- Free SQLite databases: 10, with 5 GB total storage and 500 MB per database.
+- Pro SQLite databases: 50 thousand, with a 1 TB account hard cap and 10 GB
   per database. The first 25 billion rows read, 50 million rows written, and
-  5 GiB storage are included each month before paid overage pricing.
-- SQLite follows D1 limits for 30 second query timeouts, 50 queries per Worker
+  5 GB storage are included each month before paid overage pricing.
+- SQLite follows Tovuk limits for 30 second query timeouts, 50 queries per Worker
   invocation on Free, 1000 on Pro, 100 bound parameters, 100 KB SQL statements,
   100 columns, and 2 MB row/blob/string values.
 - Free KV meters: 100 thousand reads per day, 1000 writes per day, 1000
-  deletes per day, 1000 lists per day, and 1 GiB storage per account and
+  deletes per day, 1000 lists per day, and 1 GB storage per account and
   namespace.
 - Pro KV has no account or namespace storage hard cap. The first 10 million
-  reads, 1 million writes, 1 million deletes, 1 million lists, and 1 GiB
+  reads, 1 million writes, 1 million deletes, 1 million lists, and 1 GB
   storage are included each month before paid overage pricing.
 - KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
   least 60 seconds, and KV `expiration` must be at least 60 seconds in the
@@ -73,7 +73,7 @@ ambiguous to run.
 - Pro queue operations: 1 million per month included before paid overage
   pricing.
 - Queue messages are limited to 128 KB total. Tovuk reserves 100 bytes for
-  Cloudflare-compatible metadata, so the maximum user body is 127900 bytes.
+  Tovuk queue metadata, so the maximum user body is 127900 bytes.
   Send delay is limited to 24 hours, retries are limited to 100, batches can
   contain up to 100 messages, and one send batch is capped at 256 KB total.
 - Queue consumer batch size defaults to 10 and can be configured from 1 to
@@ -86,8 +86,8 @@ ambiguous to run.
   configured dead-letter queue after retries are exhausted.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
-- Durable Object SQLite storage is 1 GiB per object on Free and 10 GiB per
-  object on Pro. Free also has a 5 GiB account storage cap, 5 million SQLite
+- Durable Object SQLite storage is 1 GB per object on Free and 10 GB per
+  object on Pro. Free also has a 5 GB account storage cap, 5 million SQLite
   rows read per day, and 100 thousand SQLite rows written per day. Pro includes
   1 million requests, 400 thousand GB-s duration, 25 billion SQLite rows read,
   and 50 million SQLite rows written per month before paid overage pricing.
@@ -132,7 +132,7 @@ tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 tovuk limit set cdn_transfer_bytes --period month --value 107374182400 --json
 tovuk limit set origin_transfer_bytes --period month --value 107374182400 --json
-tovuk limit set object_storage_bytes --period month --value 10737418240 --json
+tovuk limit set object_storage_bytes --period month --value 10000000000 --json
 tovuk limit set durable_object_requests --period month --value 1000000 --json
 tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set log_events --period month --value 20000000 --json
