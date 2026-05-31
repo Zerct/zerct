@@ -8,11 +8,15 @@ workers as explicit resources.
 
 ```sh
 npx tovuk database create --service service_1 DB --json
+npx tovuk database query --service service_1 DB "select 1" --json
+npx tovuk database query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
 npx tovuk platform --service service_1 --json
 ```
 
 Agents should create databases before a deploy needs them, then keep schema
-migrations in source control.
+migrations in source control. Query responses include `rowsRead`,
+`rowsWritten`, `vmSteps`, `fullscanSteps`, and storage usage so agents can fix
+slow or expensive queries without dashboard access.
 
 ## Migration guidance
 
@@ -22,6 +26,7 @@ Recommended pattern:
 2. Acquire one migration lock per service database.
 3. Apply pending migrations before serving traffic.
 4. Keep request handlers free of schema changes and long backfills.
+5. Use parameterized SQL with `--params` instead of interpolating user input.
 
 Agents should reject database code that:
 
@@ -30,6 +35,7 @@ Agents should reject database code that:
 - stores secrets in source;
 - ignores migration errors;
 - performs long backfills during request handling.
+- concatenates user input into SQL instead of using parameters.
 
 ## Limits
 

@@ -27,6 +27,7 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "sqlite/databases",
             "name",
         ),
+        "query" | "execute" => sqlite_query(cli),
         _ => unknown_platform_command(cli, "sqlite"),
     }
 }
@@ -127,6 +128,69 @@ fn create_app_resource(
         &service_route(cli, suffix)?,
         Some(Value::Object(body)),
     )
+}
+
+fn sqlite_query(cli: &CliOptions) -> Result<()> {
+    let database = required_arg(
+        cli,
+        1,
+        "sqlite_database_required",
+        "SQLite database is required.",
+        "Use `tovuk database query --service <service> DB \"select 1\" --json`.",
+    )?;
+    let sql = cli
+        .args
+        .iter()
+        .skip(2)
+        .cloned()
+        .collect::<Vec<_>>()
+        .join(" ");
+    if sql.trim().is_empty() {
+        return Err(agent_error(
+            "sqlite_sql_required",
+            "SQLite SQL is required.",
+            "Pass one SQL statement after the database name.",
+            cli.output.json,
+        ));
+    }
+    let params = sqlite_params(cli)?;
+    let route = format!(
+        "{}/sqlite/{}/query",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&database)
+    );
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &route,
+        Some(json!({
+            "sql": sql,
+            "params": params,
+        })),
+    )
+}
+
+fn sqlite_params(cli: &CliOptions) -> Result<Vec<Value>> {
+    if cli.params.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+    let value = serde_json::from_str::<Value>(&cli.params).map_err(|_error| {
+        agent_error(
+            "invalid_sqlite_params",
+            "SQLite params must be a JSON array.",
+            "Pass params as JSON such as `--params '[1,\"Ada\"]'`.",
+            cli.output.json,
+        )
+    })?;
+    match value {
+        Value::Array(values) => Ok(values),
+        _other => Err(agent_error(
+            "invalid_sqlite_params",
+            "SQLite params must be a JSON array.",
+            "Pass params as JSON such as `--params '[1,\"Ada\"]'`.",
+            cli.output.json,
+        )),
+    }
 }
 
 fn kv_keys(cli: &CliOptions) -> Result<()> {

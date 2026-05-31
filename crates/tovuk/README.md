@@ -52,6 +52,7 @@ tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk platform --service service_1 --json
 tovuk database create --service service_1 DB --json
+tovuk database query --service service_1 DB "select 1" --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 tovuk kv get --service service_1 CACHE user:1 --json

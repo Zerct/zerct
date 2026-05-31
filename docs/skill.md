@@ -53,6 +53,7 @@ Manage platform resources without dashboard access:
 ```sh
 npx tovuk platform --service <service> --json
 npx tovuk database create --service <service> DB --json
+npx tovuk database query --service <service> DB "select 1" --json
 npx tovuk kv create --service <service> CACHE --json
 npx tovuk queue create --service <service> jobs --json
 npx tovuk cron create --service <service> nightly "0 0 * * *" --json

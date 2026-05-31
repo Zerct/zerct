@@ -3346,6 +3346,93 @@
           "description": "Request body for POST /v1/services/{service_id}/queues/{queue}/messages. Context: paths./v1/services/{service_id}/queues/{queue}/messages.post.requestBody."
         }
       }
+    },
+    "/v1/services/{service_id}/sqlite/{database}/query": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Query SQLite database",
+        "description": "Execute one parameterized service SQLite statement or transaction batch. Context: paths./v1/services/{service_id}/sqlite/{database}/query.post.",
+        "operationId": "queryServiceSqliteDatabase",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SqliteQueryCompleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/sqlite/{database}/query.post.parameters.0.",
+            "example": "service_1"
+          },
+          {
+            "name": "database",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sqlite_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "DB"
+              ]
+            },
+            "description": "SQLite database id or binding name. Context: paths./v1/services/{service_id}/sqlite/{database}/query.post.parameters.1.",
+            "example": "DB"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SqliteQueryRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/sqlite/{database}/query",
+                  "value": {
+                    "sql": "select * from users where id = ?",
+                    "params": [
+                      1
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for POST /v1/services/{service_id}/sqlite/{database}/query. Context: paths./v1/services/{service_id}/sqlite/{database}/query.post.requestBody."
+        }
+      }
     }
   },
   "components": {
@@ -5961,6 +6048,75 @@
                   },
                   "nextActions": [
                     "Inspect messages with tovuk queue messages."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "SqliteQueryCompleted": {
+        "description": "SQLite query completed. Context: components.responses.SqliteQueryCompleted.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SqliteQueryResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "SQLite query completed.",
+                "value": {
+                  "database": {
+                    "id": "sqlite_1",
+                    "name": "DB",
+                    "storageLimitMib": 500,
+                    "storageUsedMib": 1,
+                    "quotaState": "ok",
+                    "timeTravelDays": 7,
+                    "queryTimeoutSeconds": 30
+                  },
+                  "results": [
+                    {
+                      "success": true,
+                      "columns": [
+                        "id",
+                        "name"
+                      ],
+                      "rows": [
+                        {
+                          "id": 1,
+                          "name": "Ada"
+                        }
+                      ],
+                      "rowsRead": 1,
+                      "rowsWritten": 0,
+                      "vmSteps": 12,
+                      "fullscanSteps": 0,
+                      "durationMs": 1,
+                      "changes": 0,
+                      "lastInsertRowid": 1
+                    }
+                  ],
+                  "rowsRead": 1,
+                  "rowsWritten": 0,
+                  "storageUsedMib": 1,
+                  "nextActions": [
+                    "Use parameterized SQL with params instead of interpolating user input.",
+                    "Keep hot queries indexed and inspect rowsRead, vmSteps, and fullscanSteps in the response."
                   ]
                 }
               }
@@ -11697,7 +11853,7 @@
             "description": "Quota state. Context: components.schemas.SqliteDatabaseBinding.properties.quotaState.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^(ok|soft_limit|read_only)$",
+            "pattern": "^(ok|read_limited|write_limited|storage_exceeded)$",
             "examples": [
               "ok"
             ]
@@ -13605,6 +13761,347 @@
             ]
           }
         ]
+      },
+      "SqliteStatementRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sql"
+        ],
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "SQL statement. Use one statement per item. Context: components.schemas.SqliteStatementRequest.properties.sql.",
+            "minLength": 1,
+            "maxLength": 100000,
+            "examples": [
+              "select * from users where id = ?"
+            ],
+            "pattern": "^[\\s\\S]{1,100000}$"
+          },
+          "params": {
+            "type": "array",
+            "description": "Positional SQLite bind parameters. Context: components.schemas.SqliteStatementRequest.properties.params.",
+            "maxItems": 100,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2000000,
+                  "pattern": "^[\\s\\S]{0,2000000}$"
+                },
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "format": "int64"
+                },
+                {
+                  "type": "number",
+                  "minimum": -1e+308,
+                  "maximum": 1e+308
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "examples": [
+              [
+                1
+              ]
+            ]
+          }
+        },
+        "description": "One SQLite statement plus positional parameters. Context: components.schemas.SqliteStatementRequest."
+      },
+      "SqliteQueryRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "Single SQL statement. Context: components.schemas.SqliteQueryRequest.properties.sql.",
+            "minLength": 1,
+            "maxLength": 100000,
+            "examples": [
+              "select 1"
+            ],
+            "pattern": "^[\\s\\S]{1,100000}$"
+          },
+          "params": {
+            "type": "array",
+            "description": "Positional parameters for sql. Context: components.schemas.SqliteQueryRequest.properties.params.",
+            "maxItems": 100,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2000000,
+                  "pattern": "^[\\s\\S]{0,2000000}$"
+                },
+                {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "format": "int64"
+                },
+                {
+                  "type": "number",
+                  "minimum": -1e+308,
+                  "maximum": 1e+308
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "examples": [
+              []
+            ]
+          },
+          "statements": {
+            "type": "array",
+            "description": "Batched statements executed in one transaction. Context: components.schemas.SqliteQueryRequest.properties.statements.",
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/SqliteStatementRequest"
+            },
+            "examples": [
+              [
+                {
+                  "sql": "create table if not exists users(id integer primary key, name text)",
+                  "params": []
+                }
+              ]
+            ]
+          }
+        },
+        "description": "SQLite query request. Context: components.schemas.SqliteQueryRequest."
+      },
+      "SqliteStatementResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "columns",
+          "rows",
+          "rowsRead",
+          "rowsWritten",
+          "vmSteps",
+          "fullscanSteps",
+          "durationMs",
+          "changes",
+          "lastInsertRowid"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the statement completed. Context: components.schemas.SqliteStatementResult.properties.success.",
+            "examples": [
+              true
+            ]
+          },
+          "columns": {
+            "type": "array",
+            "description": "Result column names. Context: components.schemas.SqliteStatementResult.properties.columns.",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
+            },
+            "examples": [
+              [
+                "id",
+                "name"
+              ]
+            ]
+          },
+          "rows": {
+            "type": "array",
+            "description": "Result rows as JSON objects. Context: components.schemas.SqliteStatementResult.properties.rows.",
+            "maxItems": 1000,
+            "items": {
+              "type": "object"
+            },
+            "examples": [
+              [
+                {
+                  "id": 1,
+                  "name": "Ada"
+                }
+              ]
+            ]
+          },
+          "rowsRead": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Metered rows read. Context: components.schemas.SqliteStatementResult.properties.rowsRead.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              1
+            ]
+          },
+          "rowsWritten": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Metered rows written. Context: components.schemas.SqliteStatementResult.properties.rowsWritten.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              0
+            ]
+          },
+          "vmSteps": {
+            "type": "integer",
+            "format": "int64",
+            "description": "SQLite virtual machine steps. Context: components.schemas.SqliteStatementResult.properties.vmSteps.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              12
+            ]
+          },
+          "fullscanSteps": {
+            "type": "integer",
+            "format": "int64",
+            "description": "SQLite full-scan steps. Context: components.schemas.SqliteStatementResult.properties.fullscanSteps.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              0
+            ]
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Duration in milliseconds. Context: components.schemas.SqliteStatementResult.properties.durationMs.",
+            "minimum": 0,
+            "maximum": 3600000,
+            "examples": [
+              1
+            ]
+          },
+          "changes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Changed rows reported by SQLite. Context: components.schemas.SqliteStatementResult.properties.changes.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              0
+            ]
+          },
+          "lastInsertRowid": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Last inserted row id reported by SQLite. Context: components.schemas.SqliteStatementResult.properties.lastInsertRowid.",
+            "examples": [
+              1
+            ],
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "description": "SQLite statement result. Context: components.schemas.SqliteStatementResult."
+      },
+      "SqliteQueryResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "database",
+          "results",
+          "rowsRead",
+          "rowsWritten",
+          "storageUsedMib",
+          "nextActions"
+        ],
+        "properties": {
+          "database": {
+            "$ref": "#/components/schemas/SqliteDatabaseBinding"
+          },
+          "results": {
+            "type": "array",
+            "description": "Per-statement results. Context: components.schemas.SqliteQueryResponse.properties.results.",
+            "items": {
+              "$ref": "#/components/schemas/SqliteStatementResult"
+            },
+            "examples": [
+              [
+                {
+                  "success": true,
+                  "columns": [
+                    "id",
+                    "name"
+                  ],
+                  "rows": [
+                    {
+                      "id": 1,
+                      "name": "Ada"
+                    }
+                  ],
+                  "rowsRead": 1,
+                  "rowsWritten": 0,
+                  "vmSteps": 12,
+                  "fullscanSteps": 0,
+                  "durationMs": 1,
+                  "changes": 0,
+                  "lastInsertRowid": 1
+                }
+              ]
+            ]
+          },
+          "rowsRead": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Metered rows read for this request. Context: components.schemas.SqliteQueryResponse.properties.rowsRead.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              1
+            ]
+          },
+          "rowsWritten": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Metered rows written for this request. Context: components.schemas.SqliteQueryResponse.properties.rowsWritten.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              0
+            ]
+          },
+          "storageUsedMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Storage used after execution. Context: components.schemas.SqliteQueryResponse.properties.storageUsedMib.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              1
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.SqliteQueryResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,512}$"
+            },
+            "examples": [
+              [
+                "Add an index when fullscanSteps is high."
+              ]
+            ]
+          }
+        },
+        "description": "SQLite query response. Context: components.schemas.SqliteQueryResponse."
       }
     }
   }
