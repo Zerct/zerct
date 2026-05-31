@@ -2773,7 +2773,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^[a-z_]{3,64}$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
               "maxLength": 64,
               "examples": [
                 "worker_requests"
@@ -3841,7 +3841,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
               "maxLength": 128,
               "examples": [
                 "worker_requests"
@@ -12598,7 +12598,7 @@
             "description": "Meter name. Context: components.schemas.UsageCap.properties.metric.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^[a-z_]{3,64}$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
             "examples": [
               "worker_requests"
             ]
@@ -14590,7 +14590,7 @@
             "description": "Meter name. Context: components.schemas.UsageCapDeleteResponse.properties.metric.",
             "minLength": 1,
             "maxLength": 128,
-            "pattern": "^[a-z][a-z0-9_]{0,127}$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|kv_reads|kv_writes|kv_deletes|kv_lists|queue_operations|object_storage_bytes|origin_transfer_bytes|cdn_transfer_bytes)$",
             "examples": [
               "worker_requests"
             ]
