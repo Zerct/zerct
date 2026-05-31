@@ -58,6 +58,8 @@ ambiguous to run.
 - KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
   least 60 seconds, and KV `expiration` must be at least 60 seconds in the
   future. KV keys are limited to 512 bytes and values to 25 MiB.
+- Bulk KV reads accept up to 100 keys per request. Bulk KV writes and deletes
+  accept up to 10000 keys per request.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
   or delete chunk.
 - Pro queue operations: 1 million per month included before paid overage
