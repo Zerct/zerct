@@ -69,6 +69,8 @@ tovuk durable-object delete --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
 tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limit set durable_object_requests --period month --value 1000000 --json
+tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit delete worker_requests --period day --json
 tovuk billing checkout --json
 tovuk billing portal

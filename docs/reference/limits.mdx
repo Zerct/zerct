@@ -72,9 +72,11 @@ ambiguous to run.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
 - Durable Object SQLite storage is 1 GiB per object on Free and 10 GiB per
-  object on Pro. Free also has a 5 GiB account storage cap. Pro includes
-  1 million requests and 400 thousand GB-s duration per month before paid
-  overage pricing.
+  object on Pro. Free also has a 5 GiB account storage cap, 5 million SQLite
+  rows read per day, and 100 thousand SQLite rows written per day. Pro includes
+  1 million requests, 400 thousand GB-s duration, 25 billion SQLite rows read,
+  and 50 million SQLite rows written per month before paid overage pricing.
+- Durable Object key and value payloads are limited to 2 MiB combined.
 - Free logs include 200 thousand events per day with 3 day retention. Pro logs
   include 20 million events per month with 7 day retention.
 - Free support tickets: 3 per day.
@@ -113,4 +115,6 @@ Agents should set explicit hard caps before high-throughput tests or launch:
 tovuk pricing --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+tovuk limit set durable_object_requests --period month --value 1000000 --json
+tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 ```
