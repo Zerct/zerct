@@ -61,6 +61,9 @@ tovuk database create --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 tovuk queue create --service service_1 jobs --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
