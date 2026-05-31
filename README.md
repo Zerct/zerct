@@ -20,8 +20,8 @@ tovuk deploy
 Create a worker-static starter:
 
 ```sh
-tovuk init my-app --template worker-static-rust-tanstack
-cd my-app/web && bun install && cd ..
+tovuk init hello-service --template worker-static-rust-tanstack
+cd hello-service/web && bun install && cd ..
 ```
 
 From a worker-static repo root, `tovuk deploy` reads the single root
@@ -32,7 +32,7 @@ service bindings, and usage caps through CLI resource commands.
 Worker-static deploys use this `tovuk.toml` shape:
 
 ```toml
-name = "my-app"
+name = "hello-service"
 kind = "worker_static"
 
 [worker]
@@ -159,21 +159,21 @@ tovuk me
 tovuk usage
 tovuk activity --json
 tovuk service list
-tovuk service show app_1 --json
+tovuk service show service_1 --json
 tovuk deploys
-tovuk builds --service app_1
-tovuk logs --service app_1 --limit 100 --json
+tovuk builds --service service_1
+tovuk logs --service service_1 --limit 100 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --build job_1 --json
-tovuk env list --service app_1
-tovuk domains list --service app_1
-tovuk domains verify --service app_1 api.example.com
-tovuk kv put --service app_1 CACHE user:1 '{"name":"Ada"}' --json
-tovuk kv get --service app_1 CACHE user:1 --json
-tovuk queue send --service app_1 jobs '{"task":"sync"}' --json
+tovuk env list --service service_1
+tovuk domains list --service service_1
+tovuk domains verify --service service_1 api.example.com
+tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
+tovuk kv get --service service_1 CACHE user:1 --json
+tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk billing checkout --json
 tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```

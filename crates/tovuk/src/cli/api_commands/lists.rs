@@ -4,7 +4,7 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::{app_route, page_query},
+    common::{page_query, service_route},
     generic::print_authenticated,
 };
 
@@ -16,7 +16,7 @@ pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
             let route = if let Some(service) = service {
                 format!("/v1/services/{}/overview", encode_component(&service))
             } else {
-                app_route(cli, "overview")?
+                service_route(cli, "overview")?
             };
             print_authenticated(cli, &route)
         }
@@ -30,12 +30,12 @@ pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
 }
 
 pub(crate) fn deploys_command(cli: &CliOptions) -> Result<()> {
-    let route = if cli.app.is_empty() {
+    let route = if cli.service.is_empty() {
         format!("/v1/deploys{}", page_query(cli))
     } else {
         format!(
             "/v1/services/{}/deploys{}",
-            encode_component(&cli.app),
+            encode_component(&cli.service),
             page_query(cli)
         )
     };
@@ -43,12 +43,12 @@ pub(crate) fn deploys_command(cli: &CliOptions) -> Result<()> {
 }
 
 pub(crate) fn builds_command(cli: &CliOptions) -> Result<()> {
-    let route = if cli.app.is_empty() {
+    let route = if cli.service.is_empty() {
         format!("/v1/builds{}", page_query(cli))
     } else {
         format!(
             "/v1/services/{}/builds{}",
-            encode_component(&cli.app),
+            encode_component(&cli.service),
             page_query(cli)
         )
     };

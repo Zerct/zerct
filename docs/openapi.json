@@ -51,7 +51,7 @@
     },
     {
       "name": "Storage",
-      "description": "App object storage and media endpoints. Context: tags.Storage."
+      "description": "Service object storage and media endpoints. Context: tags.Storage."
     }
   ],
   "paths": {
@@ -314,8 +314,8 @@
         "tags": [
           "Deploy"
         ],
-        "summary": "Deploy app",
-        "description": "Deploys an app from a source archive produced by the Tovuk CLI. Context: paths./v1/deploy.post.",
+        "summary": "Deploy service",
+        "description": "Deploys a service from a source archive produced by the Tovuk CLI. Context: paths./v1/deploy.post.",
         "operationId": "createDeploy",
         "requestBody": {
           "description": "Deploy source archive and runtime metadata. Context: paths./v1/deploy.post.requestBody.",
@@ -366,17 +366,17 @@
         }
       }
     },
-    "/v1/apps": {
+    "/v1/services": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "List apps",
-        "description": "List apps for GET /v1/apps. Context: paths./v1/apps.get.",
-        "operationId": "listApps",
+        "summary": "List services",
+        "description": "List services for GET /v1/services. Context: paths./v1/services.get.",
+        "operationId": "listServices",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/AppsLoaded"
+            "$ref": "#/components/responses/ServicesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -393,14 +393,14 @@
         }
       }
     },
-    "/v1/apps/{app_id}": {
+    "/v1/services/{service_id}": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "Get app",
-        "description": "Get app for GET /v1/apps/{app_id}. Context: paths./v1/apps/{app_id}.get.",
-        "operationId": "getApp",
+        "summary": "Get service",
+        "description": "Get service for GET /v1/services/{service_id}. Context: paths./v1/services/{service_id}.get.",
+        "operationId": "getService",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StatusLoaded"
@@ -420,19 +420,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}.get.parameters.0.",
+            "example": "service_1"
           }
         ]
       },
@@ -440,9 +440,9 @@
         "tags": [
           "Deploy"
         ],
-        "summary": "Delete app",
-        "description": "Deletes an app when it is not actively running. Context: paths./v1/apps/{app_id}.delete.",
-        "operationId": "deleteApp",
+        "summary": "Delete service",
+        "description": "Deletes a service when it is not actively running. Context: paths./v1/services/{service_id}.delete.",
+        "operationId": "deleteService",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StatusLoaded"
@@ -462,46 +462,46 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}.delete.parameters.0. Context: paths./v1/apps/{app_id}.delete.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}.delete.parameters.0. Context: paths./v1/services/{service_id}.delete.parameters.0.",
+            "example": "service_1"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/overview": {
+    "/v1/services/{service_id}/overview": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "Get app overview",
-        "description": "Returns app status, deploys, builds, logs, env names, domains, database metadata, and next actions. Context: paths./v1/apps/{app_id}/overview.get.",
-        "operationId": "getAppOverview",
+        "summary": "Get service overview",
+        "description": "Returns service status, deploys, builds, logs, env names, domains, database metadata, and next actions. Context: paths./v1/services/{service_id}/overview.get.",
+        "operationId": "getServiceOverview",
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/overview.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/overview.get.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "limit",
@@ -517,7 +517,7 @@
                 100
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/overview.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/overview.get.parameters.1.",
             "example": 100
           },
           {
@@ -532,13 +532,13 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/overview.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/services/{service_id}/overview.get.parameters.2.",
             "example": "1000"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/components/responses/AppOverviewLoaded"
+            "$ref": "#/components/responses/ServiceOverviewLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -555,14 +555,14 @@
         }
       }
     },
-    "/v1/apps/{app_id}/deploys": {
+    "/v1/services/{service_id}/deploys": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "List app deploys",
-        "description": "List app deploys for GET /v1/apps/{app_id}/deploys. Context: paths./v1/apps/{app_id}/deploys.get.",
-        "operationId": "listAppDeploys",
+        "summary": "List service deploys",
+        "description": "List service deploys for GET /v1/services/{service_id}/deploys. Context: paths./v1/services/{service_id}/deploys.get.",
+        "operationId": "listServiceDeploys",
         "responses": {
           "200": {
             "$ref": "#/components/responses/DeploysLoaded"
@@ -582,19 +582,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0. Context: paths./v1/apps/{app_id}/deploys.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/deploys.get.parameters.0. Context: paths./v1/services/{service_id}/deploys.get.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "limit",
@@ -610,7 +610,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/deploys.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/deploys.get.parameters.1.",
             "example": 1
           },
           {
@@ -625,20 +625,20 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/deploys.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/services/{service_id}/deploys.get.parameters.2.",
             "example": "1000"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/builds": {
+    "/v1/services/{service_id}/builds": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "List app builds",
-        "description": "List app builds for GET /v1/apps/{app_id}/builds. Context: paths./v1/apps/{app_id}/builds.get.",
-        "operationId": "listAppBuilds",
+        "summary": "List service builds",
+        "description": "List service builds for GET /v1/services/{service_id}/builds. Context: paths./v1/services/{service_id}/builds.get.",
+        "operationId": "listServiceBuilds",
         "responses": {
           "200": {
             "$ref": "#/components/responses/BuildsLoaded"
@@ -658,19 +658,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/builds.get.parameters.0. Context: paths./v1/apps/{app_id}/builds.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/builds.get.parameters.0. Context: paths./v1/services/{service_id}/builds.get.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "limit",
@@ -686,7 +686,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/builds.get.parameters.1. Context: paths./v1/apps/{app_id}/builds.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/builds.get.parameters.1. Context: paths./v1/services/{service_id}/builds.get.parameters.1.",
             "example": 1
           },
           {
@@ -701,20 +701,20 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/builds.get.parameters.2. Context: paths./v1/apps/{app_id}/builds.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/services/{service_id}/builds.get.parameters.2. Context: paths./v1/services/{service_id}/builds.get.parameters.2.",
             "example": "1000"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/logs": {
+    "/v1/services/{service_id}/logs": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "Read app logs",
-        "description": "Returns the latest app logs in chronological order. Context: paths./v1/apps/{app_id}/logs.get.",
-        "operationId": "readAppLogs",
+        "summary": "Read service logs",
+        "description": "Returns the latest service logs in chronological order. Context: paths./v1/services/{service_id}/logs.get.",
+        "operationId": "readServiceLogs",
         "responses": {
           "200": {
             "$ref": "#/components/responses/LogsLoaded"
@@ -734,19 +734,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/logs.get.parameters.0. Context: paths./v1/apps/{app_id}/logs.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/logs.get.parameters.0. Context: paths./v1/services/{service_id}/logs.get.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "limit",
@@ -762,7 +762,7 @@
                 1
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/apps/{app_id}/logs.get.parameters.1. Context: paths./v1/apps/{app_id}/logs.get.parameters.1.",
+            "description": "Maximum records to return. Context: paths./v1/services/{service_id}/logs.get.parameters.1. Context: paths./v1/services/{service_id}/logs.get.parameters.1.",
             "example": 1
           },
           {
@@ -777,20 +777,20 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/apps/{app_id}/logs.get.parameters.2. Context: paths./v1/apps/{app_id}/logs.get.parameters.2.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/services/{service_id}/logs.get.parameters.2. Context: paths./v1/services/{service_id}/logs.get.parameters.2.",
             "example": "1000"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/database": {
+    "/v1/services/{service_id}/database": {
       "get": {
         "tags": [
           "Deploy"
         ],
         "summary": "Get SQLite",
-        "description": "Get SQLite for GET /v1/apps/{app_id}/database. Context: paths./v1/apps/{app_id}/database.get.",
-        "operationId": "getAppDatabase",
+        "description": "Get SQLite for GET /v1/services/{service_id}/database. Context: paths./v1/services/{service_id}/database.get.",
+        "operationId": "getServiceDatabase",
         "responses": {
           "200": {
             "$ref": "#/components/responses/DatabaseLoaded"
@@ -810,31 +810,31 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/database.get.parameters.0. Context: paths./v1/apps/{app_id}/database.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/database.get.parameters.0. Context: paths./v1/services/{service_id}/database.get.parameters.0.",
+            "example": "service_1"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/env": {
+    "/v1/services/{service_id}/env": {
       "get": {
         "tags": [
           "Deploy"
         ],
         "summary": "List environment variables",
-        "description": "List environment variables for GET /v1/apps/{app_id}/env. Context: paths./v1/apps/{app_id}/env.get.",
-        "operationId": "listAppEnv",
+        "description": "List environment variables for GET /v1/services/{service_id}/env. Context: paths./v1/services/{service_id}/env.get.",
+        "operationId": "listServiceEnv",
         "responses": {
           "200": {
             "$ref": "#/components/responses/EnvLoaded"
@@ -854,19 +854,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/env.get.parameters.0. Context: paths./v1/apps/{app_id}/env.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/env.get.parameters.0. Context: paths./v1/services/{service_id}/env.get.parameters.0.",
+            "example": "service_1"
           }
         ]
       },
@@ -875,8 +875,8 @@
           "Deploy"
         ],
         "summary": "Set environment variable",
-        "description": "Set environment variable for PUT /v1/apps/{app_id}/env. Context: paths./v1/apps/{app_id}/env.put.",
-        "operationId": "setAppEnv",
+        "description": "Set environment variable for PUT /v1/services/{service_id}/env. Context: paths./v1/services/{service_id}/env.put.",
+        "operationId": "setServiceEnv",
         "responses": {
           "200": {
             "$ref": "#/components/responses/EnvSet"
@@ -896,19 +896,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/env.put.parameters.0. Context: paths./v1/apps/{app_id}/env.put.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/env.put.parameters.0. Context: paths./v1/services/{service_id}/env.put.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -920,7 +920,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for PUT /v1/apps/{app_id}/env",
+                  "summary": "Request example for PUT /v1/services/{service_id}/env",
                   "value": {
                     "name": "value",
                     "value": "value"
@@ -929,18 +929,18 @@
               }
             }
           },
-          "description": "Request body for PUT /v1/apps/{app_id}/env. Context: paths./v1/apps/{app_id}/env.put.requestBody."
+          "description": "Request body for PUT /v1/services/{service_id}/env. Context: paths./v1/services/{service_id}/env.put.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/env/{name}": {
+    "/v1/services/{service_id}/env/{name}": {
       "delete": {
         "tags": [
           "Deploy"
         ],
         "summary": "Delete environment variable",
-        "description": "Delete environment variable for DELETE /v1/apps/{app_id}/env/{name}. Context: paths./v1/apps/{app_id}/env/{name}.delete.",
-        "operationId": "deleteAppEnv",
+        "description": "Delete environment variable for DELETE /v1/services/{service_id}/env/{name}. Context: paths./v1/services/{service_id}/env/{name}.delete.",
+        "operationId": "deleteServiceEnv",
         "responses": {
           "200": {
             "$ref": "#/components/responses/EnvDeleted"
@@ -960,19 +960,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/env/{name}.delete.parameters.0. Context: paths./v1/services/{service_id}/env/{name}.delete.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "name",
@@ -986,20 +986,20 @@
                 "DATABASE_URL"
               ]
             },
-            "description": "Environment variable name. Context: paths./v1/apps/{app_id}/env/{name}.delete.parameters.1.",
+            "description": "Environment variable name. Context: paths./v1/services/{service_id}/env/{name}.delete.parameters.1.",
             "example": "DATABASE_URL"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/domains": {
+    "/v1/services/{service_id}/domains": {
       "get": {
         "tags": [
           "Deploy"
         ],
         "summary": "List custom domains",
-        "description": "List custom domains for GET /v1/apps/{app_id}/domains. Context: paths./v1/apps/{app_id}/domains.get.",
-        "operationId": "listAppDomains",
+        "description": "List custom domains for GET /v1/services/{service_id}/domains. Context: paths./v1/services/{service_id}/domains.get.",
+        "operationId": "listServiceDomains",
         "responses": {
           "200": {
             "$ref": "#/components/responses/DomainsLoaded"
@@ -1019,19 +1019,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains.get.parameters.0. Context: paths./v1/apps/{app_id}/domains.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/domains.get.parameters.0. Context: paths./v1/services/{service_id}/domains.get.parameters.0.",
+            "example": "service_1"
           }
         ]
       },
@@ -1040,8 +1040,8 @@
           "Deploy"
         ],
         "summary": "Add custom domain",
-        "description": "Add custom domain for POST /v1/apps/{app_id}/domains. Context: paths./v1/apps/{app_id}/domains.post.",
-        "operationId": "addAppDomain",
+        "description": "Add custom domain for POST /v1/services/{service_id}/domains. Context: paths./v1/services/{service_id}/domains.post.",
+        "operationId": "addServiceDomain",
         "responses": {
           "200": {
             "$ref": "#/components/responses/DomainAdded"
@@ -1061,19 +1061,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains.post.parameters.0. Context: paths./v1/apps/{app_id}/domains.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/domains.post.parameters.0. Context: paths./v1/services/{service_id}/domains.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -1081,11 +1081,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AppDomainAddRequest"
+                "$ref": "#/components/schemas/ServiceDomainAddRequest"
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/domains",
+                  "summary": "Request example for POST /v1/services/{service_id}/domains",
                   "value": {
                     "domain": "api.example.com"
                   }
@@ -1093,18 +1093,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/domains. Context: paths./v1/apps/{app_id}/domains.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/domains. Context: paths./v1/services/{service_id}/domains.post.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/domains/{domain}/verify": {
+    "/v1/services/{service_id}/domains/{domain}/verify": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Verify custom domain",
-        "description": "Checks whether the custom domain CNAME points at Tovuk and activates routing when ownership is verified. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.",
-        "operationId": "verifyAppDomain",
+        "description": "Checks whether the custom domain CNAME points at Tovuk and activates routing when ownership is verified. Context: paths./v1/services/{service_id}/domains/{domain}/verify.post.",
+        "operationId": "verifyServiceDomain",
         "responses": {
           "200": {
             "$ref": "#/components/responses/DomainVerified"
@@ -1124,19 +1124,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/domains/{domain}/verify.post.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "domain",
@@ -1150,20 +1150,20 @@
                 "api.example.com"
               ]
             },
-            "description": "Custom domain name. Context: paths./v1/apps/{app_id}/domains/{domain}/verify.post.parameters.1.",
+            "description": "Custom domain name. Context: paths./v1/services/{service_id}/domains/{domain}/verify.post.parameters.1.",
             "example": "api.example.com"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/domains/{domain}": {
+    "/v1/services/{service_id}/domains/{domain}": {
       "delete": {
         "tags": [
           "Deploy"
         ],
         "summary": "Delete custom domain",
-        "description": "Delete custom domain for DELETE /v1/apps/{app_id}/domains/{domain}. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.",
-        "operationId": "deleteAppDomain",
+        "description": "Delete custom domain for DELETE /v1/services/{service_id}/domains/{domain}. Context: paths./v1/services/{service_id}/domains/{domain}.delete.",
+        "operationId": "deleteServiceDomain",
         "responses": {
           "200": {
             "$ref": "#/components/responses/DomainDeleted"
@@ -1183,19 +1183,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/domains/{domain}.delete.parameters.0. Context: paths./v1/services/{service_id}/domains/{domain}.delete.parameters.0.",
+            "example": "service_1"
           },
           {
             "name": "domain",
@@ -1209,7 +1209,7 @@
                 "api.example.com"
               ]
             },
-            "description": "Custom domain name. Context: paths./v1/apps/{app_id}/domains/{domain}.delete.parameters.1.",
+            "description": "Custom domain name. Context: paths./v1/services/{service_id}/domains/{domain}.delete.parameters.1.",
             "example": "api.example.com"
           }
         ]
@@ -1613,7 +1613,7 @@
           "Accounts"
         ],
         "summary": "Get account activity",
-        "description": "Returns account profile, usage, apps, recent deploys, recent builds, and next actions. Context: paths./v1/activity.get.",
+        "description": "Returns account profile, usage, services, recent deploys, recent builds, and next actions. Context: paths./v1/activity.get.",
         "operationId": "getAccountActivity",
         "parameters": [
           {
@@ -1674,23 +1674,23 @@
           "Deploy"
         ],
         "summary": "List deploys",
-        "description": "Lists recent deploys account-wide or filtered by app id or app name. Context: paths./v1/deploys.get.",
+        "description": "Lists recent deploys account-wide or filtered by service id or service name. Context: paths./v1/deploys.get.",
         "operationId": "listDeploys",
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "query",
             "required": false,
-            "description": "Optional app id or app name filter. Context: paths./v1/deploys.get.parameters.0.",
+            "description": "Optional service id or service name filter. Context: paths./v1/deploys.get.parameters.0.",
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 64,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "limit",
@@ -1750,23 +1750,23 @@
           "Deploy"
         ],
         "summary": "List builds",
-        "description": "Lists recent build jobs account-wide or filtered by app id or app name. Context: paths./v1/builds.get.",
+        "description": "Lists recent build jobs account-wide or filtered by service id or service name. Context: paths./v1/builds.get.",
         "operationId": "listBuilds",
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "query",
             "required": false,
-            "description": "Optional app id or app name filter. Context: paths./v1/builds.get.parameters.0. Context: paths./v1/builds.get.parameters.0.",
+            "description": "Optional service id or service name filter. Context: paths./v1/builds.get.parameters.0. Context: paths./v1/builds.get.parameters.0.",
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 64,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "limit",
@@ -1927,7 +1927,7 @@
                   "value": {
                     "subject": "Deploy failed",
                     "details": "Agent retried deploy after doctor.",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "failing_command": "tovuk deploy --wait --json",
                     "build_id": "job_1",
                     "deploy_id": "deploy_1",
@@ -1938,7 +1938,7 @@
               }
             }
           },
-          "description": "JSON body describing the support issue, optional app, structured failure context, and optional severity. Context: paths./v1/support/tickets.post.requestBody."
+          "description": "JSON body describing the support issue, optional service, structured failure context, and optional severity. Context: paths./v1/support/tickets.post.requestBody."
         },
         "responses": {
           "200": {
@@ -2008,14 +2008,14 @@
         }
       }
     },
-    "/v1/apps/{app_id}/storage": {
+    "/v1/services/{service_id}/storage": {
       "get": {
         "tags": [
           "Storage"
         ],
-        "summary": "List app storage objects",
-        "description": "List files and media stored for an app. Context: paths./v1/apps/{app_id}/storage.get.",
-        "operationId": "listAppStorageObjects",
+        "summary": "List service storage objects",
+        "description": "List files and media stored for a service. Context: paths./v1/services/{service_id}/storage.get.",
+        "operationId": "listServiceStorageObjects",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StorageObjectsLoaded"
@@ -2038,19 +2038,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage.get.parameters.app_id.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage.get.parameters.service_id.",
+            "example": "service_1"
           }
         ]
       },
@@ -2058,9 +2058,9 @@
         "tags": [
           "Storage"
         ],
-        "summary": "Delete app storage object",
-        "description": "Delete one app-local storage object by path. Context: paths./v1/apps/{app_id}/storage.delete.",
-        "operationId": "deleteAppStorageObject",
+        "summary": "Delete service storage object",
+        "description": "Delete one service-local storage object by path. Context: paths./v1/services/{service_id}/storage.delete.",
+        "operationId": "deleteServiceStorageObject",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StorageObjectDeleted"
@@ -2083,19 +2083,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage.delete.parameters.app_id.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage.delete.parameters.service_id.",
+            "example": "service_1"
           },
           {
             "name": "path",
@@ -2110,20 +2110,20 @@
                 "uploads/logo.png"
               ]
             },
-            "description": "App-local object path. Context: paths./v1/apps/{app_id}/storage.delete.parameters.path.",
+            "description": "Service-local object path. Context: paths./v1/services/{service_id}/storage.delete.parameters.path.",
             "example": "uploads/logo.png"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/storage/upload-url": {
+    "/v1/services/{service_id}/storage/upload-url": {
       "post": {
         "tags": [
           "Storage"
         ],
         "summary": "Create storage upload URL",
-        "description": "Create a short-lived direct upload URL for an app file or media object. Context: paths./v1/apps/{app_id}/storage/upload-url.post.",
-        "operationId": "createAppStorageUploadUrl",
+        "description": "Create a short-lived direct upload URL for a service file or media object. Context: paths./v1/services/{service_id}/storage/upload-url.post.",
+        "operationId": "createServiceStorageUploadUrl",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StorageUploadUrlCreated"
@@ -2146,19 +2146,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage/upload-url.post.parameters.app_id.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage/upload-url.post.parameters.service_id.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2170,7 +2170,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/storage/upload-url",
+                  "summary": "Request example for POST /v1/services/{service_id}/storage/upload-url",
                   "value": {
                     "path": "uploads/logo.png",
                     "contentType": "image/png",
@@ -2181,18 +2181,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/storage/upload-url. Context: paths.POST /v1/apps/{app_id}/storage/upload-url.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/storage/upload-url. Context: paths.POST /v1/services/{service_id}/storage/upload-url.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/storage/complete": {
+    "/v1/services/{service_id}/storage/complete": {
       "post": {
         "tags": [
           "Storage"
         ],
         "summary": "Complete storage upload",
-        "description": "Validate and mark a direct app object upload complete. Context: paths./v1/apps/{app_id}/storage/complete.post.",
-        "operationId": "completeAppStorageUpload",
+        "description": "Validate and mark a direct service object upload complete. Context: paths./v1/services/{service_id}/storage/complete.post.",
+        "operationId": "completeServiceStorageUpload",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StorageObjectCompleted"
@@ -2215,19 +2215,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage/complete.post.parameters.app_id.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage/complete.post.parameters.service_id.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2239,7 +2239,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/storage/complete",
+                  "summary": "Request example for POST /v1/services/{service_id}/storage/complete",
                   "value": {
                     "path": "uploads/logo.png"
                   }
@@ -2247,18 +2247,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/storage/complete. Context: paths.POST /v1/apps/{app_id}/storage/complete.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/storage/complete. Context: paths.POST /v1/services/{service_id}/storage/complete.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/storage/download-url": {
+    "/v1/services/{service_id}/storage/download-url": {
       "post": {
         "tags": [
           "Storage"
         ],
         "summary": "Create storage download URL",
-        "description": "Create a short-lived direct download URL for an uploaded app object. Context: paths./v1/apps/{app_id}/storage/download-url.post.",
-        "operationId": "createAppStorageDownloadUrl",
+        "description": "Create a short-lived direct download URL for an uploaded service object. Context: paths./v1/services/{service_id}/storage/download-url.post.",
+        "operationId": "createServiceStorageDownloadUrl",
         "responses": {
           "200": {
             "$ref": "#/components/responses/StorageDownloadUrlCreated"
@@ -2281,19 +2281,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/storage/download-url.post.parameters.app_id.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/storage/download-url.post.parameters.service_id.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2305,7 +2305,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/storage/download-url",
+                  "summary": "Request example for POST /v1/services/{service_id}/storage/download-url",
                   "value": {
                     "path": "uploads/logo.png"
                   }
@@ -2313,18 +2313,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/storage/download-url. Context: paths.POST /v1/apps/{app_id}/storage/download-url.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/storage/download-url. Context: paths.POST /v1/services/{service_id}/storage/download-url.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/platform": {
+    "/v1/services/{service_id}/platform": {
       "get": {
         "tags": [
           "Deploy"
         ],
         "summary": "List platform resources",
-        "description": "List worker platform resources for one app. Context: paths./v1/apps/{app_id}/platform.get.",
-        "operationId": "getAppPlatformResources",
+        "description": "List worker platform resources for one service. Context: paths./v1/services/{service_id}/platform.get.",
+        "operationId": "getServicePlatformResources",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2344,31 +2344,31 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/platform.get.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/platform.get.parameters.0.",
+            "example": "service_1"
           }
         ]
       }
     },
-    "/v1/apps/{app_id}/sqlite/databases": {
+    "/v1/services/{service_id}/sqlite/databases": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Create SQLite database",
-        "description": "Create an app SQLite database binding. Context: paths./v1/apps/{app_id}/sqlite/databases.post.",
-        "operationId": "createAppSqliteDatabase",
+        "description": "Create a service SQLite database binding. Context: paths./v1/services/{service_id}/sqlite/databases.post.",
+        "operationId": "createServiceSqliteDatabase",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2388,19 +2388,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/sqlite/databases.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/sqlite/databases.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2412,7 +2412,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/sqlite/databases",
+                  "summary": "Request example for POST /v1/services/{service_id}/sqlite/databases",
                   "value": {
                     "name": "DB"
                   }
@@ -2420,18 +2420,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/sqlite/databases. Context: paths./v1/apps/{app_id}/sqlite/databases.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/sqlite/databases. Context: paths./v1/services/{service_id}/sqlite/databases.post.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/kv/namespaces": {
+    "/v1/services/{service_id}/kv/namespaces": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Create KV namespace",
-        "description": "Create an app KV namespace binding. Context: paths./v1/apps/{app_id}/kv/namespaces.post.",
-        "operationId": "createAppKvNamespace",
+        "description": "Create a service KV namespace binding. Context: paths./v1/services/{service_id}/kv/namespaces.post.",
+        "operationId": "createServiceKvNamespace",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2451,19 +2451,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/kv/namespaces.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/namespaces.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2475,7 +2475,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/kv/namespaces",
+                  "summary": "Request example for POST /v1/services/{service_id}/kv/namespaces",
                   "value": {
                     "name": "CACHE"
                   }
@@ -2483,18 +2483,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/kv/namespaces. Context: paths./v1/apps/{app_id}/kv/namespaces.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/kv/namespaces. Context: paths./v1/services/{service_id}/kv/namespaces.post.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/queues": {
+    "/v1/services/{service_id}/queues": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Create queue",
-        "description": "Create an app queue for background work. Context: paths./v1/apps/{app_id}/queues.post.",
-        "operationId": "createAppQueue",
+        "description": "Create a service queue for background work. Context: paths./v1/services/{service_id}/queues.post.",
+        "operationId": "createServiceQueue",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2514,19 +2514,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/queues.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2538,7 +2538,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/queues",
+                  "summary": "Request example for POST /v1/services/{service_id}/queues",
                   "value": {
                     "name": "jobs"
                   }
@@ -2546,18 +2546,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/queues. Context: paths./v1/apps/{app_id}/queues.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/queues. Context: paths./v1/services/{service_id}/queues.post.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/cron": {
+    "/v1/services/{service_id}/cron": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Create cron trigger",
-        "description": "Create an app cron trigger. Context: paths./v1/apps/{app_id}/cron.post.",
-        "operationId": "createAppCronTrigger",
+        "description": "Create a service cron trigger. Context: paths./v1/services/{service_id}/cron.post.",
+        "operationId": "createServiceCronTrigger",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2577,19 +2577,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/cron.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/cron.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2601,7 +2601,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/cron",
+                  "summary": "Request example for POST /v1/services/{service_id}/cron",
                   "value": {
                     "name": "nightly",
                     "cronExpression": "0 0 * * *"
@@ -2610,18 +2610,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/cron. Context: paths./v1/apps/{app_id}/cron.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/cron. Context: paths./v1/services/{service_id}/cron.post.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/durable-objects/namespaces": {
+    "/v1/services/{service_id}/durable-objects/namespaces": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Create Durable Object namespace",
-        "description": "Create an app Durable Object namespace. Context: paths./v1/apps/{app_id}/durable-objects/namespaces.post.",
-        "operationId": "createAppDurableObjectNamespace",
+        "description": "Create a service Durable Object namespace. Context: paths./v1/services/{service_id}/durable-objects/namespaces.post.",
+        "operationId": "createServiceDurableObjectNamespace",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2641,19 +2641,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/durable-objects/namespaces.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/durable-objects/namespaces.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2665,7 +2665,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/durable-objects/namespaces",
+                  "summary": "Request example for POST /v1/services/{service_id}/durable-objects/namespaces",
                   "value": {
                     "className": "Room"
                   }
@@ -2673,18 +2673,18 @@
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/durable-objects/namespaces. Context: paths./v1/apps/{app_id}/durable-objects/namespaces.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/durable-objects/namespaces. Context: paths./v1/services/{service_id}/durable-objects/namespaces.post.requestBody."
         }
       }
     },
-    "/v1/apps/{app_id}/service-bindings": {
+    "/v1/services/{service_id}/service-bindings": {
       "post": {
         "tags": [
           "Deploy"
         ],
         "summary": "Create service binding",
-        "description": "Create a private service binding to another app. Context: paths./v1/apps/{app_id}/service-bindings.post.",
-        "operationId": "createAppServiceBinding",
+        "description": "Create a private service binding to another service. Context: paths./v1/services/{service_id}/service-bindings.post.",
+        "operationId": "createServiceBinding",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2704,19 +2704,19 @@
         },
         "parameters": [
           {
-            "name": "app_id",
+            "name": "service_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
-            "description": "Tovuk app id or app name. Context: paths./v1/apps/{app_id}/service-bindings.post.parameters.0.",
-            "example": "app_1"
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/service-bindings.post.parameters.0.",
+            "example": "service_1"
           }
         ],
         "requestBody": {
@@ -2728,16 +2728,16 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/apps/{app_id}/service-bindings",
+                  "summary": "Request example for POST /v1/services/{service_id}/service-bindings",
                   "value": {
                     "bindingName": "AUTH_SERVICE",
-                    "targetApp": "auth-app"
+                    "targetService": "auth-service"
                   }
                 }
               }
             }
           },
-          "description": "Request body for POST /v1/apps/{app_id}/service-bindings. Context: paths./v1/apps/{app_id}/service-bindings.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/service-bindings. Context: paths./v1/services/{service_id}/service-bindings.post.requestBody."
         }
       }
     },
@@ -2839,14 +2839,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
             "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/keys.get.parameters.0.",
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "namespace",
@@ -2946,14 +2946,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
             "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.get.parameters.0.",
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "namespace",
@@ -3019,14 +3019,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
             "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.put.parameters.0.",
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "namespace",
@@ -3116,14 +3116,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
             "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/kv/{namespace}/values/{key}.delete.parameters.0.",
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "namespace",
@@ -3191,14 +3191,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
             "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}/messages.get.parameters.0.",
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "queue",
@@ -3299,14 +3299,14 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
               "maxLength": 512,
               "examples": [
-                "app_1"
+                "service_1"
               ]
             },
             "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/queues/{queue}/messages.post.parameters.0.",
-            "example": "app_1"
+            "example": "service_1"
           },
           {
             "name": "queue",
@@ -3527,8 +3527,8 @@
               "example": {
                 "summary": "Deploy accepted.",
                 "value": {
-                  "app": {
-                    "id": "app_1",
+                  "service": {
+                    "id": "service_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
                     "kind": "rust_worker",
@@ -3538,14 +3538,14 @@
                   },
                   "deploy": {
                     "id": "deploy_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "build_job_id": "job_1",
                     "commit_sha": "0123456789abcdef",
                     "url": "https://hello-rust.tovuk.app"
                   },
                   "build_job": {
                     "id": "job_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "status": "queued",
                     "message": "Build queued."
                   },
@@ -3578,7 +3578,7 @@
                     },
                     "idle_timeout_minutes": 15
                   },
-                  "next_command": "tovuk logs --app app_1"
+                  "next_command": "tovuk logs --service service_1"
                 }
               }
             }
@@ -3853,9 +3853,9 @@
                     "displayName": "Acme",
                     "accountUrl": "https://tovuk.com/acme"
                   },
-                  "apps": [],
+                  "services": [],
                   "usage": {
-                    "appCount": 1,
+                    "serviceCount": 1,
                     "runningCount": 1,
                     "databaseCount": 1,
                     "runtimeMemoryMib": 512,
@@ -3876,7 +3876,7 @@
                     "concurrentBuilds": 1,
                     "maxBuildDurationSeconds": 1200,
                     "customDomains": 100,
-                    "alwaysOnApps": 0,
+                    "alwaysOnServices": 0,
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
@@ -3931,20 +3931,20 @@
           }
         }
       },
-      "AppsLoaded": {
-        "description": "Apps loaded. Context: components.responses.AppsLoaded.",
+      "ServicesLoaded": {
+        "description": "Services loaded. Context: components.responses.ServicesLoaded.",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AppsResponse"
+              "$ref": "#/components/schemas/ServicesResponse"
             },
             "examples": {
               "example": {
-                "summary": "Apps loaded.",
+                "summary": "Services loaded.",
                 "value": {
-                  "apps": [
+                  "services": [
                     {
-                      "appId": "app_01HW0000000000000000000000",
+                      "serviceId": "service_01HW0000000000000000000000",
                       "name": "hello-rust",
                       "slug": "hello-rust",
                       "url": "https://hello-rust.tovuk.app",
@@ -3980,7 +3980,7 @@
         }
       },
       "StatusLoaded": {
-        "description": "App status loaded. Context: components.responses.StatusLoaded.",
+        "description": "Service status loaded. Context: components.responses.StatusLoaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -3988,10 +3988,10 @@
             },
             "examples": {
               "example": {
-                "summary": "App status loaded.",
+                "summary": "Service status loaded.",
                 "value": {
-                  "app": {
-                    "id": "app_1",
+                  "service": {
+                    "id": "service_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
                     "kind": "rust_worker",
@@ -4001,14 +4001,14 @@
                   },
                   "latest_deploy": {
                     "id": "deploy_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "build_job_id": "job_1",
                     "commit_sha": "0123456789abcdef",
                     "url": "https://hello-rust.tovuk.app"
                   },
                   "latest_build_job": {
                     "id": "job_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "status": "queued",
                     "message": "Build queued."
                   }
@@ -4046,7 +4046,7 @@
                   "deploys": [
                     {
                       "id": "deploy_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
                       "url": "https://hello-rust.tovuk.app"
@@ -4083,8 +4083,8 @@
               "example": {
                 "summary": "Deploy details loaded.",
                 "value": {
-                  "app": {
-                    "id": "app_1",
+                  "service": {
+                    "id": "service_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
                     "kind": "rust_worker",
@@ -4094,14 +4094,14 @@
                   },
                   "deploy": {
                     "id": "deploy_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "build_job_id": "job_1",
                     "commit_sha": "0123456789abcdef",
                     "url": "https://hello-rust.tovuk.app"
                   },
                   "build_job": {
                     "id": "job_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "status": "queued",
                     "message": "Build queued."
                   }
@@ -4136,7 +4136,7 @@
               "example": {
                 "summary": "Deploy canceled.",
                 "value": {
-                  "deploy_id": "app_1",
+                  "deploy_id": "service_1",
                   "canceled_build_jobs": 0
                 }
               }
@@ -4172,7 +4172,7 @@
                   "builds": [
                     {
                       "id": "job_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "status": "queued",
                       "message": "Build queued."
                     }
@@ -4210,12 +4210,12 @@
                 "value": {
                   "build": {
                     "id": "job_1",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "status": "queued",
                     "message": "Build queued."
                   },
-                  "app": {
-                    "id": "app_1",
+                  "service": {
+                    "id": "service_1",
                     "account_id": "acct_1",
                     "name": "hello-rust",
                     "kind": "rust_worker",
@@ -4223,7 +4223,7 @@
                     "runtime_status": "running",
                     "url": "https://hello-rust.tovuk.app"
                   },
-                  "deploy_id": "app_1"
+                  "deploy_id": "service_1"
                 }
               }
             }
@@ -4296,8 +4296,8 @@
                 "summary": "Database loaded.",
                 "value": {
                   "database": {
-                    "id": "app_1",
-                    "app_id": "app_1",
+                    "id": "service_1",
+                    "service_id": "service_1",
                     "plan": "free",
                     "storage_limit_mib": 1,
                     "connection_limit": 1,
@@ -4434,7 +4434,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AppDomainsResponse"
+              "$ref": "#/components/schemas/ServiceDomainsResponse"
             },
             "examples": {
               "example": {
@@ -4443,7 +4443,7 @@
                   "domains": [
                     {
                       "id": "dom_01HW0000000000000000000000",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "domain": "api.example.com",
                       "status": "pending",
                       "verified": false,
@@ -4481,14 +4481,14 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AppDomain"
+              "$ref": "#/components/schemas/ServiceDomain"
             },
             "examples": {
               "example": {
                 "summary": "Domain added.",
                 "value": {
                   "id": "dom_01HW0000000000000000000000",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "domain": "api.example.com",
                   "status": "pending",
                   "verified": false,
@@ -4524,7 +4524,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AppDomainDeleteResponse"
+              "$ref": "#/components/schemas/ServiceDomainDeleteResponse"
             },
             "examples": {
               "example": {
@@ -4679,7 +4679,7 @@
                     "accountUrl": "https://tovuk.com/acme"
                   },
                   "usage": {
-                    "appCount": 1,
+                    "serviceCount": 1,
                     "runningCount": 1,
                     "databaseCount": 1,
                     "runtimeMemoryMib": 512,
@@ -4700,7 +4700,7 @@
                     "concurrentBuilds": 1,
                     "maxBuildDurationSeconds": 1200,
                     "customDomains": 100,
-                    "alwaysOnApps": 0,
+                    "alwaysOnServices": 0,
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
@@ -4790,7 +4790,7 @@
                     "accountUrl": "https://tovuk.com/acme"
                   },
                   "usage": {
-                    "appCount": 1,
+                    "serviceCount": 1,
                     "runningCount": 1,
                     "databaseCount": 1,
                     "runtimeMemoryMib": 512,
@@ -4811,7 +4811,7 @@
                     "concurrentBuilds": 1,
                     "maxBuildDurationSeconds": 1200,
                     "customDomains": 100,
-                    "alwaysOnApps": 0,
+                    "alwaysOnServices": 0,
                     "logRetentionDays": 3,
                     "objectStorageMib": 10240,
                     "storageObjects": 100000,
@@ -4860,9 +4860,9 @@
                     "apiTokens": 10,
                     "supportTicketsPerDay": 3
                   },
-                  "apps": [
+                  "services": [
                     {
-                      "appId": "app_01HW0000000000000000000000",
+                      "serviceId": "service_01HW0000000000000000000000",
                       "name": "hello-rust",
                       "slug": "hello-rust",
                       "url": "https://hello-rust.tovuk.app",
@@ -4880,7 +4880,7 @@
                   "deploys": [
                     {
                       "id": "deploy_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
                       "url": "https://hello-rust.tovuk.app"
@@ -4889,13 +4889,13 @@
                   "builds": [
                     {
                       "id": "job_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "status": "queued",
                       "message": "Build queued."
                     }
                   ],
                   "next_actions": [
-                    "Use `tovuk overview --app <app>` for a compact app state snapshot."
+                    "Use `tovuk overview --service <service>` for a compact service state snapshot."
                   ]
                 }
               }
@@ -4903,8 +4903,8 @@
           }
         }
       },
-      "AppOverviewLoaded": {
-        "description": "App overview loaded. Context: components.responses.AppOverviewLoaded.",
+      "ServiceOverviewLoaded": {
+        "description": "Service overview loaded. Context: components.responses.ServiceOverviewLoaded.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -4922,15 +4922,15 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AppOverviewResponse"
+              "$ref": "#/components/schemas/ServiceOverviewResponse"
             },
             "examples": {
               "example": {
-                "summary": "App overview loaded.",
+                "summary": "Service overview loaded.",
                 "value": {
                   "status": {
-                    "app": {
-                      "id": "app_1",
+                    "service": {
+                      "id": "service_1",
                       "account_id": "acct_1",
                       "name": "hello-rust",
                       "kind": "rust_worker",
@@ -4940,14 +4940,14 @@
                     },
                     "latest_deploy": {
                       "id": "deploy_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
                       "url": "https://hello-rust.tovuk.app"
                     },
                     "latest_build_job": {
                       "id": "job_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "status": "queued",
                       "message": "Build queued."
                     }
@@ -4955,7 +4955,7 @@
                   "deploys": [
                     {
                       "id": "deploy_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "build_job_id": "job_1",
                       "commit_sha": "0123456789abcdef",
                       "url": "https://hello-rust.tovuk.app"
@@ -4964,7 +4964,7 @@
                   "builds": [
                     {
                       "id": "job_1",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "status": "queued",
                       "message": "Build queued."
                     }
@@ -4990,7 +4990,7 @@
                   "domains": [],
                   "database": null,
                   "next_actions": [
-                    "Watch the active build with `tovuk logs --app app_1`."
+                    "Watch the active build with `tovuk logs --service service_1`."
                   ]
                 }
               }
@@ -5017,14 +5017,14 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AppDomain"
+              "$ref": "#/components/schemas/ServiceDomain"
             },
             "examples": {
               "example": {
                 "summary": "Domain verification checked.",
                 "value": {
                   "id": "dom_01HW0000000000000000000000",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "domain": "api.example.com",
                   "status": "active",
                   "verified": true,
@@ -5175,12 +5175,12 @@
                 "value": {
                   "ticket": {
                     "id": "ticket_0123456789abcdef0123",
-                    "app_id": "app_1",
+                    "service_id": "service_1",
                     "subject": "Deploy failed",
                     "details": "Agent retried deploy after doctor.",
                     "severity": "normal",
                     "status": "open",
-                    "agent_instruction": "Continue with tovuk overview --app app_1 --json.",
+                    "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                     "created_at": "2026-05-27T12:00:00Z",
                     "updated_at": "2026-05-27T12:00:00Z",
                     "failing_command": "tovuk deploy --wait --json",
@@ -5229,12 +5229,12 @@
                   "tickets": [
                     {
                       "id": "ticket_0123456789abcdef0123",
-                      "app_id": "app_1",
+                      "service_id": "service_1",
                       "subject": "Deploy failed",
                       "details": "Agent retried deploy after doctor.",
                       "severity": "normal",
                       "status": "open",
-                      "agent_instruction": "Continue with tovuk overview --app app_1 --json.",
+                      "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                       "created_at": "2026-05-27T12:00:00Z",
                       "updated_at": "2026-05-27T12:00:00Z",
                       "failing_command": "tovuk deploy --wait --json",
@@ -5281,7 +5281,7 @@
                 "summary": "Support ticket resolved.",
                 "value": {
                   "id": "ticket_0123456789abcdef0123",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "subject": "Deploy failed",
                   "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
@@ -5376,7 +5376,7 @@
                 "value": {
                   "code": "payment_required",
                   "message": "Object storage limit reached.",
-                  "agent_instruction": "Delete unused app files with `tovuk storage delete --app <app> <path>`, or open the returned Stripe Checkout URL.",
+                  "agent_instruction": "Delete unused service files with `tovuk storage delete --service <service> <path>`, or open the returned Stripe Checkout URL.",
                   "docs_url": "https://docs.tovuk.com/pricing",
                   "checkout_url": "https://checkout.stripe.com/c/pay/cs_test_123"
                 }
@@ -5399,7 +5399,7 @@
                   "objects": [
                     {
                       "path": "uploads/logo.png",
-                      "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                      "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
                       "contentType": "image/png",
                       "sizeBytes": 24812,
                       "status": "uploaded",
@@ -5442,7 +5442,7 @@
                 "value": {
                   "method": "PUT",
                   "url": "https://object-storage.example/upload-signature",
-                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
                   "path": "uploads/logo.png",
                   "expiresSeconds": 900,
                   "contentType": "image/png",
@@ -5479,7 +5479,7 @@
                 "summary": "Storage object upload completed.",
                 "value": {
                   "path": "uploads/logo.png",
-                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
                   "contentType": "image/png",
                   "sizeBytes": 24812,
                   "status": "uploaded",
@@ -5520,7 +5520,7 @@
                 "value": {
                   "method": "GET",
                   "url": "https://object-storage.example/upload-signature",
-                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
                   "path": "uploads/logo.png",
                   "expiresSeconds": 900,
                   "contentType": null,
@@ -5589,7 +5589,7 @@
               "example": {
                 "summary": "Platform resources loaded.",
                 "value": {
-                  "appId": "app_1",
+                  "serviceId": "service_1",
                   "plan": "free",
                   "limits": {
                     "projects": 100,
@@ -5643,7 +5643,7 @@
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
                     "customDomains": 100,
-                    "alwaysOnApps": 0,
+                    "alwaysOnServices": 0,
                     "logRetentionDays": 3,
                     "apiTokens": 10,
                     "supportTicketsPerDay": 3
@@ -5693,7 +5693,7 @@
                   "serviceBindings": [
                     {
                       "bindingName": "AUTH_SERVICE",
-                      "targetAppId": "app_2"
+                      "targetServiceId": "service_2"
                     }
                   ],
                   "usageCaps": [
@@ -6195,7 +6195,7 @@
       },
       "DeployRequest": {
         "type": "object",
-        "description": "Request body for deploying an app. Context: components.schemas.DeployRequest.",
+        "description": "Request body for deploying a service. Context: components.schemas.DeployRequest.",
         "additionalProperties": false,
         "required": [
           "config",
@@ -6270,17 +6270,17 @@
         "description": "Response returned after a deploy is accepted. Context: components.schemas.DeployResponse.",
         "additionalProperties": false,
         "required": [
-          "app",
+          "service",
           "deploy",
           "build_job",
           "deploy_plan",
           "next_command"
         ],
         "properties": {
-          "app": {
+          "service": {
             "examples": [
               {
-                "id": "app_1",
+                "id": "service_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
                 "kind": "rust_worker",
@@ -6289,13 +6289,13 @@
                 "url": "https://hello-rust.tovuk.app"
               }
             ],
-            "$ref": "#/components/schemas/App"
+            "$ref": "#/components/schemas/Service"
           },
           "deploy": {
             "examples": [
               {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
@@ -6307,7 +6307,7 @@
             "examples": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
@@ -6352,7 +6352,7 @@
             "type": "string",
             "description": "Next command for humans and agents. Context: components.schemas.DeployResponse.properties.next_command.",
             "examples": [
-              "tovuk logs --app app_1"
+              "tovuk logs --service service_1"
             ],
             "pattern": "^[\\s\\S]{0,8192}$",
             "maxLength": 512
@@ -6360,8 +6360,8 @@
         },
         "examples": [
           {
-            "app": {
-              "id": "app_1",
+            "service": {
+              "id": "service_1",
               "account_id": "acct_1",
               "name": "hello-rust",
               "kind": "rust_worker",
@@ -6371,14 +6371,14 @@
             },
             "deploy": {
               "id": "deploy_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "build_job_id": "job_1",
               "commit_sha": "0123456789abcdef",
               "url": "https://hello-rust.tovuk.app"
             },
             "build_job": {
               "id": "job_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "status": "queued",
               "message": "Build queued."
             },
@@ -6411,7 +6411,7 @@
               },
               "idle_timeout_minutes": 15
             },
-            "next_command": "tovuk logs --app app_1"
+            "next_command": "tovuk logs --service service_1"
           }
         ]
       },
@@ -6700,7 +6700,7 @@
         "additionalProperties": false,
         "required": [
           "profile",
-          "apps",
+          "services",
           "usage",
           "limits"
         ],
@@ -6718,18 +6718,18 @@
             ],
             "$ref": "#/components/schemas/AccountProfileResponse"
           },
-          "apps": {
+          "services": {
             "type": "array",
-            "description": "Deploys owned by the account. Context: components.schemas.AccountDashboardResponse.properties.apps.",
+            "description": "Deploys owned by the account. Context: components.schemas.AccountDashboardResponse.properties.services.",
             "minItems": 0,
             "maxItems": 1000,
             "items": {
-              "$ref": "#/components/schemas/AccountDashboardApp"
+              "$ref": "#/components/schemas/AccountDashboardService"
             },
             "examples": [
               [
                 {
-                  "appId": "app_01HW0000000000000000000000",
+                  "serviceId": "service_01HW0000000000000000000000",
                   "name": "hello-rust",
                   "slug": "hello-rust",
                   "url": "https://hello-rust.tovuk.app",
@@ -6749,7 +6749,7 @@
           "usage": {
             "examples": [
               {
-                "appCount": 1,
+                "serviceCount": 1,
                 "runningCount": 1,
                 "runtimeMemoryMib": 256,
                 "runtimeCpuMillis": 250,
@@ -6779,9 +6779,9 @@
               "displayName": "Acme",
               "accountUrl": "https://tovuk.com/acme"
             },
-            "apps": [],
+            "services": [],
             "usage": {
-              "appCount": 1,
+              "serviceCount": 1,
               "runningCount": 1,
               "databaseCount": 1,
               "runtimeMemoryMib": 512,
@@ -6802,7 +6802,7 @@
               "concurrentBuilds": 1,
               "maxBuildDurationSeconds": 1200,
               "customDomains": 100,
-              "alwaysOnApps": 0,
+              "alwaysOnServices": 0,
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
@@ -6854,12 +6854,12 @@
           }
         ]
       },
-      "AccountDashboardApp": {
+      "AccountDashboardService": {
         "type": "object",
-        "description": "Dashboard deploy row. Context: components.schemas.AccountDashboardApp.",
+        "description": "Dashboard deploy row. Context: components.schemas.AccountDashboardService.",
         "additionalProperties": false,
         "required": [
-          "appId",
+          "serviceId",
           "name",
           "slug",
           "url",
@@ -6874,18 +6874,18 @@
           "latestDeployAt"
         ],
         "properties": {
-          "appId": {
+          "serviceId": {
             "type": "string",
-            "description": "App id shown on the account dashboard. Context: components.schemas.AccountDashboardApp.properties.appId.",
-            "pattern": "^app_[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Service id shown on the account dashboard. Context: components.schemas.AccountDashboardService.properties.serviceId.",
+            "pattern": "^service_[0-9A-HJKMNP-TV-Z]{26}$",
             "examples": [
-              "app_01HW0000000000000000000000"
+              "service_01HW0000000000000000000000"
             ],
             "maxLength": 512
           },
           "name": {
             "type": "string",
-            "description": "Service name. Context: components.schemas.AccountDashboardApp.properties.name.",
+            "description": "Service name. Context: components.schemas.AccountDashboardService.properties.name.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -6894,7 +6894,7 @@
           },
           "slug": {
             "type": "string",
-            "description": "Public deploy slug. Context: components.schemas.AccountDashboardApp.properties.slug.",
+            "description": "Public deploy slug. Context: components.schemas.AccountDashboardService.properties.slug.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -6903,7 +6903,7 @@
           },
           "url": {
             "type": "string",
-            "description": "HTTPS endpoint assigned to the deploy. Context: components.schemas.AccountDashboardApp.properties.url.",
+            "description": "HTTPS endpoint assigned to the deploy. Context: components.schemas.AccountDashboardService.properties.url.",
             "format": "uri",
             "examples": [
               "https://hello-rust.tovuk.app"
@@ -6929,7 +6929,7 @@
           },
           "deployCount": {
             "type": "integer",
-            "description": "Number of deploy records. Context: components.schemas.AccountDashboardApp.properties.deployCount.",
+            "description": "Number of deploy records. Context: components.schemas.AccountDashboardService.properties.deployCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -6939,7 +6939,7 @@
           },
           "runtimeMemoryMib": {
             "type": "integer",
-            "description": "Runtime memory limit in MiB. Context: components.schemas.AccountDashboardApp.properties.runtimeMemoryMib.",
+            "description": "Runtime memory limit in MiB. Context: components.schemas.AccountDashboardService.properties.runtimeMemoryMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -6949,7 +6949,7 @@
           },
           "runtimeCpuMillis": {
             "type": "integer",
-            "description": "Runtime CPU limit in millis. Context: components.schemas.AccountDashboardApp.properties.runtimeCpuMillis.",
+            "description": "Runtime CPU limit in millis. Context: components.schemas.AccountDashboardService.properties.runtimeCpuMillis.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -6962,7 +6962,7 @@
               "integer",
               "null"
             ],
-            "description": "SQLite storage limit in MiB when enabled. Context: components.schemas.AccountDashboardApp.properties.databaseStorageMib.",
+            "description": "SQLite storage limit in MiB when enabled. Context: components.schemas.AccountDashboardService.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -6972,7 +6972,7 @@
           },
           "idleTimeoutMinutes": {
             "type": "integer",
-            "description": "Idle timeout in minutes. Context: components.schemas.AccountDashboardApp.properties.idleTimeoutMinutes.",
+            "description": "Idle timeout in minutes. Context: components.schemas.AccountDashboardService.properties.idleTimeoutMinutes.",
             "format": "int64",
             "minimum": 0,
             "maximum": 10080,
@@ -6985,7 +6985,7 @@
               "string",
               "null"
             ],
-            "description": "Latest deploy creation timestamp. Context: components.schemas.AccountDashboardApp.properties.latestDeployAt.",
+            "description": "Latest deploy creation timestamp. Context: components.schemas.AccountDashboardService.properties.latestDeployAt.",
             "format": "date-time",
             "examples": [
               "2026-05-25T12:00:00.000Z"
@@ -6994,7 +6994,7 @@
         },
         "examples": [
           {
-            "appId": "app_01HW0000000000000000000000",
+            "serviceId": "service_01HW0000000000000000000000",
             "name": "hello-rust",
             "slug": "hello-rust",
             "url": "https://hello-rust.tovuk.app",
@@ -7015,7 +7015,7 @@
         "description": "Aggregated account dashboard usage. Context: components.schemas.AccountDashboardUsage.",
         "additionalProperties": false,
         "required": [
-          "appCount",
+          "serviceCount",
           "runningCount",
           "runtimeMemoryMib",
           "runtimeCpuMillis",
@@ -7029,9 +7029,9 @@
           "objectStorageMib"
         ],
         "properties": {
-          "appCount": {
+          "serviceCount": {
             "type": "integer",
-            "description": "Number of apps. Context: components.schemas.AccountDashboardUsage.properties.appCount.",
+            "description": "Number of services. Context: components.schemas.AccountDashboardUsage.properties.serviceCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
@@ -7041,7 +7041,7 @@
           },
           "runningCount": {
             "type": "integer",
-            "description": "Number of running apps. Context: components.schemas.AccountDashboardUsage.properties.runningCount.",
+            "description": "Number of running services. Context: components.schemas.AccountDashboardUsage.properties.runningCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
@@ -7071,7 +7071,7 @@
           },
           "databaseStorageMib": {
             "type": "integer",
-            "description": "Sum of app SQLite database storage limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.databaseStorageMib.",
+            "description": "Sum of service SQLite database storage limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -7094,7 +7094,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
-            "description": "Number of app SQLite databases.",
+            "description": "Number of service SQLite databases.",
             "examples": [
               1
             ]
@@ -7124,7 +7124,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 100000,
-            "description": "Custom domains attached to account apps.",
+            "description": "Custom domains attached to account services.",
             "examples": [
               1
             ]
@@ -7134,7 +7134,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
-            "description": "Number of app storage objects, including pending direct uploads. Context: components.schemas.AccountDashboardUsage.properties.storageObjectCount.",
+            "description": "Number of service storage objects, including pending direct uploads. Context: components.schemas.AccountDashboardUsage.properties.storageObjectCount.",
             "examples": [
               2
             ]
@@ -7144,7 +7144,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576000,
-            "description": "App object storage used in MiB, rounded up from bytes. Context: components.schemas.AccountDashboardUsage.properties.objectStorageMib.",
+            "description": "Service object storage used in MiB, rounded up from bytes. Context: components.schemas.AccountDashboardUsage.properties.objectStorageMib.",
             "examples": [
               24
             ]
@@ -7152,7 +7152,7 @@
         },
         "examples": [
           {
-            "appCount": 1,
+            "serviceCount": 1,
             "runningCount": 1,
             "databaseCount": 1,
             "runtimeMemoryMib": 512,
@@ -7179,9 +7179,9 @@
           "rust_worker"
         ]
       },
-      "App": {
+      "Service": {
         "type": "object",
-        "description": "Hosted Tovuk app. Context: components.schemas.App.",
+        "description": "Hosted Tovuk service. Context: components.schemas.Service.",
         "additionalProperties": false,
         "required": [
           "id",
@@ -7195,16 +7195,16 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "App id. Context: components.schemas.App.properties.id.",
+            "description": "Service id. Context: components.schemas.Service.properties.id.",
             "examples": [
-              "app_1"
+              "service_1"
             ],
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512
           },
           "account_id": {
             "type": "string",
-            "description": "Account id. Context: components.schemas.App.properties.account_id.",
+            "description": "Account id. Context: components.schemas.Service.properties.account_id.",
             "examples": [
               "acct_1"
             ],
@@ -7213,7 +7213,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Service name. Context: components.schemas.App.name. Context: components.schemas.App.properties.name.",
+            "description": "Service name. Context: components.schemas.Service.name. Context: components.schemas.Service.properties.name.",
             "examples": [
               "hello-rust"
             ],
@@ -7241,7 +7241,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Public app URL. Context: components.schemas.App.properties.url.",
+            "description": "Public service URL. Context: components.schemas.Service.properties.url.",
             "examples": [
               "https://hello-rust.tovuk.app"
             ]
@@ -7249,7 +7249,7 @@
         },
         "examples": [
           {
-            "id": "app_1",
+            "id": "service_1",
             "account_id": "acct_1",
             "name": "hello-rust",
             "kind": "rust_worker",
@@ -7265,7 +7265,7 @@
         "additionalProperties": false,
         "required": [
           "id",
-          "app_id",
+          "service_id",
           "build_job_id",
           "commit_sha",
           "url"
@@ -7280,11 +7280,11 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512
           },
-          "app_id": {
+          "service_id": {
             "type": "string",
-            "description": "App id. Context: components.schemas.Deploy.app_id. Context: components.schemas.Deploy.properties.app_id.",
+            "description": "Service id. Context: components.schemas.Deploy.service_id. Context: components.schemas.Deploy.properties.service_id.",
             "examples": [
-              "app_1"
+              "service_1"
             ],
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512
@@ -7313,7 +7313,7 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "description": "Public app URL. Context: components.schemas.Deploy.url. Context: components.schemas.Deploy.properties.url.",
+            "description": "Public service URL. Context: components.schemas.Deploy.url. Context: components.schemas.Deploy.properties.url.",
             "examples": [
               "https://hello-rust.tovuk.app"
             ]
@@ -7322,7 +7322,7 @@
         "examples": [
           {
             "id": "deploy_1",
-            "app_id": "app_1",
+            "service_id": "service_1",
             "build_job_id": "job_1",
             "commit_sha": "0123456789abcdef",
             "url": "https://hello-rust.tovuk.app"
@@ -7335,7 +7335,7 @@
         "additionalProperties": false,
         "required": [
           "id",
-          "app_id",
+          "service_id",
           "status",
           "message"
         ],
@@ -7349,11 +7349,11 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512
           },
-          "app_id": {
+          "service_id": {
             "type": "string",
-            "description": "App id. Context: components.schemas.BuildJob.app_id. Context: components.schemas.BuildJob.properties.app_id.",
+            "description": "Service id. Context: components.schemas.BuildJob.service_id. Context: components.schemas.BuildJob.properties.service_id.",
             "examples": [
-              "app_1"
+              "service_1"
             ],
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512
@@ -7385,7 +7385,7 @@
         "examples": [
           {
             "id": "job_1",
-            "app_id": "app_1",
+            "service_id": "service_1",
             "status": "queued",
             "message": "Build queued."
           }
@@ -7525,7 +7525,7 @@
             "format": "int64",
             "minimum": 1,
             "maximum": 10080,
-            "description": "Idle timeout in minutes for this app. Context: components.schemas.DeployPlan.properties.idle_timeout_minutes.",
+            "description": "Idle timeout in minutes for this service. Context: components.schemas.DeployPlan.properties.idle_timeout_minutes.",
             "examples": [
               15
             ]
@@ -7563,24 +7563,24 @@
           }
         ]
       },
-      "AppsResponse": {
+      "ServicesResponse": {
         "type": "object",
-        "description": "Apps owned by the authenticated account. Context: components.schemas.AppsResponse.",
+        "description": "Services owned by the authenticated account. Context: components.schemas.ServicesResponse.",
         "additionalProperties": false,
         "required": [
-          "apps"
+          "services"
         ],
         "properties": {
-          "apps": {
+          "services": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AccountDashboardApp"
+              "$ref": "#/components/schemas/AccountDashboardService"
             },
             "maxItems": 1000,
             "examples": [
               [
                 {
-                  "appId": "app_01HW0000000000000000000000",
+                  "serviceId": "service_01HW0000000000000000000000",
                   "name": "hello-rust",
                   "slug": "hello-rust",
                   "url": "https://hello-rust.tovuk.app",
@@ -7600,9 +7600,9 @@
         },
         "examples": [
           {
-            "apps": [
+            "services": [
               {
-                "appId": "app_01HW0000000000000000000000",
+                "serviceId": "service_01HW0000000000000000000000",
                 "name": "hello-rust",
                 "slug": "hello-rust",
                 "url": "https://hello-rust.tovuk.app",
@@ -7638,7 +7638,7 @@
               [
                 {
                   "id": "deploy_1",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "build_job_id": "job_1",
                   "commit_sha": "0123456789abcdef",
                   "url": "https://hello-rust.tovuk.app"
@@ -7652,7 +7652,7 @@
             "deploys": [
               {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
@@ -7666,15 +7666,15 @@
         "description": "Deploy details. Context: components.schemas.DeployDetailsResponse.",
         "additionalProperties": false,
         "required": [
-          "app",
+          "service",
           "deploy",
           "build_job"
         ],
         "properties": {
-          "app": {
+          "service": {
             "examples": [
               {
-                "id": "app_1",
+                "id": "service_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
                 "kind": "rust_worker",
@@ -7683,13 +7683,13 @@
                 "url": "https://hello-rust.tovuk.app"
               }
             ],
-            "$ref": "#/components/schemas/App"
+            "$ref": "#/components/schemas/Service"
           },
           "deploy": {
             "examples": [
               {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
@@ -7709,7 +7709,7 @@
             "examples": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
@@ -7718,8 +7718,8 @@
         },
         "examples": [
           {
-            "app": {
-              "id": "app_1",
+            "service": {
+              "id": "service_1",
               "account_id": "acct_1",
               "name": "hello-rust",
               "kind": "rust_worker",
@@ -7729,14 +7729,14 @@
             },
             "deploy": {
               "id": "deploy_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "build_job_id": "job_1",
               "commit_sha": "0123456789abcdef",
               "url": "https://hello-rust.tovuk.app"
             },
             "build_job": {
               "id": "job_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "status": "queued",
               "message": "Build queued."
             }
@@ -7757,7 +7757,7 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
-              "app_1"
+              "service_1"
             ]
           },
           "canceled_build_jobs": {
@@ -7772,7 +7772,7 @@
         },
         "examples": [
           {
-            "deploy_id": "app_1",
+            "deploy_id": "service_1",
             "canceled_build_jobs": 0
           }
         ]
@@ -7795,7 +7795,7 @@
               [
                 {
                   "id": "job_1",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "status": "queued",
                   "message": "Build queued."
                 }
@@ -7808,7 +7808,7 @@
             "builds": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
@@ -7822,7 +7822,7 @@
         "additionalProperties": false,
         "required": [
           "build",
-          "app",
+          "service",
           "deploy_id"
         ],
         "properties": {
@@ -7830,17 +7830,17 @@
             "examples": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
             ],
             "$ref": "#/components/schemas/BuildJob"
           },
-          "app": {
+          "service": {
             "examples": [
               {
-                "id": "app_1",
+                "id": "service_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
                 "kind": "rust_worker",
@@ -7849,7 +7849,7 @@
                 "url": "https://hello-rust.tovuk.app"
               }
             ],
-            "$ref": "#/components/schemas/App"
+            "$ref": "#/components/schemas/Service"
           },
           "deploy_id": {
             "type": [
@@ -7860,7 +7860,7 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
-              "app_1"
+              "service_1"
             ]
           }
         },
@@ -7868,12 +7868,12 @@
           {
             "build": {
               "id": "job_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "status": "queued",
               "message": "Build queued."
             },
-            "app": {
-              "id": "app_1",
+            "service": {
+              "id": "service_1",
               "account_id": "acct_1",
               "name": "hello-rust",
               "kind": "rust_worker",
@@ -7881,7 +7881,7 @@
               "runtime_status": "running",
               "url": "https://hello-rust.tovuk.app"
             },
-            "deploy_id": "app_1"
+            "deploy_id": "service_1"
           }
         ]
       },
@@ -7998,7 +7998,7 @@
         "additionalProperties": false,
         "required": [
           "id",
-          "app_id",
+          "service_id",
           "plan",
           "storage_limit_mib",
           "connection_limit",
@@ -8010,15 +8010,15 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
-              "app_1"
+              "service_1"
             ]
           },
-          "app_id": {
+          "service_id": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
-              "app_1"
+              "service_1"
             ]
           },
           "plan": {
@@ -8054,8 +8054,8 @@
         },
         "examples": [
           {
-            "id": "app_1",
-            "app_id": "app_1",
+            "id": "service_1",
+            "service_id": "service_1",
             "plan": "free",
             "storage_limit_mib": 1,
             "connection_limit": 1,
@@ -8075,8 +8075,8 @@
           "database": {
             "examples": [
               {
-                "id": "app_1",
-                "app_id": "app_1",
+                "id": "service_1",
+                "service_id": "service_1",
                 "plan": "free",
                 "storage_limit_mib": 1,
                 "connection_limit": 1,
@@ -8095,8 +8095,8 @@
         "examples": [
           {
             "database": {
-              "id": "app_1",
-              "app_id": "app_1",
+              "id": "service_1",
+              "service_id": "service_1",
               "plan": "free",
               "storage_limit_mib": 1,
               "connection_limit": 1,
@@ -8287,13 +8287,13 @@
           }
         ]
       },
-      "AppDomain": {
+      "ServiceDomain": {
         "type": "object",
-        "description": "Custom domain metadata. Context: components.schemas.AppDomain.",
+        "description": "Custom domain metadata. Context: components.schemas.ServiceDomain.",
         "additionalProperties": false,
         "required": [
           "id",
-          "app_id",
+          "service_id",
           "domain",
           "status",
           "verified",
@@ -8311,15 +8311,15 @@
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
-              "app_1"
+              "service_1"
             ]
           },
-          "app_id": {
+          "service_id": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]{0,63}$",
             "maxLength": 512,
             "examples": [
-              "app_1"
+              "service_1"
             ]
           },
           "domain": {
@@ -8363,7 +8363,7 @@
           },
           "status": {
             "type": "string",
-            "description": "Custom domain setup status. Context: components.schemas.AppDomain.properties.status.",
+            "description": "Custom domain setup status. Context: components.schemas.ServiceDomain.properties.status.",
             "enum": [
               "pending",
               "active"
@@ -8374,7 +8374,7 @@
           },
           "dns_record_type": {
             "type": "string",
-            "description": "DNS record type customers create. Context: components.schemas.AppDomain.properties.dns_record_type.",
+            "description": "DNS record type customers create. Context: components.schemas.ServiceDomain.properties.dns_record_type.",
             "enum": [
               "CNAME"
             ],
@@ -8384,7 +8384,7 @@
           },
           "dns_record_name": {
             "type": "string",
-            "description": "DNS record name customers create. Context: components.schemas.AppDomain.properties.dns_record_name.",
+            "description": "DNS record name customers create. Context: components.schemas.ServiceDomain.properties.dns_record_name.",
             "pattern": "^([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$",
             "maxLength": 512,
             "examples": [
@@ -8393,7 +8393,7 @@
           },
           "dns_record_value": {
             "type": "string",
-            "description": "Tovuk CNAME target. Context: components.schemas.AppDomain.properties.dns_record_value.",
+            "description": "Tovuk CNAME target. Context: components.schemas.ServiceDomain.properties.dns_record_value.",
             "enum": [
               "cname.tovuk.app"
             ],
@@ -8403,7 +8403,7 @@
           },
           "cloudflare_dns_url": {
             "type": "string",
-            "description": "Cloudflare DNS dashboard URL. Context: components.schemas.AppDomain.properties.cloudflare_dns_url.",
+            "description": "Cloudflare DNS dashboard URL. Context: components.schemas.ServiceDomain.properties.cloudflare_dns_url.",
             "format": "uri",
             "examples": [
               "https://dash.cloudflare.com/?to=/:account/:zone/dns/records"
@@ -8413,7 +8413,7 @@
         "examples": [
           {
             "id": "dom_01HW0000000000000000000000",
-            "app_id": "app_1",
+            "service_id": "service_1",
             "domain": "api.example.com",
             "status": "pending",
             "verified": false,
@@ -8427,9 +8427,9 @@
           }
         ]
       },
-      "AppDomainsResponse": {
+      "ServiceDomainsResponse": {
         "type": "object",
-        "description": "Custom domains attached to the app. Context: components.schemas.AppDomainsResponse.",
+        "description": "Custom domains attached to the service. Context: components.schemas.ServiceDomainsResponse.",
         "additionalProperties": false,
         "required": [
           "domains"
@@ -8438,14 +8438,14 @@
           "domains": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AppDomain"
+              "$ref": "#/components/schemas/ServiceDomain"
             },
             "maxItems": 1000,
             "examples": [
               [
                 {
-                  "id": "app_1",
-                  "app_id": "app_1",
+                  "id": "service_1",
+                  "service_id": "service_1",
                   "domain": "api.example.com",
                   "verified": true,
                   "verified_at": "2026-05-25T12:00:00.000Z",
@@ -8460,8 +8460,8 @@
           {
             "domains": [
               {
-                "id": "app_1",
-                "app_id": "app_1",
+                "id": "service_1",
+                "service_id": "service_1",
                 "domain": "api.example.com",
                 "verified": true,
                 "verified_at": "2026-05-25T12:00:00.000Z",
@@ -8472,9 +8472,9 @@
           }
         ]
       },
-      "AppDomainAddRequest": {
+      "ServiceDomainAddRequest": {
         "type": "object",
-        "description": "Attach a custom domain. Context: components.schemas.AppDomainAddRequest.",
+        "description": "Attach a custom domain. Context: components.schemas.ServiceDomainAddRequest.",
         "additionalProperties": false,
         "required": [
           "domain"
@@ -8495,9 +8495,9 @@
           }
         ]
       },
-      "AppDomainDeleteResponse": {
+      "ServiceDomainDeleteResponse": {
         "type": "object",
-        "description": "Custom domain delete result. Context: components.schemas.AppDomainDeleteResponse.",
+        "description": "Custom domain delete result. Context: components.schemas.ServiceDomainDeleteResponse.",
         "additionalProperties": false,
         "required": [
           "domain",
@@ -8528,18 +8528,18 @@
       },
       "StatusResponse": {
         "type": "object",
-        "description": "Current app status including the latest deploy and latest build job. Context: components.schemas.StatusResponse.",
+        "description": "Current service status including the latest deploy and latest build job. Context: components.schemas.StatusResponse.",
         "additionalProperties": false,
         "required": [
-          "app",
+          "service",
           "latest_deploy",
           "latest_build_job"
         ],
         "properties": {
-          "app": {
+          "service": {
             "examples": [
               {
-                "id": "app_1",
+                "id": "service_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
                 "kind": "rust_worker",
@@ -8548,7 +8548,7 @@
                 "url": "https://hello-rust.tovuk.app"
               }
             ],
-            "$ref": "#/components/schemas/App"
+            "$ref": "#/components/schemas/Service"
           },
           "latest_deploy": {
             "anyOf": [
@@ -8562,7 +8562,7 @@
             "examples": [
               {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
@@ -8581,7 +8581,7 @@
             "examples": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
@@ -8590,8 +8590,8 @@
         },
         "examples": [
           {
-            "app": {
-              "id": "app_1",
+            "service": {
+              "id": "service_1",
               "account_id": "acct_1",
               "name": "hello-rust",
               "kind": "rust_worker",
@@ -8601,14 +8601,14 @@
             },
             "latest_deploy": {
               "id": "deploy_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "build_job_id": "job_1",
               "commit_sha": "0123456789abcdef",
               "url": "https://hello-rust.tovuk.app"
             },
             "latest_build_job": {
               "id": "job_1",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "status": "queued",
               "message": "Build queued."
             }
@@ -9047,7 +9047,7 @@
       },
       "ColdStartPolicy": {
         "type": "string",
-        "description": "Cold-start behavior for a deployed app. Context: components.schemas.ColdStartPolicy.",
+        "description": "Cold-start behavior for a deployed service. Context: components.schemas.ColdStartPolicy.",
         "enum": [
           "required",
           "allowed",
@@ -9516,7 +9516,7 @@
               "accountUrl": "https://tovuk.com/acme"
             },
             "usage": {
-              "appCount": 1,
+              "serviceCount": 1,
               "runningCount": 1,
               "databaseCount": 1,
               "runtimeMemoryMib": 512,
@@ -9537,7 +9537,7 @@
               "concurrentBuilds": 1,
               "maxBuildDurationSeconds": 1200,
               "customDomains": 100,
-              "alwaysOnApps": 0,
+              "alwaysOnServices": 0,
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
@@ -9643,7 +9643,7 @@
           "buildMemoryMib",
           "buildDiskMib",
           "customDomains",
-          "alwaysOnApps",
+          "alwaysOnServices",
           "logRetentionDays",
           "apiTokens",
           "supportTicketsPerDay"
@@ -10063,10 +10063,10 @@
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "alwaysOnApps": {
+          "alwaysOnServices": {
             "type": "integer",
             "format": "int64",
-            "description": "Always-on apps allowed. Context: components.schemas.PlanLimits.properties.alwaysOnApps.",
+            "description": "Always-on services allowed. Context: components.schemas.PlanLimits.properties.alwaysOnServices.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -10147,7 +10147,7 @@
             "buildMemoryMib": 8192,
             "buildDiskMib": 20480,
             "customDomains": 100,
-            "alwaysOnApps": 0,
+            "alwaysOnServices": 0,
             "logRetentionDays": 3,
             "apiTokens": 10,
             "supportTicketsPerDay": 3
@@ -10162,7 +10162,7 @@
           "profile",
           "usage",
           "limits",
-          "apps",
+          "services",
           "deploys",
           "builds",
           "next_actions"
@@ -10182,17 +10182,17 @@
             "storageObjects": 200,
             "storageObjectMaxMib": 64
           },
-          "apps": {
+          "services": {
             "type": "array",
-            "description": "Account apps. Context: components.schemas.AccountActivityResponse.properties.apps.",
+            "description": "Account services. Context: components.schemas.AccountActivityResponse.properties.services.",
             "items": {
-              "$ref": "#/components/schemas/AccountDashboardApp"
+              "$ref": "#/components/schemas/AccountDashboardService"
             },
             "maxItems": 1000,
             "examples": [
               [
                 {
-                  "appId": "app_01HW0000000000000000000000",
+                  "serviceId": "service_01HW0000000000000000000000",
                   "name": "hello-rust",
                   "slug": "hello-rust",
                   "url": "https://hello-rust.tovuk.app",
@@ -10220,7 +10220,7 @@
               [
                 {
                   "id": "deploy_1",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "build_job_id": "job_1",
                   "commit_sha": "0123456789abcdef",
                   "url": "https://hello-rust.tovuk.app"
@@ -10239,7 +10239,7 @@
               [
                 {
                   "id": "job_1",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "status": "queued",
                   "message": "Build queued."
                 }
@@ -10257,7 +10257,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Use `tovuk overview --app <app>` for a compact app state snapshot."
+                "Use `tovuk overview --service <service>` for a compact service state snapshot."
               ]
             ]
           }
@@ -10274,7 +10274,7 @@
               "accountUrl": "https://tovuk.com/acme"
             },
             "usage": {
-              "appCount": 1,
+              "serviceCount": 1,
               "runningCount": 1,
               "databaseCount": 1,
               "runtimeMemoryMib": 512,
@@ -10295,7 +10295,7 @@
               "concurrentBuilds": 1,
               "maxBuildDurationSeconds": 1200,
               "customDomains": 100,
-              "alwaysOnApps": 0,
+              "alwaysOnServices": 0,
               "logRetentionDays": 3,
               "objectStorageMib": 10240,
               "storageObjects": 100000,
@@ -10344,9 +10344,9 @@
               "apiTokens": 10,
               "supportTicketsPerDay": 3
             },
-            "apps": [
+            "services": [
               {
-                "appId": "app_01HW0000000000000000000000",
+                "serviceId": "service_01HW0000000000000000000000",
                 "name": "hello-rust",
                 "slug": "hello-rust",
                 "url": "https://hello-rust.tovuk.app",
@@ -10364,7 +10364,7 @@
             "deploys": [
               {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
@@ -10373,20 +10373,20 @@
             "builds": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
             ],
             "next_actions": [
-              "Use `tovuk overview --app <app>` for a compact app state snapshot."
+              "Use `tovuk overview --service <service>` for a compact service state snapshot."
             ]
           }
         ]
       },
-      "AppOverviewResponse": {
+      "ServiceOverviewResponse": {
         "type": "object",
-        "description": "Single app overview response optimized for dashboards and agents. Context: components.schemas.AppOverviewResponse.",
+        "description": "Single service overview response optimized for dashboards and agents. Context: components.schemas.ServiceOverviewResponse.",
         "additionalProperties": false,
         "required": [
           "status",
@@ -10404,7 +10404,7 @@
           },
           "deploys": {
             "type": "array",
-            "description": "Recent deploys for the app. Context: components.schemas.AppOverviewResponse.properties.deploys.",
+            "description": "Recent deploys for the service. Context: components.schemas.ServiceOverviewResponse.properties.deploys.",
             "items": {
               "$ref": "#/components/schemas/Deploy"
             },
@@ -10413,7 +10413,7 @@
               [
                 {
                   "id": "deploy_1",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "build_job_id": "job_1",
                   "commit_sha": "0123456789abcdef",
                   "url": "https://hello-rust.tovuk.app"
@@ -10423,7 +10423,7 @@
           },
           "builds": {
             "type": "array",
-            "description": "Recent builds for the app. Context: components.schemas.AppOverviewResponse.properties.builds.",
+            "description": "Recent builds for the service. Context: components.schemas.ServiceOverviewResponse.properties.builds.",
             "items": {
               "$ref": "#/components/schemas/BuildJob"
             },
@@ -10432,7 +10432,7 @@
               [
                 {
                   "id": "job_1",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "status": "queued",
                   "message": "Build queued."
                 }
@@ -10444,7 +10444,7 @@
           },
           "env": {
             "type": "array",
-            "description": "Environment variable names only. Context: components.schemas.AppOverviewResponse.properties.env.",
+            "description": "Environment variable names only. Context: components.schemas.ServiceOverviewResponse.properties.env.",
             "items": {
               "$ref": "#/components/schemas/EnvVarSummary"
             },
@@ -10461,9 +10461,9 @@
           },
           "domains": {
             "type": "array",
-            "description": "Custom domains attached to the app. Context: components.schemas.AppOverviewResponse.properties.domains.",
+            "description": "Custom domains attached to the service. Context: components.schemas.ServiceOverviewResponse.properties.domains.",
             "items": {
-              "$ref": "#/components/schemas/AppDomain"
+              "$ref": "#/components/schemas/ServiceDomain"
             },
             "maxItems": 100,
             "examples": [
@@ -10479,14 +10479,14 @@
                 "type": "null"
               }
             ],
-            "description": "SQLite database metadata, when attached. Context: components.schemas.AppOverviewResponse.properties.database.",
+            "description": "SQLite database metadata, when attached. Context: components.schemas.ServiceOverviewResponse.properties.database.",
             "examples": [
               null
             ]
           },
           "next_actions": {
             "type": "array",
-            "description": "Recommended next actions for humans and agents. Context: components.schemas.AppOverviewResponse.properties.next_actions.",
+            "description": "Recommended next actions for humans and agents. Context: components.schemas.ServiceOverviewResponse.properties.next_actions.",
             "items": {
               "type": "string",
               "pattern": "^[\\s\\S]{0,8192}$",
@@ -10495,7 +10495,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Watch the active build with `tovuk logs --app app_1`."
+                "Watch the active build with `tovuk logs --service service_1`."
               ]
             ]
           }
@@ -10503,8 +10503,8 @@
         "examples": [
           {
             "status": {
-              "app": {
-                "id": "app_1",
+              "service": {
+                "id": "service_1",
                 "account_id": "acct_1",
                 "name": "hello-rust",
                 "kind": "rust_worker",
@@ -10514,14 +10514,14 @@
               },
               "latest_deploy": {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
               },
               "latest_build_job": {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
@@ -10529,7 +10529,7 @@
             "deploys": [
               {
                 "id": "deploy_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "build_job_id": "job_1",
                 "commit_sha": "0123456789abcdef",
                 "url": "https://hello-rust.tovuk.app"
@@ -10538,7 +10538,7 @@
             "builds": [
               {
                 "id": "job_1",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "status": "queued",
                 "message": "Build queued."
               }
@@ -10564,7 +10564,7 @@
             "domains": [],
             "database": null,
             "next_actions": [
-              "Watch the active build with `tovuk logs --app app_1`."
+              "Watch the active build with `tovuk logs --service service_1`."
             ]
           }
         ]
@@ -10785,20 +10785,20 @@
             "maxLength": 8000,
             "description": "Agent-readable details and attempted fixes. Context: components.schemas.SupportTicketCreateRequest.properties.details.",
             "examples": [
-              "Command, app id, build id, deploy id, and first actionable log line."
+              "Command, service id, build id, deploy id, and first actionable log line."
             ],
             "pattern": "^[\\s\\S]{1,8000}$"
           },
-          "app_id": {
+          "service_id": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Optional related app id or app name. Context: components.schemas.SupportTicketCreateRequest.properties.app_id.",
+            "description": "Optional related service id or service name. Context: components.schemas.SupportTicketCreateRequest.properties.service_id.",
             "examples": [
-              "app_1"
+              "service_1"
             ],
-            "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
             "maxLength": 64
           },
           "failing_command": {
@@ -10867,7 +10867,7 @@
           {
             "subject": "Deploy failed",
             "details": "Agent retried deploy after doctor.",
-            "app_id": "app_1",
+            "service_id": "service_1",
             "failing_command": "tovuk deploy --wait --json",
             "build_id": "job_1",
             "deploy_id": "deploy_1",
@@ -10882,7 +10882,7 @@
         "additionalProperties": false,
         "required": [
           "id",
-          "app_id",
+          "service_id",
           "subject",
           "details",
           "failing_command",
@@ -10905,16 +10905,16 @@
             "pattern": "^ticket_[a-f0-9]{20}$",
             "maxLength": 27
           },
-          "app_id": {
+          "service_id": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Related app id. Context: components.schemas.SupportTicket.properties.app_id.",
+            "description": "Related service id. Context: components.schemas.SupportTicket.properties.service_id.",
             "examples": [
-              "app_1"
+              "service_1"
             ],
-            "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
             "maxLength": 64
           },
           "subject": {
@@ -10995,7 +10995,7 @@
             "type": "string",
             "description": "Next step for the user agent. Context: components.schemas.SupportTicket.properties.agent_instruction.",
             "examples": [
-              "Continue with tovuk overview --app app_1 --json."
+              "Continue with tovuk overview --service service_1 --json."
             ],
             "pattern": "^[\\s\\S]{1,500}$",
             "maxLength": 500
@@ -11020,7 +11020,7 @@
         "examples": [
           {
             "id": "ticket_0123456789abcdef0123",
-            "app_id": "app_1",
+            "service_id": "service_1",
             "subject": "Deploy failed",
             "details": "Agent retried deploy after doctor.",
             "failing_command": "tovuk deploy --wait --json",
@@ -11029,7 +11029,7 @@
             "first_log_line": "cargo check failed in src/main.rs",
             "severity": "normal",
             "status": "open",
-            "agent_instruction": "Continue with tovuk overview --app app_1 --json.",
+            "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
             "created_at": "2026-05-27T12:00:00Z",
             "updated_at": "2026-05-27T12:00:00Z"
           }
@@ -11126,12 +11126,12 @@
           {
             "ticket": {
               "id": "ticket_0123456789abcdef0123",
-              "app_id": "app_1",
+              "service_id": "service_1",
               "subject": "Deploy failed",
               "details": "Command, ids, and first actionable log line.",
               "severity": "normal",
               "status": "open",
-              "agent_instruction": "Continue with tovuk overview --app app_1 --json.",
+              "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
               "created_at": "2026-05-27T12:00:00Z",
               "updated_at": "2026-05-27T12:00:00Z"
             },
@@ -11164,12 +11164,12 @@
               [
                 {
                   "id": "ticket_123",
-                  "app_id": "app_1",
+                  "service_id": "service_1",
                   "subject": "Deploy failed",
                   "details": "Agent retried deploy after doctor.",
                   "severity": "normal",
                   "status": "open",
-                  "agent_instruction": "Continue with tovuk overview --app app_1 --json.",
+                  "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                   "created_at": "2026-05-27T12:00:00Z",
                   "updated_at": "2026-05-27T12:00:00Z",
                   "failing_command": "tovuk deploy --wait --json",
@@ -11189,12 +11189,12 @@
             "tickets": [
               {
                 "id": "ticket_0123456789abcdef0123",
-                "app_id": "app_1",
+                "service_id": "service_1",
                 "subject": "Deploy failed",
                 "details": "Agent retried deploy after doctor.",
                 "severity": "normal",
                 "status": "open",
-                "agent_instruction": "Continue with tovuk overview --app app_1 --json.",
+                "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
                 "created_at": "2026-05-27T12:00:00Z",
                 "updated_at": "2026-05-27T12:00:00Z",
                 "failing_command": "tovuk deploy --wait --json",
@@ -11214,7 +11214,7 @@
       },
       "StorageUploadUrlRequest": {
         "type": "object",
-        "description": "Request a direct app object upload URL. Context: components.schemas.StorageUploadUrlRequest.",
+        "description": "Request a direct service object upload URL. Context: components.schemas.StorageUploadUrlRequest.",
         "additionalProperties": false,
         "required": [
           "path",
@@ -11224,7 +11224,7 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "App-local object path. Context: components.schemas.StorageUploadUrlRequest.properties.path.",
+            "description": "Service-local object path. Context: components.schemas.StorageUploadUrlRequest.properties.path.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
@@ -11272,7 +11272,7 @@
       },
       "StorageDownloadUrlRequest": {
         "type": "object",
-        "description": "Request a direct app object download URL. Context: components.schemas.StorageDownloadUrlRequest.",
+        "description": "Request a direct service object download URL. Context: components.schemas.StorageDownloadUrlRequest.",
         "additionalProperties": false,
         "required": [
           "path"
@@ -11280,7 +11280,7 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "App-local object path. Context: components.schemas.StorageDownloadUrlRequest.properties.path.",
+            "description": "Service-local object path. Context: components.schemas.StorageDownloadUrlRequest.properties.path.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
@@ -11305,7 +11305,7 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "App-local object path. Context: components.schemas.StorageCompleteRequest.properties.path.",
+            "description": "Service-local object path. Context: components.schemas.StorageCompleteRequest.properties.path.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
@@ -11322,7 +11322,7 @@
       },
       "StorageObject": {
         "type": "object",
-        "description": "App storage object metadata. Context: components.schemas.StorageObject.",
+        "description": "Service storage object metadata. Context: components.schemas.StorageObject.",
         "additionalProperties": false,
         "required": [
           "path",
@@ -11338,7 +11338,7 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "App-local object path. Context: components.schemas.StorageObject.properties.path.",
+            "description": "Service-local object path. Context: components.schemas.StorageObject.properties.path.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
@@ -11353,7 +11353,7 @@
             "maxLength": 1024,
             "pattern": "^[\\s\\S]{1,1024}$",
             "examples": [
-              "accounts/acct_01HW/apps/app_1/uploads/logo.png"
+              "objects/acct_01HW/services/service_1/uploads/logo.png"
             ]
           },
           "contentType": {
@@ -11432,7 +11432,7 @@
         "examples": [
           {
             "path": "uploads/logo.png",
-            "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+            "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
             "contentType": "image/png",
             "sizeBytes": 24812,
             "status": "uploaded",
@@ -11445,7 +11445,7 @@
       },
       "StorageObjectsResponse": {
         "type": "object",
-        "description": "Stored app objects. Context: components.schemas.StorageObjectsResponse.",
+        "description": "Stored service objects. Context: components.schemas.StorageObjectsResponse.",
         "additionalProperties": false,
         "required": [
           "objects"
@@ -11461,7 +11461,7 @@
               [
                 {
                   "path": "uploads/logo.png",
-                  "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                  "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
                   "contentType": "image/png",
                   "sizeBytes": 24812,
                   "status": "uploaded",
@@ -11479,7 +11479,7 @@
             "objects": [
               {
                 "path": "uploads/logo.png",
-                "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+                "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
                 "contentType": "image/png",
                 "sizeBytes": 24812,
                 "status": "uploaded",
@@ -11494,7 +11494,7 @@
       },
       "StorageDeleteResponse": {
         "type": "object",
-        "description": "App storage object delete response. Context: components.schemas.StorageDeleteResponse.",
+        "description": "Service storage object delete response. Context: components.schemas.StorageDeleteResponse.",
         "additionalProperties": false,
         "required": [
           "path",
@@ -11503,7 +11503,7 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "App-local object path. Context: components.schemas.StorageDeleteResponse.properties.path.",
+            "description": "Service-local object path. Context: components.schemas.StorageDeleteResponse.properties.path.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
@@ -11566,12 +11566,12 @@
             "maxLength": 1024,
             "pattern": "^[\\s\\S]{1,1024}$",
             "examples": [
-              "accounts/acct_01HW/apps/app_1/uploads/logo.png"
+              "objects/acct_01HW/services/service_1/uploads/logo.png"
             ]
           },
           "path": {
             "type": "string",
-            "description": "App-local object path. Context: components.schemas.StorageUrlResponse.properties.path.",
+            "description": "Service-local object path. Context: components.schemas.StorageUrlResponse.properties.path.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,511}$",
@@ -11631,7 +11631,7 @@
           {
             "method": "PUT",
             "url": "https://object-storage.example/upload-signature",
-            "objectKey": "accounts/acct_01HW/apps/app_1/uploads/logo.png",
+            "objectKey": "objects/acct_01HW/services/service_1/uploads/logo.png",
             "path": "uploads/logo.png",
             "expiresSeconds": 900,
             "contentType": "image/png",
@@ -11928,7 +11928,7 @@
         "additionalProperties": false,
         "required": [
           "bindingName",
-          "targetAppId"
+          "targetServiceId"
         ],
         "properties": {
           "bindingName": {
@@ -11941,14 +11941,14 @@
               "AUTH_SERVICE"
             ]
           },
-          "targetAppId": {
+          "targetServiceId": {
             "type": "string",
-            "description": "Target app id. Context: components.schemas.ServiceBinding.properties.targetAppId.",
+            "description": "Target service id. Context: components.schemas.ServiceBinding.properties.targetServiceId.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^app_[a-z0-9_]{1,60}$",
+            "pattern": "^service_[a-z0-9_]{1,60}$",
             "examples": [
-              "app_1"
+              "service_1"
             ]
           }
         },
@@ -12019,7 +12019,7 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "appId",
+          "serviceId",
           "plan",
           "limits",
           "sqliteDatabases",
@@ -12032,14 +12032,14 @@
           "nextActions"
         ],
         "properties": {
-          "appId": {
+          "serviceId": {
             "type": "string",
-            "description": "App id. Context: components.schemas.PlatformResourcesResponse.properties.appId.",
+            "description": "Service id. Context: components.schemas.PlatformResourcesResponse.properties.serviceId.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^app_[a-z0-9_]{1,60}$",
+            "pattern": "^service_[a-z0-9_]{1,60}$",
             "examples": [
-              "app_1"
+              "service_1"
             ]
           },
           "plan": {
@@ -12099,7 +12099,7 @@
               "buildMemoryMib",
               "buildDiskMib",
               "customDomains",
-              "alwaysOnApps",
+              "alwaysOnServices",
               "logRetentionDays",
               "apiTokens",
               "supportTicketsPerDay"
@@ -12519,10 +12519,10 @@
                 "minimum": 0,
                 "maximum": 1000000000000
               },
-              "alwaysOnApps": {
+              "alwaysOnServices": {
                 "type": "integer",
                 "format": "int64",
-                "description": "Always-on apps allowed. Context: components.schemas.PlanLimits.properties.alwaysOnApps. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.alwaysOnApps.",
+                "description": "Always-on services allowed. Context: components.schemas.PlanLimits.properties.alwaysOnServices. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.alwaysOnServices.",
                 "minimum": 0,
                 "maximum": 1000000000000
               },
@@ -12603,7 +12603,7 @@
                 "buildMemoryMib": 8192,
                 "buildDiskMib": 20480,
                 "customDomains": 100,
-                "alwaysOnApps": 0,
+                "alwaysOnServices": 0,
                 "logRetentionDays": 3,
                 "apiTokens": 10,
                 "supportTicketsPerDay": 3
@@ -12661,7 +12661,7 @@
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
               "customDomains": 100,
-              "alwaysOnApps": 0,
+              "alwaysOnServices": 0,
               "logRetentionDays": 3,
               "apiTokens": 10,
               "supportTicketsPerDay": 3
@@ -12770,7 +12770,7 @@
               [
                 {
                   "bindingName": "AUTH_SERVICE",
-                  "targetAppId": "app_2"
+                  "targetServiceId": "service_2"
                 }
               ]
             ]
@@ -12810,7 +12810,7 @@
             ]
           }
         },
-        "description": "App platform resources exposed to agents. Context: components.schemas.PlatformResourcesResponse."
+        "description": "Service platform resources exposed to agents. Context: components.schemas.PlatformResourcesResponse."
       },
       "SqliteDatabaseCreateRequest": {
         "type": "object",
@@ -12928,7 +12928,7 @@
         "additionalProperties": false,
         "required": [
           "bindingName",
-          "targetApp"
+          "targetService"
         ],
         "properties": {
           "bindingName": {
@@ -12941,14 +12941,14 @@
               "AUTH_SERVICE"
             ]
           },
-          "targetApp": {
+          "targetService": {
             "type": "string",
-            "description": "Target app id or app name. Context: components.schemas.ServiceBindingCreateRequest.properties.targetApp.",
+            "description": "Target service id or service name. Context: components.schemas.ServiceBindingCreateRequest.properties.targetService.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^(app_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
             "examples": [
-              "auth-app"
+              "auth-service"
             ]
           }
         },

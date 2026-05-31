@@ -47,12 +47,12 @@ need a runtime process; they call Rust workers for dynamic behavior.
 Use CLI commands to create runtime resources without dashboard work:
 
 ```sh
-tovuk database create --service app_1 DB --json
-tovuk kv create --service app_1 CACHE --json
-tovuk queue create --service app_1 jobs --json
-tovuk cron create --service app_1 nightly "0 0 * * *" --json
-tovuk durable-object create --service app_1 Room --json
-tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+tovuk database create --service service_1 DB --json
+tovuk kv create --service service_1 CACHE --json
+tovuk queue create --service service_1 jobs --json
+tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk durable-object create --service service_1 Room --json
+tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 ```
 
 ## Agent-ready errors

@@ -32,7 +32,7 @@ fn reject_legacy_database_flag(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "deploy_database_flag_removed",
             "The deploy-time database flag is no longer supported.",
-            "Create app SQLite databases with `tovuk sqlite create --app <app> DB --json` and bind them through worker platform resources.",
+            "Create SQLite databases with `tovuk database create --service <service> DB --json` and bind them through worker platform resources.",
             cli.output.json,
         ));
     }
@@ -45,12 +45,12 @@ fn preflight_deploy_limits(
     token: &str,
 ) -> Result<()> {
     let usage_response = api_request(cli, Method::GET, "/v1/usage", Some(token), None)?;
-    let apps_response = api_request(cli, Method::GET, "/v1/apps", Some(token), None)?;
-    let existing_apps = app_name_set(&apps_response);
-    let requested = requested_new_resources(plan, &existing_apps);
+    let services_response = api_request(cli, Method::GET, "/v1/services", Some(token), None)?;
+    let existing_services = service_name_set(&services_response);
+    let requested = requested_new_resources(plan, &existing_services);
     let usage = usage_response.get("usage").unwrap_or(&Value::Null);
     let limits = usage_response.get("limits").unwrap_or(&Value::Null);
-    let used_projects = number_field(usage, "appCount");
+    let used_projects = number_field(usage, "serviceCount");
     let project_limit = number_field(limits, "projects");
 
     if requested.projects > 0 && used_projects + requested.projects > project_limit {
@@ -60,7 +60,7 @@ fn preflight_deploy_limits(
             format!(
                 "Project limit reached: {used_projects}/{project_limit} projects are already used."
             ),
-            "Redeploy an existing app by reusing its `name` in tovuk.toml, or open the returned Stripe Checkout URL before creating another project.",
+            "Redeploy an existing service by reusing its `name` in tovuk.toml, or open the returned Stripe Checkout URL before creating another project.",
         ));
     }
     Ok(())
@@ -70,13 +70,13 @@ struct RequestedResources {
     projects: u64,
 }
 
-fn app_name_set(response: &Value) -> BTreeSet<String> {
+fn service_name_set(response: &Value) -> BTreeSet<String> {
     response
-        .get("apps")
+        .get("services")
         .and_then(Value::as_array)
         .into_iter()
         .flatten()
-        .filter_map(|app| app.get("name").and_then(Value::as_str))
+        .filter_map(|service| service.get("name").and_then(Value::as_str))
         .map(str::to_owned)
         .collect()
 }

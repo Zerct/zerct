@@ -47,7 +47,7 @@ Show the returned `checkout.url` to the human. If the issue is not a payment
 problem, create a support ticket with command output and ids:
 
 ```sh
-tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
+tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
 ```
 
 Resolve the ticket after the issue is fixed:

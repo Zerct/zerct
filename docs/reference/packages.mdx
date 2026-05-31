@@ -22,12 +22,12 @@ The agent repair loop is the same on every package surface:
 tovuk doctor --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
-tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage list --service app_1 --json
-tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --service app_1 uploads/logo.png --json
+tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+tovuk storage list --service service_1 --json
+tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk billing checkout --json
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
@@ -48,11 +48,11 @@ tovuk deploy
 pipx install tovuk
 tovuk deploy --wait
 tovuk logs --build job_1 --json
-tovuk domains verify --service app_1 api.example.com
-tovuk storage list --service app_1 --json
-tovuk storage upload --service app_1 ./media.png media/media.png --public --json
+tovuk domains verify --service service_1 api.example.com
+tovuk storage list --service service_1 --json
+tovuk storage upload --service service_1 ./media.png media/media.png --public --json
 tovuk billing checkout --json
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service app_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
@@ -62,7 +62,7 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 cargo install tovuk
 tovuk deploy --wait
 tovuk logs --deploy deploy_1 --json
-tovuk storage download --service app_1 media/media.png ./media.png --json
+tovuk storage download --service service_1 media/media.png ./media.png --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json

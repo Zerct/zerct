@@ -9,13 +9,13 @@ need dashboard access.
 ## Commands
 
 ```sh
-tovuk platform --service app_1 --json
-tovuk database create --service app_1 DB --json
-tovuk kv create --service app_1 CACHE --json
-tovuk queue create --service app_1 jobs --json
-tovuk cron create --service app_1 nightly "0 0 * * *" --json
-tovuk durable-object create --service app_1 Room --json
-tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+tovuk platform --service service_1 --json
+tovuk database create --service service_1 DB --json
+tovuk kv create --service service_1 CACHE --json
+tovuk queue create --service service_1 jobs --json
+tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk durable-object create --service service_1 Room --json
+tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk limit set worker_requests --period day --value 100000 --json
 ```
 
@@ -32,8 +32,8 @@ tovuk limit set worker_requests --period day --value 100000 --json
 Use object storage commands for service files and media:
 
 ```sh
-tovuk storage list --service app_1 --json
-tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --service app_1 uploads/logo.png --json
+tovuk storage list --service service_1 --json
+tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service service_1 uploads/logo.png --json
 ```

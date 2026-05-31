@@ -51,7 +51,7 @@ operator agent to act:
 tovuk support create \
   "Deploy failed" \
   "Agent already ran doctor and retried deploy." \
-  --service app_1 \
+  --service service_1 \
   --build job_1 \
   --deploy deploy_1 \
   --failing-command "tovuk deploy --wait --json" \
@@ -81,10 +81,10 @@ tovuk billing checkout "Project limit reached" --json
 ## Storage commands
 
 ```sh
-tovuk storage list --service app_1 --json
-tovuk storage upload --service app_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --service app_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --service app_1 uploads/logo.png --json
+tovuk storage list --service service_1 --json
+tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage delete --service service_1 uploads/logo.png --json
 ```
 
 Use `--public` only when the service needs a CDN URL. Use `--content-type <mime>`
@@ -94,8 +94,8 @@ when the extension is missing or ambiguous.
 
 ```txt
 Create a Tovuk worker-static project. Run
-`tovuk init my-app --template worker-static-rust-tanstack`, then install
-frontend packages in `my-app/web`. Keep dynamic server logic in the Rust worker.
+`tovuk init hello-service --template worker-static-rust-tanstack`, then install
+frontend packages in `hello-service/web`. Keep dynamic server logic in the Rust worker.
 Keep the TanStack frontend static at runtime and call same-origin `/api`. Run
 doctor in JSON mode, preview from the repo root when local tools are installed,
 then deploy from the repo root.
@@ -104,19 +104,19 @@ then deploy from the repo root.
 ## Log commands
 
 ```sh
-tovuk service show app_1 --json
-tovuk builds --service app_1 --json
+tovuk service show service_1 --json
+tovuk builds --service service_1 --json
 tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json
-tovuk logs --service app_1 --json
-tovuk storage list --service app_1 --json
-tovuk platform --service app_1 --json
-tovuk database create --service app_1 DB --json
-tovuk kv create --service app_1 CACHE --json
-tovuk queue create --service app_1 jobs --json
-tovuk cron create --service app_1 nightly "0 0 * * *" --json
-tovuk durable-object create --service app_1 Room --json
-tovuk binding create --service app_1 AUTH_SERVICE --target auth-app --json
+tovuk logs --service service_1 --json
+tovuk storage list --service service_1 --json
+tovuk platform --service service_1 --json
+tovuk database create --service service_1 DB --json
+tovuk kv create --service service_1 CACHE --json
+tovuk queue create --service service_1 jobs --json
+tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk durable-object create --service service_1 Room --json
+tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk limit set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
 tovuk support list --json

@@ -5,7 +5,7 @@ use super::super::{
     project::{encode_component, string_field},
 };
 use super::{
-    common::{page_query, require_app},
+    common::{page_query, require_service},
     http::api_request,
 };
 use reqwest::Method;
@@ -65,13 +65,13 @@ fn log_route(cli: &CliOptions) -> Result<(String, String)> {
         ));
     }
 
-    let app = require_app(cli)?;
+    let service = require_service(cli)?;
     Ok((
         format!(
-            "/v1/apps/{}/logs{}",
-            encode_component(&app),
+            "/v1/services/{}/logs{}",
+            encode_component(&service),
             page_query(cli)
         ),
-        format!("--app {app}"),
+        format!("--service {service}"),
     ))
 }

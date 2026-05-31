@@ -42,7 +42,7 @@ handlers, middleware, and server logic to Rust workers.
 
 ```sh
 tovuk doctor --json
-tovuk init my-app --template worker-static-rust-tanstack
+tovuk init hello-service --template worker-static-rust-tanstack
 tovuk preview
 tovuk deploy --wait --json
 tovuk logs --build <build_id> --json
@@ -51,23 +51,23 @@ tovuk logs --build <build_id> --json
 Manage platform resources without dashboard access:
 
 ```sh
-tovuk platform --service <app_id> --json
-tovuk database create --service <app_id> DB --json
-tovuk kv create --service <app_id> CACHE --json
-tovuk queue create --service <app_id> jobs --json
-tovuk cron create --service <app_id> nightly "0 0 * * *" --json
-tovuk durable-object create --service <app_id> Room --json
-tovuk binding create --service <app_id> AUTH_SERVICE --target auth-app --json
+tovuk platform --service <service> --json
+tovuk database create --service <service> DB --json
+tovuk kv create --service <service> CACHE --json
+tovuk queue create --service <service> jobs --json
+tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk durable-object create --service <service> Room --json
+tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk limit set worker_requests --period day --value 100000 --json
 ```
 
 Manage service files and media without dashboard access:
 
 ```sh
-tovuk storage list --service <app_id> --json
-tovuk storage upload --service <app_id> ./logo.png uploads/logo.png --public --json
-tovuk storage download --service <app_id> uploads/logo.png ./logo.png --json
-tovuk storage delete --service <app_id> uploads/logo.png --json
+tovuk storage list --service <service> --json
+tovuk storage upload --service <service> ./logo.png uploads/logo.png --public --json
+tovuk storage download --service <service> uploads/logo.png ./logo.png --json
+tovuk storage delete --service <service> uploads/logo.png --json
 ```
 
 When a plan limit blocks work:

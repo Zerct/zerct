@@ -46,7 +46,7 @@ pub(super) fn upload_presigned_file(
             agent_error(
                 "storage_upload_failed",
                 format!("Storage upload failed: {error}"),
-                "Retry the upload. If it keeps failing, create a support ticket with the app id and storage path.",
+                "Retry the upload. If it keeps failing, create a support ticket with the service id and storage path.",
                 cli.output.json,
             )
         })?;
@@ -59,7 +59,7 @@ pub(super) fn upload_presigned_file(
             "Storage upload returned HTTP {}.",
             response.status().as_u16()
         ),
-        "Retry the upload. If it keeps failing, create a support ticket with the app id and storage path.",
+        "Retry the upload. If it keeps failing, create a support ticket with the service id and storage path.",
         cli.output.json,
     ))
 }
@@ -92,7 +92,7 @@ pub(super) fn download_presigned_file(
         agent_error(
             "storage_download_failed",
             format!("Storage download failed: {error}"),
-            "Retry the download. If it keeps failing, create a support ticket with the app id and storage path.",
+            "Retry the download. If it keeps failing, create a support ticket with the service id and storage path.",
             cli.output.json,
         )
     })?;
@@ -103,7 +103,7 @@ pub(super) fn download_presigned_file(
                 "Storage download returned HTTP {}.",
                 response.status().as_u16()
             ),
-            "Retry the download. If it keeps failing, create a support ticket with the app id and storage path.",
+            "Retry the download. If it keeps failing, create a support ticket with the service id and storage path.",
             cli.output.json,
         ));
     }

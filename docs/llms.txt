@@ -82,23 +82,23 @@ curl https://api.tovuk.com/v1/status
 tovuk activity --json
 tovuk service list --json
 tovuk service show <service> --json
-tovuk builds --service <app> --json
+tovuk builds --service <service> --json
 tovuk logs --build <build_id> --json
-tovuk logs --service <app> --json
-tovuk env list --service <app> --json
-tovuk domains list --service <app> --json
-tovuk platform --service <app> --json
-tovuk database create --service <app> DB --json
-tovuk kv create --service <app> CACHE --json
-tovuk queue create --service <app> jobs --json
-tovuk cron create --service <app> nightly "0 0 * * *" --json
-tovuk durable-object create --service <app> Room --json
-tovuk binding create --service <app> AUTH_SERVICE --target auth-app --json
+tovuk logs --service <service> --json
+tovuk env list --service <service> --json
+tovuk domains list --service <service> --json
+tovuk platform --service <service> --json
+tovuk database create --service <service> DB --json
+tovuk kv create --service <service> CACHE --json
+tovuk queue create --service <service> jobs --json
+tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk durable-object create --service <service> Room --json
+tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk limit set worker_requests --period day --value 100000 --json
-tovuk storage list --service <app> --json
-tovuk storage upload --service <app> ./file.png uploads/file.png --public --json
-tovuk storage download --service <app> uploads/file.png ./file.png --json
-tovuk storage delete --service <app> uploads/file.png --json
+tovuk storage list --service <service> --json
+tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
+tovuk storage download --service <service> uploads/file.png ./file.png --json
+tovuk storage delete --service <service> uploads/file.png --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
@@ -110,7 +110,7 @@ available and a deploy fails, inspect build logs instead of changing status
 checks.
 
 Never print or commit secrets. Put secrets in Tovuk env vars with
-`tovuk env set --service <app> KEY=value`.
+`tovuk env set --service <service> KEY=value`.
 
 When a free-tier limit blocks work, run `tovuk billing checkout --json` and
 show the returned URL to the human. When Tovuk support is needed, create a

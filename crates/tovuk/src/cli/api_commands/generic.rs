@@ -3,7 +3,7 @@ use super::super::{
     errors::{Result, print_json},
 };
 use super::{
-    common::{app_route, page_query},
+    common::{page_query, service_route},
     http::api_request,
 };
 use reqwest::Method;
@@ -24,12 +24,12 @@ pub(crate) fn print_paged_authenticated(cli: &CliOptions, route: &str) -> Result
     print_authenticated(cli, &format!("{route}{}", page_query(cli)))
 }
 
-pub(crate) fn app_get_command(cli: &CliOptions, suffix: &str) -> Result<()> {
+pub(crate) fn service_get_command(cli: &CliOptions, suffix: &str) -> Result<()> {
     let token = super::super::auth::read_or_login_token(cli)?;
     let response = api_request(
         cli,
         Method::GET,
-        &app_route(cli, suffix)?,
+        &service_route(cli, suffix)?,
         Some(&token),
         None,
     )?;
