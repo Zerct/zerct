@@ -29,8 +29,8 @@ ambiguous to run.
   limit, a 5115 GiB (4.995 TiB) multipart upload limit, 10 thousand multipart
   upload parts, 1 million Class A operations per month, and 10 million Class B
   operations per month.
-- Pro service object storage has a 1 TiB account hard cap, includes 10 GiB,
-  has no object-count cap, has the same 5 TiB object ceiling, 5120 MiB
+- Pro service object storage has no storage or object-count hard cap, includes
+  10 GiB, has the same 5 TiB object ceiling, 5120 MiB
   single-part upload limit, and 5115 GiB multipart upload limit, includes
   1 million Class A operations and 10 million Class B operations per month,
   and exposes R2-style paid overage rates in `tovuk pricing --json`.
@@ -43,10 +43,11 @@ ambiguous to run.
   invocation on Free, 1000 on Pro, 100 bound parameters, 100 KB SQL statements,
   100 columns, and 2 MB row/blob/string values.
 - Free KV meters: 100 thousand reads per day, 1000 writes per day, 1000
-  deletes per day, and 1000 lists per day.
-- Pro KV has a 1 TiB account hard cap. The first 10 million reads, 1 million
-  writes, 1 million deletes, 1 million lists, and 1 GiB storage are included
-  each month before paid overage pricing.
+  deletes per day, 1000 lists per day, and 1 GiB storage per account and
+  namespace.
+- Pro KV has no account or namespace storage hard cap. The first 10 million
+  reads, 1 million writes, 1 million deletes, 1 million lists, and 1 GiB
+  storage are included each month before paid overage pricing.
 - KV metadata is limited to 1024 bytes. KV `expirationTtlSeconds` must be at
   least 30 seconds. KV keys are limited to 512 bytes and values to 25 MiB.
 - Free queue operations: 10 thousand per day, counted per 64 KB read, write,
