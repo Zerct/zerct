@@ -48,9 +48,11 @@ Free plans follow Cloudflare-style SQLite limits: 10 service databases, 5 GiB to
 storage, 500 MiB per database, 5 million rows read per day, and 100 thousand
 rows written per day.
 
-Pro plans use larger monthly meters for predictable capacity. Inspect the exact
-current limits with:
+Pro plans have a 1 TiB account hard cap, 10 GiB per database, and monthly
+included row meters before paid overage pricing. Inspect the exact current
+limits and prices with:
 
 ```sh
 npx tovuk usage --json
+npx tovuk pricing --json
 ```

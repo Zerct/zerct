@@ -4446,7 +4446,81 @@
                     "apiTokens": 10,
                     "supportTicketsPerDay": 3,
                     "objectStorageClassAOperationsPerMonth": 1000000,
-                    "objectStorageClassBOperationsPerMonth": 10000000
+                    "objectStorageClassBOperationsPerMonth": 10000000,
+                    "kvNamespaces": 1000,
+                    "queues": 10000,
+                    "durableObjectClasses": 100,
+                    "durableObjectDurationGbSecondsPerDay": 13000,
+                    "durableObjectDurationGbSecondsPerMonth": null,
+                    "durableObjectSqliteStorageMibPerAccount": 5120,
+                    "logEventsPerDay": 200000,
+                    "logEventsPerMonth": null
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 0,
+                    "paidOveragesEnabled": false,
+                    "workers": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedCpuMsPerMonth": null,
+                      "cpuOverageUsdMicrosPerMillionMs": null
+                    },
+                    "sqlite": {
+                      "includedRowsReadPerMonth": null,
+                      "rowsReadOverageUsdMicrosPerMillion": null,
+                      "includedRowsWrittenPerMonth": null,
+                      "rowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 5120,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "egressFree": true
+                    },
+                    "kv": {
+                      "includedReadsPerMonth": null,
+                      "readOverageUsdMicrosPerMillion": null,
+                      "includedWritesPerMonth": null,
+                      "writeOverageUsdMicrosPerMillion": null,
+                      "includedDeletesPerMonth": null,
+                      "deleteOverageUsdMicrosPerMillion": null,
+                      "includedListsPerMonth": null,
+                      "listOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 1024,
+                      "storageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "queues": {
+                      "includedOperationsPerMonth": null,
+                      "operationOverageUsdMicrosPerMillion": null,
+                      "egressFree": true
+                    },
+                    "durableObjects": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedDurationGbSecondsPerMonth": null,
+                      "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                      "includedSqliteRowsReadPerMonth": null,
+                      "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                      "includedSqliteRowsWrittenPerMonth": null,
+                      "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedSqliteStorageMib": 5120,
+                      "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "objectStorage": {
+                      "includedStorageMib": 10240,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "includedClassAOperationsPerMonth": 1000000,
+                      "classAOverageUsdMicrosPerMillion": null,
+                      "includedClassBOperationsPerMonth": 10000000,
+                      "classBOverageUsdMicrosPerMillion": null,
+                      "egressFree": true,
+                      "deleteOperationsFree": true
+                    },
+                    "staticAssets": {
+                      "requestsFreeAndUnlimited": true,
+                      "storageFree": true
+                    },
+                    "logs": {
+                      "includedEventsPerMonth": null,
+                      "eventOverageUsdMicrosPerMillion": null
+                    }
                   }
                 }
               }
@@ -5160,6 +5234,280 @@
                       "command": "npx tovuk deploy",
                       "description": "Deploys the current repo. Context: components.responses.CapabilitiesLoaded.content.application/json.examples.example.value.commands.0."
                     }
+                  ],
+                  "plans": [
+                    {
+                      "plan": "free",
+                      "limits": {
+                        "projects": 100,
+                        "sqliteDatabases": 10,
+                        "sqliteStorageMib": 5120,
+                        "sqliteStorageMibPerDatabase": 500,
+                        "sqliteRowsReadPerDay": 5000000,
+                        "sqliteRowsReadPerMonth": null,
+                        "sqliteRowsWrittenPerDay": 100000,
+                        "sqliteRowsWrittenPerMonth": null,
+                        "sqliteQueryTimeoutSeconds": 30,
+                        "sqliteTimeTravelDays": 7,
+                        "workers": 100,
+                        "workerRequestsPerDay": 100000,
+                        "workerRequestsPerMonth": null,
+                        "workerCpuMsPerRequest": 10,
+                        "workerCpuMsPerMonth": null,
+                        "workerMemoryMib": 128,
+                        "workerSubrequestsPerRequest": 50,
+                        "workerOutgoingConnectionsPerRequest": 6,
+                        "workerEnvVars": 64,
+                        "workerEnvVarSizeKib": 5,
+                        "workerCompressedSizeMib": 3,
+                        "workerStartupTimeMs": 1000,
+                        "cronTriggers": 5,
+                        "staticAssetFilesPerVersion": 20000,
+                        "staticAssetFileSizeMib": 25,
+                        "kvStorageMib": 1024,
+                        "kvReadsPerDay": 100000,
+                        "kvReadsPerMonth": null,
+                        "kvWritesPerDay": 1000,
+                        "kvWritesPerMonth": null,
+                        "kvDeletesPerDay": 1000,
+                        "kvDeletesPerMonth": null,
+                        "kvListsPerDay": 1000,
+                        "kvListsPerMonth": null,
+                        "queueOperationsPerDay": 10000,
+                        "queueOperationsPerMonth": null,
+                        "durableObjectRequestsPerDay": 100000,
+                        "durableObjectRequestsPerMonth": null,
+                        "durableObjectSqliteStorageMib": 1024,
+                        "objectStorageMib": 10240,
+                        "storageObjects": 100000,
+                        "storageObjectMaxMib": 5115,
+                        "objectStorageClassAOperationsPerMonth": 1000000,
+                        "objectStorageClassBOperationsPerMonth": 10000000,
+                        "dataTransferGib": 100,
+                        "monthlyBuildMinutes": 3000,
+                        "monthlyDeployments": 0,
+                        "concurrentBuilds": 1,
+                        "maxBuildDurationSeconds": 1200,
+                        "buildCpuMillis": 2000,
+                        "buildMemoryMib": 8192,
+                        "buildDiskMib": 20480,
+                        "customDomains": 100,
+                        "alwaysOnServices": 0,
+                        "logRetentionDays": 3,
+                        "apiTokens": 10,
+                        "supportTicketsPerDay": 3,
+                        "kvNamespaces": 1000,
+                        "queues": 10000,
+                        "durableObjectClasses": 100,
+                        "durableObjectDurationGbSecondsPerDay": 13000,
+                        "durableObjectDurationGbSecondsPerMonth": null,
+                        "durableObjectSqliteStorageMibPerAccount": 5120,
+                        "logEventsPerDay": 200000,
+                        "logEventsPerMonth": null
+                      },
+                      "pricing": {
+                        "subscriptionUsdCentsPerMonth": 0,
+                        "paidOveragesEnabled": false,
+                        "workers": {
+                          "includedRequestsPerMonth": null,
+                          "requestOverageUsdMicrosPerMillion": null,
+                          "includedCpuMsPerMonth": null,
+                          "cpuOverageUsdMicrosPerMillionMs": null
+                        },
+                        "sqlite": {
+                          "includedRowsReadPerMonth": null,
+                          "rowsReadOverageUsdMicrosPerMillion": null,
+                          "includedRowsWrittenPerMonth": null,
+                          "rowsWrittenOverageUsdMicrosPerMillion": null,
+                          "includedStorageMib": 5120,
+                          "storageOverageUsdMicrosPerGibMonth": null,
+                          "egressFree": true
+                        },
+                        "kv": {
+                          "includedReadsPerMonth": null,
+                          "readOverageUsdMicrosPerMillion": null,
+                          "includedWritesPerMonth": null,
+                          "writeOverageUsdMicrosPerMillion": null,
+                          "includedDeletesPerMonth": null,
+                          "deleteOverageUsdMicrosPerMillion": null,
+                          "includedListsPerMonth": null,
+                          "listOverageUsdMicrosPerMillion": null,
+                          "includedStorageMib": 1024,
+                          "storageOverageUsdMicrosPerGibMonth": null
+                        },
+                        "queues": {
+                          "includedOperationsPerMonth": null,
+                          "operationOverageUsdMicrosPerMillion": null,
+                          "egressFree": true
+                        },
+                        "durableObjects": {
+                          "includedRequestsPerMonth": null,
+                          "requestOverageUsdMicrosPerMillion": null,
+                          "includedDurationGbSecondsPerMonth": null,
+                          "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                          "includedSqliteRowsReadPerMonth": null,
+                          "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                          "includedSqliteRowsWrittenPerMonth": null,
+                          "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                          "includedSqliteStorageMib": 5120,
+                          "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                        },
+                        "objectStorage": {
+                          "includedStorageMib": 10240,
+                          "storageOverageUsdMicrosPerGibMonth": null,
+                          "includedClassAOperationsPerMonth": 1000000,
+                          "classAOverageUsdMicrosPerMillion": null,
+                          "includedClassBOperationsPerMonth": 10000000,
+                          "classBOverageUsdMicrosPerMillion": null,
+                          "egressFree": true,
+                          "deleteOperationsFree": true
+                        },
+                        "staticAssets": {
+                          "requestsFreeAndUnlimited": true,
+                          "storageFree": true
+                        },
+                        "logs": {
+                          "includedEventsPerMonth": null,
+                          "eventOverageUsdMicrosPerMillion": null
+                        }
+                      }
+                    },
+                    {
+                      "plan": "pro",
+                      "limits": {
+                        "projects": 500,
+                        "sqliteDatabases": 50000,
+                        "sqliteStorageMib": 1048576,
+                        "sqliteStorageMibPerDatabase": 10240,
+                        "sqliteRowsReadPerDay": null,
+                        "sqliteRowsReadPerMonth": 25000000000,
+                        "sqliteRowsWrittenPerDay": null,
+                        "sqliteRowsWrittenPerMonth": 50000000,
+                        "sqliteQueryTimeoutSeconds": 30,
+                        "sqliteTimeTravelDays": 30,
+                        "workers": 500,
+                        "workerRequestsPerDay": null,
+                        "workerRequestsPerMonth": 10000000,
+                        "workerCpuMsPerRequest": 300000,
+                        "workerCpuMsPerMonth": 30000000,
+                        "workerMemoryMib": 128,
+                        "workerSubrequestsPerRequest": 10000,
+                        "workerOutgoingConnectionsPerRequest": 6,
+                        "workerEnvVars": 128,
+                        "workerEnvVarSizeKib": 5,
+                        "workerCompressedSizeMib": 10,
+                        "workerStartupTimeMs": 1000,
+                        "cronTriggers": 250,
+                        "staticAssetFilesPerVersion": 100000,
+                        "staticAssetFileSizeMib": 25,
+                        "kvStorageMib": 1048576,
+                        "kvReadsPerDay": null,
+                        "kvReadsPerMonth": 10000000,
+                        "kvWritesPerDay": null,
+                        "kvWritesPerMonth": 1000000,
+                        "kvDeletesPerDay": null,
+                        "kvDeletesPerMonth": 1000000,
+                        "kvListsPerDay": null,
+                        "kvListsPerMonth": 1000000,
+                        "queueOperationsPerDay": null,
+                        "queueOperationsPerMonth": 1000000,
+                        "durableObjectRequestsPerDay": null,
+                        "durableObjectRequestsPerMonth": 1000000,
+                        "durableObjectSqliteStorageMib": 10240,
+                        "objectStorageMib": 1048576,
+                        "storageObjects": 1000000,
+                        "storageObjectMaxMib": 5115,
+                        "objectStorageClassAOperationsPerMonth": 1000000,
+                        "objectStorageClassBOperationsPerMonth": 10000000,
+                        "dataTransferGib": 1024,
+                        "monthlyBuildMinutes": 6000,
+                        "monthlyDeployments": 0,
+                        "concurrentBuilds": 6,
+                        "maxBuildDurationSeconds": 1200,
+                        "buildCpuMillis": 4000,
+                        "buildMemoryMib": 8192,
+                        "buildDiskMib": 20480,
+                        "customDomains": 100,
+                        "alwaysOnServices": 0,
+                        "logRetentionDays": 7,
+                        "apiTokens": 100,
+                        "supportTicketsPerDay": 20,
+                        "kvNamespaces": 1000,
+                        "queues": 10000,
+                        "durableObjectClasses": 500,
+                        "durableObjectDurationGbSecondsPerDay": null,
+                        "durableObjectDurationGbSecondsPerMonth": 400000,
+                        "durableObjectSqliteStorageMibPerAccount": null,
+                        "logEventsPerDay": null,
+                        "logEventsPerMonth": 20000000
+                      },
+                      "pricing": {
+                        "subscriptionUsdCentsPerMonth": 2500,
+                        "paidOveragesEnabled": true,
+                        "workers": {
+                          "includedRequestsPerMonth": 10000000,
+                          "requestOverageUsdMicrosPerMillion": 300000,
+                          "includedCpuMsPerMonth": 30000000,
+                          "cpuOverageUsdMicrosPerMillionMs": 20000
+                        },
+                        "sqlite": {
+                          "includedRowsReadPerMonth": 25000000000,
+                          "rowsReadOverageUsdMicrosPerMillion": 1000,
+                          "includedRowsWrittenPerMonth": 50000000,
+                          "rowsWrittenOverageUsdMicrosPerMillion": 1000000,
+                          "includedStorageMib": 5120,
+                          "storageOverageUsdMicrosPerGibMonth": 750000,
+                          "egressFree": true
+                        },
+                        "kv": {
+                          "includedReadsPerMonth": 10000000,
+                          "readOverageUsdMicrosPerMillion": 500000,
+                          "includedWritesPerMonth": 1000000,
+                          "writeOverageUsdMicrosPerMillion": 5000000,
+                          "includedDeletesPerMonth": 1000000,
+                          "deleteOverageUsdMicrosPerMillion": 5000000,
+                          "includedListsPerMonth": 1000000,
+                          "listOverageUsdMicrosPerMillion": 5000000,
+                          "includedStorageMib": 1024,
+                          "storageOverageUsdMicrosPerGibMonth": 500000
+                        },
+                        "queues": {
+                          "includedOperationsPerMonth": 1000000,
+                          "operationOverageUsdMicrosPerMillion": 400000,
+                          "egressFree": true
+                        },
+                        "durableObjects": {
+                          "includedRequestsPerMonth": 1000000,
+                          "requestOverageUsdMicrosPerMillion": 150000,
+                          "includedDurationGbSecondsPerMonth": 400000,
+                          "durationOverageUsdMicrosPerMillionGbSeconds": 12500000,
+                          "includedSqliteRowsReadPerMonth": 25000000000,
+                          "sqliteRowsReadOverageUsdMicrosPerMillion": 1000,
+                          "includedSqliteRowsWrittenPerMonth": 50000000,
+                          "sqliteRowsWrittenOverageUsdMicrosPerMillion": 1000000,
+                          "includedSqliteStorageMib": 5120,
+                          "sqliteStorageOverageUsdMicrosPerGibMonth": 200000
+                        },
+                        "objectStorage": {
+                          "includedStorageMib": 10240,
+                          "storageOverageUsdMicrosPerGibMonth": 15000,
+                          "includedClassAOperationsPerMonth": 1000000,
+                          "classAOverageUsdMicrosPerMillion": 4500000,
+                          "includedClassBOperationsPerMonth": 10000000,
+                          "classBOverageUsdMicrosPerMillion": 360000,
+                          "egressFree": true,
+                          "deleteOperationsFree": true
+                        },
+                        "staticAssets": {
+                          "requestsFreeAndUnlimited": true,
+                          "storageFree": true
+                        },
+                        "logs": {
+                          "includedEventsPerMonth": 20000000,
+                          "eventOverageUsdMicrosPerMillion": 600000
+                        }
+                      }
+                    }
                   ]
                 }
               }
@@ -5272,7 +5620,81 @@
                     "apiTokens": 10,
                     "supportTicketsPerDay": 3,
                     "objectStorageClassAOperationsPerMonth": 1000000,
-                    "objectStorageClassBOperationsPerMonth": 10000000
+                    "objectStorageClassBOperationsPerMonth": 10000000,
+                    "kvNamespaces": 1000,
+                    "queues": 10000,
+                    "durableObjectClasses": 100,
+                    "durableObjectDurationGbSecondsPerDay": 13000,
+                    "durableObjectDurationGbSecondsPerMonth": null,
+                    "durableObjectSqliteStorageMibPerAccount": 5120,
+                    "logEventsPerDay": 200000,
+                    "logEventsPerMonth": null
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 0,
+                    "paidOveragesEnabled": false,
+                    "workers": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedCpuMsPerMonth": null,
+                      "cpuOverageUsdMicrosPerMillionMs": null
+                    },
+                    "sqlite": {
+                      "includedRowsReadPerMonth": null,
+                      "rowsReadOverageUsdMicrosPerMillion": null,
+                      "includedRowsWrittenPerMonth": null,
+                      "rowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 5120,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "egressFree": true
+                    },
+                    "kv": {
+                      "includedReadsPerMonth": null,
+                      "readOverageUsdMicrosPerMillion": null,
+                      "includedWritesPerMonth": null,
+                      "writeOverageUsdMicrosPerMillion": null,
+                      "includedDeletesPerMonth": null,
+                      "deleteOverageUsdMicrosPerMillion": null,
+                      "includedListsPerMonth": null,
+                      "listOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 1024,
+                      "storageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "queues": {
+                      "includedOperationsPerMonth": null,
+                      "operationOverageUsdMicrosPerMillion": null,
+                      "egressFree": true
+                    },
+                    "durableObjects": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedDurationGbSecondsPerMonth": null,
+                      "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                      "includedSqliteRowsReadPerMonth": null,
+                      "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                      "includedSqliteRowsWrittenPerMonth": null,
+                      "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedSqliteStorageMib": 5120,
+                      "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "objectStorage": {
+                      "includedStorageMib": 10240,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "includedClassAOperationsPerMonth": 1000000,
+                      "classAOverageUsdMicrosPerMillion": null,
+                      "includedClassBOperationsPerMonth": 10000000,
+                      "classBOverageUsdMicrosPerMillion": null,
+                      "egressFree": true,
+                      "deleteOperationsFree": true
+                    },
+                    "staticAssets": {
+                      "requestsFreeAndUnlimited": true,
+                      "storageFree": true
+                    },
+                    "logs": {
+                      "includedEventsPerMonth": null,
+                      "eventOverageUsdMicrosPerMillion": null
+                    }
                   }
                 }
               }
@@ -5385,7 +5807,15 @@
                     "apiTokens": 10,
                     "supportTicketsPerDay": 3,
                     "objectStorageClassAOperationsPerMonth": 1000000,
-                    "objectStorageClassBOperationsPerMonth": 10000000
+                    "objectStorageClassBOperationsPerMonth": 10000000,
+                    "kvNamespaces": 1000,
+                    "queues": 10000,
+                    "durableObjectClasses": 100,
+                    "durableObjectDurationGbSecondsPerDay": 13000,
+                    "durableObjectDurationGbSecondsPerMonth": null,
+                    "durableObjectSqliteStorageMibPerAccount": 5120,
+                    "logEventsPerDay": 200000,
+                    "logEventsPerMonth": null
                   },
                   "services": [
                     {
@@ -5423,7 +5853,73 @@
                   ],
                   "next_actions": [
                     "Use `npx tovuk overview --service <service>` for a compact service state snapshot."
-                  ]
+                  ],
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 0,
+                    "paidOveragesEnabled": false,
+                    "workers": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedCpuMsPerMonth": null,
+                      "cpuOverageUsdMicrosPerMillionMs": null
+                    },
+                    "sqlite": {
+                      "includedRowsReadPerMonth": null,
+                      "rowsReadOverageUsdMicrosPerMillion": null,
+                      "includedRowsWrittenPerMonth": null,
+                      "rowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 5120,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "egressFree": true
+                    },
+                    "kv": {
+                      "includedReadsPerMonth": null,
+                      "readOverageUsdMicrosPerMillion": null,
+                      "includedWritesPerMonth": null,
+                      "writeOverageUsdMicrosPerMillion": null,
+                      "includedDeletesPerMonth": null,
+                      "deleteOverageUsdMicrosPerMillion": null,
+                      "includedListsPerMonth": null,
+                      "listOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 1024,
+                      "storageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "queues": {
+                      "includedOperationsPerMonth": null,
+                      "operationOverageUsdMicrosPerMillion": null,
+                      "egressFree": true
+                    },
+                    "durableObjects": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedDurationGbSecondsPerMonth": null,
+                      "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                      "includedSqliteRowsReadPerMonth": null,
+                      "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                      "includedSqliteRowsWrittenPerMonth": null,
+                      "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedSqliteStorageMib": 5120,
+                      "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "objectStorage": {
+                      "includedStorageMib": 10240,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "includedClassAOperationsPerMonth": 1000000,
+                      "classAOverageUsdMicrosPerMillion": null,
+                      "includedClassBOperationsPerMonth": 10000000,
+                      "classBOverageUsdMicrosPerMillion": null,
+                      "egressFree": true,
+                      "deleteOperationsFree": true
+                    },
+                    "staticAssets": {
+                      "requestsFreeAndUnlimited": true,
+                      "storageFree": true
+                    },
+                    "logs": {
+                      "includedEventsPerMonth": null,
+                      "eventOverageUsdMicrosPerMillion": null
+                    }
+                  }
                 }
               }
             }
@@ -6117,7 +6613,6 @@
                 "summary": "Platform resources loaded.",
                 "value": {
                   "serviceId": "service_1",
-                  "plan": "free",
                   "limits": {
                     "projects": 100,
                     "sqliteDatabases": 10,
@@ -6175,7 +6670,15 @@
                     "apiTokens": 10,
                     "supportTicketsPerDay": 3,
                     "objectStorageClassAOperationsPerMonth": 1000000,
-                    "objectStorageClassBOperationsPerMonth": 10000000
+                    "objectStorageClassBOperationsPerMonth": 10000000,
+                    "kvNamespaces": 1000,
+                    "queues": 10000,
+                    "durableObjectClasses": 100,
+                    "durableObjectDurationGbSecondsPerDay": 13000,
+                    "durableObjectDurationGbSecondsPerMonth": null,
+                    "durableObjectSqliteStorageMibPerAccount": 5120,
+                    "logEventsPerDay": 200000,
+                    "logEventsPerMonth": null
                   },
                   "sqliteDatabases": [
                     {
@@ -6236,7 +6739,73 @@
                   ],
                   "nextActions": [
                     "Run tovuk deploy --wait --json after resources are configured."
-                  ]
+                  ],
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 0,
+                    "paidOveragesEnabled": false,
+                    "workers": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedCpuMsPerMonth": null,
+                      "cpuOverageUsdMicrosPerMillionMs": null
+                    },
+                    "sqlite": {
+                      "includedRowsReadPerMonth": null,
+                      "rowsReadOverageUsdMicrosPerMillion": null,
+                      "includedRowsWrittenPerMonth": null,
+                      "rowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 5120,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "egressFree": true
+                    },
+                    "kv": {
+                      "includedReadsPerMonth": null,
+                      "readOverageUsdMicrosPerMillion": null,
+                      "includedWritesPerMonth": null,
+                      "writeOverageUsdMicrosPerMillion": null,
+                      "includedDeletesPerMonth": null,
+                      "deleteOverageUsdMicrosPerMillion": null,
+                      "includedListsPerMonth": null,
+                      "listOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 1024,
+                      "storageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "queues": {
+                      "includedOperationsPerMonth": null,
+                      "operationOverageUsdMicrosPerMillion": null,
+                      "egressFree": true
+                    },
+                    "durableObjects": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedDurationGbSecondsPerMonth": null,
+                      "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                      "includedSqliteRowsReadPerMonth": null,
+                      "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                      "includedSqliteRowsWrittenPerMonth": null,
+                      "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedSqliteStorageMib": 5120,
+                      "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "objectStorage": {
+                      "includedStorageMib": 10240,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "includedClassAOperationsPerMonth": 1000000,
+                      "classAOverageUsdMicrosPerMillion": null,
+                      "includedClassBOperationsPerMonth": 10000000,
+                      "classBOverageUsdMicrosPerMillion": null,
+                      "egressFree": true,
+                      "deleteOperationsFree": true
+                    },
+                    "staticAssets": {
+                      "requestsFreeAndUnlimited": true,
+                      "storageFree": true
+                    },
+                    "logs": {
+                      "includedEventsPerMonth": null,
+                      "eventOverageUsdMicrosPerMillion": null
+                    }
+                  }
                 }
               }
             }
@@ -7338,7 +7907,8 @@
           "profile",
           "services",
           "usage",
-          "limits"
+          "limits",
+          "pricing"
         ],
         "properties": {
           "profile": {
@@ -7404,6 +7974,143 @@
             "storageObjectMaxMib": 5115,
             "objectStorageClassAOperationsPerMonth": 1000000,
             "objectStorageClassBOperationsPerMonth": 10000000
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing",
+            "examples": [
+              {
+                "subscriptionUsdCentsPerMonth": 0,
+                "paidOveragesEnabled": false,
+                "workers": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedCpuMsPerMonth": null,
+                  "cpuOverageUsdMicrosPerMillionMs": null
+                },
+                "sqlite": {
+                  "includedRowsReadPerMonth": null,
+                  "rowsReadOverageUsdMicrosPerMillion": null,
+                  "includedRowsWrittenPerMonth": null,
+                  "rowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 5120,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "egressFree": true
+                },
+                "kv": {
+                  "includedReadsPerMonth": null,
+                  "readOverageUsdMicrosPerMillion": null,
+                  "includedWritesPerMonth": null,
+                  "writeOverageUsdMicrosPerMillion": null,
+                  "includedDeletesPerMonth": null,
+                  "deleteOverageUsdMicrosPerMillion": null,
+                  "includedListsPerMonth": null,
+                  "listOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 1024,
+                  "storageOverageUsdMicrosPerGibMonth": null
+                },
+                "queues": {
+                  "includedOperationsPerMonth": null,
+                  "operationOverageUsdMicrosPerMillion": null,
+                  "egressFree": true
+                },
+                "durableObjects": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedDurationGbSecondsPerMonth": null,
+                  "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                  "includedSqliteRowsReadPerMonth": null,
+                  "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                  "includedSqliteRowsWrittenPerMonth": null,
+                  "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedSqliteStorageMib": 5120,
+                  "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                },
+                "objectStorage": {
+                  "includedStorageMib": 10240,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "includedClassAOperationsPerMonth": 1000000,
+                  "classAOverageUsdMicrosPerMillion": null,
+                  "includedClassBOperationsPerMonth": 10000000,
+                  "classBOverageUsdMicrosPerMillion": null,
+                  "egressFree": true,
+                  "deleteOperationsFree": true
+                },
+                "staticAssets": {
+                  "requestsFreeAndUnlimited": true,
+                  "storageFree": true
+                },
+                "logs": {
+                  "includedEventsPerMonth": null,
+                  "eventOverageUsdMicrosPerMillion": null
+                }
+              }
+            ],
+            "example": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
+            }
           }
         },
         "examples": [
@@ -7489,7 +8196,81 @@
               "apiTokens": 10,
               "supportTicketsPerDay": 3,
               "objectStorageClassAOperationsPerMonth": 1000000,
-              "objectStorageClassBOperationsPerMonth": 10000000
+              "objectStorageClassBOperationsPerMonth": 10000000,
+              "kvNamespaces": 1000,
+              "queues": 10000,
+              "durableObjectClasses": 100,
+              "durableObjectDurationGbSecondsPerDay": 13000,
+              "durableObjectDurationGbSecondsPerMonth": null,
+              "durableObjectSqliteStorageMibPerAccount": 5120,
+              "logEventsPerDay": 200000,
+              "logEventsPerMonth": null
+            },
+            "pricing": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
             }
           }
         ]
@@ -10010,7 +10791,8 @@
           "auth",
           "agent_workflow",
           "endpoints",
-          "commands"
+          "commands",
+          "plans"
         ],
         "properties": {
           "product": {
@@ -10116,6 +10898,291 @@
                 }
               ]
             ]
+          },
+          "plans": {
+            "type": "array",
+            "description": "Public plan limits and pricing.",
+            "items": {
+              "$ref": "#/components/schemas/PlanCatalogEntry"
+            },
+            "minItems": 2,
+            "maxItems": 2,
+            "examples": [
+              [
+                {
+                  "plan": "free",
+                  "limits": {
+                    "projects": 100,
+                    "sqliteDatabases": 10,
+                    "sqliteStorageMib": 5120,
+                    "sqliteStorageMibPerDatabase": 500,
+                    "sqliteRowsReadPerDay": 5000000,
+                    "sqliteRowsReadPerMonth": null,
+                    "sqliteRowsWrittenPerDay": 100000,
+                    "sqliteRowsWrittenPerMonth": null,
+                    "sqliteQueryTimeoutSeconds": 30,
+                    "sqliteTimeTravelDays": 7,
+                    "workers": 100,
+                    "workerRequestsPerDay": 100000,
+                    "workerRequestsPerMonth": null,
+                    "workerCpuMsPerRequest": 10,
+                    "workerCpuMsPerMonth": null,
+                    "workerMemoryMib": 128,
+                    "workerSubrequestsPerRequest": 50,
+                    "workerOutgoingConnectionsPerRequest": 6,
+                    "workerEnvVars": 64,
+                    "workerEnvVarSizeKib": 5,
+                    "workerCompressedSizeMib": 3,
+                    "workerStartupTimeMs": 1000,
+                    "cronTriggers": 5,
+                    "staticAssetFilesPerVersion": 20000,
+                    "staticAssetFileSizeMib": 25,
+                    "kvStorageMib": 1024,
+                    "kvReadsPerDay": 100000,
+                    "kvReadsPerMonth": null,
+                    "kvWritesPerDay": 1000,
+                    "kvWritesPerMonth": null,
+                    "kvDeletesPerDay": 1000,
+                    "kvDeletesPerMonth": null,
+                    "kvListsPerDay": 1000,
+                    "kvListsPerMonth": null,
+                    "queueOperationsPerDay": 10000,
+                    "queueOperationsPerMonth": null,
+                    "durableObjectRequestsPerDay": 100000,
+                    "durableObjectRequestsPerMonth": null,
+                    "durableObjectSqliteStorageMib": 1024,
+                    "objectStorageMib": 10240,
+                    "storageObjects": 100000,
+                    "storageObjectMaxMib": 5115,
+                    "objectStorageClassAOperationsPerMonth": 1000000,
+                    "objectStorageClassBOperationsPerMonth": 10000000,
+                    "dataTransferGib": 100,
+                    "monthlyBuildMinutes": 3000,
+                    "monthlyDeployments": 0,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 1200,
+                    "buildCpuMillis": 2000,
+                    "buildMemoryMib": 8192,
+                    "buildDiskMib": 20480,
+                    "customDomains": 100,
+                    "alwaysOnServices": 0,
+                    "logRetentionDays": 3,
+                    "apiTokens": 10,
+                    "supportTicketsPerDay": 3,
+                    "kvNamespaces": 1000,
+                    "queues": 10000,
+                    "durableObjectClasses": 100,
+                    "durableObjectDurationGbSecondsPerDay": 13000,
+                    "durableObjectDurationGbSecondsPerMonth": null,
+                    "durableObjectSqliteStorageMibPerAccount": 5120,
+                    "logEventsPerDay": 200000,
+                    "logEventsPerMonth": null
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 0,
+                    "paidOveragesEnabled": false,
+                    "workers": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedCpuMsPerMonth": null,
+                      "cpuOverageUsdMicrosPerMillionMs": null
+                    },
+                    "sqlite": {
+                      "includedRowsReadPerMonth": null,
+                      "rowsReadOverageUsdMicrosPerMillion": null,
+                      "includedRowsWrittenPerMonth": null,
+                      "rowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 5120,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "egressFree": true
+                    },
+                    "kv": {
+                      "includedReadsPerMonth": null,
+                      "readOverageUsdMicrosPerMillion": null,
+                      "includedWritesPerMonth": null,
+                      "writeOverageUsdMicrosPerMillion": null,
+                      "includedDeletesPerMonth": null,
+                      "deleteOverageUsdMicrosPerMillion": null,
+                      "includedListsPerMonth": null,
+                      "listOverageUsdMicrosPerMillion": null,
+                      "includedStorageMib": 1024,
+                      "storageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "queues": {
+                      "includedOperationsPerMonth": null,
+                      "operationOverageUsdMicrosPerMillion": null,
+                      "egressFree": true
+                    },
+                    "durableObjects": {
+                      "includedRequestsPerMonth": null,
+                      "requestOverageUsdMicrosPerMillion": null,
+                      "includedDurationGbSecondsPerMonth": null,
+                      "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                      "includedSqliteRowsReadPerMonth": null,
+                      "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                      "includedSqliteRowsWrittenPerMonth": null,
+                      "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                      "includedSqliteStorageMib": 5120,
+                      "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                    },
+                    "objectStorage": {
+                      "includedStorageMib": 10240,
+                      "storageOverageUsdMicrosPerGibMonth": null,
+                      "includedClassAOperationsPerMonth": 1000000,
+                      "classAOverageUsdMicrosPerMillion": null,
+                      "includedClassBOperationsPerMonth": 10000000,
+                      "classBOverageUsdMicrosPerMillion": null,
+                      "egressFree": true,
+                      "deleteOperationsFree": true
+                    },
+                    "staticAssets": {
+                      "requestsFreeAndUnlimited": true,
+                      "storageFree": true
+                    },
+                    "logs": {
+                      "includedEventsPerMonth": null,
+                      "eventOverageUsdMicrosPerMillion": null
+                    }
+                  }
+                },
+                {
+                  "plan": "pro",
+                  "limits": {
+                    "projects": 500,
+                    "sqliteDatabases": 10,
+                    "sqliteStorageMib": 5120,
+                    "sqliteStorageMibPerDatabase": 500,
+                    "sqliteRowsReadPerDay": 5000000,
+                    "sqliteRowsReadPerMonth": null,
+                    "sqliteRowsWrittenPerDay": 100000,
+                    "sqliteRowsWrittenPerMonth": null,
+                    "sqliteQueryTimeoutSeconds": 30,
+                    "sqliteTimeTravelDays": 7,
+                    "workers": 100,
+                    "workerRequestsPerDay": null,
+                    "workerRequestsPerMonth": 10000000,
+                    "workerCpuMsPerRequest": 300000,
+                    "workerCpuMsPerMonth": 30000000,
+                    "workerMemoryMib": 128,
+                    "workerSubrequestsPerRequest": 50,
+                    "workerOutgoingConnectionsPerRequest": 6,
+                    "workerEnvVars": 64,
+                    "workerEnvVarSizeKib": 5,
+                    "workerCompressedSizeMib": 3,
+                    "workerStartupTimeMs": 1000,
+                    "cronTriggers": 5,
+                    "staticAssetFilesPerVersion": 20000,
+                    "staticAssetFileSizeMib": 25,
+                    "kvStorageMib": 1048576,
+                    "kvReadsPerDay": 100000,
+                    "kvReadsPerMonth": null,
+                    "kvWritesPerDay": 1000,
+                    "kvWritesPerMonth": null,
+                    "kvDeletesPerDay": 1000,
+                    "kvDeletesPerMonth": null,
+                    "kvListsPerDay": 1000,
+                    "kvListsPerMonth": null,
+                    "queueOperationsPerDay": 10000,
+                    "queueOperationsPerMonth": null,
+                    "durableObjectRequestsPerDay": 100000,
+                    "durableObjectRequestsPerMonth": null,
+                    "durableObjectSqliteStorageMib": 1024,
+                    "objectStorageMib": 1048576,
+                    "storageObjects": 100000,
+                    "storageObjectMaxMib": 5115,
+                    "objectStorageClassAOperationsPerMonth": 1000000,
+                    "objectStorageClassBOperationsPerMonth": 10000000,
+                    "dataTransferGib": 100,
+                    "monthlyBuildMinutes": 3000,
+                    "monthlyDeployments": 0,
+                    "concurrentBuilds": 1,
+                    "maxBuildDurationSeconds": 1200,
+                    "buildCpuMillis": 2000,
+                    "buildMemoryMib": 8192,
+                    "buildDiskMib": 20480,
+                    "customDomains": 100,
+                    "alwaysOnServices": 0,
+                    "logRetentionDays": 3,
+                    "apiTokens": 10,
+                    "supportTicketsPerDay": 3,
+                    "kvNamespaces": 1000,
+                    "queues": 10000,
+                    "durableObjectClasses": 500,
+                    "durableObjectDurationGbSecondsPerDay": null,
+                    "durableObjectDurationGbSecondsPerMonth": 400000,
+                    "durableObjectSqliteStorageMibPerAccount": 5120,
+                    "logEventsPerDay": null,
+                    "logEventsPerMonth": 20000000
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 2500,
+                    "paidOveragesEnabled": true,
+                    "workers": {
+                      "includedRequestsPerMonth": 10000000,
+                      "requestOverageUsdMicrosPerMillion": 300000,
+                      "includedCpuMsPerMonth": 30000000,
+                      "cpuOverageUsdMicrosPerMillionMs": 20000
+                    },
+                    "sqlite": {
+                      "includedRowsReadPerMonth": 25000000000,
+                      "rowsReadOverageUsdMicrosPerMillion": 1000,
+                      "includedRowsWrittenPerMonth": 50000000,
+                      "rowsWrittenOverageUsdMicrosPerMillion": 1000000,
+                      "includedStorageMib": 5120,
+                      "storageOverageUsdMicrosPerGibMonth": 750000,
+                      "egressFree": true
+                    },
+                    "kv": {
+                      "includedReadsPerMonth": 10000000,
+                      "readOverageUsdMicrosPerMillion": 500000,
+                      "includedWritesPerMonth": 1000000,
+                      "writeOverageUsdMicrosPerMillion": 5000000,
+                      "includedDeletesPerMonth": 1000000,
+                      "deleteOverageUsdMicrosPerMillion": 5000000,
+                      "includedListsPerMonth": 1000000,
+                      "listOverageUsdMicrosPerMillion": 5000000,
+                      "includedStorageMib": 1024,
+                      "storageOverageUsdMicrosPerGibMonth": 500000
+                    },
+                    "queues": {
+                      "includedOperationsPerMonth": 1000000,
+                      "operationOverageUsdMicrosPerMillion": 400000,
+                      "egressFree": true
+                    },
+                    "durableObjects": {
+                      "includedRequestsPerMonth": 1000000,
+                      "requestOverageUsdMicrosPerMillion": 150000,
+                      "includedDurationGbSecondsPerMonth": 400000,
+                      "durationOverageUsdMicrosPerMillionGbSeconds": 12500000,
+                      "includedSqliteRowsReadPerMonth": 25000000000,
+                      "sqliteRowsReadOverageUsdMicrosPerMillion": 1000,
+                      "includedSqliteRowsWrittenPerMonth": 50000000,
+                      "sqliteRowsWrittenOverageUsdMicrosPerMillion": 1000000,
+                      "includedSqliteStorageMib": 5120,
+                      "sqliteStorageOverageUsdMicrosPerGibMonth": 200000
+                    },
+                    "objectStorage": {
+                      "includedStorageMib": 10240,
+                      "storageOverageUsdMicrosPerGibMonth": 15000,
+                      "includedClassAOperationsPerMonth": 1000000,
+                      "classAOverageUsdMicrosPerMillion": 4500000,
+                      "includedClassBOperationsPerMonth": 10000000,
+                      "classBOverageUsdMicrosPerMillion": 360000,
+                      "egressFree": true,
+                      "deleteOperationsFree": true
+                    },
+                    "staticAssets": {
+                      "requestsFreeAndUnlimited": true,
+                      "storageFree": true
+                    },
+                    "logs": {
+                      "includedEventsPerMonth": 20000000,
+                      "eventOverageUsdMicrosPerMillion": 600000
+                    }
+                  }
+                }
+              ]
+            ]
           }
         }
       },
@@ -10126,7 +11193,8 @@
         "required": [
           "profile",
           "usage",
-          "limits"
+          "limits",
+          "pricing"
         ],
         "properties": {
           "profile": {
@@ -10144,6 +11212,143 @@
             "storageObjectMaxMib": 5115,
             "objectStorageClassAOperationsPerMonth": 1000000,
             "objectStorageClassBOperationsPerMonth": 10000000
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing",
+            "examples": [
+              {
+                "subscriptionUsdCentsPerMonth": 0,
+                "paidOveragesEnabled": false,
+                "workers": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedCpuMsPerMonth": null,
+                  "cpuOverageUsdMicrosPerMillionMs": null
+                },
+                "sqlite": {
+                  "includedRowsReadPerMonth": null,
+                  "rowsReadOverageUsdMicrosPerMillion": null,
+                  "includedRowsWrittenPerMonth": null,
+                  "rowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 5120,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "egressFree": true
+                },
+                "kv": {
+                  "includedReadsPerMonth": null,
+                  "readOverageUsdMicrosPerMillion": null,
+                  "includedWritesPerMonth": null,
+                  "writeOverageUsdMicrosPerMillion": null,
+                  "includedDeletesPerMonth": null,
+                  "deleteOverageUsdMicrosPerMillion": null,
+                  "includedListsPerMonth": null,
+                  "listOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 1024,
+                  "storageOverageUsdMicrosPerGibMonth": null
+                },
+                "queues": {
+                  "includedOperationsPerMonth": null,
+                  "operationOverageUsdMicrosPerMillion": null,
+                  "egressFree": true
+                },
+                "durableObjects": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedDurationGbSecondsPerMonth": null,
+                  "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                  "includedSqliteRowsReadPerMonth": null,
+                  "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                  "includedSqliteRowsWrittenPerMonth": null,
+                  "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedSqliteStorageMib": 5120,
+                  "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                },
+                "objectStorage": {
+                  "includedStorageMib": 10240,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "includedClassAOperationsPerMonth": 1000000,
+                  "classAOverageUsdMicrosPerMillion": null,
+                  "includedClassBOperationsPerMonth": 10000000,
+                  "classBOverageUsdMicrosPerMillion": null,
+                  "egressFree": true,
+                  "deleteOperationsFree": true
+                },
+                "staticAssets": {
+                  "requestsFreeAndUnlimited": true,
+                  "storageFree": true
+                },
+                "logs": {
+                  "includedEventsPerMonth": null,
+                  "eventOverageUsdMicrosPerMillion": null
+                }
+              }
+            ],
+            "example": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
+            }
           }
         },
         "examples": [
@@ -10228,7 +11433,81 @@
               "apiTokens": 10,
               "supportTicketsPerDay": 3,
               "objectStorageClassAOperationsPerMonth": 1000000,
-              "objectStorageClassBOperationsPerMonth": 10000000
+              "objectStorageClassBOperationsPerMonth": 10000000,
+              "kvNamespaces": 1000,
+              "queues": 10000,
+              "durableObjectClasses": 100,
+              "durableObjectDurationGbSecondsPerDay": 13000,
+              "durableObjectDurationGbSecondsPerMonth": null,
+              "durableObjectSqliteStorageMibPerAccount": 5120,
+              "logEventsPerDay": 200000,
+              "logEventsPerMonth": null
+            },
+            "pricing": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
             }
           }
         ]
@@ -10292,7 +11571,15 @@
           "alwaysOnServices",
           "logRetentionDays",
           "apiTokens",
-          "supportTicketsPerDay"
+          "supportTicketsPerDay",
+          "kvNamespaces",
+          "queues",
+          "durableObjectClasses",
+          "durableObjectDurationGbSecondsPerDay",
+          "durableObjectDurationGbSecondsPerMonth",
+          "durableObjectSqliteStorageMibPerAccount",
+          "logEventsPerDay",
+          "logEventsPerMonth"
         ],
         "properties": {
           "projects": {
@@ -10756,6 +12043,77 @@
             "description": "Monthly included Class B object storage operations. Context: components.schemas.PlanLimits.properties.objectStorageClassBOperationsPerMonth.",
             "minimum": 0,
             "maximum": 1000000000000
+          },
+          "kvNamespaces": {
+            "type": "integer",
+            "format": "int64",
+            "description": "KV namespaces allowed for the account.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "queues": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Queues allowed for the account.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectClasses": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Durable Object classes allowed for the account.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectDurationGbSecondsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily Durable Object duration in GB-seconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectDurationGbSecondsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly Durable Object duration in GB-seconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durableObjectSqliteStorageMibPerAccount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Account-level Durable Object SQLite storage cap in MiB.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "logEventsPerDay": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Daily log event allowance, when set.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "logEventsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Monthly log event allowance, when set.",
+            "minimum": 0,
+            "maximum": 1000000000000
           }
         },
         "additionalProperties": false,
@@ -10818,7 +12176,15 @@
             "apiTokens": 10,
             "supportTicketsPerDay": 3,
             "objectStorageClassAOperationsPerMonth": 1000000,
-            "objectStorageClassBOperationsPerMonth": 10000000
+            "objectStorageClassBOperationsPerMonth": 10000000,
+            "kvNamespaces": 1000,
+            "queues": 10000,
+            "durableObjectClasses": 100,
+            "durableObjectDurationGbSecondsPerDay": 13000,
+            "durableObjectDurationGbSecondsPerMonth": null,
+            "durableObjectSqliteStorageMibPerAccount": 5120,
+            "logEventsPerDay": 200000,
+            "logEventsPerMonth": null
           }
         ]
       },
@@ -10833,7 +12199,8 @@
           "services",
           "deploys",
           "builds",
-          "next_actions"
+          "next_actions",
+          "pricing"
         ],
         "properties": {
           "profile": {
@@ -10930,6 +12297,143 @@
                 "Use `npx tovuk overview --service <service>` for a compact service state snapshot."
               ]
             ]
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing",
+            "examples": [
+              {
+                "subscriptionUsdCentsPerMonth": 0,
+                "paidOveragesEnabled": false,
+                "workers": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedCpuMsPerMonth": null,
+                  "cpuOverageUsdMicrosPerMillionMs": null
+                },
+                "sqlite": {
+                  "includedRowsReadPerMonth": null,
+                  "rowsReadOverageUsdMicrosPerMillion": null,
+                  "includedRowsWrittenPerMonth": null,
+                  "rowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 5120,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "egressFree": true
+                },
+                "kv": {
+                  "includedReadsPerMonth": null,
+                  "readOverageUsdMicrosPerMillion": null,
+                  "includedWritesPerMonth": null,
+                  "writeOverageUsdMicrosPerMillion": null,
+                  "includedDeletesPerMonth": null,
+                  "deleteOverageUsdMicrosPerMillion": null,
+                  "includedListsPerMonth": null,
+                  "listOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 1024,
+                  "storageOverageUsdMicrosPerGibMonth": null
+                },
+                "queues": {
+                  "includedOperationsPerMonth": null,
+                  "operationOverageUsdMicrosPerMillion": null,
+                  "egressFree": true
+                },
+                "durableObjects": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedDurationGbSecondsPerMonth": null,
+                  "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                  "includedSqliteRowsReadPerMonth": null,
+                  "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                  "includedSqliteRowsWrittenPerMonth": null,
+                  "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedSqliteStorageMib": 5120,
+                  "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                },
+                "objectStorage": {
+                  "includedStorageMib": 10240,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "includedClassAOperationsPerMonth": 1000000,
+                  "classAOverageUsdMicrosPerMillion": null,
+                  "includedClassBOperationsPerMonth": 10000000,
+                  "classBOverageUsdMicrosPerMillion": null,
+                  "egressFree": true,
+                  "deleteOperationsFree": true
+                },
+                "staticAssets": {
+                  "requestsFreeAndUnlimited": true,
+                  "storageFree": true
+                },
+                "logs": {
+                  "includedEventsPerMonth": null,
+                  "eventOverageUsdMicrosPerMillion": null
+                }
+              }
+            ],
+            "example": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
+            }
           }
         },
         "examples": [
@@ -11014,7 +12518,15 @@
               "apiTokens": 10,
               "supportTicketsPerDay": 3,
               "objectStorageClassAOperationsPerMonth": 1000000,
-              "objectStorageClassBOperationsPerMonth": 10000000
+              "objectStorageClassBOperationsPerMonth": 10000000,
+              "kvNamespaces": 1000,
+              "queues": 10000,
+              "durableObjectClasses": 100,
+              "durableObjectDurationGbSecondsPerDay": 13000,
+              "durableObjectDurationGbSecondsPerMonth": null,
+              "durableObjectSqliteStorageMibPerAccount": 5120,
+              "logEventsPerDay": 200000,
+              "logEventsPerMonth": null
             },
             "services": [
               {
@@ -11052,7 +12564,73 @@
             ],
             "next_actions": [
               "Use `npx tovuk overview --service <service>` for a compact service state snapshot."
-            ]
+            ],
+            "pricing": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
+            }
           }
         ]
       },
@@ -12692,7 +14270,6 @@
         "additionalProperties": false,
         "required": [
           "serviceId",
-          "plan",
           "limits",
           "sqliteDatabases",
           "kvNamespaces",
@@ -12701,7 +14278,8 @@
           "durableObjectNamespaces",
           "serviceBindings",
           "usageCaps",
-          "nextActions"
+          "nextActions",
+          "pricing"
         ],
         "properties": {
           "serviceId": {
@@ -12714,656 +14292,8 @@
               "service_1"
             ]
           },
-          "plan": {
-            "$ref": "#/components/schemas/Plan"
-          },
           "limits": {
-            "type": "object",
-            "required": [
-              "projects",
-              "sqliteDatabases",
-              "sqliteStorageMib",
-              "sqliteStorageMibPerDatabase",
-              "sqliteRowsReadPerDay",
-              "sqliteRowsReadPerMonth",
-              "sqliteRowsWrittenPerDay",
-              "sqliteRowsWrittenPerMonth",
-              "sqliteQueryTimeoutSeconds",
-              "sqliteTimeTravelDays",
-              "workers",
-              "workerRequestsPerDay",
-              "workerRequestsPerMonth",
-              "workerCpuMsPerRequest",
-              "workerCpuMsPerMonth",
-              "workerMemoryMib",
-              "workerSubrequestsPerRequest",
-              "workerOutgoingConnectionsPerRequest",
-              "workerEnvVars",
-              "workerEnvVarSizeKib",
-              "workerCompressedSizeMib",
-              "workerStartupTimeMs",
-              "cronTriggers",
-              "staticAssetFilesPerVersion",
-              "staticAssetFileSizeMib",
-              "kvStorageMib",
-              "kvReadsPerDay",
-              "kvReadsPerMonth",
-              "kvWritesPerDay",
-              "kvWritesPerMonth",
-              "kvDeletesPerDay",
-              "kvDeletesPerMonth",
-              "kvListsPerDay",
-              "kvListsPerMonth",
-              "queueOperationsPerDay",
-              "queueOperationsPerMonth",
-              "durableObjectRequestsPerDay",
-              "durableObjectRequestsPerMonth",
-              "durableObjectSqliteStorageMib",
-              "objectStorageMib",
-              "storageObjects",
-              "storageObjectMaxMib",
-              "objectStorageClassAOperationsPerMonth",
-              "objectStorageClassBOperationsPerMonth",
-              "dataTransferGib",
-              "monthlyBuildMinutes",
-              "monthlyDeployments",
-              "concurrentBuilds",
-              "maxBuildDurationSeconds",
-              "buildCpuMillis",
-              "buildMemoryMib",
-              "buildDiskMib",
-              "customDomains",
-              "alwaysOnServices",
-              "logRetentionDays",
-              "apiTokens",
-              "supportTicketsPerDay"
-            ],
-            "properties": {
-              "projects": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Hosted projects. Context: components.schemas.PlanLimits.properties.projects. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.projects.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteDatabases": {
-                "type": "integer",
-                "format": "int64",
-                "description": "SQLite databases allowed for the account. Context: components.schemas.PlanLimits.properties.sqliteDatabases. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteDatabases.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteStorageMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Total SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.sqliteStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteStorageMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteStorageMibPerDatabase": {
-                "type": "integer",
-                "format": "int64",
-                "description": "SQLite storage in MiB for each database. Context: components.schemas.PlanLimits.properties.sqliteStorageMibPerDatabase. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteStorageMibPerDatabase.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteRowsReadPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily SQLite rows read limit, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsReadPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsReadPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteRowsReadPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly SQLite rows read allowance, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsReadPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsReadPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteRowsWrittenPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily SQLite rows written limit, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsWrittenPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsWrittenPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteRowsWrittenPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly SQLite rows written allowance, when set. Context: components.schemas.PlanLimits.properties.sqliteRowsWrittenPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteRowsWrittenPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteQueryTimeoutSeconds": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum SQLite query duration in seconds. Context: components.schemas.PlanLimits.properties.sqliteQueryTimeoutSeconds. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteQueryTimeoutSeconds.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "sqliteTimeTravelDays": {
-                "type": "integer",
-                "format": "int64",
-                "description": "SQLite restore window in days. Context: components.schemas.PlanLimits.properties.sqliteTimeTravelDays. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.sqliteTimeTravelDays.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workers": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Rust workers allowed for the account. Context: components.schemas.PlanLimits.properties.workers. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workers.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerRequestsPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily worker request limit, when set. Context: components.schemas.PlanLimits.properties.workerRequestsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerRequestsPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerRequestsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly included worker requests, when set. Context: components.schemas.PlanLimits.properties.workerRequestsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerRequestsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerCpuMsPerRequest": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum worker CPU time for one request in milliseconds. Context: components.schemas.PlanLimits.properties.workerCpuMsPerRequest. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerCpuMsPerRequest.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerCpuMsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly included worker CPU time in milliseconds. Context: components.schemas.PlanLimits.properties.workerCpuMsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerCpuMsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerMemoryMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Worker memory limit in MiB. Context: components.schemas.PlanLimits.properties.workerMemoryMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerMemoryMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerSubrequestsPerRequest": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Subrequests allowed during one worker invocation. Context: components.schemas.PlanLimits.properties.workerSubrequestsPerRequest. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerSubrequestsPerRequest.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerOutgoingConnectionsPerRequest": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Simultaneous outgoing connections per worker invocation. Context: components.schemas.PlanLimits.properties.workerOutgoingConnectionsPerRequest. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerOutgoingConnectionsPerRequest.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerEnvVars": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Environment variables allowed per worker. Context: components.schemas.PlanLimits.properties.workerEnvVars. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerEnvVars.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerEnvVarSizeKib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum environment variable size in KiB. Context: components.schemas.PlanLimits.properties.workerEnvVarSizeKib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerEnvVarSizeKib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerCompressedSizeMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum compressed worker artifact size in MiB. Context: components.schemas.PlanLimits.properties.workerCompressedSizeMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerCompressedSizeMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "workerStartupTimeMs": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum worker startup time in milliseconds. Context: components.schemas.PlanLimits.properties.workerStartupTimeMs. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.workerStartupTimeMs.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "cronTriggers": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Cron triggers allowed for the account. Context: components.schemas.PlanLimits.properties.cronTriggers. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.cronTriggers.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "staticAssetFilesPerVersion": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Static asset files allowed per deploy version. Context: components.schemas.PlanLimits.properties.staticAssetFilesPerVersion. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.staticAssetFilesPerVersion.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "staticAssetFileSizeMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum static asset file size in MiB. Context: components.schemas.PlanLimits.properties.staticAssetFileSizeMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.staticAssetFileSizeMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvStorageMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "KV storage in MiB. Context: components.schemas.PlanLimits.properties.kvStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvStorageMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvReadsPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily KV read limit, when set. Context: components.schemas.PlanLimits.properties.kvReadsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvReadsPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvReadsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly KV read allowance, when set. Context: components.schemas.PlanLimits.properties.kvReadsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvReadsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvWritesPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily KV write limit, when set. Context: components.schemas.PlanLimits.properties.kvWritesPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvWritesPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvWritesPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly KV write allowance, when set. Context: components.schemas.PlanLimits.properties.kvWritesPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvWritesPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvDeletesPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily KV delete limit, when set. Context: components.schemas.PlanLimits.properties.kvDeletesPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvDeletesPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvDeletesPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly KV delete allowance, when set. Context: components.schemas.PlanLimits.properties.kvDeletesPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvDeletesPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvListsPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily KV list limit, when set. Context: components.schemas.PlanLimits.properties.kvListsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvListsPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "kvListsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly KV list allowance, when set. Context: components.schemas.PlanLimits.properties.kvListsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.kvListsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "queueOperationsPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily queue operation limit, when set. Context: components.schemas.PlanLimits.properties.queueOperationsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.queueOperationsPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "queueOperationsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly queue operation allowance, when set. Context: components.schemas.PlanLimits.properties.queueOperationsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.queueOperationsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "durableObjectRequestsPerDay": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Daily Durable Object request limit, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.durableObjectRequestsPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "durableObjectRequestsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly Durable Object request allowance, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerMonth. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.durableObjectRequestsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "durableObjectSqliteStorageMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Durable Object SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.durableObjectSqliteStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.durableObjectSqliteStorageMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "objectStorageMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Object storage in MiB. Context: components.schemas.PlanLimits.properties.objectStorageMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.objectStorageMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "storageObjects": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Stored objects allowed. Context: components.schemas.PlanLimits.properties.storageObjects. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.storageObjects.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "storageObjectMaxMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum single-part object upload size in MiB. Context: components.schemas.PlanLimits.properties.storageObjectMaxMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.storageObjectMaxMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "dataTransferGib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Included monthly data transfer in GiB. Context: components.schemas.PlanLimits.properties.dataTransferGib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.dataTransferGib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "monthlyBuildMinutes": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Included monthly build minutes. Context: components.schemas.PlanLimits.properties.monthlyBuildMinutes. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.monthlyBuildMinutes.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "monthlyDeployments": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Included monthly deploy count. Context: components.schemas.PlanLimits.properties.monthlyDeployments. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.monthlyDeployments.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "concurrentBuilds": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Concurrent builds allowed. Context: components.schemas.PlanLimits.properties.concurrentBuilds. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.concurrentBuilds.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "maxBuildDurationSeconds": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Maximum build duration in seconds. Context: components.schemas.PlanLimits.properties.maxBuildDurationSeconds. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.maxBuildDurationSeconds.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "buildCpuMillis": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Build CPU limit in millis. Context: components.schemas.PlanLimits.properties.buildCpuMillis. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.buildCpuMillis.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "buildMemoryMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Build memory limit in MiB. Context: components.schemas.PlanLimits.properties.buildMemoryMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.buildMemoryMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "buildDiskMib": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Build disk limit in MiB. Context: components.schemas.PlanLimits.properties.buildDiskMib. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.buildDiskMib.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "customDomains": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Custom domains allowed. Context: components.schemas.PlanLimits.properties.customDomains. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.customDomains.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "alwaysOnServices": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Always-on services allowed. Context: components.schemas.PlanLimits.properties.alwaysOnServices. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.alwaysOnServices.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "logRetentionDays": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Log retention in days. Context: components.schemas.PlanLimits.properties.logRetentionDays. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.logRetentionDays.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "apiTokens": {
-                "type": "integer",
-                "format": "int64",
-                "description": "API tokens allowed. Context: components.schemas.PlanLimits.properties.apiTokens. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.apiTokens.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "supportTicketsPerDay": {
-                "type": "integer",
-                "format": "int64",
-                "description": "Support tickets allowed per day. Context: components.schemas.PlanLimits.properties.supportTicketsPerDay. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.supportTicketsPerDay.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "objectStorageClassAOperationsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly included Class A object storage operations returned with platform resources. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.objectStorageClassAOperationsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              },
-              "objectStorageClassBOperationsPerMonth": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "format": "int64",
-                "description": "Monthly included Class B object storage operations returned with platform resources. Context: components.schemas.PlatformResourcesResponse.properties.limits.properties.objectStorageClassBOperationsPerMonth.",
-                "minimum": 0,
-                "maximum": 1000000000000
-              }
-            },
-            "additionalProperties": false,
-            "description": "Plan limits attached to this platform resources response. Context: components.schemas.PlatformResourcesResponse.properties.limits.",
-            "examples": [
-              {
-                "projects": 100,
-                "sqliteDatabases": 10,
-                "sqliteStorageMib": 5120,
-                "sqliteStorageMibPerDatabase": 500,
-                "sqliteRowsReadPerDay": 5000000,
-                "sqliteRowsReadPerMonth": null,
-                "sqliteRowsWrittenPerDay": 100000,
-                "sqliteRowsWrittenPerMonth": null,
-                "sqliteQueryTimeoutSeconds": 30,
-                "sqliteTimeTravelDays": 7,
-                "workers": 100,
-                "workerRequestsPerDay": 100000,
-                "workerRequestsPerMonth": null,
-                "workerCpuMsPerRequest": 10,
-                "workerCpuMsPerMonth": null,
-                "workerMemoryMib": 128,
-                "workerSubrequestsPerRequest": 50,
-                "workerOutgoingConnectionsPerRequest": 6,
-                "workerEnvVars": 64,
-                "workerEnvVarSizeKib": 5,
-                "workerCompressedSizeMib": 3,
-                "workerStartupTimeMs": 1000,
-                "cronTriggers": 5,
-                "staticAssetFilesPerVersion": 20000,
-                "staticAssetFileSizeMib": 25,
-                "kvStorageMib": 1024,
-                "kvReadsPerDay": 100000,
-                "kvReadsPerMonth": null,
-                "kvWritesPerDay": 1000,
-                "kvWritesPerMonth": null,
-                "kvDeletesPerDay": 1000,
-                "kvDeletesPerMonth": null,
-                "kvListsPerDay": 1000,
-                "kvListsPerMonth": null,
-                "queueOperationsPerDay": 10000,
-                "queueOperationsPerMonth": null,
-                "durableObjectRequestsPerDay": 100000,
-                "durableObjectRequestsPerMonth": null,
-                "durableObjectSqliteStorageMib": 1024,
-                "objectStorageMib": 10240,
-                "storageObjects": 100000,
-                "storageObjectMaxMib": 5115,
-                "dataTransferGib": 100,
-                "monthlyBuildMinutes": 3000,
-                "monthlyDeployments": 0,
-                "concurrentBuilds": 1,
-                "maxBuildDurationSeconds": 1200,
-                "buildCpuMillis": 2000,
-                "buildMemoryMib": 8192,
-                "buildDiskMib": 20480,
-                "customDomains": 100,
-                "alwaysOnServices": 0,
-                "logRetentionDays": 3,
-                "apiTokens": 10,
-                "supportTicketsPerDay": 3,
-                "objectStorageClassAOperationsPerMonth": 1000000,
-                "objectStorageClassBOperationsPerMonth": 10000000
-              }
-            ],
-            "example": {
-              "projects": 100,
-              "sqliteDatabases": 10,
-              "sqliteStorageMib": 5120,
-              "sqliteStorageMibPerDatabase": 500,
-              "sqliteRowsReadPerDay": 5000000,
-              "sqliteRowsReadPerMonth": null,
-              "sqliteRowsWrittenPerDay": 100000,
-              "sqliteRowsWrittenPerMonth": null,
-              "sqliteQueryTimeoutSeconds": 30,
-              "sqliteTimeTravelDays": 7,
-              "workers": 100,
-              "workerRequestsPerDay": 100000,
-              "workerRequestsPerMonth": null,
-              "workerCpuMsPerRequest": 10,
-              "workerCpuMsPerMonth": null,
-              "workerMemoryMib": 128,
-              "workerSubrequestsPerRequest": 50,
-              "workerOutgoingConnectionsPerRequest": 6,
-              "workerEnvVars": 64,
-              "workerEnvVarSizeKib": 5,
-              "workerCompressedSizeMib": 3,
-              "workerStartupTimeMs": 1000,
-              "cronTriggers": 5,
-              "staticAssetFilesPerVersion": 20000,
-              "staticAssetFileSizeMib": 25,
-              "kvStorageMib": 1024,
-              "kvReadsPerDay": 100000,
-              "kvReadsPerMonth": null,
-              "kvWritesPerDay": 1000,
-              "kvWritesPerMonth": null,
-              "kvDeletesPerDay": 1000,
-              "kvDeletesPerMonth": null,
-              "kvListsPerDay": 1000,
-              "kvListsPerMonth": null,
-              "queueOperationsPerDay": 10000,
-              "queueOperationsPerMonth": null,
-              "durableObjectRequestsPerDay": 100000,
-              "durableObjectRequestsPerMonth": null,
-              "durableObjectSqliteStorageMib": 1024,
-              "objectStorageMib": 10240,
-              "storageObjects": 100000,
-              "storageObjectMaxMib": 5115,
-              "dataTransferGib": 100,
-              "monthlyBuildMinutes": 3000,
-              "monthlyDeployments": 0,
-              "concurrentBuilds": 1,
-              "maxBuildDurationSeconds": 1200,
-              "buildCpuMillis": 2000,
-              "buildMemoryMib": 8192,
-              "buildDiskMib": 20480,
-              "customDomains": 100,
-              "alwaysOnServices": 0,
-              "logRetentionDays": 3,
-              "apiTokens": 10,
-              "supportTicketsPerDay": 3,
-              "objectStorageClassAOperationsPerMonth": 1000000,
-              "objectStorageClassBOperationsPerMonth": 10000000
-            }
+            "$ref": "#/components/schemas/PlanLimits"
           },
           "sqliteDatabases": {
             "type": "array",
@@ -13505,6 +14435,194 @@
               [
                 "Run tovuk deploy --wait --json after resources are configured."
               ]
+            ]
+          },
+          "pricing": {
+            "type": "object",
+            "description": "Plan pricing metadata.",
+            "additionalProperties": false,
+            "required": [
+              "subscriptionUsdCentsPerMonth",
+              "paidOveragesEnabled",
+              "workers",
+              "sqlite",
+              "kv",
+              "queues",
+              "durableObjects",
+              "objectStorage",
+              "staticAssets",
+              "logs"
+            ],
+            "properties": {
+              "subscriptionUsdCentsPerMonth": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Platform response plan subscription price in USD cents per month.",
+                "minimum": 0,
+                "maximum": 1000000000000
+              },
+              "paidOveragesEnabled": {
+                "type": "boolean",
+                "description": "Platform response flag for paid overage availability."
+              },
+              "workers": {
+                "$ref": "#/components/schemas/WorkerPricing"
+              },
+              "sqlite": {
+                "$ref": "#/components/schemas/SqlitePricing"
+              },
+              "kv": {
+                "$ref": "#/components/schemas/KvPricing"
+              },
+              "queues": {
+                "$ref": "#/components/schemas/QueuePricing"
+              },
+              "durableObjects": {
+                "$ref": "#/components/schemas/DurableObjectPricing"
+              },
+              "objectStorage": {
+                "$ref": "#/components/schemas/ObjectStoragePricing"
+              },
+              "staticAssets": {
+                "$ref": "#/components/schemas/StaticAssetPricing"
+              },
+              "logs": {
+                "$ref": "#/components/schemas/LogPricing"
+              }
+            },
+            "example": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
+            },
+            "examples": [
+              {
+                "subscriptionUsdCentsPerMonth": 0,
+                "paidOveragesEnabled": false,
+                "workers": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedCpuMsPerMonth": null,
+                  "cpuOverageUsdMicrosPerMillionMs": null
+                },
+                "sqlite": {
+                  "includedRowsReadPerMonth": null,
+                  "rowsReadOverageUsdMicrosPerMillion": null,
+                  "includedRowsWrittenPerMonth": null,
+                  "rowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 5120,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "egressFree": true
+                },
+                "kv": {
+                  "includedReadsPerMonth": null,
+                  "readOverageUsdMicrosPerMillion": null,
+                  "includedWritesPerMonth": null,
+                  "writeOverageUsdMicrosPerMillion": null,
+                  "includedDeletesPerMonth": null,
+                  "deleteOverageUsdMicrosPerMillion": null,
+                  "includedListsPerMonth": null,
+                  "listOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 1024,
+                  "storageOverageUsdMicrosPerGibMonth": null
+                },
+                "queues": {
+                  "includedOperationsPerMonth": null,
+                  "operationOverageUsdMicrosPerMillion": null,
+                  "egressFree": true
+                },
+                "durableObjects": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedDurationGbSecondsPerMonth": null,
+                  "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                  "includedSqliteRowsReadPerMonth": null,
+                  "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                  "includedSqliteRowsWrittenPerMonth": null,
+                  "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedSqliteStorageMib": 5120,
+                  "sqliteStorageOverageUsdMicrosPerGibMonth": null
+                },
+                "objectStorage": {
+                  "includedStorageMib": 10240,
+                  "storageOverageUsdMicrosPerGibMonth": null,
+                  "includedClassAOperationsPerMonth": 1000000,
+                  "classAOverageUsdMicrosPerMillion": null,
+                  "includedClassBOperationsPerMonth": 10000000,
+                  "classBOverageUsdMicrosPerMillion": null,
+                  "egressFree": true,
+                  "deleteOperationsFree": true
+                },
+                "staticAssets": {
+                  "requestsFreeAndUnlimited": true,
+                  "storageFree": true
+                },
+                "logs": {
+                  "includedEventsPerMonth": null,
+                  "eventOverageUsdMicrosPerMillion": null
+                }
+              }
             ]
           }
         },
@@ -14722,6 +15840,671 @@
           }
         },
         "description": "Usage cap deletion response. Context: components.schemas.UsageCapDeleteResponse."
+      },
+      "WorkerPricing": {
+        "type": "object",
+        "description": "Worker request and CPU pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedRequestsPerMonth",
+          "requestOverageUsdMicrosPerMillion",
+          "includedCpuMsPerMonth",
+          "cpuOverageUsdMicrosPerMillionMs"
+        ],
+        "properties": {
+          "includedRequestsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly worker requests.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "requestOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million worker requests.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedCpuMsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly worker CPU time in milliseconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "cpuOverageUsdMicrosPerMillionMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million worker CPU milliseconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          }
+        }
+      },
+      "SqlitePricing": {
+        "type": "object",
+        "description": "SQLite row and storage pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedRowsReadPerMonth",
+          "rowsReadOverageUsdMicrosPerMillion",
+          "includedRowsWrittenPerMonth",
+          "rowsWrittenOverageUsdMicrosPerMillion",
+          "includedStorageMib",
+          "storageOverageUsdMicrosPerGibMonth",
+          "egressFree"
+        ],
+        "properties": {
+          "includedRowsReadPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly SQLite rows read.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "rowsReadOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million SQLite rows read.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedRowsWrittenPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly SQLite rows written.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "rowsWrittenOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million SQLite rows written.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included SQLite storage in MiB.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageOverageUsdMicrosPerGibMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per GiB-month.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "egressFree": {
+            "type": "boolean",
+            "description": "Whether SQLite egress is free."
+          }
+        }
+      },
+      "KvPricing": {
+        "type": "object",
+        "description": "KV operation and storage pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedReadsPerMonth",
+          "readOverageUsdMicrosPerMillion",
+          "includedWritesPerMonth",
+          "writeOverageUsdMicrosPerMillion",
+          "includedDeletesPerMonth",
+          "deleteOverageUsdMicrosPerMillion",
+          "includedListsPerMonth",
+          "listOverageUsdMicrosPerMillion",
+          "includedStorageMib",
+          "storageOverageUsdMicrosPerGibMonth"
+        ],
+        "properties": {
+          "includedReadsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly KV reads.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "readOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million KV reads.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedWritesPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly KV writes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "writeOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million KV writes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedDeletesPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly KV deletes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "deleteOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million KV deletes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedListsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly KV list requests.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "listOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million KV list requests.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included KV storage in MiB.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageOverageUsdMicrosPerGibMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "KV storage overage price in USD micro-units per GiB-month.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          }
+        }
+      },
+      "QueuePricing": {
+        "type": "object",
+        "description": "Queue operation pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedOperationsPerMonth",
+          "operationOverageUsdMicrosPerMillion",
+          "egressFree"
+        ],
+        "properties": {
+          "includedOperationsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly queue operations.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "operationOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million queue operations.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "egressFree": {
+            "type": "boolean",
+            "description": "Whether queue egress is free."
+          }
+        }
+      },
+      "DurableObjectPricing": {
+        "type": "object",
+        "description": "Durable Object request, duration, and storage pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedRequestsPerMonth",
+          "requestOverageUsdMicrosPerMillion",
+          "includedDurationGbSecondsPerMonth",
+          "durationOverageUsdMicrosPerMillionGbSeconds",
+          "includedSqliteRowsReadPerMonth",
+          "sqliteRowsReadOverageUsdMicrosPerMillion",
+          "includedSqliteRowsWrittenPerMonth",
+          "sqliteRowsWrittenOverageUsdMicrosPerMillion",
+          "includedSqliteStorageMib",
+          "sqliteStorageOverageUsdMicrosPerGibMonth"
+        ],
+        "properties": {
+          "includedRequestsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly Durable Object requests.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "requestOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million Durable Object requests.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedDurationGbSecondsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly Durable Object duration in GB-seconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "durationOverageUsdMicrosPerMillionGbSeconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million GB-seconds.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedSqliteRowsReadPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly Durable Object SQLite rows read.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteRowsReadOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million Durable Object SQLite rows read.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedSqliteRowsWrittenPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly Durable Object SQLite rows written.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteRowsWrittenOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million Durable Object SQLite rows written.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedSqliteStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included Durable Object SQLite storage in MiB.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "sqliteStorageOverageUsdMicrosPerGibMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Durable Object SQLite storage overage price in USD micro-units per GiB-month.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          }
+        }
+      },
+      "ObjectStoragePricing": {
+        "type": "object",
+        "description": "Object storage pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedStorageMib",
+          "storageOverageUsdMicrosPerGibMonth",
+          "includedClassAOperationsPerMonth",
+          "classAOverageUsdMicrosPerMillion",
+          "includedClassBOperationsPerMonth",
+          "classBOverageUsdMicrosPerMillion",
+          "egressFree",
+          "deleteOperationsFree"
+        ],
+        "properties": {
+          "includedStorageMib": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included object storage in MiB.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageOverageUsdMicrosPerGibMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Object storage overage price in USD micro-units per GiB-month.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedClassAOperationsPerMonth": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included monthly Class A object storage operations.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "classAOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million Class A operations.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "includedClassBOperationsPerMonth": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Included monthly Class B object storage operations.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "classBOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million Class B operations.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "egressFree": {
+            "type": "boolean",
+            "description": "Whether object storage egress is free."
+          },
+          "deleteOperationsFree": {
+            "type": "boolean",
+            "description": "Whether object delete operations are free."
+          }
+        }
+      },
+      "StaticAssetPricing": {
+        "type": "object",
+        "description": "Static asset pricing.",
+        "additionalProperties": false,
+        "required": [
+          "requestsFreeAndUnlimited",
+          "storageFree"
+        ],
+        "properties": {
+          "requestsFreeAndUnlimited": {
+            "type": "boolean",
+            "description": "Whether static asset requests are free and unlimited."
+          },
+          "storageFree": {
+            "type": "boolean",
+            "description": "Whether static asset storage is free."
+          }
+        }
+      },
+      "LogPricing": {
+        "type": "object",
+        "description": "Runtime log pricing.",
+        "additionalProperties": false,
+        "required": [
+          "includedEventsPerMonth",
+          "eventOverageUsdMicrosPerMillion"
+        ],
+        "properties": {
+          "includedEventsPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly log events.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "eventOverageUsdMicrosPerMillion": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units per one million log events.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          }
+        }
+      },
+      "PlanPricing": {
+        "type": "object",
+        "description": "Plan pricing and overage metadata.",
+        "additionalProperties": false,
+        "required": [
+          "subscriptionUsdCentsPerMonth",
+          "paidOveragesEnabled",
+          "workers",
+          "sqlite",
+          "kv",
+          "queues",
+          "durableObjects",
+          "objectStorage",
+          "staticAssets",
+          "logs"
+        ],
+        "properties": {
+          "subscriptionUsdCentsPerMonth": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Subscription price in USD cents per month.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "paidOveragesEnabled": {
+            "type": "boolean",
+            "description": "Whether paid overages are available for this plan."
+          },
+          "workers": {
+            "$ref": "#/components/schemas/WorkerPricing"
+          },
+          "sqlite": {
+            "$ref": "#/components/schemas/SqlitePricing"
+          },
+          "kv": {
+            "$ref": "#/components/schemas/KvPricing"
+          },
+          "queues": {
+            "$ref": "#/components/schemas/QueuePricing"
+          },
+          "durableObjects": {
+            "$ref": "#/components/schemas/DurableObjectPricing"
+          },
+          "objectStorage": {
+            "$ref": "#/components/schemas/ObjectStoragePricing"
+          },
+          "staticAssets": {
+            "$ref": "#/components/schemas/StaticAssetPricing"
+          },
+          "logs": {
+            "$ref": "#/components/schemas/LogPricing"
+          }
+        }
+      },
+      "PlanCatalogEntry": {
+        "type": "object",
+        "description": "Public plan catalog entry.",
+        "additionalProperties": false,
+        "required": [
+          "plan",
+          "limits",
+          "pricing"
+        ],
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PlanLimits"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing",
+            "example": {
+              "subscriptionUsdCentsPerMonth": 0,
+              "paidOveragesEnabled": false,
+              "workers": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedCpuMsPerMonth": null,
+                "cpuOverageUsdMicrosPerMillionMs": null
+              },
+              "sqlite": {
+                "includedRowsReadPerMonth": null,
+                "rowsReadOverageUsdMicrosPerMillion": null,
+                "includedRowsWrittenPerMonth": null,
+                "rowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 5120,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "egressFree": true
+              },
+              "kv": {
+                "includedReadsPerMonth": null,
+                "readOverageUsdMicrosPerMillion": null,
+                "includedWritesPerMonth": null,
+                "writeOverageUsdMicrosPerMillion": null,
+                "includedDeletesPerMonth": null,
+                "deleteOverageUsdMicrosPerMillion": null,
+                "includedListsPerMonth": null,
+                "listOverageUsdMicrosPerMillion": null,
+                "includedStorageMib": 1024,
+                "storageOverageUsdMicrosPerGibMonth": null
+              },
+              "queues": {
+                "includedOperationsPerMonth": null,
+                "operationOverageUsdMicrosPerMillion": null,
+                "egressFree": true
+              },
+              "durableObjects": {
+                "includedRequestsPerMonth": null,
+                "requestOverageUsdMicrosPerMillion": null,
+                "includedDurationGbSecondsPerMonth": null,
+                "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                "includedSqliteRowsReadPerMonth": null,
+                "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                "includedSqliteRowsWrittenPerMonth": null,
+                "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                "includedSqliteStorageMib": 5120,
+                "sqliteStorageOverageUsdMicrosPerGibMonth": null
+              },
+              "objectStorage": {
+                "includedStorageMib": 10240,
+                "storageOverageUsdMicrosPerGibMonth": null,
+                "includedClassAOperationsPerMonth": 1000000,
+                "classAOverageUsdMicrosPerMillion": null,
+                "includedClassBOperationsPerMonth": 10000000,
+                "classBOverageUsdMicrosPerMillion": null,
+                "egressFree": true,
+                "deleteOperationsFree": true
+              },
+              "staticAssets": {
+                "requestsFreeAndUnlimited": true,
+                "storageFree": true
+              },
+              "logs": {
+                "includedEventsPerMonth": null,
+                "eventOverageUsdMicrosPerMillion": null
+              }
+            }
+          }
+        }
       }
     }
   }

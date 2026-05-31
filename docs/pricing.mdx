@@ -1,0 +1,104 @@
+---
+title: "Pricing"
+description: "Free and Pro limits for agent-ready deploys."
+---
+
+Tovuk uses Cloudflare-style meters so agents can predict cost before they
+deploy. Free plans hard-stop at the free limits. Pro costs `$25/month`, includes
+the monthly allowances below, and lets agents set hard usage caps before paid
+overages.
+
+Use the CLI to read the live catalog:
+
+```sh
+tovuk pricing --json
+```
+
+Use the authenticated usage view before heavy work:
+
+```sh
+tovuk usage --json
+```
+
+## Free
+
+- Projects: `100`.
+- Rust Workers: `100,000` requests per day, `10 ms` CPU per invocation,
+  `128 MiB` memory, `50` subrequests per request.
+- Static assets: free and unlimited requests, free asset storage, `20,000`
+  files per Worker version, `25 MiB` per file.
+- SQLite: `10` databases, `5 GiB` total, `500 MiB` per database, `5 million`
+  rows read per day, `100,000` rows written per day.
+- KV: `1,000` namespaces, `1 GiB` per namespace, `100,000` reads per day,
+  `1,000` writes, deletes, and list requests per day.
+- Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
+  `24 hour` retention.
+- Durable Objects: `100` classes, `100,000` requests per day, `13,000 GB-s`
+  duration per day, `5 GiB` account SQLite storage, `1 GiB` per object.
+- Object storage: `10 GiB`, `100,000` objects, `1 million` Class A operations
+  per month, `10 million` Class B operations per month, free egress.
+- Logs: `200,000` events per day, `3 day` retention.
+- API tokens: `10`.
+- Support tickets: `3` per day.
+
+## Pro
+
+- Subscription: `$25/month`.
+- Projects: `500`.
+- Rust Workers: `10 million` included requests per month, then `$0.30` per
+  million requests. CPU includes `30 million ms` per month, then `$0.02` per
+  million CPU ms. Per-invocation CPU can be up to `300,000 ms`.
+- Static assets: free and unlimited requests, free asset storage, `100,000`
+  files per Worker version, `25 MiB` per file.
+- SQLite: `50,000` databases, `1 TiB` account hard cap, `10 GiB` per database,
+  `25 billion` rows read and `50 million` rows written per month included.
+  Overage is `$0.001` per million rows read, `$1.00` per million rows written,
+  and `$0.75` per GiB-month after the included `5 GiB`.
+- KV: `1,000` namespaces, `1 TiB` account hard cap, `10 million` reads and
+  `1 million` writes, deletes, and lists per month included. Overage is `$0.50`
+  per million reads, `$5.00` per million writes, deletes, or lists, and `$0.50`
+  per GiB-month after the included `1 GiB`.
+- Queues: `10,000` queues, `1 million` operations per month included, then
+  `$0.40` per million operations. Default retention is `4 days`, configurable
+  up to `14 days`.
+- Durable Objects: `500` classes, `1 million` requests and `400,000 GB-s`
+  duration per month included. Overage is `$0.15` per million requests and
+  `$12.50` per million GB-s. SQLite storage includes `5 GiB`, then `$0.20`
+  per GiB-month.
+- Object storage: `1 TiB` account hard cap, `1 million` objects, `10 GiB`
+  included storage, `1 million` Class A operations, and `10 million` Class B
+  operations per month. Overage is `$0.015` per GiB-month, `$4.50` per million
+  Class A operations, and `$0.36` per million Class B operations. Egress and
+  deletes are free.
+- Logs: `20 million` events per month, then `$0.60` per million events, `7 day`
+  retention.
+- API tokens: `100`.
+- Support tickets: `20` per day.
+
+## Hard Caps
+
+Paid overage should never surprise a human. Before a high-throughput test or a
+production launch, set hard caps:
+
+```sh
+tovuk limit set worker_requests --period month --value 10000000 --json
+tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
+```
+
+Tovuk reports prices in API JSON as USD micro-units. `1,000,000` means `$1.00`.
+
+## Sources
+
+These limits follow Cloudflare product docs for [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/),
+[Workers limits](https://developers.cloudflare.com/workers/platform/limits/),
+[D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/),
+[D1 limits](https://developers.cloudflare.com/d1/platform/limits/),
+[KV pricing](https://developers.cloudflare.com/kv/platform/pricing/),
+[KV limits](https://developers.cloudflare.com/kv/platform/limits/),
+[Queues pricing](https://developers.cloudflare.com/queues/platform/pricing/),
+[Queues limits](https://developers.cloudflare.com/queues/platform/limits/),
+[Durable Objects pricing](https://developers.cloudflare.com/durable-objects/platform/pricing/),
+[Durable Objects limits](https://developers.cloudflare.com/durable-objects/platform/limits/),
+[R2 pricing](https://developers.cloudflare.com/r2/pricing/), and
+[Static Assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/).

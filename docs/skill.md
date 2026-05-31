@@ -45,6 +45,7 @@ npx tovuk doctor --json
 npx tovuk init hello-service --template worker-static-rust-tanstack
 npx tovuk preview
 npx tovuk deploy --wait --json
+npx tovuk pricing --json
 npx tovuk logs --build <build_id> --json
 ```
 
@@ -67,6 +68,14 @@ npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service 
 npx tovuk binding delete --service <service> AUTH_SERVICE --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
 npx tovuk limit delete worker_requests --period day --json
+```
+
+Before high-throughput work or paid usage, read pricing and set hard caps:
+
+```sh
+npx tovuk pricing --json
+npx tovuk limit set worker_requests --period month --value 10000000 --json
+npx tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 ```
 
 Manage service files and media without dashboard access:

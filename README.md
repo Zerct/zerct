@@ -155,6 +155,7 @@ Useful agent commands:
 
 ```sh
 npx tovuk capabilities
+npx tovuk pricing --json
 npx tovuk me
 npx tovuk usage
 npx tovuk activity --json

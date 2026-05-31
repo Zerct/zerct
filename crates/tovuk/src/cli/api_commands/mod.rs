@@ -15,7 +15,7 @@ pub(crate) use common::service_route;
 pub(crate) use domains::domains_command;
 pub(crate) use env::env_command;
 pub(crate) use generic::{
-    capabilities, print_authenticated, print_paged_authenticated, service_get_command,
+    capabilities, pricing, print_authenticated, print_paged_authenticated, service_get_command,
 };
 pub(crate) use http::{api_request, payment_required_agent_error};
 pub(crate) use lists::{builds_command, deploys_command, service_command};

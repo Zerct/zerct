@@ -23,7 +23,7 @@ func checkCLIContract() {
 	homebrewFormula := readText("Formula/tovuk.rb")
 
 	for _, command := range []string{
-		"init", "install", "doctor", "preview", "login", "deploy", "capabilities",
+		"init", "install", "doctor", "preview", "login", "deploy", "capabilities", "pricing",
 		"me", "usage", "activity", "service", "services", "overview", "deploys", "builds", "logs",
 		"status", "inspect", "platform", "kv", "queue", "cron", "durable-object",
 		"binding", "limit", "database", "env", "domains", "storage", "files", "media",
@@ -40,6 +40,7 @@ func checkCLIContract() {
 		requireContains(source, "tovuk kv put", "agentic kv put command")
 		requireContains(source, "tovuk kv get", "agentic kv get command")
 		requireContains(source, "tovuk queue send", "agentic queue send command")
+		requireContains(source, "tovuk pricing", "agentic pricing command")
 		requireContains(source, "tovuk billing checkout --json", "agentic billing checkout command")
 		requireContains(source, "tovuk support create", "agentic support create command")
 		requireContains(source, "tovuk support list", "agentic support list command")
