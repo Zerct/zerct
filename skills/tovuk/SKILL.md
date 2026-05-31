@@ -42,13 +42,15 @@ worker-static app to Tovuk.
 Agents can manage runtime resources without dashboard access:
 
 ```sh
-npx tovuk platform --app <app_id> --json
-npx tovuk sqlite create --app <app_id> DB --json
-npx tovuk kv create --app <app_id> CACHE --json
-npx tovuk queue create --app <app_id> jobs --json
-npx tovuk cron create --app <app_id> nightly "0 0 * * *" --json
-npx tovuk durable create --app <app_id> Room --json
-npx tovuk binding create --app <app_id> AUTH_SERVICE --target auth-app --json
+npx tovuk platform --service <service> --json
+npx tovuk database create --service <service> DB --json
+npx tovuk kv create --service <service> CACHE --json
+npx tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+npx tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
+npx tovuk queue create --service <service> jobs --json
+npx tovuk cron create --service <service> nightly "0 0 * * *" --json
+npx tovuk durable-object create --service <service> Room --json
+npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 npx tovuk caps set worker_requests --period day --value 100000 --json
 ```
 

@@ -57,6 +57,9 @@ npx tovuk database create --service <service> DB --json
 npx tovuk database query --service <service> DB "select 1" --json
 npx tovuk database delete --service <service> DB --json
 npx tovuk kv create --service <service> CACHE --json
+npx tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+npx tovuk kv bulk get --service <service> CACHE feature:search user:1 --json
+npx tovuk kv bulk delete --service <service> CACHE feature:search old:key --json
 npx tovuk kv namespace delete --service <service> CACHE --json
 npx tovuk queue create --service <service> failed_jobs --json
 npx tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json

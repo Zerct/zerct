@@ -54,6 +54,10 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
         "keys" => kv_keys(cli),
         "get" => kv_get(cli),
         "put" => kv_put(cli),
+        "bulk" => kv_bulk_command(cli),
+        "bulk-get" => kv_bulk_get(cli, 1),
+        "bulk-put" => kv_bulk_put(cli, 1),
+        "bulk-delete" | "bulk-del" | "bulk-rm" => kv_bulk_delete(cli, 1),
         "delete" | "del" | "rm" => kv_delete(cli),
         "namespace" | "namespaces" => kv_namespace_command(cli),
         "delete-namespace" | "remove-namespace" => delete_app_resource(
@@ -65,6 +69,20 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
             "kv/namespaces",
         ),
         _ => unknown_platform_command(cli, "kv"),
+    }
+}
+
+fn kv_bulk_command(cli: &CliOptions) -> Result<()> {
+    match cli.args.get(1).map_or("", String::as_str) {
+        "get" => kv_bulk_get(cli, 2),
+        "put" => kv_bulk_put(cli, 2),
+        "delete" | "del" | "rm" => kv_bulk_delete(cli, 2),
+        _ => Err(agent_error(
+            "unknown_command",
+            "Unknown KV bulk command.",
+            "Use `tovuk kv bulk put --service <service> CACHE '[{\"key\":\"a\",\"value\":\"1\"}]' --json`, `tovuk kv bulk get --service <service> CACHE a b --json`, or `tovuk kv bulk delete --service <service> CACHE a b --json`.",
+            cli.output.json,
+        )),
     }
 }
 
@@ -498,6 +516,187 @@ fn kv_delete(cli: &CliOptions) -> Result<()> {
     )
 }
 
+fn kv_bulk_get(cli: &CliOptions, namespace_index: usize) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        namespace_index,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv bulk get --service <service> CACHE key-a key-b --json`.",
+    )?;
+    let keys = kv_bulk_keys(cli, namespace_index + 1)?;
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &kv_bulk_route(cli, &namespace, "")?,
+        Some(json!({ "keys": keys })),
+    )
+}
+
+fn kv_bulk_put(cli: &CliOptions, namespace_index: usize) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        namespace_index,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv bulk put --service <service> CACHE '[{\"key\":\"a\",\"value\":\"1\"}]' --json`.",
+    )?;
+    let raw = raw_bulk_json(
+        cli,
+        namespace_index + 1,
+        "KV bulk entries are required.",
+        "Pass JSON entries as `--value '[{\"key\":\"a\",\"value\":\"1\"}]'` or as the final positional argument.",
+    )?;
+    let payload = kv_bulk_put_payload(&raw, cli)?;
+    print_authenticated_mutation(
+        cli,
+        Method::PUT,
+        &kv_bulk_route(cli, &namespace, "")?,
+        Some(payload),
+    )
+}
+
+fn kv_bulk_delete(cli: &CliOptions, namespace_index: usize) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        namespace_index,
+        "kv_namespace_required",
+        "KV namespace is required.",
+        "Use `tovuk kv bulk delete --service <service> CACHE key-a key-b --json`.",
+    )?;
+    let keys = kv_bulk_keys(cli, namespace_index + 1)?;
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &kv_bulk_route(cli, &namespace, "removals")?,
+        Some(json!({ "keys": keys })),
+    )
+}
+
+fn kv_bulk_keys(cli: &CliOptions, first_key_index: usize) -> Result<Vec<String>> {
+    if !cli.value.trim().is_empty() {
+        return parse_kv_bulk_keys_json(&cli.value, cli);
+    }
+    let keys = cli
+        .args
+        .iter()
+        .skip(first_key_index)
+        .filter(|key| !key.trim().is_empty())
+        .cloned()
+        .collect::<Vec<_>>();
+    if keys.is_empty() {
+        return Err(agent_error(
+            "kv_keys_required",
+            "KV keys are required.",
+            "Pass keys as positional arguments or with `--value '[\"key-a\",\"key-b\"]'`.",
+            cli.output.json,
+        ));
+    }
+    Ok(keys)
+}
+
+fn parse_kv_bulk_keys_json(source: &str, cli: &CliOptions) -> Result<Vec<String>> {
+    let value = serde_json::from_str::<Value>(source).map_err(|_error| {
+        agent_error(
+            "invalid_kv_keys",
+            "KV keys JSON is invalid.",
+            "Pass keys as JSON such as `--value '[\"key-a\",\"key-b\"]'`.",
+            cli.output.json,
+        )
+    })?;
+    let keys = match value {
+        Value::Array(items) => items,
+        Value::Object(mut object) => match object.remove("keys") {
+            Some(Value::Array(items)) => items,
+            _other => {
+                return Err(agent_error(
+                    "invalid_kv_keys",
+                    "KV keys JSON must contain a keys array.",
+                    "Pass keys as JSON such as `--value '{\"keys\":[\"key-a\",\"key-b\"]}'`.",
+                    cli.output.json,
+                ));
+            }
+        },
+        _other => {
+            return Err(agent_error(
+                "invalid_kv_keys",
+                "KV keys JSON must be an array or object.",
+                "Pass keys as JSON such as `--value '[\"key-a\",\"key-b\"]'`.",
+                cli.output.json,
+            ));
+        }
+    };
+    keys.into_iter()
+        .map(|item| match item {
+            Value::String(key) if !key.trim().is_empty() => Ok(key),
+            _other => Err(agent_error(
+                "invalid_kv_keys",
+                "KV keys must be strings.",
+                "Pass keys as JSON strings.",
+                cli.output.json,
+            )),
+        })
+        .collect()
+}
+
+fn raw_bulk_json(
+    cli: &CliOptions,
+    first_value_index: usize,
+    message: &'static str,
+    instruction: &'static str,
+) -> Result<String> {
+    let raw = if cli.value.trim().is_empty() {
+        cli.args
+            .iter()
+            .skip(first_value_index)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        cli.value.clone()
+    };
+    if raw.trim().is_empty() {
+        return Err(agent_error(
+            "kv_bulk_json_required",
+            message,
+            instruction,
+            cli.output.json,
+        ));
+    }
+    Ok(raw)
+}
+
+fn kv_bulk_put_payload(source: &str, cli: &CliOptions) -> Result<Value> {
+    let value = serde_json::from_str::<Value>(source).map_err(|_error| {
+        agent_error(
+            "invalid_kv_bulk_entries",
+            "KV bulk entries JSON is invalid.",
+            "Pass an entries array such as `--value '[{\"key\":\"a\",\"value\":\"1\"}]'`.",
+            cli.output.json,
+        )
+    })?;
+    match value {
+        Value::Array(entries) => Ok(json!({ "entries": entries })),
+        Value::Object(object) if object.contains_key("entries") => Ok(Value::Object(object)),
+        Value::Object(object) => {
+            let entries = object
+                .into_iter()
+                .map(|(key, value)| match value {
+                    Value::String(text) => json!({ "key": key, "value": text, "encoding": "text" }),
+                    other => json!({ "key": key, "value": other.to_string(), "encoding": "text" }),
+                })
+                .collect::<Vec<_>>();
+            Ok(json!({ "entries": entries }))
+        }
+        _other => Err(agent_error(
+            "invalid_kv_bulk_entries",
+            "KV bulk entries must be a JSON array or object.",
+            "Pass an entries array such as `--value '[{\"key\":\"a\",\"value\":\"1\"}]'`.",
+            cli.output.json,
+        )),
+    }
+}
+
 fn queue_messages(cli: &CliOptions) -> Result<()> {
     let queue = required_arg(
         cli,
@@ -606,6 +805,19 @@ fn kv_value_route(cli: &CliOptions, namespace: &str, key: &str) -> Result<String
         encode_component(namespace),
         encode_component(key)
     ))
+}
+
+fn kv_bulk_route(cli: &CliOptions, namespace: &str, suffix: &str) -> Result<String> {
+    let route = format!(
+        "{}/kv/{}/bulk",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(namespace)
+    );
+    if suffix.is_empty() {
+        Ok(route)
+    } else {
+        Ok(format!("{route}/{}", encode_component(suffix)))
+    }
 }
 
 fn create_cron(cli: &CliOptions) -> Result<()> {

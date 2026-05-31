@@ -58,6 +58,9 @@ tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 tovuk kv namespace delete --service service_1 CACHE --json
 tovuk queue create --service service_1 failed_jobs --json
 tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json

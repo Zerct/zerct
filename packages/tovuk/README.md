@@ -67,6 +67,9 @@ npx tovuk storage download --service service_1 uploads/logo.png ./logo.png --jso
 npx tovuk storage delete --service service_1 uploads/logo.png --json
 npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 npx tovuk kv get --service service_1 CACHE user:1 --json
+npx tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+npx tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+npx tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 ```
 

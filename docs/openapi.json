@@ -3952,6 +3952,254 @@
           }
         ]
       }
+    },
+    "/v1/services/{service_id}/kv/{namespace}/bulk": {
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Bulk write KV values",
+        "description": "Write up to 10000 KV values to a service namespace. Each key counts as one KV write for metering. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk.put.",
+        "operationId": "bulkPutServiceKvValues",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvBulkMutationLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name for the KV bulk write request. Context: bulkPutServiceKvValues.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name for the KV bulk write request. Context: bulkPutServiceKvValues.parameters.namespace.",
+            "example": "CACHE"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KvBulkPutRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for PUT /v1/services/{service_id}/kv/{namespace}/bulk",
+                  "value": {
+                    "entries": [
+                      {
+                        "key": "user:1",
+                        "value": "{\"name\":\"Ada\"}",
+                        "encoding": "text",
+                        "metadata": {
+                          "source": "agent"
+                        },
+                        "expirationTtlSeconds": 3600
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request example for PUT /v1/services/{service_id}/kv/{namespace}/bulk. Context: request body."
+        }
+      },
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Bulk read KV values",
+        "description": "Read up to 10000 KV values from a service namespace in requested key order. Each key counts as one KV read for metering. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk.post.",
+        "operationId": "bulkGetServiceKvValues",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvBulkGetLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name for the KV bulk read request. Context: bulkGetServiceKvValues.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name for the KV bulk read request. Context: bulkGetServiceKvValues.parameters.namespace.",
+            "example": "CACHE"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KvBulkGetRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/kv/{namespace}/bulk",
+                  "value": {
+                    "keys": [
+                      "user:1",
+                      "user:2"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request example for POST /v1/services/{service_id}/kv/{namespace}/bulk. Context: request body."
+        }
+      }
+    },
+    "/v1/services/{service_id}/kv/{namespace}/bulk/removals": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Bulk delete KV values",
+        "description": "Create a bulk KV removal job for up to 10000 keys in one service namespace. Missing keys are reported but do not fail the request. Each key counts as one KV delete for metering. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk/removals.post.",
+        "operationId": "bulkRemoveServiceKvValues",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/KvBulkMutationLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name for the KV bulk removal request. Context: bulkRemoveServiceKvValues.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(kv_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "CACHE"
+              ]
+            },
+            "description": "KV namespace id or binding name for the KV bulk removal request. Context: bulkRemoveServiceKvValues.parameters.namespace.",
+            "example": "CACHE"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KvBulkDeleteRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Request example for POST /v1/services/{service_id}/kv/{namespace}/bulk/removals",
+                  "value": {
+                    "keys": [
+                      "user:1",
+                      "user:2"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request example for POST /v1/services/{service_id}/kv/{namespace}/bulk/removals. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk/removals.post.requestBody."
+        }
+      }
     }
   },
   "components": {
@@ -7614,6 +7862,184 @@
                   "nextActions": [
                     "Run tovuk usage --json to confirm current account usage.",
                     "Set a replacement cap before allowing paid overage traffic."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "KvBulkGetLoaded": {
+        "description": "KV bulk values loaded. Context: components.responses.KvBulkGetLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/KvBulkGetResponse",
+              "examples": [
+                {
+                  "namespace": {
+                    "id": "kv_1",
+                    "name": "CACHE",
+                    "storageLimitMib": 1024,
+                    "storageUsedBytes": 14
+                  },
+                  "values": [
+                    {
+                      "key": "user:1",
+                      "found": true,
+                      "entry": {
+                        "key": "user:1",
+                        "valueSizeBytes": 14,
+                        "metadata": {
+                          "source": "agent"
+                        },
+                        "expiresAt": null,
+                        "createdAt": "2026-06-01 12:00:00Z",
+                        "updatedAt": "2026-06-01 12:00:00Z"
+                      },
+                      "valueBase64": "eyJuYW1lIjoiQWRhIn0=",
+                      "valueText": "{\"name\":\"Ada\"}"
+                    }
+                  ],
+                  "successfulKeyCount": 1,
+                  "missingKeys": [],
+                  "nextActions": [
+                    "Use KV for small cached values."
+                  ]
+                }
+              ]
+            },
+            "examples": {
+              "example": {
+                "summary": "KV bulk values loaded",
+                "value": {
+                  "namespace": {
+                    "id": "kv_1",
+                    "name": "CACHE",
+                    "storageLimitMib": 1024,
+                    "storageUsedBytes": 14
+                  },
+                  "values": [
+                    {
+                      "key": "user:1",
+                      "found": true,
+                      "entry": {
+                        "key": "user:1",
+                        "valueSizeBytes": 14,
+                        "metadata": {
+                          "source": "agent"
+                        },
+                        "expiresAt": null,
+                        "createdAt": "2026-06-01 12:00:00Z",
+                        "updatedAt": "2026-06-01 12:00:00Z"
+                      },
+                      "valueBase64": "eyJuYW1lIjoiQWRhIn0=",
+                      "valueText": "{\"name\":\"Ada\"}"
+                    }
+                  ],
+                  "successfulKeyCount": 1,
+                  "missingKeys": [],
+                  "nextActions": [
+                    "Use KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "KvBulkMutationLoaded": {
+        "description": "KV bulk mutation completed. Context: components.responses.KvBulkMutationLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/KvBulkMutationResponse",
+              "examples": [
+                {
+                  "namespace": {
+                    "id": "kv_1",
+                    "name": "CACHE",
+                    "storageLimitMib": 1024,
+                    "storageUsedBytes": 14
+                  },
+                  "successfulKeyCount": 1,
+                  "deletedKeyCount": 0,
+                  "missingKeys": [],
+                  "unsuccessfulKeys": [],
+                  "keys": [
+                    {
+                      "key": "user:1",
+                      "valueSizeBytes": 14,
+                      "metadata": {
+                        "source": "agent"
+                      },
+                      "expiresAt": null,
+                      "createdAt": "2026-06-01 12:00:00Z",
+                      "updatedAt": "2026-06-01 12:00:00Z"
+                    }
+                  ],
+                  "nextActions": [
+                    "Use KV for small cached values."
+                  ]
+                }
+              ]
+            },
+            "examples": {
+              "example": {
+                "summary": "KV bulk mutation completed",
+                "value": {
+                  "namespace": {
+                    "id": "kv_1",
+                    "name": "CACHE",
+                    "storageLimitMib": 1024,
+                    "storageUsedBytes": 14
+                  },
+                  "successfulKeyCount": 1,
+                  "deletedKeyCount": 0,
+                  "missingKeys": [],
+                  "unsuccessfulKeys": [],
+                  "keys": [
+                    {
+                      "key": "user:1",
+                      "valueSizeBytes": 14,
+                      "metadata": {
+                        "source": "agent"
+                      },
+                      "expiresAt": null,
+                      "createdAt": "2026-06-01 12:00:00Z",
+                      "updatedAt": "2026-06-01 12:00:00Z"
+                    }
+                  ],
+                  "nextActions": [
+                    "Use KV for small cached values."
                   ]
                 }
               }
@@ -17990,6 +18416,486 @@
           }
         },
         "description": "Queue update request with optional retry, batch, retention, and dead-letter controls. Context: components.schemas.QueueUpdateRequest."
+      },
+      "KvBulkPutItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "value"
+        ],
+        "description": "KV bulk put item. Context: components.schemas.KvBulkPutItem.",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "KV key. Context: components.schemas.KvBulkPutItem.properties.key.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "user:1"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "value": {
+            "type": "string",
+            "description": "Value text or base64 bytes. Context: components.schemas.KvBulkPutItem.properties.value.",
+            "minLength": 1,
+            "maxLength": 26214400,
+            "examples": [
+              "{\"name\":\"Ada\"}"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "text",
+              "base64"
+            ],
+            "description": "Value encoding. Context: components.schemas.KvBulkPutItem.properties.encoding.",
+            "examples": [
+              "text"
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "maxProperties": 64,
+            "description": "Small metadata object for this KV value, limited to 1024 serialized bytes. Context: components.schemas.KvBulkPutItem.properties.metadata.",
+            "examples": [
+              {
+                "source": "agent"
+              }
+            ]
+          },
+          "expirationTtlSeconds": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 30,
+            "maximum": 31536000,
+            "description": "Optional TTL in seconds. Context: components.schemas.KvBulkPutItem.properties.expirationTtlSeconds.",
+            "examples": [
+              3600
+            ]
+          }
+        },
+        "examples": [
+          {
+            "key": "user:1",
+            "value": "{\"name\":\"Ada\"}",
+            "encoding": "text",
+            "metadata": {
+              "source": "agent"
+            },
+            "expirationTtlSeconds": 3600
+          }
+        ]
+      },
+      "KvBulkPutRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entries"
+        ],
+        "description": "KV bulk put request. Context: components.schemas.KvBulkPutRequest.",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/KvBulkPutItem"
+            },
+            "description": "KV entries accepted by one bulk write request. Context: components.schemas.KvBulkPutRequest.properties.entries.",
+            "examples": [
+              [
+                {
+                  "key": "user:1",
+                  "value": "{\"name\":\"Ada\"}",
+                  "encoding": "text",
+                  "metadata": {
+                    "source": "agent"
+                  },
+                  "expirationTtlSeconds": 3600
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "entries": [
+              {
+                "key": "user:1",
+                "value": "{\"name\":\"Ada\"}",
+                "encoding": "text",
+                "metadata": {
+                  "source": "agent"
+                },
+                "expirationTtlSeconds": 3600
+              }
+            ]
+          }
+        ]
+      },
+      "KvBulkGetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "type": "string",
+              "description": "KV key requested by the bulk read request.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:1"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "KV keys requested by one bulk read request. Context: components.schemas.KvBulkGetRequest.properties.keys.",
+            "examples": [
+              [
+                "user:1",
+                "user:2"
+              ]
+            ]
+          }
+        },
+        "description": "KV bulk get request. Context: components.schemas.KvBulkGetRequest.",
+        "examples": [
+          {
+            "keys": [
+              "user:1",
+              "user:2"
+            ]
+          }
+        ]
+      },
+      "KvBulkDeleteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10000,
+            "items": {
+              "type": "string",
+              "description": "KV key requested by the bulk delete request.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:1"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "KV keys requested by one bulk delete request. Context: components.schemas.KvBulkDeleteRequest.properties.keys.",
+            "examples": [
+              [
+                "user:1",
+                "user:2"
+              ]
+            ]
+          }
+        },
+        "description": "KV bulk delete request. Context: components.schemas.KvBulkDeleteRequest.",
+        "examples": [
+          {
+            "keys": [
+              "user:1",
+              "user:2"
+            ]
+          }
+        ]
+      },
+      "KvBulkGetItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "found",
+          "entry",
+          "valueBase64",
+          "valueText"
+        ],
+        "description": "KV bulk get response item. Context: components.schemas.KvBulkGetItem.",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Requested KV key. Context: components.schemas.KvBulkGetItem.properties.key.",
+            "minLength": 1,
+            "maxLength": 512,
+            "examples": [
+              "user:1"
+            ],
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "found": {
+            "type": "boolean",
+            "description": "Whether the key was found and not expired. Context: components.schemas.KvBulkGetItem.properties.found.",
+            "examples": [
+              true
+            ]
+          },
+          "entry": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/KvEntrySummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "KV entry metadata when found. Context: components.schemas.KvBulkGetItem.properties.entry."
+          },
+          "valueBase64": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Base64 encoded value when found. Context: components.schemas.KvBulkGetItem.properties.valueBase64.",
+            "examples": [
+              "eyJuYW1lIjoiQWRhIn0="
+            ],
+            "maxLength": 26214400,
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          },
+          "valueText": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTF-8 value when valid. Context: components.schemas.KvBulkGetItem.properties.valueText.",
+            "examples": [
+              "{\"name\":\"Ada\"}"
+            ],
+            "maxLength": 26214400,
+            "pattern": "^[\\s\\S]{0,26214400}$"
+          }
+        }
+      },
+      "KvBulkGetResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "namespace",
+          "values",
+          "successfulKeyCount",
+          "missingKeys",
+          "nextActions"
+        ],
+        "description": "KV bulk get response. Context: components.schemas.KvBulkGetResponse.",
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/KvNamespaceBinding"
+          },
+          "values": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/KvBulkGetItem"
+            },
+            "description": "Values in requested key order. Context: components.schemas.KvBulkGetResponse.properties.values.",
+            "examples": [
+              [
+                {
+                  "key": "user:1",
+                  "found": true,
+                  "entry": {
+                    "key": "user:1",
+                    "valueSizeBytes": 14,
+                    "metadata": {
+                      "source": "agent"
+                    },
+                    "expiresAt": null,
+                    "createdAt": "2026-06-01 12:00:00Z",
+                    "updatedAt": "2026-06-01 12:00:00Z"
+                  },
+                  "valueBase64": "eyJuYW1lIjoiQWRhIn0=",
+                  "valueText": "{\"name\":\"Ada\"}"
+                }
+              ]
+            ]
+          },
+          "successfulKeyCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Count of found keys. Context: components.schemas.KvBulkGetResponse.properties.successfulKeyCount.",
+            "examples": [
+              1
+            ]
+          },
+          "missingKeys": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "type": "string",
+              "description": "KV key missing from the bulk read response.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:2"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Requested keys not found or expired. Context: components.schemas.KvBulkGetResponse.properties.missingKeys.",
+            "examples": [
+              [
+                "user:2"
+              ]
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "description": "Agent-readable next action.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "Use KV for small cached values."
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable follow-up actions for a bulk KV read response.",
+            "examples": [
+              [
+                "Use KV for small cached values."
+              ]
+            ]
+          }
+        }
+      },
+      "KvBulkMutationResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "namespace",
+          "successfulKeyCount",
+          "deletedKeyCount",
+          "missingKeys",
+          "unsuccessfulKeys",
+          "keys",
+          "nextActions"
+        ],
+        "description": "KV bulk mutation response. Context: components.schemas.KvBulkMutationResponse.",
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/KvNamespaceBinding"
+          },
+          "successfulKeyCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Number of requested keys accepted. Context: components.schemas.KvBulkMutationResponse.properties.successfulKeyCount.",
+            "examples": [
+              2
+            ]
+          },
+          "deletedKeyCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Number of keys actually removed for delete requests. Context: components.schemas.KvBulkMutationResponse.properties.deletedKeyCount.",
+            "examples": [
+              1
+            ]
+          },
+          "missingKeys": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "type": "string",
+              "description": "KV key absent during the bulk delete request.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:2"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Requested keys not present during delete. Context: components.schemas.KvBulkMutationResponse.properties.missingKeys.",
+            "examples": [
+              [
+                "user:2"
+              ]
+            ]
+          },
+          "unsuccessfulKeys": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "type": "string",
+              "description": "KV key that failed during the bulk mutation request.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "user:3"
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Keys that failed and should be retried. Context: components.schemas.KvBulkMutationResponse.properties.unsuccessfulKeys.",
+            "examples": [
+              []
+            ]
+          },
+          "keys": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "$ref": "#/components/schemas/KvEntrySummary"
+            },
+            "description": "Updated entries for bulk put requests. Context: components.schemas.KvBulkMutationResponse.properties.keys.",
+            "examples": [
+              [
+                {
+                  "key": "user:1",
+                  "valueSizeBytes": 14,
+                  "metadata": {
+                    "source": "agent"
+                  },
+                  "expiresAt": null,
+                  "createdAt": "2026-06-01 12:00:00Z",
+                  "updatedAt": "2026-06-01 12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "description": "Agent-readable next action for a bulk KV mutation response.",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "Use KV for small cached values."
+              ],
+              "pattern": "^[\\s\\S]{0,26214400}$"
+            },
+            "description": "Agent-readable follow-up actions for a bulk KV mutation response.",
+            "examples": [
+              [
+                "Use KV for small cached values."
+              ]
+            ]
+          }
+        }
       }
     }
   }

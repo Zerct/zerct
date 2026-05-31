@@ -172,6 +172,9 @@ npx tovuk domains verify --service service_1 api.example.com
 npx tovuk database query --service service_1 DB "select 1" --json
 npx tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 npx tovuk kv get --service service_1 CACHE user:1 --json
+npx tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+npx tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+npx tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 npx tovuk billing checkout --json
 npx tovuk billing portal
