@@ -67,36 +67,45 @@ jobs:
             *.exe) asset="${asset}.exe" ;;
           esac
           echo "name=$asset" >> "$GITHUB_OUTPUT"
-      - name: Check release version
+      - name: Check release asset
         id: release
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           tag="v${{ steps.version.outputs.version }}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::$tag already exists; verifying existing native asset without overwriting it."
+            if gh release view "$tag" --json assets --jq '.assets[].name' \
+              | grep -Fx "${{ steps.asset.outputs.name }}" >/dev/null; then
+              echo "asset_exists=true" >> "$GITHUB_OUTPUT"
+              echo "::notice::${{ steps.asset.outputs.name }} already exists on $tag."
+            else
+              echo "asset_exists=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::$tag exists, building missing asset ${{ steps.asset.outputs.name }}."
+            fi
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "asset_exists=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Build
-        if: steps.release.outputs.exists == 'false'
+        if: steps.release.outputs.asset_exists == 'false'
         shell: bash
         run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
       - name: Prepare asset
-        if: steps.release.outputs.exists == 'false'
+        if: steps.release.outputs.asset_exists == 'false'
         shell: bash
         run: |
           cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "${{ steps.asset.outputs.name }}"
           chmod +x "${{ steps.asset.outputs.name }}" || true
       - name: Upload release asset
-        if: steps.release.outputs.exists == 'false'
+        if: steps.release.outputs.asset_exists == 'false'
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          tag="v${{ steps.version.outputs.version }}"
+          tag="${{ steps.release.outputs.tag }}"
           if ! gh release view "$tag" >/dev/null 2>&1; then
             gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag" \
               || gh release view "$tag" >/dev/null
