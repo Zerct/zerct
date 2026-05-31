@@ -28,6 +28,14 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "name",
         ),
         "query" | "execute" => sqlite_query(cli),
+        "delete" | "del" | "rm" => delete_app_resource(
+            cli,
+            1,
+            "sqlite_database_required",
+            "SQLite database is required.",
+            "Use `tovuk database delete --service <service> DB --json`.",
+            "sqlite/databases",
+        ),
         _ => unknown_platform_command(cli, "sqlite"),
     }
 }
@@ -47,6 +55,15 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
         "get" => kv_get(cli),
         "put" => kv_put(cli),
         "delete" | "del" | "rm" => kv_delete(cli),
+        "namespace" | "namespaces" => kv_namespace_command(cli),
+        "delete-namespace" | "remove-namespace" => delete_app_resource(
+            cli,
+            1,
+            "kv_namespace_required",
+            "KV namespace is required.",
+            "Use `tovuk kv namespace delete --service <service> CACHE --json`.",
+            "kv/namespaces",
+        ),
         _ => unknown_platform_command(cli, "kv"),
     }
 }
@@ -64,6 +81,14 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
         ),
         "messages" => queue_messages(cli),
         "send" => queue_send(cli),
+        "delete" | "del" | "rm" => delete_app_resource(
+            cli,
+            1,
+            "queue_name_required",
+            "Queue name is required.",
+            "Use `tovuk queue delete --service <service> jobs --json`.",
+            "queues",
+        ),
         _ => unknown_platform_command(cli, "queue"),
     }
 }
@@ -72,6 +97,14 @@ pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_cron(cli),
+        "delete" | "del" | "rm" => delete_app_resource(
+            cli,
+            1,
+            "cron_name_required",
+            "Cron trigger name is required.",
+            "Use `tovuk cron delete --service <service> nightly --json`.",
+            "cron",
+        ),
         _ => unknown_platform_command(cli, "cron"),
     }
 }
@@ -87,6 +120,14 @@ pub(crate) fn durable_command(cli: &CliOptions) -> Result<()> {
             "durable-objects/namespaces",
             "className",
         ),
+        "delete" | "del" | "rm" => delete_app_resource(
+            cli,
+            1,
+            "durable_class_required",
+            "Durable Object class name is required.",
+            "Use `tovuk durable-object delete --service <service> Room --json`.",
+            "durable-objects/namespaces",
+        ),
         _ => unknown_platform_command(cli, "durable"),
     }
 }
@@ -95,6 +136,14 @@ pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_service_binding(cli),
+        "delete" | "del" | "rm" => delete_app_resource(
+            cli,
+            1,
+            "binding_name_required",
+            "Service binding name is required.",
+            "Use `tovuk binding delete --service <service> AUTH_SERVICE --json`.",
+            "service-bindings",
+        ),
         _ => unknown_platform_command(cli, "binding"),
     }
 }
@@ -102,10 +151,11 @@ pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
 pub(crate) fn caps_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("", String::as_str) {
         "set" => set_usage_cap(cli),
+        "delete" | "del" | "rm" => delete_usage_cap(cli),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown usage cap command.",
-            "Use `tovuk caps set worker_requests --period day --value 100000 --json`.",
+            "Use `tovuk caps set worker_requests --period day --value 100000 --json` or `tovuk caps delete worker_requests --period day --json`.",
             cli.output.json,
         )),
     }
@@ -127,6 +177,27 @@ fn create_app_resource(
         Method::POST,
         &service_route(cli, suffix)?,
         Some(Value::Object(body)),
+    )
+}
+
+fn delete_app_resource(
+    cli: &CliOptions,
+    arg_index: usize,
+    code: &str,
+    message: &str,
+    instruction: &str,
+    suffix: &str,
+) -> Result<()> {
+    let resource = required_arg(cli, arg_index, code, message, instruction)?;
+    print_authenticated_mutation(
+        cli,
+        Method::DELETE,
+        &format!(
+            "{}/{}",
+            service_route(cli, suffix)?.trim_end_matches('/'),
+            encode_component(&resource)
+        ),
+        None,
     )
 }
 
@@ -188,6 +259,25 @@ fn sqlite_params(cli: &CliOptions) -> Result<Vec<Value>> {
             "invalid_sqlite_params",
             "SQLite params must be a JSON array.",
             "Pass params as JSON such as `--params '[1,\"Ada\"]'`.",
+            cli.output.json,
+        )),
+    }
+}
+
+fn kv_namespace_command(cli: &CliOptions) -> Result<()> {
+    match cli.args.get(1).map_or("", String::as_str) {
+        "delete" | "del" | "rm" => delete_app_resource(
+            cli,
+            2,
+            "kv_namespace_required",
+            "KV namespace is required.",
+            "Use `tovuk kv namespace delete --service <service> CACHE --json`.",
+            "kv/namespaces",
+        ),
+        _ => Err(agent_error(
+            "unknown_command",
+            "Unknown KV namespace command.",
+            "Use `tovuk kv namespace delete --service <service> CACHE --json`.",
             cli.output.json,
         )),
     }
@@ -480,6 +570,42 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
             "hardStop": true,
             "notifyAtPercent": 80,
         })),
+    )?;
+    print_json(&response)
+}
+
+fn delete_usage_cap(cli: &CliOptions) -> Result<()> {
+    let metric = required_arg(
+        cli,
+        1,
+        "cap_metric_required",
+        "Usage cap metric is required.",
+        "Use `tovuk caps delete worker_requests --period day --json`.",
+    )?;
+    let period = if cli.period.is_empty() {
+        cli.args.get(2).cloned().unwrap_or_default()
+    } else {
+        cli.period.clone()
+    };
+    if period.is_empty() {
+        return Err(agent_error(
+            "cap_period_required",
+            "Usage cap period is required.",
+            "Use `tovuk caps delete worker_requests --period day --json`.",
+            cli.output.json,
+        ));
+    }
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::DELETE,
+        &format!(
+            "/v1/usage/caps/{}/{}",
+            encode_component(&metric),
+            encode_component(&period)
+        ),
+        Some(&token),
+        None,
     )?;
     print_json(&response)
 }

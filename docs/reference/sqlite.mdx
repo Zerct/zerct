@@ -10,6 +10,7 @@ workers as explicit resources.
 npx tovuk database create --service service_1 DB --json
 npx tovuk database query --service service_1 DB "select 1" --json
 npx tovuk database query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
+npx tovuk database delete --service service_1 DB --json
 npx tovuk platform --service service_1 --json
 ```
 
@@ -17,6 +18,10 @@ Agents should create databases before a deploy needs them, then keep schema
 migrations in source control. Query responses include `rowsRead`,
 `rowsWritten`, `vmSteps`, `fullscanSteps`, and storage usage so agents can fix
 slow or expensive queries without dashboard access.
+
+Delete stale databases only after migrations or exports are complete. The
+delete command removes the binding and local SQLite file set, then returns the
+remaining platform resources.
 
 ## Migration guidance
 

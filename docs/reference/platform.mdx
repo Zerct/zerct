@@ -12,12 +12,19 @@ need dashboard access.
 npx tovuk platform --service service_1 --json
 npx tovuk database create --service service_1 DB --json
 npx tovuk database query --service service_1 DB "select 1" --json
+npx tovuk database delete --service service_1 DB --json
 npx tovuk kv create --service service_1 CACHE --json
+npx tovuk kv namespace delete --service service_1 CACHE --json
 npx tovuk queue create --service service_1 jobs --json
+npx tovuk queue delete --service service_1 jobs --json
 npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
+npx tovuk cron delete --service service_1 nightly --json
 npx tovuk durable-object create --service service_1 Room --json
+npx tovuk durable-object delete --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+npx tovuk binding delete --service service_1 AUTH_SERVICE --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
+npx tovuk limit delete worker_requests --period day --json
 ```
 
 ## Resource model
@@ -30,6 +37,9 @@ npx tovuk limit set worker_requests --period day --value 100000 --json
 - Durable Objects: keyed stateful Rust actors for realtime coordination.
 - Service bindings: private worker-to-worker calls without public URLs.
 - Usage caps: hard stops and notification thresholds for predictable spend.
+
+Delete commands return the refreshed platform resource payload so agents can
+verify cleanup immediately and continue without dashboard checks.
 
 Use object storage commands for service files and media:
 

@@ -113,8 +113,11 @@ npx tovuk storage list --service service_1 --json
 npx tovuk platform --service service_1 --json
 npx tovuk database create --service service_1 DB --json
 npx tovuk database query --service service_1 DB "select 1" --json
+npx tovuk database delete --service service_1 DB --json
 npx tovuk kv create --service service_1 CACHE --json
+npx tovuk kv namespace delete --service service_1 CACHE --json
 npx tovuk queue create --service service_1 jobs --json
+npx tovuk queue delete --service service_1 jobs --json
 npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
 npx tovuk durable-object create --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
