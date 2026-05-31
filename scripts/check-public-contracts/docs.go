@@ -38,6 +38,7 @@ func checkDocs() {
 	pricing := readText("docs/pricing.mdx")
 	limits := readText("docs/reference/limits.mdx")
 	platform := readText("docs/reference/platform.mdx")
+	products := readText("docs/reference/products.mdx")
 	for _, retired := range []string{
 		"/v1/apps",
 		"--app",
@@ -61,6 +62,11 @@ func checkDocs() {
 	requireContains(platform, "TOVUK_SQLITE_DB=sqlite_1", "runtime SQLite binding docs")
 	requireContains(platform, "TOVUK_BINDING_AUTH_SERVICE=service_2", "runtime service binding docs")
 	requireContains(platform, "It cannot manage account settings", "runtime token scope docs")
+	requireContains(products, "Use `products[].best_for`", "product choice docs")
+	requireContains(products, "Worker:\nUse for Rust public APIs", "Worker product docs")
+	requireContains(products, "State:\nUse for keyed realtime coordination", "State product docs")
+	requireContains(products, "`state_duration_gb_milliseconds`", "State meter docs")
+	requireContains(products, "Keep JavaScript and TypeScript frontend-only", "frontend-only product docs")
 	requireContains(openapi, "build_minutes", "public OpenAPI build minutes meter")
 	requireContains(openapi, `"stateSqliteStorageMib": 9536`, "OpenAPI State storage limit")
 	requireContains(openapi, `"storageObjectMaxMib": 5242880`, "OpenAPI object size limit")
