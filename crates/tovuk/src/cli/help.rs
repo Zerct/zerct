@@ -49,13 +49,18 @@ Usage:
   tovuk cron enable --service <service> nightly [--api <url>] [--json]
   tovuk cron disable --service <service> nightly [--api <url>] [--json]
   tovuk cron delete --service <service> nightly [--api <url>] [--json]
-  tovuk durable-object create --service <service> Room [--api <url>] [--json]
-  tovuk durable-object delete --service <service> Room [--api <url>] [--json]
+  tovuk state create --service <service> Room [--api <url>] [--json]
+  tovuk state objects --service <service> Room [--api <url>] [--json]
+  tovuk state keys --service <service> Room room-1 [--api <url>] [--json]
+  tovuk state get --service <service> Room room-1 counter [--api <url>] [--json]
+  tovuk state put --service <service> Room room-1 counter 1 [--api <url>] [--json]
+  tovuk state delete-value --service <service> Room room-1 counter [--api <url>] [--json]
+  tovuk state delete --service <service> Room [--api <url>] [--json]
   tovuk binding create --service <service> AUTH_SERVICE --target <target_service> [--api <url>] [--json]
   tovuk binding delete --service <service> AUTH_SERVICE [--api <url>] [--json]
   tovuk limit set worker_requests --period day --value 100000 [--api <url>] [--json]
-  tovuk limit set durable_object_requests --period month --value 1000000 [--api <url>] [--json]
-  tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
+  tovuk limit set state_requests --period month --value 1000000 [--api <url>] [--json]
+  tovuk limit set state_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
   tovuk limit delete worker_requests --period day [--api <url>] [--json]
   tovuk env list --service <service> [--api <url>] [--json]
   tovuk env set --service <service> KEY=value [--api <url>] [--json]
@@ -81,8 +86,8 @@ Agent contract:
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
-  - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a CDN URL is intended.
-  - Use tovuk pricing --json before heavy work, then set usage caps for worker, SQLite, KV, queue, Durable Object, and object storage meters before paid overages.
+  - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a public media URL is intended.
+  - Use tovuk pricing --json before heavy work, then set usage caps for worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Prefer same-origin worker-static services over split services.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.

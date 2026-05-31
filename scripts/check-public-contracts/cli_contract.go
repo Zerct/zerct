@@ -25,7 +25,7 @@ func checkCLIContract() {
 	for _, command := range []string{
 		"init", "install", "doctor", "preview", "login", "deploy", "capabilities", "pricing",
 		"me", "usage", "activity", "service", "services", "overview", "deploys", "builds", "logs",
-		"status", "inspect", "platform", "kv", "queue", "cron", "durable-object",
+		"status", "inspect", "platform", "kv", "queue", "cron", "state",
 		"binding", "limit", "database", "env", "domains", "storage", "files", "media",
 		"billing", "support",
 	} {

@@ -74,13 +74,15 @@ npx tovuk cron update --service <service> nightly "*/15 * * * *" --json
 npx tovuk cron disable --service <service> nightly --json
 npx tovuk cron enable --service <service> nightly --json
 npx tovuk cron delete --service <service> nightly --json
-npx tovuk durable-object create --service <service> Room --json
-npx tovuk durable-object delete --service <service> Room --json
+npx tovuk state create --service <service> Room --json
+npx tovuk state put --service <service> Room room-1 counter 1 --json
+npx tovuk state get --service <service> Room room-1 counter --json
+npx tovuk state delete --service <service> Room --json
 npx tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 npx tovuk binding delete --service <service> AUTH_SERVICE --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
-npx tovuk limit set durable_object_requests --period month --value 1000000 --json
-npx tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+npx tovuk limit set state_requests --period month --value 1000000 --json
+npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 npx tovuk limit delete worker_requests --period day --json
 ```
 
@@ -90,8 +92,8 @@ Before high-throughput work or paid usage, read pricing and set hard caps:
 npx tovuk pricing --json
 npx tovuk limit set worker_requests --period month --value 10000000 --json
 npx tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-npx tovuk limit set durable_object_requests --period month --value 1000000 --json
-npx tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+npx tovuk limit set state_requests --period month --value 1000000 --json
+npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 ```
 
 Manage service files and media without dashboard access:

@@ -4,7 +4,7 @@ description: "Free and Pro limits for agent-ready deploys."
 ---
 
 Tovuk uses usage meters so agents can predict cost before they deploy. Free
-plans hard-stop at the free limits. Pro costs `$5/month`, includes
+plans hard-stop at the free limits. Pro costs `$25/month`, includes
 the monthly allowances below, and lets agents set hard usage caps before paid
 overages.
 
@@ -30,14 +30,14 @@ tovuk usage --json
 - Static assets: free and unlimited requests, free asset storage, `20,000`
   files per Worker version, `25 MiB` per file.
 - Transfer: metered for visibility with no default plan cap. Agents can set
-  `cdn_transfer_bytes` and `origin_transfer_bytes` hard caps before launch.
+  `static_transfer_bytes` and `worker_transfer_bytes` hard caps before launch.
 - SQLite: `10` databases, `5 GB` total, `500 MB` per database, `5 million`
   rows read per day, `100,000` rows written per day.
 - KV: `1,000` namespaces, `1 GB` per account and namespace, `100,000`
   reads per day, `1,000` writes, deletes, and list requests per day.
 - Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
   `24 hour` retention, configurable batches, and dead-letter queues.
-- Durable Objects: `100` classes, `100,000` requests per day, `13,000 GB-s`
+- State: `100` classes, `100,000` requests per day, `13,000 GB-s`
   duration per day, `5 million` SQLite rows read per day, `100,000` SQLite
   rows written per day, `5 GB` account SQLite storage, `1 GB` per object,
   and `2 MiB` key/value payloads.
@@ -49,7 +49,7 @@ tovuk usage --json
 
 ## Pro
 
-- Subscription: `$5/month`.
+- Subscription: `$25/month`.
 - Projects: `500`.
 - Rust Workers: `10 million` included requests per month, then `$0.30` per
   million requests. CPU includes `30 million ms` per month, then `$0.02` per
@@ -59,7 +59,7 @@ tovuk usage --json
 - Static assets: free and unlimited requests, free asset storage, `100,000`
   files per Worker version, `25 MiB` per file.
 - Transfer: metered for visibility with no default plan cap. Agents can set
-  `cdn_transfer_bytes` and `origin_transfer_bytes` hard caps before
+  `static_transfer_bytes` and `worker_transfer_bytes` hard caps before
   high-throughput launches.
 - SQLite: `50,000` databases, `1 TB` account hard cap, `10 GB` per database,
   `25 billion` rows read and `50 million` rows written per month included.
@@ -72,7 +72,7 @@ tovuk usage --json
 - Queues: `10,000` queues, `1 million` operations per month included, then
   `$0.40` per million operations. Default retention is `4 days`, configurable
   up to `14 days`.
-- Durable Objects: `500` classes, `1 million` requests and `400,000 GB-s`
+- State: `500` classes, `1 million` requests and `400,000 GB-s`
   duration per month included. SQLite includes `25 billion` rows read,
   `50 million` rows written, and `5 GB` storage per month. Overage is `$0.15`
   per million requests, `$12.50` per million GB-s, `$0.001` per million rows
@@ -95,10 +95,10 @@ production launch, set hard caps:
 ```sh
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-tovuk limit set cdn_transfer_bytes --period month --value 107374182400 --json
-tovuk limit set origin_transfer_bytes --period month --value 107374182400 --json
-tovuk limit set durable_object_requests --period month --value 1000000 --json
-tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+tovuk limit set static_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set worker_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set state_requests --period month --value 1000000 --json
+tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
 ```
 

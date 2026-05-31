@@ -23,13 +23,18 @@ npx tovuk queue create --service service_1 jobs --max-retries 3 --retention-seco
 npx tovuk queue delete --service service_1 jobs --json
 npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
 npx tovuk cron delete --service service_1 nightly --json
-npx tovuk durable-object create --service service_1 Room --json
-npx tovuk durable-object delete --service service_1 Room --json
+npx tovuk state create --service service_1 Room --json
+npx tovuk state objects --service service_1 Room --json
+npx tovuk state keys --service service_1 Room room-1 --json
+npx tovuk state put --service service_1 Room room-1 counter 1 --json
+npx tovuk state get --service service_1 Room room-1 counter --json
+npx tovuk state delete-value --service service_1 Room room-1 counter --json
+npx tovuk state delete --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 npx tovuk binding delete --service service_1 AUTH_SERVICE --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
-npx tovuk limit set durable_object_requests --period month --value 1000000 --json
-npx tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
+npx tovuk limit set state_requests --period month --value 1000000 --json
+npx tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 npx tovuk limit delete worker_requests --period day --json
 ```
 
@@ -40,14 +45,15 @@ npx tovuk limit delete worker_requests --period day --json
 - KV: small config, sessions, feature flags, and cache metadata.
 - Queues: background jobs, retries, emails, and webhook processing.
 - Cron triggers: scheduled cleanup, polling, and reports.
-- Durable Objects: keyed stateful Rust actors for realtime coordination.
+- State: keyed state objects for realtime coordination, locks,
+  counters, rooms, sessions, and per-tenant state.
 - Service bindings: private worker-to-worker calls without public URLs.
 - Usage caps: hard stops and notification thresholds for predictable spend.
 - Object storage: service files and media with Class A and Class B operation
   meters.
 
 Each service can bind up to 5000 platform resources. That count includes
-SQLite databases, KV namespaces, queues, Durable Object namespaces, and private
+SQLite databases, KV namespaces, queues, State namespaces, and private
 service bindings.
 
 ## Custom domains
@@ -101,10 +107,25 @@ npx tovuk queue update --service service_1 jobs --max-batch-size 25 --max-batch-
 npx tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 ```
 
-Durable Object usage is metered with Tovuk counters:
-`durable_object_requests`, `durable_object_duration_gb_seconds`,
-`durable_object_sqlite_rows_read`, `durable_object_sqlite_rows_written`, and
-`durable_object_sqlite_storage_bytes`.
+State usage is metered with Tovuk counters:
+`state_requests`, `state_duration_gb_seconds`, `state_sqlite_rows_read`,
+`state_sqlite_rows_written`, and `state_sqlite_storage_bytes`.
+
+State values are addressed by namespace, object key, and state key. Use workers
+for public HTTP APIs, then call State only when one key needs serialized
+coordination:
+
+```sh
+npx tovuk state objects --service service_1 Room --json
+npx tovuk state keys --service service_1 Room room-1 --json
+npx tovuk state put --service service_1 Room room-1 counter 1 --json
+npx tovuk state get --service service_1 Room room-1 counter --json
+npx tovuk state delete-value --service service_1 Room room-1 counter --json
+```
+
+State keys are capped at 512 bytes. The state key and value are
+capped at 2 MiB combined. Free services get 1 GB per object and a 5 GB account
+cap. Pro services get 10 GB per object.
 
 ## Worker delivery
 

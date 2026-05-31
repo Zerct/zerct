@@ -53,7 +53,7 @@ npx tovuk kv create --service service_1 CACHE --json
 npx tovuk queue create --service service_1 failed_jobs --json
 npx tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 npx tovuk cron create --service service_1 nightly "0 0 * * *" --json
-npx tovuk durable-object create --service service_1 Room --json
+npx tovuk state create --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 ```
 

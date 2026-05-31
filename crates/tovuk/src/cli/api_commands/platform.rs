@@ -262,27 +262,140 @@ fn cron_update_request(cli: &CliOptions, trigger: &str, body: Value) -> Result<(
     print_authenticated_mutation(cli, Method::PUT, &route, Some(body))
 }
 
-pub(crate) fn durable_command(cli: &CliOptions) -> Result<()> {
+pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_app_resource(
             cli,
-            "durable_class_required",
-            "Durable Object class name is required.",
-            "Use `tovuk durable-object create --service <service> Room --json`.",
-            "durable-objects/namespaces",
+            "state_class_required",
+            "State class name is required.",
+            "Use `tovuk state create --service <service> Room --json`.",
+            "state/namespaces",
             "className",
         ),
+        "objects" | "instances" => state_objects(cli),
+        "keys" => state_keys(cli),
+        "get" => state_get(cli),
+        "put" | "set" => state_put(cli),
+        "delete-value" | "delete-state" | "del-state" | "rm-state" => state_delete_value(cli),
         "delete" | "del" | "rm" => delete_app_resource(
             cli,
             1,
-            "durable_class_required",
-            "Durable Object class name is required.",
-            "Use `tovuk durable-object delete --service <service> Room --json`.",
-            "durable-objects/namespaces",
+            "state_class_required",
+            "State class name is required.",
+            "Use `tovuk state delete --service <service> Room --json`.",
+            "state/namespaces",
         ),
-        _ => unknown_platform_command(cli, "durable"),
+        _ => unknown_platform_command(cli, "state"),
     }
+}
+
+fn state_objects(cli: &CliOptions) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "state_class_required",
+        "State class name is required.",
+        "Use `tovuk state objects --service <service> Room --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::GET,
+        &state_objects_route(cli, &namespace)?,
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
+fn state_keys(cli: &CliOptions) -> Result<()> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "state_class_required",
+        "State class name is required.",
+        "Use `tovuk state keys --service <service> Room room-1 --json`.",
+    )?;
+    let object_key = required_arg(
+        cli,
+        2,
+        "state_object_key_required",
+        "State object key is required.",
+        "Use `tovuk state keys --service <service> Room room-1 --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::GET,
+        &state_object_route(cli, &namespace, &object_key, "keys")?,
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
+fn state_get(cli: &CliOptions) -> Result<()> {
+    let (namespace, object_key, key) = state_value_args(
+        cli,
+        "Use `tovuk state get --service <service> Room room-1 counter --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::GET,
+        &state_value_route(cli, &namespace, &object_key, &key)?,
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
+fn state_put(cli: &CliOptions) -> Result<()> {
+    let (namespace, object_key, key) = state_value_args(
+        cli,
+        "Use `tovuk state put --service <service> Room room-1 counter 1 --json`.",
+    )?;
+    let value = if cli.value.is_empty() {
+        cli.args
+            .iter()
+            .skip(4)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join(" ")
+    } else {
+        cli.value.clone()
+    };
+    if value.is_empty() {
+        return Err(agent_error(
+            "state_value_required",
+            "State value is required.",
+            "Pass the value as the final argument or with `--value <value>`.",
+            cli.output.json,
+        ));
+    }
+    print_authenticated_mutation(
+        cli,
+        Method::PUT,
+        &state_value_route(cli, &namespace, &object_key, &key)?,
+        Some(json!({
+            "value": value,
+            "encoding": "text",
+        })),
+    )
+}
+
+fn state_delete_value(cli: &CliOptions) -> Result<()> {
+    let (namespace, object_key, key) = state_value_args(
+        cli,
+        "Use `tovuk state delete-value --service <service> Room room-1 counter --json`.",
+    )?;
+    print_authenticated_mutation(
+        cli,
+        Method::DELETE,
+        &state_value_route(cli, &namespace, &object_key, &key)?,
+        None,
+    )
 }
 
 pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
@@ -998,6 +1111,66 @@ fn kv_bulk_route(cli: &CliOptions, namespace: &str, suffix: &str) -> Result<Stri
     } else {
         Ok(format!("{route}/{}", encode_component(suffix)))
     }
+}
+
+fn state_value_args(cli: &CliOptions, instruction: &str) -> Result<(String, String, String)> {
+    let namespace = required_arg(
+        cli,
+        1,
+        "state_class_required",
+        "State class name is required.",
+        instruction,
+    )?;
+    let object_key = required_arg(
+        cli,
+        2,
+        "state_object_key_required",
+        "State object key is required.",
+        instruction,
+    )?;
+    let key = required_arg(
+        cli,
+        3,
+        "state_key_required",
+        "State key is required.",
+        instruction,
+    )?;
+    Ok((namespace, object_key, key))
+}
+
+fn state_objects_route(cli: &CliOptions, namespace: &str) -> Result<String> {
+    Ok(format!(
+        "{}/state/namespaces/{}/objects",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(namespace)
+    ))
+}
+
+fn state_object_route(
+    cli: &CliOptions,
+    namespace: &str,
+    object_key: &str,
+    suffix: &str,
+) -> Result<String> {
+    Ok(format!(
+        "{}/{}/{}",
+        state_objects_route(cli, namespace)?,
+        encode_component(object_key),
+        suffix.trim_start_matches('/')
+    ))
+}
+
+fn state_value_route(
+    cli: &CliOptions,
+    namespace: &str,
+    object_key: &str,
+    key: &str,
+) -> Result<String> {
+    Ok(format!(
+        "{}/values/{}",
+        state_object_route(cli, namespace, object_key, "")?.trim_end_matches('/'),
+        encode_component(key)
+    ))
 }
 
 fn create_cron(cli: &CliOptions) -> Result<()> {

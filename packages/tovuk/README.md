@@ -43,7 +43,7 @@ Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
 fix the first actionable log error, rerun doctor, then redeploy.
 
 Agents can create service SQLite databases, KV namespaces, queues, cron triggers,
-Durable Object namespaces, service bindings, and usage caps through the CLI.
+State namespaces, service bindings, and usage caps through the CLI.
 
 Agents can also inspect API capabilities, account identity, usage, account
 activity, services, complete service overviews, deploys, builds, service/deploy/build logs,
@@ -73,6 +73,8 @@ npx tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 npx tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 npx tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 npx tovuk queue metrics --service service_1 jobs --json
+npx tovuk state put --service service_1 Room room-1 counter 1 --json
+npx tovuk state get --service service_1 Room room-1 counter --json
 ```
 
 When a free-tier limit blocks work, run:

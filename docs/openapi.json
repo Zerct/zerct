@@ -2618,14 +2618,14 @@
         }
       }
     },
-    "/v1/services/{service_id}/durable-objects/namespaces": {
+    "/v1/services/{service_id}/state/namespaces": {
       "post": {
         "tags": [
           "Deploy"
         ],
-        "summary": "Create Durable Object namespace",
-        "description": "Create a service Durable Object namespace. Context: paths./v1/services/{service_id}/durable-objects/namespaces.post.",
-        "operationId": "createServiceDurableObjectNamespace",
+        "summary": "Create State namespace",
+        "description": "Create a service State namespace. Context: paths./v1/services/{service_id}/state/namespaces.post.",
+        "operationId": "createServiceStateNamespace",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -2656,7 +2656,7 @@
                 "service_1"
               ]
             },
-            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/durable-objects/namespaces.post.parameters.0.",
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/state/namespaces.post.parameters.0.",
             "example": "service_1"
           }
         ],
@@ -2665,11 +2665,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DurableObjectNamespaceCreateRequest"
+                "$ref": "#/components/schemas/StateNamespaceCreateRequest"
               },
               "examples": {
                 "example": {
-                  "summary": "Request example for POST /v1/services/{service_id}/durable-objects/namespaces",
+                  "summary": "Request example for POST /v1/services/{service_id}/state/namespaces",
                   "value": {
                     "className": "Room"
                   }
@@ -2677,7 +2677,7 @@
               }
             }
           },
-          "description": "Request body for POST /v1/services/{service_id}/durable-objects/namespaces. Context: paths./v1/services/{service_id}/durable-objects/namespaces.post.requestBody."
+          "description": "Request body for POST /v1/services/{service_id}/state/namespaces. Context: paths./v1/services/{service_id}/state/namespaces.post.requestBody."
         }
       }
     },
@@ -2777,7 +2777,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|durable_object_requests|durable_object_duration_gb_seconds|durable_object_sqlite_rows_read|durable_object_sqlite_rows_written|durable_object_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes|log_events)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
               "maxLength": 64,
               "examples": [
                 "worker_requests"
@@ -4001,14 +4001,14 @@
         }
       }
     },
-    "/v1/services/{service_id}/durable-objects/namespaces/{namespace}": {
+    "/v1/services/{service_id}/state/namespaces/{namespace}": {
       "delete": {
         "tags": [
           "Deploy"
         ],
-        "summary": "Delete Durable Object namespace",
-        "description": "Delete Durable Object namespace. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/durable-objects/namespaces/{namespace}.delete.",
-        "operationId": "deleteServiceDurableObjectNamespace",
+        "summary": "Delete State namespace",
+        "description": "Delete State namespace. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/state/namespaces/{namespace}.delete.",
+        "operationId": "deleteServiceStateNamespace",
         "responses": {
           "200": {
             "$ref": "#/components/responses/PlatformResourcesLoaded"
@@ -4042,7 +4042,7 @@
                 "service_1"
               ]
             },
-            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/durable-objects/namespaces/{namespace}.delete.parameters.service_id.",
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/state/namespaces/{namespace}.delete.parameters.service_id.",
             "example": "service_1"
           },
           {
@@ -4051,13 +4051,13 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(durable_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
               "maxLength": 128,
               "examples": [
                 "Room"
               ]
             },
-            "description": "Durable Object namespace id or class name. Context: paths./v1/services/{service_id}/durable-objects/namespaces/{namespace}.delete.parameters.namespace.",
+            "description": "State namespace id or class name. Context: paths./v1/services/{service_id}/state/namespaces/{namespace}.delete.parameters.namespace.",
             "example": "Room"
           }
         ]
@@ -4160,7 +4160,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|durable_object_requests|durable_object_duration_gb_seconds|durable_object_sqlite_rows_read|durable_object_sqlite_rows_written|durable_object_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes|log_events)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
               "maxLength": 128,
               "examples": [
                 "worker_requests"
@@ -4434,6 +4434,510 @@
           },
           "description": "Request example for POST /v1/services/{service_id}/kv/{namespace}/bulk/removals. Context: paths./v1/services/{service_id}/kv/{namespace}/bulk/removals.post.requestBody."
         }
+      }
+    },
+    "/v1/services/{service_id}/state/namespaces/{namespace}/objects": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List State objects",
+        "description": "List keyed State objects for one service namespace.",
+        "operationId": "listServiceStateObjects",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateInstancesLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name for listing State objects.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name for object listing.",
+            "example": "Room"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "examples": [
+                100
+              ],
+              "format": "int32"
+            },
+            "description": "Maximum State objects to return.",
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "room-1"
+              ],
+              "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$"
+            },
+            "description": "State object cursor returned by a previous object list page.",
+            "example": "room-1"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/keys": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List State keys",
+        "description": "List keys stored inside one State object.",
+        "operationId": "listServiceStateKeys",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateKeysLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name for listing State keys.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name for key listing.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key whose keys should be listed.",
+            "example": "room-1"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "examples": [
+                100
+              ],
+              "format": "int32"
+            },
+            "description": "Maximum State keys to return.",
+            "example": 100
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "examples": [
+                "counter"
+              ],
+              "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$"
+            },
+            "description": "State key cursor returned by a previous key list page.",
+            "example": "counter"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/values/{key}": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read State value",
+        "description": "Read one State value.",
+        "operationId": "readServiceStateValue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateEntryLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name for reading a State value.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name for reading one value.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key for the read value operation.",
+            "example": "room-1"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "counter"
+              ]
+            },
+            "description": "State value key for the read operation. Slash characters are allowed when URL-encoded.",
+            "example": "counter"
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Write State value",
+        "description": "Write one State value.",
+        "operationId": "writeServiceStateValue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateEntryLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name for writing a State value.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name for writing one value.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key for the write value operation.",
+            "example": "room-1"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "counter"
+              ]
+            },
+            "description": "State value key for the write operation. Slash characters are allowed when URL-encoded.",
+            "example": "counter"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateEntryPutRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "State value request.",
+                  "value": {
+                    "value": "1",
+                    "encoding": "text"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for writing one State value."
+        }
+      },
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete State value",
+        "description": "Delete one State value.",
+        "operationId": "deleteServiceStateValue",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateMutationLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name for deleting a State value.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name for deleting one value.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key for the delete value operation.",
+            "example": "room-1"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "counter"
+              ]
+            },
+            "description": "State value key for the delete operation. Slash characters are allowed when URL-encoded.",
+            "example": "counter"
+          }
+        ]
       }
     }
   },
@@ -4959,7 +5463,7 @@
                     "kvNamespaceCount": 1,
                     "queueCount": 1,
                     "cronTriggerCount": 1,
-                    "durableObjectNamespaceCount": 1,
+                    "stateNamespaceCount": 1,
                     "usageCapCount": 2
                   },
                   "limits": {
@@ -5018,9 +5522,9 @@
                     "kvListsPerMonth": null,
                     "queueOperationsPerDay": 10000,
                     "queueOperationsPerMonth": null,
-                    "durableObjectRequestsPerDay": 100000,
-                    "durableObjectRequestsPerMonth": null,
-                    "durableObjectSqliteStorageMib": 953,
+                    "stateRequestsPerDay": 100000,
+                    "stateRequestsPerMonth": null,
+                    "stateSqliteStorageMib": 953,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -5030,10 +5534,10 @@
                     "objectStorageClassBOperationsPerMonth": 10000000,
                     "kvNamespaces": 1000,
                     "queues": 10000,
-                    "durableObjectClasses": 100,
-                    "durableObjectDurationGbSecondsPerDay": 13000,
-                    "durableObjectDurationGbSecondsPerMonth": null,
-                    "durableObjectSqliteStorageMibPerAccount": 4768,
+                    "stateClasses": 100,
+                    "stateDurationGbSecondsPerDay": 13000,
+                    "stateDurationGbSecondsPerMonth": null,
+                    "stateSqliteStorageMibPerAccount": 4768,
                     "logEventsPerDay": 200000,
                     "logEventsPerMonth": null,
                     "sqliteQueriesPerWorkerInvocation": 50,
@@ -5079,10 +5583,10 @@
                     "queueVisibilityTimeoutSeconds": 43200,
                     "queueDelaySeconds": 86400,
                     "queueRetentionSeconds": 86400,
-                    "durableObjectInstances": null,
-                    "durableObjectWebsocketMessageMib": 32,
-                    "durableObjectSoftRequestsPerSecond": 1000,
-                    "durableObjectCpuMsPerRequest": 30000,
+                    "stateInstances": null,
+                    "stateWebsocketMessageMib": 32,
+                    "stateSoftRequestsPerSecond": 1000,
+                    "stateCpuMsPerRequest": 30000,
                     "storageSinglePartUploadMaxMib": 5120,
                     "storageMultipartUploadMaxMib": 5242880,
                     "storageUploadParts": 10000,
@@ -5091,11 +5595,11 @@
                     "storageCustomDomainsPerBucket": 50,
                     "storageBucketManagementOperationsPerSecond": 50,
                     "storageSameKeyWritesPerSecond": 1,
-                    "durableObjectSqliteRowsReadPerDay": 5000000,
-                    "durableObjectSqliteRowsReadPerMonth": null,
-                    "durableObjectSqliteRowsWrittenPerDay": 100000,
-                    "durableObjectSqliteRowsWrittenPerMonth": null,
-                    "durableObjectKeyValueSizeMib": 2
+                    "stateSqliteRowsReadPerDay": 5000000,
+                    "stateSqliteRowsReadPerMonth": null,
+                    "stateSqliteRowsWrittenPerDay": 100000,
+                    "stateSqliteRowsWrittenPerMonth": null,
+                    "stateKeyValueSizeMib": 2
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -5132,7 +5636,7 @@
                       "operationOverageUsdMicrosPerMillion": null,
                       "egressFree": true
                     },
-                    "durableObjects": {
+                    "state": {
                       "includedRequestsPerMonth": null,
                       "requestOverageUsdMicrosPerMillion": null,
                       "includedDurationGbSecondsPerMonth": null,
@@ -5924,9 +6428,9 @@
                         "kvListsPerMonth": null,
                         "queueOperationsPerDay": 10000,
                         "queueOperationsPerMonth": null,
-                        "durableObjectRequestsPerDay": 100000,
-                        "durableObjectRequestsPerMonth": null,
-                        "durableObjectSqliteStorageMib": 953,
+                        "stateRequestsPerDay": 100000,
+                        "stateRequestsPerMonth": null,
+                        "stateSqliteStorageMib": 953,
                         "objectStorageMib": 9536,
                         "storageObjects": null,
                         "storageObjectMaxMib": 5242880,
@@ -5947,10 +6451,10 @@
                         "supportTicketsPerDay": 3,
                         "kvNamespaces": 1000,
                         "queues": 10000,
-                        "durableObjectClasses": 100,
-                        "durableObjectDurationGbSecondsPerDay": 13000,
-                        "durableObjectDurationGbSecondsPerMonth": null,
-                        "durableObjectSqliteStorageMibPerAccount": 4768,
+                        "stateClasses": 100,
+                        "stateDurationGbSecondsPerDay": 13000,
+                        "stateDurationGbSecondsPerMonth": null,
+                        "stateSqliteStorageMibPerAccount": 4768,
                         "logEventsPerDay": 200000,
                         "logEventsPerMonth": null,
                         "sqliteQueriesPerWorkerInvocation": 50,
@@ -5996,10 +6500,10 @@
                         "queueVisibilityTimeoutSeconds": 43200,
                         "queueDelaySeconds": 86400,
                         "queueRetentionSeconds": 86400,
-                        "durableObjectInstances": null,
-                        "durableObjectWebsocketMessageMib": 32,
-                        "durableObjectSoftRequestsPerSecond": 1000,
-                        "durableObjectCpuMsPerRequest": 30000,
+                        "stateInstances": null,
+                        "stateWebsocketMessageMib": 32,
+                        "stateSoftRequestsPerSecond": 1000,
+                        "stateCpuMsPerRequest": 30000,
                         "storageSinglePartUploadMaxMib": 5120,
                         "storageMultipartUploadMaxMib": 5242880,
                         "storageUploadParts": 10000,
@@ -6008,11 +6512,11 @@
                         "storageCustomDomainsPerBucket": 50,
                         "storageBucketManagementOperationsPerSecond": 50,
                         "storageSameKeyWritesPerSecond": 1,
-                        "durableObjectSqliteRowsReadPerDay": 5000000,
-                        "durableObjectSqliteRowsReadPerMonth": null,
-                        "durableObjectSqliteRowsWrittenPerDay": 100000,
-                        "durableObjectSqliteRowsWrittenPerMonth": null,
-                        "durableObjectKeyValueSizeMib": 2
+                        "stateSqliteRowsReadPerDay": 5000000,
+                        "stateSqliteRowsReadPerMonth": null,
+                        "stateSqliteRowsWrittenPerDay": 100000,
+                        "stateSqliteRowsWrittenPerMonth": null,
+                        "stateKeyValueSizeMib": 2
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 0,
@@ -6049,7 +6553,7 @@
                           "operationOverageUsdMicrosPerMillion": null,
                           "egressFree": true
                         },
-                        "durableObjects": {
+                        "state": {
                           "includedRequestsPerMonth": null,
                           "requestOverageUsdMicrosPerMillion": null,
                           "includedDurationGbSecondsPerMonth": null,
@@ -6128,9 +6632,9 @@
                         "kvListsPerMonth": 1000000,
                         "queueOperationsPerDay": null,
                         "queueOperationsPerMonth": 1000000,
-                        "durableObjectRequestsPerDay": null,
-                        "durableObjectRequestsPerMonth": 1000000,
-                        "durableObjectSqliteStorageMib": 9536,
+                        "stateRequestsPerDay": null,
+                        "stateRequestsPerMonth": 1000000,
+                        "stateSqliteStorageMib": 9536,
                         "objectStorageMib": null,
                         "storageObjects": null,
                         "storageObjectMaxMib": 5242880,
@@ -6151,10 +6655,10 @@
                         "supportTicketsPerDay": 20,
                         "kvNamespaces": 1000,
                         "queues": 10000,
-                        "durableObjectClasses": 500,
-                        "durableObjectDurationGbSecondsPerDay": null,
-                        "durableObjectDurationGbSecondsPerMonth": 400000,
-                        "durableObjectSqliteStorageMibPerAccount": null,
+                        "stateClasses": 500,
+                        "stateDurationGbSecondsPerDay": null,
+                        "stateDurationGbSecondsPerMonth": 400000,
+                        "stateSqliteStorageMibPerAccount": null,
                         "logEventsPerDay": null,
                         "logEventsPerMonth": 20000000,
                         "sqliteQueriesPerWorkerInvocation": 1000,
@@ -6200,10 +6704,10 @@
                         "queueVisibilityTimeoutSeconds": 43200,
                         "queueDelaySeconds": 86400,
                         "queueRetentionSeconds": 1209600,
-                        "durableObjectInstances": null,
-                        "durableObjectWebsocketMessageMib": 32,
-                        "durableObjectSoftRequestsPerSecond": 1000,
-                        "durableObjectCpuMsPerRequest": 300000,
+                        "stateInstances": null,
+                        "stateWebsocketMessageMib": 32,
+                        "stateSoftRequestsPerSecond": 1000,
+                        "stateCpuMsPerRequest": 300000,
                         "storageSinglePartUploadMaxMib": 5120,
                         "storageMultipartUploadMaxMib": 5242880,
                         "storageUploadParts": 10000,
@@ -6212,14 +6716,14 @@
                         "storageCustomDomainsPerBucket": 50,
                         "storageBucketManagementOperationsPerSecond": 50,
                         "storageSameKeyWritesPerSecond": 1,
-                        "durableObjectSqliteRowsReadPerDay": null,
-                        "durableObjectSqliteRowsReadPerMonth": 25000000000,
-                        "durableObjectSqliteRowsWrittenPerDay": null,
-                        "durableObjectSqliteRowsWrittenPerMonth": 50000000,
-                        "durableObjectKeyValueSizeMib": 2
+                        "stateSqliteRowsReadPerDay": null,
+                        "stateSqliteRowsReadPerMonth": 25000000000,
+                        "stateSqliteRowsWrittenPerDay": null,
+                        "stateSqliteRowsWrittenPerMonth": 50000000,
+                        "stateKeyValueSizeMib": 2
                       },
                       "pricing": {
-                        "subscriptionUsdCentsPerMonth": 500,
+                        "subscriptionUsdCentsPerMonth": 2500,
                         "paidOveragesEnabled": true,
                         "workers": {
                           "includedRequestsPerMonth": 10000000,
@@ -6253,7 +6757,7 @@
                           "operationOverageUsdMicrosPerMillion": 400000,
                           "egressFree": true
                         },
-                        "durableObjects": {
+                        "state": {
                           "includedRequestsPerMonth": 1000000,
                           "requestOverageUsdMicrosPerMillion": 150000,
                           "includedDurationGbSecondsPerMonth": 400000,
@@ -6342,7 +6846,7 @@
                     "kvNamespaceCount": 1,
                     "queueCount": 1,
                     "cronTriggerCount": 1,
-                    "durableObjectNamespaceCount": 1,
+                    "stateNamespaceCount": 1,
                     "usageCapCount": 2
                   },
                   "limits": {
@@ -6401,9 +6905,9 @@
                     "kvListsPerMonth": null,
                     "queueOperationsPerDay": 10000,
                     "queueOperationsPerMonth": null,
-                    "durableObjectRequestsPerDay": 100000,
-                    "durableObjectRequestsPerMonth": null,
-                    "durableObjectSqliteStorageMib": 953,
+                    "stateRequestsPerDay": 100000,
+                    "stateRequestsPerMonth": null,
+                    "stateSqliteStorageMib": 953,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -6413,10 +6917,10 @@
                     "objectStorageClassBOperationsPerMonth": 10000000,
                     "kvNamespaces": 1000,
                     "queues": 10000,
-                    "durableObjectClasses": 100,
-                    "durableObjectDurationGbSecondsPerDay": 13000,
-                    "durableObjectDurationGbSecondsPerMonth": null,
-                    "durableObjectSqliteStorageMibPerAccount": 4768,
+                    "stateClasses": 100,
+                    "stateDurationGbSecondsPerDay": 13000,
+                    "stateDurationGbSecondsPerMonth": null,
+                    "stateSqliteStorageMibPerAccount": 4768,
                     "logEventsPerDay": 200000,
                     "logEventsPerMonth": null,
                     "sqliteQueriesPerWorkerInvocation": 50,
@@ -6462,10 +6966,10 @@
                     "queueVisibilityTimeoutSeconds": 43200,
                     "queueDelaySeconds": 86400,
                     "queueRetentionSeconds": 86400,
-                    "durableObjectInstances": null,
-                    "durableObjectWebsocketMessageMib": 32,
-                    "durableObjectSoftRequestsPerSecond": 1000,
-                    "durableObjectCpuMsPerRequest": 30000,
+                    "stateInstances": null,
+                    "stateWebsocketMessageMib": 32,
+                    "stateSoftRequestsPerSecond": 1000,
+                    "stateCpuMsPerRequest": 30000,
                     "storageSinglePartUploadMaxMib": 5120,
                     "storageMultipartUploadMaxMib": 5242880,
                     "storageUploadParts": 10000,
@@ -6474,11 +6978,11 @@
                     "storageCustomDomainsPerBucket": 50,
                     "storageBucketManagementOperationsPerSecond": 50,
                     "storageSameKeyWritesPerSecond": 1,
-                    "durableObjectSqliteRowsReadPerDay": 5000000,
-                    "durableObjectSqliteRowsReadPerMonth": null,
-                    "durableObjectSqliteRowsWrittenPerDay": 100000,
-                    "durableObjectSqliteRowsWrittenPerMonth": null,
-                    "durableObjectKeyValueSizeMib": 2
+                    "stateSqliteRowsReadPerDay": 5000000,
+                    "stateSqliteRowsReadPerMonth": null,
+                    "stateSqliteRowsWrittenPerDay": 100000,
+                    "stateSqliteRowsWrittenPerMonth": null,
+                    "stateKeyValueSizeMib": 2
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -6515,7 +7019,7 @@
                       "operationOverageUsdMicrosPerMillion": null,
                       "egressFree": true
                     },
-                    "durableObjects": {
+                    "state": {
                       "includedRequestsPerMonth": null,
                       "requestOverageUsdMicrosPerMillion": null,
                       "includedDurationGbSecondsPerMonth": null,
@@ -6602,7 +7106,7 @@
                     "kvNamespaceCount": 1,
                     "queueCount": 1,
                     "cronTriggerCount": 1,
-                    "durableObjectNamespaceCount": 1,
+                    "stateNamespaceCount": 1,
                     "usageCapCount": 2
                   },
                   "limits": {
@@ -6661,9 +7165,9 @@
                     "kvListsPerMonth": null,
                     "queueOperationsPerDay": 10000,
                     "queueOperationsPerMonth": null,
-                    "durableObjectRequestsPerDay": 100000,
-                    "durableObjectRequestsPerMonth": null,
-                    "durableObjectSqliteStorageMib": 953,
+                    "stateRequestsPerDay": 100000,
+                    "stateRequestsPerMonth": null,
+                    "stateSqliteStorageMib": 953,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -6673,10 +7177,10 @@
                     "objectStorageClassBOperationsPerMonth": 10000000,
                     "kvNamespaces": 1000,
                     "queues": 10000,
-                    "durableObjectClasses": 100,
-                    "durableObjectDurationGbSecondsPerDay": 13000,
-                    "durableObjectDurationGbSecondsPerMonth": null,
-                    "durableObjectSqliteStorageMibPerAccount": 4768,
+                    "stateClasses": 100,
+                    "stateDurationGbSecondsPerDay": 13000,
+                    "stateDurationGbSecondsPerMonth": null,
+                    "stateSqliteStorageMibPerAccount": 4768,
                     "logEventsPerDay": 200000,
                     "logEventsPerMonth": null,
                     "sqliteQueriesPerWorkerInvocation": 50,
@@ -6722,10 +7226,10 @@
                     "queueVisibilityTimeoutSeconds": 43200,
                     "queueDelaySeconds": 86400,
                     "queueRetentionSeconds": 86400,
-                    "durableObjectInstances": null,
-                    "durableObjectWebsocketMessageMib": 32,
-                    "durableObjectSoftRequestsPerSecond": 1000,
-                    "durableObjectCpuMsPerRequest": 30000,
+                    "stateInstances": null,
+                    "stateWebsocketMessageMib": 32,
+                    "stateSoftRequestsPerSecond": 1000,
+                    "stateCpuMsPerRequest": 30000,
                     "storageSinglePartUploadMaxMib": 5120,
                     "storageMultipartUploadMaxMib": 5242880,
                     "storageUploadParts": 10000,
@@ -6734,11 +7238,11 @@
                     "storageCustomDomainsPerBucket": 50,
                     "storageBucketManagementOperationsPerSecond": 50,
                     "storageSameKeyWritesPerSecond": 1,
-                    "durableObjectSqliteRowsReadPerDay": 5000000,
-                    "durableObjectSqliteRowsReadPerMonth": null,
-                    "durableObjectSqliteRowsWrittenPerDay": 100000,
-                    "durableObjectSqliteRowsWrittenPerMonth": null,
-                    "durableObjectKeyValueSizeMib": 2
+                    "stateSqliteRowsReadPerDay": 5000000,
+                    "stateSqliteRowsReadPerMonth": null,
+                    "stateSqliteRowsWrittenPerDay": 100000,
+                    "stateSqliteRowsWrittenPerMonth": null,
+                    "stateKeyValueSizeMib": 2
                   },
                   "services": [
                     {
@@ -6812,7 +7316,7 @@
                       "operationOverageUsdMicrosPerMillion": null,
                       "egressFree": true
                     },
-                    "durableObjects": {
+                    "state": {
                       "includedRequestsPerMonth": null,
                       "requestOverageUsdMicrosPerMillion": null,
                       "includedDurationGbSecondsPerMonth": null,
@@ -7581,9 +8085,9 @@
                     "kvListsPerMonth": null,
                     "queueOperationsPerDay": 10000,
                     "queueOperationsPerMonth": null,
-                    "durableObjectRequestsPerDay": 100000,
-                    "durableObjectRequestsPerMonth": null,
-                    "durableObjectSqliteStorageMib": 953,
+                    "stateRequestsPerDay": 100000,
+                    "stateRequestsPerMonth": null,
+                    "stateSqliteStorageMib": 953,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5242880,
@@ -7604,10 +8108,10 @@
                     "objectStorageClassBOperationsPerMonth": 10000000,
                     "kvNamespaces": 1000,
                     "queues": 10000,
-                    "durableObjectClasses": 100,
-                    "durableObjectDurationGbSecondsPerDay": 13000,
-                    "durableObjectDurationGbSecondsPerMonth": null,
-                    "durableObjectSqliteStorageMibPerAccount": 4768,
+                    "stateClasses": 100,
+                    "stateDurationGbSecondsPerDay": 13000,
+                    "stateDurationGbSecondsPerMonth": null,
+                    "stateSqliteStorageMibPerAccount": 4768,
                     "logEventsPerDay": 200000,
                     "logEventsPerMonth": null,
                     "sqliteQueriesPerWorkerInvocation": 50,
@@ -7653,10 +8157,10 @@
                     "queueVisibilityTimeoutSeconds": 43200,
                     "queueDelaySeconds": 86400,
                     "queueRetentionSeconds": 86400,
-                    "durableObjectInstances": null,
-                    "durableObjectWebsocketMessageMib": 32,
-                    "durableObjectSoftRequestsPerSecond": 1000,
-                    "durableObjectCpuMsPerRequest": 30000,
+                    "stateInstances": null,
+                    "stateWebsocketMessageMib": 32,
+                    "stateSoftRequestsPerSecond": 1000,
+                    "stateCpuMsPerRequest": 30000,
                     "storageSinglePartUploadMaxMib": 5120,
                     "storageMultipartUploadMaxMib": 5242880,
                     "storageUploadParts": 10000,
@@ -7665,11 +8169,11 @@
                     "storageCustomDomainsPerBucket": 50,
                     "storageBucketManagementOperationsPerSecond": 50,
                     "storageSameKeyWritesPerSecond": 1,
-                    "durableObjectSqliteRowsReadPerDay": 5000000,
-                    "durableObjectSqliteRowsReadPerMonth": null,
-                    "durableObjectSqliteRowsWrittenPerDay": 100000,
-                    "durableObjectSqliteRowsWrittenPerMonth": null,
-                    "durableObjectKeyValueSizeMib": 2
+                    "stateSqliteRowsReadPerDay": 5000000,
+                    "stateSqliteRowsReadPerMonth": null,
+                    "stateSqliteRowsWrittenPerDay": 100000,
+                    "stateSqliteRowsWrittenPerMonth": null,
+                    "stateKeyValueSizeMib": 2
                   },
                   "sqliteDatabases": [
                     {
@@ -7710,9 +8214,9 @@
                       "enabled": true
                     }
                   ],
-                  "durableObjectNamespaces": [
+                  "stateNamespaces": [
                     {
-                      "id": "durable_1",
+                      "id": "state_namespace_1",
                       "className": "Room",
                       "storageLimitMib": 953
                     }
@@ -7770,7 +8274,7 @@
                       "operationOverageUsdMicrosPerMillion": null,
                       "egressFree": true
                     },
-                    "durableObjects": {
+                    "state": {
                       "includedRequestsPerMonth": null,
                       "requestOverageUsdMicrosPerMillion": null,
                       "includedDurationGbSecondsPerMonth": null,
@@ -8466,6 +8970,236 @@
                   },
                   "nextActions": [
                     "Inspect messages with tovuk queue messages."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "StateInstancesLoaded": {
+        "description": "State instances loaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StateInstancesResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "State instances loaded.",
+                "value": {
+                  "namespace": {
+                    "id": "state_namespace_1",
+                    "className": "Room",
+                    "storageLimitMib": 953
+                  },
+                  "objects": [
+                    {
+                      "id": "state_object_1",
+                      "namespaceId": "state_namespace_1",
+                      "objectKey": "room-1",
+                      "storageUsedBytes": 1,
+                      "storageUsedMib": 1,
+                      "lastSeenAt": "2026-05-31 12:00:00Z",
+                      "hibernatedAt": null,
+                      "createdAt": "2026-05-31 12:00:00Z",
+                      "updatedAt": "2026-05-31 12:00:00Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "nextActions": [
+                    "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
+                    "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
+                    "Use SQLite for relational service data and KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "StateKeysLoaded": {
+        "description": "State state keys loaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StateKeysResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "State state keys loaded.",
+                "value": {
+                  "namespace": {
+                    "id": "state_namespace_1",
+                    "className": "Room",
+                    "storageLimitMib": 953
+                  },
+                  "object": {
+                    "id": "state_object_1",
+                    "namespaceId": "state_namespace_1",
+                    "objectKey": "room-1",
+                    "storageUsedBytes": 1,
+                    "storageUsedMib": 1,
+                    "lastSeenAt": "2026-05-31 12:00:00Z",
+                    "hibernatedAt": null,
+                    "createdAt": "2026-05-31 12:00:00Z",
+                    "updatedAt": "2026-05-31 12:00:00Z"
+                  },
+                  "keys": [
+                    {
+                      "key": "counter",
+                      "valueSizeBytes": 1,
+                      "createdAt": "2026-05-31 12:00:00Z",
+                      "updatedAt": "2026-05-31 12:00:00Z"
+                    }
+                  ],
+                  "listComplete": true,
+                  "nextCursor": null,
+                  "nextActions": [
+                    "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
+                    "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
+                    "Use SQLite for relational service data and KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "StateEntryLoaded": {
+        "description": "State state entry loaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StateEntryResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "State state entry loaded.",
+                "value": {
+                  "namespace": {
+                    "id": "state_namespace_1",
+                    "className": "Room",
+                    "storageLimitMib": 953
+                  },
+                  "object": {
+                    "id": "state_object_1",
+                    "namespaceId": "state_namespace_1",
+                    "objectKey": "room-1",
+                    "storageUsedBytes": 1,
+                    "storageUsedMib": 1,
+                    "lastSeenAt": "2026-05-31 12:00:00Z",
+                    "hibernatedAt": null,
+                    "createdAt": "2026-05-31 12:00:00Z",
+                    "updatedAt": "2026-05-31 12:00:00Z"
+                  },
+                  "entry": {
+                    "key": "counter",
+                    "valueSizeBytes": 1,
+                    "createdAt": "2026-05-31 12:00:00Z",
+                    "updatedAt": "2026-05-31 12:00:00Z"
+                  },
+                  "valueBase64": "MQ==",
+                  "valueText": "1",
+                  "nextActions": [
+                    "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
+                    "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
+                    "Use SQLite for relational service data and KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "StateMutationLoaded": {
+        "description": "State state mutation completed.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StateMutationResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "State state mutation completed.",
+                "value": {
+                  "namespace": {
+                    "id": "state_namespace_1",
+                    "className": "Room",
+                    "storageLimitMib": 953
+                  },
+                  "object": {
+                    "id": "state_object_1",
+                    "namespaceId": "state_namespace_1",
+                    "objectKey": "room-1",
+                    "storageUsedBytes": 0,
+                    "storageUsedMib": 0,
+                    "lastSeenAt": "2026-05-31 12:00:00Z",
+                    "hibernatedAt": null,
+                    "createdAt": "2026-05-31 12:00:00Z",
+                    "updatedAt": "2026-05-31 12:00:00Z"
+                  },
+                  "deleted": true,
+                  "nextActions": [
+                    "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
+                    "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
+                    "Use SQLite for relational service data and KV for small cached values."
                   ]
                 }
               }
@@ -9316,7 +10050,7 @@
                   "operationOverageUsdMicrosPerMillion": null,
                   "egressFree": true
                 },
-                "durableObjects": {
+                "state": {
                   "includedRequestsPerMonth": null,
                   "requestOverageUsdMicrosPerMillion": null,
                   "includedDurationGbSecondsPerMonth": null,
@@ -9383,7 +10117,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -9444,7 +10178,7 @@
               "kvNamespaceCount": 1,
               "queueCount": 1,
               "cronTriggerCount": 1,
-              "durableObjectNamespaceCount": 1,
+              "stateNamespaceCount": 1,
               "usageCapCount": 2
             },
             "limits": {
@@ -9503,9 +10237,9 @@
               "kvListsPerMonth": null,
               "queueOperationsPerDay": 10000,
               "queueOperationsPerMonth": null,
-              "durableObjectRequestsPerDay": 100000,
-              "durableObjectRequestsPerMonth": null,
-              "durableObjectSqliteStorageMib": 953,
+              "stateRequestsPerDay": 100000,
+              "stateRequestsPerMonth": null,
+              "stateSqliteStorageMib": 953,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -9515,10 +10249,10 @@
               "objectStorageClassBOperationsPerMonth": 10000000,
               "kvNamespaces": 1000,
               "queues": 10000,
-              "durableObjectClasses": 100,
-              "durableObjectDurationGbSecondsPerDay": 13000,
-              "durableObjectDurationGbSecondsPerMonth": null,
-              "durableObjectSqliteStorageMibPerAccount": 4768,
+              "stateClasses": 100,
+              "stateDurationGbSecondsPerDay": 13000,
+              "stateDurationGbSecondsPerMonth": null,
+              "stateSqliteStorageMibPerAccount": 4768,
               "logEventsPerDay": 200000,
               "logEventsPerMonth": null,
               "sqliteQueriesPerWorkerInvocation": 50,
@@ -9564,10 +10298,10 @@
               "queueVisibilityTimeoutSeconds": 43200,
               "queueDelaySeconds": 86400,
               "queueRetentionSeconds": 86400,
-              "durableObjectInstances": null,
-              "durableObjectWebsocketMessageMib": 32,
-              "durableObjectSoftRequestsPerSecond": 1000,
-              "durableObjectCpuMsPerRequest": 30000,
+              "stateInstances": null,
+              "stateWebsocketMessageMib": 32,
+              "stateSoftRequestsPerSecond": 1000,
+              "stateCpuMsPerRequest": 30000,
               "storageSinglePartUploadMaxMib": 5120,
               "storageMultipartUploadMaxMib": 5242880,
               "storageUploadParts": 10000,
@@ -9576,11 +10310,11 @@
               "storageCustomDomainsPerBucket": 50,
               "storageBucketManagementOperationsPerSecond": 50,
               "storageSameKeyWritesPerSecond": 1,
-              "durableObjectSqliteRowsReadPerDay": 5000000,
-              "durableObjectSqliteRowsReadPerMonth": null,
-              "durableObjectSqliteRowsWrittenPerDay": 100000,
-              "durableObjectSqliteRowsWrittenPerMonth": null,
-              "durableObjectKeyValueSizeMib": 2
+              "stateSqliteRowsReadPerDay": 5000000,
+              "stateSqliteRowsReadPerMonth": null,
+              "stateSqliteRowsWrittenPerDay": 100000,
+              "stateSqliteRowsWrittenPerMonth": null,
+              "stateKeyValueSizeMib": 2
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -9617,7 +10351,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -9827,7 +10561,7 @@
           "kvNamespaceCount",
           "queueCount",
           "cronTriggerCount",
-          "durableObjectNamespaceCount",
+          "stateNamespaceCount",
           "usageCapCount"
         ],
         "properties": {
@@ -9922,10 +10656,10 @@
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectNamespaceCount": {
+          "stateNamespaceCount": {
             "type": "integer",
             "format": "int64",
-            "description": "Number of Durable Object namespaces. Context: components.schemas.AccountDashboardUsage.properties.durableObjectNamespaceCount.",
+            "description": "Number of State namespaces. Context: components.schemas.AccountDashboardUsage.properties.stateNamespaceCount.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -10004,7 +10738,7 @@
             "kvNamespaceCount": 1,
             "queueCount": 1,
             "cronTriggerCount": 1,
-            "durableObjectNamespaceCount": 1,
+            "stateNamespaceCount": 1,
             "usageCapCount": 2
           }
         ]
@@ -12377,9 +13111,9 @@
                     "kvListsPerMonth": null,
                     "queueOperationsPerDay": 10000,
                     "queueOperationsPerMonth": null,
-                    "durableObjectRequestsPerDay": 100000,
-                    "durableObjectRequestsPerMonth": null,
-                    "durableObjectSqliteStorageMib": 953,
+                    "stateRequestsPerDay": 100000,
+                    "stateRequestsPerMonth": null,
+                    "stateSqliteStorageMib": 953,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5242880,
@@ -12400,10 +13134,10 @@
                     "supportTicketsPerDay": 3,
                     "kvNamespaces": 1000,
                     "queues": 10000,
-                    "durableObjectClasses": 100,
-                    "durableObjectDurationGbSecondsPerDay": 13000,
-                    "durableObjectDurationGbSecondsPerMonth": null,
-                    "durableObjectSqliteStorageMibPerAccount": 4768,
+                    "stateClasses": 100,
+                    "stateDurationGbSecondsPerDay": 13000,
+                    "stateDurationGbSecondsPerMonth": null,
+                    "stateSqliteStorageMibPerAccount": 4768,
                     "logEventsPerDay": 200000,
                     "logEventsPerMonth": null,
                     "sqliteQueriesPerWorkerInvocation": 50,
@@ -12449,10 +13183,10 @@
                     "queueVisibilityTimeoutSeconds": 43200,
                     "queueDelaySeconds": 86400,
                     "queueRetentionSeconds": 86400,
-                    "durableObjectInstances": null,
-                    "durableObjectWebsocketMessageMib": 32,
-                    "durableObjectSoftRequestsPerSecond": 1000,
-                    "durableObjectCpuMsPerRequest": 30000,
+                    "stateInstances": null,
+                    "stateWebsocketMessageMib": 32,
+                    "stateSoftRequestsPerSecond": 1000,
+                    "stateCpuMsPerRequest": 30000,
                     "storageSinglePartUploadMaxMib": 5120,
                     "storageMultipartUploadMaxMib": 5242880,
                     "storageUploadParts": 10000,
@@ -12461,11 +13195,11 @@
                     "storageCustomDomainsPerBucket": 50,
                     "storageBucketManagementOperationsPerSecond": 50,
                     "storageSameKeyWritesPerSecond": 1,
-                    "durableObjectSqliteRowsReadPerDay": 5000000,
-                    "durableObjectSqliteRowsReadPerMonth": null,
-                    "durableObjectSqliteRowsWrittenPerDay": 100000,
-                    "durableObjectSqliteRowsWrittenPerMonth": null,
-                    "durableObjectKeyValueSizeMib": 2
+                    "stateSqliteRowsReadPerDay": 5000000,
+                    "stateSqliteRowsReadPerMonth": null,
+                    "stateSqliteRowsWrittenPerDay": 100000,
+                    "stateSqliteRowsWrittenPerMonth": null,
+                    "stateKeyValueSizeMib": 2
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -12502,7 +13236,7 @@
                       "operationOverageUsdMicrosPerMillion": null,
                       "egressFree": true
                     },
-                    "durableObjects": {
+                    "state": {
                       "includedRequestsPerMonth": null,
                       "requestOverageUsdMicrosPerMillion": null,
                       "includedDurationGbSecondsPerMonth": null,
@@ -12581,9 +13315,9 @@
                     "kvListsPerMonth": 1000000,
                     "queueOperationsPerDay": null,
                     "queueOperationsPerMonth": 1000000,
-                    "durableObjectRequestsPerDay": null,
-                    "durableObjectRequestsPerMonth": 1000000,
-                    "durableObjectSqliteStorageMib": 9536,
+                    "stateRequestsPerDay": null,
+                    "stateRequestsPerMonth": 1000000,
+                    "stateSqliteStorageMib": 9536,
                     "objectStorageMib": null,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5242880,
@@ -12604,10 +13338,10 @@
                     "supportTicketsPerDay": 20,
                     "kvNamespaces": 1000,
                     "queues": 10000,
-                    "durableObjectClasses": 500,
-                    "durableObjectDurationGbSecondsPerDay": null,
-                    "durableObjectDurationGbSecondsPerMonth": 400000,
-                    "durableObjectSqliteStorageMibPerAccount": null,
+                    "stateClasses": 500,
+                    "stateDurationGbSecondsPerDay": null,
+                    "stateDurationGbSecondsPerMonth": 400000,
+                    "stateSqliteStorageMibPerAccount": null,
                     "logEventsPerDay": null,
                     "logEventsPerMonth": 20000000,
                     "sqliteQueriesPerWorkerInvocation": 1000,
@@ -12653,10 +13387,10 @@
                     "queueVisibilityTimeoutSeconds": 43200,
                     "queueDelaySeconds": 86400,
                     "queueRetentionSeconds": 1209600,
-                    "durableObjectInstances": null,
-                    "durableObjectWebsocketMessageMib": 32,
-                    "durableObjectSoftRequestsPerSecond": 1000,
-                    "durableObjectCpuMsPerRequest": 300000,
+                    "stateInstances": null,
+                    "stateWebsocketMessageMib": 32,
+                    "stateSoftRequestsPerSecond": 1000,
+                    "stateCpuMsPerRequest": 300000,
                     "storageSinglePartUploadMaxMib": 5120,
                     "storageMultipartUploadMaxMib": 5242880,
                     "storageUploadParts": 10000,
@@ -12665,14 +13399,14 @@
                     "storageCustomDomainsPerBucket": 50,
                     "storageBucketManagementOperationsPerSecond": 50,
                     "storageSameKeyWritesPerSecond": 1,
-                    "durableObjectSqliteRowsReadPerDay": null,
-                    "durableObjectSqliteRowsReadPerMonth": 25000000000,
-                    "durableObjectSqliteRowsWrittenPerDay": null,
-                    "durableObjectSqliteRowsWrittenPerMonth": 50000000,
-                    "durableObjectKeyValueSizeMib": 2
+                    "stateSqliteRowsReadPerDay": null,
+                    "stateSqliteRowsReadPerMonth": 25000000000,
+                    "stateSqliteRowsWrittenPerDay": null,
+                    "stateSqliteRowsWrittenPerMonth": 50000000,
+                    "stateKeyValueSizeMib": 2
                   },
                   "pricing": {
-                    "subscriptionUsdCentsPerMonth": 500,
+                    "subscriptionUsdCentsPerMonth": 2500,
                     "paidOveragesEnabled": true,
                     "workers": {
                       "includedRequestsPerMonth": 10000000,
@@ -12706,7 +13440,7 @@
                       "operationOverageUsdMicrosPerMillion": 400000,
                       "egressFree": true
                     },
-                    "durableObjects": {
+                    "state": {
                       "includedRequestsPerMonth": 1000000,
                       "requestOverageUsdMicrosPerMillion": 150000,
                       "includedDurationGbSecondsPerMonth": 400000,
@@ -12811,7 +13545,7 @@
                   "operationOverageUsdMicrosPerMillion": null,
                   "egressFree": true
                 },
-                "durableObjects": {
+                "state": {
                   "includedRequestsPerMonth": null,
                   "requestOverageUsdMicrosPerMillion": null,
                   "includedDurationGbSecondsPerMonth": null,
@@ -12878,7 +13612,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -12938,7 +13672,7 @@
               "kvNamespaceCount": 1,
               "queueCount": 1,
               "cronTriggerCount": 1,
-              "durableObjectNamespaceCount": 1,
+              "stateNamespaceCount": 1,
               "usageCapCount": 2
             },
             "limits": {
@@ -12997,9 +13731,9 @@
               "kvListsPerMonth": null,
               "queueOperationsPerDay": 10000,
               "queueOperationsPerMonth": null,
-              "durableObjectRequestsPerDay": 100000,
-              "durableObjectRequestsPerMonth": null,
-              "durableObjectSqliteStorageMib": 953,
+              "stateRequestsPerDay": 100000,
+              "stateRequestsPerMonth": null,
+              "stateSqliteStorageMib": 953,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -13009,10 +13743,10 @@
               "objectStorageClassBOperationsPerMonth": 10000000,
               "kvNamespaces": 1000,
               "queues": 10000,
-              "durableObjectClasses": 100,
-              "durableObjectDurationGbSecondsPerDay": 13000,
-              "durableObjectDurationGbSecondsPerMonth": null,
-              "durableObjectSqliteStorageMibPerAccount": 4768,
+              "stateClasses": 100,
+              "stateDurationGbSecondsPerDay": 13000,
+              "stateDurationGbSecondsPerMonth": null,
+              "stateSqliteStorageMibPerAccount": 4768,
               "logEventsPerDay": 200000,
               "logEventsPerMonth": null,
               "sqliteQueriesPerWorkerInvocation": 50,
@@ -13058,10 +13792,10 @@
               "queueVisibilityTimeoutSeconds": 43200,
               "queueDelaySeconds": 86400,
               "queueRetentionSeconds": 86400,
-              "durableObjectInstances": null,
-              "durableObjectWebsocketMessageMib": 32,
-              "durableObjectSoftRequestsPerSecond": 1000,
-              "durableObjectCpuMsPerRequest": 30000,
+              "stateInstances": null,
+              "stateWebsocketMessageMib": 32,
+              "stateSoftRequestsPerSecond": 1000,
+              "stateCpuMsPerRequest": 30000,
               "storageSinglePartUploadMaxMib": 5120,
               "storageMultipartUploadMaxMib": 5242880,
               "storageUploadParts": 10000,
@@ -13070,11 +13804,11 @@
               "storageCustomDomainsPerBucket": 50,
               "storageBucketManagementOperationsPerSecond": 50,
               "storageSameKeyWritesPerSecond": 1,
-              "durableObjectSqliteRowsReadPerDay": 5000000,
-              "durableObjectSqliteRowsReadPerMonth": null,
-              "durableObjectSqliteRowsWrittenPerDay": 100000,
-              "durableObjectSqliteRowsWrittenPerMonth": null,
-              "durableObjectKeyValueSizeMib": 2
+              "stateSqliteRowsReadPerDay": 5000000,
+              "stateSqliteRowsReadPerMonth": null,
+              "stateSqliteRowsWrittenPerDay": 100000,
+              "stateSqliteRowsWrittenPerMonth": null,
+              "stateKeyValueSizeMib": 2
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -13111,7 +13845,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -13192,9 +13926,9 @@
           "kvListsPerMonth",
           "queueOperationsPerDay",
           "queueOperationsPerMonth",
-          "durableObjectRequestsPerDay",
-          "durableObjectRequestsPerMonth",
-          "durableObjectSqliteStorageMib",
+          "stateRequestsPerDay",
+          "stateRequestsPerMonth",
+          "stateSqliteStorageMib",
           "objectStorageMib",
           "storageObjects",
           "storageObjectMaxMib",
@@ -13215,10 +13949,10 @@
           "supportTicketsPerDay",
           "kvNamespaces",
           "queues",
-          "durableObjectClasses",
-          "durableObjectDurationGbSecondsPerDay",
-          "durableObjectDurationGbSecondsPerMonth",
-          "durableObjectSqliteStorageMibPerAccount",
+          "stateClasses",
+          "stateDurationGbSecondsPerDay",
+          "stateDurationGbSecondsPerMonth",
+          "stateSqliteStorageMibPerAccount",
           "logEventsPerDay",
           "logEventsPerMonth",
           "sqliteQueriesPerWorkerInvocation",
@@ -13264,10 +13998,10 @@
           "queueVisibilityTimeoutSeconds",
           "queueDelaySeconds",
           "queueRetentionSeconds",
-          "durableObjectInstances",
-          "durableObjectWebsocketMessageMib",
-          "durableObjectSoftRequestsPerSecond",
-          "durableObjectCpuMsPerRequest",
+          "stateInstances",
+          "stateWebsocketMessageMib",
+          "stateSoftRequestsPerSecond",
+          "stateCpuMsPerRequest",
           "storageSinglePartUploadMaxMib",
           "storageMultipartUploadMaxMib",
           "storageUploadParts",
@@ -13276,11 +14010,11 @@
           "storageCustomDomainsPerBucket",
           "storageBucketManagementOperationsPerSecond",
           "storageSameKeyWritesPerSecond",
-          "durableObjectSqliteRowsReadPerDay",
-          "durableObjectSqliteRowsReadPerMonth",
-          "durableObjectSqliteRowsWrittenPerDay",
-          "durableObjectSqliteRowsWrittenPerMonth",
-          "durableObjectKeyValueSizeMib"
+          "stateSqliteRowsReadPerDay",
+          "stateSqliteRowsReadPerMonth",
+          "stateSqliteRowsWrittenPerDay",
+          "stateSqliteRowsWrittenPerMonth",
+          "stateKeyValueSizeMib"
         ],
         "properties": {
           "projects": {
@@ -13645,37 +14379,37 @@
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectRequestsPerDay": {
+          "stateRequestsPerDay": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Daily Durable Object request limit, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerDay.",
+            "description": "Daily State request limit, when set. Context: components.schemas.PlanLimits.properties.stateRequestsPerDay.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectRequestsPerMonth": {
+          "stateRequestsPerMonth": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Monthly Durable Object request allowance, when set. Context: components.schemas.PlanLimits.properties.durableObjectRequestsPerMonth.",
+            "description": "Monthly State request allowance, when set. Context: components.schemas.PlanLimits.properties.stateRequestsPerMonth.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSqliteStorageMib": {
+          "stateSqliteStorageMib": {
             "type": "integer",
             "format": "int64",
-            "description": "Durable Object SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.durableObjectSqliteStorageMib.",
+            "description": "State SQLite storage in MiB. Context: components.schemas.PlanLimits.properties.stateSqliteStorageMib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectKeyValueSizeMib": {
+          "stateKeyValueSizeMib": {
             "type": "integer",
             "format": "int64",
-            "description": "Durable Object key and value combined limit in MiB. Context: components.schemas.PlanLimits.properties.durableObjectKeyValueSizeMib.",
+            "description": "State key and value combined limit in MiB. Context: components.schemas.PlanLimits.properties.stateKeyValueSizeMib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -13834,80 +14568,80 @@
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectClasses": {
+          "stateClasses": {
             "type": "integer",
             "format": "int64",
-            "description": "Durable Object classes allowed for the account.",
+            "description": "State classes allowed for the account.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectDurationGbSecondsPerDay": {
+          "stateDurationGbSecondsPerDay": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Daily Durable Object duration in GB-seconds.",
+            "description": "Daily State duration in GB-seconds.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectDurationGbSecondsPerMonth": {
+          "stateDurationGbSecondsPerMonth": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Monthly Durable Object duration in GB-seconds.",
+            "description": "Monthly State duration in GB-seconds.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSqliteRowsReadPerDay": {
+          "stateSqliteRowsReadPerDay": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Daily Durable Object SQLite rows read, when set. Context: components.schemas.PlanLimits.properties.durableObjectSqliteRowsReadPerDay.",
+            "description": "Daily State SQLite rows read, when set. Context: components.schemas.PlanLimits.properties.stateSqliteRowsReadPerDay.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSqliteRowsReadPerMonth": {
+          "stateSqliteRowsReadPerMonth": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Monthly Durable Object SQLite rows read included, when set. Context: components.schemas.PlanLimits.properties.durableObjectSqliteRowsReadPerMonth.",
+            "description": "Monthly State SQLite rows read included, when set. Context: components.schemas.PlanLimits.properties.stateSqliteRowsReadPerMonth.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSqliteRowsWrittenPerDay": {
+          "stateSqliteRowsWrittenPerDay": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Daily Durable Object SQLite rows written, when set. Context: components.schemas.PlanLimits.properties.durableObjectSqliteRowsWrittenPerDay.",
+            "description": "Daily State SQLite rows written, when set. Context: components.schemas.PlanLimits.properties.stateSqliteRowsWrittenPerDay.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSqliteRowsWrittenPerMonth": {
+          "stateSqliteRowsWrittenPerMonth": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Monthly Durable Object SQLite rows written included, when set. Context: components.schemas.PlanLimits.properties.durableObjectSqliteRowsWrittenPerMonth.",
+            "description": "Monthly State SQLite rows written included, when set. Context: components.schemas.PlanLimits.properties.stateSqliteRowsWrittenPerMonth.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSqliteStorageMibPerAccount": {
+          "stateSqliteStorageMibPerAccount": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Account-level Durable Object SQLite storage cap in MiB.",
+            "description": "Account-level State SQLite storage cap in MiB.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -14238,34 +14972,34 @@
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectInstances": {
+          "stateInstances": {
             "type": [
               "integer",
               "null"
             ],
             "format": "int64",
-            "description": "Durable Object instances allowed, when capped. Context: components.schemas.PlanLimits.properties.durableObjectInstances.",
+            "description": "State instances allowed, when capped. Context: components.schemas.PlanLimits.properties.stateInstances.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectWebsocketMessageMib": {
+          "stateWebsocketMessageMib": {
             "type": "integer",
             "format": "int64",
-            "description": "Durable Object WebSocket message size in MiB. Context: components.schemas.PlanLimits.properties.durableObjectWebsocketMessageMib.",
+            "description": "State WebSocket message size in MiB. Context: components.schemas.PlanLimits.properties.stateWebsocketMessageMib.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectSoftRequestsPerSecond": {
+          "stateSoftRequestsPerSecond": {
             "type": "integer",
             "format": "int64",
-            "description": "Soft request throughput for one Durable Object instance. Context: components.schemas.PlanLimits.properties.durableObjectSoftRequestsPerSecond.",
+            "description": "Soft request throughput for one State instance. Context: components.schemas.PlanLimits.properties.stateSoftRequestsPerSecond.",
             "minimum": 0,
             "maximum": 1000000000000
           },
-          "durableObjectCpuMsPerRequest": {
+          "stateCpuMsPerRequest": {
             "type": "integer",
             "format": "int64",
-            "description": "Durable Object CPU limit per request in milliseconds. Context: components.schemas.PlanLimits.properties.durableObjectCpuMsPerRequest.",
+            "description": "State CPU limit per request in milliseconds. Context: components.schemas.PlanLimits.properties.stateCpuMsPerRequest.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -14374,9 +15108,9 @@
             "kvListsPerMonth": null,
             "queueOperationsPerDay": 10000,
             "queueOperationsPerMonth": null,
-            "durableObjectRequestsPerDay": 100000,
-            "durableObjectRequestsPerMonth": null,
-            "durableObjectSqliteStorageMib": 953,
+            "stateRequestsPerDay": 100000,
+            "stateRequestsPerMonth": null,
+            "stateSqliteStorageMib": 953,
             "objectStorageMib": 9536,
             "storageObjects": null,
             "storageObjectMaxMib": 5242880,
@@ -14397,10 +15131,10 @@
             "objectStorageClassBOperationsPerMonth": 10000000,
             "kvNamespaces": 1000,
             "queues": 10000,
-            "durableObjectClasses": 100,
-            "durableObjectDurationGbSecondsPerDay": 13000,
-            "durableObjectDurationGbSecondsPerMonth": null,
-            "durableObjectSqliteStorageMibPerAccount": 4768,
+            "stateClasses": 100,
+            "stateDurationGbSecondsPerDay": 13000,
+            "stateDurationGbSecondsPerMonth": null,
+            "stateSqliteStorageMibPerAccount": 4768,
             "logEventsPerDay": 200000,
             "logEventsPerMonth": null,
             "sqliteQueriesPerWorkerInvocation": 50,
@@ -14446,10 +15180,10 @@
             "queueVisibilityTimeoutSeconds": 43200,
             "queueDelaySeconds": 86400,
             "queueRetentionSeconds": 86400,
-            "durableObjectInstances": null,
-            "durableObjectWebsocketMessageMib": 32,
-            "durableObjectSoftRequestsPerSecond": 1000,
-            "durableObjectCpuMsPerRequest": 30000,
+            "stateInstances": null,
+            "stateWebsocketMessageMib": 32,
+            "stateSoftRequestsPerSecond": 1000,
+            "stateCpuMsPerRequest": 30000,
             "storageSinglePartUploadMaxMib": 5120,
             "storageMultipartUploadMaxMib": 5242880,
             "storageUploadParts": 10000,
@@ -14458,11 +15192,11 @@
             "storageCustomDomainsPerBucket": 50,
             "storageBucketManagementOperationsPerSecond": 50,
             "storageSameKeyWritesPerSecond": 1,
-            "durableObjectSqliteRowsReadPerDay": 5000000,
-            "durableObjectSqliteRowsReadPerMonth": null,
-            "durableObjectSqliteRowsWrittenPerDay": 100000,
-            "durableObjectSqliteRowsWrittenPerMonth": null,
-            "durableObjectKeyValueSizeMib": 2
+            "stateSqliteRowsReadPerDay": 5000000,
+            "stateSqliteRowsReadPerMonth": null,
+            "stateSqliteRowsWrittenPerDay": 100000,
+            "stateSqliteRowsWrittenPerMonth": null,
+            "stateKeyValueSizeMib": 2
           }
         ]
       },
@@ -14617,7 +15351,7 @@
                   "operationOverageUsdMicrosPerMillion": null,
                   "egressFree": true
                 },
-                "durableObjects": {
+                "state": {
                   "includedRequestsPerMonth": null,
                   "requestOverageUsdMicrosPerMillion": null,
                   "includedDurationGbSecondsPerMonth": null,
@@ -14684,7 +15418,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -14744,7 +15478,7 @@
               "kvNamespaceCount": 1,
               "queueCount": 1,
               "cronTriggerCount": 1,
-              "durableObjectNamespaceCount": 1,
+              "stateNamespaceCount": 1,
               "usageCapCount": 2
             },
             "limits": {
@@ -14803,9 +15537,9 @@
               "kvListsPerMonth": null,
               "queueOperationsPerDay": 10000,
               "queueOperationsPerMonth": null,
-              "durableObjectRequestsPerDay": 100000,
-              "durableObjectRequestsPerMonth": null,
-              "durableObjectSqliteStorageMib": 953,
+              "stateRequestsPerDay": 100000,
+              "stateRequestsPerMonth": null,
+              "stateSqliteStorageMib": 953,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -14815,10 +15549,10 @@
               "objectStorageClassBOperationsPerMonth": 10000000,
               "kvNamespaces": 1000,
               "queues": 10000,
-              "durableObjectClasses": 100,
-              "durableObjectDurationGbSecondsPerDay": 13000,
-              "durableObjectDurationGbSecondsPerMonth": null,
-              "durableObjectSqliteStorageMibPerAccount": 4768,
+              "stateClasses": 100,
+              "stateDurationGbSecondsPerDay": 13000,
+              "stateDurationGbSecondsPerMonth": null,
+              "stateSqliteStorageMibPerAccount": 4768,
               "logEventsPerDay": 200000,
               "logEventsPerMonth": null,
               "sqliteQueriesPerWorkerInvocation": 50,
@@ -14864,10 +15598,10 @@
               "queueVisibilityTimeoutSeconds": 43200,
               "queueDelaySeconds": 86400,
               "queueRetentionSeconds": 86400,
-              "durableObjectInstances": null,
-              "durableObjectWebsocketMessageMib": 32,
-              "durableObjectSoftRequestsPerSecond": 1000,
-              "durableObjectCpuMsPerRequest": 30000,
+              "stateInstances": null,
+              "stateWebsocketMessageMib": 32,
+              "stateSoftRequestsPerSecond": 1000,
+              "stateCpuMsPerRequest": 30000,
               "storageSinglePartUploadMaxMib": 5120,
               "storageMultipartUploadMaxMib": 5242880,
               "storageUploadParts": 10000,
@@ -14876,11 +15610,11 @@
               "storageCustomDomainsPerBucket": 50,
               "storageBucketManagementOperationsPerSecond": 50,
               "storageSameKeyWritesPerSecond": 1,
-              "durableObjectSqliteRowsReadPerDay": 5000000,
-              "durableObjectSqliteRowsReadPerMonth": null,
-              "durableObjectSqliteRowsWrittenPerDay": 100000,
-              "durableObjectSqliteRowsWrittenPerMonth": null,
-              "durableObjectKeyValueSizeMib": 2
+              "stateSqliteRowsReadPerDay": 5000000,
+              "stateSqliteRowsReadPerMonth": null,
+              "stateSqliteRowsWrittenPerDay": 100000,
+              "stateSqliteRowsWrittenPerMonth": null,
+              "stateKeyValueSizeMib": 2
             },
             "services": [
               {
@@ -14954,7 +15688,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -15858,7 +16592,7 @@
           },
           "publicRead": {
             "type": "boolean",
-            "description": "Whether the object should be served through the public Tovuk media CDN. Context: components.schemas.StorageUploadUrlRequest.properties.publicRead.",
+            "description": "Whether the object should be served through the public Tovuk media. Context: components.schemas.StorageUploadUrlRequest.properties.publicRead.",
             "default": false,
             "examples": [
               true
@@ -15993,7 +16727,7 @@
           },
           "publicRead": {
             "type": "boolean",
-            "description": "Whether the object is publicly served through Tovuk media CDN. Context: components.schemas.StorageObject.properties.publicRead.",
+            "description": "Whether the object is publicly served through Tovuk media. Context: components.schemas.StorageObject.properties.publicRead.",
             "examples": [
               true
             ]
@@ -16003,7 +16737,7 @@
               {
                 "type": "string",
                 "format": "uri",
-                "description": "Public CDN URL. Context: components.schemas.StorageObject.properties.publicUrl.anyOf.0.",
+                "description": "Public media URL. Context: components.schemas.StorageObject.properties.publicUrl.anyOf.0.",
                 "examples": [
                   "https://media.tovuk.app/hello-rust/uploads/logo.png"
                 ]
@@ -16217,7 +16951,7 @@
               {
                 "type": "string",
                 "format": "uri",
-                "description": "Public CDN URL when public serving is enabled. Context: components.schemas.StorageUrlResponse.properties.publicUrl.anyOf.0.",
+                "description": "Public media URL when public serving is enabled. Context: components.schemas.StorageUrlResponse.properties.publicUrl.anyOf.0.",
                 "examples": [
                   "https://media.tovuk.app/hello-rust/uploads/logo.png"
                 ]
@@ -16534,7 +17268,7 @@
         },
         "description": "Cron trigger metadata. Context: components.schemas.CronTrigger."
       },
-      "DurableObjectNamespace": {
+      "StateNamespace": {
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -16545,17 +17279,17 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Durable Object namespace id. Context: components.schemas.DurableObjectNamespace.properties.id.",
+            "description": "State namespace id. Context: components.schemas.StateNamespace.properties.id.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^durable_[0-9]+$",
+            "pattern": "^state_namespace_[0-9]+$",
             "examples": [
-              "durable_1"
+              "state_namespace_1"
             ]
           },
           "className": {
             "type": "string",
-            "description": "Rust actor class name. Context: components.schemas.DurableObjectNamespace.properties.className.",
+            "description": "Rust actor class name. Context: components.schemas.StateNamespace.properties.className.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Z][A-Za-z0-9_]{0,63}$",
@@ -16566,7 +17300,7 @@
           "storageLimitMib": {
             "type": "integer",
             "format": "int64",
-            "description": "Storage limit in MiB. Context: components.schemas.DurableObjectNamespace.properties.storageLimitMib.",
+            "description": "Storage limit in MiB. Context: components.schemas.StateNamespace.properties.storageLimitMib.",
             "minimum": 0,
             "maximum": 1000000000000,
             "examples": [
@@ -16574,7 +17308,7 @@
             ]
           }
         },
-        "description": "Durable Object namespace metadata. Context: components.schemas.DurableObjectNamespace."
+        "description": "State namespace metadata."
       },
       "ServiceBinding": {
         "type": "object",
@@ -16623,7 +17357,7 @@
             "description": "Meter name. Context: components.schemas.UsageCap.properties.metric.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|durable_object_requests|durable_object_duration_gb_seconds|durable_object_sqlite_rows_read|durable_object_sqlite_rows_written|durable_object_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes|log_events)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
             "examples": [
               "worker_requests"
             ]
@@ -16678,7 +17412,7 @@
           "kvNamespaces",
           "queues",
           "cronTriggers",
-          "durableObjectNamespaces",
+          "stateNamespaces",
           "serviceBindings",
           "usageCaps",
           "nextActions",
@@ -16777,17 +17511,17 @@
               ]
             ]
           },
-          "durableObjectNamespaces": {
+          "stateNamespaces": {
             "type": "array",
             "maxItems": 100000,
             "items": {
-              "$ref": "#/components/schemas/DurableObjectNamespace"
+              "$ref": "#/components/schemas/StateNamespace"
             },
-            "description": "Durable Object namespaces. Context: components.schemas.PlatformResourcesResponse.properties.durableObjectNamespaces.",
+            "description": "State namespaces. Context: components.schemas.PlatformResourcesResponse.properties.stateNamespaces.",
             "examples": [
               [
                 {
-                  "id": "durable_1",
+                  "id": "state_namespace_1",
                   "className": "Room",
                   "storageLimitMib": 953
                 }
@@ -16855,7 +17589,7 @@
               "sqlite",
               "kv",
               "queues",
-              "durableObjects",
+              "state",
               "objectStorage",
               "staticAssets",
               "logs"
@@ -16884,8 +17618,8 @@
               "queues": {
                 "$ref": "#/components/schemas/QueuePricing"
               },
-              "durableObjects": {
-                "$ref": "#/components/schemas/DurableObjectPricing"
+              "state": {
+                "$ref": "#/components/schemas/StatePricing"
               },
               "objectStorage": {
                 "$ref": "#/components/schemas/ObjectStoragePricing"
@@ -16932,7 +17666,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -16999,7 +17733,7 @@
                   "operationOverageUsdMicrosPerMillion": null,
                   "egressFree": true
                 },
-                "durableObjects": {
+                "state": {
                   "includedRequestsPerMonth": null,
                   "requestOverageUsdMicrosPerMillion": null,
                   "includedDurationGbSecondsPerMonth": null,
@@ -17179,7 +17913,7 @@
         },
         "description": "CronTriggerCreateRequest. Context: components.schemas.CronTriggerCreateRequest."
       },
-      "DurableObjectNamespaceCreateRequest": {
+      "StateNamespaceCreateRequest": {
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -17188,7 +17922,7 @@
         "properties": {
           "className": {
             "type": "string",
-            "description": "Rust actor class name. Context: components.schemas.DurableObjectNamespaceCreateRequest.properties.className.",
+            "description": "Rust actor class name. Context: components.schemas.StateNamespaceCreateRequest.properties.className.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^[A-Z][A-Za-z0-9_]{0,63}$",
@@ -17197,7 +17931,7 @@
             ]
           }
         },
-        "description": "DurableObjectNamespaceCreateRequest. Context: components.schemas.DurableObjectNamespaceCreateRequest."
+        "description": "StateNamespaceCreateRequest. Context: components.schemas.StateNamespaceCreateRequest."
       },
       "ServiceBindingCreateRequest": {
         "type": "object",
@@ -18322,7 +19056,7 @@
             "description": "Meter name. Context: components.schemas.UsageCapDeleteResponse.properties.metric.",
             "minLength": 1,
             "maxLength": 128,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|durable_object_requests|durable_object_duration_gb_seconds|durable_object_sqlite_rows_read|durable_object_sqlite_rows_written|durable_object_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|origin_transfer_bytes|cdn_transfer_bytes|log_events)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
             "examples": [
               "worker_requests"
             ]
@@ -18647,9 +19381,9 @@
           }
         }
       },
-      "DurableObjectPricing": {
+      "StatePricing": {
         "type": "object",
-        "description": "Durable Object request, duration, and storage pricing.",
+        "description": "State request, duration, and storage pricing.",
         "additionalProperties": false,
         "required": [
           "includedRequestsPerMonth",
@@ -18670,7 +19404,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Included monthly Durable Object requests.",
+            "description": "Included monthly State requests.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18680,7 +19414,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Overage price in USD micro-units per one million Durable Object requests.",
+            "description": "Overage price in USD micro-units per one million State requests.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18690,7 +19424,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Included monthly Durable Object duration in GB-seconds.",
+            "description": "Included monthly State duration in GB-seconds.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18710,7 +19444,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Included monthly Durable Object SQLite rows read.",
+            "description": "Included monthly State SQLite rows read.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18720,7 +19454,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Overage price in USD micro-units per one million Durable Object SQLite rows read.",
+            "description": "Overage price in USD micro-units per one million State SQLite rows read.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18730,7 +19464,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Included monthly Durable Object SQLite rows written.",
+            "description": "Included monthly State SQLite rows written.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18740,14 +19474,14 @@
               "null"
             ],
             "format": "int64",
-            "description": "Overage price in USD micro-units per one million Durable Object SQLite rows written.",
+            "description": "Overage price in USD micro-units per one million State SQLite rows written.",
             "minimum": 0,
             "maximum": 1000000000000
           },
           "includedSqliteStorageMib": {
             "type": "integer",
             "format": "int64",
-            "description": "Included Durable Object SQLite storage in MiB.",
+            "description": "Included State SQLite storage in MiB.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18757,7 +19491,7 @@
               "null"
             ],
             "format": "int64",
-            "description": "Durable Object SQLite storage overage price in USD micro-units per GB-month.",
+            "description": "State SQLite storage overage price in USD micro-units per GB-month.",
             "minimum": 0,
             "maximum": 1000000000000
           }
@@ -18900,7 +19634,7 @@
           "sqlite",
           "kv",
           "queues",
-          "durableObjects",
+          "state",
           "objectStorage",
           "staticAssets",
           "logs"
@@ -18929,8 +19663,8 @@
           "queues": {
             "$ref": "#/components/schemas/QueuePricing"
           },
-          "durableObjects": {
-            "$ref": "#/components/schemas/DurableObjectPricing"
+          "state": {
+            "$ref": "#/components/schemas/StatePricing"
           },
           "objectStorage": {
             "$ref": "#/components/schemas/ObjectStoragePricing"
@@ -18996,7 +19730,7 @@
                 "operationOverageUsdMicrosPerMillion": null,
                 "egressFree": true
               },
-              "durableObjects": {
+              "state": {
                 "includedRequestsPerMonth": null,
                 "requestOverageUsdMicrosPerMillion": null,
                 "includedDurationGbSecondsPerMonth": null,
@@ -19943,6 +20677,457 @@
             ]
           }
         ]
+      },
+      "StateInstance": {
+        "type": "object",
+        "description": "State object metadata.",
+        "required": [
+          "id",
+          "namespaceId",
+          "objectKey",
+          "storageUsedBytes",
+          "storageUsedMib",
+          "lastSeenAt",
+          "hibernatedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^state_object_[0-9]+$",
+            "maxLength": 128,
+            "description": "Object instance id.",
+            "examples": [
+              "state_object_1"
+            ]
+          },
+          "namespaceId": {
+            "type": "string",
+            "pattern": "^state_namespace_[0-9]+$",
+            "maxLength": 128,
+            "description": "Namespace id.",
+            "examples": [
+              "state_namespace_1"
+            ]
+          },
+          "objectKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Object key inside the namespace.",
+            "examples": [
+              "room-1"
+            ],
+            "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$"
+          },
+          "storageUsedBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current storage usage in bytes.",
+            "examples": [
+              1
+            ],
+            "format": "int64",
+            "maximum": 9007199254740991
+          },
+          "storageUsedMib": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current storage usage in MiB.",
+            "examples": [
+              1
+            ],
+            "format": "int64",
+            "maximum": 9007199254740991
+          },
+          "lastSeenAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTC timestamp when this State object was last touched.",
+            "examples": [
+              "2026-05-31 12:00:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "hibernatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTC timestamp when this State object last hibernated.",
+            "examples": [
+              null
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC timestamp when this State object was created.",
+            "examples": [
+              "2026-05-31 12:00:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "UTC timestamp when this State object was last updated.",
+            "examples": [
+              "2026-05-31 12:00:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          }
+        },
+        "examples": [
+          {
+            "id": "state_object_1",
+            "namespaceId": "state_namespace_1",
+            "objectKey": "room-1",
+            "storageUsedBytes": 1,
+            "storageUsedMib": 1,
+            "lastSeenAt": "2026-05-31 12:00:00Z",
+            "hibernatedAt": null,
+            "createdAt": "2026-05-31 12:00:00Z",
+            "updatedAt": "2026-05-31 12:00:00Z"
+          }
+        ]
+      },
+      "StateInstancesResponse": {
+        "type": "object",
+        "description": "State object listing.",
+        "required": [
+          "namespace",
+          "objects",
+          "nextCursor",
+          "nextActions"
+        ],
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/StateNamespace"
+          },
+          "objects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StateInstance"
+            },
+            "examples": [
+              [
+                {
+                  "id": "state_object_1",
+                  "namespaceId": "state_namespace_1",
+                  "objectKey": "room-1",
+                  "storageUsedBytes": 1,
+                  "storageUsedMib": 1,
+                  "lastSeenAt": "2026-05-31 12:00:00Z",
+                  "hibernatedAt": null,
+                  "createdAt": "2026-05-31 12:00:00Z",
+                  "updatedAt": "2026-05-31 12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Cursor to pass when more objects are available.",
+            "examples": [
+              null
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$",
+            "maxLength": 512
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "Use State only for keyed coordination, realtime rooms, locks, counters, and per-tenant state."
+              ]
+            },
+            "examples": [
+              [
+                "Use State only for keyed coordination, realtime rooms, locks, counters, and per-tenant state."
+              ]
+            ]
+          }
+        }
+      },
+      "StateEntrySummary": {
+        "type": "object",
+        "description": "State key metadata without the value body.",
+        "required": [
+          "key",
+          "valueSizeBytes",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "State key.",
+            "examples": [
+              "counter"
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$"
+          },
+          "valueSizeBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Stored value size in bytes.",
+            "examples": [
+              1
+            ],
+            "format": "int64",
+            "maximum": 9007199254740991
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "UTC timestamp when this State key was created.",
+            "examples": [
+              "2026-05-31 12:00:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "UTC timestamp when this State key was last updated.",
+            "examples": [
+              "2026-05-31 12:00:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          }
+        },
+        "examples": [
+          {
+            "key": "counter",
+            "valueSizeBytes": 1,
+            "createdAt": "2026-05-31 12:00:00Z",
+            "updatedAt": "2026-05-31 12:00:00Z"
+          }
+        ]
+      },
+      "StateKeysResponse": {
+        "type": "object",
+        "description": "State key listing.",
+        "required": [
+          "namespace",
+          "object",
+          "keys",
+          "listComplete",
+          "nextCursor",
+          "nextActions"
+        ],
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/StateNamespace"
+          },
+          "object": {
+            "$ref": "#/components/schemas/StateInstance"
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StateEntrySummary"
+            },
+            "examples": [
+              [
+                {
+                  "key": "counter",
+                  "valueSizeBytes": 1,
+                  "createdAt": "2026-05-31 12:00:00Z",
+                  "updatedAt": "2026-05-31 12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "listComplete": {
+            "type": "boolean",
+            "description": "Whether the full key list has been returned.",
+            "examples": [
+              true
+            ]
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Cursor to pass when more keys are available.",
+            "examples": [
+              null
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,512}$",
+            "maxLength": 512
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "Read a key with tovuk state get when targeted state inspection is needed."
+              ]
+            },
+            "examples": [
+              [
+                "Read a key with tovuk state get when targeted state inspection is needed."
+              ]
+            ]
+          }
+        }
+      },
+      "StateEntryResponse": {
+        "type": "object",
+        "description": "State value response.",
+        "required": [
+          "namespace",
+          "object",
+          "entry",
+          "valueBase64",
+          "valueText",
+          "nextActions"
+        ],
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/StateNamespace"
+          },
+          "object": {
+            "$ref": "#/components/schemas/StateInstance"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/StateEntrySummary"
+          },
+          "valueBase64": {
+            "type": "string",
+            "description": "Base64 encoded value bytes.",
+            "examples": [
+              "MQ=="
+            ],
+            "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+            "maxLength": 2796204
+          },
+          "valueText": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTF-8 value when bytes are valid text.",
+            "examples": [
+              "1"
+            ],
+            "pattern": "^[\\s\\S]{1,2097152}$",
+            "maxLength": 2097152
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "Keep ordinary relational data in SQLite and use State only for keyed coordination."
+              ]
+            },
+            "examples": [
+              [
+                "Keep ordinary relational data in SQLite and use State only for keyed coordination."
+              ]
+            ]
+          }
+        }
+      },
+      "StateEntryPutRequest": {
+        "type": "object",
+        "description": "State value put request.",
+        "required": [
+          "value"
+        ],
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2097152,
+            "description": "Value body. Use encoding base64 for binary data.",
+            "examples": [
+              "1"
+            ],
+            "pattern": "^[\\s\\S]{1,2097152}$"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "text",
+              "base64"
+            ],
+            "default": "text",
+            "description": "Value encoding.",
+            "examples": [
+              "text"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "value": "1",
+            "encoding": "text"
+          }
+        ]
+      },
+      "StateMutationResponse": {
+        "type": "object",
+        "description": "State mutation response.",
+        "required": [
+          "namespace",
+          "object",
+          "deleted",
+          "nextActions"
+        ],
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/StateNamespace"
+          },
+          "object": {
+            "$ref": "#/components/schemas/StateInstance"
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Whether an existing state key was removed.",
+            "examples": [
+              true
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "List State keys after pruning to verify cleanup."
+              ]
+            },
+            "examples": [
+              [
+                "List State keys after pruning to verify cleanup."
+              ]
+            ]
+          }
+        }
       }
     }
   }
