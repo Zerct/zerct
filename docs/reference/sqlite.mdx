@@ -16,8 +16,9 @@ npx tovuk platform --service service_1 --json
 
 Agents should create databases before a deploy needs them, then keep schema
 migrations in source control. Query responses include `rowsRead`,
-`rowsWritten`, `vmSteps`, `fullscanSteps`, and storage usage so agents can fix
-slow or expensive queries without dashboard access.
+`rowsWritten`, `vmSteps`, `fullscanSteps`, and D1-style `meta.duration`,
+`meta.size_after`, `meta.rows_read`, and `meta.rows_written` fields so agents
+can fix slow or expensive queries without dashboard access.
 
 Delete stale databases only after migrations or exports are complete. The
 delete command removes the binding and local SQLite file set, then returns the
@@ -55,6 +56,8 @@ limits and prices with:
 D1-style query limits are exposed in `tovuk pricing --json`: 30 second query
 timeouts, 50 queries per Worker invocation on Free, 1000 on Pro, 100 bound
 parameters, 100 KB SQL statements, 100 columns, and 2 MB row/blob/string values.
+Storage is also tracked through the `sqlite_storage_bytes` gauge meter for
+account caps and agent-readable usage APIs.
 
 ```sh
 npx tovuk usage --json

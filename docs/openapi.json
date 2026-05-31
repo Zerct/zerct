@@ -8057,6 +8057,12 @@
                   "rowsRead": 1,
                   "rowsWritten": 0,
                   "storageUsedMib": 1,
+                  "meta": {
+                    "duration": 0.001,
+                    "size_after": 4096,
+                    "rows_read": 1,
+                    "rows_written": 0
+                  },
                   "nextActions": [
                     "Use parameterized SQL with params instead of interpolating user input.",
                     "Keep hot queries indexed and inspect rowsRead, vmSteps, and fullscanSteps in the response."
@@ -17919,6 +17925,7 @@
           "rowsRead",
           "rowsWritten",
           "storageUsedMib",
+          "meta",
           "nextActions"
         ],
         "properties": {
@@ -17986,6 +17993,9 @@
               1
             ]
           },
+          "meta": {
+            "$ref": "#/components/schemas/SqliteQueryMeta"
+          },
           "nextActions": {
             "type": "array",
             "description": "Agent-readable next actions. Context: components.schemas.SqliteQueryResponse.properties.nextActions.",
@@ -18001,6 +18011,58 @@
           }
         },
         "description": "SQLite query response. Context: components.schemas.SqliteQueryResponse."
+      },
+      "SqliteQueryMeta": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "duration",
+          "size_after",
+          "rows_read",
+          "rows_written"
+        ],
+        "properties": {
+          "duration": {
+            "type": "number",
+            "format": "double",
+            "description": "Query duration in seconds. Context: components.schemas.SqliteQueryMeta.properties.duration.",
+            "minimum": 0,
+            "examples": [
+              0.001
+            ]
+          },
+          "size_after": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Database size after execution in bytes. Context: components.schemas.SqliteQueryMeta.properties.size_after.",
+            "minimum": 0,
+            "maximum": 1099511627776,
+            "examples": [
+              4096
+            ]
+          },
+          "rows_read": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Metered rows read. Context: components.schemas.SqliteQueryMeta.properties.rows_read.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              1
+            ]
+          },
+          "rows_written": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Metered rows written. Context: components.schemas.SqliteQueryMeta.properties.rows_written.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              0
+            ]
+          }
+        },
+        "description": "D1-style SQLite query metadata. Context: components.schemas.SqliteQueryMeta."
       },
       "UsageCapDeleteResponse": {
         "type": "object",
