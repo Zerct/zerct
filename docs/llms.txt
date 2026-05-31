@@ -4,7 +4,7 @@ Tovuk deploys Rust workers, static frontends, and worker-static services.
 Worker-static services use one root tovuk.toml, serve the frontend at `/`, and route
 `/api/*` to the Rust worker.
 
-Use the npm CLI unless the user already installed a persistent CLI:
+Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
 
 ```sh
 tovuk doctor --json

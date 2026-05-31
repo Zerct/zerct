@@ -4,7 +4,7 @@ Python CLI package for deploying Rust workers, static frontends, and worker-stat
 services to Tovuk.
 It installs or downloads the same native Tovuk binary used by npm, Homebrew,
 and Cargo. PyPI requires Python to install and launch the package, but it does
-not require Node.js, npm, `npx`, or `tsx`.
+not require Node.js, npm, or any JavaScript runtime.
 
 ```sh
 pipx install tovuk
@@ -31,6 +31,7 @@ gates.
 The npm package is also available:
 
 ```sh
+npm install -g tovuk
 tovuk deploy
 ```
 

@@ -3,7 +3,7 @@
 Rust CLI package for deploying Rust workers, static frontends, and worker-static
 services to Tovuk.
 This is the native source of truth for the Tovuk CLI. It does not require
-Node.js, npm, `npx`, `tsx`, or Python at runtime.
+Node.js, npm, Python, or any JavaScript runtime.
 
 ```sh
 cargo install tovuk
@@ -26,6 +26,7 @@ gates.
 The npm package is also available:
 
 ```sh
+npm install -g tovuk
 tovuk deploy
 ```
 

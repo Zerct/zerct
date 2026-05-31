@@ -3,6 +3,10 @@
 Deploy Rust workers, static frontends, and worker-static services to Tovuk.
 
 ```sh
+npm install -g tovuk
+```
+
+```sh
 tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk doctor --json
@@ -10,8 +14,8 @@ tovuk deploy --wait --json
 ```
 
 The npm package installs the native Tovuk binary for the current platform.
-Node is required by npm to install the package, but the `tovuk` command itself
-does not delegate to `npx`, `tsx`, or any JavaScript runtime.
+Node is required by npm to install the package, but the installed `tovuk`
+command runs as a native binary.
 
 Rust workers expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,

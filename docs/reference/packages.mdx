@@ -6,11 +6,12 @@ description: "Official Tovuk package surfaces."
 ## npm
 
 ```sh
+npm install -g tovuk
 tovuk deploy
 ```
 
-`tovuk` is the live npm package and the source of truth for the PyPI,
-Cargo, and Homebrew wrappers.
+`tovuk` is the live unscoped npm package. It installs a native binary for the
+current platform.
 
 All official package CLIs expose the same agent commands for login, doctor,
 preview, deploy, wait, capabilities, account usage, services, deploys, builds,

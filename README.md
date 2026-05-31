@@ -8,7 +8,22 @@ worker-static service uses one `tovuk.toml`, one deployment URL, static files at
 
 ## Install
 
-Use npm for the lowest-friction agent path:
+Install the native CLI once, then run `tovuk` directly:
+
+```sh
+npm install -g tovuk
+```
+
+Other supported installers:
+
+```sh
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+pipx install tovuk
+cargo install tovuk
+```
+
+Agent commands should use the native binary:
 
 ```sh
 tovuk init
