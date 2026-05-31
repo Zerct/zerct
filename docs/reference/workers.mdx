@@ -70,3 +70,31 @@ npx tovuk durable-object create --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 npx tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```
+
+## Runtime events
+
+Queues and cron triggers are delivered to the same Rust worker process. Tovuk
+wakes a sleeping worker before delivery.
+
+- Queue batches are sent as `POST /.tovuk/queues/<queue>`.
+- Cron triggers are sent as `POST /.tovuk/cron/<trigger>`.
+- WebSocket upgrades on worker routes are proxied to the Rust worker.
+
+Queue payloads use JSON with base64 bodies:
+
+```json
+{
+  "queue": "jobs",
+  "messages": [
+    {
+      "id": "message_1",
+      "attempts": 1,
+      "body": "eyJ0YXNrIjoic3luYyJ9",
+      "encoding": "base64"
+    }
+  ]
+}
+```
+
+Return any `2xx` status to mark a queue batch complete. Return a non-`2xx`
+status or close the connection to retry until the queue retry limit is reached.

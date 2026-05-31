@@ -41,6 +41,10 @@ ambiguous to run.
   retries are limited to 100.
 - Free queue retention is fixed at 24 hours. Pro queue retention defaults to
   4 days and can be configured up to 14 days.
+- Queue deliveries are sent to `POST /.tovuk/queues/<queue>` in batches of up
+  to 10 messages.
+- Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
+  the Rust worker if needed.
 - Durable Object SQLite storage is 1 GiB per object on Free and 10 GiB per
   object on Pro.
 - Free support tickets: 3 per day.

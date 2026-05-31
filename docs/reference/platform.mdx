@@ -59,3 +59,19 @@ npx tovuk limit set object_storage_class_b_operations --period month --value 100
 
 Queue messages are capped at 128 KB. Store larger payloads in object storage and
 send the storage path in the queue message.
+
+## Worker delivery
+
+Agents create resources through CLI/API commands. Deployed Rust workers receive
+runtime events through internal HTTP endpoints:
+
+- `POST /.tovuk/queues/<queue>` receives a JSON batch with base64 message bodies.
+- `POST /.tovuk/cron/<trigger>` receives `{ "name": "...", "cronExpression": "..." }`.
+- Tovuk records worker request, worker CPU, and queue operation meters for
+  delivered events.
+- Tovuk wakes cold workers before delivery, retries failed queue batches, and
+  expires messages at the queue retention limit.
+
+Use these endpoints only inside deployed workers. Browser frontends should call
+the same-origin Rust API under `/api/*`. Public traffic to `/.tovuk/*` is
+blocked by the router.

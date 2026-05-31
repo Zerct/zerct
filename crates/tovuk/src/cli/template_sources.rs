@@ -124,6 +124,10 @@ fn handle(mut stream: TcpStream) -> std::io::Result<()> {
 
     let body = if path == "/healthz" || path == "/api/healthz" {
         r#"{"ok":true}"#
+    } else if method == "POST" && path.starts_with("/.tovuk/queues/") {
+        r#"{"ok":true,"event":"queue"}"#
+    } else if method == "POST" && path.starts_with("/.tovuk/cron/") {
+        r#"{"ok":true,"event":"cron"}"#
     } else {
         r#"{"message":"hello from tovuk","worker":"rust"}"#
     };
@@ -147,7 +151,7 @@ fn write_response(
 ) -> std::io::Result<()> {
     write!(
         stream,
-        "HTTP/1.1 {status}\r\ncontent-type: application/json\r\ncontent-length: {}\r\naccess-control-allow-origin: {origin}\r\naccess-control-allow-methods: GET, OPTIONS\r\naccess-control-allow-headers: content-type, authorization\r\nconnection: close\r\n\r\n{body}",
+        "HTTP/1.1 {status}\r\ncontent-type: application/json\r\ncontent-length: {}\r\naccess-control-allow-origin: {origin}\r\naccess-control-allow-methods: GET, POST, OPTIONS\r\naccess-control-allow-headers: content-type, authorization\r\nconnection: close\r\n\r\n{body}",
         body.len()
     )
 }

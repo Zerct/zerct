@@ -16,12 +16,16 @@ Use this page when an AI coding agent is deploying with Tovuk.
 7. Redeploy with the same deploy command.
 8. For service files or media, use `npx tovuk storage ... --json` instead of the
    dashboard.
-9. If a plan limit blocks the deploy or storage action, run
+9. For background work, create a queue and implement
+   `POST /.tovuk/queues/<queue>` in the Rust worker.
+10. For scheduled work, create a cron trigger and implement
+   `POST /.tovuk/cron/<trigger>` in the Rust worker.
+11. If a plan limit blocks the deploy or storage action, run
    `npx tovuk billing checkout --json` and show the returned
    `checkout.url` to the human.
-10. If Tovuk itself needs help, create a support ticket with the exact command,
+12. If Tovuk itself needs help, create a support ticket with the exact command,
    service id, build id, deploy id, and first actionable log line.
-11. Resolve the support ticket after the agent fixes the issue.
+13. Resolve the support ticket after the agent fixes the issue.
 
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
 typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
@@ -40,6 +44,9 @@ Run `npx tovuk doctor --json`. Fix the first failed check by following
 `npx tovuk logs --build <build_id> --json`, fix the first actionable
 error, and redeploy. Use platform resource commands for SQLite, KV, queues,
 cron triggers, Durable Objects, service bindings, and usage caps.
+For queue handlers, implement `POST /.tovuk/queues/<queue>` and return `2xx`
+only after the batch is safely handled. For cron handlers, implement
+`POST /.tovuk/cron/<trigger>` and keep it idempotent.
 ```
 
 ## Support loop
