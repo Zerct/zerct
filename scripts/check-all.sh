@@ -6,6 +6,10 @@ cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
 native_cli="$repo_root/crates/tovuk/target/release/tovuk"
 export TOVUK_NATIVE_BINARY="$native_cli"
+if rg -n 'npx[[:space:]]+tovuk' README.md docs packages crates skills Formula .github scripts --glob '!scripts/check-all.sh'; then
+  printf 'Use native `tovuk` guidance instead of `tovuk`.\n' >&2
+  exit 1
+fi
 strict_rust_check="cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
 strict_clippy_args=(
   --locked
