@@ -82,6 +82,8 @@ Queues and cron triggers are delivered to the same Rust worker process. Tovuk
 wakes a sleeping worker before delivery.
 
 - Queue batches are sent as `POST /.tovuk/queues/<queue>`.
+- Queue batch size and batch timeout are configured per queue through
+  `tovuk queue create` or `tovuk queue update`.
 - Cron triggers are sent as `POST /.tovuk/cron/<trigger>`.
 - WebSocket upgrades on worker routes are proxied to the Rust worker. Tovuk
   meters the initial worker request and handshake CPU, not idle connection time.
@@ -104,3 +106,5 @@ Queue payloads use JSON with base64 bodies:
 
 Return any `2xx` status to mark a queue batch complete. Return a non-`2xx`
 status or close the connection to retry until the queue retry limit is reached.
+When a dead-letter queue is configured, messages that exhaust retries are
+copied there for later inspection or replay.

@@ -74,6 +74,8 @@ Worker-static contract:
 - Worker build and runtime commands must use `cargo build --release` and a
   `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
 - Queue handlers are Rust worker routes at `POST /.tovuk/queues/<queue>`.
+- Queue batch size, batch timeout, retries, retention, and dead-letter routing
+  are configurable through the CLI/API.
 - Queue handler payloads contain base64 message bodies. Return `2xx` only after
   the batch is safely handled.
 - Cron handlers are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
@@ -100,7 +102,10 @@ tovuk database query --service <service> DB "select 1" --json
 tovuk database delete --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv namespace delete --service <service> CACHE --json
-tovuk queue create --service <service> jobs --json
+tovuk queue create --service <service> failed_jobs --json
+tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service <service> jobs --max-batch-size 25 --json
+tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
 tovuk queue delete --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
 tovuk cron delete --service <service> nightly --json

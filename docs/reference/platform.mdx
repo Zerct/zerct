@@ -72,6 +72,15 @@ message. Queue specs follow Cloudflare limits for 100 message consumer batches,
 12 hour visibility timeouts, 24 hour send delays, and 15 minute consumer wall
 time.
 
+Agents can tune queue delivery without a dashboard:
+
+```bash
+tovuk queue create --service service_1 failed_jobs --json
+tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service service_1 jobs --max-batch-size 25 --max-batch-timeout-seconds 10 --json
+tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
+```
+
 Durable Object usage is metered with Cloudflare-style counters:
 `durable_object_requests`, `durable_object_duration_gb_seconds`,
 `durable_object_sqlite_rows_read`, `durable_object_sqlite_rows_written`, and
@@ -87,7 +96,8 @@ runtime events through internal HTTP endpoints:
 - Tovuk records worker request, worker CPU, and queue operation meters for
   delivered events.
 - Tovuk wakes cold workers before delivery, retries failed queue batches, and
-  expires messages at the queue retention limit.
+  expires messages at the queue retention limit. Messages that exhaust retries
+  move to the configured dead-letter queue when one is set.
 
 Use these endpoints only inside deployed workers. Browser frontends should call
 the same-origin Rust API under `/api/*`. Public traffic to `/.tovuk/*` is

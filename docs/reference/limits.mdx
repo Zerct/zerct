@@ -65,10 +65,14 @@ ambiguous to run.
   Cloudflare-compatible metadata, so the maximum user body is 127900 bytes.
   Send delay is limited to 24 hours, retries are limited to 100, batches can
   contain up to 100 messages, and one send batch is capped at 256 KB total.
+- Queue consumer batch size defaults to 10 and can be configured from 1 to
+  100. Batch timeout defaults to 5 seconds and can be configured from 0 to
+  60 seconds.
 - Free queue retention is fixed at 24 hours. Pro queue retention defaults to
   4 days and can be configured up to 14 days.
 - Queue deliveries are sent to `POST /.tovuk/queues/<queue>` in batches of up
-  to 10 messages.
+  to the queue's configured batch size. Failed messages can be routed to a
+  configured dead-letter queue after retries are exhausted.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed.
 - Durable Object SQLite storage is 1 GiB per object on Free and 10 GiB per

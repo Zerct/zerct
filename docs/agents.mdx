@@ -127,7 +127,9 @@ tovuk database query --service service_1 DB "select 1" --json
 tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv namespace delete --service service_1 CACHE --json
-tovuk queue create --service service_1 jobs --json
+tovuk queue create --service service_1 failed_jobs --json
+tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue update --service service_1 jobs --max-batch-size 25 --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk durable-object create --service service_1 Room --json
