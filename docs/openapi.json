@@ -5827,7 +5827,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 9536
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -6748,7 +6748,7 @@
                         "stateSqliteRowsWrittenPerDay": 100000,
                         "stateSqliteRowsWrittenPerMonth": null,
                         "stateKeyValueSizeMib": 2,
-                        "stateSqliteStorageMibPerObject": 9536
+                        "stateSqliteStorageMibPerObject": 953
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 0,
@@ -7291,7 +7291,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 9536
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -7569,7 +7569,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 9536
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "services": [
                     {
@@ -8504,7 +8504,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 9536
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "sqliteDatabases": [
                     {
@@ -8549,7 +8549,7 @@
                     {
                       "id": "state_namespace_1",
                       "className": "Room",
-                      "storageLimitMib": 9536
+                      "storageLimitMib": 953
                     }
                   ],
                   "serviceBindings": [
@@ -9340,7 +9340,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "objects": [
                     {
@@ -9395,7 +9395,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "object": {
                     "id": "state_object_1",
@@ -9457,7 +9457,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "object": {
                     "id": "state_object_1",
@@ -9517,7 +9517,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 9536
+                    "storageLimitMib": 953
                   },
                   "object": {
                     "id": "state_object_1",
@@ -10759,7 +10759,7 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 9536
+              "stateSqliteStorageMibPerObject": 953
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -13667,7 +13667,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 9536
+                    "stateSqliteStorageMibPerObject": 953
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -14372,7 +14372,7 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 9536
+              "stateSqliteStorageMibPerObject": 953
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -15764,7 +15764,7 @@
             "stateSqliteRowsWrittenPerDay": 100000,
             "stateSqliteRowsWrittenPerMonth": null,
             "stateKeyValueSizeMib": 2,
-            "stateSqliteStorageMibPerObject": 9536
+            "stateSqliteStorageMibPerObject": 953
           }
         ]
       },
@@ -16204,7 +16204,7 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 9536
+              "stateSqliteStorageMibPerObject": 953
             },
             "services": [
               {
@@ -18533,7 +18533,7 @@
                 {
                   "id": "state_namespace_1",
                   "className": "Room",
-                  "storageLimitMib": 9536
+                  "storageLimitMib": 953
                 }
               ]
             ]
@@ -19359,7 +19359,7 @@
           "expirationTtlSeconds": {
             "type": "integer",
             "format": "int64",
-            "minimum": 60,
+            "minimum": 30,
             "maximum": 253402300799,
             "description": "Optional TTL in seconds from now. If expiration is also set, this value wins. Context: components.schemas.KvEntryPutRequest.properties.expirationTtlSeconds.",
             "examples": [
@@ -20945,7 +20945,7 @@
           "expirationTtlSeconds": {
             "type": "integer",
             "format": "int64",
-            "minimum": 60,
+            "minimum": 30,
             "maximum": 253402300799,
             "description": "Optional TTL in seconds from now. If expiration is also set, this value wins. Context: components.schemas.KvBulkPutItem.properties.expirationTtlSeconds.",
             "examples": [
