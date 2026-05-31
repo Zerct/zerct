@@ -25,6 +25,7 @@ Usage:
   tovuk inspect --service <service> [--api <url>] [--json]
   tovuk platform --service <service> [--api <url>] [--json]
   tovuk database create --service <service> DB [--api <url>] [--json]
+  tovuk database query --service <service> DB "select 1" [--params <json_array>] [--api <url>] [--json]
   tovuk kv create --service <service> CACHE [--api <url>] [--json]
   tovuk kv keys --service <service> CACHE [--api <url>] [--json]
   tovuk kv get --service <service> CACHE <key> [--api <url>] [--json]

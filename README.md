@@ -168,6 +168,7 @@ tovuk logs --build job_1 --json
 tovuk env list --service service_1
 tovuk domains list --service service_1
 tovuk domains verify --service service_1 api.example.com
+tovuk database query --service service_1 DB "select 1" --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
 tovuk kv get --service service_1 CACHE user:1 --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
