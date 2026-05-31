@@ -2777,7 +2777,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
               "maxLength": 64,
               "examples": [
                 "worker_requests"
@@ -4160,7 +4160,7 @@
             "required": true,
             "schema": {
               "type": "string",
-              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+              "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
               "maxLength": 128,
               "examples": [
                 "worker_requests"
@@ -5524,7 +5524,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 953,
+                    "stateSqliteStorageMib": 9536,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -6430,7 +6430,7 @@
                         "queueOperationsPerMonth": null,
                         "stateRequestsPerDay": 100000,
                         "stateRequestsPerMonth": null,
-                        "stateSqliteStorageMib": 953,
+                        "stateSqliteStorageMib": 9536,
                         "objectStorageMib": 9536,
                         "storageObjects": null,
                         "storageObjectMaxMib": 5237760,
@@ -6941,7 +6941,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 953,
+                    "stateSqliteStorageMib": 9536,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -7201,7 +7201,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 953,
+                    "stateSqliteStorageMib": 9536,
                     "buildCpuMillis": 2000,
                     "buildMemoryMib": 8192,
                     "buildDiskMib": 20480,
@@ -8121,7 +8121,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 953,
+                    "stateSqliteStorageMib": 9536,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -10273,7 +10273,7 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 953,
+              "stateSqliteStorageMib": 9536,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -13148,7 +13148,7 @@
                     "queueOperationsPerMonth": null,
                     "stateRequestsPerDay": 100000,
                     "stateRequestsPerMonth": null,
-                    "stateSqliteStorageMib": 953,
+                    "stateSqliteStorageMib": 9536,
                     "objectStorageMib": 9536,
                     "storageObjects": null,
                     "storageObjectMaxMib": 5237760,
@@ -13813,7 +13813,7 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 953,
+              "stateSqliteStorageMib": 9536,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -15190,7 +15190,7 @@
             "queueOperationsPerMonth": null,
             "stateRequestsPerDay": 100000,
             "stateRequestsPerMonth": null,
-            "stateSqliteStorageMib": 953,
+            "stateSqliteStorageMib": 9536,
             "objectStorageMib": 9536,
             "storageObjects": null,
             "storageObjectMaxMib": 5237760,
@@ -15619,7 +15619,7 @@
               "queueOperationsPerMonth": null,
               "stateRequestsPerDay": 100000,
               "stateRequestsPerMonth": null,
-              "stateSqliteStorageMib": 953,
+              "stateSqliteStorageMib": 9536,
               "buildCpuMillis": 2000,
               "buildMemoryMib": 8192,
               "buildDiskMib": 20480,
@@ -17437,7 +17437,7 @@
             "description": "Meter name. Context: components.schemas.UsageCap.properties.metric.",
             "minLength": 1,
             "maxLength": 512,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
             "examples": [
               "worker_requests"
             ]
@@ -19136,7 +19136,7 @@
             "description": "Meter name. Context: components.schemas.UsageCapDeleteResponse.properties.metric.",
             "minLength": 1,
             "maxLength": 128,
-            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_seconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
+            "pattern": "^(worker_requests|worker_cpu_ms|sqlite_rows_read|sqlite_rows_written|sqlite_storage_bytes|kv_reads|kv_writes|kv_deletes|kv_lists|kv_storage_bytes|queue_operations|state_requests|state_duration_gb_milliseconds|state_sqlite_rows_read|state_sqlite_rows_written|state_sqlite_storage_bytes|object_storage_bytes|object_storage_class_a_operations|object_storage_class_b_operations|worker_transfer_bytes|static_transfer_bytes|log_events)$",
             "examples": [
               "worker_requests"
             ]
