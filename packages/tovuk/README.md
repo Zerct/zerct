@@ -58,6 +58,9 @@ tovuk pricing --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 ```
 
+The pricing response includes plan pricing and product meter metadata, so agents
+can choose the correct product and cap the right meters in one flow.
+
 Manage service files and media without dashboard access:
 
 ```sh

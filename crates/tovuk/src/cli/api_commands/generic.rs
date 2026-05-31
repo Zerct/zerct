@@ -17,9 +17,12 @@ pub(crate) fn capabilities(cli: &CliOptions) -> Result<()> {
 pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
     let response = api_request(cli, Method::GET, "/v1/capabilities", None, None)?;
     let plans = response.get("plans").cloned().unwrap_or(Value::Null);
+    let products = response.get("products").cloned().unwrap_or(Value::Null);
     print_json(&json!({
         "plans": plans,
+        "products": products,
         "nextActions": [
+            "Use the `products` entries to choose Worker, Static Frontend, SQLite, Object Storage, State, KV, Queue, or Cron before changing code.",
             "Use `tovuk usage --json` after login to compare current usage against these limits.",
             "Use `tovuk limit set <metric> --period month --value <n> --json` to set a hard cap before paid overages.",
             "Use `tovuk billing checkout --json` when an upgrade is required."

@@ -64,11 +64,12 @@ The machine-readable product catalog is available from:
 
 ```sh
 tovuk capabilities --json
+tovuk pricing --json
 ```
 
-Use the `products` array to decide which resource fits a task, the `meters`
-array to set hard caps, and the plan `limits` and `pricing` objects to estimate
-free and paid usage before deployment.
+Both commands expose the `products` array. Use it to decide which resource fits
+a task, use each product's `meters` to set hard caps, and use the plan `limits`
+and `pricing` objects to estimate free and paid usage before deployment.
 
 ## Custom domains
 
