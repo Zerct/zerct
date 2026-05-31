@@ -34,7 +34,9 @@ tovuk usage --json
 - Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
   `24 hour` retention.
 - Durable Objects: `100` classes, `100,000` requests per day, `13,000 GB-s`
-  duration per day, `5 GiB` account SQLite storage, `1 GiB` per object.
+  duration per day, `5 million` SQLite rows read per day, `100,000` SQLite
+  rows written per day, `5 GiB` account SQLite storage, `1 GiB` per object,
+  and `2 MiB` key/value payloads.
 - Object storage: `10 GiB`, no object-count cap, `1 million` Class A
   operations per month, `10 million` Class B operations per month, free egress.
 - Logs: `200,000` events per day, `3 day` retention.
@@ -62,9 +64,10 @@ tovuk usage --json
   `$0.40` per million operations. Default retention is `4 days`, configurable
   up to `14 days`.
 - Durable Objects: `500` classes, `1 million` requests and `400,000 GB-s`
-  duration per month included. Overage is `$0.15` per million requests and
-  `$12.50` per million GB-s. SQLite storage includes `5 GiB`, then `$0.20`
-  per GiB-month.
+  duration per month included. SQLite includes `25 billion` rows read,
+  `50 million` rows written, and `5 GiB` storage per month. Overage is `$0.15`
+  per million requests, `$12.50` per million GB-s, `$0.001` per million rows
+  read, `$1.00` per million rows written, and `$0.20` per GiB-month.
 - Object storage: no storage or object-count hard cap, `10 GiB` included
   storage, `1 million` Class A operations, and `10 million` Class B operations
   per month. Overage is `$0.015` per GiB-month, `$4.50` per million
@@ -83,6 +86,8 @@ production launch, set hard caps:
 ```sh
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
+tovuk limit set durable_object_requests --period month --value 1000000 --json
+tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
 ```
 

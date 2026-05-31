@@ -45,6 +45,8 @@ Usage:
   tovuk binding create --service <service> AUTH_SERVICE --target <target_service> [--api <url>] [--json]
   tovuk binding delete --service <service> AUTH_SERVICE [--api <url>] [--json]
   tovuk limit set worker_requests --period day --value 100000 [--api <url>] [--json]
+  tovuk limit set durable_object_requests --period month --value 1000000 [--api <url>] [--json]
+  tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
   tovuk limit delete worker_requests --period day [--api <url>] [--json]
   tovuk env list --service <service> [--api <url>] [--json]
   tovuk env set --service <service> KEY=value [--api <url>] [--json]
@@ -71,7 +73,7 @@ Agent contract:
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; pass --public only when a CDN URL is intended.
-  - Use tovuk pricing --json before heavy work, then set usage caps before paid overages.
+  - Use tovuk pricing --json before heavy work, then set usage caps for worker, SQLite, KV, queue, Durable Object, and object storage meters before paid overages.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Prefer same-origin worker-static services over split services.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.

@@ -27,6 +27,8 @@ npx tovuk durable-object delete --service service_1 Room --json
 npx tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 npx tovuk binding delete --service service_1 AUTH_SERVICE --json
 npx tovuk limit set worker_requests --period day --value 100000 --json
+npx tovuk limit set durable_object_requests --period month --value 1000000 --json
+npx tovuk limit set durable_object_sqlite_rows_written --period month --value 50000000 --json
 npx tovuk limit delete worker_requests --period day --json
 ```
 
@@ -69,6 +71,11 @@ message. Queue specs follow Cloudflare limits for 100 message consumer batches,
 5000 messages per second per queue, 25 GB backlogs, 250 concurrent consumers,
 12 hour visibility timeouts, 24 hour send delays, and 15 minute consumer wall
 time.
+
+Durable Object usage is metered with Cloudflare-style counters:
+`durable_object_requests`, `durable_object_duration_gb_seconds`,
+`durable_object_sqlite_rows_read`, `durable_object_sqlite_rows_written`, and
+`durable_object_sqlite_storage_bytes`.
 
 ## Worker delivery
 
