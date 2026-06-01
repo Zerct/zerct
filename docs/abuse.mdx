@@ -58,6 +58,15 @@ the next `agent_instruction`.
 
 ## Quarantine
 
+Operators can list all abuse reports for triage:
+
+```sh
+tovuk abuse list --operator --json
+```
+
+The API route is `GET /v1/operator/abuse/reports`. It requires an operator
+token.
+
 Operators can quarantine the service attached to a confirmed abuse report:
 
 ```sh

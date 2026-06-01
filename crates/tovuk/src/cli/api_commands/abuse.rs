@@ -14,7 +14,7 @@ use serde_json::{Map, Value};
 
 pub(crate) fn abuse_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => print_paged_authenticated(cli, "/v1/abuse/reports"),
+        "list" => abuse_list(cli),
         "report" => abuse_report(cli),
         "appeal" => abuse_appeal(cli),
         "quarantine" => abuse_operator_action(cli, "quarantine"),
@@ -25,6 +25,14 @@ pub(crate) fn abuse_command(cli: &CliOptions) -> Result<()> {
             "Use `tovuk abuse report <target_url> \"Summary\" \"Details\" --category phishing --reporter-email reporter@example.com --evidence \"Evidence\" --json`, `tovuk abuse list --json`, `tovuk abuse appeal <report_id> \"Details\" --json`, or an operator-only quarantine command.",
             cli.output.json,
         )),
+    }
+}
+
+fn abuse_list(cli: &CliOptions) -> Result<()> {
+    if cli.abuse.operator {
+        print_paged_authenticated(cli, "/v1/operator/abuse/reports")
+    } else {
+        print_paged_authenticated(cli, "/v1/abuse/reports")
     }
 }
 

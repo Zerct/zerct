@@ -71,6 +71,7 @@ fn apply_boolean_flag(
             name,
             json_output,
         ),
+        "--operator" => set_boolean_flag(inline, || cli.abuse.operator = true, name, json_output),
         _ => return Ok(None),
     }
     .map(Some)

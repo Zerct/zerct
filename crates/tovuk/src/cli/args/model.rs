@@ -61,6 +61,7 @@ pub(crate) struct StorageOptions {
 
 #[derive(Clone, Debug)]
 pub(crate) struct AbuseOptions {
+    pub(crate) operator: bool,
     pub(crate) category: String,
     pub(crate) reporter_email: String,
     pub(crate) reporter_name: String,
@@ -97,6 +98,7 @@ impl Default for CliOptions {
             template: String::new(),
             severity: String::new(),
             abuse: AbuseOptions {
+                operator: false,
                 category: String::new(),
                 reporter_email: String::new(),
                 reporter_name: String::new(),
