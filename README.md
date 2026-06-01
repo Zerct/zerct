@@ -32,8 +32,8 @@ tovuk deploy --dry-run
 tovuk deploy --wait
 ```
 
-`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but the
-deploy contract is always the committed `tovuk.toml`. Agents must review
+`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but deploy
+behavior is controlled only by the committed `tovuk.toml`. Agents must review
 `[capabilities]` before deploy instead of relying on automatic project
 detection.
 
@@ -240,6 +240,12 @@ tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 tovuk queue metrics --service service_1 jobs --json
+tovuk state objects --service service_1 Room --json
+tovuk state keys --service service_1 Room room-1 --json
+tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json
+tovuk state alarm get --service service_1 Room room-1 --json
+tovuk state alarm delete --service service_1 Room room-1 --json
+tovuk state delete-value --service service_1 Room room-1 counter --json
 tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 tovuk storage url --service service_1 uploads/logo.png --json

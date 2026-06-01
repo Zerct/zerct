@@ -14,6 +14,7 @@ func checkCLIContract() {
 		readSortedTexts("crates/tovuk/src/cli", ".rs")...,
 	), "\n")
 
+	rootReadme := readText("README.md")
 	cargoReadme := readText("crates/tovuk/README.md")
 	cargoTemplateCLI := readText("crates/tovuk/src/cli/templates/mod.rs")
 	npmPackage := readPackageJSON("packages/tovuk/package.json")
@@ -57,7 +58,16 @@ func checkCLIContract() {
 		requireContains(source, "tovuk abuse reject", "agentic abuse reject command")
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")
 	}
-	for _, source := range []string{cargoReadme, npmReadme, pythonReadme} {
+	for _, source := range []string{cargoCLI, rootReadme, cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "tovuk storage url", "agentic storage URL command")
+		requireContains(source, "tovuk state objects", "agentic State objects command")
+		requireContains(source, "tovuk state keys", "agentic State keys command")
+		requireContains(source, "tovuk state alarm set", "agentic State alarm set command")
+		requireContains(source, "tovuk state alarm get", "agentic State alarm get command")
+		requireContains(source, "tovuk state alarm delete", "agentic State alarm delete command")
+		requireContains(source, "tovuk state delete-value", "agentic State value delete command")
+	}
+	for _, source := range []string{rootReadme, cargoReadme, npmReadme, pythonReadme} {
 		requireContains(source, "controlled only by the committed `tovuk.toml`", "advisory scaffold wording")
 		requireContains(source, "billingEstimate", "agentic usage cost estimate docs")
 	}
