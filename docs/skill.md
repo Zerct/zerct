@@ -77,6 +77,9 @@ tovuk cron delete --service <service> nightly --json
 tovuk state create --service <service> Room --json
 tovuk state put --service <service> Room room-1 counter 1 --json
 tovuk state get --service <service> Room room-1 counter --json
+tovuk state alarm set --service <service> Room room-1 --delay-seconds 60 --json
+tovuk state alarm get --service <service> Room room-1 --json
+tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json

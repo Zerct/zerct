@@ -101,6 +101,9 @@ ambiguous to run.
   per day. Pro keeps each State object at 10 GB and includes 1 million
   requests, 400 thousand GB-s duration, 25 billion SQLite rows read, and
   50 million SQLite rows written per month before paid overage pricing.
+- State alarms allow one scheduled alarm per State object. A replaced alarm
+  keeps only the newest schedule. Failed alarm handlers retry at least once with
+  exponential backoff starting at 2 seconds and stop after 6 retries.
 - State key and value payloads are limited to 2 MiB combined.
 - Free logs include 200 thousand events per day with 3 day retention. Pro logs
   include 20 million events per month with 7 day retention. Each captured log

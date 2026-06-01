@@ -187,6 +187,8 @@ fn handle(mut stream: TcpStream) -> std::io::Result<()> {
         r#"{"ok":true,"event":"queue"}"#
     } else if method == "POST" && path.starts_with("/.tovuk/cron/") {
         r#"{"ok":true,"event":"cron"}"#
+    } else if method == "POST" && path.starts_with("/.tovuk/state/") && path.ends_with("/alarm") {
+        r#"{"ok":true,"event":"state-alarm"}"#
     } else {
         r#"{"message":"hello from tovuk","worker":"rust"}"#
     };

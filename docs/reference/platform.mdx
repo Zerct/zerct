@@ -184,12 +184,21 @@ tovuk state objects --service service_1 Room --json
 tovuk state keys --service service_1 Room room-1 --json
 tovuk state put --service service_1 Room room-1 counter 1 --json
 tovuk state get --service service_1 Room room-1 counter --json
+tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json
+tovuk state alarm get --service service_1 Room room-1 --json
+tovuk state alarm delete --service service_1 Room room-1 --json
 tovuk state delete-value --service service_1 Room room-1 counter --json
 ```
 
 State keys are capped at 512 bytes. The state key and value are
 capped at 2 MiB combined. Free State objects get 1 GB per object and a 5 GB
 account cap. Pro State objects get 10 GB per object.
+
+Each State object can hold one scheduled alarm. Setting a new alarm replaces
+the previous one. Use `--delay-seconds` for relative scheduling or pass a UNIX
+millisecond timestamp for an absolute schedule. Alarm delivery is at least once;
+failed handlers retry with exponential backoff from 2 seconds and stop after 6
+retries.
 
 ## Worker delivery
 
@@ -198,11 +207,14 @@ runtime events through internal HTTP endpoints:
 
 - `POST /.tovuk/queues/<queue>` receives a JSON batch with base64 message bodies.
 - `POST /.tovuk/cron/<trigger>` receives `{ "name": "...", "cronExpression": "..." }`.
-- Tovuk records worker request, worker CPU, and queue operation meters for
-  delivered events.
+- `POST /.tovuk/state/<class>/<object>/alarm` receives alarm metadata with
+  `retryCount` and `isRetry`.
+- Tovuk records worker request, worker CPU, State request, State duration, and
+  queue operation meters for delivered events.
 - Tovuk wakes cold workers before delivery, retries failed queue batches, and
   expires messages at the queue retention limit. Messages that exhaust retries
-  move to the configured dead-letter queue when one is set.
+  move to the configured dead-letter queue when one is set. State alarms that
+  exhaust retries are cleared.
 
 Use these endpoints only inside deployed workers. Browser frontends should call
 the same-origin Rust API under `/api/*`. Public traffic to `/.tovuk/*` is
