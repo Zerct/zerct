@@ -208,7 +208,7 @@ Each State object can hold one scheduled alarm. Setting a new alarm replaces
 the previous one. Use `--delay-seconds` for relative scheduling or pass a UNIX
 millisecond timestamp for an absolute schedule. Alarm delivery is at least once;
 failed handlers retry with exponential backoff from 2 seconds and stop after 6
-retries.
+retries. Alarm handlers have a `15 minute` wall-clock limit.
 
 ## Worker delivery
 

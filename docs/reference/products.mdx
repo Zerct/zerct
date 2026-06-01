@@ -74,7 +74,9 @@ HTTP handlers. Features include State classes, keyed object instances,
 serialized key/value operations, one scheduled alarm per object, realtime
 coordination behind a Rust worker, and request, duration, row, and storage
 metering. Main meters: `state_requests`, `state_duration_gb_milliseconds`,
-`state_sqlite_rows_read`, and `state_sqlite_rows_written`.
+`state_sqlite_rows_read`, and `state_sqlite_rows_written`. Agent-readable
+limits include class count, request and duration allowances, storage, payload,
+WebSocket message size, soft per-object throughput, CPU, and alarm wall-time.
 
 KV:
 Use for small config, sessions, feature flags, cache metadata, and rate-limit
