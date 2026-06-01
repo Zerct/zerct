@@ -142,10 +142,10 @@ bun add -d oxlint oxlint-tsgolint fallow
 Rust worker checks must include `cargo fmt --all --check`, locked release-mode
 `cargo check`, locked release-mode tests, and strict all-target, all-feature
 Clippy with panic/unwrap bans plus resource-sensitive lints.
-Frontend checks must install dependencies, run stable native type-aware
+Package frontend checks must install dependencies, run stable native type-aware
 TypeScript checks, and run native linting plus Fallow dead-code, semantic
-duplicate-code, and health gates before build work is queued. Frontend browser
-source must be `.ts` or `.tsx` under
+duplicate-code, and health gates before build work is queued. Package frontend
+browser source must be `.ts` or `.tsx` under
 `src`, `app`, `pages`, `routes`, or `components`; browser `.js`, `.jsx`,
 `.mjs`, and `.cjs` source is rejected. Bun projects should commit `bun.lock`
 for the fastest Tovuk build path. Existing npm projects can still deploy with a

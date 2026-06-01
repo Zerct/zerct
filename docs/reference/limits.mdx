@@ -37,10 +37,11 @@ ambiguous to run.
 - `_headers` supports up to 100 header rules with 2000 characters per line.
 - `_redirects` supports up to 2000 static redirects, 100 dynamic redirects,
   2100 total redirects, and 1000 characters per rule.
-- Static frontend projects run stable native type-aware TypeScript checks and
-  native linting before build work starts.
-- Frontend browser source must use `.ts` or `.tsx`; `.js`, `.jsx`,
-  `.mjs`, and `.cjs` browser source is rejected.
+- Package static frontend projects run stable native type-aware TypeScript
+  checks and native linting before build work starts.
+- Package frontend browser source must use `.ts` or `.tsx`; `.js`, `.jsx`,
+  `.mjs`, and `.cjs` browser source is rejected. Plain static HTML/CSS/JS
+  frontends without `package.json` may use no-op build commands.
 - A health endpoint is required for Rust workers.
 - Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.

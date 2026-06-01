@@ -14,7 +14,7 @@ full-stack service to Tovuk.
 2. For Rust workers, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint,
    `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
    strict Clippy resource lints, and small declared runtime resources.
-3. For static frontends, set `kind = "static_frontend"` and ensure
+3. For package static frontends, set `kind = "static_frontend"` and ensure
    `package.json`, TypeScript browser source, stable native type-aware
    typechecking, native linting, Fallow quality gates, a lockfile, and a strict
    frontend check command.

@@ -22,9 +22,9 @@ Rust workers expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
 listen on `0.0.0.0:$PORT`, and expose the configured health endpoint.
 
-Static frontends must use TypeScript browser source, stable native type-aware
-TypeScript checks, native linting such as `oxlint`, `biome check`, or
-`deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
+Package static frontends must use TypeScript browser source, stable native
+type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
+or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
 
 From a full-stack repo root, the same deploy command reads one root
 `tovuk.toml`, reads explicit `[capabilities]`, builds the worker and frontend

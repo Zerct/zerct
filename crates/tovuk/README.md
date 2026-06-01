@@ -23,7 +23,7 @@ routed to the Rust worker.
 behavior is controlled only by the committed `tovuk.toml`. Review explicit
 `[capabilities]` before deploy.
 
-Static frontend deploys require TypeScript browser source, stable native
+Package static frontend deploys require TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
 or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health
 gates.
