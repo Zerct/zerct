@@ -57,6 +57,11 @@ Free plan:
 - 10 thousand multipart upload parts
 - 1 million Class A operations per month
 - 10 million Class B operations per month
+- 64 KB minimum billable object size
+- 50 million objects per storage bucket
+- 750 requests per second per storage bucket and source IP
+- 256 parallel sessions per source IP
+- 10 Gbit/s per storage bucket
 
 Pro plan:
 
@@ -69,6 +74,7 @@ Pro plan:
 - 1 million Class A operations per month included, then paid overage
 - 10 million Class B operations per month included, then paid overage
 - free egress and free delete operations
+- same storage bucket guardrails as Free
 
 Use Class A caps for write/list-heavy workflows and Class B caps for
 read/download-heavy workflows. Multipart upload create consumes Class A

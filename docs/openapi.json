@@ -6293,7 +6293,14 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 953,
+                    "storageMinimumBillableObjectBytes": 64000,
+                    "storageBucketMaxTb": 100,
+                    "storageObjectsPerBucket": 50000000,
+                    "storageParallelSessionsPerSourceIp": 256,
+                    "storageRequestsPerSecondPerSourceIp": 750,
+                    "storageRequestsPerSecondPerBucket": 750,
+                    "storageBucketBandwidthGbitPerSecond": 10
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -7217,7 +7224,14 @@
                         "stateSqliteRowsWrittenPerDay": 100000,
                         "stateSqliteRowsWrittenPerMonth": null,
                         "stateKeyValueSizeMib": 2,
-                        "stateSqliteStorageMibPerObject": 953
+                        "stateSqliteStorageMibPerObject": 953,
+                        "storageMinimumBillableObjectBytes": 64000,
+                        "storageBucketMaxTb": 100,
+                        "storageObjectsPerBucket": 50000000,
+                        "storageParallelSessionsPerSourceIp": 256,
+                        "storageRequestsPerSecondPerSourceIp": 750,
+                        "storageRequestsPerSecondPerBucket": 750,
+                        "storageBucketBandwidthGbitPerSecond": 10
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 0,
@@ -7428,7 +7442,14 @@
                         "stateSqliteRowsWrittenPerDay": null,
                         "stateSqliteRowsWrittenPerMonth": 50000000,
                         "stateKeyValueSizeMib": 2,
-                        "stateSqliteStorageMibPerObject": 9536
+                        "stateSqliteStorageMibPerObject": 9536,
+                        "storageMinimumBillableObjectBytes": 64000,
+                        "storageBucketMaxTb": 100,
+                        "storageObjectsPerBucket": 50000000,
+                        "storageParallelSessionsPerSourceIp": 256,
+                        "storageRequestsPerSecondPerSourceIp": 750,
+                        "storageRequestsPerSecondPerBucket": 750,
+                        "storageBucketBandwidthGbitPerSecond": 10
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 500,
@@ -7766,7 +7787,14 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 953,
+                    "storageMinimumBillableObjectBytes": 64000,
+                    "storageBucketMaxTb": 100,
+                    "storageObjectsPerBucket": 50000000,
+                    "storageParallelSessionsPerSourceIp": 256,
+                    "storageRequestsPerSecondPerSourceIp": 750,
+                    "storageRequestsPerSecondPerBucket": 750,
+                    "storageBucketBandwidthGbitPerSecond": 10
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -8047,7 +8075,14 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 953,
+                    "storageMinimumBillableObjectBytes": 64000,
+                    "storageBucketMaxTb": 100,
+                    "storageObjectsPerBucket": 50000000,
+                    "storageParallelSessionsPerSourceIp": 256,
+                    "storageRequestsPerSecondPerSourceIp": 750,
+                    "storageRequestsPerSecondPerBucket": 750,
+                    "storageBucketBandwidthGbitPerSecond": 10
                   },
                   "services": [
                     {
@@ -8985,7 +9020,14 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 953,
+                    "storageMinimumBillableObjectBytes": 64000,
+                    "storageBucketMaxTb": 100,
+                    "storageObjectsPerBucket": 50000000,
+                    "storageParallelSessionsPerSourceIp": 256,
+                    "storageRequestsPerSecondPerSourceIp": 750,
+                    "storageRequestsPerSecondPerBucket": 750,
+                    "storageBucketBandwidthGbitPerSecond": 10
                   },
                   "sqliteDatabases": [
                     {
@@ -11211,7 +11253,14 @@
             "objectStorageClassBOperationsPerMonth": 10000000,
             "storageSinglePartUploadMaxMib": 5115,
             "storageMultipartUploadMaxMib": 5237760,
-            "storageUploadParts": 10000
+            "storageUploadParts": 10000,
+            "storageMinimumBillableObjectBytes": 64000,
+            "storageBucketMaxTb": 100,
+            "storageObjectsPerBucket": 50000000,
+            "storageParallelSessionsPerSourceIp": 256,
+            "storageRequestsPerSecondPerSourceIp": 750,
+            "storageRequestsPerSecondPerBucket": 750,
+            "storageBucketBandwidthGbitPerSecond": 10
           },
           "pricing": {
             "$ref": "#/components/schemas/PlanPricing",
@@ -11544,7 +11593,14 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 953
+              "stateSqliteStorageMibPerObject": 953,
+              "storageMinimumBillableObjectBytes": 64000,
+              "storageBucketMaxTb": 100,
+              "storageObjectsPerBucket": 50000000,
+              "storageParallelSessionsPerSourceIp": 256,
+              "storageRequestsPerSecondPerSourceIp": 750,
+              "storageRequestsPerSecondPerBucket": 750,
+              "storageBucketBandwidthGbitPerSecond": 10
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -14482,7 +14538,14 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 953,
+                    "storageMinimumBillableObjectBytes": 64000,
+                    "storageBucketMaxTb": 100,
+                    "storageObjectsPerBucket": 50000000,
+                    "storageParallelSessionsPerSourceIp": 256,
+                    "storageRequestsPerSecondPerSourceIp": 750,
+                    "storageRequestsPerSecondPerBucket": 750,
+                    "storageBucketBandwidthGbitPerSecond": 10
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -14693,7 +14756,14 @@
                     "stateSqliteRowsWrittenPerDay": null,
                     "stateSqliteRowsWrittenPerMonth": 50000000,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 9536
+                    "stateSqliteStorageMibPerObject": 9536,
+                    "storageMinimumBillableObjectBytes": 64000,
+                    "storageBucketMaxTb": 100,
+                    "storageObjectsPerBucket": 50000000,
+                    "storageParallelSessionsPerSourceIp": 256,
+                    "storageRequestsPerSecondPerSourceIp": 750,
+                    "storageRequestsPerSecondPerBucket": 750,
+                    "storageBucketBandwidthGbitPerSecond": 10
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 500,
@@ -14866,7 +14936,14 @@
             "objectStorageClassBOperationsPerMonth": 10000000,
             "storageSinglePartUploadMaxMib": 5115,
             "storageMultipartUploadMaxMib": 5237760,
-            "storageUploadParts": 10000
+            "storageUploadParts": 10000,
+            "storageMinimumBillableObjectBytes": 64000,
+            "storageBucketMaxTb": 100,
+            "storageObjectsPerBucket": 50000000,
+            "storageParallelSessionsPerSourceIp": 256,
+            "storageRequestsPerSecondPerSourceIp": 750,
+            "storageRequestsPerSecondPerBucket": 750,
+            "storageBucketBandwidthGbitPerSecond": 10
           },
           "pricing": {
             "$ref": "#/components/schemas/PlanPricing",
@@ -15198,7 +15275,14 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 953
+              "stateSqliteStorageMibPerObject": 953,
+              "storageMinimumBillableObjectBytes": 64000,
+              "storageBucketMaxTb": 100,
+              "storageObjectsPerBucket": 50000000,
+              "storageParallelSessionsPerSourceIp": 256,
+              "storageRequestsPerSecondPerSourceIp": 750,
+              "storageRequestsPerSecondPerBucket": 750,
+              "storageBucketBandwidthGbitPerSecond": 10
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -15431,6 +15515,13 @@
           "storageUploadParts",
           "storageKeySizeBytes",
           "storageMetadataSizeBytes",
+          "storageMinimumBillableObjectBytes",
+          "storageBucketMaxTb",
+          "storageObjectsPerBucket",
+          "storageParallelSessionsPerSourceIp",
+          "storageRequestsPerSecondPerSourceIp",
+          "storageRequestsPerSecondPerBucket",
+          "storageBucketBandwidthGbitPerSecond",
           "storageCustomDomainsPerBucket",
           "storageBucketManagementOperationsPerSecond",
           "storageSameKeyWritesPerSecond",
@@ -16503,6 +16594,55 @@
             "description": "State SQLite storage per object in MiB. Context: components.schemas.PlanLimits.properties.stateSqliteStorageMibPerObject.",
             "minimum": 0,
             "maximum": 1000000000000
+          },
+          "storageMinimumBillableObjectBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Minimum object size counted for storage billing. Context: components.schemas.PlanLimits.properties.storageMinimumBillableObjectBytes.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageBucketMaxTb": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum storage behind one object storage bucket in terabytes. Context: components.schemas.PlanLimits.properties.storageBucketMaxTb.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageObjectsPerBucket": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Maximum objects behind one object storage bucket. Context: components.schemas.PlanLimits.properties.storageObjectsPerBucket.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageParallelSessionsPerSourceIp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Parallel object storage sessions from one source IP. Context: components.schemas.PlanLimits.properties.storageParallelSessionsPerSourceIp.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageRequestsPerSecondPerSourceIp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Object storage requests per second from one source IP. Context: components.schemas.PlanLimits.properties.storageRequestsPerSecondPerSourceIp.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageRequestsPerSecondPerBucket": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Object storage requests per second behind one bucket. Context: components.schemas.PlanLimits.properties.storageRequestsPerSecondPerBucket.",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "storageBucketBandwidthGbitPerSecond": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Object storage bandwidth behind one bucket in gigabits per second. Context: components.schemas.PlanLimits.properties.storageBucketBandwidthGbitPerSecond.",
+            "minimum": 0,
+            "maximum": 1000000000000
           }
         },
         "additionalProperties": false,
@@ -16644,7 +16784,14 @@
             "stateSqliteRowsWrittenPerDay": 100000,
             "stateSqliteRowsWrittenPerMonth": null,
             "stateKeyValueSizeMib": 2,
-            "stateSqliteStorageMibPerObject": 953
+            "stateSqliteStorageMibPerObject": 953,
+            "storageMinimumBillableObjectBytes": 64000,
+            "storageBucketMaxTb": 100,
+            "storageObjectsPerBucket": 50000000,
+            "storageParallelSessionsPerSourceIp": 256,
+            "storageRequestsPerSecondPerSourceIp": 750,
+            "storageRequestsPerSecondPerBucket": 750,
+            "storageBucketBandwidthGbitPerSecond": 10
           }
         ]
       },
@@ -16681,7 +16828,14 @@
             "objectStorageClassBOperationsPerMonth": 10000000,
             "storageSinglePartUploadMaxMib": 5115,
             "storageMultipartUploadMaxMib": 5237760,
-            "storageUploadParts": 10000
+            "storageUploadParts": 10000,
+            "storageMinimumBillableObjectBytes": 64000,
+            "storageBucketMaxTb": 100,
+            "storageObjectsPerBucket": 50000000,
+            "storageParallelSessionsPerSourceIp": 256,
+            "storageRequestsPerSecondPerSourceIp": 750,
+            "storageRequestsPerSecondPerBucket": 750,
+            "storageBucketBandwidthGbitPerSecond": 10
           },
           "services": {
             "type": "array",
@@ -17092,7 +17246,14 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 953
+              "stateSqliteStorageMibPerObject": 953,
+              "storageMinimumBillableObjectBytes": 64000,
+              "storageBucketMaxTb": 100,
+              "storageObjectsPerBucket": 50000000,
+              "storageParallelSessionsPerSourceIp": 256,
+              "storageRequestsPerSecondPerSourceIp": 750,
+              "storageRequestsPerSecondPerBucket": 750,
+              "storageBucketBandwidthGbitPerSecond": 10
             },
             "services": [
               {

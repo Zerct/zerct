@@ -114,6 +114,8 @@ tovuk queue delete --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
 tovuk cron delete --service <service> nightly --json
 tovuk state create --service <service> Room --json
+tovuk state objects --service <service> Room --json
+tovuk state keys --service <service> Room room-1 --json
 tovuk state put --service <service> Room room-1 counter 1 --json
 tovuk state get --service <service> Room room-1 counter --json
 tovuk state alarm set --service <service> Room room-1 --delay-seconds 60 --json
@@ -138,7 +140,9 @@ tovuk support resolve <ticket_id> --json
 ```
 
 `tovuk storage upload` automatically switches to multipart transfer for files
-larger than 100 MiB.
+larger than 100 MiB. Object storage limits expose object size, part count,
+metadata size, minimum billable object size, object count per storage bucket,
+request throughput, source-IP concurrency, and bucket bandwidth.
 
 Before load tests, production launch, or paid usage, run
 `tovuk pricing --json` and set hard usage caps with `tovuk limit set`.
