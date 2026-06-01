@@ -7,7 +7,7 @@ Tovuk exposes the product catalog through the CLI and API so agents can make
 deployment decisions without dashboard access:
 
 ```sh
-tovuk capabilities --json
+tovuk pricing --json
 tovuk pricing --json
 ```
 
@@ -152,12 +152,12 @@ code. Main meters: any supported meter from `tovuk pricing --json`.
 - Set hard usage caps before high-throughput work:
 
 ```sh
-tovuk limit set worker_requests --period month --value 10000000 --json
-tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-tovuk limit set sqlite_rows_read --period month --value 25000000000 --json
-tovuk limit set queue_operations --period month --value 1000000 --json
-tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
-tovuk limit set object_storage_egress_bytes --period month --value 1000000000000 --json
+tovuk limits set worker_requests --period month --value 10000000 --json
+tovuk limits set worker_cpu_ms --period month --value 30000000 --json
+tovuk limits set sqlite_rows_read --period month --value 25000000000 --json
+tovuk limits set queue_operations --period month --value 1000000 --json
+tovuk limits set object_storage_class_a_operations --period month --value 1000000 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
 ```
 
 The live `tovuk pricing --json` response is the source of truth for current

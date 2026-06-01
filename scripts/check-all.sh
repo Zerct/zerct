@@ -94,6 +94,9 @@ printf '%s\n' "$native_cli_version"
 "$native_cli" --help | grep -q 'tovuk storage download'
 "$native_cli" --help | grep -q 'tovuk deploy --dry-run'
 "$native_cli" --help | grep -q 'tovuk pricing'
+"$native_cli" --help | grep -q 'tovuk service resources'
+"$native_cli" --help | grep -q 'tovuk service builds'
+"$native_cli" --help | grep -q 'tovuk limits set'
 "$native_cli" --help | grep -q 'tovuk billing checkout'
 test "$("$native_cli" -V)" = "$native_cli_version"
 test "$("$native_cli" --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
@@ -107,6 +110,14 @@ if "$native_cli" plan --json >/tmp/tovuk-retired-plan.out 2>/tmp/tovuk-retired-p
   exit 1
 fi
 grep -q '"code": "unknown_command"' /tmp/tovuk-retired-plan.err
+for retired_command in \
+  init install preview capabilities me activity services overview deploys builds status inspect platform limit files media queues bindings; do
+  if "$native_cli" "$retired_command" --json >/tmp/tovuk-retired-command.out 2>/tmp/tovuk-retired-command.err; then
+    printf 'expected retired native CLI command to fail: %s\n' "$retired_command" >&2
+    exit 1
+  fi
+  grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
+done
 
 "$python_bin" -m compileall -q packages/tovuk-py/src
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
@@ -116,6 +127,9 @@ PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk 
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage download'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk deploy --dry-run'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk pricing'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk service resources'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk service builds'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk limits set'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
 if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
@@ -123,6 +137,14 @@ if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-u
   exit 1
 fi
 grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
+for retired_command in \
+  init install preview capabilities me activity services overview deploys builds status inspect platform limit files media queues bindings; do
+  if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk "$retired_command" --json >/tmp/tovuk-retired-command.out 2>/tmp/tovuk-retired-command.err; then
+    printf 'expected retired Python CLI command to fail: %s\n' "$retired_command" >&2
+    exit 1
+  fi
+  grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
+done
 
 test -f examples/hello-rust/Cargo.lock
 cargo check --locked --release --all-targets --all-features --manifest-path examples/hello-rust/Cargo.toml

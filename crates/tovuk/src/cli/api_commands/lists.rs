@@ -12,15 +12,12 @@ use reqwest::Method;
 pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => print_authenticated(cli, "/v1/services"),
-        "show" => {
-            let service = cli.args.get(1).cloned().filter(|value| !value.is_empty());
-            let route = if let Some(service) = service {
-                format!("/v1/services/{}/overview", encode_component(&service))
-            } else {
-                service_route(cli, "overview")?
-            };
-            print_authenticated(cli, &route)
-        }
+        "show" => service_get(cli, 1, "overview"),
+        "status" => service_get(cli, 1, "status"),
+        "inspect" => service_get(cli, 1, "inspect"),
+        "resources" => service_get(cli, 1, "platform"),
+        "deploys" => service_paged_get(cli, 1, "deploys"),
+        "builds" => service_paged_get(cli, 1, "builds"),
         "delete" | "del" | "rm" => {
             let service = cli.args.get(1).cloned().filter(|value| !value.is_empty());
             let route = if let Some(service) = service {
@@ -33,34 +30,41 @@ pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
         _ => Err(agent_error(
             "unknown_command",
             "Unknown service command.",
-            "Use `tovuk service list --json`, `tovuk service show <service> --json`, or `tovuk service delete <service> --json`.",
+            "Use `tovuk service list --json`, `tovuk service show <service> --json`, `tovuk service status <service> --json`, `tovuk service resources <service> --json`, `tovuk service deploys <service> --json`, `tovuk service builds <service> --json`, or `tovuk service delete <service> --json`.",
             cli.output.json,
         )),
     }
 }
 
-pub(crate) fn deploys_command(cli: &CliOptions) -> Result<()> {
-    let route = if cli.service.is_empty() {
-        format!("/v1/deploys{}", page_query(cli))
-    } else {
-        format!(
-            "/v1/services/{}/deploys{}",
-            encode_component(&cli.service),
-            page_query(cli)
-        )
-    };
+fn service_get(cli: &CliOptions, arg_index: usize, suffix: &str) -> Result<()> {
+    print_authenticated(cli, &service_route_from_arg(cli, arg_index, suffix)?)
+}
+
+fn service_paged_get(cli: &CliOptions, arg_index: usize, suffix: &str) -> Result<()> {
+    let route = format!(
+        "{}{}",
+        service_route_from_arg(cli, arg_index, suffix)?,
+        page_query(cli)
+    );
     print_authenticated(cli, &route)
 }
 
-pub(crate) fn builds_command(cli: &CliOptions) -> Result<()> {
-    let route = if cli.service.is_empty() {
-        format!("/v1/builds{}", page_query(cli))
-    } else {
-        format!(
-            "/v1/services/{}/builds{}",
-            encode_component(&cli.service),
-            page_query(cli)
-        )
-    };
-    print_authenticated(cli, &route)
+fn service_route_from_arg(cli: &CliOptions, arg_index: usize, suffix: &str) -> Result<String> {
+    let service = cli
+        .args
+        .get(arg_index)
+        .cloned()
+        .filter(|value| !value.is_empty());
+    if let Some(service) = service {
+        let suffix = suffix.trim_matches('/');
+        if suffix.is_empty() {
+            return Ok(format!("/v1/services/{}", encode_component(&service)));
+        }
+        return Ok(format!(
+            "/v1/services/{}/{}",
+            encode_component(&service),
+            suffix
+        ));
+    }
+    service_route(cli, suffix)
 }

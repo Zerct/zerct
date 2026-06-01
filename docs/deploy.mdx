@@ -10,7 +10,7 @@ guessing.
 
 1. Login with GitHub or Google.
 2. Run `tovuk check --json`.
-3. Run `tovuk preview` for local verification.
+3. Run `tovuk deploy --dry-run --json` to verify deploy intent, meters, and limits.
 4. Run `tovuk deploy --wait --json`.
 5. Tovuk queues the build, runs checks, and verifies the health route for Rust
    workers.
@@ -20,16 +20,15 @@ For worker-static repos, run `tovuk deploy` from the repo root. The CLI reads
 the root `tovuk.toml`, builds the configured worker and frontend roots, serves
 the frontend at `/`, and routes `/api/*` to the Rust worker.
 
-## Local preview
+## Local check
 
 ```sh
-tovuk preview
+tovuk check
 ```
 
-For Rust workers, preview builds the release binary and starts it with `PORT`.
-For static frontends, preview builds the frontend and serves the output
-directory. For worker-static services, preview builds both roots, runs the worker, and
-serves the frontend with a local `/api/*` proxy.
+For Rust workers, check runs the configured quality gates before any remote
+build is queued. For static frontends, check runs the configured frontend
+quality command. For worker-static services, check validates both roots.
 
 ## Runtime contract
 
@@ -59,7 +58,7 @@ tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --js
 tovuk service delete service_1 --json
 ```
 
-Use `service delete` for smoke-test and preview services that should not keep
+Use `service delete` for smoke-test and throwaway services that should not keep
 runtime, storage, queue, State, KV, SQLite, or domain resources.
 
 ## Agent-ready errors

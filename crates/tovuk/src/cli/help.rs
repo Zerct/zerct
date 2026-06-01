@@ -2,28 +2,22 @@ use super::constants::VERSION;
 
 const HELP_BODY: &str = r#"
 Usage:
-  tovuk init [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
-  tovuk install [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
+  tovuk new [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
   tovuk check [path] [--json]
-  tovuk preview [path] [--port <port>]
   tovuk login [--token <token>] [--api <url>]
   tovuk deploy --dry-run [path] [--api <url>] [--json]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
-  tovuk capabilities [--api <url>] [--json]
   tovuk pricing [--api <url>] [--json]
-  tovuk me [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
-  tovuk activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk service list [--api <url>] [--json]
   tovuk service show <service> [--api <url>] [--json]
+  tovuk service status <service> [--api <url>] [--json]
+  tovuk service inspect <service> [--api <url>] [--json]
+  tovuk service resources <service> [--api <url>] [--json]
+  tovuk service deploys <service> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  tovuk service builds <service> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk service delete <service> [--api <url>] [--json]
-  tovuk overview --service <service> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk deploys [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk builds [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk logs --service <service> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk status --service <service> [--api <url>] [--json]
-  tovuk inspect --service <service> [--api <url>] [--json]
-  tovuk platform --service <service> [--api <url>] [--json]
   tovuk database create --service <service> DB [--api <url>] [--json]
   tovuk database query --service <service> DB "select 1" [--params <json_array>] [--api <url>] [--json]
   tovuk database backup [list|create|restore] --service <service> DB [backup_id] [--api <url>] [--json]
@@ -60,11 +54,11 @@ Usage:
   tovuk state delete --service <service> Room [--api <url>] [--json]
   tovuk binding create --service <service> AUTH_SERVICE --target <target_service> [--api <url>] [--json]
   tovuk binding delete --service <service> AUTH_SERVICE [--api <url>] [--json]
-  tovuk limit set build_minutes --period month --value 6000 [--api <url>] [--json]
-  tovuk limit set worker_requests --period day --value 100000 [--api <url>] [--json]
-  tovuk limit set state_requests --period month --value 1000000 [--api <url>] [--json]
-  tovuk limit set state_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
-  tovuk limit delete worker_requests --period day [--api <url>] [--json]
+  tovuk limits set build_minutes --period month --value 6000 [--api <url>] [--json]
+  tovuk limits set worker_requests --period day --value 100000 [--api <url>] [--json]
+  tovuk limits set state_requests --period month --value 1000000 [--api <url>] [--json]
+  tovuk limits set state_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
+  tovuk limits delete worker_requests --period day [--api <url>] [--json]
   tovuk env list --service <service> [--api <url>] [--json]
   tovuk env set --service <service> KEY=value [--api <url>] [--json]
   tovuk env delete --service <service> KEY [--api <url>] [--json]
@@ -92,7 +86,7 @@ Agent contract:
   - Create SQLite backups before migrations or destructive writes; restore from CLI/API without dashboard access, then verify with read queries.
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
-  - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
+  - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.

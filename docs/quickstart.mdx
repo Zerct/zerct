@@ -14,7 +14,7 @@ description: "Deploy a Rust worker with Tovuk."
 From your worker directory:
 
 ```sh
-tovuk init
+tovuk new
 ```
 
 This creates `tovuk.toml`.
@@ -22,7 +22,7 @@ This creates `tovuk.toml`.
 For a new project, start from a template:
 
 ```sh
-tovuk init hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 ```
 
@@ -42,12 +42,6 @@ tovuk deploy --dry-run --json
 ```
 
 Review warnings, enabled capabilities, meters, limits, and `billingEstimate`.
-
-Preview locally:
-
-```sh
-tovuk preview
-```
 
 ## Deploy
 

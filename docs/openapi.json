@@ -7547,7 +7547,7 @@
                         "Single-key serialized state"
                       ],
                       "commands": [
-                        "tovuk init hello-service --template worker-static-rust-tanstack",
+                        "tovuk new hello-service --template worker-static-rust-tanstack",
                         "tovuk deploy --wait --json",
                         "tovuk logs --service <service> --json"
                       ],
@@ -8148,7 +8148,7 @@
                     }
                   ],
                   "next_actions": [
-                    "Use `tovuk overview --service <service>` for a compact service state snapshot."
+                    "Use `tovuk service show <service>` for a compact service state snapshot."
                   ],
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -8505,7 +8505,7 @@
                     "details": "Agent retried deploy after check.",
                     "severity": "normal",
                     "status": "open",
-                    "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
+                    "agent_instruction": "Continue with tovuk service show service_1 --json.",
                     "created_at": "2026-05-27T12:00:00Z",
                     "updated_at": "2026-05-27T12:00:00Z",
                     "failing_command": "tovuk deploy --wait --json",
@@ -8559,7 +8559,7 @@
                       "details": "Agent retried deploy after check.",
                       "severity": "normal",
                       "status": "open",
-                      "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
+                      "agent_instruction": "Continue with tovuk service show service_1 --json.",
                       "created_at": "2026-05-27T12:00:00Z",
                       "updated_at": "2026-05-27T12:00:00Z",
                       "failing_command": "tovuk deploy --wait --json",
@@ -14900,7 +14900,7 @@
                     "Single-key serialized state"
                   ],
                   "commands": [
-                    "tovuk init hello-service --template worker-static-rust-tanstack",
+                    "tovuk new hello-service --template worker-static-rust-tanstack",
                     "tovuk deploy --wait --json",
                     "tovuk logs --service <service> --json"
                   ],
@@ -16946,7 +16946,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Use `tovuk overview --service <service>` for a compact service state snapshot."
+                "Use `tovuk service show <service>` for a compact service state snapshot."
               ]
             ]
           },
@@ -17326,7 +17326,7 @@
               }
             ],
             "next_actions": [
-              "Use `tovuk overview --service <service>` for a compact service state snapshot."
+              "Use `tovuk service show <service>` for a compact service state snapshot."
             ],
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -18041,7 +18041,7 @@
             "type": "string",
             "description": "Next step for the user agent. Context: components.schemas.SupportTicket.properties.agent_instruction.",
             "examples": [
-              "Continue with tovuk overview --service service_1 --json."
+              "Continue with tovuk service show service_1 --json."
             ],
             "pattern": "^[\\s\\S]{1,500}$",
             "maxLength": 500
@@ -18075,7 +18075,7 @@
             "first_log_line": "cargo check failed in src/main.rs",
             "severity": "normal",
             "status": "open",
-            "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
+            "agent_instruction": "Continue with tovuk service show service_1 --json.",
             "created_at": "2026-05-27T12:00:00Z",
             "updated_at": "2026-05-27T12:00:00Z"
           }
@@ -18177,7 +18177,7 @@
               "details": "Command, ids, and first actionable log line.",
               "severity": "normal",
               "status": "open",
-              "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
+              "agent_instruction": "Continue with tovuk service show service_1 --json.",
               "created_at": "2026-05-27T12:00:00Z",
               "updated_at": "2026-05-27T12:00:00Z"
             },
@@ -18215,7 +18215,7 @@
                   "details": "Agent retried deploy after check.",
                   "severity": "normal",
                   "status": "open",
-                  "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
+                  "agent_instruction": "Continue with tovuk service show service_1 --json.",
                   "created_at": "2026-05-27T12:00:00Z",
                   "updated_at": "2026-05-27T12:00:00Z",
                   "failing_command": "tovuk deploy --wait --json",
@@ -18240,7 +18240,7 @@
                 "details": "Agent retried deploy after check.",
                 "severity": "normal",
                 "status": "open",
-                "agent_instruction": "Continue with tovuk overview --service service_1 --json.",
+                "agent_instruction": "Continue with tovuk service show service_1 --json.",
                 "created_at": "2026-05-27T12:00:00Z",
                 "updated_at": "2026-05-27T12:00:00Z",
                 "failing_command": "tovuk deploy --wait --json",
@@ -23628,7 +23628,7 @@
               "Single-key serialized state"
             ],
             "commands": [
-              "tovuk init hello-service --template worker-static-rust-tanstack",
+              "tovuk new hello-service --template worker-static-rust-tanstack",
               "tovuk deploy --wait --json",
               "tovuk logs --service <service> --json"
             ],

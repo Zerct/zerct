@@ -9,7 +9,7 @@ need dashboard access.
 ## Commands
 
 ```sh
-tovuk platform --service service_1 --json
+tovuk service resources service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
 tovuk database backup create --service service_1 DB --json
@@ -35,11 +35,11 @@ tovuk state delete-value --service service_1 Room room-1 counter --json
 tovuk state delete --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
-tovuk limit set build_minutes --period month --value 6000 --json
-tovuk limit set worker_requests --period day --value 100000 --json
-tovuk limit set state_requests --period month --value 1000000 --json
-tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-tovuk limit delete worker_requests --period day --json
+tovuk limits set build_minutes --period month --value 6000 --json
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set state_requests --period month --value 1000000 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits delete worker_requests --period day --json
 ```
 
 ## Resource model
@@ -77,7 +77,7 @@ subrequest limits.
 The machine-readable product catalog is available from:
 
 ```sh
-tovuk capabilities --json
+tovuk pricing --json
 tovuk pricing --json
 tovuk usage --json
 ```
@@ -157,9 +157,9 @@ tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
-tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
-tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
-tovuk limit set object_storage_egress_bytes --period month --value 1000000000000 --json
+tovuk limits set object_storage_class_a_operations --period month --value 1000000 --json
+tovuk limits set object_storage_class_b_operations --period month --value 10000000 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
 ```
 
 `tovuk storage upload` automatically switches to multipart transfer for files

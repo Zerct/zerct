@@ -55,7 +55,7 @@ error, and redeploy. Use platform resource commands for SQLite, KV, queues,
 cron triggers, State, service bindings, and usage caps.
 Before load tests or production launch, run `tovuk pricing --json`, inspect
 `billingEstimate` from `tovuk usage --json`, and set hard usage caps with
-`tovuk limit set`.
+`tovuk limits set`.
 For queue handlers, implement `POST /.tovuk/queues/<queue>` and return `2xx`
 only after the batch is safely handled. For cron handlers, implement
 `POST /.tovuk/cron/<trigger>` and keep it idempotent.
@@ -115,11 +115,11 @@ larger than 100 MiB.
 
 ```txt
 Create a Tovuk worker-static project. Run
-`tovuk init hello-service --template worker-static-rust-tanstack`, then install
+`tovuk new hello-service --template worker-static-rust-tanstack`, then install
 frontend packages in `hello-service/web`. Keep dynamic server logic in the Rust worker.
 Keep the TanStack frontend static at runtime and call same-origin `/api`. Run
-check in JSON mode, preview from the repo root when local tools are installed,
-then deploy from the repo root.
+check in JSON mode, run deploy dry-run from the repo root, then deploy from
+the repo root.
 ```
 
 ## Log commands
@@ -127,12 +127,12 @@ then deploy from the repo root.
 ```sh
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
-tovuk builds --service service_1 --json
+tovuk service builds service_1 --json
 tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --service service_1 --json
 tovuk storage list --service service_1 --json
-tovuk platform --service service_1 --json
+tovuk service resources service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
 tovuk database backup create --service service_1 DB --json
@@ -153,10 +153,10 @@ tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json
 tovuk state alarm get --service service_1 Room room-1 --json
 tovuk state alarm delete --service service_1 Room room-1 --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-tovuk limit set build_minutes --period month --value 6000 --json
-tovuk limit set worker_requests --period day --value 100000 --json
-tovuk limit set state_requests --period month --value 1000000 --json
-tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set build_minutes --period month --value 6000 --json
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set state_requests --period month --value 1000000 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk billing checkout --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json

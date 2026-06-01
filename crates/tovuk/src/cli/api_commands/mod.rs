@@ -11,18 +11,15 @@ mod storage;
 mod support;
 
 pub(crate) use billing::billing_command;
-pub(crate) use common::service_route;
 pub(crate) use domains::domains_command;
 pub(crate) use env::env_command;
-pub(crate) use generic::{
-    capabilities, pricing, print_authenticated, print_paged_authenticated, service_get_command,
-};
+pub(crate) use generic::{pricing, print_authenticated};
 pub(crate) use http::{api_request, payment_required_agent_error};
-pub(crate) use lists::{builds_command, deploys_command, service_command};
+pub(crate) use lists::service_command;
 pub(crate) use logs::logs_command;
 pub(crate) use platform::{
-    binding_command, caps_command, cron_command, kv_command, platform_command, queue_command,
-    sqlite_command, state_command,
+    binding_command, caps_command, cron_command, kv_command, queue_command, sqlite_command,
+    state_command,
 };
 pub(crate) use storage::storage_command;
 pub(crate) use support::support_command;

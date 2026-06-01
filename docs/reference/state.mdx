@@ -79,9 +79,9 @@ Use `tovuk pricing --json` for current `state*` limit fields and pricing. Use
 `tovuk usage --json` before load tests, then set hard caps:
 
 ```sh
-tovuk limit set state_requests --period month --value 1000000 --json
-tovuk limit set state_duration_gb_milliseconds --period month --value 400000000 --json
-tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set state_requests --period month --value 1000000 --json
+tovuk limits set state_duration_gb_milliseconds --period month --value 400000000 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
 ```
 
 ## Choosing State

@@ -134,7 +134,7 @@ func checkDocs() {
 	requireContains(openapi, `"/v1/services/{service_id}/storage/multipart/create"`, "OpenAPI multipart create route")
 	requireContains(openapi, `"StorageMultipartCreateRequest"`, "OpenAPI multipart create schema")
 	requireContains(openapi, `"StorageMultipartCompleteRequest"`, "OpenAPI multipart complete schema")
-	requireContains(limits, "tovuk limit set build_minutes", "build minutes cap docs")
+	requireContains(limits, "tovuk limits set build_minutes", "build minutes cap docs")
 	requireContains(limits, "Deploy hooks can trigger 10 builds per service", "build hook rate docs")
 	requireContains(limits, "WebSocket response-side tunnel bytes", "worker websocket transfer meter docs")
 	requireContains(limits, "Service binding call chains can use up to 32 worker invocations", "service binding invocation limit docs")

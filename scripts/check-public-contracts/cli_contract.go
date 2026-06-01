@@ -23,11 +23,9 @@ func checkCLIContract() {
 	homebrewFormula := readText("Formula/tovuk.rb")
 
 	for _, command := range []string{
-		"init", "install", "check", "preview", "login", "deploy", "capabilities", "pricing",
-		"me", "usage", "activity", "service", "services", "overview", "deploys", "builds", "logs",
-		"status", "inspect", "platform", "kv", "queue", "cron", "state",
-		"binding", "limit", "database", "env", "domains", "storage", "files", "media",
-		"billing", "support",
+		"new", "check", "login", "deploy", "pricing", "usage", "service", "logs",
+		"database", "kv", "queue", "cron", "state", "binding", "limits", "env",
+		"domains", "storage", "billing", "support",
 	} {
 		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
 	}
@@ -42,6 +40,8 @@ func checkCLIContract() {
 		requireContains(source, "tovuk queue send", "agentic queue send command")
 		requireContains(source, "tovuk pricing", "agentic pricing command")
 		requireContains(source, "tovuk deploy --dry-run", "agentic deploy dry-run command")
+		requireContains(source, "tovuk service resources", "agentic service resources command")
+		requireContains(source, "tovuk service builds", "agentic service builds command")
 		requireContains(source, "tovuk billing checkout --json", "agentic billing checkout command")
 		requireContains(source, "tovuk support create", "agentic support create command")
 		requireContains(source, "tovuk support list", "agentic support list command")
@@ -75,6 +75,24 @@ func checkCLIContract() {
 		rejectContains(source, "--app", "retired app flag")
 		rejectContains(source, "/v1/apps", "retired apps API path")
 		rejectContains(source, retiredOrgScope, "retired org scope")
+	}
+	for _, source := range []string{cargoCLI, cargoReadme, npmReadme, pythonReadme} {
+		rejectContains(source, "tovuk init", "retired init command")
+		rejectContains(source, "tovuk install", "retired install command")
+		rejectContains(source, "tovuk preview", "retired preview command")
+		rejectContains(source, "tovuk capabilities", "retired capabilities command")
+		rejectContains(source, "tovuk me", "retired me command")
+		rejectContains(source, "tovuk activity", "retired activity command")
+		rejectContains(source, "tovuk overview", "retired overview command")
+		rejectContains(source, "tovuk deploys", "retired top-level deploys command")
+		rejectContains(source, "tovuk builds", "retired top-level builds command")
+		rejectContains(source, "tovuk status", "retired top-level status command")
+		rejectContains(source, "tovuk inspect", "retired top-level inspect command")
+		rejectContains(source, "tovuk platform", "retired platform command")
+		rejectContains(source, "tovuk services", "retired services command")
+		rejectContains(source, "tovuk limit ", "retired singular limit command")
+		rejectContains(source, "tovuk files", "retired storage alias")
+		rejectContains(source, "tovuk media", "retired storage alias")
 	}
 
 	fmt.Println("Checked native CLI command and package contract.")
