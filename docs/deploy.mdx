@@ -12,11 +12,13 @@ guessing.
 2. Run `tovuk check --json`.
 3. Run `tovuk deploy --dry-run --json` to verify deploy intent, meters, and limits.
 4. Run `tovuk deploy --wait --json`.
-5. Cancel stale queued work with `tovuk deploy cancel <deploy_id> --json` when
+5. Inspect deploy state with `tovuk deploy list --json` or
+   `tovuk deploy show <deploy_id> --json`.
+6. Cancel stale queued work with `tovuk deploy cancel <deploy_id> --json` when
    a newer deploy supersedes it.
-6. Tovuk queues the build, runs checks, and verifies the health route for Rust
+7. Tovuk queues the build, runs checks, and verifies the health route for Rust
    workers.
-7. Tovuk exposes the service on a `tovuk.app` deployment hostname.
+8. Tovuk exposes the service on a `tovuk.app` deployment hostname.
 
 For full-stack repos, run `tovuk deploy` from the repo root. The CLI reads
 the root `tovuk.toml`, builds the configured worker and frontend roots, serves

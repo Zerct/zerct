@@ -15,6 +15,8 @@ class Tovuk < Formula
     help = shell_output("#{bin}/tovuk --help")
     assert_match "tovuk new", help
     assert_match "tovuk deploy --dry-run", help
+    assert_match "tovuk deploy list", help
+    assert_match "tovuk deploy show", help
     assert_match "tovuk deploy cancel", help
     assert_match "tovuk pricing", help
     assert_match "tovuk service show", help

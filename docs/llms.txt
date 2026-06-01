@@ -10,6 +10,8 @@ Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy list --json
+tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json
 ```
 
@@ -26,11 +28,13 @@ Agent repair loop:
    `billingEstimate`.
 7. Set hard usage caps for expected load.
 8. Run `tovuk deploy --wait --json`.
-9. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
-10. If deploy fails, read `build_job.id` or the failed build id.
-11. Run `tovuk logs --build <build_id> --json`.
-12. Fix the first actionable log error.
-13. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
+9. Inspect deploy state with `tovuk deploy list --json` or
+   `tovuk deploy show <deploy_id> --json` when needed.
+10. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
+11. If deploy fails, read `build_job.id` or the failed build id.
+12. Run `tovuk logs --build <build_id> --json`.
+13. Fix the first actionable log error.
+14. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
 
 Rust worker contract:
 

@@ -12,6 +12,8 @@ cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy list --json
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 ```
 
@@ -47,6 +49,7 @@ Agent repair loop:
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 ```
@@ -69,6 +72,8 @@ Before high-throughput work, read pricing and set hard caps:
 tovuk pricing --json
 tovuk usage --json
 tovuk deploy --dry-run --json
+tovuk deploy list --json
+tovuk deploy show deploy_1 --json
 tovuk service show service_1 --json
 tovuk limits set worker_requests --period month --value 10000000 --json
 ```

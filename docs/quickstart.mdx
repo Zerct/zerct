@@ -52,6 +52,8 @@ Review warnings, enabled capabilities, meters, limits, and `billingEstimate`.
 tovuk deploy --wait --json
 ```
 
+Inspect deploy state with `tovuk deploy list --json` or
+`tovuk deploy show <deploy_id> --json` when an agent needs to recover context.
 Cancel stale queued work with `tovuk deploy cancel <deploy_id> --json` when a
 newer deploy supersedes it.
 
