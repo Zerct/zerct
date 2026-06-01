@@ -8,6 +8,8 @@ Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
 
 ```sh
 tovuk check --json
+tovuk account show --json
+tovuk account update --handle <handle> --display-name <name> --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 tovuk deploy list --json
@@ -23,18 +25,21 @@ Agent repair loop:
 2. If it fails, read the first failed check.
 3. Apply its `agent_instruction` exactly.
 4. Rerun check until it passes.
-5. Run `tovuk deploy --dry-run --json`.
-6. Review warnings, enabled and disabled capabilities, meters, limits, and
+5. Run `tovuk account show --json`.
+6. If account setup is incomplete, run
+   `tovuk account update --handle <handle> --display-name <name> --json`.
+7. Run `tovuk deploy --dry-run --json`.
+8. Review warnings, enabled and disabled capabilities, meters, limits, and
    `billingEstimate`.
-7. Set hard usage caps for expected load.
-8. Run `tovuk deploy --wait --json`.
-9. Inspect deploy state with `tovuk deploy list --json` or
+9. Set hard usage caps for expected load.
+10. Run `tovuk deploy --wait --json`.
+11. Inspect deploy state with `tovuk deploy list --json` or
    `tovuk deploy show <deploy_id> --json` when needed.
-10. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
-11. If deploy fails, read `build_job.id` or the failed build id.
-12. Run `tovuk logs --build <build_id> --json`.
-13. Fix the first actionable log error.
-14. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
+12. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
+13. If deploy fails, read `build_job.id` or the failed build id.
+14. Run `tovuk logs --build <build_id> --json`.
+15. Fix the first actionable log error.
+16. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
 
 Rust worker contract:
 

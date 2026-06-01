@@ -10,6 +10,8 @@ npm install -g tovuk
 tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
+tovuk account show --json
+tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 tovuk deploy list --json
@@ -71,6 +73,7 @@ Before high-throughput work, read pricing and set hard caps:
 ```sh
 tovuk pricing --json
 tovuk usage --json
+tovuk account activity --json
 tovuk deploy --dry-run --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json

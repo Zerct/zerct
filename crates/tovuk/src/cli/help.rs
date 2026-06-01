@@ -10,6 +10,9 @@ Usage:
   tovuk deploy list [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk deploy show <deploy_id> [--api <url>] [--json]
   tovuk deploy cancel <deploy_id> [--api <url>] [--json]
+  tovuk account show [--api <url>] [--json]
+  tovuk account activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
+  tovuk account update --handle <handle> [--display-name <name>] [--api <url>] [--json]
   tovuk pricing [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
   tovuk service list [--api <url>] [--json]
@@ -102,6 +105,7 @@ Agent contract:
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
   - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
   - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
+  - Use tovuk account show/activity/update --json for account setup and account-wide recovery without dashboard-only steps.
   - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, resources, limits, pricing, usage caps, and next actions.
   - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.

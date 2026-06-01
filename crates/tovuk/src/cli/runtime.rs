@@ -1,9 +1,9 @@
 use super::{
     api_commands::{
-        abuse_command, billing_command, binding_command, caps_command, cron_command,
-        domains_command, env_command, kv_command, logs_command, nodes_command, pricing,
-        print_authenticated, queue_command, service_command, sqlite_command, state_command,
-        storage_command, support_command,
+        abuse_command, account_command, billing_command, binding_command, caps_command,
+        cron_command, domains_command, env_command, kv_command, logs_command, nodes_command,
+        pricing, print_authenticated, queue_command, service_command, sqlite_command,
+        state_command, storage_command, support_command,
     },
     args::{parse_args, project_path},
     auth::login,
@@ -44,6 +44,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "login" => login(&cli),
         "deploy" => deploy(&project_path(cli.args.first())?, &cli),
         "pricing" => pricing(&cli),
+        "account" => account_command(&cli),
         "usage" => print_authenticated(&cli, "/v1/usage"),
         "service" => service_command(&cli),
         "logs" => logs_command(&cli),

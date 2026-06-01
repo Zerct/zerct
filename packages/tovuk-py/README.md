@@ -11,6 +11,8 @@ pipx install tovuk
 tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
+tovuk account show --json
+tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
 tovuk deploy --dry-run --json
 tovuk check
 tovuk deploy --wait --json
@@ -48,6 +50,8 @@ The Python package exposes the same agent command surface as npm:
 ```sh
 tovuk pricing
 tovuk pricing --json
+tovuk account show --json
+tovuk account activity --json
 tovuk deploy --dry-run --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json

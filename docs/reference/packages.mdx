@@ -13,8 +13,8 @@ tovuk deploy
 `tovuk` is the live unscoped npm package. It installs a native binary for the
 current platform.
 
-All official package CLIs expose the same agent commands for login, check,
-deploy, deploy dry-runs, deploy history, deploy cancellation, pricing, usage, service
+All official package CLIs expose the same agent commands for login, account
+setup, check, deploy, deploy dry-runs, deploy history, deploy cancellation, pricing, usage, service
 inspection, logs, env, domains, storage, limits, billing, and support.
 `tovuk usage --json` includes `billingEstimate.lineItems` so package users and
 agents can inspect current-month cost estimates without a dashboard.
@@ -26,6 +26,8 @@ The agent repair loop is the same on every package surface:
 
 ```sh
 tovuk check --json
+tovuk account show --json
+tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 tovuk deploy list --json
@@ -60,6 +62,7 @@ tovuk deploy
 
 ```sh
 pipx install tovuk
+tovuk account show --json
 tovuk deploy --wait
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json

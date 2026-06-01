@@ -28,6 +28,8 @@ Agent commands should use the native binary:
 ```sh
 tovuk new
 tovuk check
+tovuk account show
+tovuk account update --handle your-handle --display-name "Your Team"
 tovuk deploy --dry-run
 tovuk deploy --wait
 tovuk deploy list
@@ -221,6 +223,9 @@ Useful agent commands:
 ```sh
 tovuk pricing
 tovuk pricing --json
+tovuk account show --json
+tovuk account activity --json
+tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
 tovuk deploy --dry-run --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json
