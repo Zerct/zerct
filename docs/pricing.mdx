@@ -58,7 +58,8 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   write per second to the same object key.
 - Builds: `3,000` minutes per month, `1` concurrent build, `20 minute`
   timeout, `2 vCPU`, `8 GB` memory, `20 GB` disk, `64` build environment
-  variables, and `5 KB` per build environment variable.
+  variables, `5 KB` per build environment variable, `10` deploy hooks per
+  service per minute, and `100` deploy hooks per account per minute.
 - Logs: `200,000` events per day, `3 day` retention, `256 KB` per event.
 - API tokens: `10`.
 - Support tickets: `3` per day.
@@ -103,7 +104,9 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   write per second to the same object key.
 - Builds: `6,000` minutes per month, then `$0.005` per minute, `6` concurrent
   builds, `20 minute` timeout, `4 vCPU`, `8 GB` memory, `20 GB` disk, `64`
-  build environment variables, and `5 KB` per build environment variable.
+  build environment variables, `5 KB` per build environment variable, `10`
+  deploy hooks per service per minute, and `100` deploy hooks per account per
+  minute.
 - Logs: `20 million` events per month, then `$0.60` per million events, `7 day`
   retention, `256 KB` per event.
 - API tokens: `100`.

@@ -41,7 +41,8 @@ ambiguous to run.
 - Builds may be queued when capacity is busy.
 - Builds run with 2 vCPU on Free, 4 vCPU on Pro, 8 GB memory, 20 GB disk,
   20 minute max duration, 64 build environment variables, and a 5 KB limit per
-  build environment variable.
+  build environment variable. Deploy hooks can trigger 10 builds per service
+  per minute and 100 builds per account per minute.
 - Free service object storage includes 10 GB total, no object-count cap, a
   4.995 TiB object storage object size ceiling, a 5115 MiB (4.995 GiB)
   single-part upload limit, a 4.995 TiB multipart upload limit, 10 thousand
