@@ -20,8 +20,7 @@ pub(crate) fn frontend_package_json(name: &str) -> String {
         "scripts": {
             "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
             "lint": "oxlint src vite.config.ts --deny-warnings && fallow dead-code --production --include-dupes --include-entry-exports --fail-on-issues && fallow dupes --production --mode semantic --threshold 1 --ignore-imports --fail-on-issues && fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity",
-            "build": "vite build",
-            "preview": "vite preview --host 0.0.0.0"
+            "build": "vite build"
         },
         "dependencies": {
             "@tanstack/react-router": "^1.170.8",

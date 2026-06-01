@@ -7,7 +7,7 @@ npm install -g tovuk
 ```
 
 ```sh
-tovuk init hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
@@ -30,10 +30,10 @@ From a worker-static repo root, the same deploy command reads one root
 `tovuk.toml`, builds the worker and frontend roots, and returns one service URL
 with `/api/*` routed to the Rust worker.
 
-Preview before deploying:
+Check before deploying:
 
 ```sh
-tovuk preview
+tovuk check
 ```
 
 Agent repair loop:
@@ -51,11 +51,11 @@ fix the first actionable log error, rerun check, then redeploy.
 Agents can create service SQLite databases, KV namespaces, queues, cron triggers,
 State namespaces, service bindings, and usage caps through the CLI.
 
-Agents can also inspect API capabilities, account identity, usage, account
-activity, services, complete service overviews, deploys, builds, service/deploy/build logs,
-env metadata, custom domains, domain verification, service storage files and media,
-pricing, billing checkout links, billing portal links, service deletion, and
-support ticket create, list, and resolve actions through the same CLI.
+Agents can also inspect pricing, usage, services, service summaries, deploys,
+builds, service/deploy/build logs, env metadata, custom domains, domain
+verification, service storage files and media, billing checkout links, billing
+portal links, service deletion, and support ticket create/list/resolve actions
+through the same CLI.
 
 Before high-throughput work, read pricing and set hard caps:
 
@@ -63,7 +63,9 @@ Before high-throughput work, read pricing and set hard caps:
 tovuk pricing --json
 tovuk usage --json
 tovuk deploy --dry-run --json
-tovuk limit set worker_requests --period month --value 10000000 --json
+tovuk service resources service_1 --json
+tovuk service builds service_1 --json
+tovuk limits set worker_requests --period month --value 10000000 --json
 ```
 
 The pricing response includes plan pricing and product meter metadata, so agents

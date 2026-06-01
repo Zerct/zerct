@@ -15,15 +15,15 @@ description: "Recent product updates from Tovuk."
   from one repo with a single root `tovuk.toml`. Run
   `tovuk deploy --wait --json` to get one `*.tovuk.app` URL serving static
   assets at `/` and the worker at `/api/*`. See [Workers](/reference/workers).
-- **Project templates and local preview.** Scaffold a Rust API, TanStack static
-  frontend, or worker-static project with `tovuk init`, then run
-  `tovuk preview` to test locally before deploying. See
+- **Project templates and local checks.** Scaffold a Rust API, TanStack static
+  frontend, or worker-static project with `tovuk new`, then run
+  `tovuk check` to test locally before deploying. See
   [Templates](/templates).
 - **Custom domain verification.** Verify and connect custom domains from the
   CLI without leaving your terminal.
-- **Agent and deploy inspection commands.** New `overview`, `builds`, and
-  `logs` commands return structured JSON for service, build, and deploy state so
-  agents can debug failed deploys end to end. See the
+- **Agent and deploy inspection commands.** `service show`, `service builds`,
+  and `logs` commands return structured JSON for service, build, and deploy
+  state so agents can debug failed deploys end to end. See the
   [Agent Loop](/agents#log-commands).
 - **Homebrew tap.** Install the CLI on macOS with
   `brew tap tovuk/tovuk https://github.com/tovuk/tovuk && brew install tovuk`.

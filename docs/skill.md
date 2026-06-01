@@ -42,9 +42,9 @@ handlers, middleware, and server logic to Rust workers.
 
 ```sh
 tovuk check --json
-tovuk init hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template worker-static-rust-tanstack
 tovuk deploy --dry-run --json
-tovuk preview
+tovuk check
 tovuk deploy --wait --json
 tovuk pricing --json
 tovuk logs --build <build_id> --json
@@ -53,7 +53,7 @@ tovuk logs --build <build_id> --json
 Manage platform resources without dashboard access:
 
 ```sh
-tovuk platform --service <service> --json
+tovuk service resources <service> --json
 tovuk database create --service <service> DB --json
 tovuk database query --service <service> DB "select 1" --json
 tovuk database delete --service <service> DB --json
@@ -84,11 +84,11 @@ tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
-tovuk limit set build_minutes --period month --value 6000 --json
-tovuk limit set worker_requests --period day --value 100000 --json
-tovuk limit set state_requests --period month --value 1000000 --json
-tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-tovuk limit delete worker_requests --period day --json
+tovuk limits set build_minutes --period month --value 6000 --json
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set state_requests --period month --value 1000000 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits delete worker_requests --period day --json
 ```
 
 Before high-throughput work or paid usage, read pricing and set hard caps:
@@ -96,11 +96,11 @@ Before high-throughput work or paid usage, read pricing and set hard caps:
 ```sh
 tovuk pricing --json
 tovuk usage --json
-tovuk limit set build_minutes --period month --value 6000 --json
-tovuk limit set worker_requests --period month --value 10000000 --json
-tovuk limit set worker_cpu_ms --period month --value 30000000 --json
-tovuk limit set state_requests --period month --value 1000000 --json
-tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set build_minutes --period month --value 6000 --json
+tovuk limits set worker_requests --period month --value 10000000 --json
+tovuk limits set worker_cpu_ms --period month --value 30000000 --json
+tovuk limits set state_requests --period month --value 1000000 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
 ```
 
 Manage service files and media without dashboard access:
@@ -116,7 +116,7 @@ tovuk storage delete --service <service> uploads/logo.png --json
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.
 
-Use `tovuk capabilities --json` to inspect product choices, meters, limit
+Use `tovuk pricing --json` to inspect product choices, meters, limit
 fields, and plan prices before selecting Worker, Static Frontend, SQLite,
 Object Storage, State, KV, Queues, Cron, Service Bindings, Secrets, Custom
 Domains, Logs, Builds, or Usage Caps.

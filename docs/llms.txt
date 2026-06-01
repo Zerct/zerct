@@ -92,19 +92,19 @@ Worker-static contract:
 Useful commands:
 
 ```sh
-tovuk capabilities --json
+tovuk pricing --json
 tovuk deploy --dry-run --json
 curl https://api.tovuk.com/v1/status
-tovuk activity --json
+tovuk usage --json
 tovuk service list --json
 tovuk service show <service> --json
 tovuk service delete <service> --json
-tovuk builds --service <service> --json
+tovuk service builds <service> --json
 tovuk logs --build <build_id> --json
 tovuk logs --service <service> --json
 tovuk env list --service <service> --json
 tovuk domains list --service <service> --json
-tovuk platform --service <service> --json
+tovuk service resources <service> --json
 tovuk database create --service <service> DB --json
 tovuk database query --service <service> DB "select 1" --json
 tovuk database backup create --service <service> DB --json
@@ -131,10 +131,10 @@ tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
-tovuk limit set worker_requests --period day --value 100000 --json
-tovuk limit set state_requests --period month --value 1000000 --json
-tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
-tovuk limit delete worker_requests --period day --json
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set state_requests --period month --value 1000000 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits delete worker_requests --period day --json
 tovuk storage list --service <service> --json
 tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
 tovuk storage download --service <service> uploads/file.png ./file.png --json
@@ -152,7 +152,7 @@ metadata size, custom domains per storage bucket, bucket management operations,
 and same-key write throughput.
 
 Before load tests, production launch, or paid usage, run
-`tovuk pricing --json` and set hard usage caps with `tovuk limit set`.
+`tovuk pricing --json` and set hard usage caps with `tovuk limits set`.
 Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `sqlite_rows_read`, `sqlite_rows_written`, `kv_reads`, `queue_operations`,
 `state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
@@ -160,7 +160,7 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `object_storage_bytes`, `object_storage_class_a_operations`, and
 `object_storage_class_b_operations`, and `object_storage_egress_bytes`.
 
-`tovuk capabilities --json` and `tovuk pricing --json` expose a
+`tovuk pricing --json` and `tovuk pricing --json` expose a
 `products` catalog. Use each product's `features`, `meters`, `meter_details`,
 `pricing_fields`, and `limit_fields` before load tests, media uploads, or paid
 usage.

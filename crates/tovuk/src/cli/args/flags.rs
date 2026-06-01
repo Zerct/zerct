@@ -1,6 +1,6 @@
 use super::{
     model::CliOptions,
-    values::{set_boolean_flag, set_string_flag, set_u16_flag, set_u64_flag},
+    values::{set_boolean_flag, set_string_flag, set_u64_flag},
 };
 use crate::cli::errors::{Result, agent_error};
 
@@ -101,7 +101,7 @@ fn apply_value_flag(
         "--failing-command" | "--first-log-line" | "--severity" => {
             apply_support_value_flag(cli, name, inline, argv, index)
         }
-        "--port" | "--wait-timeout" => apply_numeric_value_flag(cli, name, inline, argv, index),
+        "--wait-timeout" => apply_numeric_value_flag(cli, name, inline, argv, index),
         _ => Err(agent_error(
             "unknown_argument",
             format!("Unknown Tovuk option: {name}."),
@@ -304,7 +304,6 @@ fn apply_numeric_value_flag(
     index: usize,
 ) -> Result<usize> {
     match name {
-        "--port" => set_u16_flag(&mut cli.port, name, inline, argv, index, cli.output.json),
         "--wait-timeout" => set_u64_flag(
             &mut cli.deployment.wait_timeout_seconds,
             name,

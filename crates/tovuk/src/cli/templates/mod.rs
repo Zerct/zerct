@@ -1,5 +1,4 @@
 use super::{
-    check::check_project,
     errors::{Result, internal_error},
     project::{ensure_directory, path_relative},
     project_layout::infer_project_kind,
@@ -12,7 +11,7 @@ mod scaffold;
 use config::init_config;
 use scaffold::create_template;
 
-pub(crate) fn init_project(project_dir: &Path, template: &str) -> Result<()> {
+pub(crate) fn new_project(project_dir: &Path, template: &str) -> Result<()> {
     if !template.is_empty() {
         fs::create_dir_all(project_dir).map_err(|error| internal_error(error.to_string()))?;
         create_template(project_dir, template)?;
@@ -33,9 +32,4 @@ pub(crate) fn init_project(project_dir: &Path, template: &str) -> Result<()> {
     );
     println!("detected {}", kind.as_str());
     Ok(())
-}
-
-pub(crate) fn install_project(project_dir: &Path, template: &str) -> Result<()> {
-    init_project(project_dir, template)?;
-    check_project(project_dir, false)
 }

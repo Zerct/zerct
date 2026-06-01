@@ -26,17 +26,16 @@ cargo install tovuk
 Agent commands should use the native binary:
 
 ```sh
-tovuk init
+tovuk new
 tovuk check
 tovuk deploy --dry-run
-tovuk preview
-tovuk deploy
+tovuk deploy --wait
 ```
 
 Create a worker-static starter:
 
 ```sh
-tovuk init hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 ```
 
@@ -173,17 +172,16 @@ the deploy. Later commands reuse that session.
 Useful agent commands:
 
 ```sh
-tovuk capabilities
+tovuk pricing
 tovuk pricing --json
 tovuk deploy --dry-run --json
-tovuk me
 tovuk usage
-tovuk activity --json
+tovuk usage --json
 tovuk service list
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
-tovuk deploys
-tovuk builds --service service_1
+tovuk service deploys service_1
+tovuk service builds service_1
 tovuk logs --service service_1 --limit 100 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --build job_1 --json

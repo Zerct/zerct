@@ -8,24 +8,24 @@ Use templates when you want Tovuk to create the project shape.
 ## Rust API
 
 ```sh
-tovuk init api --template rust-worker
+tovuk new api --template rust-worker
 tovuk check
-tovuk preview
+tovuk deploy --dry-run --json
 ```
 
 ## TanStack Static Frontend
 
 ```sh
-tovuk init web --template tanstack-static-frontend
+tovuk new web --template tanstack-static-frontend
 bun install
 tovuk check
-tovuk preview
+tovuk deploy --dry-run --json
 ```
 
 ## Worker Static
 
 ```sh
-tovuk init hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check
 tovuk deploy --wait --json

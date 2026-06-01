@@ -19,7 +19,6 @@ pub(crate) struct CliOptions {
     pub(crate) token: String,
     pub(crate) template: String,
     pub(crate) severity: String,
-    pub(crate) port: u16,
     pub(crate) deployment: DeploymentOptions,
     pub(crate) kv: KvOptions,
     pub(crate) queue: QueueOptions,
@@ -86,7 +85,6 @@ impl Default for CliOptions {
             token: String::new(),
             template: String::new(),
             severity: String::new(),
-            port: 0,
             deployment: DeploymentOptions {
                 database: false,
                 dry_run: false,

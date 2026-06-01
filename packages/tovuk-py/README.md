@@ -8,11 +8,11 @@ not require Node.js, npm, or any JavaScript runtime.
 
 ```sh
 pipx install tovuk
-tovuk init hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
-tovuk preview
+tovuk check
 tovuk deploy --wait --json
 ```
 
@@ -39,17 +39,16 @@ tovuk deploy
 The Python package exposes the same agent command surface as npm:
 
 ```sh
-tovuk capabilities
+tovuk pricing
 tovuk pricing --json
 tovuk deploy --dry-run --json
-tovuk me
+tovuk usage
 tovuk usage --json
-tovuk activity --json
 tovuk service list
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
-tovuk deploys --service service_1
-tovuk builds
+tovuk service deploys service_1
+tovuk service builds service_1
 tovuk logs --deploy deploy_1 --limit 100 --json
 tovuk env list --service service_1
 tovuk env set --service service_1 API_KEY=value
@@ -60,7 +59,7 @@ tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
-tovuk platform --service service_1 --json
+tovuk service resources service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
@@ -80,7 +79,7 @@ tovuk state create --service service_1 Room --json
 tovuk state put --service service_1 Room room-1 counter 1 --json
 tovuk state get --service service_1 Room room-1 counter --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-tovuk limit set worker_requests --period day --value 100000 --json
+tovuk limits set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
 tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json

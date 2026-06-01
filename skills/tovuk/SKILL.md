@@ -28,9 +28,9 @@ worker-static app to Tovuk.
    Fallow for new package frontends. Avoid JavaScript-based lint, format,
    typecheck, dead-code, or duplicate-code tooling.
 7. For a new worker-static project, run
-   `tovuk init my-app --template worker-static-rust-tanstack`.
+   `tovuk new my-app --template worker-static-rust-tanstack`.
 8. Run `tovuk check --json`.
-9. Run `tovuk preview` when local tools are available.
+9. Run `tovuk check` when local tools are available.
 10. Run `tovuk deploy --wait --json`.
 11. If Tovuk returns an `agent_instruction`, apply it, rerun check, and
     redeploy.
@@ -42,7 +42,7 @@ worker-static app to Tovuk.
 Agents can manage runtime resources without dashboard access:
 
 ```sh
-tovuk platform --service <service> --json
+tovuk service resources <service> --json
 tovuk database create --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json

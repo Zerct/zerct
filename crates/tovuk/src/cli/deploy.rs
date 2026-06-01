@@ -34,7 +34,7 @@ pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "missing_project_contract",
             "No tovuk.toml was found.",
-            "Run `tovuk init` in each service directory, or pass a project path.",
+            "Create a tovuk.toml in each service directory, run `tovuk new <path> --template <template>`, or pass a project path.",
             cli.output.json,
         ));
     }
