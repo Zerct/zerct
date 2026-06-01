@@ -43,7 +43,8 @@ From a worker-static repo root, `tovuk deploy` reads the single root
 `tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
 databases, KV namespaces, queues, cron triggers, State namespaces,
 service bindings, object storage objects, and usage caps through CLI resource
-commands.
+commands. Service binding call chains can use up to 32 worker invocations per
+top-level request.
 
 Worker-static deploys use this `tovuk.toml` shape:
 

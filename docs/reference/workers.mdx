@@ -83,6 +83,9 @@ At runtime, workers receive `TOVUK_SERVICE_ID`, `TOVUK_SERVICE_SLUG`,
 `TOVUK_BINDINGS_VERSION`, and one `TOVUK_<RESOURCE>_<NAME>` variable per
 SQLite, KV, Queue, Cron, State, and private service binding. Agents should use
 those variables to discover the resources they created through the CLI/API.
+Service binding call chains can use up to 32 worker invocations per top-level
+request, and every service binding call also counts against Worker subrequest
+limits.
 
 Use `TOVUK_RUNTIME_TOKEN` only from Rust worker code. The token is scoped to the
 current `TOVUK_SERVICE_ID`, so worker code can query its own SQLite database,
