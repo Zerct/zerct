@@ -141,8 +141,8 @@ tovuk support resolve <ticket_id> --json
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB. Object storage limits expose object size, part count,
-metadata size, minimum billable object size, object count per storage bucket,
-request throughput, source-IP concurrency, and bucket bandwidth.
+metadata size, custom domains per storage bucket, bucket management operations,
+and same-key write throughput.
 
 Before load tests, production launch, or paid usage, run
 `tovuk pricing --json` and set hard usage caps with `tovuk limit set`.

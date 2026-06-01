@@ -46,16 +46,15 @@ ambiguous to run.
   4.995 TiB object storage object size ceiling, a 5115 MiB (4.995 GiB)
   single-part upload limit, a 4.995 TiB multipart upload limit, 10 thousand
   multipart upload parts, 1 million Class A operations per month, 10 million
-  Class B operations per month, 64 KB minimum billable object size, 50 million
-  objects per storage bucket, 750 requests per second per storage bucket and
-  source IP, 256 parallel sessions per source IP, and 10 Gbit/s per storage
-  bucket.
+  Class B operations per month, free egress, free delete operations,
+  50 custom domains per storage bucket, 50 bucket management operations per
+  second, and 1 write per second to the same object key.
 - Pro service object storage has no storage or object-count hard cap, includes
   10 GB, has the same 4.995 TiB object ceiling, 5115 MiB
   single-part upload limit, and 4.995 TiB multipart upload limit, includes
   1 million Class A operations and 10 million Class B operations per month,
-  exposes the same storage bucket guardrails, and exposes object storage paid
-  overage rates in `tovuk pricing --json`.
+  keeps egress and deletes free, and exposes object storage paid overage rates
+  in `tovuk pricing --json`.
 - `tovuk storage upload` automatically switches to multipart upload above
   100 MiB and plans upload parts before transfer so agents can fail early on
   byte or operation caps.
