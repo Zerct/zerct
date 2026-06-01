@@ -10383,7 +10383,8 @@
           "services",
           "usage",
           "limits",
-          "pricing"
+          "pricing",
+          "billingEstimate"
         ],
         "properties": {
           "profile": {
@@ -10597,6 +10598,10 @@
                 "eventOverageUsdMicrosPerMillion": null
               }
             }
+          },
+          "billingEstimate": {
+            "$ref": "#/components/schemas/UsageCostEstimate",
+            "description": "Current-month cost estimate computed from usage meters and plan pricing. Context: components.schemas.AccountDashboardResponse.properties.billingEstimate."
           }
         },
         "examples": [
@@ -10851,6 +10856,33 @@
                 "includedEventsPerMonth": null,
                 "eventOverageUsdMicrosPerMillion": null
               }
+            },
+            "billingEstimate": {
+              "currency": "USD",
+              "plan": "pro",
+              "paidOveragesEnabled": true,
+              "subscriptionUsdMicrosPerMonth": 5000000,
+              "currentMonthOverageUsdMicros": 470000,
+              "estimatedMonthlyTotalUsdMicros": 5470000,
+              "lineItems": [
+                {
+                  "product": "worker",
+                  "meter": "worker_requests",
+                  "currentMonthUsed": 11500000,
+                  "includedPerMonth": 10000000,
+                  "billableAmount": 1500000,
+                  "usageUnit": "request",
+                  "billingUnit": "million_requests",
+                  "billingUnitSize": 1000000,
+                  "priceUsdMicrosPerBillingUnit": 300000,
+                  "rounding": "prorated_to_micro_usd",
+                  "estimatedUsdMicros": 450000,
+                  "estimateBasis": "current_month_usage_window"
+                }
+              ],
+              "nextActions": [
+                "Set hard caps before high-throughput tests so paid overages stay intentional."
+              ]
             }
           }
         ]
@@ -14054,7 +14086,8 @@
           "profile",
           "usage",
           "limits",
-          "pricing"
+          "pricing",
+          "billingEstimate"
         ],
         "properties": {
           "profile": {
@@ -14220,6 +14253,10 @@
                 "eventOverageUsdMicrosPerMillion": null
               }
             }
+          },
+          "billingEstimate": {
+            "$ref": "#/components/schemas/UsageCostEstimate",
+            "description": "Current-month cost estimate computed from usage meters and plan pricing. Context: components.schemas.AccountUsageResponse.properties.billingEstimate."
           }
         },
         "examples": [
@@ -14473,6 +14510,33 @@
                 "includedEventsPerMonth": null,
                 "eventOverageUsdMicrosPerMillion": null
               }
+            },
+            "billingEstimate": {
+              "currency": "USD",
+              "plan": "pro",
+              "paidOveragesEnabled": true,
+              "subscriptionUsdMicrosPerMonth": 5000000,
+              "currentMonthOverageUsdMicros": 470000,
+              "estimatedMonthlyTotalUsdMicros": 5470000,
+              "lineItems": [
+                {
+                  "product": "worker",
+                  "meter": "worker_requests",
+                  "currentMonthUsed": 11500000,
+                  "includedPerMonth": 10000000,
+                  "billableAmount": 1500000,
+                  "usageUnit": "request",
+                  "billingUnit": "million_requests",
+                  "billingUnitSize": 1000000,
+                  "priceUsdMicrosPerBillingUnit": 300000,
+                  "rounding": "prorated_to_micro_usd",
+                  "estimatedUsdMicros": 450000,
+                  "estimateBasis": "current_month_usage_window"
+                }
+              ],
+              "nextActions": [
+                "Set hard caps before high-throughput tests so paid overages stay intentional."
+              ]
             }
           }
         ]
@@ -15837,7 +15901,8 @@
           "deploys",
           "builds",
           "next_actions",
-          "pricing"
+          "pricing",
+          "billingEstimate"
         ],
         "properties": {
           "profile": {
@@ -16082,6 +16147,10 @@
                 "eventOverageUsdMicrosPerMillion": null
               }
             }
+          },
+          "billingEstimate": {
+            "$ref": "#/components/schemas/UsageCostEstimate",
+            "description": "Current-month cost estimate computed from usage meters and plan pricing. Context: components.schemas.AccountActivityResponse.properties.billingEstimate."
           }
         },
         "examples": [
@@ -16372,6 +16441,33 @@
                 "includedEventsPerMonth": null,
                 "eventOverageUsdMicrosPerMillion": null
               }
+            },
+            "billingEstimate": {
+              "currency": "USD",
+              "plan": "pro",
+              "paidOveragesEnabled": true,
+              "subscriptionUsdMicrosPerMonth": 5000000,
+              "currentMonthOverageUsdMicros": 470000,
+              "estimatedMonthlyTotalUsdMicros": 5470000,
+              "lineItems": [
+                {
+                  "product": "worker",
+                  "meter": "worker_requests",
+                  "currentMonthUsed": 11500000,
+                  "includedPerMonth": 10000000,
+                  "billableAmount": 1500000,
+                  "usageUnit": "request",
+                  "billingUnit": "million_requests",
+                  "billingUnitSize": 1000000,
+                  "priceUsdMicrosPerBillingUnit": 300000,
+                  "rounding": "prorated_to_micro_usd",
+                  "estimatedUsdMicros": 450000,
+                  "estimateBasis": "current_month_usage_window"
+                }
+              ],
+              "nextActions": [
+                "Set hard caps before high-throughput tests so paid overages stay intentional."
+              ]
             }
           }
         ]
@@ -22659,6 +22755,238 @@
             "worker_cpu_ms": 35,
             "static_transfer_bytes": 2048,
             "build_minutes": 1
+          }
+        ]
+      },
+      "UsageCostLineItem": {
+        "type": "object",
+        "description": "One cost-estimate line for a usage meter. Context: components.schemas.UsageCostLineItem.",
+        "additionalProperties": false,
+        "required": [
+          "product",
+          "meter",
+          "currentMonthUsed",
+          "includedPerMonth",
+          "billableAmount",
+          "usageUnit",
+          "billingUnit",
+          "billingUnitSize",
+          "priceUsdMicrosPerBillingUnit",
+          "rounding",
+          "estimatedUsdMicros",
+          "estimateBasis"
+        ],
+        "properties": {
+          "product": {
+            "type": "string",
+            "description": "Product key from the capability catalog.",
+            "minLength": 0,
+            "maxLength": 128,
+            "pattern": "^[\\s\\S]{0,128}$"
+          },
+          "meter": {
+            "type": "string",
+            "description": "Stable usage meter name.",
+            "minLength": 0,
+            "maxLength": 128,
+            "pattern": "^[\\s\\S]{0,128}$"
+          },
+          "currentMonthUsed": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Current-month usage, or current storage bytes treated as a full-month estimate.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "includedPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Included monthly usage for this meter, when the plan has one.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "billableAmount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Usage above the included monthly amount.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "usageUnit": {
+            "type": "string",
+            "description": "Unit for currentMonthUsed, includedPerMonth, and billableAmount.",
+            "minLength": 0,
+            "maxLength": 128,
+            "pattern": "^[\\s\\S]{0,128}$"
+          },
+          "billingUnit": {
+            "type": "string",
+            "description": "Human-readable billing unit name.",
+            "minLength": 0,
+            "maxLength": 128,
+            "pattern": "^[\\s\\S]{0,128}$"
+          },
+          "billingUnitSize": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of usage units in one billing unit.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "priceUsdMicrosPerBillingUnit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Overage price in USD micro-units for one billing unit.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rounding": {
+            "type": "string",
+            "description": "Rounding rule used for the estimate.",
+            "enum": [
+              "prorated_to_micro_usd",
+              "next_billing_unit"
+            ]
+          },
+          "estimatedUsdMicros": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Estimated current-month charge for this line in USD micro-units.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "estimateBasis": {
+            "type": "string",
+            "description": "How the usage amount was sourced.",
+            "enum": [
+              "current_month_usage_window",
+              "current_storage_bytes_as_full_month"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "product": "worker",
+            "meter": "worker_requests",
+            "currentMonthUsed": 11500000,
+            "includedPerMonth": 10000000,
+            "billableAmount": 1500000,
+            "usageUnit": "request",
+            "billingUnit": "million_requests",
+            "billingUnitSize": 1000000,
+            "priceUsdMicrosPerBillingUnit": 300000,
+            "rounding": "prorated_to_micro_usd",
+            "estimatedUsdMicros": 450000,
+            "estimateBasis": "current_month_usage_window"
+          }
+        ]
+      },
+      "UsageCostEstimate": {
+        "type": "object",
+        "description": "Conservative current-month cost estimate for agent planning. Context: components.schemas.UsageCostEstimate.",
+        "additionalProperties": false,
+        "required": [
+          "currency",
+          "plan",
+          "paidOveragesEnabled",
+          "subscriptionUsdMicrosPerMonth",
+          "currentMonthOverageUsdMicros",
+          "estimatedMonthlyTotalUsdMicros",
+          "lineItems",
+          "nextActions"
+        ],
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "ISO currency code for every amount in this estimate.",
+            "enum": [
+              "USD"
+            ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          },
+          "paidOveragesEnabled": {
+            "type": "boolean",
+            "description": "Whether this plan allows paid overages instead of hard-stopping at included usage."
+          },
+          "subscriptionUsdMicrosPerMonth": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Monthly subscription amount in USD micro-units.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "currentMonthOverageUsdMicros": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Current-month overage estimate in USD micro-units.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "estimatedMonthlyTotalUsdMicros": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Subscription plus current-month overage estimate in USD micro-units.",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "lineItems": {
+            "type": "array",
+            "description": "Product and meter line items used for the estimate.",
+            "minItems": 0,
+            "maxItems": 64,
+            "items": {
+              "$ref": "#/components/schemas/UsageCostLineItem"
+            }
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable follow-up guidance.",
+            "minItems": 0,
+            "maxItems": 16,
+            "items": {
+              "type": "string",
+              "description": "Agent-readable follow-up guidance item.",
+              "minLength": 0,
+              "maxLength": 8192,
+              "pattern": "^[\\s\\S]{0,8192}$"
+            }
+          }
+        },
+        "examples": [
+          {
+            "currency": "USD",
+            "plan": "pro",
+            "paidOveragesEnabled": true,
+            "subscriptionUsdMicrosPerMonth": 5000000,
+            "currentMonthOverageUsdMicros": 470000,
+            "estimatedMonthlyTotalUsdMicros": 5470000,
+            "lineItems": [
+              {
+                "product": "worker",
+                "meter": "worker_requests",
+                "currentMonthUsed": 11500000,
+                "includedPerMonth": 10000000,
+                "billableAmount": 1500000,
+                "usageUnit": "request",
+                "billingUnit": "million_requests",
+                "billingUnitSize": 1000000,
+                "priceUsdMicrosPerBillingUnit": 300000,
+                "rounding": "prorated_to_micro_usd",
+                "estimatedUsdMicros": 450000,
+                "estimateBasis": "current_month_usage_window"
+              }
+            ],
+            "nextActions": [
+              "Set hard caps before high-throughput tests so paid overages stay intentional."
+            ]
           }
         ]
       }

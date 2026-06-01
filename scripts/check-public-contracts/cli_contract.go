@@ -46,6 +46,9 @@ func checkCLIContract() {
 		requireContains(source, "tovuk support list", "agentic support list command")
 		requireContains(source, "tovuk support resolve", "agentic support resolve command")
 	}
+	for _, source := range []string{cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "billingEstimate", "agentic usage cost estimate docs")
+	}
 
 	requireContains(cargoCLI, "worker-static-rust-tanstack", "worker-static template option")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")

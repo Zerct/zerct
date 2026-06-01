@@ -16,6 +16,8 @@ current platform.
 All official package CLIs expose the same agent commands for login, doctor,
 preview, deploy, wait, capabilities, account usage, services, deploys, builds,
 logs, env, domains, storage, billing, and support.
+`tovuk usage --json` includes `billingEstimate.lineItems` so package users and
+agents can inspect current-month cost estimates without a dashboard.
 
 The agent repair loop is the same on every package surface:
 
@@ -23,6 +25,7 @@ The agent repair loop is the same on every package surface:
 tovuk doctor --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
+tovuk usage --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 tovuk storage list --service service_1 --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json

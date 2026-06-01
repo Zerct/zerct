@@ -24,6 +24,11 @@ Use the authenticated usage view before heavy work:
 tovuk usage --json
 ```
 
+`usage.billingEstimate` returns current-month line items for every priced
+meter, including the usage amount, included amount, billable amount, billing
+unit, rounding rule, and estimated USD micro-units. Storage estimates use the
+current stored bytes as a full-month estimate so agents can plan conservatively.
+
 ## Free
 
 - Projects: `100`.
@@ -114,5 +119,6 @@ tovuk limit set object_storage_class_a_operations --period month --value 1000000
 ```
 
 Tovuk reports prices in API JSON as USD micro-units. `1,000,000` means `$1.00`.
+`tovuk usage --json` reports the same unit in `billingEstimate`.
 
 The live API catalog is the source of truth for current limits and prices.
