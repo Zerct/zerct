@@ -85,6 +85,9 @@ func checkDocs() {
 		"appCount",
 		"wants_database",
 		"wantsDatabase",
+		"/v1/services/{service_id}/database",
+		"DatabaseResponse",
+		"database_url_injected",
 		retiredFullstackKind,
 		retiredFullstackTemplate,
 	} {

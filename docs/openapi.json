@@ -488,7 +488,7 @@
           "Deploy"
         ],
         "summary": "Get service overview",
-        "description": "Returns service status, deploys, builds, logs, env names, domains, database metadata, and next actions. Context: paths./v1/services/{service_id}/overview.get.",
+        "description": "Returns service status, deploys, builds, logs, env names, domains, resource bindings, limits, pricing, usage caps, and next actions. Context: paths./v1/services/{service_id}/overview.get.",
         "operationId": "getServiceOverview",
         "parameters": [
           {
@@ -782,50 +782,6 @@
             },
             "description": "Cursor returned by the previous response. Context: paths./v1/services/{service_id}/logs.get.parameters.2. Context: paths./v1/services/{service_id}/logs.get.parameters.2.",
             "example": "1000"
-          }
-        ]
-      }
-    },
-    "/v1/services/{service_id}/database": {
-      "get": {
-        "tags": [
-          "Deploy"
-        ],
-        "summary": "Get SQLite",
-        "description": "Get SQLite for GET /v1/services/{service_id}/database. Context: paths./v1/services/{service_id}/database.get.",
-        "operationId": "getServiceDatabase",
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/DatabaseLoaded"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "service_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
-              "maxLength": 512,
-              "examples": [
-                "service_1"
-              ]
-            },
-            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/database.get.parameters.0. Context: paths./v1/services/{service_id}/database.get.parameters.0.",
-            "example": "service_1"
           }
         ]
       }
@@ -7346,46 +7302,6 @@
           }
         }
       },
-      "DatabaseLoaded": {
-        "description": "Database loaded. Context: components.responses.DatabaseLoaded.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/DatabaseResponse"
-            },
-            "examples": {
-              "example": {
-                "summary": "Database loaded.",
-                "value": {
-                  "database": {
-                    "id": "service_1",
-                    "service_id": "service_1",
-                    "plan": "free",
-                    "storage_limit_mib": 1,
-                    "connection_limit": 1,
-                    "external_access": true
-                  },
-                  "database_url_injected": true
-                }
-              }
-            }
-          }
-        },
-        "headers": {
-          "X-RateLimit-Limit": {
-            "$ref": "#/components/headers/RateLimitLimit"
-          },
-          "X-RateLimit-Remaining": {
-            "$ref": "#/components/headers/RateLimitRemaining"
-          },
-          "X-RateLimit-Reset": {
-            "$ref": "#/components/headers/RateLimitReset"
-          },
-          "Retry-After": {
-            "$ref": "#/components/headers/RetryAfter"
-          }
-        }
-      },
       "EnvLoaded": {
         "description": "Environment variables loaded. Context: components.responses.EnvLoaded.",
         "content": {
@@ -13752,120 +13668,6 @@
           }
         ]
       },
-      "Database": {
-        "type": "object",
-        "description": "SQLite metadata. Context: components.schemas.Database.",
-        "additionalProperties": false,
-        "required": [
-          "id",
-          "service_id",
-          "plan",
-          "storage_limit_mib",
-          "connection_limit",
-          "external_access"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]{0,63}$",
-            "maxLength": 512,
-            "examples": [
-              "service_1"
-            ]
-          },
-          "service_id": {
-            "type": "string",
-            "pattern": "^[a-z][a-z0-9_]{0,63}$",
-            "maxLength": 512,
-            "examples": [
-              "service_1"
-            ]
-          },
-          "plan": {
-            "examples": [
-              "free"
-            ],
-            "$ref": "#/components/schemas/Plan"
-          },
-          "storage_limit_mib": {
-            "type": "integer",
-            "minimum": 1,
-            "format": "int64",
-            "maximum": 1000000000,
-            "examples": [
-              1
-            ]
-          },
-          "connection_limit": {
-            "type": "integer",
-            "minimum": 1,
-            "format": "int64",
-            "maximum": 1000000000,
-            "examples": [
-              1
-            ]
-          },
-          "external_access": {
-            "type": "boolean",
-            "examples": [
-              true
-            ]
-          }
-        },
-        "examples": [
-          {
-            "id": "service_1",
-            "service_id": "service_1",
-            "plan": "free",
-            "storage_limit_mib": 1,
-            "connection_limit": 1,
-            "external_access": true
-          }
-        ]
-      },
-      "DatabaseResponse": {
-        "type": "object",
-        "description": "SQLite status. Context: components.schemas.DatabaseResponse.",
-        "additionalProperties": false,
-        "required": [
-          "database",
-          "database_url_injected"
-        ],
-        "properties": {
-          "database": {
-            "examples": [
-              {
-                "id": "service_1",
-                "service_id": "service_1",
-                "plan": "free",
-                "storage_limit_mib": 1,
-                "connection_limit": 1,
-                "external_access": true
-              }
-            ],
-            "$ref": "#/components/schemas/Database"
-          },
-          "database_url_injected": {
-            "type": "boolean",
-            "examples": [
-              true
-            ]
-          }
-        },
-        "examples": [
-          {
-            "database": {
-              "id": "service_1",
-              "service_id": "service_1",
-              "plan": "free",
-              "storage_limit_mib": 1,
-              "connection_limit": 1,
-              "external_access": true
-            },
-            "database_url_injected": true
-          }
-        ]
-      },
       "EnvSetRequest": {
         "type": "object",
         "description": "Set an environment variable. Context: components.schemas.EnvSetRequest.",
@@ -18472,7 +18274,7 @@
           "logs",
           "env",
           "domains",
-          "database",
+          "resources",
           "next_actions"
         ],
         "properties": {
@@ -18547,20 +18349,6 @@
               []
             ]
           },
-          "database": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Database"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "SQLite database metadata, when attached. Context: components.schemas.ServiceOverviewResponse.properties.database.",
-            "examples": [
-              null
-            ]
-          },
           "next_actions": {
             "type": "array",
             "description": "Recommended next actions for humans and agents. Context: components.schemas.ServiceOverviewResponse.properties.next_actions.",
@@ -18575,6 +18363,9 @@
                 "Watch the active build with `tovuk logs --service service_1`."
               ]
             ]
+          },
+          "resources": {
+            "$ref": "#/components/schemas/ServiceResourcesResponse"
           }
         },
         "examples": [
@@ -18639,10 +18430,237 @@
               }
             ],
             "domains": [],
-            "database": null,
             "next_actions": [
               "Watch the active build with `tovuk logs --service service_1`."
-            ]
+            ],
+            "resources": {
+              "serviceId": "service_1",
+              "limits": {
+                "projects": 100,
+                "sqliteDatabases": 10,
+                "sqliteStorageMib": 4768,
+                "sqliteStorageMibPerDatabase": 476,
+                "sqliteRowsReadPerDay": 5000000,
+                "sqliteRowsReadPerMonth": null,
+                "sqliteRowsWrittenPerDay": 100000,
+                "sqliteRowsWrittenPerMonth": null,
+                "sqliteQueryTimeoutSeconds": 30,
+                "sqliteTimeTravelDays": 7,
+                "workers": 100,
+                "workerRequestsPerDay": 100000,
+                "workerRequestsPerMonth": null,
+                "workerCpuMsPerRequest": 10,
+                "workerCpuMsPerMonth": null,
+                "workerMemoryMib": 128,
+                "workerSubrequestsPerRequest": 50,
+                "workerOutgoingConnectionsPerRequest": 6,
+                "workerBindingsPerService": 5000,
+                "workerEnvVars": 64,
+                "workerEnvVarSizeKib": 5,
+                "workerUncompressedSizeMib": 64,
+                "workerCompressedSizeMib": 3,
+                "workerStartupTimeMs": 1000,
+                "cronTriggers": 5,
+                "staticAssetFilesPerVersion": 20000,
+                "staticAssetFileSizeMib": 25,
+                "staticAssetHeaderRules": 100,
+                "staticAssetHeaderLineChars": 2000,
+                "staticAssetRedirectStaticRules": 2000,
+                "staticAssetRedirectDynamicRules": 100,
+                "staticAssetRedirectTotalRules": 2100,
+                "staticAssetRedirectRuleChars": 1000,
+                "kvStorageMib": 953,
+                "kvReadsPerDay": 100000,
+                "kvReadsPerMonth": null,
+                "kvWritesPerDay": 1000,
+                "kvWritesPerMonth": null,
+                "kvDeletesPerDay": 1000,
+                "kvDeletesPerMonth": null,
+                "kvListsPerDay": 1000,
+                "kvListsPerMonth": null,
+                "queueOperationsPerDay": 10000,
+                "queueOperationsPerMonth": null,
+                "stateRequestsPerDay": 100000,
+                "stateRequestsPerMonth": null,
+                "objectStorageMib": 9536,
+                "storageObjects": null,
+                "storageObjectMaxMib": 5237760,
+                "dataTransferGib": null,
+                "monthlyBuildMinutes": 3000,
+                "monthlyDeployments": 0,
+                "buildDeployHooksPerServicePerMinute": 10,
+                "buildDeployHooksPerAccountPerMinute": 100,
+                "concurrentBuilds": 1,
+                "maxBuildDurationSeconds": 1200,
+                "buildCpuMillicores": 2000,
+                "buildMemoryMib": 8192,
+                "buildDiskMib": 20480,
+                "buildEnvVars": 64,
+                "buildEnvVarSizeKib": 5,
+                "customDomains": 100,
+                "alwaysOnServices": 0,
+                "logRetentionDays": 3,
+                "logEventSizeBytes": 262144,
+                "apiTokens": 10,
+                "supportTicketsPerDay": 3,
+                "objectStorageClassAOperationsPerMonth": 1000000,
+                "objectStorageClassBOperationsPerMonth": 10000000,
+                "kvNamespaces": 1000,
+                "queues": 10000,
+                "stateClasses": 100,
+                "stateDurationGbSecondsPerDay": 13000,
+                "stateDurationGbSecondsPerMonth": null,
+                "stateSqliteStorageMibPerAccount": 4768,
+                "logEventsPerDay": 200000,
+                "logEventsPerMonth": null,
+                "sqliteQueriesPerWorkerInvocation": 50,
+                "sqliteTimeTravelRestoreOperationsPer10MinPerDatabase": 10,
+                "sqliteMaxColumnsPerTable": 100,
+                "sqliteMaxRowBytes": 2000000,
+                "sqliteMaxSqlStatementBytes": 100000,
+                "sqliteMaxBoundParameters": 100,
+                "sqliteMaxSqlFunctionArguments": 32,
+                "sqliteMaxLikeGlobPatternBytes": 50,
+                "sqliteMaxImportMib": 4768,
+                "workerDefaultCpuMsPerRequest": 10,
+                "workerInternalSubrequestsPerRequest": 1000,
+                "serviceBindingInvocationsPerRequest": 32,
+                "workerUrlSizeKib": 16,
+                "workerRequestHeaderSizeKib": 128,
+                "workerResponseHeaderSizeKib": 128,
+                "workerRequestBodySizeMib": 100,
+                "workerWaitUntilSeconds": 30,
+                "workerHttpDurationSeconds": null,
+                "workerCronDurationSeconds": 900,
+                "workerQueueConsumerDurationSeconds": 900,
+                "workerWebsocketMessageMib": 32,
+                "kvStorageMibPerNamespace": 953,
+                "kvOperationsPerWorkerInvocation": 1000,
+                "kvKeySizeBytes": 512,
+                "kvMetadataSizeBytes": 1024,
+                "kvValueSizeMib": 25,
+                "kvMinCacheTtlSeconds": 30,
+                "kvSameKeyWritesPerSecond": 1,
+                "kvBulkReadKeys": 100,
+                "kvBulkMutationKeys": 10000,
+                "kvBulkRequestBytes": 100000000,
+                "queueMessageSizeBytes": 128000,
+                "queueUserBodySizeBytes": 127900,
+                "queueMaxRetries": 100,
+                "queueBatchSize": 100,
+                "queueSendBatchMessages": 100,
+                "queueSendBatchBytes": 256000,
+                "queueBatchWaitSeconds": 60,
+                "queueThroughputMessagesPerSecond": 5000,
+                "queueBacklogBytes": 25000000000,
+                "queueConcurrentConsumers": 250,
+                "queueVisibilityTimeoutSeconds": 43200,
+                "queueDelaySeconds": 86400,
+                "queueRetentionSeconds": 86400,
+                "stateInstances": null,
+                "stateWebsocketMessageMib": 32,
+                "stateSoftRequestsPerSecond": 1000,
+                "stateCpuMsPerRequest": 30000,
+                "stateAlarmDurationSeconds": 900,
+                "storageSinglePartUploadMaxMib": 5115,
+                "storageMultipartUploadMaxMib": 5237760,
+                "storageUploadParts": 10000,
+                "storageKeySizeBytes": 1024,
+                "storageMetadataSizeBytes": 8192,
+                "storageCustomDomainsPerBucket": 50,
+                "storageBucketManagementOperationsPerSecond": 50,
+                "storageSameKeyWritesPerSecond": 1,
+                "stateSqliteRowsReadPerDay": 5000000,
+                "stateSqliteRowsReadPerMonth": null,
+                "stateSqliteRowsWrittenPerDay": 100000,
+                "stateSqliteRowsWrittenPerMonth": null,
+                "stateKeyValueSizeMib": 2,
+                "stateSqliteStorageMibPerObject": 953,
+                "objectStorageEgressBytesPerMonth": 1000000000000
+              },
+              "pricing": {
+                "subscriptionUsdCentsPerMonth": 0,
+                "paidOveragesEnabled": false,
+                "workers": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedCpuMsPerMonth": null,
+                  "cpuOverageUsdMicrosPerMillionMs": null
+                },
+                "sqlite": {
+                  "includedRowsReadPerMonth": null,
+                  "rowsReadOverageUsdMicrosPerMillion": null,
+                  "includedRowsWrittenPerMonth": null,
+                  "rowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 4768,
+                  "storageOverageUsdMicrosPerGbMonth": null,
+                  "egressFree": true
+                },
+                "kv": {
+                  "includedReadsPerMonth": null,
+                  "readOverageUsdMicrosPerMillion": null,
+                  "includedWritesPerMonth": null,
+                  "writeOverageUsdMicrosPerMillion": null,
+                  "includedDeletesPerMonth": null,
+                  "deleteOverageUsdMicrosPerMillion": null,
+                  "includedListsPerMonth": null,
+                  "listOverageUsdMicrosPerMillion": null,
+                  "includedStorageMib": 953,
+                  "storageOverageUsdMicrosPerGbMonth": null
+                },
+                "queues": {
+                  "includedOperationsPerMonth": null,
+                  "operationOverageUsdMicrosPerMillion": null,
+                  "egressFree": true
+                },
+                "state": {
+                  "includedRequestsPerMonth": null,
+                  "requestOverageUsdMicrosPerMillion": null,
+                  "includedDurationGbSecondsPerMonth": null,
+                  "durationOverageUsdMicrosPerMillionGbSeconds": null,
+                  "includedSqliteRowsReadPerMonth": null,
+                  "sqliteRowsReadOverageUsdMicrosPerMillion": null,
+                  "includedSqliteRowsWrittenPerMonth": null,
+                  "sqliteRowsWrittenOverageUsdMicrosPerMillion": null,
+                  "includedSqliteStorageMib": 4768,
+                  "sqliteStorageOverageUsdMicrosPerGbMonth": null
+                },
+                "objectStorage": {
+                  "includedStorageMib": 9536,
+                  "storageOverageUsdMicrosPerGbMonth": null,
+                  "includedClassAOperationsPerMonth": 1000000,
+                  "classAOverageUsdMicrosPerMillion": null,
+                  "includedClassBOperationsPerMonth": 10000000,
+                  "classBOverageUsdMicrosPerMillion": null,
+                  "egressFree": false,
+                  "deleteOperationsFree": true,
+                  "includedEgressBytesPerMonth": 1000000000000,
+                  "egressOverageUsdMicrosPerTb": null
+                },
+                "staticAssets": {
+                  "requestsFreeAndUnlimited": true,
+                  "storageFree": true
+                },
+                "builds": {
+                  "includedMinutesPerMonth": 3000,
+                  "minuteOverageUsdMicros": null
+                },
+                "logs": {
+                  "includedEventsPerMonth": null,
+                  "eventOverageUsdMicrosPerMillion": null
+                }
+              },
+              "sqliteDatabases": [],
+              "kvNamespaces": [],
+              "queues": [],
+              "cronTriggers": [],
+              "stateNamespaces": [],
+              "serviceBindings": [],
+              "usageCaps": [],
+              "nextActions": [
+                "Run tovuk service show service_1 --json after resource changes."
+              ]
+            }
           }
         ]
       },
@@ -21851,8 +21869,8 @@
                 },
                 {
                   "type": "number",
-                  "minimum": -1e+308,
-                  "maximum": 1e+308
+                  "minimum": -1E+308,
+                  "maximum": 1E+308
                 },
                 {
                   "type": "boolean"
@@ -21904,8 +21922,8 @@
                 },
                 {
                   "type": "number",
-                  "minimum": -1e+308,
-                  "maximum": 1e+308
+                  "minimum": -1E+308,
+                  "maximum": 1E+308
                 },
                 {
                   "type": "boolean"
