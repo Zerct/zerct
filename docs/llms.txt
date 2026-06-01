@@ -60,19 +60,22 @@ Static frontend contract:
 - `[capabilities]` explicitly sets `static_frontend = true`,
   `worker = false`, service capabilities to true, and unused optional
   resources to false.
-- `package.json` is committed.
-- A package lockfile is committed.
-- Browser source is `.ts` or `.tsx` under `src`, `app`, `pages`, `routes`, or
-  `components`.
-- `package.json` has `typecheck`, `lint`, and `build` scripts.
-- `typecheck` runs stable native type-aware TypeScript checks such as
+- Package static frontends commit `package.json` and a package lockfile.
+- Package browser source is `.ts` or `.tsx` under `src`, `app`, `pages`,
+  `routes`, or `components`.
+- Package `package.json` has `typecheck`, `lint`, and `build` scripts.
+- Package `typecheck` runs stable native type-aware TypeScript checks such as
   `oxlint --type-aware --type-check`.
-- `lint` runs native tooling such as `oxlint`, `biome check`, or `deno lint`.
-- `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health` gates.
-- `[build].check` installs dependencies and runs package scripts for typecheck
-  and lint.
+- Package `lint` runs native tooling such as `oxlint`, `biome check`, or
+  `deno lint`.
+- Package `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health`
+  gates.
+- Package `[build].check` installs dependencies and runs package scripts for
+  typecheck and lint.
+- Plain static frontends without `package.json` include `index.html`, set
+  `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
 - Weak typecheck, fake lint, missing Fallow quality gates, and JavaScript-based
-  lint/format scripts are rejected for deploys.
+  lint/format scripts are rejected for package deploys.
 - JavaScript and TypeScript are frontend-only. API routes, SSR handlers,
   middleware, and server logic must move to the Rust worker.
 
