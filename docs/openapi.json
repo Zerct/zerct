@@ -343,7 +343,6 @@
                       }
                     },
                     "commit_sha": null,
-                    "wants_database": false,
                     "source_archive_base64": "H4sIAAAAAAAA"
                   }
                 }
@@ -11570,12 +11569,6 @@
               "0123456789abcdef"
             ]
           },
-          "wants_database": {
-            "type": "boolean",
-            "deprecated": true,
-            "default": false,
-            "description": "Deprecated deploy-time database flag. Create SQLite databases through resource APIs instead."
-          },
           "source_archive_base64": {
             "type": [
               "string",
@@ -11601,7 +11594,6 @@
               }
             },
             "commit_sha": null,
-            "wants_database": false,
             "source_archive_base64": "H4sIAAAAAAAA"
           }
         ]

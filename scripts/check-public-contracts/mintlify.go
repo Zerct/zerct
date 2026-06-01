@@ -33,6 +33,12 @@ func checkMintlifyAgentReadiness(target string) {
 		if strings.TrimSpace(response) == "" {
 			fail("%s is empty", path)
 		}
+		rejectRetiredPublicNames(path, response)
+	}
+
+	for _, path := range []string{"/", "/quickstart", "/pricing", "/reference/limits"} {
+		response := fetchText(client, baseURL, path, map[string]string{"Accept": "text/html"}, retries, retryDelay)
+		rejectRetiredPublicNames(path, response)
 	}
 
 	llms := fetchText(client, baseURL, "/llms.txt", nil, retries, retryDelay)
@@ -60,6 +66,22 @@ func checkMintlifyAgentReadiness(target string) {
 	requirePattern("MCP discovery", mcpDiscovery, `/mcp`)
 
 	fmt.Printf("Mintlify agent readiness checks passed for %s\n", baseURL)
+}
+
+func rejectRetiredPublicNames(label string, source string) {
+	lower := strings.ToLower(source)
+	for _, retired := range retiredPublicNames() {
+		if strings.Contains(lower, retired) {
+			fail("%s contains retired public branding", label)
+		}
+	}
+}
+
+func retiredPublicNames() []string {
+	return []string{
+		string([]byte{122, 101, 114, 99, 116}),
+		string([]byte{120, 113, 117, 105, 107}),
+	}
 }
 
 func checkMintlifyScore(path string) {

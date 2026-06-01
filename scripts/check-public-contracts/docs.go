@@ -83,6 +83,8 @@ func checkDocs() {
 		"targetApp",
 		"alwaysOnApps",
 		"appCount",
+		"wants_database",
+		"wantsDatabase",
 		retiredFullstackKind,
 		retiredFullstackTemplate,
 	} {
