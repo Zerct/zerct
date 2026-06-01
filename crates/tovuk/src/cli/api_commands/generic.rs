@@ -22,7 +22,7 @@ pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
         "plans": plans,
         "products": products,
         "nextActions": [
-            "Use the `products` entries to choose Worker, Static Frontend, SQLite, Object Storage, State, KV, Queue, or Cron before changing code.",
+            "Use the `products` entries to choose Worker, Static Frontend, SQLite, Object Storage, State, KV, Queue, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, or Usage Caps before changing code.",
             "Use `tovuk usage --json` after login to compare current usage against these limits.",
             "Use `tovuk limit set <metric> --period month --value <n> --json` to set a hard cap before paid overages.",
             "Use `tovuk billing checkout --json` when an upgrade is required."

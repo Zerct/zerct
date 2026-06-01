@@ -62,6 +62,9 @@ tovuk limit delete worker_requests --period day --json
 - State: keyed state objects for realtime coordination, locks,
   counters, rooms, sessions, and per-tenant state.
 - Service bindings: private worker-to-worker calls without public URLs.
+- Secrets: server-only environment variables managed with `tovuk env`.
+- Custom domains: production hostnames with agent-verifiable DNS setup.
+- Logs: build, deploy, and runtime diagnosis for repair loops.
 - Usage caps: hard stops and notification thresholds for predictable usage.
 
 Each service can bind up to 5000 platform resources. That count includes
@@ -125,8 +128,8 @@ curl -fsS "$TOVUK_API_BASE_URL/v1/services/$TOVUK_SERVICE_ID/platform" \
 Custom domains use one DNS-only CNAME record:
 
 ```sh
-tovuk domain add --service service_1 api.example.com --json
-tovuk domain verify --service service_1 api.example.com --json
+tovuk domains add --service service_1 api.example.com --json
+tovuk domains verify --service service_1 api.example.com --json
 ```
 
 The API response includes `dns_record_type`, `dns_record_name`,
