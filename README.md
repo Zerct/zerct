@@ -290,6 +290,8 @@ tovuk nodes enable tovuk-riesling --token "$TOVUK_OPERATOR_TOKEN" --json
 
 `tovuk storage upload` automatically uses multipart transfer for files larger
 than 100 MiB, so agents can upload large media through the same command.
+Public media uploads reject executable and script payloads. Store artifacts
+privately, and use Static Frontend for browser-executed web assets.
 
 `tovuk pricing --json` returns both plan pricing and product meter metadata,
 so agents can choose Worker, Static Frontend, SQLite, Object Storage, State,
