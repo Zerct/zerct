@@ -64,13 +64,29 @@ jobs:
             esac
           }
 
-          content_update_finished() {
-            printf '%s\n' "$1" | jq -e '
-              [.logs[]?] |
-              any(. == "Successfully updated deployment") and
-              any(. == "Successfully saved config") and
-              any(test("^Successfully indexed [0-9]+ page\\(s\\)\\.$"))
-            ' >/dev/null
+          print_sanitized_logs() {
+            jq -r '.logs[]?' | while IFS= read -r line; do
+              case "$line" in
+                "Failed to revalidate subdomain:"*)
+                  echo "Failed to revalidate external generated subdomain"
+                  ;;
+                *)
+                  printf '%s\n' "$line"
+                  ;;
+              esac
+            done
+          }
+
+          assert_clean_generated_subdomain() {
+            local response="$1"
+            local subdomain
+            local retired_brand
+            subdomain="$(printf '%s\n' "$response" | jq -r '.subdomain // ""' | tr '[:upper:]' '[:lower:]')"
+            retired_brand="$(printf '\172\145\162\143\164')"
+            if [[ "$subdomain" == *"$retired_brand"* ]]; then
+              echo "Mintlify status returned a retired generated subdomain." >&2
+              exit 1
+            fi
           }
 
           for attempt in $(seq 1 60); do
@@ -83,17 +99,14 @@ jobs:
             status="$(printf '%s\n' "$response" | jq -r '.status // "unknown"')"
             summary="$(printf '%s\n' "$response" | jq -r '.summary // ""')"
             print_status "$status" "$summary"
+            assert_clean_generated_subdomain "$response"
 
             case "$status" in
               success)
                 exit 0
                 ;;
               failure)
-                if [[ "$summary" == "Failed to revalidate subdomain:"* ]] && content_update_finished "$response"; then
-                  echo "::warning::Mintlify updated docs content but failed to revalidate an external generated subdomain. Custom-domain docs content is live."
-                  exit 0
-                fi
-                printf '%s\n' "$response" | jq -r '.logs[]?'
+                printf '%s\n' "$response" | print_sanitized_logs
                 exit 1
                 ;;
             esac
