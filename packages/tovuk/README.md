@@ -10,6 +10,7 @@ npm install -g tovuk
 tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk doctor --json
+tovuk plan --json
 tovuk deploy --wait --json
 ```
 
@@ -39,6 +40,7 @@ Agent repair loop:
 
 ```sh
 tovuk doctor --json
+tovuk plan --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
 ```
@@ -60,6 +62,7 @@ Before high-throughput work, read pricing and set hard caps:
 ```sh
 tovuk pricing --json
 tovuk usage --json
+tovuk plan --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 ```
 
@@ -67,6 +70,8 @@ The pricing response includes plan pricing and product meter metadata, so agents
 can choose the correct product and cap the right meters in one flow.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
+The plan response combines `tovuk.toml`, doctor checks, capability meters,
+account limits, and `billingEstimate` before deploy, without creating a build.
 
 Manage service files and media without dashboard access:
 

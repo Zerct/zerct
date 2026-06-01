@@ -7,6 +7,7 @@ Usage:
   tovuk doctor [path] [--json]
   tovuk preview [path] [--port <port>]
   tovuk login [--token <token>] [--api <url>]
+  tovuk plan [path] [--api <url>] [--json]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
   tovuk capabilities [--api <url>] [--json]
   tovuk pricing [--api <url>] [--json]
@@ -92,6 +93,7 @@ Agent contract:
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
+  - Run tovuk plan --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
   - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.
   - Prefer same-origin worker-static services over split services.
