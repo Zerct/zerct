@@ -101,9 +101,10 @@ ambiguous to run.
   4 days and can be configured up to 14 days.
 - Queue deliveries are sent to `POST /.tovuk/queues/<queue>` in batches of up
   to the queue's configured batch size. Failed messages can be routed to a
-  configured dead-letter queue after retries are exhausted.
+  configured dead-letter queue after retries are exhausted. Queue handlers have
+  a `15 minute` wall-clock limit.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
-  the Rust worker if needed.
+  the Rust worker if needed. Cron handlers have a `15 minute` wall-clock limit.
 - State SQLite storage is 10 GB per object on Free and Pro, with a 5 GB Free
   account storage cap, 5 million SQLite rows read per day, and 100 thousand
   SQLite rows written per day. Pro includes 1 million
@@ -111,7 +112,8 @@ ambiguous to run.
   50 million SQLite rows written per month before paid overage pricing.
 - State alarms allow one scheduled alarm per State object. A replaced alarm
   keeps only the newest schedule. Failed alarm handlers retry at least once with
-  exponential backoff starting at 2 seconds and stop after 6 retries.
+  exponential backoff starting at 2 seconds and stop after 6 retries. State
+  alarm handlers have a `15 minute` wall-clock limit.
 - State key and value payloads are limited to 2 MiB combined.
 - Free logs include 200 thousand events per day with 3 day retention. Pro logs
   include 20 million events per month with 7 day retention. Each captured log

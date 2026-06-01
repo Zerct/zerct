@@ -51,8 +51,9 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
 - State: `100` classes, `100,000` requests per day, `13,000 GB-s`
   duration per day, `5 million` SQLite rows read per day, `100,000` SQLite
   rows written per day, `5 GB` account SQLite storage, `10 GB` per object,
-  and `2 MiB` key/value payloads. The Free account cap is enforced before a
-  single object can use its full per-object ceiling.
+  `2 MiB` key/value payloads, and `15 minute` State alarm handlers. The Free
+  account cap is enforced before a single object can use its full per-object
+  ceiling.
 - Object storage: `10 GB`, no object-count cap, `1 million` Class A
   operations per month, `10 million` Class B operations per month, free egress,
   free delete operations, `5 TB` maximum object size, `5 GB` maximum
@@ -95,9 +96,10 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   up to `14 days`.
 - State: `500` classes, `1 million` requests and `400,000 GB-s`
   duration per month included. SQLite includes `25 billion` rows read,
-  `50 million` rows written, and `5 GB` storage per month. Overage is `$0.15`
-  per million requests, `$12.50` per million GB-s, `$0.001` per million rows
-  read, `$1.00` per million rows written, and `$0.20` per GB-month.
+  `50 million` rows written, `5 GB` storage per month, and `15 minute` State
+  alarm handlers. Overage is `$0.15` per million requests, `$12.50` per million
+  GB-s, `$0.001` per million rows read, `$1.00` per million rows written, and
+  `$0.20` per GB-month.
 - Object storage: no storage or object-count hard cap, `10 GB` included
   storage, `1 million` Class A operations, and `10 million` Class B operations
   per month. Overage is `$0.015` per GB-month, `$4.50` per million
