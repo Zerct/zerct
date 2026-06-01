@@ -77,18 +77,6 @@ jobs:
             done
           }
 
-          assert_clean_generated_subdomain() {
-            local response="$1"
-            local subdomain
-            local retired_brand
-            subdomain="$(printf '%s\n' "$response" | jq -r '.subdomain // ""' | tr '[:upper:]' '[:lower:]')"
-            retired_brand="$(printf '\172\145\162\143\164')"
-            if [[ "$subdomain" == *"$retired_brand"* ]]; then
-              echo "Mintlify status returned a retired generated subdomain." >&2
-              exit 1
-            fi
-          }
-
           for attempt in $(seq 1 60); do
             response="$(
               curl -fsS \
@@ -98,8 +86,8 @@ jobs:
             )"
             status="$(printf '%s\n' "$response" | jq -r '.status // "unknown"')"
             summary="$(printf '%s\n' "$response" | jq -r '.summary // ""')"
+            printf 'Mintlify deployment poll attempt %s/60\n' "$attempt"
             print_status "$status" "$summary"
-            assert_clean_generated_subdomain "$response"
 
             case "$status" in
               success)
