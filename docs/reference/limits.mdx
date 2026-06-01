@@ -66,6 +66,8 @@ ambiguous to run.
 - SQLite follows Tovuk limits for 30 second query timeouts, 50 queries per Worker
   invocation on Free, 1000 on Pro, 100 bound parameters, 100 KB SQL statements,
   100 columns, and 2 MB row/blob/string values.
+- SQLite backups keep a 7 day restore window on Free and 30 days on Pro, with
+  10 restores per database per 10 minute window.
 - Free KV meters: 100 thousand reads per day, 1000 writes per day, 1000
   deletes per day, 1000 lists per day, and 1 GB storage per account and
   namespace.

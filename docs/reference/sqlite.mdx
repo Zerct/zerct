@@ -10,6 +10,9 @@ workers as explicit resources.
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
 tovuk database query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
+tovuk database backup create --service service_1 DB --json
+tovuk database backup list --service service_1 DB --json
+tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
 tovuk database delete --service service_1 DB --json
 tovuk platform --service service_1 --json
 ```
@@ -20,9 +23,14 @@ migrations in source control. Query responses include `rowsRead`,
 `meta.size_after`, `meta.rows_read`, and `meta.rows_written` fields so agents
 can fix slow or expensive queries without dashboard access.
 
-Delete stale databases only after migrations or exports are complete. The
-delete command removes the binding and local SQLite file set, then returns the
-remaining platform resources.
+Create a backup before schema migrations, backfills, imports, or destructive
+writes. Restore commands create a pre-restore safety backup first, replace the
+live database, update storage meters, and return both backup ids so agents can
+verify or roll back without dashboard access.
+
+Delete stale databases only after migrations, backups, or exports are complete.
+The delete command removes the binding and local SQLite file set, then returns
+the remaining platform resources.
 
 ## Migration guidance
 
@@ -32,7 +40,9 @@ Recommended pattern:
 2. Acquire one migration lock per service database.
 3. Apply pending migrations before serving traffic.
 4. Keep request handlers free of schema changes and long backfills.
-5. Use parameterized SQL with `--params` instead of interpolating user input.
+5. Create a backup before migrations that drop columns, rewrite tables, or
+   backfill large data.
+6. Use parameterized SQL with `--params` instead of interpolating user input.
 
 Agents should reject database code that:
 
@@ -58,6 +68,11 @@ timeouts, 50 queries per Worker invocation on Free, 1000 on Pro, 100 bound
 parameters, 100 KB SQL statements, 100 columns, and 2 MB row/blob/string values.
 Storage is also tracked through the `sqlite_storage_bytes` gauge meter for
 account caps and agent-readable usage APIs.
+
+SQLite backup restore windows are exposed as `sqliteTimeTravelDays` in
+`tovuk pricing --json`: Free keeps 7 days, Pro keeps 30 days. Restores are
+rate-limited per database during each 10 minute window and return
+`previousBackup` for safety.
 
 ```sh
 tovuk usage --json

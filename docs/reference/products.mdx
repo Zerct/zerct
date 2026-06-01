@@ -35,9 +35,9 @@ Main meter: `static_transfer_bytes`.
 
 SQLite:
 Use for service-local relational data, transactions, migrations, and data
-inspection. Avoid files, media, single-key counters, and cross-service shared
-storage. Main meters: `sqlite_rows_read`, `sqlite_rows_written`, and
-`sqlite_storage_bytes`.
+inspection. Create backups before destructive migrations. Avoid files, media,
+single-key counters, and cross-service shared storage. Main meters:
+`sqlite_rows_read`, `sqlite_rows_written`, and `sqlite_storage_bytes`.
 
 Object Storage:
 Use for user uploads, images, videos, documents, generated files, and downloads.

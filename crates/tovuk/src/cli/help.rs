@@ -1,9 +1,6 @@
 use super::constants::VERSION;
 
-pub(crate) fn help_text() -> String {
-    format!(
-        r#"Tovuk {VERSION}
-
+const HELP_BODY: &str = r#"
 Usage:
   tovuk init [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
   tovuk install [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
@@ -28,6 +25,7 @@ Usage:
   tovuk platform --service <service> [--api <url>] [--json]
   tovuk database create --service <service> DB [--api <url>] [--json]
   tovuk database query --service <service> DB "select 1" [--params <json_array>] [--api <url>] [--json]
+  tovuk database backup [list|create|restore] --service <service> DB [backup_id] [--api <url>] [--json]
   tovuk database delete --service <service> DB [--api <url>] [--json]
   tovuk kv create --service <service> CACHE [--api <url>] [--json]
   tovuk kv namespace delete --service <service> CACHE [--api <url>] [--json]
@@ -35,7 +33,7 @@ Usage:
   tovuk kv get --service <service> CACHE <key> [--api <url>] [--json]
   tovuk kv put --service <service> CACHE <key> <value> [--metadata <json>] [--expiration <unix_seconds>] [--ttl <seconds>] [--api <url>] [--json]
   tovuk kv delete --service <service> CACHE <key> [--api <url>] [--json]
-  tovuk kv bulk put --service <service> CACHE '[{{"key":"a","value":"1"}}]' [--api <url>] [--json]
+  tovuk kv bulk put --service <service> CACHE '[{"key":"a","value":"1"}]' [--api <url>] [--json]
   tovuk kv bulk get --service <service> CACHE key-a key-b [--api <url>] [--json]
   tovuk kv bulk delete --service <service> CACHE key-a key-b [--api <url>] [--json]
   tovuk queue create --service <service> jobs [--max-retries <n>] [--retention-seconds <seconds>] [--max-batch-size <n>] [--max-batch-timeout-seconds <seconds>] [--dead-letter-queue <queue>] [--api <url>] [--json]
@@ -43,7 +41,7 @@ Usage:
   tovuk queue messages --service <service> jobs [--api <url>] [--json]
   tovuk queue metrics --service <service> jobs [--api <url>] [--json]
   tovuk queue send --service <service> jobs <body> [--delay-seconds <seconds>] [--api <url>] [--json]
-  tovuk queue send-batch --service <service> jobs '[{{"body":{{"task":"sync"}}}}]' [--delay-seconds <seconds>] [--api <url>] [--json]
+  tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}}]' [--delay-seconds <seconds>] [--api <url>] [--json]
   tovuk queue delete --service <service> jobs [--api <url>] [--json]
   tovuk cron create --service <service> nightly "0 0 * * *" [--api <url>] [--json]
   tovuk cron update --service <service> nightly "*/15 * * * *" [--api <url>] [--json]
@@ -90,6 +88,7 @@ Agent contract:
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
+  - Create SQLite backups before migrations or destructive writes; restore from CLI/API without dashboard access, then verify with read queries.
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
@@ -101,6 +100,8 @@ Agent contract:
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Keep direct unsafe out of Rust source.
   - Keep Rust worker resources within Tovuk limits: 128mb memory, CPU allocation 1, metered worker_cpu_ms caps, and 1-60 minute idle timeout.
-"#
-    )
+"#;
+
+pub(crate) fn help_text() -> String {
+    format!("Tovuk {VERSION}\n{HELP_BODY}")
 }

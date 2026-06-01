@@ -131,6 +131,9 @@ tovuk storage list --service service_1 --json
 tovuk platform --service service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
+tovuk database backup create --service service_1 DB --json
+tovuk database backup list --service service_1 DB --json
+tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
 tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv namespace delete --service service_1 CACHE --json
