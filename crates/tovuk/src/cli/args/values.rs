@@ -1,5 +1,7 @@
 use crate::cli::errors::{Result, agent_error};
 
+const LONG_FLAG_PREFIX: &str = "\x2d\x2d";
+
 pub(super) fn set_string_flag(
     target: &mut String,
     name: &str,
@@ -65,7 +67,9 @@ fn flag_value(
             )
         })?
     };
-    if value.is_empty() || (!arg_has_inline_value(argv, index) && value.starts_with("--")) {
+    if value.is_empty()
+        || (!arg_has_inline_value(argv, index) && value.starts_with(LONG_FLAG_PREFIX))
+    {
         return Err(agent_error(
             "missing_argument",
             format!("{name} requires a value."),
@@ -86,7 +90,7 @@ fn flag_consumed(argv: &[String], index: usize) -> usize {
 
 fn arg_has_inline_value(argv: &[String], index: usize) -> bool {
     argv.get(index)
-        .is_some_and(|arg| arg.starts_with("--") && arg.contains('='))
+        .is_some_and(|arg| arg.starts_with(LONG_FLAG_PREFIX) && arg.contains('='))
 }
 
 fn parse_u64(value: &str, name: &str, json_output: bool) -> Result<u64> {

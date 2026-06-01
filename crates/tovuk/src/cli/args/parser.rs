@@ -1,6 +1,8 @@
 use super::{flags, model::CliOptions};
 use crate::cli::errors::{Result, agent_error};
 
+const END_OF_OPTIONS: &str = "\x2d\x2d";
+
 pub(crate) fn parse_args(argv: &[String]) -> Result<CliOptions> {
     let mut cli = CliOptions::default();
     let mut positional = Vec::new();
@@ -8,7 +10,7 @@ pub(crate) fn parse_args(argv: &[String]) -> Result<CliOptions> {
 
     while index < argv.len() {
         let arg = argv[index].clone();
-        if arg == "--" {
+        if arg == END_OF_OPTIONS {
             positional.extend(argv.iter().skip(index + 1).cloned());
             break;
         }
