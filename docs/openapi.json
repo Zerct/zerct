@@ -7513,6 +7513,13 @@
                       "key": "worker",
                       "name": "Worker",
                       "summary": "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers.",
+                      "features": [
+                        "Rust-only HTTP runtime for public APIs under /api/*",
+                        "WebSocket upgrades proxied to Rust workers",
+                        "Cron and queue event delivery to the same Rust worker",
+                        "Service bindings for private worker-to-worker HTTP calls",
+                        "Request, CPU, and response transfer metering"
+                      ],
                       "best_for": [
                         "Public HTTP APIs under /api/*",
                         "Webhooks, auth callbacks, and form handlers",
@@ -14824,6 +14831,13 @@
                   "key": "worker",
                   "name": "Worker",
                   "summary": "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers.",
+                  "features": [
+                    "Rust-only HTTP runtime for public APIs under /api/*",
+                    "WebSocket upgrades proxied to Rust workers",
+                    "Cron and queue event delivery to the same Rust worker",
+                    "Service bindings for private worker-to-worker HTTP calls",
+                    "Request, CPU, and response transfer metering"
+                  ],
                   "best_for": [
                     "Public HTTP APIs under /api/*",
                     "Webhooks, auth callbacks, and form handlers",
@@ -23255,6 +23269,7 @@
           "key",
           "name",
           "summary",
+          "features",
           "best_for",
           "avoid_for",
           "commands",
@@ -23289,6 +23304,27 @@
             "maxLength": 300,
             "examples": [
               "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers."
+            ]
+          },
+          "features": {
+            "type": "array",
+            "description": "Concrete features agents can rely on for this product.",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,180}$",
+              "maxLength": 180,
+              "examples": [
+                "Rust-only HTTP runtime for public APIs under /api/*"
+              ]
+            },
+            "examples": [
+              [
+                "Rust-only HTTP runtime for public APIs under /api/*",
+                "WebSocket upgrades proxied to Rust workers",
+                "Request, CPU, and response transfer metering"
+              ]
             ]
           },
           "best_for": {
@@ -23449,6 +23485,13 @@
             "key": "worker",
             "name": "Worker",
             "summary": "Rust HTTP runtime for public APIs, webhooks, auth callbacks, forms, and scheduled or queued handlers.",
+            "features": [
+              "Rust-only HTTP runtime for public APIs under /api/*",
+              "WebSocket upgrades proxied to Rust workers",
+              "Cron and queue event delivery to the same Rust worker",
+              "Service bindings for private worker-to-worker HTTP calls",
+              "Request, CPU, and response transfer metering"
+            ],
             "best_for": [
               "Public HTTP APIs under /api/*",
               "Webhooks, auth callbacks, and form handlers",
