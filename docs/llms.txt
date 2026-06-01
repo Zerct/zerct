@@ -156,6 +156,9 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `tovuk capabilities --json` and `tovuk pricing --json` expose a
 `products` catalog. Use each product's `meters` and `limit_fields` before load
 tests, media uploads, or paid usage.
+The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
+KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
+Usage Caps.
 
 Use `GET /v1/status` only when Tovuk itself appears unavailable. If the API is
 available and a deploy fails, inspect build logs instead of changing status

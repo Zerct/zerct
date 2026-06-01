@@ -72,6 +72,30 @@ Use for UTC scheduled cleanup, polling, reports, and sync tasks. Avoid
 long-running workflows without checkpoints and user-facing request handling.
 Main meters: `worker_requests` and `worker_cpu_ms`.
 
+Service Bindings:
+Use for private worker-to-worker calls between account-owned Rust Worker
+services. Avoid browser calls, cross-account public APIs, and retryable
+background work that belongs in Queues. Main meters: `worker_requests` and
+`worker_cpu_ms` on the called workers.
+
+Secrets:
+Use for server-only environment variables, API keys, and build-time
+configuration that must not be committed. Avoid frontend public variables,
+large files, and secrets that should be encrypted before leaving the user
+system. Secrets have no direct usage meter; agents should use the worker and
+build environment limit fields.
+
+Custom Domains:
+Use for production hostnames on public services with agent-verifiable DNS setup.
+Avoid pointing A records at origin hosts, using Tovuk-owned hostnames, or using
+domains for private service-to-service calls. Custom domains have no direct
+usage meter; agents should use the `customDomains` limit field.
+
+Logs:
+Use for build, deploy, and runtime diagnosis in agent repair loops and support
+tickets. Avoid long-term analytics storage, secrets, and full user payload
+dumps. Main meter: `log_events`.
+
 Builds:
 Use for pre-deploy quality gates, release builds, frontend builds, and deploy
 promotion. Avoid runtime request handling, background jobs, and artifact storage
@@ -94,6 +118,11 @@ code. Main meters: any supported meter from `tovuk pricing --json`.
   or SQLite.
 - Use State only when one object key needs serialized coordination.
 - Use KV for small lookup data where eventual consistency is acceptable.
+- Use service bindings for private worker-to-worker calls instead of exposing
+  internal APIs publicly.
+- Use `tovuk env set` for server-only secrets and never commit `.env` files.
+- Use `tovuk domains add` and the returned DNS record for custom domains.
+- Use `tovuk logs --json` for repair loops and support-ticket evidence.
 - Set hard usage caps before high-throughput work:
 
 ```sh
