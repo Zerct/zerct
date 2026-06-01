@@ -218,8 +218,6 @@ tovuk usage --json
 tovuk service list
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
-tovuk service deploys service_1
-tovuk service builds service_1
 tovuk logs --service service_1 --limit 100 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --build job_1 --json

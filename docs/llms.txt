@@ -108,12 +108,10 @@ tovuk usage --json
 tovuk service list --json
 tovuk service show <service> --json
 tovuk service delete <service> --json
-tovuk service builds <service> --json
 tovuk logs --build <build_id> --json
 tovuk logs --service <service> --json
 tovuk env list --service <service> --json
 tovuk domains list --service <service> --json
-tovuk service resources <service> --json
 tovuk database create --service <service> DB --json
 tovuk database query --service <service> DB "select 1" --json
 tovuk database backup create --service <service> DB --json
