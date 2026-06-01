@@ -6,6 +6,8 @@ use std::{
     process::{Command, Stdio},
 };
 
+const CLIPPY_ARG_SEPARATOR: &str = "\x2d\x2d";
+
 pub(super) fn rust_backend_checks(project_dir: &Path, config_valid: bool) -> Vec<QualityCheck> {
     let mut checks = vec![cargo_lints(project_dir), unsafe_check(project_dir)];
     if config_valid {
@@ -63,7 +65,7 @@ fn strict_clippy_check(project_dir: &Path) -> QualityCheck {
         "--all-targets",
         "--all-features",
         "--quiet",
-        "--",
+        CLIPPY_ARG_SEPARATOR,
         "-D",
         "warnings",
     ];

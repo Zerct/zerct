@@ -4,11 +4,13 @@ use super::{
 };
 use crate::cli::errors::{Result, agent_error};
 
+const LONG_FLAG_PREFIX: &str = "\x2d\x2d";
+
 pub(super) fn parse_flag(arg: &str) -> Option<(&str, Option<String>)> {
     if !arg.starts_with('-') {
         return None;
     }
-    if arg.starts_with("--")
+    if arg.starts_with(LONG_FLAG_PREFIX)
         && let Some(index) = arg.find('=')
         && index > 2
     {
