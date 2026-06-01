@@ -11,12 +11,14 @@ tovuk capabilities --json
 tovuk pricing --json
 ```
 
-Use `products[].best_for`, `products[].avoid_for`, `products[].meters`, and
-`products[].limit_fields` to choose the smallest resource that fits the job.
-Use `plans[].limits` and `plans[].pricing` before load tests, media uploads, or
-paid usage.
+Use `products[].best_for`, `products[].avoid_for`, `products[].meters`,
+`products[].pricing_fields`, and `products[].limit_fields` to choose the
+smallest resource that fits the job. Use `plans[].limits` and
+`plans[].pricing` before load tests, media uploads, or paid usage.
 `limit_fields` includes the relevant runtime, storage, payload, batching,
 retention, and monthly allowance fields for each product.
+`pricing_fields` includes the exact JSON paths agents should read under each
+plan's `pricing` object for included usage and overage costs.
 Use `tovuk usage --json` for the authenticated `billingEstimate` line items
 before high-throughput work.
 
@@ -137,6 +139,7 @@ tovuk limit set object_storage_class_a_operations --period month --value 1000000
 ```
 
 The live `tovuk pricing --json` response is the source of truth for current
-free limits, Pro included usage, overage prices, meters, and limit fields.
+free limits, Pro included usage, overage prices, meters, pricing fields, and
+limit fields.
 The live `tovuk usage --json` response is the source of truth for current
 meter usage and `billingEstimate` cost lines.

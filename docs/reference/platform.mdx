@@ -80,10 +80,11 @@ tovuk usage --json
 ```
 
 The catalog commands expose the `products` array. Use it to decide which
-resource fits a task, use each product's `meters` to set hard caps, and use the
-plan `limits` and `pricing` objects to estimate free and paid usage before
-deployment. The authenticated usage response adds `billingEstimate.lineItems`
-for current-month cost planning.
+resource fits a task, use each product's `meters` to set hard caps, use
+`pricing_fields` to read the relevant plan prices, and use the plan `limits`
+and `pricing` objects to estimate free and paid usage before deployment. The
+authenticated usage response adds `billingEstimate.lineItems` for current-month
+cost planning.
 
 ## Runtime bindings
 
