@@ -128,6 +128,9 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
+`tovuk service show <service> --json` includes `accountUsage` and
+`billingEstimate` beside service resources, recent deploys, builds, logs, env
+names, domains, and next actions.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks, capability meters,
 account limits, and `billingEstimate` before deploy, without creating a build.
 

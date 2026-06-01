@@ -488,7 +488,7 @@
           "Deploy"
         ],
         "summary": "Get service overview",
-        "description": "Returns service status, deploys, builds, logs, env names, domains, resource bindings, limits, pricing, usage caps, and next actions. Context: paths./v1/services/{service_id}/overview.get.",
+        "description": "Returns service status, deploys, builds, logs, env names, domains, resource bindings, limits, pricing, usage caps, account usage, billing estimate, and next actions. Context: paths./v1/services/{service_id}/overview.get.",
         "operationId": "getServiceOverview",
         "parameters": [
           {
@@ -8844,7 +8844,51 @@
                     }
                   ],
                   "domains": [],
-                  "database": null,
+                  "accountUsage": {
+                    "serviceCount": 1,
+                    "runningCount": 1,
+                    "databaseCount": 1,
+                    "runtimeMemoryMib": 512,
+                    "runtimeCpuMillis": 250,
+                    "databaseStorageMib": 512,
+                    "deployCount": 3,
+                    "monthlyDeployCount": 3,
+                    "monthlyBuildMinutes": 5,
+                    "customDomainCount": 1,
+                    "storageObjectCount": 2,
+                    "objectStorageMib": 24,
+                    "kvNamespaceCount": 1,
+                    "queueCount": 1,
+                    "cronTriggerCount": 1,
+                    "stateNamespaceCount": 1,
+                    "usageCapCount": 2,
+                    "meters": {
+                      "day": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
+                      },
+                      "month": {
+                        "worker_requests": 240,
+                        "worker_cpu_ms": 35,
+                        "static_transfer_bytes": 2048,
+                        "build_minutes": 1
+                      }
+                    }
+                  },
+                  "billingEstimate": {
+                    "currency": "USD",
+                    "plan": "free",
+                    "paidOveragesEnabled": false,
+                    "subscriptionUsdMicrosPerMonth": 0,
+                    "currentMonthOverageUsdMicros": 0,
+                    "estimatedMonthlyTotalUsdMicros": 0,
+                    "lineItems": [],
+                    "nextActions": [
+                      "Set hard caps before high-throughput tests so paid overages stay intentional."
+                    ]
+                  },
                   "next_actions": [
                     "Watch the active build with `tovuk logs --service service_1`."
                   ]
@@ -18275,6 +18319,8 @@
           "env",
           "domains",
           "resources",
+          "accountUsage",
+          "billingEstimate",
           "next_actions"
         ],
         "properties": {
@@ -18366,6 +18412,14 @@
           },
           "resources": {
             "$ref": "#/components/schemas/ServiceResourcesResponse"
+          },
+          "accountUsage": {
+            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "description": "Authenticated account usage snapshot so agents can reason about limits from service show. Context: components.schemas.ServiceOverviewResponse.properties.accountUsage."
+          },
+          "billingEstimate": {
+            "$ref": "#/components/schemas/UsageCostEstimate",
+            "description": "Current-month cost estimate computed from account usage and plan pricing. Context: components.schemas.ServiceOverviewResponse.properties.billingEstimate."
           }
         },
         "examples": [
@@ -18659,6 +18713,51 @@
               "usageCaps": [],
               "nextActions": [
                 "Run tovuk service show service_1 --json after resource changes."
+              ]
+            },
+            "accountUsage": {
+              "serviceCount": 1,
+              "runningCount": 1,
+              "databaseCount": 1,
+              "runtimeMemoryMib": 512,
+              "runtimeCpuMillis": 250,
+              "databaseStorageMib": 512,
+              "deployCount": 3,
+              "monthlyDeployCount": 3,
+              "monthlyBuildMinutes": 5,
+              "customDomainCount": 1,
+              "storageObjectCount": 2,
+              "objectStorageMib": 24,
+              "kvNamespaceCount": 1,
+              "queueCount": 1,
+              "cronTriggerCount": 1,
+              "stateNamespaceCount": 1,
+              "usageCapCount": 2,
+              "meters": {
+                "day": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
+                },
+                "month": {
+                  "worker_requests": 240,
+                  "worker_cpu_ms": 35,
+                  "static_transfer_bytes": 2048,
+                  "build_minutes": 1
+                }
+              }
+            },
+            "billingEstimate": {
+              "currency": "USD",
+              "plan": "free",
+              "paidOveragesEnabled": false,
+              "subscriptionUsdMicrosPerMonth": 0,
+              "currentMonthOverageUsdMicros": 0,
+              "estimatedMonthlyTotalUsdMicros": 0,
+              "lineItems": [],
+              "nextActions": [
+                "Set hard caps before high-throughput tests so paid overages stay intentional."
               ]
             }
           }
