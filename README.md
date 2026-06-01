@@ -216,6 +216,8 @@ than 100 MiB, so agents can upload large media through the same command.
 so agents can choose Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, or
 Usage Caps and set the matching usage caps before heavy work.
+It also exposes object storage object, single-part upload, and multipart upload
+ceilings so agents can plan large file transfers before reserving bytes.
 
 The same commands are available through PyPI and Cargo after installation:
 
