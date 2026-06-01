@@ -74,6 +74,7 @@ npm --prefix packages/tovuk run check
 go run scripts/check-public-contracts/*.go package-versions
 go run scripts/check-public-contracts/*.go cli-contract
 go run scripts/check-public-contracts/*.go docs
+go run scripts/check-prose-style.go --self-test
 go run scripts/check-prose-style.go
 scripts/check-github-actions.sh
 scripts/check-shell-style.sh

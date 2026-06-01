@@ -52,7 +52,9 @@ jobs:
             exit 1
           fi
       - if: steps.version.outputs.exists == 'false'
-        run: go run scripts/check-prose-style.go
+        run: |
+          go run scripts/check-prose-style.go --self-test
+          go run scripts/check-prose-style.go
       - uses: dtolnay/rust-toolchain@stable
         if: steps.version.outputs.exists == 'false'
       - uses: actions/cache@v5

@@ -38,6 +38,14 @@ var (
 )
 
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "--self-test" {
+		runSelfTest()
+		return
+	}
+	if len(os.Args) > 1 {
+		fail("usage: check-prose-style.go [--self-test]")
+	}
+
 	files, err := gitFiles()
 	if err != nil {
 		fail("list git files: %v", err)
@@ -124,6 +132,40 @@ func main() {
 
 	fmt.Printf("Checked %d text files for em dashes.\n", len(textFiles))
 	fmt.Printf("Checked %d prose files for double hyphen prose.\n", proseCount)
+}
+
+func runSelfTest() {
+	cases := []struct {
+		name string
+		line string
+		want bool
+	}{
+		{
+			name: "prose double hyphen remains searchable",
+			line: "Avoid double hyphen -- punctuation.",
+			want: true,
+		},
+		{
+			name: "inline command flags are ignored",
+			line: "Use `tovuk deploy --dry-run --json` before deploy.",
+			want: false,
+		},
+		{
+			name: "URLs are ignored",
+			line: "See https://example.test/path--segment for generated output.",
+			want: false,
+		},
+	}
+	for _, test := range cases {
+		got := strings.Contains(searchableLine(test.line), "--")
+		if got != test.want {
+			fail("self-test %q failed: got %t, want %t", test.name, got, test.want)
+		}
+	}
+	if !strings.Contains("bad punctuation \u2014 stop", "\u2014") {
+		fail("self-test em dash fixture failed")
+	}
+	fmt.Println("Style checker self-test passed.")
 }
 
 func gitFiles() ([]string, error) {

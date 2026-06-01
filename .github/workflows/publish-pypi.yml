@@ -96,7 +96,9 @@ jobs:
           PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
           PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
       - if: steps.version.outputs.exists == 'false'
-        run: go run scripts/check-prose-style.go
+        run: |
+          go run scripts/check-prose-style.go --self-test
+          go run scripts/check-prose-style.go
       - if: steps.version.outputs.exists == 'false'
         run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - if: steps.version.outputs.exists == 'false'
