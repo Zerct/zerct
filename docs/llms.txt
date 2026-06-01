@@ -35,7 +35,7 @@ Rust worker contract:
 - `Cargo.toml`, `Cargo.lock`, and `tovuk.toml` are committed.
 - `kind = "rust_worker"` is set in `tovuk.toml`.
 - `[capabilities]` explicitly sets `worker = true`,
-  `static_frontend = false`, platform capabilities to true, and unused optional
+  `static_frontend = false`, service capabilities to true, and unused optional
   resources to false.
 - `[build].check` includes `cargo fmt --all --check`.
 - `[build].check` includes release-mode
@@ -58,7 +58,7 @@ Static frontend contract:
 
 - `kind = "static_frontend"` is set in `tovuk.toml`.
 - `[capabilities]` explicitly sets `static_frontend = true`,
-  `worker = false`, platform capabilities to true, and unused optional
+  `worker = false`, service capabilities to true, and unused optional
   resources to false.
 - `package.json` is committed.
 - A package lockfile is committed.
@@ -80,7 +80,7 @@ Full-stack contract:
 
 - One root `tovuk.toml` sets `kind = "fullstack"`.
 - `[capabilities]` explicitly sets `static_frontend = true`, `worker = true`,
-  platform capabilities to true, and unused optional resources to false.
+  service capabilities to true, and unused optional resources to false.
 - `[worker].root` points to the Rust worker.
 - `[frontend].root` points to the static frontend.
 - The frontend calls same-origin `/api`.

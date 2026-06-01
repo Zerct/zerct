@@ -12,13 +12,13 @@ use super::{
 use reqwest::Method;
 use serde_json::{Map, Value, json};
 
-pub(crate) fn platform_command(cli: &CliOptions) -> Result<()> {
-    service_get_command(cli, "platform")
+pub(crate) fn resources_command(cli: &CliOptions) -> Result<()> {
+    service_get_command(cli, "resources")
 }
 
 pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => platform_command(cli),
+        "list" => resources_command(cli),
         "create" => create_app_resource(
             cli,
             "sqlite_binding_required",
@@ -38,7 +38,7 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "Use `tovuk database delete --service <service> DB --json`.",
             "sqlite/databases",
         ),
-        _ => unknown_platform_command(cli, "sqlite"),
+        _ => unknown_resources_command(cli, "sqlite"),
     }
 }
 
@@ -58,7 +58,7 @@ fn sqlite_backup_command(cli: &CliOptions) -> Result<()> {
 
 pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => platform_command(cli),
+        "list" => resources_command(cli),
         "create" => create_app_resource(
             cli,
             "kv_binding_required",
@@ -73,7 +73,7 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
         "bulk" => kv_bulk_command(cli),
         "delete" => kv_delete(cli),
         "namespace" => kv_namespace_command(cli),
-        _ => unknown_platform_command(cli, "kv"),
+        _ => unknown_resources_command(cli, "kv"),
     }
 }
 
@@ -93,7 +93,7 @@ fn kv_bulk_command(cli: &CliOptions) -> Result<()> {
 
 pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => platform_command(cli),
+        "list" => resources_command(cli),
         "create" => create_queue(cli),
         "update" => update_queue(cli),
         "messages" => queue_messages(cli),
@@ -108,7 +108,7 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
             "Use `tovuk queue delete --service <service> jobs --json`.",
             "queues",
         ),
-        _ => unknown_platform_command(cli, "queue"),
+        _ => unknown_resources_command(cli, "queue"),
     }
 }
 
@@ -201,7 +201,7 @@ fn apply_queue_policy_options(cli: &CliOptions, body: &mut Map<String, Value>) -
 
 pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => platform_command(cli),
+        "list" => resources_command(cli),
         "create" => create_cron(cli),
         "update" => update_cron(cli),
         "enable" => set_cron_enabled(cli, true),
@@ -214,7 +214,7 @@ pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
             "Use `tovuk cron delete --service <service> nightly --json`.",
             "cron",
         ),
-        _ => unknown_platform_command(cli, "cron"),
+        _ => unknown_resources_command(cli, "cron"),
     }
 }
 
@@ -269,7 +269,7 @@ fn cron_update_request(cli: &CliOptions, trigger: &str, body: Value) -> Result<(
 
 pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => platform_command(cli),
+        "list" => resources_command(cli),
         "create" => create_app_resource(
             cli,
             "state_class_required",
@@ -292,7 +292,7 @@ pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
             "Use `tovuk state delete --service <service> Room --json`.",
             "state/namespaces",
         ),
-        _ => unknown_platform_command(cli, "state"),
+        _ => unknown_resources_command(cli, "state"),
     }
 }
 
@@ -492,7 +492,7 @@ fn state_delete_value(cli: &CliOptions) -> Result<()> {
 
 pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => platform_command(cli),
+        "list" => resources_command(cli),
         "create" => create_service_binding(cli),
         "delete" => delete_app_resource(
             cli,
@@ -502,7 +502,7 @@ pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
             "Use `tovuk binding delete --service <service> AUTH_SERVICE --json`.",
             "service-bindings",
         ),
-        _ => unknown_platform_command(cli, "binding"),
+        _ => unknown_resources_command(cli, "binding"),
     }
 }
 
@@ -1219,7 +1219,7 @@ fn optional_u16(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u16>
         agent_error(
             "invalid_argument",
             format!("{flag} is too large."),
-            format!("Pass {flag} within the documented platform limit."),
+            format!("Pass {flag} within the documented resource limit."),
             cli.output.json,
         )
     })
@@ -1233,7 +1233,7 @@ fn optional_u32(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u32>
         agent_error(
             "invalid_argument",
             format!("{flag} is too large."),
-            format!("Pass {flag} within the documented platform limit."),
+            format!("Pass {flag} within the documented resource limit."),
             cli.output.json,
         )
     })
@@ -1522,7 +1522,7 @@ fn required_arg(
         .ok_or_else(|| agent_error(code, message, instruction, cli.output.json))
 }
 
-fn unknown_platform_command(cli: &CliOptions, family: &str) -> Result<()> {
+fn unknown_resources_command(cli: &CliOptions, family: &str) -> Result<()> {
     Err(agent_error(
         "unknown_command",
         format!("Unknown {family} command."),

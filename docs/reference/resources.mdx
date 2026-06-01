@@ -1,9 +1,9 @@
 ---
-title: "Platform Resources"
-description: "Agent-ready commands for worker platform resources."
+title: "Service Resources"
+description: "Agent-ready commands for worker service resources."
 ---
 
-Tovuk platform resources are managed through the CLI and API so agents do not
+Tovuk service resources are managed through the CLI and API so agents do not
 need dashboard access.
 
 ## Commands
@@ -67,7 +67,7 @@ tovuk limits delete worker_requests --period day --json
 - Logs: build, deploy, and runtime diagnosis for repair loops.
 - Usage caps: hard stops and notification thresholds for predictable usage.
 
-Each service can bind up to 5000 platform resources. That count includes
+Each service can bind up to 5000 service resources. That count includes
 SQLite databases, KV namespaces, queues, State namespaces, and private
 service bindings.
 Service binding call chains can use up to 32 worker invocations per
@@ -77,7 +77,6 @@ subrequest limits.
 The machine-readable product catalog is available from:
 
 ```sh
-tovuk pricing --json
 tovuk pricing --json
 tovuk usage --json
 ```
@@ -114,7 +113,7 @@ are uppercased for environment suffixes, so a queue named `jobs` becomes
 `TOVUK_QUEUE_JOBS`, and a State class named `Room` becomes `TOVUK_STATE_ROOM`.
 
 `TOVUK_RUNTIME_TOKEN` is injected only into the deployed Rust worker process.
-It can call Tovuk APIs for the current `TOVUK_SERVICE_ID`, including platform
+It can call Tovuk APIs for the current `TOVUK_SERVICE_ID`, including resource
 inspection, SQLite queries, KV reads and writes, queue sends and metrics, State
 values, and object storage operations. It cannot manage account settings,
 billing, domains, environment secrets, support tickets, or other services.
@@ -124,7 +123,7 @@ store it in source control.
 Runtime API calls should use:
 
 ```sh
-curl -fsS "$TOVUK_API_BASE_URL/v1/services/$TOVUK_SERVICE_ID/platform" \
+curl -fsS "$TOVUK_API_BASE_URL/v1/services/$TOVUK_SERVICE_ID/resources" \
   -H "Authorization: Bearer $TOVUK_RUNTIME_TOKEN"
 ```
 
@@ -142,7 +141,7 @@ The API response includes `dns_record_type`, `dns_record_name`,
 configure DNS through the user's DNS provider API without dashboard access.
 Never point an A record at Tovuk origin hosts.
 
-Delete commands return the refreshed platform resource payload so agents can
+Delete commands return the refreshed service resource payload so agents can
 verify cleanup immediately and continue without dashboard checks.
 
 KV keys follow the Tovuk 512 byte limit and may include path separators when

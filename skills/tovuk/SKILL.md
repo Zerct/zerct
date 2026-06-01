@@ -1,12 +1,12 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and worker-static services to Tovuk with `tovuk`.
+description: Deploy Rust workers, static frontends, and full-stack services to Tovuk with `tovuk`.
 ---
 
 # Tovuk
 
 Use when a user wants to deploy a Rust worker, static frontend, or
-worker-static service to Tovuk.
+full-stack service to Tovuk.
 
 ## Workflow
 
@@ -21,14 +21,14 @@ worker-static service to Tovuk.
 4. For plain static frontends without a package manager, set
    `kind = "static_frontend"`, require `index.html`, use
    `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
-5. For worker-static services, set `kind = "worker_static"` in one root
+5. For full-stack services, set `kind = "fullstack"` in one root
    `tovuk.toml`, configure `[worker].root` and `[frontend].root`, serve the
    frontend at `/`, and route API calls through same-origin `/api`.
 6. Prefer Bun with `bun.lock`, source-scoped Oxlint type-aware checks, and
    Fallow for new package frontends. Avoid JavaScript-based lint, format,
    typecheck, dead-code, or duplicate-code tooling.
-7. For a new worker-static project, run
-   `tovuk new my-app --template worker-static-rust-tanstack`.
+7. For a new full-stack project, run
+   `tovuk new my-app --template fullstack-rust-tanstack`.
 8. Run `tovuk check --json`.
 9. Run `tovuk check` when local tools are available.
 10. Run `tovuk deploy --wait --json`.
@@ -37,7 +37,7 @@ worker-static service to Tovuk.
 12. If a build fails, run `tovuk logs --build <build_id> --json`, fix the
     first actionable log error, rerun check, and redeploy.
 
-## Platform resources
+## Service resources
 
 Agents can manage runtime resources without dashboard access:
 
@@ -83,7 +83,7 @@ type-aware TypeScript checks, run native linting plus Fallow dead-code,
 semantic duplicate-code, and health gates; build to `[build].output`; and
 include `index.html`.
 
-Worker-static frontends call same-origin `/api` for APIs and server-side logic.
+Full-stack frontends call same-origin `/api` for APIs and server-side logic.
 JavaScript and TypeScript are frontend-only on Tovuk.
 
 Abuse reports are API and CLI first. Create reports with target URL, category,

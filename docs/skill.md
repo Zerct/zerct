@@ -51,7 +51,7 @@ tovuk pricing --json
 tovuk logs --build <build_id> --json
 ```
 
-Manage platform resources without dashboard access:
+Manage service resources without dashboard access:
 
 ```sh
 tovuk service show <service> --json

@@ -32,7 +32,7 @@ fn reject_legacy_database_flag(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "deploy_database_flag_removed",
             "The deploy-time database flag is no longer supported.",
-            "Create SQLite databases with `tovuk database create --service <service> DB --json` and bind them through worker platform resources.",
+            "Create SQLite databases with `tovuk database create --service <service> DB --json` and bind them through worker service resources.",
             cli.output.json,
         ));
     }

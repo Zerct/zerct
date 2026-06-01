@@ -248,7 +248,7 @@ fn project_next_actions(ok: bool, kind: Option<ProjectKind>) -> Vec<&'static str
         ],
         Some(ProjectKind::RustWorker) => vec![
             "Review Rust Worker meters and billingEstimate.lineItems.",
-            "Set usage caps for worker and optional platform resource meters before load.",
+            "Set usage caps for worker and optional service resource meters before load.",
             "Run `tovuk deploy --wait --json` only after this dry run is acceptable.",
         ],
         Some(ProjectKind::StaticFrontend) => vec![

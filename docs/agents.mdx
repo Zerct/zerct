@@ -51,7 +51,7 @@ Run `tovuk check --json`. Fix the first failed check by following
 warnings, capabilities, meters, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable
-error, and redeploy. Use platform resource commands for SQLite, KV, queues,
+error, and redeploy. Use service resource commands for SQLite, KV, queues,
 cron triggers, State, service bindings, and usage caps.
 Before load tests or production launch, run `tovuk pricing --json`, inspect
 `billingEstimate` from `tovuk usage --json`, and set hard usage caps with
