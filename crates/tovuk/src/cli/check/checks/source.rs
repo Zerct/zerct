@@ -1,10 +1,10 @@
-use super::super::report::DoctorCheck;
+use super::super::report::QualityCheck;
 use crate::cli::source_policy::backend_javascript_or_typescript_sources;
 use std::path::Path;
 
-pub(super) fn backend_javascript_source_check(project_dir: &Path, label: &str) -> DoctorCheck {
+pub(super) fn backend_javascript_source_check(project_dir: &Path, label: &str) -> QualityCheck {
     let matches = backend_javascript_or_typescript_sources(project_dir, label);
-    DoctorCheck {
+    QualityCheck {
         name: "rust worker js/ts server source".to_owned(),
         ok: matches.is_empty(),
         message: if matches.is_empty() {

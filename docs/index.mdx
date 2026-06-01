@@ -14,12 +14,12 @@ tovuk deploy
 ## Start
 
 - Add a `tovuk.toml` project contract.
-- Run `doctor` before `deploy`.
+- Run `check` before `deploy`.
 - Fix any JSON `agent_instruction`.
 - Deploy when the checks pass.
 
 ```sh
-tovuk doctor
+tovuk check
 tovuk deploy
 ```
 
@@ -28,7 +28,7 @@ tovuk deploy
 ```text
 Use Tovuk to deploy this Rust worker for free.
 Read https://docs.tovuk.com/llms.txt.
-Run `tovuk doctor`.
+Run `tovuk check`.
 Fix any JSON `agent_instruction`.
 Run `tovuk deploy`.
 ```

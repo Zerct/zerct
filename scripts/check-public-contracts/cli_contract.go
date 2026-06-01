@@ -23,7 +23,7 @@ func checkCLIContract() {
 	homebrewFormula := readText("Formula/tovuk.rb")
 
 	for _, command := range []string{
-		"init", "install", "doctor", "preview", "login", "plan", "deploy", "capabilities", "pricing",
+		"init", "install", "check", "preview", "login", "plan", "deploy", "capabilities", "pricing",
 		"me", "usage", "activity", "service", "services", "overview", "deploys", "builds", "logs",
 		"status", "inspect", "platform", "kv", "queue", "cron", "state",
 		"binding", "limit", "database", "env", "domains", "storage", "files", "media",

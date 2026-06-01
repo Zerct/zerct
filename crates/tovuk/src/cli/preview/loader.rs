@@ -1,13 +1,13 @@
 use super::super::{
+    check::{QualityReportKind, run_check_workspace},
     config::{TovukConfig, parse_tovuk_toml, validate_config},
-    doctor::{DoctorReportKind, run_doctor_workspace},
     errors::{Result, agent_error, internal_error},
 };
 use std::{fs, path::Path};
 
 pub(super) fn preview_config(project_dir: &Path) -> Result<TovukConfig> {
-    let report = run_doctor_workspace(project_dir);
-    if matches!(report, DoctorReportKind::Workspace(_)) {
+    let report = run_check_workspace(project_dir);
+    if matches!(report, QualityReportKind::Workspace(_)) {
         return Err(agent_error(
             "workspace_preview_unsupported",
             "Preview one project at a time.",
@@ -23,8 +23,8 @@ pub(super) fn preview_config(project_dir: &Path) -> Result<TovukConfig> {
             .and_then(|check| check.agent_instruction.clone())
             .unwrap_or_else(|| "Fix the failed checks and retry `tovuk preview`.".to_owned());
         return Err(agent_error(
-            "doctor_failed",
-            "Tovuk doctor failed.",
+            "check_failed",
+            "Tovuk check failed.",
             instruction,
             false,
         ));

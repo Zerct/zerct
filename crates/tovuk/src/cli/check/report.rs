@@ -3,7 +3,7 @@ use serde::Serialize;
 use std::path::Path;
 
 #[derive(Clone, Debug, Serialize)]
-pub(crate) struct DoctorCheck {
+pub(crate) struct QualityCheck {
     pub(crate) name: String,
     pub(crate) ok: bool,
     pub(crate) message: String,
@@ -11,37 +11,37 @@ pub(crate) struct DoctorCheck {
 }
 
 #[derive(Clone, Debug, Serialize)]
-pub(crate) struct DoctorReport {
+pub(crate) struct QualityReport {
     pub(crate) ok: bool,
     pub(crate) project: String,
     pub(crate) config: Option<TovukConfig>,
-    pub(crate) checks: Vec<DoctorCheck>,
+    pub(crate) checks: Vec<QualityCheck>,
 }
 
 #[derive(Clone, Debug, Serialize)]
-pub(crate) struct ProjectDoctorReport {
+pub(crate) struct ProjectQualityReport {
     pub(crate) relative: String,
     pub(crate) ok: bool,
     pub(crate) project: String,
     pub(crate) config: Option<TovukConfig>,
-    pub(crate) checks: Vec<DoctorCheck>,
+    pub(crate) checks: Vec<QualityCheck>,
 }
 
 #[derive(Clone, Debug, Serialize)]
-pub(crate) struct WorkspaceDoctorReport {
+pub(crate) struct WorkspaceQualityReport {
     pub(crate) ok: bool,
     pub(crate) workspace: String,
-    pub(crate) projects: Vec<ProjectDoctorReport>,
+    pub(crate) projects: Vec<ProjectQualityReport>,
 }
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(untagged)]
-pub(crate) enum DoctorReportKind {
-    Project(Box<DoctorReport>),
-    Workspace(WorkspaceDoctorReport),
+pub(crate) enum QualityReportKind {
+    Project(Box<QualityReport>),
+    Workspace(WorkspaceQualityReport),
 }
 
-impl DoctorReportKind {
+impl QualityReportKind {
     pub(crate) fn ok(&self) -> bool {
         match self {
             Self::Project(report) => report.ok,
@@ -49,7 +49,7 @@ impl DoctorReportKind {
         }
     }
 
-    pub(crate) fn checks(&self) -> Vec<DoctorCheck> {
+    pub(crate) fn checks(&self) -> Vec<QualityCheck> {
         match self {
             Self::Project(report) => report.checks.clone(),
             Self::Workspace(report) => report
@@ -61,12 +61,12 @@ impl DoctorReportKind {
     }
 }
 
-pub(super) fn doctor_report(
+pub(super) fn quality_report(
     project_dir: &Path,
     config: Option<TovukConfig>,
-    checks: Vec<DoctorCheck>,
-) -> DoctorReport {
-    DoctorReport {
+    checks: Vec<QualityCheck>,
+) -> QualityReport {
+    QualityReport {
         ok: checks.iter().all(|check| check.ok),
         project: project_dir.display().to_string(),
         config,
@@ -74,10 +74,10 @@ pub(super) fn doctor_report(
     }
 }
 
-pub(super) fn print_doctor_report(report: &DoctorReportKind) {
+pub(super) fn print_quality_report(report: &QualityReportKind) {
     match report {
-        DoctorReportKind::Project(report) => print_checks(&report.checks),
-        DoctorReportKind::Workspace(report) => {
+        QualityReportKind::Project(report) => print_checks(&report.checks),
+        QualityReportKind::Workspace(report) => {
             for project in &report.projects {
                 println!("project {}", project.relative);
                 print_checks(&project.checks);
@@ -86,7 +86,7 @@ pub(super) fn print_doctor_report(report: &DoctorReportKind) {
     }
 }
 
-pub(super) fn print_checks(checks: &[DoctorCheck]) {
+pub(super) fn print_checks(checks: &[QualityCheck]) {
     for check in checks {
         println!(
             "{} {}{}",
@@ -101,14 +101,14 @@ pub(super) fn print_checks(checks: &[DoctorCheck]) {
     }
 }
 
-pub(crate) fn doctor_check(
+pub(crate) fn quality_check(
     name: &str,
     ok: bool,
     success: &str,
     failure: &str,
     instruction: &str,
-) -> DoctorCheck {
-    DoctorCheck {
+) -> QualityCheck {
+    QualityCheck {
         name: name.to_owned(),
         ok,
         message: if ok { success } else { failure }.to_owned(),

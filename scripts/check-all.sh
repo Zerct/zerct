@@ -123,7 +123,7 @@ test -f examples/hello-rust/Cargo.lock
 cargo check --locked --release --all-targets --all-features --manifest-path examples/hello-rust/Cargo.toml
 cargo test --locked --release --all-targets --all-features --manifest-path examples/hello-rust/Cargo.toml
 cargo clippy --manifest-path examples/hello-rust/Cargo.toml "${strict_clippy_args[@]}"
-"$native_cli" doctor examples/hello-rust --json >/dev/null
+"$native_cli" check examples/hello-rust --json >/dev/null
 
 rust_policy_fixture="$(mktemp -d)"
 js_worker_fixture="$(mktemp -d)"
@@ -156,8 +156,8 @@ mkdir -p "$rust_policy_fixture/src"
 printf 'fn main() {}\n' >"$rust_policy_fixture/src/main.rs"
 
 for command in \
-  "$native_cli doctor $rust_policy_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $rust_policy_fixture --json"; do
+  "$native_cli check $rust_policy_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk check $rust_policy_fixture --json"; do
   if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected Rust policy fixture to fail: %s\n' "$command" >&2
     exit 1
@@ -196,8 +196,8 @@ printf 'fn main() {}\n' >"$js_worker_fixture/src/main.rs"
 printf 'import http from "node:http"\n' >"$js_worker_fixture/src/server.ts"
 
 for command in \
-  "$native_cli doctor $js_worker_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $js_worker_fixture --json"; do
+  "$native_cli check $js_worker_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk check $js_worker_fixture --json"; do
   if eval "$command" >/tmp/tovuk-policy-check.json 2>/tmp/tovuk-policy-check.err; then
     printf 'expected JS worker fixture to fail: %s\n' "$command" >&2
     exit 1
@@ -220,8 +220,8 @@ cat >"$plain_static_fixture/index.html" <<'EOF'
 EOF
 
 for command in \
-  "$native_cli doctor $plain_static_fixture --json" \
-  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk doctor $plain_static_fixture --json"; do
+  "$native_cli check $plain_static_fixture --json" \
+  "PYTHONPATH=packages/tovuk-py/src $python_bin -m tovuk check $plain_static_fixture --json"; do
   eval "$command" >/tmp/tovuk-policy-check.json
   grep -q '"ok": true' /tmp/tovuk-policy-check.json
 done
@@ -271,7 +271,7 @@ cat >"$worker_static_fixture/web/index.html" <<'EOF'
 <h1>worker static</h1>
 EOF
 
-"$native_cli" doctor "$worker_static_fixture" --json >/tmp/tovuk-policy-check.json
+"$native_cli" check "$worker_static_fixture" --json >/tmp/tovuk-policy-check.json
 grep -q '"ok": true' /tmp/tovuk-policy-check.json
 
 printf 'all checks passed\n'

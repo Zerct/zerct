@@ -10,7 +10,7 @@ not require Node.js, npm, or any JavaScript runtime.
 pipx install tovuk
 tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
-tovuk doctor --json
+tovuk check --json
 tovuk plan --json
 tovuk preview
 tovuk deploy --wait --json
@@ -83,7 +83,7 @@ tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --js
 tovuk limit set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
 tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
@@ -93,7 +93,7 @@ agents can choose the correct product and cap the right meters before heavy
 work.
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
-`tovuk plan --json` combines `tovuk.toml`, doctor checks, capability meters,
+`tovuk plan --json` combines `tovuk.toml`, quality checks, capability meters,
 account limits, and `billingEstimate` before deploy, without creating a build.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
@@ -102,14 +102,14 @@ larger than 100 MiB.
 Agent repair loop:
 
 ```sh
-tovuk doctor --json
+tovuk check --json
 tovuk plan --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
 ```
 
 Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
-fix the first actionable log error, rerun doctor, then redeploy.
+fix the first actionable log error, rerun check, then redeploy.
 
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
 the Tovuk session in the OS credential store when available, and continues the

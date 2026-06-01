@@ -9,7 +9,7 @@ use super::{
     api_commands::api_request,
     args::CliOptions,
     auth::read_or_login_token,
-    doctor::run_doctor,
+    check::run_check,
     errors::{Result, agent_error},
     project::nested_string,
 };
@@ -87,7 +87,7 @@ fn deploy_projects(
 }
 
 fn deploy_project(project_dir: &Path, cli: &CliOptions, token: &str) -> Result<Value> {
-    let report = run_doctor(project_dir);
+    let report = run_check(project_dir);
     if !report.ok {
         let instruction = report
             .checks
@@ -96,8 +96,8 @@ fn deploy_project(project_dir: &Path, cli: &CliOptions, token: &str) -> Result<V
             .and_then(|check| check.agent_instruction.clone())
             .unwrap_or_else(|| "Fix the failed checks and retry.".to_owned());
         return Err(agent_error(
-            "doctor_failed",
-            "Tovuk doctor failed.",
+            "check_failed",
+            "Tovuk check failed.",
             instruction,
             cli.output.json,
         ));

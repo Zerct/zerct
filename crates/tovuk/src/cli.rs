@@ -1,11 +1,11 @@
 mod api_commands;
 mod args;
 mod auth;
+mod check;
 mod command_policy;
 mod config;
 mod constants;
 mod deploy;
-mod doctor;
 mod errors;
 mod frontend_checks;
 mod help;

@@ -9,7 +9,7 @@ npm install -g tovuk
 ```sh
 tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
-tovuk doctor --json
+tovuk check --json
 tovuk plan --json
 tovuk deploy --wait --json
 ```
@@ -39,14 +39,14 @@ tovuk preview
 Agent repair loop:
 
 ```sh
-tovuk doctor --json
+tovuk check --json
 tovuk plan --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
 ```
 
 Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
-fix the first actionable log error, rerun doctor, then redeploy.
+fix the first actionable log error, rerun check, then redeploy.
 
 Agents can create service SQLite databases, KV namespaces, queues, cron triggers,
 State namespaces, service bindings, and usage caps through the CLI.
@@ -70,7 +70,7 @@ The pricing response includes plan pricing and product meter metadata, so agents
 can choose the correct product and cap the right meters in one flow.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
-The plan response combines `tovuk.toml`, doctor checks, capability meters,
+The plan response combines `tovuk.toml`, quality checks, capability meters,
 account limits, and `billingEstimate` before deploy, without creating a build.
 
 Manage service files and media without dashboard access:
@@ -104,7 +104,7 @@ tovuk billing checkout --json
 When Tovuk support is needed, include enough evidence for a support agent:
 
 ```sh
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 ```
 
 When the issue is fixed, resolve the ticket:

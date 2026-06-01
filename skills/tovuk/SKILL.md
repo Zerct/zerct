@@ -29,13 +29,13 @@ worker-static app to Tovuk.
    typecheck, dead-code, or duplicate-code tooling.
 7. For a new worker-static project, run
    `tovuk init my-app --template worker-static-rust-tanstack`.
-8. Run `tovuk doctor --json`.
+8. Run `tovuk check --json`.
 9. Run `tovuk preview` when local tools are available.
 10. Run `tovuk deploy --wait --json`.
-11. If Tovuk returns an `agent_instruction`, apply it, rerun doctor, and
+11. If Tovuk returns an `agent_instruction`, apply it, rerun check, and
     redeploy.
 12. If a build fails, run `tovuk logs --build <build_id> --json`, fix the
-    first actionable log error, rerun doctor, and redeploy.
+    first actionable log error, rerun check, and redeploy.
 
 ## Platform resources
 

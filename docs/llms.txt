@@ -7,7 +7,7 @@ Worker-static services use one root tovuk.toml, serve the frontend at `/`, and r
 Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
 
 ```sh
-tovuk doctor --json
+tovuk check --json
 tovuk plan --json
 tovuk deploy --wait --json
 ```
@@ -16,10 +16,10 @@ Reference: [Tovuk docs](https://docs.tovuk.com).
 
 Agent repair loop:
 
-1. Run `tovuk doctor --json`.
+1. Run `tovuk check --json`.
 2. If it fails, read the first failed check.
 3. Apply its `agent_instruction` exactly.
-4. Rerun doctor until it passes.
+4. Rerun check until it passes.
 5. Run `tovuk plan --json`.
 6. Review warnings, enabled and disabled capabilities, meters, limits, and
    `billingEstimate`.
@@ -28,7 +28,7 @@ Agent repair loop:
 9. If deploy fails, read `build_job.id` or the failed build id.
 10. Run `tovuk logs --build <build_id> --json`.
 11. Fix the first actionable log error.
-12. Rerun doctor and plan before redeploying.
+12. Rerun check and plan before redeploying.
 
 Rust worker contract:
 
@@ -142,7 +142,7 @@ tovuk storage url --service <service> uploads/file.png --json
 tovuk storage delete --service <service> uploads/file.png --json
 tovuk billing checkout --json
 tovuk support list --json
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
+tovuk support create "Deploy failed" "Agent retried deploy after check." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
 tovuk support resolve <ticket_id> --json
 ```
 
@@ -164,7 +164,7 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `products` catalog. Use each product's `features`, `meters`, `meter_details`,
 `pricing_fields`, and `limit_fields` before load tests, media uploads, or paid
 usage.
-`tovuk plan --json` is read-only and combines `tovuk.toml`, doctor checks,
+`tovuk plan --json` is read-only and combines `tovuk.toml`, quality checks,
 capability meters, account limits, usage, and `billingEstimate` before deploy.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and

@@ -2,8 +2,8 @@ use super::{
     api_commands::api_request,
     args::CliOptions,
     auth::read_or_login_token,
+    check::run_check,
     deploy::{DeployProjectInfo, discover_deploy_projects},
-    doctor::run_doctor,
     errors::{Result, agent_error, print_json},
     project::number_field,
     project_kind::ProjectKind,
@@ -36,7 +36,7 @@ pub(crate) fn plan_project(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     let ok = warnings.is_empty()
         && project_plans
             .iter()
-            .all(|project| project["doctor"]["ok"].as_bool().unwrap_or(false));
+            .all(|project| project["check"]["ok"].as_bool().unwrap_or(false));
 
     print_json(&json!({
         "ok": ok,
@@ -59,7 +59,7 @@ fn project_plan(
     existing_service_names: &BTreeSet<String>,
     capabilities: &Value,
 ) -> Value {
-    let report = run_doctor(&project.dir);
+    let report = run_check(&project.dir);
     let config = report.config.as_ref();
     let kind = config
         .as_ref()
@@ -89,7 +89,7 @@ fn project_plan(
         "kind": kind.map(ProjectKind::as_str),
         "config": config,
         "capabilities": capability_plan(kind, capabilities),
-        "doctor": {
+        "check": {
             "ok": report.ok,
             "checks": report.checks,
         },
@@ -273,7 +273,7 @@ fn capability_catalog(capabilities: &Value) -> Value {
 
 fn project_next_actions(ok: bool, kind: Option<ProjectKind>) -> Vec<&'static str> {
     if !ok {
-        return vec!["Fix the first failed doctor check, then rerun `tovuk plan --json`."];
+        return vec!["Fix the first failed quality check, then rerun `tovuk plan --json`."];
     }
     match kind {
         Some(ProjectKind::WorkerStatic) => vec![
@@ -304,7 +304,7 @@ fn next_actions(ok: bool) -> Vec<&'static str> {
         ];
     }
     vec![
-        "Fix warnings and failed doctor checks.",
+        "Fix warnings and failed quality checks.",
         "Rerun `tovuk plan --json` before deploy.",
         "Use `tovuk billing checkout --json` if a limit blocks the plan.",
     ]

@@ -1,5 +1,5 @@
 use super::{
-    doctor::doctor_project,
+    check::check_project,
     errors::{Result, internal_error},
     project::{ensure_directory, path_relative},
     project_layout::infer_project_kind,
@@ -37,5 +37,5 @@ pub(crate) fn init_project(project_dir: &Path, template: &str) -> Result<()> {
 
 pub(crate) fn install_project(project_dir: &Path, template: &str) -> Result<()> {
     init_project(project_dir, template)?;
-    doctor_project(project_dir, false)
+    check_project(project_dir, false)
 }

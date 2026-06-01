@@ -2,7 +2,7 @@ use super::{
     super::{
         config::TovukConfig, frontend_checks::static_frontend_checks, project_kind::ProjectKind,
     },
-    report::DoctorCheck,
+    report::QualityCheck,
 };
 use std::path::Path;
 
@@ -21,7 +21,7 @@ pub(super) fn fullstack_checks(
     project_dir: &Path,
     config: &TovukConfig,
     config_valid: bool,
-) -> Vec<DoctorCheck> {
+) -> Vec<QualityCheck> {
     let backend_root = config.backend.root.clone().unwrap_or_default();
     let frontend_root = config.frontend.root.clone().unwrap_or_default();
     let backend_dir = project_dir.join(&backend_root);
@@ -43,11 +43,11 @@ pub(super) fn fullstack_checks(
     checks
 }
 
-pub(super) fn rust_doctor_checks(
+pub(super) fn rust_quality_checks(
     project_dir: &Path,
     kind: ProjectKind,
     config_valid: bool,
-) -> Vec<DoctorCheck> {
+) -> Vec<QualityCheck> {
     if kind.is_static_frontend() {
         let mut checks = static_frontend_checks(project_dir, config_valid);
         checks.push(rust::unsafe_check(project_dir));

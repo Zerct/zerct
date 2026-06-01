@@ -1,9 +1,9 @@
-use super::report::{DoctorCheck, doctor_check};
+use super::report::{QualityCheck, quality_check};
 use crate::cli::config::{TovukConfig, parse_tovuk_toml, validate_config};
 use std::{fs, path::Path};
 
 pub(super) struct ConfigResult {
-    pub(super) check: DoctorCheck,
+    pub(super) check: QualityCheck,
     pub(super) config: Option<TovukConfig>,
     pub(super) valid: bool,
 }
@@ -12,7 +12,7 @@ pub(super) fn read_config(project_dir: &Path) -> ConfigResult {
     let config_path = project_dir.join("tovuk.toml");
     if !config_path.exists() {
         return ConfigResult {
-            check: doctor_check(
+            check: quality_check(
                 "tovuk.toml",
                 false,
                 "valid",
@@ -27,7 +27,7 @@ pub(super) fn read_config(project_dir: &Path) -> ConfigResult {
         Ok(source) => source,
         Err(error) => {
             return ConfigResult {
-                check: DoctorCheck {
+                check: QualityCheck {
                     name: "tovuk.toml".to_owned(),
                     ok: false,
                     message: error.to_string(),
@@ -43,12 +43,12 @@ pub(super) fn read_config(project_dir: &Path) -> ConfigResult {
         Ok(config)
     }) {
         Ok(config) => ConfigResult {
-            check: doctor_check("tovuk.toml", true, "valid", "missing", ""),
+            check: quality_check("tovuk.toml", true, "valid", "missing", ""),
             config: Some(config),
             valid: true,
         },
         Err(message) => ConfigResult {
-            check: DoctorCheck {
+            check: QualityCheck {
                 name: "tovuk.toml".to_owned(),
                 ok: false,
                 message: message.clone(),
