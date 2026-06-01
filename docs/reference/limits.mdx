@@ -39,6 +39,9 @@ ambiguous to run.
 - Rust workers must bind to `0.0.0.0:$PORT`.
 - Secrets must stay in server-side environment variables.
 - Builds may be queued when capacity is busy.
+- Builds run with 2 vCPU on Free, 4 vCPU on Pro, 8 GB memory, 20 GB disk,
+  20 minute max duration, 64 build environment variables, and a 5 KB limit per
+  build environment variable.
 - Free service object storage includes 10 GB total, no object-count cap, a
   4.995 TiB object storage object size ceiling, a 5115 MiB (4.995 GiB)
   single-part upload limit, a 4.995 TiB multipart upload limit, 10 thousand
@@ -100,7 +103,8 @@ ambiguous to run.
   50 million SQLite rows written per month before paid overage pricing.
 - State key and value payloads are limited to 2 MiB combined.
 - Free logs include 200 thousand events per day with 3 day retention. Pro logs
-  include 20 million events per month with 7 day retention.
+  include 20 million events per month with 7 day retention. Each captured log
+  event is capped at 256 KB.
 - Free support tickets: 3 per day.
 - Pro support tickets: 20 per day.
 - Free API tokens: 10.
