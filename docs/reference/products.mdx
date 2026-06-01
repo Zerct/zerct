@@ -101,7 +101,7 @@ Use for pre-deploy quality gates, release builds, frontend builds, and deploy
 promotion. Avoid runtime request handling, background jobs, and artifact storage
 after deploy. Main meter: `build_minutes`. Agent-readable limits include build
 CPU, memory, disk, duration, concurrency, environment variable count, and
-environment variable size.
+environment variable size, plus deploy hook rates per service and per account.
 
 Usage Caps:
 Use for load tests, launch guardrails, and paid-usage hard stops. Avoid using
