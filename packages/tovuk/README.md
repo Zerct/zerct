@@ -30,6 +30,10 @@ From a full-stack repo root, the same deploy command reads one root
 `tovuk.toml`, reads explicit `[capabilities]`, builds the worker and frontend
 roots, and returns one service URL with `/api/*` routed to the Rust worker.
 
+`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but deploy
+behavior is controlled only by the committed `tovuk.toml`. Review explicit
+`[capabilities]` before deploy.
+
 Check before deploying:
 
 ```sh
@@ -51,12 +55,11 @@ fix the first actionable log error, rerun check, then redeploy.
 Agents can create service SQLite databases, KV namespaces, queues, cron triggers,
 State namespaces, service bindings, and usage caps through the CLI.
 
-Agents can also inspect pricing, usage, services, service summaries, deploys,
-builds, service/deploy/build logs, env metadata, custom domains, domain
-verification, service storage files and media, billing checkout links, billing
-portal links, service deletion, and support ticket create/list/resolve actions
-through the same CLI. Abuse reports, owner-visible report lists, and owner
-appeals also use `tovuk abuse`.
+Agents can also inspect pricing, usage, service details, build logs, env
+metadata, custom domains, domain verification, service storage files and
+media, billing checkout links, billing portal links, service deletion, and
+support ticket create/list/resolve actions through the same CLI. Abuse reports,
+owner-visible report lists, and owner appeals also use `tovuk abuse`.
 
 Before high-throughput work, read pricing and set hard caps:
 

@@ -30,6 +30,7 @@ pub(crate) fn new_project(project_dir: &Path, template: &str) -> Result<()> {
         "created {}",
         path_relative(&config_path, &env::current_dir().unwrap_or_default())
     );
-    println!("detected {}", kind.as_str());
+    println!("scaffolded {} config from existing files", kind.as_str());
+    println!("deploy reads tovuk.toml only; review [capabilities] before deploy");
     Ok(())
 }

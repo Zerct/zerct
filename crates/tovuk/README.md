@@ -19,6 +19,10 @@ From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
 builds the worker and frontend roots, and returns one service URL with `/api/*`
 routed to the Rust worker.
 
+`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but deploy
+behavior is controlled only by the committed `tovuk.toml`. Review explicit
+`[capabilities]` before deploy.
+
 Static frontend deploys require TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
 or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health

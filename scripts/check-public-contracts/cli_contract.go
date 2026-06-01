@@ -15,6 +15,7 @@ func checkCLIContract() {
 	), "\n")
 
 	cargoReadme := readText("crates/tovuk/README.md")
+	cargoTemplateCLI := readText("crates/tovuk/src/cli/templates/mod.rs")
 	npmPackage := readPackageJSON("packages/tovuk/package.json")
 	npmInstall := readText("packages/tovuk/install.mjs")
 	npmReadme := readText("packages/tovuk/README.md")
@@ -57,12 +58,15 @@ func checkCLIContract() {
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")
 	}
 	for _, source := range []string{cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "controlled only by the committed `tovuk.toml`", "advisory scaffold wording")
 		requireContains(source, "billingEstimate", "agentic usage cost estimate docs")
 	}
 
 	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
 	requireContains(cargoCLI, "rust-worker", "Rust worker template option")
+	requireContains(cargoTemplateCLI, "scaffolded {} config from existing files", "advisory new-project scaffold output")
+	requireContains(cargoTemplateCLI, "deploy reads tovuk.toml only", "tovuk.toml-only scaffold guidance")
 	requireContains(cargoCLI, "JavaScript and TypeScript are frontend-only on Tovuk", "Rust-only runtime policy")
 	requireContains(npmInstall, "TOVUK_NATIVE_BINARY", "npm local native binary override")
 	requireContains(pythonCLI, "TOVUK_NATIVE_BINARY", "PyPI local native binary override")

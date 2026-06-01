@@ -177,10 +177,9 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `object_storage_bytes`, `object_storage_class_a_operations`, and
 `object_storage_class_b_operations`, and `object_storage_egress_bytes`.
 
-`tovuk pricing --json` and `tovuk pricing --json` expose a
-`products` catalog. Use each product's `features`, `meters`, `meter_details`,
-`pricing_fields`, and `limit_fields` before load tests, media uploads, or paid
-usage.
+`tovuk pricing --json` exposes a `products` catalog. Use each product's
+`features`, `meters`, `meter_details`, `pricing_fields`, and `limit_fields`
+before load tests, media uploads, or paid usage.
 `tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, quality checks,
 capability meters, account limits, usage, and `billingEstimate` before deploy.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
