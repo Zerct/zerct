@@ -7534,6 +7534,12 @@
                         "worker_cpu_ms",
                         "worker_transfer_bytes"
                       ],
+                      "pricing_fields": [
+                        "pricing.workers.includedRequestsPerMonth",
+                        "pricing.workers.requestOverageUsdMicrosPerMillion",
+                        "pricing.workers.includedCpuMsPerMonth",
+                        "pricing.workers.cpuOverageUsdMicrosPerMillionMs"
+                      ],
                       "limit_fields": [
                         "workers",
                         "workerRequestsPerDay",
@@ -14789,7 +14795,7 @@
           },
           "products": {
             "type": "array",
-            "description": "Product choices, usage meters, limit fields, and CLI commands for agent planning.",
+            "description": "Product choices, usage meters, pricing fields, limit fields, and CLI commands for agent planning.",
             "minItems": 1,
             "maxItems": 50,
             "items": {
@@ -14821,6 +14827,12 @@
                     "worker_requests",
                     "worker_cpu_ms",
                     "worker_transfer_bytes"
+                  ],
+                  "pricing_fields": [
+                    "pricing.workers.includedRequestsPerMonth",
+                    "pricing.workers.requestOverageUsdMicrosPerMillion",
+                    "pricing.workers.includedCpuMsPerMonth",
+                    "pricing.workers.cpuOverageUsdMicrosPerMillionMs"
                   ],
                   "limit_fields": [
                     "workers",
@@ -23213,6 +23225,7 @@
           "avoid_for",
           "commands",
           "meters",
+          "pricing_fields",
           "limit_fields"
         ],
         "properties": {
@@ -23326,6 +23339,28 @@
               ]
             ]
           },
+          "pricing_fields": {
+            "type": "array",
+            "description": "Key pricing fields in PlanPricing.",
+            "minItems": 0,
+            "maxItems": 40,
+            "items": {
+              "type": "string",
+              "pattern": "^pricing\\.[A-Za-z][A-Za-z0-9]*(\\.[A-Za-z][A-Za-z0-9]*){0,3}$",
+              "maxLength": 120,
+              "examples": [
+                "pricing.workers.includedRequestsPerMonth"
+              ]
+            },
+            "examples": [
+              [
+                "pricing.workers.includedRequestsPerMonth",
+                "pricing.workers.requestOverageUsdMicrosPerMillion",
+                "pricing.workers.includedCpuMsPerMonth",
+                "pricing.workers.cpuOverageUsdMicrosPerMillionMs"
+              ]
+            ]
+          },
           "limit_fields": {
             "type": "array",
             "description": "Key limit fields in PlanLimits.",
@@ -23376,6 +23411,12 @@
               "worker_requests",
               "worker_cpu_ms",
               "worker_transfer_bytes"
+            ],
+            "pricing_fields": [
+              "pricing.workers.includedRequestsPerMonth",
+              "pricing.workers.requestOverageUsdMicrosPerMillion",
+              "pricing.workers.includedCpuMsPerMonth",
+              "pricing.workers.cpuOverageUsdMicrosPerMillionMs"
             ],
             "limit_fields": [
               "workers",

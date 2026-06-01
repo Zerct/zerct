@@ -14,9 +14,10 @@ Use the CLI to read the live catalog:
 tovuk pricing --json
 ```
 
-The response includes both `plans` and `products`. Use `products[].meters` and
-`products[].limit_fields` to choose the right product and set hard caps before
-large deploys, media uploads, or paid usage.
+The response includes both `plans` and `products`. Use `products[].meters`,
+`products[].pricing_fields`, and `products[].limit_fields` to choose the right
+product, price the relevant meters, and set hard caps before large deploys,
+media uploads, or paid usage.
 
 Use the authenticated usage view before heavy work:
 
