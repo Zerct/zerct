@@ -13,18 +13,18 @@ tovuk deploy
 `tovuk` is the live unscoped npm package. It installs a native binary for the
 current platform.
 
-All official package CLIs expose the same agent commands for login, doctor,
+All official package CLIs expose the same agent commands for login, check,
 preview, deploy, wait, capabilities, account usage, services, deploys, builds,
 logs, env, domains, storage, billing, support, and read-only deploy planning.
 `tovuk usage --json` includes `billingEstimate.lineItems` so package users and
 agents can inspect current-month cost estimates without a dashboard.
-`tovuk plan --json` combines `tovuk.toml`, doctor checks, capability meters,
+`tovuk plan --json` combines `tovuk.toml`, quality checks, capability meters,
 limits, and `billingEstimate` before deploy without creating a build.
 
 The agent repair loop is the same on every package surface:
 
 ```sh
-tovuk doctor --json
+tovuk check --json
 tovuk plan --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
@@ -34,7 +34,7 @@ tovuk storage list --service service_1 --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk billing checkout --json
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
@@ -42,7 +42,7 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 larger than 100 MiB.
 
 Fix `agent_instruction` first. If a build fails, fix the first actionable log
-line, rerun doctor, then redeploy.
+line, rerun check, then redeploy.
 
 ## Homebrew
 
@@ -62,7 +62,7 @@ tovuk domains verify --service service_1 api.example.com
 tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./media.png media/media.png --public --json
 tovuk billing checkout --json
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 

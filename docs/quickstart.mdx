@@ -29,11 +29,11 @@ cd hello-service/web && bun install && cd ..
 ## Check locally
 
 ```sh
-tovuk doctor --json
+tovuk check --json
 ```
 
 Fix the first failed check before deploying. Tovuk errors include
-`agent_instruction`, so agents can make the exact code change and rerun doctor.
+`agent_instruction`, so agents can make the exact code change and rerun check.
 
 Plan the deploy before creating a build:
 
@@ -65,7 +65,7 @@ If the build fails, inspect the build logs:
 tovuk logs --build <build_id> --json
 ```
 
-Fix the first actionable error, rerun doctor, then redeploy.
+Fix the first actionable error, rerun check, then redeploy.
 
 ## Worker-static repos
 

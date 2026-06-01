@@ -9,7 +9,7 @@ Use templates when you want Tovuk to create the project shape.
 
 ```sh
 tovuk init api --template rust-worker
-tovuk doctor
+tovuk check
 tovuk preview
 ```
 
@@ -18,7 +18,7 @@ tovuk preview
 ```sh
 tovuk init web --template tanstack-static-frontend
 bun install
-tovuk doctor
+tovuk check
 tovuk preview
 ```
 
@@ -27,7 +27,7 @@ tovuk preview
 ```sh
 tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
-tovuk doctor
+tovuk check
 tovuk deploy --wait --json
 ```
 

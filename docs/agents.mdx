@@ -7,9 +7,9 @@ Use this page when an AI coding agent is deploying with Tovuk.
 
 ## The loop
 
-1. Run `tovuk doctor --json`.
+1. Run `tovuk check --json`.
 2. If it fails, fix the first failed check by following `agent_instruction`.
-3. Run `tovuk doctor --json` again.
+3. Run `tovuk check --json` again.
 4. Run `tovuk plan --json`.
 5. Review warnings, capabilities, meters, limits, and `billingEstimate`.
 6. Set usage caps for expected load.
@@ -46,8 +46,8 @@ to Rust.
 
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
-Run `tovuk doctor --json`. Fix the first failed check by following
-`agent_instruction`, then rerun doctor. Run `tovuk plan --json` and review
+Run `tovuk check --json`. Fix the first failed check by following
+`agent_instruction`, then rerun check. Run `tovuk plan --json` and review
 warnings, capabilities, meters, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable
@@ -69,7 +69,7 @@ operator agent to act:
 ```sh
 tovuk support create \
   "Deploy failed" \
-  "Agent already ran doctor and retried deploy." \
+  "Agent already ran check and retried deploy." \
   --service service_1 \
   --build job_1 \
   --deploy deploy_1 \
@@ -118,7 +118,7 @@ Create a Tovuk worker-static project. Run
 `tovuk init hello-service --template worker-static-rust-tanstack`, then install
 frontend packages in `hello-service/web`. Keep dynamic server logic in the Rust worker.
 Keep the TanStack frontend static at runtime and call same-origin `/api`. Run
-doctor in JSON mode, preview from the repo root when local tools are installed,
+check in JSON mode, preview from the repo root when local tools are installed,
 then deploy from the repo root.
 ```
 

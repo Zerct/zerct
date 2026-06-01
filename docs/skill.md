@@ -41,7 +41,7 @@ handlers, middleware, and server logic to Rust workers.
 ## Commands
 
 ```sh
-tovuk doctor --json
+tovuk check --json
 tovuk init hello-service --template worker-static-rust-tanstack
 tovuk plan --json
 tovuk preview

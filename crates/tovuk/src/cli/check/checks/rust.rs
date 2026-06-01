@@ -1,4 +1,4 @@
-use super::super::{cargo_lints::cargo_lints, report::DoctorCheck};
+use super::super::{cargo_lints::cargo_lints, report::QualityCheck};
 use crate::cli::{constants::RUST_STRICT_CLIPPY_DENY_LINTS, project::walk_project_files};
 use std::{
     fs,
@@ -6,7 +6,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub(super) fn rust_backend_checks(project_dir: &Path, config_valid: bool) -> Vec<DoctorCheck> {
+pub(super) fn rust_backend_checks(project_dir: &Path, config_valid: bool) -> Vec<QualityCheck> {
     let mut checks = vec![cargo_lints(project_dir), unsafe_check(project_dir)];
     if config_valid {
         checks.extend(rust_command_checks(project_dir));
@@ -14,7 +14,7 @@ pub(super) fn rust_backend_checks(project_dir: &Path, config_valid: bool) -> Vec
     checks
 }
 
-fn rust_command_checks(project_dir: &Path) -> Vec<DoctorCheck> {
+fn rust_command_checks(project_dir: &Path) -> Vec<QualityCheck> {
     vec![
         cargo_command_check(
             project_dir,
@@ -55,7 +55,7 @@ fn rust_command_checks(project_dir: &Path) -> Vec<DoctorCheck> {
     ]
 }
 
-fn strict_clippy_check(project_dir: &Path) -> DoctorCheck {
+fn strict_clippy_check(project_dir: &Path) -> QualityCheck {
     let mut clippy_args = vec![
         "clippy",
         "--locked",
@@ -86,7 +86,7 @@ fn cargo_command_check(
     args: &[&str],
     missing: &str,
     failed: &str,
-) -> DoctorCheck {
+) -> QualityCheck {
     let result = Command::new("cargo")
         .args(args)
         .current_dir(project_dir)
@@ -96,7 +96,7 @@ fn cargo_command_check(
     let output = match result {
         Ok(output) => output,
         Err(error) => {
-            return DoctorCheck {
+            return QualityCheck {
                 name: name.to_owned(),
                 ok: false,
                 message: error.to_string(),
@@ -109,7 +109,7 @@ fn cargo_command_check(
     } else {
         first_output_line(&output.stderr, &output.stdout, name)
     };
-    DoctorCheck {
+    QualityCheck {
         name: name.to_owned(),
         ok: output.status.success(),
         message,
@@ -132,9 +132,9 @@ pub(crate) fn first_output_line(stderr: &[u8], stdout: &[u8], fallback: &str) ->
     value.chars().take(240).collect()
 }
 
-pub(super) fn unsafe_check(project_dir: &Path) -> DoctorCheck {
+pub(super) fn unsafe_check(project_dir: &Path) -> QualityCheck {
     let hits = scan_unsafe(project_dir);
-    DoctorCheck {
+    QualityCheck {
         name: "unsafe".to_owned(),
         ok: hits.is_empty(),
         message: if hits.is_empty() {

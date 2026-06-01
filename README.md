@@ -27,7 +27,7 @@ Agent commands should use the native binary:
 
 ```sh
 tovuk init
-tovuk doctor
+tovuk check
 tovuk plan
 tovuk preview
 tovuk deploy
@@ -130,12 +130,12 @@ Agent prompt:
 
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
-Run `tovuk doctor --json`. Fix the first failed check by following
-`agent_instruction`, then rerun doctor. Run `tovuk plan --json` and review
+Run `tovuk check --json`. Fix the first failed check by following
+`agent_instruction`, then rerun check. Run `tovuk plan --json` and review
 warnings, meters, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable
-error, rerun doctor, and redeploy. If a plan limit blocks work, run
+error, rerun check, and redeploy. If a plan limit blocks work, run
 `tovuk billing checkout --json` and show the returned URL to the
 human. If Tovuk support is needed, run `tovuk support create` with
 `--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
@@ -162,7 +162,7 @@ does not drift.
 
 ```sh
 cd examples/hello-rust
-tovuk doctor
+tovuk check
 tovuk deploy
 ```
 
@@ -208,7 +208,7 @@ tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk billing checkout --json
 tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after doctor." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
@@ -225,7 +225,7 @@ ceilings so agents can plan large file transfers before reserving bytes.
 `tovuk usage --json` returns `billingEstimate.lineItems` for priced meters and
 explicitly free transfer meters, so agents can audit and cap usage before load
 tests or public launches.
-`tovuk plan --json` is read-only and combines `tovuk.toml`, doctor checks,
+`tovuk plan --json` is read-only and combines `tovuk.toml`, quality checks,
 capability meters, account limits, and billing estimates before deploy.
 
 The same commands are available through PyPI and Cargo after installation:

@@ -110,7 +110,7 @@ fn write_frontend_template(
         )?;
     }
     println!(
-        "run package install in the frontend directory before doctor: bun install or npm install"
+        "run package install in the frontend directory before check: bun install or npm install"
     );
     Ok(())
 }

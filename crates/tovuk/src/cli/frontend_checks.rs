@@ -3,7 +3,7 @@ mod predicates;
 mod scripts;
 mod source;
 
-use super::doctor::{DoctorCheck, doctor_check};
+use super::check::{QualityCheck, quality_check};
 use std::path::Path;
 
 pub(crate) use layout::{frontend_build_command, frontend_check_command, is_plain_static_frontend};
@@ -13,7 +13,7 @@ pub(crate) use predicates::{
 use scripts::frontend_script_checks;
 use source::frontend_source_checks;
 
-pub(crate) fn static_frontend_checks(project_dir: &Path, run_scripts: bool) -> Vec<DoctorCheck> {
+pub(crate) fn static_frontend_checks(project_dir: &Path, run_scripts: bool) -> Vec<QualityCheck> {
     if is_plain_static_frontend(project_dir) {
         return Vec::new();
     }
@@ -23,8 +23,8 @@ pub(crate) fn static_frontend_checks(project_dir: &Path, run_scripts: bool) -> V
     checks
 }
 
-fn frontend_lockfile_check(project_dir: &Path) -> DoctorCheck {
-    doctor_check(
+fn frontend_lockfile_check(project_dir: &Path) -> QualityCheck {
+    quality_check(
         "frontend lockfile",
         layout::frontend_lockfile_exists(project_dir),
         "found",

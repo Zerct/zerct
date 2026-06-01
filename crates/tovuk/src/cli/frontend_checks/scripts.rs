@@ -7,7 +7,7 @@ use super::{
     },
 };
 use crate::cli::{
-    doctor::{DoctorCheck, doctor_check, first_output_line},
+    check::{QualityCheck, first_output_line, quality_check},
     project::read_package_json,
 };
 use serde_json::Value;
@@ -17,7 +17,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub(super) fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> Vec<DoctorCheck> {
+pub(super) fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> Vec<QualityCheck> {
     let manifest = read_package_json(project_dir);
     let typecheck = package_script_value(manifest.as_ref(), "typecheck");
     let lint = package_script_value(manifest.as_ref(), "lint");
@@ -35,8 +35,8 @@ pub(super) fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> V
     checks
 }
 
-fn package_script_exists_check(script: &str, command: &str) -> DoctorCheck {
-    doctor_check(
+fn package_script_exists_check(script: &str, command: &str) -> QualityCheck {
+    quality_check(
         &format!("package script {script}"),
         !command.is_empty(),
         "found",
@@ -45,8 +45,8 @@ fn package_script_exists_check(script: &str, command: &str) -> DoctorCheck {
     )
 }
 
-fn strict_typecheck_check(command: &str) -> DoctorCheck {
-    doctor_check(
+fn strict_typecheck_check(command: &str) -> QualityCheck {
+    quality_check(
         "strict frontend typecheck",
         uses_strict_frontend_typechecker(command),
         "accepted",
@@ -55,7 +55,7 @@ fn strict_typecheck_check(command: &str) -> DoctorCheck {
     )
 }
 
-fn native_lint_check(manifest: Option<&Value>) -> DoctorCheck {
+fn native_lint_check(manifest: Option<&Value>) -> QualityCheck {
     let ok = !package_script_tree_uses(
         manifest,
         "lint",
@@ -67,7 +67,7 @@ fn native_lint_check(manifest: Option<&Value>) -> DoctorCheck {
         uses_native_frontend_linter,
         &mut BTreeSet::new(),
     );
-    doctor_check(
+    quality_check(
         "native frontend lint",
         ok,
         "accepted",
@@ -76,7 +76,7 @@ fn native_lint_check(manifest: Option<&Value>) -> DoctorCheck {
     )
 }
 
-fn native_quality_gate_check(manifest: Option<&Value>) -> DoctorCheck {
+fn native_quality_gate_check(manifest: Option<&Value>) -> QualityCheck {
     let ok = package_script_tree_uses(
         manifest,
         "lint",
@@ -93,7 +93,7 @@ fn native_quality_gate_check(manifest: Option<&Value>) -> DoctorCheck {
         uses_native_health_checker,
         &mut BTreeSet::new(),
     );
-    doctor_check(
+    quality_check(
         "native frontend quality gates",
         ok,
         "accepted",
@@ -133,7 +133,7 @@ fn package_script_tree_uses(
         .any(|referenced| package_script_tree_uses(manifest, referenced, predicate, seen))
 }
 
-fn package_script_check(project_dir: &Path, script: &str) -> DoctorCheck {
+fn package_script_check(project_dir: &Path, script: &str) -> QualityCheck {
     let manager = frontend_package_manager(project_dir);
     let args = if manager == "bun" {
         vec!["run", script]
@@ -148,7 +148,7 @@ fn package_script_check(project_dir: &Path, script: &str) -> DoctorCheck {
     let output = match result {
         Ok(output) => output,
         Err(error) => {
-            return DoctorCheck {
+            return QualityCheck {
                 name: format!("{manager} run {script}"),
                 ok: false,
                 message: error.to_string(),
@@ -163,7 +163,7 @@ fn package_script_check(project_dir: &Path, script: &str) -> DoctorCheck {
             };
         }
     };
-    DoctorCheck {
+    QualityCheck {
         name: format!("{manager} run {script}"),
         ok: output.status.success(),
         message: if output.status.success() {

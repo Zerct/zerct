@@ -45,10 +45,10 @@ description: "Recent product updates from Tovuk."
 - **Preflight deploy limits in SDKs.** Plan-limit checks now run before a
   deploy starts, returning a Stripe checkout link via `tovuk billing checkout`
   when an upgrade is needed.
-- **Actionable doctor feedback.** `tovuk doctor` now returns a concrete
+- **Actionable check feedback.** `tovuk check` now returns a concrete
   `agent_instruction` for every failed check so agents can repair issues in
   one loop. See the [Agent Loop](/agents#the-loop).
-- **Improved workspace doctor UX.** Faster checks and clearer output for
+- **Improved workspace check UX.** Faster checks and clearer output for
   worker-static workspaces.
 - **Inline CLI flag values.** Flags now accept inline values
   (`--service=service_1`) alongside the existing space-separated form.

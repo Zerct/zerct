@@ -4,7 +4,7 @@ const HELP_BODY: &str = r#"
 Usage:
   tovuk init [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
   tovuk install [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
-  tovuk doctor [path] [--json]
+  tovuk check [path] [--json]
   tovuk preview [path] [--port <port>]
   tovuk login [--token <token>] [--api <url>]
   tovuk plan [path] [--api <url>] [--json]

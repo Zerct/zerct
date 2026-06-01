@@ -1,10 +1,10 @@
-use crate::cli::{doctor::DoctorCheck, source_policy::frontend_source_report};
+use crate::cli::{check::QualityCheck, source_policy::frontend_source_report};
 use std::path::Path;
 
-pub(super) fn frontend_source_checks(project_dir: &Path) -> Vec<DoctorCheck> {
+pub(super) fn frontend_source_checks(project_dir: &Path) -> Vec<QualityCheck> {
     let report = frontend_source_report(project_dir);
     vec![
-        DoctorCheck {
+        QualityCheck {
             name: "typescript source".to_owned(),
             ok: !report.typescript.is_empty(),
             message: if report.typescript.is_empty() {
@@ -37,8 +37,8 @@ pub(super) fn frontend_source_checks(project_dir: &Path) -> Vec<DoctorCheck> {
     ]
 }
 
-fn forbidden_source_check(name: &str, files: &[String], instruction: &str) -> DoctorCheck {
-    DoctorCheck {
+fn forbidden_source_check(name: &str, files: &[String], instruction: &str) -> QualityCheck {
+    QualityCheck {
         name: name.to_owned(),
         ok: files.is_empty(),
         message: if files.is_empty() {

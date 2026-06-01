@@ -1,13 +1,13 @@
-use super::report::DoctorCheck;
+use super::report::QualityCheck;
 use crate::cli::constants::RUST_STRICT_CLIPPY_DENY_LINTS;
 use std::{fs, path::Path};
 
-pub(super) fn cargo_lints(project_dir: &Path) -> DoctorCheck {
+pub(super) fn cargo_lints(project_dir: &Path) -> QualityCheck {
     let cargo_toml = project_dir.join("Cargo.toml");
     let source = match fs::read_to_string(&cargo_toml) {
         Ok(source) => source,
         Err(error) => {
-            return DoctorCheck {
+            return QualityCheck {
                 name: "cargo lints".to_owned(),
                 ok: false,
                 message: error.to_string(),
@@ -24,7 +24,7 @@ pub(super) fn cargo_lints(project_dir: &Path) -> DoctorCheck {
     let cargo_toml = match source.parse::<toml::Table>() {
         Ok(cargo_toml) => cargo_toml,
         Err(error) => {
-            return DoctorCheck {
+            return QualityCheck {
                 name: "cargo lints".to_owned(),
                 ok: false,
                 message: error.to_string(),
@@ -39,7 +39,7 @@ pub(super) fn cargo_lints(project_dir: &Path) -> DoctorCheck {
         && required_clippy_lints
             .iter()
             .all(|lint| cargo_lint_level(&cargo_toml, "clippy", lint) == Some("deny"));
-    DoctorCheck {
+    QualityCheck {
         name: "cargo lints".to_owned(),
         ok,
         message: if ok {
