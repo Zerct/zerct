@@ -200,9 +200,10 @@ tovuk state alarm delete --service service_1 Room room-1 --json
 tovuk state delete-value --service service_1 Room room-1 counter --json
 ```
 
-State keys are capped at 512 bytes. The state key and value are
-capped at 2 MiB combined. Free and Pro State objects get 10 GB per object.
-Free also has a 5 GB account cap, so total Free State storage stops earlier.
+State keys are capped at 512 bytes. The state key and value are capped at
+2 MiB combined. Free State objects get 1 GB per object.
+Pro State objects get 10 GB per object. Free also has a 5 GB account cap, so
+total Free State storage stops earlier.
 
 Each State object can hold one scheduled alarm. Setting a new alarm replaces
 the previous one. Use `--delay-seconds` for relative scheduling or pass a UNIX
