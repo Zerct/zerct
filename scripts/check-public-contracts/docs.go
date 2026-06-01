@@ -106,6 +106,8 @@ func checkDocs() {
 	requireContains(openapi, `"StorageMultipartCompleteRequest"`, "OpenAPI multipart complete schema")
 	requireContains(limits, "tovuk limit set build_minutes", "build minutes cap docs")
 	requireContains(limits, "Deploy hooks can trigger 10 builds per service", "build hook rate docs")
+	requireContains(limits, "WebSocket response-side tunnel bytes", "worker websocket transfer meter docs")
+	requireContains(readText("docs/reference/workers.mdx"), "response-side tunnel", "worker websocket transfer docs")
 	rejectContains(pricing, "`1 GB` per object", "stale Free State storage docs")
 	rejectContains(limits, "State SQLite storage is 1 GB per object on Free", "stale State storage docs")
 	rejectContains(limits, "least 60 seconds", "stale KV minimum expiration docs")

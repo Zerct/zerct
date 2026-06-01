@@ -99,7 +99,8 @@ wakes a sleeping worker before delivery.
   `tovuk queue create` or `tovuk queue update`.
 - Cron triggers are sent as `POST /.tovuk/cron/<trigger>`.
 - WebSocket upgrades on worker routes are proxied to the Rust worker. Tovuk
-  meters the initial worker request and handshake CPU, not idle connection time.
+  meters the initial worker request, handshake CPU, and response-side tunnel
+  bytes under `worker_transfer_bytes`, not idle connection time.
 
 Queue payloads use JSON with base64 bodies:
 

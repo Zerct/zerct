@@ -81,7 +81,8 @@ Worker-static contract:
 - Cron handlers are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
 - Cron handlers must be idempotent because schedules can overlap with retries
   or manual agent actions.
-- WebSocket upgrades on worker routes are proxied to Rust workers.
+- WebSocket upgrades on worker routes are proxied to Rust workers and meter
+  response-side tunnel bytes as `worker_transfer_bytes`.
 
 Useful commands:
 
