@@ -70,6 +70,9 @@ tovuk limit delete worker_requests --period day --json
 Each service can bind up to 5000 platform resources. That count includes
 SQLite databases, KV namespaces, queues, State namespaces, and private
 service bindings.
+Service binding call chains can use up to 32 worker invocations per
+top-level request, and every service binding call also counts against Worker
+subrequest limits.
 
 The machine-readable product catalog is available from:
 

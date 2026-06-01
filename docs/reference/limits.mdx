@@ -18,6 +18,9 @@ ambiguous to run.
 - One service can bind up to 5000 platform resources, including SQLite
   databases, KV namespaces, queues, State namespaces, and private
   service bindings.
+- Service binding call chains can use up to 32 worker invocations per
+  top-level request. Each service binding call also counts against the Worker
+  subrequest limit.
 - Rust worker artifacts are capped at 64 MiB before compression, 3 MiB after
   compression on Free, and 10 MiB after compression on Pro.
 - Runtime idle timeout must be between `1` and `60` minutes.
