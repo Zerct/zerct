@@ -28,7 +28,7 @@ Agent commands should use the native binary:
 ```sh
 tovuk init
 tovuk check
-tovuk plan
+tovuk deploy --dry-run
 tovuk preview
 tovuk deploy
 ```
@@ -131,7 +131,7 @@ Agent prompt:
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
 Run `tovuk check --json`. Fix the first failed check by following
-`agent_instruction`, then rerun check. Run `tovuk plan --json` and review
+`agent_instruction`, then rerun check. Run `tovuk deploy --dry-run --json` and review
 warnings, meters, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable
@@ -175,7 +175,7 @@ Useful agent commands:
 ```sh
 tovuk capabilities
 tovuk pricing --json
-tovuk plan --json
+tovuk deploy --dry-run --json
 tovuk me
 tovuk usage
 tovuk activity --json
@@ -225,7 +225,7 @@ ceilings so agents can plan large file transfers before reserving bytes.
 `tovuk usage --json` returns `billingEstimate.lineItems` for priced meters and
 explicitly free transfer meters, so agents can audit and cap usage before load
 tests or public launches.
-`tovuk plan --json` is read-only and combines `tovuk.toml`, quality checks,
+`tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, quality checks,
 capability meters, account limits, and billing estimates before deploy.
 
 The same commands are available through PyPI and Cargo after installation:

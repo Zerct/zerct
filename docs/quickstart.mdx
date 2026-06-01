@@ -35,10 +35,10 @@ tovuk check --json
 Fix the first failed check before deploying. Tovuk errors include
 `agent_instruction`, so agents can make the exact code change and rerun check.
 
-Plan the deploy before creating a build:
+Dry-run the deploy before creating a build:
 
 ```sh
-tovuk plan --json
+tovuk deploy --dry-run --json
 ```
 
 Review warnings, enabled capabilities, meters, limits, and `billingEstimate`.

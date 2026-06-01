@@ -10,7 +10,7 @@ cargo install tovuk
 tovuk init hello-service --template worker-static-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
-tovuk plan --json
+tovuk deploy --dry-run --json
 tovuk preview
 tovuk deploy --wait --json
 ```
@@ -36,7 +36,7 @@ The Cargo package exposes the same agent command surface as npm:
 ```sh
 tovuk capabilities
 tovuk pricing --json
-tovuk plan --json
+tovuk deploy --dry-run --json
 tovuk me
 tovuk usage --json
 tovuk activity --json
@@ -98,7 +98,7 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
-`tovuk plan --json` combines `tovuk.toml`, quality checks, capability meters,
+`tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks, capability meters,
 account limits, and `billingEstimate` before deploy, without creating a build.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
@@ -108,7 +108,7 @@ Agent repair loop:
 
 ```sh
 tovuk check --json
-tovuk plan --json
+tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
 ```

@@ -1,5 +1,6 @@
 mod archive;
 mod discovery;
+mod dry_run;
 mod output;
 mod plan;
 mod types;
@@ -15,6 +16,7 @@ use super::{
 };
 use archive::create_archive_base64;
 pub(crate) use discovery::discover_deploy_projects;
+use dry_run::print_deploy_dry_run;
 use output::{print_deploy_result, print_workspace_deploy_results};
 use plan::create_deploy_plan;
 use reqwest::Method;
@@ -23,7 +25,6 @@ use std::{
     path::Path,
     process::{Command, Stdio},
 };
-pub(crate) use types::DeployProjectInfo;
 use types::{DeployPlanProject, WorkspaceDeployResult};
 use wait::wait_for_workspace_builds;
 
@@ -38,6 +39,9 @@ pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
         ));
     }
     let token = read_or_login_token(cli)?;
+    if cli.deployment.dry_run {
+        return print_deploy_dry_run(project_dir, &projects, cli, &token);
+    }
     let plan = create_deploy_plan(&projects, cli, &token)?;
     let mut results = deploy_projects(&plan, cli, &token)?;
     if cli.deployment.wait {
