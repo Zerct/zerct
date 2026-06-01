@@ -513,7 +513,7 @@ pub(crate) fn caps_command(cli: &CliOptions) -> Result<()> {
         _ => Err(agent_error(
             "unknown_command",
             "Unknown usage cap command.",
-            "Use `tovuk caps set worker_requests --period day --value 100000 --json` or `tovuk caps delete worker_requests --period day --json`.",
+            "Use `tovuk limits set worker_requests --period day --value 100000 --json` or `tovuk limits delete worker_requests --period day --json`.",
             cli.output.json,
         )),
     }
@@ -1428,7 +1428,7 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
         1,
         "cap_metric_required",
         "Usage cap metric is required.",
-        "Use `tovuk caps set worker_requests --period day --value 100000 --json`.",
+        "Use `tovuk limits set worker_requests --period day --value 100000 --json`.",
     )?;
     let period = if cli.period.is_empty() {
         cli.args.get(2).cloned().unwrap_or_default()
@@ -1444,7 +1444,7 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "cap_period_or_value_required",
             "Usage cap period and value are required.",
-            "Use `tovuk caps set worker_requests --period day --value 100000 --json`.",
+            "Use `tovuk limits set worker_requests --period day --value 100000 --json`.",
             cli.output.json,
         ));
     }
@@ -1478,7 +1478,7 @@ fn delete_usage_cap(cli: &CliOptions) -> Result<()> {
         1,
         "cap_metric_required",
         "Usage cap metric is required.",
-        "Use `tovuk caps delete worker_requests --period day --json`.",
+        "Use `tovuk limits delete worker_requests --period day --json`.",
     )?;
     let period = if cli.period.is_empty() {
         cli.args.get(2).cloned().unwrap_or_default()
@@ -1489,7 +1489,7 @@ fn delete_usage_cap(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "cap_period_required",
             "Usage cap period is required.",
-            "Use `tovuk caps delete worker_requests --period day --json`.",
+            "Use `tovuk limits delete worker_requests --period day --json`.",
             cli.output.json,
         ));
     }

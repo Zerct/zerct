@@ -70,6 +70,9 @@ Usage:
   tovuk support list [--limit <n>] [--api <url>] [--json]
   tovuk support create "Subject" "Details" [--service <service>] [--build <build_id>] [--deploy <deploy_id>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
   tovuk support resolve <ticket_id> [--api <url>] [--json]
+  tovuk abuse report <target_url> "Summary" "Details" --category phishing|malware|illegal_content|copyright|trademark|network_abuse|privacy|emergency_safety|other --reporter-email <email> [--service <service>] [--target-path <path>] [--object-path <path>] [--evidence <text>] [--api <url>] [--json]
+  tovuk abuse list [--limit <n>] [--api <url>] [--json]
+  tovuk abuse appeal <report_id> "Remediation details" [--evidence <text>] [--api <url>] [--json]
 
 Agent contract:
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
@@ -91,6 +94,7 @@ Agent contract:
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
+  - Create abuse reports with target URL, category, reporter email, and evidence. Owners track and appeal service reports with tovuk abuse list --json and tovuk abuse appeal <report_id> --json.
   - Keep direct unsafe out of Rust source.
   - Keep Rust worker resources within Tovuk limits: 128mb memory, CPU allocation 1, metered worker_cpu_ms caps, and 1-60 minute idle timeout.
 "#;

@@ -1,12 +1,12 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and worker-static apps to Tovuk with `tovuk`.
+description: Deploy Rust workers, static frontends, and worker-static services to Tovuk with `tovuk`.
 ---
 
 # Tovuk
 
 Use when a user wants to deploy a Rust worker, static frontend, or
-worker-static app to Tovuk.
+worker-static service to Tovuk.
 
 ## Workflow
 
@@ -21,7 +21,7 @@ worker-static app to Tovuk.
 4. For plain static frontends without a package manager, set
    `kind = "static_frontend"`, require `index.html`, use
    `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
-5. For worker-static apps, set `kind = "worker_static"` in one root
+5. For worker-static services, set `kind = "worker_static"` in one root
    `tovuk.toml`, configure `[worker].root` and `[frontend].root`, serve the
    frontend at `/`, and route API calls through same-origin `/api`.
 6. Prefer Bun with `bun.lock`, source-scoped Oxlint type-aware checks, and
@@ -54,9 +54,12 @@ tovuk queue metrics --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
 tovuk cron update --service <service> nightly "*/15 * * * *" --json
 tovuk cron disable --service <service> nightly --json
-tovuk durable-object create --service <service> Room --json
+tovuk state create --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
-tovuk caps set worker_requests --period day --value 100000 --json
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
+tovuk abuse list --json
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
 ```
 
 ## Contract
@@ -75,3 +78,7 @@ include `index.html`.
 
 Worker-static frontends call same-origin `/api` for APIs and server-side logic.
 JavaScript and TypeScript are frontend-only on Tovuk.
+
+Abuse reports are API and CLI first. Create reports with target URL, category,
+reporter email, and evidence. Service owners use `tovuk abuse list --json` and
+`tovuk abuse appeal <report_id> --json` with remediation evidence.

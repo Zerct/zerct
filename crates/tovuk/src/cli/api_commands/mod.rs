@@ -1,3 +1,4 @@
+mod abuse;
 mod billing;
 mod common;
 mod domains;
@@ -10,6 +11,7 @@ mod platform;
 mod storage;
 mod support;
 
+pub(crate) use abuse::abuse_command;
 pub(crate) use billing::billing_command;
 pub(crate) use domains::domains_command;
 pub(crate) use env::env_command;

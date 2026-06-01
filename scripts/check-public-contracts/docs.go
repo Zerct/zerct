@@ -39,6 +39,7 @@ func checkDocs() {
 	limits := readText("docs/reference/limits.mdx")
 	platform := readText("docs/reference/platform.mdx")
 	products := readText("docs/reference/products.mdx")
+	abuse := readText("docs/abuse.mdx")
 	allUsageCapMeters := []string{
 		"worker_requests",
 		"worker_cpu_ms",
@@ -165,6 +166,15 @@ func checkDocs() {
 	requireContains(openapi, `"/v1/services/{service_id}/storage/multipart/create"`, "OpenAPI multipart create route")
 	requireContains(openapi, `"StorageMultipartCreateRequest"`, "OpenAPI multipart create schema")
 	requireContains(openapi, `"StorageMultipartCompleteRequest"`, "OpenAPI multipart complete schema")
+	requireContains(abuse, "tovuk abuse report", "abuse report CLI docs")
+	requireContains(abuse, "tovuk abuse list", "abuse list CLI docs")
+	requireContains(abuse, "tovuk abuse appeal", "abuse appeal CLI docs")
+	requireContains(openapi, `"/v1/abuse/reports"`, "OpenAPI abuse reports route")
+	requireContains(openapi, `"/v1/abuse/reports/{report_id}/appeal"`, "OpenAPI abuse appeal route")
+	requireContains(openapi, `"AbuseReportCreateRequest"`, "OpenAPI abuse create schema")
+	requireContains(openapi, `"AbuseReportCreateResponse"`, "OpenAPI abuse create response schema")
+	requireContains(openapi, `"AbuseReportsResponse"`, "OpenAPI abuse list response schema")
+	requireContains(openapi, `"tovuk abuse list --json"`, "OpenAPI abuse next command")
 	requireContains(limits, "tovuk limits set build_minutes", "build minutes cap docs")
 	requireContains(limits, "Deploy hooks can trigger 10 builds per service", "build hook rate docs")
 	requireContains(limits, "WebSocket response-side tunnel bytes", "worker websocket transfer meter docs")
@@ -192,6 +202,7 @@ func checkDocs() {
 	rejectContains(openapi, `"storageSinglePartUploadMaxMib": 5120`, "stale OpenAPI single-part upload limit")
 	rejectContains(storage, "free egress", "stale object storage egress docs")
 	rejectContains(pricing, "free egress", "stale pricing object storage egress docs")
+	rejectContains(openapi, "tovuk caps", "retired usage caps command in OpenAPI")
 
 	fmt.Printf("Checked %d Mintlify navigation entries.\n", len(pages))
 }

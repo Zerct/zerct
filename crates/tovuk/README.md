@@ -70,6 +70,9 @@ tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 tovuk queue metrics --service service_1 jobs --json
 tovuk queue delete --service service_1 jobs --json
+tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
+tovuk abuse list --json
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk cron update --service service_1 nightly "*/15 * * * *" --json
 tovuk cron disable --service service_1 nightly --json

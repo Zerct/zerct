@@ -5616,6 +5616,169 @@
           }
         ]
       }
+    },
+    "/v1/abuse/reports": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "List abuse reports",
+        "description": "List abuse reports affecting authenticated account services. Context: paths./v1/abuse/reports.get.",
+        "operationId": "listAbuseReports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "format": "int32"
+            },
+            "description": "Maximum number of abuse reports to return. Context: paths./v1/abuse/reports.get.parameters.limit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseReportsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create abuse report",
+        "description": "Create a rate-limited public abuse report with reporter contact, category, target URL, and preserved evidence. Context: paths./v1/abuse/reports.post.",
+        "operationId": "createAbuseReport",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseReportCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Create abuse report",
+                  "value": {
+                    "reporter_email": "reporter@example.com",
+                    "reporter_name": "Security Researcher",
+                    "category": "phishing",
+                    "target_url": "https://demo.tovuk.app/login",
+                    "target_path": "/login",
+                    "service_id": "service_1",
+                    "summary": "Phishing page",
+                    "details": "Credential collection form is impersonating another service.",
+                    "evidence": "Screenshot URL and request id.",
+                    "owner_notification_allowed": true
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body describing reporter contact, abuse category, affected target, details, and evidence. Context: paths./v1/abuse/reports.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseReportCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/abuse/reports/{report_id}/appeal": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Appeal abuse report",
+        "description": "Submit owner remediation details and evidence for an account-owned abuse report. Context: paths./v1/abuse/reports/{report_id}/appeal.post.",
+        "operationId": "appealAbuseReport",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/abuse/reports/{report_id}/appeal.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseReportAppealRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Appeal abuse report",
+                  "value": {
+                    "details": "Removed the reported file and rotated credentials.",
+                    "evidence": "deploy_1 remediation log"
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with remediation details and optional evidence. Context: paths./v1/abuse/reports/{report_id}/appeal.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseReportAppealed"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10477,6 +10640,166 @@
                 }
               }
             }
+          }
+        }
+      },
+      "AbuseReportCreated": {
+        "description": "Abuse report created. Context: components.responses.AbuseReportCreated.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AbuseReportCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Abuse report created.",
+                "value": {
+                  "report": {
+                    "id": "abuse_0123456789abcdef0123",
+                    "service_id": "service_1",
+                    "reporter_email": "reporter@example.com",
+                    "reporter_name": "Security Researcher",
+                    "category": "phishing",
+                    "target_url": "https://demo.tovuk.app/login",
+                    "target_path": "/login",
+                    "object_path": null,
+                    "summary": "Phishing page",
+                    "details": "Credential collection form is impersonating another service.",
+                    "evidence": "Screenshot URL and request id.",
+                    "severity": "urgent",
+                    "status": "open",
+                    "quarantine_recommended": true,
+                    "owner_notification_allowed": true,
+                    "agent_instruction": "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal.",
+                    "created_at": "2026-06-01T12:00:00Z",
+                    "updated_at": "2026-06-01T12:00:00Z"
+                  },
+                  "rate_limit": {
+                    "limitPerHour": 3,
+                    "remainingHour": 2,
+                    "limitPerDay": 10,
+                    "remainingDay": 9
+                  },
+                  "next_command": "tovuk abuse list --json"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "AbuseReportsLoaded": {
+        "description": "Abuse reports loaded. Context: components.responses.AbuseReportsLoaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AbuseReportsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Abuse reports loaded.",
+                "value": {
+                  "reports": [
+                    {
+                      "id": "abuse_0123456789abcdef0123",
+                      "service_id": "service_1",
+                      "reporter_email": "reporter@example.com",
+                      "reporter_name": "Security Researcher",
+                      "category": "phishing",
+                      "target_url": "https://demo.tovuk.app/login",
+                      "target_path": "/login",
+                      "object_path": null,
+                      "summary": "Phishing page",
+                      "details": "Credential collection form is impersonating another service.",
+                      "evidence": "Screenshot URL and request id.",
+                      "severity": "urgent",
+                      "status": "open",
+                      "quarantine_recommended": true,
+                      "owner_notification_allowed": true,
+                      "agent_instruction": "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal.",
+                      "created_at": "2026-06-01T12:00:00Z",
+                      "updated_at": "2026-06-01T12:00:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "AbuseReportAppealed": {
+        "description": "Abuse report appealed. Context: components.responses.AbuseReportAppealed.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AbuseReport"
+            },
+            "examples": {
+              "example": {
+                "summary": "Abuse report appealed.",
+                "value": {
+                  "id": "abuse_0123456789abcdef0123",
+                  "service_id": "service_1",
+                  "reporter_email": "reporter@example.com",
+                  "reporter_name": "Security Researcher",
+                  "category": "phishing",
+                  "target_url": "https://demo.tovuk.app/login",
+                  "target_path": "/login",
+                  "object_path": null,
+                  "summary": "Phishing page",
+                  "details": "Credential collection form is impersonating another service.",
+                  "evidence": "Screenshot URL and request id.",
+                  "severity": "urgent",
+                  "status": "appealed",
+                  "quarantine_recommended": true,
+                  "owner_notification_allowed": true,
+                  "agent_instruction": "Abuse report appeal received. Preserve remediation evidence and run `tovuk abuse list --json` to follow status.",
+                  "created_at": "2026-06-01T12:00:00Z",
+                  "updated_at": "2026-06-01T12:00:00Z"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
           }
         }
       }
@@ -21030,8 +21353,8 @@
                 },
                 {
                   "type": "number",
-                  "minimum": -1.0E+308,
-                  "maximum": 1.0E+308
+                  "minimum": -1e+308,
+                  "maximum": 1e+308
                 },
                 {
                   "type": "boolean"
@@ -21083,8 +21406,8 @@
                 },
                 {
                   "type": "number",
-                  "minimum": -1.0E+308,
-                  "maximum": 1.0E+308
+                  "minimum": -1e+308,
+                  "maximum": 1e+308
                 },
                 {
                   "type": "boolean"
@@ -24777,6 +25100,617 @@
           }
         },
         "description": "SQLite backup restore response. Context: components.schemas.SqliteBackupRestoreResponse."
+      },
+      "AbuseReportCategory": {
+        "type": "string",
+        "enum": [
+          "phishing",
+          "malware",
+          "illegal_content",
+          "copyright",
+          "trademark",
+          "network_abuse",
+          "privacy",
+          "emergency_safety",
+          "other"
+        ],
+        "description": "Abuse report category. Context: components.schemas.AbuseReportCategory.",
+        "examples": [
+          "phishing"
+        ]
+      },
+      "AbuseReportSeverity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "normal",
+          "urgent"
+        ],
+        "description": "Abuse report severity. Context: components.schemas.AbuseReportSeverity.",
+        "examples": [
+          "urgent"
+        ]
+      },
+      "AbuseReportStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "triaged",
+          "quarantined",
+          "owner_notified",
+          "resolved",
+          "rejected",
+          "appealed"
+        ],
+        "description": "Abuse report lifecycle status. Context: components.schemas.AbuseReportStatus.",
+        "examples": [
+          "open"
+        ]
+      },
+      "AbuseReportCreateRequest": {
+        "type": "object",
+        "description": "Request body for creating an abuse report. Context: components.schemas.AbuseReportCreateRequest.",
+        "additionalProperties": false,
+        "required": [
+          "reporter_email",
+          "category",
+          "target_url",
+          "summary",
+          "details",
+          "evidence"
+        ],
+        "properties": {
+          "reporter_email": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 320,
+            "format": "email",
+            "description": "Reporter contact email used for rate limits and follow-up. Context: components.schemas.AbuseReportCreateRequest.properties.reporter_email.",
+            "examples": [
+              "reporter@example.com"
+            ]
+          },
+          "reporter_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 160,
+            "description": "Optional reporter display name. Context: components.schemas.AbuseReportCreateRequest.properties.reporter_name.",
+            "examples": [
+              "Security Researcher"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,160}$"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AbuseReportCategory"
+          },
+          "target_url": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "Affected absolute http or https URL. Context: components.schemas.AbuseReportCreateRequest.properties.target_url.",
+            "examples": [
+              "https://demo.tovuk.app/login"
+            ]
+          },
+          "target_path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Optional affected URL path when the target URL is an origin or domain. Context: components.schemas.AbuseReportCreateRequest.properties.target_path.",
+            "examples": [
+              "/login"
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,2048}$"
+          },
+          "object_path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Optional object storage path involved in the report. Context: components.schemas.AbuseReportCreateRequest.properties.object_path.",
+            "examples": [
+              "uploads/logo.png"
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,2048}$"
+          },
+          "service_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "description": "Optional Tovuk service id or service name when known. Context: components.schemas.AbuseReportCreateRequest.properties.service_id.",
+            "examples": [
+              "service_1"
+            ],
+            "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$"
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
+            "description": "Short one-line abuse summary. Context: components.schemas.AbuseReportCreateRequest.properties.summary.",
+            "examples": [
+              "Phishing page"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,160}$"
+          },
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Reporter details and context. Context: components.schemas.AbuseReportCreateRequest.properties.details.",
+            "examples": [
+              "Credential collection form is impersonating another service."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Evidence text, URLs, request ids, object paths, or logs. Context: components.schemas.AbuseReportCreateRequest.properties.evidence.",
+            "examples": [
+              "Screenshot URL and request id."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          },
+          "owner_notification_allowed": {
+            "type": "boolean",
+            "description": "Whether Tovuk may notify the service owner where lawful. Context: components.schemas.AbuseReportCreateRequest.properties.owner_notification_allowed.",
+            "examples": [
+              true
+            ],
+            "default": true
+          }
+        },
+        "examples": [
+          {
+            "reporter_email": "reporter@example.com",
+            "reporter_name": "Security Researcher",
+            "category": "phishing",
+            "target_url": "https://demo.tovuk.app/login",
+            "target_path": "/login",
+            "service_id": "service_1",
+            "summary": "Phishing page",
+            "details": "Credential collection form is impersonating another service.",
+            "evidence": "Screenshot URL and request id.",
+            "owner_notification_allowed": true
+          }
+        ]
+      },
+      "AbuseReportAppealRequest": {
+        "type": "object",
+        "description": "Request body for appealing an abuse report. Context: components.schemas.AbuseReportAppealRequest.",
+        "additionalProperties": false,
+        "required": [
+          "details"
+        ],
+        "properties": {
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Owner appeal details and remediation evidence. Context: components.schemas.AbuseReportAppealRequest.properties.details.",
+            "examples": [
+              "Removed the reported file and rotated credentials."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          },
+          "evidence": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 2048,
+            "description": "Optional additional evidence URL, command output, or request id. Context: components.schemas.AbuseReportAppealRequest.properties.evidence.",
+            "examples": [
+              "deploy_1 remediation log"
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,2048}$"
+          }
+        },
+        "examples": [
+          {
+            "details": "Removed the reported file and rotated credentials.",
+            "evidence": "deploy_1 remediation log"
+          }
+        ]
+      },
+      "AbuseReport": {
+        "type": "object",
+        "description": "Abuse report returned to users and agents. Context: components.schemas.AbuseReport.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "service_id",
+          "reporter_email",
+          "reporter_name",
+          "category",
+          "target_url",
+          "target_path",
+          "object_path",
+          "summary",
+          "details",
+          "evidence",
+          "severity",
+          "status",
+          "quarantine_recommended",
+          "owner_notification_allowed",
+          "agent_instruction",
+          "created_at",
+          "updated_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable abuse report id. Context: components.schemas.AbuseReport.properties.id.",
+            "examples": [
+              "abuse_0123456789abcdef0123"
+            ],
+            "pattern": "^abuse_[a-f0-9]{20}$",
+            "maxLength": 26
+          },
+          "service_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Related service id when Tovuk can resolve it. Context: components.schemas.AbuseReport.properties.service_id.",
+            "examples": [
+              "service_1"
+            ],
+            "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+            "maxLength": 64
+          },
+          "reporter_email": {
+            "type": "string",
+            "maxLength": 320,
+            "format": "email",
+            "description": "Reporter contact email. Context: components.schemas.AbuseReport.properties.reporter_email.",
+            "examples": [
+              "reporter@example.com"
+            ]
+          },
+          "reporter_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 160,
+            "description": "Reporter display name. Context: components.schemas.AbuseReport.properties.reporter_name.",
+            "examples": [
+              "Security Researcher"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,160}$"
+          },
+          "category": {
+            "$ref": "#/components/schemas/AbuseReportCategory"
+          },
+          "target_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "Affected public URL. Context: components.schemas.AbuseReport.properties.target_url.",
+            "examples": [
+              "https://demo.tovuk.app/login"
+            ]
+          },
+          "target_path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048,
+            "description": "Optional affected URL path. Context: components.schemas.AbuseReport.properties.target_path.",
+            "examples": [
+              "/login"
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,2048}$"
+          },
+          "object_path": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048,
+            "description": "Optional object storage path. Context: components.schemas.AbuseReport.properties.object_path.",
+            "examples": [
+              "uploads/logo.png"
+            ],
+            "pattern": "^[^\\x00-\\x1F\\x7F]{1,2048}$"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 160,
+            "description": "Short abuse summary. Context: components.schemas.AbuseReport.properties.summary.",
+            "examples": [
+              "Phishing page"
+            ],
+            "pattern": "^[^\\r\\n\\x00-\\x1F\\x7F]{1,160}$"
+          },
+          "details": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "Reporter details and context. Context: components.schemas.AbuseReport.properties.details.",
+            "examples": [
+              "Credential collection form is impersonating another service."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          },
+          "evidence": {
+            "type": "string",
+            "maxLength": 8000,
+            "description": "Preserved reporter evidence. Context: components.schemas.AbuseReport.properties.evidence.",
+            "examples": [
+              "Screenshot URL and request id."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/AbuseReportSeverity"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AbuseReportStatus"
+          },
+          "quarantine_recommended": {
+            "type": "boolean",
+            "description": "Whether quarantine is recommended before manual review. Context: components.schemas.AbuseReport.properties.quarantine_recommended.",
+            "examples": [
+              true
+            ]
+          },
+          "owner_notification_allowed": {
+            "type": "boolean",
+            "description": "Whether owner notification is allowed where lawful. Context: components.schemas.AbuseReport.properties.owner_notification_allowed.",
+            "examples": [
+              true
+            ]
+          },
+          "agent_instruction": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Next step for the reporter or owner agent. Context: components.schemas.AbuseReport.properties.agent_instruction.",
+            "examples": [
+              "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal."
+            ],
+            "pattern": "^[\\s\\S]{1,500}$"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC creation time. Context: components.schemas.AbuseReport.properties.created_at.",
+            "examples": [
+              "2026-06-01T12:00:00Z"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC update time. Context: components.schemas.AbuseReport.properties.updated_at.",
+            "examples": [
+              "2026-06-01T12:00:00Z"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "id": "abuse_0123456789abcdef0123",
+            "service_id": "service_1",
+            "reporter_email": "reporter@example.com",
+            "reporter_name": "Security Researcher",
+            "category": "phishing",
+            "target_url": "https://demo.tovuk.app/login",
+            "target_path": "/login",
+            "object_path": null,
+            "summary": "Phishing page",
+            "details": "Credential collection form is impersonating another service.",
+            "evidence": "Screenshot URL and request id.",
+            "severity": "urgent",
+            "status": "open",
+            "quarantine_recommended": true,
+            "owner_notification_allowed": true,
+            "agent_instruction": "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal.",
+            "created_at": "2026-06-01T12:00:00Z",
+            "updated_at": "2026-06-01T12:00:00Z"
+          }
+        ]
+      },
+      "AbuseReportRateLimit": {
+        "type": "object",
+        "description": "Reporter abuse intake rate limit. Context: components.schemas.AbuseReportRateLimit.",
+        "additionalProperties": false,
+        "required": [
+          "limitPerHour",
+          "remainingHour",
+          "limitPerDay",
+          "remainingDay"
+        ],
+        "properties": {
+          "limitPerHour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "format": "int32",
+            "description": "Allowed reports per rolling hour. Context: components.schemas.AbuseReportRateLimit.properties.limitPerHour.",
+            "examples": [
+              3
+            ]
+          },
+          "remainingHour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "format": "int32",
+            "description": "Remaining reports in the rolling hour after this response. Context: components.schemas.AbuseReportRateLimit.properties.remainingHour.",
+            "examples": [
+              2
+            ]
+          },
+          "limitPerDay": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "format": "int32",
+            "description": "Allowed reports per rolling day. Context: components.schemas.AbuseReportRateLimit.properties.limitPerDay.",
+            "examples": [
+              10
+            ]
+          },
+          "remainingDay": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "format": "int32",
+            "description": "Remaining reports in the rolling day after this response. Context: components.schemas.AbuseReportRateLimit.properties.remainingDay.",
+            "examples": [
+              9
+            ]
+          }
+        },
+        "examples": [
+          {
+            "limitPerHour": 3,
+            "remainingHour": 2,
+            "limitPerDay": 10,
+            "remainingDay": 9
+          }
+        ]
+      },
+      "AbuseReportCreateResponse": {
+        "type": "object",
+        "description": "Abuse report creation response. Context: components.schemas.AbuseReportCreateResponse.",
+        "additionalProperties": false,
+        "required": [
+          "report",
+          "rate_limit",
+          "next_command"
+        ],
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/AbuseReport"
+          },
+          "rate_limit": {
+            "$ref": "#/components/schemas/AbuseReportRateLimit"
+          },
+          "next_command": {
+            "type": "string",
+            "maxLength": 240,
+            "description": "Recommended next CLI command. Context: components.schemas.AbuseReportCreateResponse.properties.next_command.",
+            "examples": [
+              "tovuk abuse list --json"
+            ],
+            "pattern": "^[\\s\\S]{1,240}$"
+          }
+        },
+        "examples": [
+          {
+            "report": {
+              "id": "abuse_0123456789abcdef0123",
+              "service_id": "service_1",
+              "reporter_email": "reporter@example.com",
+              "reporter_name": "Security Researcher",
+              "category": "phishing",
+              "target_url": "https://demo.tovuk.app/login",
+              "target_path": "/login",
+              "object_path": null,
+              "summary": "Phishing page",
+              "details": "Credential collection form is impersonating another service.",
+              "evidence": "Screenshot URL and request id.",
+              "severity": "urgent",
+              "status": "open",
+              "quarantine_recommended": true,
+              "owner_notification_allowed": true,
+              "agent_instruction": "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal.",
+              "created_at": "2026-06-01T12:00:00Z",
+              "updated_at": "2026-06-01T12:00:00Z"
+            },
+            "rate_limit": {
+              "limitPerHour": 3,
+              "remainingHour": 2,
+              "limitPerDay": 10,
+              "remainingDay": 9
+            },
+            "next_command": "tovuk abuse list --json"
+          }
+        ]
+      },
+      "AbuseReportsResponse": {
+        "type": "object",
+        "description": "Recent abuse reports visible to an account. Context: components.schemas.AbuseReportsResponse.",
+        "additionalProperties": false,
+        "required": [
+          "reports"
+        ],
+        "properties": {
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AbuseReport"
+            },
+            "description": "Reports in newest-first order. Context: components.schemas.AbuseReportsResponse.properties.reports.",
+            "examples": [
+              [
+                {
+                  "id": "abuse_0123456789abcdef0123",
+                  "service_id": "service_1",
+                  "reporter_email": "reporter@example.com",
+                  "reporter_name": "Security Researcher",
+                  "category": "phishing",
+                  "target_url": "https://demo.tovuk.app/login",
+                  "target_path": "/login",
+                  "object_path": null,
+                  "summary": "Phishing page",
+                  "details": "Credential collection form is impersonating another service.",
+                  "evidence": "Screenshot URL and request id.",
+                  "severity": "urgent",
+                  "status": "open",
+                  "quarantine_recommended": true,
+                  "owner_notification_allowed": true,
+                  "agent_instruction": "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal.",
+                  "created_at": "2026-06-01T12:00:00Z",
+                  "updated_at": "2026-06-01T12:00:00Z"
+                }
+              ]
+            ]
+          }
+        },
+        "examples": [
+          {
+            "reports": [
+              {
+                "id": "abuse_0123456789abcdef0123",
+                "service_id": "service_1",
+                "reporter_email": "reporter@example.com",
+                "reporter_name": "Security Researcher",
+                "category": "phishing",
+                "target_url": "https://demo.tovuk.app/login",
+                "target_path": "/login",
+                "object_path": null,
+                "summary": "Phishing page",
+                "details": "Credential collection form is impersonating another service.",
+                "evidence": "Screenshot URL and request id.",
+                "severity": "urgent",
+                "status": "open",
+                "quarantine_recommended": true,
+                "owner_notification_allowed": true,
+                "agent_instruction": "Abuse report received for service service_1. Preserve evidence and run `tovuk abuse list --json` from an owner session to track status or appeal.",
+                "created_at": "2026-06-01T12:00:00Z",
+                "updated_at": "2026-06-01T12:00:00Z"
+              }
+            ]
+          }
+        ]
       }
     }
   }
