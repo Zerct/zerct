@@ -31,6 +31,11 @@ dashboard step or manual presigned URL handling for large media.
 Public files return a public media URL on `media.tovuk.app`. Private files use
 short-lived download URLs.
 
+Public media uploads are scanned at upload URL creation and again at completion.
+Public objects reject executable and script content types or extensions such as
+`.exe`, `.sh`, `.js`, `.wasm`, and `.jar`. Store artifacts privately, and use
+Static Frontend for browser-executed web assets.
+
 ## Direct Multipart API
 
 Agents should prefer the CLI. Use the multipart HTTP flow only when custom

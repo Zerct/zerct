@@ -67,6 +67,9 @@ ambiguous to run.
 - `tovuk storage upload` automatically switches to multipart upload above
   100 MiB and plans upload parts before transfer so agents can fail early on
   byte or operation caps.
+- Public media uploads are scanned and reject executable or script payloads.
+  Agents should store artifacts privately and use Static Frontend for web
+  assets that browsers execute.
 - Object storage upload URL creation reserves requested bytes until the object
   is completed or deleted, so agents can avoid concurrent upload overages
   without dashboard cleanup.

@@ -129,6 +129,8 @@ disabled capabilities, quality checks, capability meters, account limits, and
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.
+Public media uploads reject executable and script payloads. Store artifacts
+privately, and use Static Frontend for browser-executed web assets.
 
 Agent repair loop:
 

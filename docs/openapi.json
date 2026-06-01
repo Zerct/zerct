@@ -19448,7 +19448,7 @@
           },
           "publicRead": {
             "type": "boolean",
-            "description": "Whether the object should be served through the public Tovuk media. Context: components.schemas.StorageUploadUrlRequest.properties.publicRead.",
+            "description": "Whether the object should be served through the public Tovuk media. Public media rejects executable and script payloads; use private objects for artifacts and Static Frontend for web assets. Context: components.schemas.StorageUploadUrlRequest.properties.publicRead.",
             "default": false,
             "examples": [
               true
@@ -19574,7 +19574,7 @@
           },
           "publicRead": {
             "type": "boolean",
-            "description": "Whether the object should be served through the public Tovuk media. Context: components.schemas.StorageMultipartCreateRequest.properties.publicRead.",
+            "description": "Whether the object should be served through the public Tovuk media. Public media rejects executable and script payloads; use private objects for artifacts and Static Frontend for web assets. Context: components.schemas.StorageMultipartCreateRequest.properties.publicRead.",
             "default": false,
             "examples": [
               true
