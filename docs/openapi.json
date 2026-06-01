@@ -7534,6 +7534,23 @@
                         "worker_cpu_ms",
                         "worker_transfer_bytes"
                       ],
+                      "meter_details": [
+                        {
+                          "name": "worker_requests",
+                          "unit": "request",
+                          "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker."
+                        },
+                        {
+                          "name": "worker_cpu_ms",
+                          "unit": "cpu_ms",
+                          "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers."
+                        },
+                        {
+                          "name": "worker_transfer_bytes",
+                          "unit": "byte",
+                          "description": "Rust Worker response body bytes plus response-side WebSocket tunnel bytes."
+                        }
+                      ],
                       "pricing_fields": [
                         "pricing.workers.includedRequestsPerMonth",
                         "pricing.workers.requestOverageUsdMicrosPerMillion",
@@ -14795,7 +14812,7 @@
           },
           "products": {
             "type": "array",
-            "description": "Product choices, usage meters, pricing fields, limit fields, and CLI commands for agent planning.",
+            "description": "Product choices, usage meter details, pricing fields, limit fields, and CLI commands for agent planning.",
             "minItems": 1,
             "maxItems": 50,
             "items": {
@@ -14827,6 +14844,23 @@
                     "worker_requests",
                     "worker_cpu_ms",
                     "worker_transfer_bytes"
+                  ],
+                  "meter_details": [
+                    {
+                      "name": "worker_requests",
+                      "unit": "request",
+                      "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker."
+                    },
+                    {
+                      "name": "worker_cpu_ms",
+                      "unit": "cpu_ms",
+                      "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers."
+                    },
+                    {
+                      "name": "worker_transfer_bytes",
+                      "unit": "byte",
+                      "description": "Rust Worker response body bytes plus response-side WebSocket tunnel bytes."
+                    }
                   ],
                   "pricing_fields": [
                     "pricing.workers.includedRequestsPerMonth",
@@ -23225,6 +23259,7 @@
           "avoid_for",
           "commands",
           "meters",
+          "meter_details",
           "pricing_fields",
           "limit_fields"
         ],
@@ -23339,6 +23374,29 @@
               ]
             ]
           },
+          "meter_details": {
+            "type": "array",
+            "description": "Structured usage meter semantics for agent planning.",
+            "minItems": 0,
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/ProductMeterEntry"
+            },
+            "examples": [
+              [
+                {
+                  "name": "worker_requests",
+                  "unit": "request",
+                  "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker."
+                },
+                {
+                  "name": "worker_cpu_ms",
+                  "unit": "cpu_ms",
+                  "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers."
+                }
+              ]
+            ]
+          },
           "pricing_fields": {
             "type": "array",
             "description": "Key pricing fields in PlanPricing.",
@@ -23412,6 +23470,23 @@
               "worker_cpu_ms",
               "worker_transfer_bytes"
             ],
+            "meter_details": [
+              {
+                "name": "worker_requests",
+                "unit": "request",
+                "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker."
+              },
+              {
+                "name": "worker_cpu_ms",
+                "unit": "cpu_ms",
+                "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers."
+              },
+              {
+                "name": "worker_transfer_bytes",
+                "unit": "byte",
+                "description": "Rust Worker response body bytes plus response-side WebSocket tunnel bytes."
+              }
+            ],
             "pricing_fields": [
               "pricing.workers.includedRequestsPerMonth",
               "pricing.workers.requestOverageUsdMicrosPerMillion",
@@ -23445,6 +23520,52 @@
               "workerQueueConsumerDurationSeconds",
               "workerWebsocketMessageMib"
             ]
+          }
+        ]
+      },
+      "ProductMeterEntry": {
+        "type": "object",
+        "description": "Usage meter semantics for one product meter.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "unit",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Stable meter name for this product entry.",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "maxLength": 80,
+            "examples": [
+              "worker_requests"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit recorded by the meter.",
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "maxLength": 64,
+            "examples": [
+              "request"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Short description of when usage is recorded.",
+            "pattern": "^[\\s\\S]{1,300}$",
+            "maxLength": 300,
+            "examples": [
+              "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker."
+            ]
+          }
+        },
+        "examples": [
+          {
+            "name": "worker_requests",
+            "unit": "request",
+            "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker."
           }
         ]
       },
