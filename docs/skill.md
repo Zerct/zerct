@@ -10,8 +10,9 @@ metadata:
 
 # Tovuk
 
-Use this skill when a user wants to deploy a Rust worker or static frontend to
-Tovuk, inspect a deployment, read logs, or prepare a project for deployment.
+Use this skill when a user wants to deploy a Rust worker, static frontend, or
+full-stack service to Tovuk, inspect a deployment, read logs, or prepare a
+project for deployment.
 
 ## Project contract
 
