@@ -82,6 +82,7 @@ func checkDocs() {
 	requireContains(openapi, `"workerWebsocketMessageMib"`, "OpenAPI worker websocket limit field")
 	requireContains(openapi, `"buildEnvVars": 64`, "OpenAPI build env var limit")
 	requireContains(openapi, `"buildEnvVarSizeKib": 5`, "OpenAPI build env var size limit")
+	requireContains(openapi, `"alwaysOnServices": 500`, "OpenAPI Pro always-on service limit")
 	requireContains(openapi, `"logEventSizeBytes": 262144`, "OpenAPI log event size limit")
 	requireContains(openapi, `"stateSqliteStorageMibPerObject": 953`, "OpenAPI State storage limit")
 	requireContains(openapi, `"storageObjectMaxMib": 5237760`, "OpenAPI object size limit")
