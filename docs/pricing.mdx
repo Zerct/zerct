@@ -48,8 +48,9 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   `24 hour` retention, configurable batches, and dead-letter queues.
 - State: `100` classes, `100,000` requests per day, `13,000 GB-s`
   duration per day, `5 million` SQLite rows read per day, `100,000` SQLite
-  rows written per day, `5 GB` account SQLite storage, `1 GB` per object,
-  and `2 MiB` key/value payloads.
+  rows written per day, `5 GB` account SQLite storage, `10 GB` per object,
+  and `2 MiB` key/value payloads. The Free account cap is enforced before a
+  single object can use its full per-object ceiling.
 - Object storage: `10 GB`, no object-count cap, `1 million` Class A
   operations per month, `10 million` Class B operations per month, free egress,
   free delete operations, `5 TiB` maximum object size, `50` custom domains
