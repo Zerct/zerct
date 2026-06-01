@@ -49,6 +49,8 @@ tovuk new hello-service --template fullstack-rust-tanstack
 tovuk deploy --dry-run --json
 tovuk check
 tovuk deploy --wait --json
+tovuk deploy list --json
+tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json
 tovuk pricing --json
 tovuk logs --build <build_id> --json

@@ -29,8 +29,11 @@ use types::{DeployPlanProject, WorkspaceDeployResult};
 use wait::wait_for_workspace_builds;
 
 pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
-    if cli.args.first().is_some_and(|arg| arg == "cancel") {
-        return cancel_deploy(cli);
+    match cli.args.first().map(String::as_str) {
+        Some("list") => return list_deploys(cli),
+        Some("show") => return show_deploy(cli),
+        Some("cancel") => return cancel_deploy(cli),
+        _ => {}
     }
     let projects = discover_deploy_projects(project_dir)?;
     if projects.is_empty() {
@@ -57,8 +60,28 @@ pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     }
 }
 
+fn list_deploys(cli: &CliOptions) -> Result<()> {
+    let token = read_or_login_token(cli)?;
+    let route = deploy_list_route(cli);
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
+    print_json(&response)
+}
+
+fn show_deploy(cli: &CliOptions) -> Result<()> {
+    let deploy_id = deploy_id_arg(cli, "show")?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::GET,
+        &deploy_show_route(&deploy_id),
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
 fn cancel_deploy(cli: &CliOptions) -> Result<()> {
-    let deploy_id = deploy_cancel_id(cli)?;
+    let deploy_id = deploy_id_arg(cli, "cancel")?;
     let token = read_or_login_token(cli)?;
     let response = api_request(
         cli,
@@ -70,7 +93,7 @@ fn cancel_deploy(cli: &CliOptions) -> Result<()> {
     print_json(&response)
 }
 
-fn deploy_cancel_id(cli: &CliOptions) -> Result<String> {
+fn deploy_id_arg(cli: &CliOptions, command: &str) -> Result<String> {
     cli.args
         .get(1)
         .cloned()
@@ -79,14 +102,46 @@ fn deploy_cancel_id(cli: &CliOptions) -> Result<String> {
             agent_error(
                 "deploy_id_required",
                 "Deploy id is required.",
-                "Pass a deploy id returned by `tovuk deploy --wait --json`, `tovuk service show <service> --json`, or build logs.",
+                format!(
+                    "Pass a deploy id to `tovuk deploy {command} <deploy_id> --json` from `tovuk deploy list --json`, `tovuk deploy --wait --json`, `tovuk service show <service> --json`, or build logs."
+                ),
                 cli.output.json,
             )
         })
 }
 
+fn deploy_list_route(cli: &CliOptions) -> String {
+    let suffix = deploy_page_query(cli);
+    if cli.service.is_empty() {
+        return format!("/v1/deploys{suffix}");
+    }
+    format!(
+        "/v1/services/{}/deploys{suffix}",
+        encode_component(&cli.service)
+    )
+}
+
+fn deploy_show_route(deploy_id: &str) -> String {
+    format!("/v1/deploys/{}", encode_component(deploy_id))
+}
+
 fn deploy_cancel_route(deploy_id: &str) -> String {
     format!("/v1/deploys/{}/cancel", encode_component(deploy_id))
+}
+
+fn deploy_page_query(cli: &CliOptions) -> String {
+    let mut params = Vec::new();
+    if !cli.limit.is_empty() {
+        params.push(format!("limit={}", encode_component(&cli.limit)));
+    }
+    if !cli.cursor.is_empty() {
+        params.push(format!("cursor={}", encode_component(&cli.cursor)));
+    }
+    if params.is_empty() {
+        String::new()
+    } else {
+        format!("?{}", params.join("&"))
+    }
 }
 
 fn deploy_projects(
@@ -164,11 +219,16 @@ fn git_commit_sha(project_dir: &Path) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{deploy_cancel_id, deploy_cancel_route};
+    use super::{deploy_cancel_route, deploy_id_arg, deploy_list_route, deploy_show_route};
     use crate::cli::args::CliOptions;
 
     #[test]
-    fn deploy_cancel_uses_target_route() {
+    fn deploy_show_and_cancel_use_target_routes() {
+        assert_eq!(
+            deploy_show_route("deploy_0123456789abcdef0123"),
+            "/v1/deploys/deploy_0123456789abcdef0123"
+        );
+        assert_eq!(deploy_show_route("deploy/id"), "/v1/deploys/deploy%2Fid");
         assert_eq!(
             deploy_cancel_route("deploy_0123456789abcdef0123"),
             "/v1/deploys/deploy_0123456789abcdef0123/cancel"
@@ -180,14 +240,42 @@ mod tests {
     }
 
     #[test]
-    fn deploy_cancel_requires_deploy_id() {
+    fn deploy_list_uses_account_or_service_route() {
+        let account_cli = CliOptions {
+            command: "deploy".to_owned(),
+            args: vec!["list".to_owned()],
+            limit: "10".to_owned(),
+            cursor: "next/page".to_owned(),
+            ..CliOptions::default()
+        };
+        assert_eq!(
+            deploy_list_route(&account_cli),
+            "/v1/deploys?limit=10&cursor=next%2Fpage"
+        );
+
+        let service_cli = CliOptions {
+            command: "deploy".to_owned(),
+            args: vec!["list".to_owned()],
+            service: "api/service".to_owned(),
+            ..CliOptions::default()
+        };
+        assert_eq!(
+            deploy_list_route(&service_cli),
+            "/v1/services/api%2Fservice/deploys"
+        );
+    }
+
+    #[test]
+    fn deploy_lifecycle_commands_require_deploy_id() {
         let cli = CliOptions {
             command: "deploy".to_owned(),
             args: vec!["cancel".to_owned()],
             ..CliOptions::default()
         };
 
-        let error_message = deploy_cancel_id(&cli).err().map(|error| error.to_string());
+        let error_message = deploy_id_arg(&cli, "cancel")
+            .err()
+            .map(|error| error.to_string());
         assert_eq!(error_message.as_deref(), Some("Deploy id is required."));
     }
 }

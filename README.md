@@ -30,6 +30,8 @@ tovuk new
 tovuk check
 tovuk deploy --dry-run
 tovuk deploy --wait
+tovuk deploy list
+tovuk deploy show <deploy_id>
 tovuk deploy cancel <deploy_id>
 ```
 
@@ -176,9 +178,10 @@ Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
 Run `tovuk check --json`. Fix the first failed check by following
 `agent_instruction`, then rerun check. Run `tovuk deploy --dry-run --json` and review
 warnings, meters, limits, and `billingEstimate`. Deploy with
-`tovuk deploy --wait --json`. If the build fails, read
-`tovuk logs --build <build_id> --json`, fix the first actionable
-error, rerun check, and redeploy. If a plan limit blocks work, run
+`tovuk deploy --wait --json`. Inspect deploy history with
+`tovuk deploy list --json` and `tovuk deploy show <deploy_id> --json`.
+If the build fails, read `tovuk logs --build <build_id> --json`, fix the
+first actionable error, rerun check, and redeploy. If a plan limit blocks work, run
 `tovuk billing checkout --json` and show the returned URL to the
 human. If Tovuk support is needed, run `tovuk support create` with
 `--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
@@ -219,6 +222,8 @@ Useful agent commands:
 tovuk pricing
 tovuk pricing --json
 tovuk deploy --dry-run --json
+tovuk deploy list --json
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk usage
 tovuk usage --json
@@ -295,6 +300,7 @@ The same commands are available through PyPI and Cargo after installation:
 pipx install tovuk
 cargo install tovuk
 tovuk deploy --wait
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 ```

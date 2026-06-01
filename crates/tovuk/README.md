@@ -13,6 +13,8 @@ tovuk check --json
 tovuk deploy --dry-run --json
 tovuk check
 tovuk deploy --wait --json
+tovuk deploy list --json
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 ```
 
@@ -42,6 +44,8 @@ The Cargo package exposes the same agent command surface as npm:
 tovuk pricing
 tovuk pricing --json
 tovuk deploy --dry-run --json
+tovuk deploy list --json
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk usage
 tovuk usage --json
@@ -132,6 +136,7 @@ Agent repair loop:
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 ```
