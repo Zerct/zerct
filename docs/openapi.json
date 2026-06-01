@@ -7437,7 +7437,7 @@
                         "stateSqliteStorageMibPerObject": 9536
                       },
                       "pricing": {
-                        "subscriptionUsdCentsPerMonth": 500,
+                        "subscriptionUsdCentsPerMonth": 2500,
                         "paidOveragesEnabled": true,
                         "workers": {
                           "includedRequestsPerMonth": 10000000,
@@ -11664,9 +11664,9 @@
               "currency": "USD",
               "plan": "pro",
               "paidOveragesEnabled": true,
-              "subscriptionUsdMicrosPerMonth": 5000000,
+              "subscriptionUsdMicrosPerMonth": 25000000,
               "currentMonthOverageUsdMicros": 470000,
-              "estimatedMonthlyTotalUsdMicros": 5470000,
+              "estimatedMonthlyTotalUsdMicros": 25470000,
               "lineItems": [
                 {
                   "product": "worker",
@@ -14744,7 +14744,7 @@
                     "stateSqliteStorageMibPerObject": 9536
                   },
                   "pricing": {
-                    "subscriptionUsdCentsPerMonth": 500,
+                    "subscriptionUsdCentsPerMonth": 2500,
                     "paidOveragesEnabled": true,
                     "workers": {
                       "includedRequestsPerMonth": 10000000,
@@ -15354,9 +15354,9 @@
               "currency": "USD",
               "plan": "pro",
               "paidOveragesEnabled": true,
-              "subscriptionUsdMicrosPerMonth": 5000000,
+              "subscriptionUsdMicrosPerMonth": 25000000,
               "currentMonthOverageUsdMicros": 470000,
-              "estimatedMonthlyTotalUsdMicros": 5470000,
+              "estimatedMonthlyTotalUsdMicros": 25470000,
               "lineItems": [
                 {
                   "product": "worker",
@@ -17305,9 +17305,9 @@
               "currency": "USD",
               "plan": "pro",
               "paidOveragesEnabled": true,
-              "subscriptionUsdMicrosPerMonth": 5000000,
+              "subscriptionUsdMicrosPerMonth": 25000000,
               "currentMonthOverageUsdMicros": 470000,
-              "estimatedMonthlyTotalUsdMicros": 5470000,
+              "estimatedMonthlyTotalUsdMicros": 25470000,
               "lineItems": [
                 {
                   "product": "worker",
@@ -24028,9 +24028,9 @@
             "currency": "USD",
             "plan": "pro",
             "paidOveragesEnabled": true,
-            "subscriptionUsdMicrosPerMonth": 5000000,
+            "subscriptionUsdMicrosPerMonth": 25000000,
             "currentMonthOverageUsdMicros": 470000,
-            "estimatedMonthlyTotalUsdMicros": 5470000,
+            "estimatedMonthlyTotalUsdMicros": 25470000,
             "lineItems": [
               {
                 "product": "worker",
