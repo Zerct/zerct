@@ -32,14 +32,14 @@ const DEFAULT_MULTIPART_PART_BYTES: u64 = 100 * 1024 * 1024;
 pub(crate) fn storage_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => storage_list(cli),
-        "upload" | "put" => storage_upload(cli),
-        "download" | "get" => storage_download(cli),
-        "delete" | "rm" => storage_delete(cli),
+        "upload" => storage_upload(cli),
+        "download" => storage_download(cli),
+        "delete" => storage_delete(cli),
         "url" => storage_download_url(cli),
         _ => Err(agent_error(
             "unknown_storage_command",
             "Unknown storage command.",
-            "Use `tovuk storage list`, `storage upload`, `storage download`, `storage delete`, or `storage url`.",
+            "Use `tovuk storage list`, `tovuk storage upload`, `tovuk storage download`, `tovuk storage delete`, or `tovuk storage url`.",
             cli.output.json,
         )),
     }

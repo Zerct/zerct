@@ -27,10 +27,10 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "sqlite/databases",
             "name",
         ),
-        "query" | "execute" => sqlite_query(cli),
-        "backup" | "backups" => sqlite_backup_command(cli),
+        "query" => sqlite_query(cli),
+        "backup" => sqlite_backup_command(cli),
         "restore" => sqlite_restore(cli, 1),
-        "delete" | "del" | "rm" => delete_app_resource(
+        "delete" => delete_app_resource(
             cli,
             1,
             "sqlite_database_required",
@@ -71,19 +71,8 @@ pub(crate) fn kv_command(cli: &CliOptions) -> Result<()> {
         "get" => kv_get(cli),
         "put" => kv_put(cli),
         "bulk" => kv_bulk_command(cli),
-        "bulk-get" => kv_bulk_get(cli, 1),
-        "bulk-put" => kv_bulk_put(cli, 1),
-        "bulk-delete" | "bulk-del" | "bulk-rm" => kv_bulk_delete(cli, 1),
-        "delete" | "del" | "rm" => kv_delete(cli),
-        "namespace" | "namespaces" => kv_namespace_command(cli),
-        "delete-namespace" | "remove-namespace" => delete_app_resource(
-            cli,
-            1,
-            "kv_namespace_required",
-            "KV namespace is required.",
-            "Use `tovuk kv namespace delete --service <service> CACHE --json`.",
-            "kv/namespaces",
-        ),
+        "delete" => kv_delete(cli),
+        "namespace" => kv_namespace_command(cli),
         _ => unknown_platform_command(cli, "kv"),
     }
 }
@@ -92,7 +81,7 @@ fn kv_bulk_command(cli: &CliOptions) -> Result<()> {
     match cli.args.get(1).map_or("", String::as_str) {
         "get" => kv_bulk_get(cli, 2),
         "put" => kv_bulk_put(cli, 2),
-        "delete" | "del" | "rm" => kv_bulk_delete(cli, 2),
+        "delete" => kv_bulk_delete(cli, 2),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown KV bulk command.",
@@ -106,12 +95,12 @@ pub(crate) fn queue_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_queue(cli),
-        "update" | "set" => update_queue(cli),
+        "update" => update_queue(cli),
         "messages" => queue_messages(cli),
         "metrics" => queue_metrics(cli),
         "send" => queue_send(cli),
-        "send-batch" | "batch-send" => queue_send_batch(cli),
-        "delete" | "del" | "rm" => delete_app_resource(
+        "send-batch" => queue_send_batch(cli),
+        "delete" => delete_app_resource(
             cli,
             1,
             "queue_name_required",
@@ -214,10 +203,10 @@ pub(crate) fn cron_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_cron(cli),
-        "update" | "set" => update_cron(cli),
+        "update" => update_cron(cli),
         "enable" => set_cron_enabled(cli, true),
         "disable" => set_cron_enabled(cli, false),
-        "delete" | "del" | "rm" => delete_app_resource(
+        "delete" => delete_app_resource(
             cli,
             1,
             "cron_name_required",
@@ -289,13 +278,13 @@ pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
             "state/namespaces",
             "className",
         ),
-        "objects" | "instances" => state_objects(cli),
+        "objects" => state_objects(cli),
         "keys" => state_keys(cli),
         "get" => state_get(cli),
-        "put" | "set" => state_put(cli),
+        "put" => state_put(cli),
         "alarm" => state_alarm_command(cli),
-        "delete-value" | "delete-state" | "del-state" | "rm-state" => state_delete_value(cli),
-        "delete" | "del" | "rm" => delete_app_resource(
+        "delete-value" => state_delete_value(cli),
+        "delete" => delete_app_resource(
             cli,
             1,
             "state_class_required",
@@ -309,10 +298,15 @@ pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
 
 fn state_alarm_command(cli: &CliOptions) -> Result<()> {
     match cli.args.get(1).map_or("get", String::as_str) {
-        "get" | "show" => state_alarm_get(cli, 2),
+        "get" => state_alarm_get(cli, 2),
         "set" => state_alarm_set(cli, 2),
-        "delete" | "del" | "rm" => state_alarm_delete(cli, 2),
-        _ => state_alarm_get(cli, 1),
+        "delete" => state_alarm_delete(cli, 2),
+        _ => Err(agent_error(
+            "unknown_command",
+            "Unknown State alarm command.",
+            "Use `tovuk state alarm get --service <service> Room room-1 --json`, `tovuk state alarm set --service <service> Room room-1 --delay-seconds 60 --json`, or `tovuk state alarm delete --service <service> Room room-1 --json`.",
+            cli.output.json,
+        )),
     }
 }
 
@@ -500,7 +494,7 @@ pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => platform_command(cli),
         "create" => create_service_binding(cli),
-        "delete" | "del" | "rm" => delete_app_resource(
+        "delete" => delete_app_resource(
             cli,
             1,
             "binding_name_required",
@@ -515,7 +509,7 @@ pub(crate) fn binding_command(cli: &CliOptions) -> Result<()> {
 pub(crate) fn caps_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("", String::as_str) {
         "set" => set_usage_cap(cli),
-        "delete" | "del" | "rm" => delete_usage_cap(cli),
+        "delete" => delete_usage_cap(cli),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown usage cap command.",
@@ -701,7 +695,7 @@ fn sqlite_params(cli: &CliOptions) -> Result<Vec<Value>> {
 
 fn kv_namespace_command(cli: &CliOptions) -> Result<()> {
     match cli.args.get(1).map_or("", String::as_str) {
-        "delete" | "del" | "rm" => delete_app_resource(
+        "delete" => delete_app_resource(
             cli,
             2,
             "kv_namespace_required",

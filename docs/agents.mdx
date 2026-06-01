@@ -127,12 +127,10 @@ the repo root.
 ```sh
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
-tovuk service builds service_1 --json
 tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --service service_1 --json
 tovuk storage list --service service_1 --json
-tovuk service resources service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
 tovuk database backup create --service service_1 DB --json

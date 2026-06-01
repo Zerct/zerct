@@ -42,8 +42,6 @@ tovuk usage --json
 tovuk service list
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
-tovuk service deploys service_1
-tovuk service builds service_1
 tovuk logs --build job_1 --limit 100 --json
 tovuk env list --service service_1
 tovuk env set --service service_1 API_KEY=value
@@ -54,7 +52,6 @@ tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
-tovuk service resources service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
 tovuk database delete --service service_1 DB --json

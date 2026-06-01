@@ -63,8 +63,7 @@ Before high-throughput work, read pricing and set hard caps:
 tovuk pricing --json
 tovuk usage --json
 tovuk deploy --dry-run --json
-tovuk service resources service_1 --json
-tovuk service builds service_1 --json
+tovuk service show service_1 --json
 tovuk limits set worker_requests --period month --value 10000000 --json
 ```
 

@@ -14,7 +14,7 @@ tovuk database backup create --service service_1 DB --json
 tovuk database backup list --service service_1 DB --json
 tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
 tovuk database delete --service service_1 DB --json
-tovuk service resources service_1 --json
+tovuk service show service_1 --json
 ```
 
 Agents should create databases before a deploy needs them, then keep schema

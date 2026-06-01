@@ -16,8 +16,7 @@ class Tovuk < Formula
     assert_match "tovuk new", help
     assert_match "tovuk deploy --dry-run", help
     assert_match "tovuk pricing", help
-    assert_match "tovuk service resources", help
-    assert_match "tovuk service builds", help
+    assert_match "tovuk service show", help
     assert_match "tovuk billing [checkout|portal]", help
     assert_match "tovuk storage list", help
     assert_match "tovuk storage upload", help

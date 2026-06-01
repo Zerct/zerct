@@ -94,8 +94,7 @@ printf '%s\n' "$native_cli_version"
 "$native_cli" --help | grep -q 'tovuk storage download'
 "$native_cli" --help | grep -q 'tovuk deploy --dry-run'
 "$native_cli" --help | grep -q 'tovuk pricing'
-"$native_cli" --help | grep -q 'tovuk service resources'
-"$native_cli" --help | grep -q 'tovuk service builds'
+"$native_cli" --help | grep -q 'tovuk service show'
 "$native_cli" --help | grep -q 'tovuk limits set'
 "$native_cli" --help | grep -q 'tovuk billing checkout'
 test "$("$native_cli" -V)" = "$native_cli_version"
@@ -118,6 +117,51 @@ for retired_command in \
   fi
   grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
 done
+for retired_service_command in status resources deploys builds inspect; do
+  if "$native_cli" service "$retired_service_command" service_1 --json >/tmp/tovuk-retired-service-command.out 2>/tmp/tovuk-retired-service-command.err; then
+    printf 'expected retired native CLI service command to fail: %s\n' "$retired_service_command" >&2
+    exit 1
+  fi
+  grep -q '"code": "unknown_command"' /tmp/tovuk-retired-service-command.err
+done
+retired_alias_cases=(
+  "service del service_1"
+  "service rm service_1"
+  "storage put"
+  "storage get"
+  "storage rm"
+  "database execute"
+  "database backups"
+  "database rm"
+  "kv bulk-get"
+  "kv bulk-put"
+  "kv bulk-delete"
+  "kv bulk-del"
+  "kv rm"
+  "kv namespaces"
+  "kv delete-namespace"
+  "queue set"
+  "queue batch-send"
+  "queue rm"
+  "cron set"
+  "cron rm"
+  "state instances"
+  "state set"
+  "state delete-state"
+  "state rm"
+  "state alarm show"
+  "state alarm rm"
+  "binding rm"
+  "limits rm"
+)
+for retired_alias in "${retired_alias_cases[@]}"; do
+  read -r -a retired_alias_args <<<"$retired_alias"
+  if "$native_cli" "${retired_alias_args[@]}" --json >/tmp/tovuk-retired-alias.out 2>/tmp/tovuk-retired-alias.err; then
+    printf 'expected retired native CLI alias to fail: %s\n' "$retired_alias" >&2
+    exit 1
+  fi
+  grep -q '"code": "unknown' /tmp/tovuk-retired-alias.err
+done
 
 "$python_bin" -m compileall -q packages/tovuk-py/src
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
@@ -127,8 +171,7 @@ PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk 
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage download'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk deploy --dry-run'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk pricing'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk service resources'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk service builds'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk service show'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk limits set'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
@@ -144,6 +187,21 @@ for retired_command in \
     exit 1
   fi
   grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
+done
+for retired_service_command in status resources deploys builds inspect; do
+  if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk service "$retired_service_command" service_1 --json >/tmp/tovuk-retired-service-command.out 2>/tmp/tovuk-retired-service-command.err; then
+    printf 'expected retired Python CLI service command to fail: %s\n' "$retired_service_command" >&2
+    exit 1
+  fi
+  grep -q '"code": "unknown_command"' /tmp/tovuk-retired-service-command.err
+done
+for retired_alias in "${retired_alias_cases[@]}"; do
+  read -r -a retired_alias_args <<<"$retired_alias"
+  if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk "${retired_alias_args[@]}" --json >/tmp/tovuk-retired-alias.out 2>/tmp/tovuk-retired-alias.err; then
+    printf 'expected retired Python CLI alias to fail: %s\n' "$retired_alias" >&2
+    exit 1
+  fi
+  grep -q '"code": "unknown' /tmp/tovuk-retired-alias.err
 done
 
 test -f examples/hello-rust/Cargo.lock

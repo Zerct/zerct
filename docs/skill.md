@@ -54,7 +54,7 @@ tovuk logs --build <build_id> --json
 Manage platform resources without dashboard access:
 
 ```sh
-tovuk service resources <service> --json
+tovuk service show <service> --json
 tovuk database create --service <service> DB --json
 tovuk database query --service <service> DB "select 1" --json
 tovuk database delete --service <service> DB --json
