@@ -15,7 +15,7 @@ Tovuk, inspect a deployment, read logs, or prepare a project for deployment.
 
 ## Project contract
 
-Always require `tovuk.toml`.
+Always require `tovuk.toml` with explicit `[capabilities]` booleans.
 
 For Rust workers, require `Cargo.toml`, `Cargo.lock`, strict locked
 release-mode Rust checks, a health endpoint, and a server that listens on
@@ -29,6 +29,7 @@ duplicate-code gates, and a lockfile. Plain static frontends can use
 For worker-static services, require one root `tovuk.toml` with:
 
 - `kind = "worker_static"`
+- `[capabilities].static_frontend = true` and `[capabilities].worker = true`
 - `[worker].root`, `[worker].check`, `[worker].build`, `[worker].command`,
   `[worker].port`, and `[worker].health = "/api/healthz"`
 - `[frontend].root`, `[frontend].check`, `[frontend].build`, and

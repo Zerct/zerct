@@ -31,6 +31,7 @@ tovuk check
 tovuk deploy --wait --json
 ```
 
-The worker-static template creates `api/`, `web/`, and one root `tovuk.toml`.
-The Rust worker owns dynamic server behavior. The TanStack frontend builds to
-static files and calls same-origin `/api`.
+Templates create one root `tovuk.toml` with explicit `[capabilities]`.
+The worker-static template also creates `api/` and `web/`. The Rust worker owns
+dynamic server behavior. The TanStack frontend builds to static files and calls
+same-origin `/api`.

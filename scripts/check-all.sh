@@ -160,6 +160,26 @@ trap 'rm -rf "$rust_policy_fixture" "$js_worker_fixture" "$plain_static_fixture"
 
 cat >"$rust_policy_fixture/tovuk.toml" <<'EOF'
 name = "missing-lints"
+kind = "rust_worker"
+
+[capabilities]
+static_frontend = false
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
 
 [run]
 command = "./target/release/missing-lints"
@@ -194,6 +214,26 @@ done
 
 cat >"$js_worker_fixture/tovuk.toml" <<'EOF'
 name = "node-worker"
+kind = "rust_worker"
+
+[capabilities]
+static_frontend = false
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
 
 [run]
 command = "node server.js"
@@ -236,6 +276,25 @@ cat >"$plain_static_fixture/tovuk.toml" <<'EOF'
 name = "plain-static"
 kind = "static_frontend"
 
+[capabilities]
+static_frontend = true
+worker = false
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
+
 [build]
 check = ":"
 command = ":"
@@ -256,6 +315,25 @@ done
 cat >"$worker_static_fixture/tovuk.toml" <<EOF
 name = "worker-static-ok"
 kind = "worker_static"
+
+[capabilities]
+static_frontend = true
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
 
 [worker]
 root = "api"

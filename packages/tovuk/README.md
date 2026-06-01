@@ -27,8 +27,8 @@ TypeScript checks, native linting such as `oxlint`, `biome check`, or
 `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
 
 From a worker-static repo root, the same deploy command reads one root
-`tovuk.toml`, builds the worker and frontend roots, and returns one service URL
-with `/api/*` routed to the Rust worker.
+`tovuk.toml`, reads explicit `[capabilities]`, builds the worker and frontend
+roots, and returns one service URL with `/api/*` routed to the Rust worker.
 
 Check before deploying:
 
@@ -72,8 +72,9 @@ The pricing response includes plan pricing and product meter metadata, so agents
 can choose the correct product and cap the right meters in one flow.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
-The deploy dry-run response combines `tovuk.toml`, quality checks, capability meters,
-account limits, and `billingEstimate` before deploy, without creating a build.
+The deploy dry-run response combines `tovuk.toml`, explicit enabled and disabled
+capabilities, quality checks, capability meters, account limits, and
+`billingEstimate` before deploy, without creating a build.
 
 Manage service files and media without dashboard access:
 

@@ -77,6 +77,7 @@ Usage:
   tovuk support resolve <ticket_id> [--api <url>] [--json]
 
 Agent contract:
+  - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
   - Worker-static services set kind = "worker_static", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.

@@ -1,4 +1,24 @@
 name = "hello-rust"
+kind = "rust_worker"
+
+[capabilities]
+static_frontend = false
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
 
 [build]
 command = "cargo build --release"

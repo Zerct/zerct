@@ -20,6 +20,7 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
     if !is_dns_safe_name(name) {
         return Err("name must be lowercase DNS-safe text up to 48 characters".to_owned());
     }
+    validate_capabilities_config(config)?;
     if config.kind.is_worker_static() {
         validate_fullstack_config(config)?;
     } else {
@@ -31,6 +32,48 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
         }
     }
     Ok(())
+}
+
+fn validate_capabilities_config(config: &TovukConfig) -> std::result::Result<(), String> {
+    let expected_static_frontend = matches!(
+        config.kind,
+        ProjectKind::StaticFrontend | ProjectKind::WorkerStatic
+    );
+    let expected_worker = matches!(
+        config.kind,
+        ProjectKind::RustWorker | ProjectKind::WorkerStatic
+    );
+    if config.capabilities.static_frontend.is_enabled() != expected_static_frontend {
+        return Err(format!(
+            "[capabilities].static_frontend must be {expected_static_frontend} for kind = \"{}\"",
+            config.kind.as_str()
+        ));
+    }
+    if config.capabilities.worker.is_enabled() != expected_worker {
+        return Err(format!(
+            "[capabilities].worker must be {expected_worker} for kind = \"{}\"",
+            config.kind.as_str()
+        ));
+    }
+    for key in required_platform_capabilities() {
+        if !config.capabilities.value_for_key(key) {
+            return Err(format!(
+                "[capabilities].{key} must be true because Tovuk exposes it for every service"
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn required_platform_capabilities() -> [&'static str; 6] {
+    [
+        "logs",
+        "builds",
+        "usage_caps",
+        "billing",
+        "support",
+        "abuse",
+    ]
 }
 
 fn validate_build_config(config: &TovukConfig) -> std::result::Result<(), String> {

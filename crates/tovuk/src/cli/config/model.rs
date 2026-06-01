@@ -6,12 +6,148 @@ pub(crate) struct TovukConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) name: Option<String>,
     pub(crate) kind: ProjectKind,
+    pub(crate) capabilities: CapabilitiesConfig,
     pub(crate) build: BuildConfig,
     pub(crate) run: RunConfig,
     pub(crate) frontend: FrontendConfig,
     #[serde(rename = "worker")]
     pub(crate) backend: BackendConfig,
     pub(crate) resources: ResourceConfig,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub(crate) struct CapabilitiesConfig {
+    pub(crate) static_frontend: CapabilityToggle,
+    pub(crate) worker: CapabilityToggle,
+    pub(crate) sqlite: CapabilityToggle,
+    pub(crate) object_storage: CapabilityToggle,
+    pub(crate) kv: CapabilityToggle,
+    pub(crate) state: CapabilityToggle,
+    pub(crate) queue: CapabilityToggle,
+    pub(crate) cron: CapabilityToggle,
+    pub(crate) service_bindings: CapabilityToggle,
+    pub(crate) secrets: CapabilityToggle,
+    pub(crate) custom_domains: CapabilityToggle,
+    pub(crate) logs: CapabilityToggle,
+    pub(crate) builds: CapabilityToggle,
+    pub(crate) usage_caps: CapabilityToggle,
+    pub(crate) billing: CapabilityToggle,
+    pub(crate) support: CapabilityToggle,
+    pub(crate) abuse: CapabilityToggle,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(transparent)]
+pub(crate) struct CapabilityToggle(bool);
+
+impl CapabilityToggle {
+    pub(crate) const fn from_bool(value: bool) -> Self {
+        Self(value)
+    }
+
+    pub(crate) const fn enabled() -> Self {
+        Self(true)
+    }
+
+    pub(crate) const fn is_enabled(self) -> bool {
+        self.0
+    }
+}
+
+impl CapabilitiesConfig {
+    pub(crate) const KEYS: [&'static str; 17] = [
+        "static_frontend",
+        "worker",
+        "sqlite",
+        "object_storage",
+        "kv",
+        "state",
+        "queue",
+        "cron",
+        "service_bindings",
+        "secrets",
+        "custom_domains",
+        "logs",
+        "builds",
+        "usage_caps",
+        "billing",
+        "support",
+        "abuse",
+    ];
+
+    pub(crate) fn for_kind(kind: ProjectKind) -> Self {
+        Self {
+            static_frontend: CapabilityToggle::from_bool(matches!(
+                kind,
+                ProjectKind::StaticFrontend | ProjectKind::WorkerStatic
+            )),
+            worker: CapabilityToggle::from_bool(matches!(
+                kind,
+                ProjectKind::RustWorker | ProjectKind::WorkerStatic
+            )),
+            sqlite: CapabilityToggle::from_bool(false),
+            object_storage: CapabilityToggle::from_bool(false),
+            kv: CapabilityToggle::from_bool(false),
+            state: CapabilityToggle::from_bool(false),
+            queue: CapabilityToggle::from_bool(false),
+            cron: CapabilityToggle::from_bool(false),
+            service_bindings: CapabilityToggle::from_bool(false),
+            secrets: CapabilityToggle::from_bool(false),
+            custom_domains: CapabilityToggle::from_bool(false),
+            logs: CapabilityToggle::enabled(),
+            builds: CapabilityToggle::enabled(),
+            usage_caps: CapabilityToggle::enabled(),
+            billing: CapabilityToggle::enabled(),
+            support: CapabilityToggle::enabled(),
+            abuse: CapabilityToggle::enabled(),
+        }
+    }
+
+    pub(crate) fn enabled_keys(&self) -> Vec<&'static str> {
+        self.filtered_keys(true)
+    }
+
+    pub(crate) fn disabled_keys(&self) -> Vec<&'static str> {
+        self.filtered_keys(false)
+    }
+
+    pub(crate) fn enabled_product_keys(&self) -> Vec<&'static str> {
+        self.enabled_keys()
+            .into_iter()
+            .filter(|key| !matches!(*key, "billing" | "support" | "abuse"))
+            .collect()
+    }
+
+    fn filtered_keys(&self, expected: bool) -> Vec<&'static str> {
+        Self::KEYS
+            .iter()
+            .copied()
+            .filter(|key| self.value_for_key(key) == expected)
+            .collect()
+    }
+
+    pub(crate) fn value_for_key(&self, key: &str) -> bool {
+        match key {
+            "static_frontend" => self.static_frontend.is_enabled(),
+            "worker" => self.worker.is_enabled(),
+            "sqlite" => self.sqlite.is_enabled(),
+            "object_storage" => self.object_storage.is_enabled(),
+            "kv" => self.kv.is_enabled(),
+            "state" => self.state.is_enabled(),
+            "queue" => self.queue.is_enabled(),
+            "cron" => self.cron.is_enabled(),
+            "service_bindings" => self.service_bindings.is_enabled(),
+            "secrets" => self.secrets.is_enabled(),
+            "custom_domains" => self.custom_domains.is_enabled(),
+            "logs" => self.logs.is_enabled(),
+            "builds" => self.builds.is_enabled(),
+            "usage_caps" => self.usage_caps.is_enabled(),
+            "billing" => self.billing.is_enabled(),
+            "support" => self.support.is_enabled(),
+            "abuse" => self.abuse.is_enabled(),
+            _ => false,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -64,7 +200,7 @@ mod tests {
 
     use super::{
         super::super::{project_kind::ProjectKind, resource_config::ResourceConfig},
-        BackendConfig, BuildConfig, FrontendConfig, RunConfig, TovukConfig,
+        BackendConfig, BuildConfig, CapabilitiesConfig, FrontendConfig, RunConfig, TovukConfig,
     };
 
     #[test]
@@ -72,6 +208,7 @@ mod tests {
         let config = TovukConfig {
             name: Some("fullstack".to_owned()),
             kind: ProjectKind::WorkerStatic,
+            capabilities: CapabilitiesConfig::for_kind(ProjectKind::WorkerStatic),
             build: BuildConfig {
                 command: "cargo build --release".to_owned(),
                 check: "cargo fmt --all --check".to_owned(),

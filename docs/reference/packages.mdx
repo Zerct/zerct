@@ -18,8 +18,9 @@ deploy, deploy dry-runs, pricing, usage, services, service deploys, service
 builds, logs, env, domains, storage, limits, billing, and support.
 `tovuk usage --json` includes `billingEstimate.lineItems` so package users and
 agents can inspect current-month cost estimates without a dashboard.
-`tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks, capability meters,
-limits, and `billingEstimate` before deploy without creating a build.
+`tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
+disabled capabilities, quality checks, capability meters, limits, and
+`billingEstimate` before deploy without creating a build.
 
 The agent repair loop is the same on every package surface:
 

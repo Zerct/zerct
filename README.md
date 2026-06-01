@@ -52,6 +52,25 @@ Worker-static deploys use this `tovuk.toml` shape:
 name = "hello-service"
 kind = "worker_static"
 
+[capabilities]
+static_frontend = true
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
+
 [worker]
 root = "api"
 check = "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr"
@@ -72,6 +91,25 @@ Static frontend deploys use the same command with this `tovuk.toml`:
 ```toml
 name = "dashboard"
 kind = "static_frontend"
+
+[capabilities]
+static_frontend = true
+worker = false
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
 
 [build]
 check = "bun ci && bun run typecheck && bun run lint"
@@ -109,8 +147,8 @@ for the fastest Tovuk build path. Existing npm projects can still deploy with a
 committed npm lockfile and npm-based build commands.
 
 Plain static HTML/CSS/JS sites can deploy without a package manager by setting
-`kind = "static_frontend"`, `[build].check = ":"`, `[build].command = ":"`, and
-`[build].output = "."`.
+`kind = "static_frontend"`, `[capabilities].static_frontend = true`,
+`[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
 
 Use Homebrew for a persistent developer CLI:
 
@@ -223,8 +261,9 @@ ceilings so agents can plan large file transfers before reserving bytes.
 `tovuk usage --json` returns `billingEstimate.lineItems` for priced meters and
 explicitly free transfer meters, so agents can audit and cap usage before load
 tests or public launches.
-`tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, quality checks,
-capability meters, account limits, and billing estimates before deploy.
+`tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, explicit
+enabled and disabled capabilities, quality checks, capability meters, account
+limits, and billing estimates before deploy.
 
 The same commands are available through PyPI and Cargo after installation:
 
