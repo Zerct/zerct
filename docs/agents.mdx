@@ -108,12 +108,17 @@ tovuk abuse list --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
 ```
 
-Operator agents can triage all reports, then quarantine or release a confirmed
-report with preserved evidence:
+Operator agents can triage all reports, notify owners where lawful, quarantine
+confirmed abuse, resolve remediated reports, reject unsupported reports, or
+release a quarantine with preserved evidence:
 
 ```sh
 tovuk abuse list --operator --json
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
 tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
 tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 ```
 

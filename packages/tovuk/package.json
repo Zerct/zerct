@@ -1,6 +1,6 @@
 {
   "name": "tovuk",
-  "version": "0.1.79",
+  "version": "0.1.80",
   "description": "Deploy Rust workers, static frontends, and worker-static services to Tovuk.",
   "type": "module",
   "bin": {

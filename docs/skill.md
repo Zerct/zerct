@@ -116,7 +116,11 @@ tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection
 tovuk abuse list --json
 tovuk abuse list --operator --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
 tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
 tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 ```
 
@@ -143,5 +147,6 @@ agent already tried. Resolve the ticket when the issue is fixed.
 Report abuse with a target URL, category, reporter email, and preserved
 evidence. Service owners should run `tovuk abuse list --json`, preserve
 remediation evidence, and appeal with `tovuk abuse appeal <report_id> --json`
-when the report was fixed or is incorrect. Operator agents can quarantine or
-release confirmed reports with preserved evidence.
+when the report was fixed or is incorrect. Operator agents can triage, notify
+owners where lawful, quarantine, resolve, reject, or release confirmed reports
+with preserved evidence.

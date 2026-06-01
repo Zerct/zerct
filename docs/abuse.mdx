@@ -56,7 +56,7 @@ The API route is `POST /v1/abuse/reports/{report_id}/appeal`. It requires an
 authenticated owner session. The response includes the updated report status and
 the next `agent_instruction`.
 
-## Quarantine
+## Operator Review
 
 Operators can list all abuse reports for triage:
 
@@ -66,6 +66,23 @@ tovuk abuse list --operator --json
 
 The API route is `GET /v1/operator/abuse/reports`. It requires an operator
 token.
+
+Operators can mark a report triaged after preserving the first evidence:
+
+```sh
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
+```
+
+The API route is `POST /v1/operator/abuse/reports/{report_id}/triage`.
+
+If owner notification is lawful and the report allows it, operators can record
+owner notification:
+
+```sh
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
+```
+
+The API route is `POST /v1/operator/abuse/reports/{report_id}/notify-owner`.
 
 Operators can quarantine the service attached to a confirmed abuse report:
 
@@ -84,6 +101,17 @@ tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeplo
 ```
 
 The API route is `POST /v1/operator/abuse/reports/{report_id}/release`.
+
+Operators can close non-quarantined reports or reject unsupported reports:
+
+```sh
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
+```
+
+The API routes are `POST /v1/operator/abuse/reports/{report_id}/resolve` and
+`POST /v1/operator/abuse/reports/{report_id}/reject`. Both release any active
+quarantine for the report before returning.
 
 ## Rate Limits
 

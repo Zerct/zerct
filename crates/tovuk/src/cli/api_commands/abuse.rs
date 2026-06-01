@@ -18,11 +18,15 @@ pub(crate) fn abuse_command(cli: &CliOptions) -> Result<()> {
         "report" => abuse_report(cli),
         "appeal" => abuse_appeal(cli),
         "quarantine" => abuse_operator_action(cli, "quarantine"),
+        "triage" => abuse_operator_action(cli, "triage"),
+        "notify-owner" => abuse_operator_action(cli, "notify-owner"),
+        "resolve" => abuse_operator_action(cli, "resolve"),
+        "reject" => abuse_operator_action(cli, "reject"),
         "release" => abuse_operator_action(cli, "release"),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown abuse command.",
-            "Use `tovuk abuse report <target_url> \"Summary\" \"Details\" --category phishing --reporter-email reporter@example.com --evidence \"Evidence\" --json`, `tovuk abuse list --json`, `tovuk abuse appeal <report_id> \"Details\" --json`, or an operator-only quarantine command.",
+            "Use `tovuk abuse report <target_url> \"Summary\" \"Details\" --category phishing --reporter-email reporter@example.com --evidence \"Evidence\" --json`, `tovuk abuse list --json`, `tovuk abuse appeal <report_id> \"Details\" --json`, or an operator-only action such as `tovuk abuse triage <report_id> \"Evidence summary\" --json`.",
             cli.output.json,
         )),
     }

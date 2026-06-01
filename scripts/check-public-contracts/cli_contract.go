@@ -49,7 +49,11 @@ func checkCLIContract() {
 		requireContains(source, "tovuk abuse list", "agentic abuse list command")
 		requireContains(source, "tovuk abuse list --operator", "agentic operator abuse list command")
 		requireContains(source, "tovuk abuse appeal", "agentic abuse appeal command")
+		requireContains(source, "tovuk abuse triage", "agentic abuse triage command")
+		requireContains(source, "tovuk abuse notify-owner", "agentic abuse owner notification command")
 		requireContains(source, "tovuk abuse quarantine", "agentic abuse quarantine command")
+		requireContains(source, "tovuk abuse resolve", "agentic abuse resolve command")
+		requireContains(source, "tovuk abuse reject", "agentic abuse reject command")
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")
 	}
 	for _, source := range []string{cargoReadme, npmReadme, pythonReadme} {

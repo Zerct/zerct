@@ -5893,6 +5893,278 @@
         }
       }
     },
+    "/v1/operator/abuse/reports/{report_id}/triage": {
+      "post": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Triage abuse report",
+        "description": "Mark an abuse report triaged while preserving operator evidence. Context: paths./v1/operator/abuse/reports/{report_id}/triage.post.",
+        "operationId": "triageAbuseReport",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/operator/abuse/reports/{report_id}/triage.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseModerationRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Triage report",
+                  "value": {
+                    "reason": "Reviewed reporter evidence and target service metadata."
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with operator triage evidence summary. Context: paths./v1/operator/abuse/reports/{report_id}/triage.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseModerationApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/operator/abuse/reports/{report_id}/notify-owner": {
+      "post": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Notify abuse report owner",
+        "description": "Record lawful owner notification for a service abuse report. Context: paths./v1/operator/abuse/reports/{report_id}/notify-owner.post.",
+        "operationId": "notifyAbuseReportOwner",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/operator/abuse/reports/{report_id}/notify-owner.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseModerationRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Record owner notification",
+                  "value": {
+                    "reason": "Owner-visible report recorded with evidence summary."
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with owner notification evidence summary. Context: paths./v1/operator/abuse/reports/{report_id}/notify-owner.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseModerationApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/operator/abuse/reports/{report_id}/resolve": {
+      "post": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Resolve abuse report",
+        "description": "Resolve an abuse report and release any active quarantine for that report. Context: paths./v1/operator/abuse/reports/{report_id}/resolve.post.",
+        "operationId": "resolveAbuseReport",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/operator/abuse/reports/{report_id}/resolve.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseModerationRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Resolve report",
+                  "value": {
+                    "reason": "Reporter issue remediated and clean deploy verified."
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with operator resolution evidence summary. Context: paths./v1/operator/abuse/reports/{report_id}/resolve.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseModerationApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/operator/abuse/reports/{report_id}/reject": {
+      "post": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Reject abuse report",
+        "description": "Reject a false or unsupported abuse report and release any active quarantine for that report. Context: paths./v1/operator/abuse/reports/{report_id}/reject.post.",
+        "operationId": "rejectAbuseReport",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/operator/abuse/reports/{report_id}/reject.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseModerationRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Reject report",
+                  "value": {
+                    "reason": "Evidence did not match the reported target."
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with operator rejection evidence summary. Context: paths./v1/operator/abuse/reports/{report_id}/reject.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseModerationApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/operator/abuse/reports/{report_id}/release": {
       "post": {
         "tags": [
@@ -25563,7 +25835,7 @@
       },
       "AbuseModerationRequest": {
         "type": "object",
-        "description": "Operator request body for quarantining or releasing a service after abuse review. Context: components.schemas.AbuseModerationRequest.",
+        "description": "Operator request body for abuse lifecycle actions after review. Context: components.schemas.AbuseModerationRequest.",
         "additionalProperties": false,
         "required": [
           "reason"
@@ -25973,7 +26245,7 @@
       },
       "AbuseModerationResponse": {
         "type": "object",
-        "description": "Operator abuse moderation response. Context: components.schemas.AbuseModerationResponse.",
+        "description": "Operator abuse moderation response for triage, owner notification, quarantine, release, resolve, or reject actions. Context: components.schemas.AbuseModerationResponse.",
         "additionalProperties": false,
         "required": [
           "report",
