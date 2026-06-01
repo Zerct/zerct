@@ -60,6 +60,13 @@ tovuk limits set worker_requests --period day --value 100000 --json
 tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
 tovuk abuse list --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
+tovuk abuse list --operator --json
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
+tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 ```
 
 ## Contract
@@ -81,4 +88,6 @@ JavaScript and TypeScript are frontend-only on Tovuk.
 
 Abuse reports are API and CLI first. Create reports with target URL, category,
 reporter email, and evidence. Service owners use `tovuk abuse list --json` and
-`tovuk abuse appeal <report_id> --json` with remediation evidence.
+`tovuk abuse appeal <report_id> --json` with remediation evidence. Operators use
+`tovuk abuse list --operator --json`, then triage, notify-owner, quarantine,
+resolve, reject, or release with preserved evidence.
