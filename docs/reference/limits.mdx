@@ -24,9 +24,10 @@ ambiguous to run.
 - Static assets follow Tovuk limits: Free allows 20 thousand files
   per deployed version, Pro allows 100 thousand files per deployed version, and
   every individual static asset is capped at 25 MiB.
-- Static responses meter `static_transfer_bytes`; Rust worker responses meter
-  `worker_transfer_bytes`. Tovuk does not set a default plan transfer cap.
-  Agents should set explicit hard caps before high-throughput launches.
+- Static responses meter `static_transfer_bytes`; Rust worker responses and
+  WebSocket response-side tunnel bytes meter `worker_transfer_bytes`. Tovuk
+  does not set a default plan transfer cap. Agents should set explicit hard
+  caps before high-throughput launches.
 - Static output rejects symlinks and non-file, non-directory entries.
 - `_headers` supports up to 100 header rules with 2000 characters per line.
 - `_redirects` supports up to 2000 static redirects, 100 dynamic redirects,
