@@ -39,6 +39,37 @@ func checkDocs() {
 	limits := readText("docs/reference/limits.mdx")
 	platform := readText("docs/reference/platform.mdx")
 	products := readText("docs/reference/products.mdx")
+	allUsageCapMeters := []string{
+		"worker_requests",
+		"worker_cpu_ms",
+		"worker_transfer_bytes",
+		"static_transfer_bytes",
+		"sqlite_rows_read",
+		"sqlite_rows_written",
+		"sqlite_storage_bytes",
+		"kv_reads",
+		"kv_writes",
+		"kv_deletes",
+		"kv_lists",
+		"kv_storage_bytes",
+		"queue_operations",
+		"state_requests",
+		"state_duration_gb_milliseconds",
+		"state_sqlite_rows_read",
+		"state_sqlite_rows_written",
+		"state_sqlite_storage_bytes",
+		"object_storage_bytes",
+		"object_storage_class_a_operations",
+		"object_storage_class_b_operations",
+		"object_storage_egress_bytes",
+		"build_minutes",
+		"log_events",
+	}
+	for _, meter := range allUsageCapMeters {
+		requireContains(products, "`"+meter+"`", "product docs usage meter "+meter)
+		requireContains(limits, "`"+meter+"`", "limits docs usage cap meter "+meter)
+		requireContains(openapi, `"`+meter+`"`, "OpenAPI usage meter "+meter)
+	}
 	for _, retired := range []string{
 		"/v1/apps",
 		"--app",
