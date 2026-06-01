@@ -28,6 +28,8 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "name",
         ),
         "query" | "execute" => sqlite_query(cli),
+        "backup" | "backups" => sqlite_backup_command(cli),
+        "restore" => sqlite_restore(cli, 1),
         "delete" | "del" | "rm" => delete_app_resource(
             cli,
             1,
@@ -37,6 +39,20 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "sqlite/databases",
         ),
         _ => unknown_platform_command(cli, "sqlite"),
+    }
+}
+
+fn sqlite_backup_command(cli: &CliOptions) -> Result<()> {
+    match cli.args.get(1).map_or("list", String::as_str) {
+        "list" => sqlite_backups(cli, 2),
+        "create" => sqlite_backup_create(cli, 2),
+        "restore" => sqlite_restore(cli, 2),
+        _ => Err(agent_error(
+            "unknown_command",
+            "Unknown SQLite backup command.",
+            "Use `tovuk database backup list --service <service> DB --json`, `tovuk database backup create --service <service> DB --json`, or `tovuk database backup restore --service <service> DB <backup_id> --json`.",
+            cli.output.json,
+        )),
     }
 }
 
@@ -586,6 +602,77 @@ fn sqlite_query(cli: &CliOptions) -> Result<()> {
             "sql": sql,
             "params": params,
         })),
+    )
+}
+
+fn sqlite_backups(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
+    let database = required_arg(
+        cli,
+        database_arg_index,
+        "sqlite_database_required",
+        "SQLite database is required.",
+        "Use `tovuk database backup list --service <service> DB --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::GET,
+        &format!(
+            "{}/sqlite/{}/backups",
+            service_route(cli, "")?.trim_end_matches('/'),
+            encode_component(&database)
+        ),
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
+fn sqlite_backup_create(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
+    let database = required_arg(
+        cli,
+        database_arg_index,
+        "sqlite_database_required",
+        "SQLite database is required.",
+        "Use `tovuk database backup create --service <service> DB --json`.",
+    )?;
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &format!(
+            "{}/sqlite/{}/backups",
+            service_route(cli, "")?.trim_end_matches('/'),
+            encode_component(&database)
+        ),
+        None,
+    )
+}
+
+fn sqlite_restore(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
+    let database = required_arg(
+        cli,
+        database_arg_index,
+        "sqlite_database_required",
+        "SQLite database is required.",
+        "Use `tovuk database backup restore --service <service> DB <backup_id> --json`.",
+    )?;
+    let backup = required_arg(
+        cli,
+        database_arg_index + 1,
+        "sqlite_backup_required",
+        "SQLite backup id is required.",
+        "Use `tovuk database backup list --service <service> DB --json` and pass a backup id.",
+    )?;
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &format!(
+            "{}/sqlite/{}/backups/{}/restore",
+            service_route(cli, "")?.trim_end_matches('/'),
+            encode_component(&database),
+            encode_component(&backup)
+        ),
+        None,
     )
 }
 

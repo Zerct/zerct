@@ -41,7 +41,7 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
 - Transfer: metered for visibility with no default plan cap. Agents can set
   `static_transfer_bytes` and `worker_transfer_bytes` hard caps before launch.
 - SQLite: `10` databases, `5 GB` total, `500 MB` per database, `5 million`
-  rows read per day, `100,000` rows written per day.
+  rows read per day, `100,000` rows written per day, and `7 days` of backups.
 - KV: `1,000` namespaces, `1 GB` per account and namespace, `100,000`
   reads per day, `1,000` writes, deletes, and list requests per day.
 - Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
@@ -75,8 +75,9 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   high-throughput launches.
 - SQLite: `50,000` databases, `1 TB` account hard cap, `10 GB` per database,
   `25 billion` rows read and `50 million` rows written per month included.
-  Overage is `$0.001` per million rows read, `$1.00` per million rows written,
-  and `$0.75` per GB-month after the included `5 GB`.
+  Backups keep a `30 day` restore window. Overage is `$0.001` per million rows
+  read, `$1.00` per million rows written, and `$0.75` per GB-month after the
+  included `5 GB`.
 - KV: `1,000` namespaces, no storage hard cap, `10 million` reads and
   `1 million` writes, deletes, and lists per month included. Overage is `$0.50`
   per million reads, `$5.00` per million writes, deletes, or lists, and `$0.50`

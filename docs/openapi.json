@@ -5408,6 +5408,214 @@
           }
         ]
       }
+    },
+    "/v1/services/{service_id}/sqlite/{database}/backups": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "List SQLite backups",
+        "description": "List restorable SQLite backups for a service database. Context: paths./v1/services/{service_id}/sqlite/{database}/backups.get.",
+        "operationId": "listServiceSqliteBackups",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SqliteBackupsListed"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/sqlite/{database}/backups.get.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "database",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sqlite_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "DB"
+              ]
+            },
+            "description": "SQLite database id or binding name. Context: paths./v1/services/{service_id}/sqlite/{database}/backups.get.parameters.database.",
+            "example": "DB"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Create SQLite backup",
+        "description": "Create a manual SQLite backup before migrations, imports, or destructive writes. Context: paths./v1/services/{service_id}/sqlite/{database}/backups.post.",
+        "operationId": "createServiceSqliteBackup",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SqliteBackupCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/sqlite/{database}/backups.post.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "database",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sqlite_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "DB"
+              ]
+            },
+            "description": "SQLite database id or binding name. Context: paths./v1/services/{service_id}/sqlite/{database}/backups.post.parameters.database.",
+            "example": "DB"
+          }
+        ]
+      }
+    },
+    "/v1/services/{service_id}/sqlite/{database}/backups/{backup}/restore": {
+      "post": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Restore SQLite backup",
+        "description": "Restore a SQLite backup and create a pre-restore safety backup first. Context: paths./v1/services/{service_id}/sqlite/{database}/backups/{backup}/restore.post.",
+        "operationId": "restoreServiceSqliteBackup",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SqliteBackupRestored"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/sqlite/{database}/backups/{backup}/restore.post.parameters.service_id.",
+            "example": "service_1"
+          },
+          {
+            "name": "database",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(sqlite_[0-9]+|[A-Z][A-Z0-9_]{0,62})$",
+              "maxLength": 128,
+              "examples": [
+                "DB"
+              ]
+            },
+            "description": "SQLite database id or binding name. Context: paths./v1/services/{service_id}/sqlite/{database}/backups/{backup}/restore.post.parameters.database.",
+            "example": "DB"
+          },
+          {
+            "name": "backup",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^sqlite_backup_[0-9]+$",
+              "maxLength": 128,
+              "examples": [
+                "sqlite_backup_1"
+              ]
+            },
+            "description": "SQLite backup id. Context: paths./v1/services/{service_id}/sqlite/{database}/backups/{backup}/restore.post.parameters.backup.",
+            "example": "sqlite_backup_1"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -10029,6 +10237,169 @@
                     "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
                     "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
                     "Use SQLite for relational service data and KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "SqliteBackupsListed": {
+        "description": "SQLite backups listed. Context: components.responses.SqliteBackupsListed.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SqliteBackupsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "SQLite backups listed.",
+                "value": {
+                  "database": {
+                    "id": "sqlite_1",
+                    "name": "DB",
+                    "storageLimitMib": 476,
+                    "storageUsedMib": 1,
+                    "quotaState": "ok",
+                    "timeTravelDays": 7,
+                    "queryTimeoutSeconds": 30
+                  },
+                  "backups": [
+                    {
+                      "id": "sqlite_backup_1",
+                      "databaseId": "sqlite_1",
+                      "kind": "manual",
+                      "sizeBytes": 32768,
+                      "expiresAt": "2026-06-08T12:00:00Z",
+                      "createdAt": "2026-06-01T12:00:00Z"
+                    }
+                  ],
+                  "nextActions": [
+                    "Create a backup before migrations or destructive writes."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "SqliteBackupCreated": {
+        "description": "SQLite backup created. Context: components.responses.SqliteBackupCreated.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SqliteBackupCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "SQLite backup created.",
+                "value": {
+                  "database": {
+                    "id": "sqlite_1",
+                    "name": "DB",
+                    "storageLimitMib": 476,
+                    "storageUsedMib": 1,
+                    "quotaState": "ok",
+                    "timeTravelDays": 7,
+                    "queryTimeoutSeconds": 30
+                  },
+                  "backup": {
+                    "id": "sqlite_backup_1",
+                    "databaseId": "sqlite_1",
+                    "kind": "manual",
+                    "sizeBytes": 32768,
+                    "expiresAt": "2026-06-08T12:00:00Z",
+                    "createdAt": "2026-06-01T12:00:00Z"
+                  },
+                  "nextActions": [
+                    "Run the migration, then verify with a read query."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "SqliteBackupRestored": {
+        "description": "SQLite backup restored. Context: components.responses.SqliteBackupRestored.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SqliteBackupRestoreResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "SQLite backup restored.",
+                "value": {
+                  "database": {
+                    "id": "sqlite_1",
+                    "name": "DB",
+                    "storageLimitMib": 476,
+                    "storageUsedMib": 1,
+                    "quotaState": "ok",
+                    "timeTravelDays": 7,
+                    "queryTimeoutSeconds": 30
+                  },
+                  "restoredBackup": {
+                    "id": "sqlite_backup_1",
+                    "databaseId": "sqlite_1",
+                    "kind": "manual",
+                    "sizeBytes": 32768,
+                    "expiresAt": "2026-06-08T12:00:00Z",
+                    "createdAt": "2026-06-01T12:00:00Z"
+                  },
+                  "previousBackup": {
+                    "id": "sqlite_backup_2",
+                    "databaseId": "sqlite_1",
+                    "kind": "pre_restore",
+                    "sizeBytes": 40960,
+                    "expiresAt": "2026-06-08T12:05:00Z",
+                    "createdAt": "2026-06-01T12:05:00Z"
+                  },
+                  "nextActions": [
+                    "Run migration checks and read queries before promoting."
                   ]
                 }
               }
@@ -23631,6 +24002,191 @@
             ]
           }
         }
+      },
+      "SqliteBackup": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "databaseId",
+          "kind",
+          "sizeBytes",
+          "expiresAt",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "SQLite backup id. Context: components.schemas.SqliteBackup.properties.id.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^sqlite_backup_[0-9]+$",
+            "examples": [
+              "sqlite_backup_1"
+            ]
+          },
+          "databaseId": {
+            "type": "string",
+            "description": "SQLite database id. Context: components.schemas.SqliteBackup.properties.databaseId.",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^sqlite_[0-9]+$",
+            "examples": [
+              "sqlite_1"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "description": "Backup kind. Context: components.schemas.SqliteBackup.properties.kind.",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^(manual|pre_restore)$",
+            "examples": [
+              "manual"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Backup file size in bytes. Context: components.schemas.SqliteBackup.properties.sizeBytes.",
+            "minimum": 0,
+            "maximum": 1000000000000,
+            "examples": [
+              32768
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp when this backup expires. Context: components.schemas.SqliteBackup.properties.expiresAt.",
+            "examples": [
+              "2026-06-08T12:00:00Z"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC timestamp when this backup was created. Context: components.schemas.SqliteBackup.properties.createdAt.",
+            "examples": [
+              "2026-06-01T12:00:00Z"
+            ]
+          }
+        },
+        "description": "SQLite backup metadata. Context: components.schemas.SqliteBackup."
+      },
+      "SqliteBackupsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "database",
+          "backups",
+          "nextActions"
+        ],
+        "properties": {
+          "database": {
+            "$ref": "#/components/schemas/SqliteDatabaseBinding"
+          },
+          "backups": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/SqliteBackup"
+            },
+            "description": "Available backups in newest-first order. Context: components.schemas.SqliteBackupsResponse.properties.backups.",
+            "examples": [
+              [
+                {
+                  "id": "sqlite_backup_1",
+                  "databaseId": "sqlite_1",
+                  "kind": "manual",
+                  "sizeBytes": 32768,
+                  "expiresAt": "2026-06-08T12:00:00Z",
+                  "createdAt": "2026-06-01T12:00:00Z"
+                }
+              ]
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.SqliteBackupsResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,512}$"
+            },
+            "examples": [
+              [
+                "Create a backup before migrations or destructive writes."
+              ]
+            ]
+          }
+        },
+        "description": "SQLite backup listing response. Context: components.schemas.SqliteBackupsResponse."
+      },
+      "SqliteBackupCreateResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "database",
+          "backup",
+          "nextActions"
+        ],
+        "properties": {
+          "database": {
+            "$ref": "#/components/schemas/SqliteDatabaseBinding"
+          },
+          "backup": {
+            "$ref": "#/components/schemas/SqliteBackup"
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.SqliteBackupCreateResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,512}$"
+            },
+            "examples": [
+              [
+                "Run the migration, then verify with a read query."
+              ]
+            ]
+          }
+        },
+        "description": "SQLite backup creation response. Context: components.schemas.SqliteBackupCreateResponse."
+      },
+      "SqliteBackupRestoreResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "database",
+          "restoredBackup",
+          "previousBackup",
+          "nextActions"
+        ],
+        "properties": {
+          "database": {
+            "$ref": "#/components/schemas/SqliteDatabaseBinding"
+          },
+          "restoredBackup": {
+            "$ref": "#/components/schemas/SqliteBackup"
+          },
+          "previousBackup": {
+            "$ref": "#/components/schemas/SqliteBackup"
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.SqliteBackupRestoreResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,512}$"
+            },
+            "examples": [
+              [
+                "Run migration checks and read queries before promoting."
+              ]
+            ]
+          }
+        },
+        "description": "SQLite backup restore response. Context: components.schemas.SqliteBackupRestoreResponse."
       }
     }
   }

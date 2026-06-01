@@ -12,6 +12,9 @@ need dashboard access.
 tovuk platform --service service_1 --json
 tovuk database create --service service_1 DB --json
 tovuk database query --service service_1 DB "select 1" --json
+tovuk database backup create --service service_1 DB --json
+tovuk database backup list --service service_1 DB --json
+tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
 tovuk database delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
@@ -47,6 +50,8 @@ tovuk limit delete worker_requests --period day --json
   Rust APIs under `/api/*`.
 - SQLite: service data with row and storage meters.
 - SQLite query: migrations, smoke tests, and data inspection with metering.
+- SQLite backups: manual restore points and pre-restore safety snapshots for
+  no-dashboard migration recovery.
 - Object storage: user uploads, images, videos, documents, generated files, and
   downloads.
 - KV: small config, sessions, feature flags, and cache metadata.
