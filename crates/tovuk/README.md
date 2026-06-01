@@ -1,13 +1,13 @@
 # tovuk
 
-Rust CLI package for deploying Rust workers, static frontends, and worker-static
+Rust CLI package for deploying Rust workers, static frontends, and full-stack
 services to Tovuk.
 This is the native source of truth for the Tovuk CLI. It does not require
 Node.js, npm, Python, or any JavaScript runtime.
 
 ```sh
 cargo install tovuk
-tovuk new hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
@@ -15,7 +15,7 @@ tovuk check
 tovuk deploy --wait --json
 ```
 
-From a worker-static repo root, `tovuk deploy` reads one root `tovuk.toml`,
+From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
 builds the worker and frontend roots, and returns one service URL with `/api/*`
 routed to the Rust worker.
 

@@ -33,7 +33,7 @@ pub(super) fn create_template(project_dir: &Path, template: &str) -> Result<()> 
                 true,
             )?;
         }
-        "worker-static-rust-tanstack" => write_fullstack_template(project_dir)?,
+        "fullstack-rust-tanstack" => write_fullstack_template(project_dir)?,
         _ => {}
     }
     println!("created {template} template");

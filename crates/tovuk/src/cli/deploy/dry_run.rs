@@ -241,8 +241,8 @@ fn project_next_actions(ok: bool, kind: Option<ProjectKind>) -> Vec<&'static str
         ];
     }
     match kind {
-        Some(ProjectKind::WorkerStatic) => vec![
-            "Review enabled worker-static capabilities and billingEstimate.lineItems.",
+        Some(ProjectKind::Fullstack) => vec![
+            "Review enabled full-stack capabilities and billingEstimate.lineItems.",
             "Set usage caps for worker, static transfer, SQLite, KV, queues, State, and object storage meters before load.",
             "Run `tovuk deploy --wait --json` only after this dry run is acceptable.",
         ],
@@ -287,8 +287,8 @@ mod tests {
     };
 
     #[test]
-    fn worker_static_dry_run_exposes_one_service_capability_set() {
-        let service_capabilities = worker_static_capabilities();
+    fn fullstack_dry_run_exposes_one_service_capability_set() {
+        let service_capabilities = fullstack_capabilities();
         let capabilities = capability_dry_run(Some(&service_capabilities), &sample_capabilities());
 
         assert!(capabilities["enabled"].as_array().is_some_and(|enabled| {
@@ -304,8 +304,8 @@ mod tests {
     }
 
     #[test]
-    fn worker_static_dry_run_lists_public_meters_before_deploy() {
-        let mut service_capabilities = worker_static_capabilities();
+    fn fullstack_dry_run_lists_public_meters_before_deploy() {
+        let mut service_capabilities = fullstack_capabilities();
         service_capabilities.sqlite = CapabilityToggle::enabled();
         service_capabilities.object_storage = CapabilityToggle::enabled();
         service_capabilities.kv = CapabilityToggle::enabled();
@@ -339,8 +339,8 @@ mod tests {
         assert!(warnings[0].contains("Project limit would be exceeded"));
     }
 
-    fn worker_static_capabilities() -> CapabilitiesConfig {
-        CapabilitiesConfig::for_kind(ProjectKind::WorkerStatic)
+    fn fullstack_capabilities() -> CapabilitiesConfig {
+        CapabilitiesConfig::for_kind(ProjectKind::Fullstack)
     }
 
     fn sample_capabilities() -> serde_json::Value {

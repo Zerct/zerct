@@ -89,7 +89,7 @@ pub(crate) fn run_check(project_dir: &Path) -> QualityReport {
         .as_ref()
         .map_or(ProjectKind::RustWorker, |config| config.kind);
 
-    if kind.is_worker_static() {
+    if kind.is_fullstack() {
         if let Some(config) = config_result.config.as_ref() {
             checks.extend(fullstack_checks(project_dir, config, config_result.valid));
         }

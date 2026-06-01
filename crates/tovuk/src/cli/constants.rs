@@ -1,4 +1,4 @@
-pub(crate) const VERSION: &str = "0.1.80";
+pub(crate) const VERSION: &str = "0.1.81";
 pub(crate) const DEFAULT_API_URL: &str = "https://api.tovuk.com";
 pub(crate) const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 pub(crate) const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: u64 = 900;
@@ -39,7 +39,7 @@ pub(crate) const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str =
 pub(crate) const PROJECT_TEMPLATES: &[&str] = &[
     "rust-worker",
     "tanstack-static-frontend",
-    "worker-static-rust-tanstack",
+    "fullstack-rust-tanstack",
 ];
 pub(crate) const JAVASCRIPT_LINTERS: &[&str] = &[
     "eslint",

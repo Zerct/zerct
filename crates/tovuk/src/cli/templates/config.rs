@@ -11,13 +11,13 @@ use std::path::Path;
 
 pub(super) fn init_config(project_dir: &Path, kind: ProjectKind) -> Result<String> {
     match kind {
-        ProjectKind::WorkerStatic => {
+        ProjectKind::Fullstack => {
             if let Some((backend, frontend)) = detect_fullstack_roots(project_dir) {
                 return Ok(fullstack_config(project_dir, &backend, &frontend, false));
             }
             Err(agent_error(
-                "worker_static_roots_missing",
-                "Could not find worker-static roots.",
+                "fullstack_roots_missing",
+                "Could not find full-stack roots.",
                 "Create api/Cargo.toml and web/package.json or web/index.html, then retry.",
                 false,
             ))
@@ -62,9 +62,9 @@ pub(super) fn fullstack_config(
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| service_name_from_dir(&backend_dir));
     let settings = frontend_build_settings(&frontend_dir, prefer_bun);
-    let capabilities = capabilities_toml(ProjectKind::WorkerStatic);
+    let capabilities = capabilities_toml(ProjectKind::Fullstack);
     format!(
-        "name = \"{name}\"\nkind = \"worker_static\"\n\n{capabilities}\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n",
+        "name = \"{name}\"\nkind = \"fullstack\"\n\n{capabilities}\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n",
         settings.check, settings.build, settings.output
     )
 }

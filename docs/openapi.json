@@ -8163,7 +8163,7 @@
                         "Single-key serialized state"
                       ],
                       "commands": [
-                        "tovuk new hello-service --template worker-static-rust-tanstack",
+                        "tovuk new hello-service --template fullstack-rust-tanstack",
                         "tovuk deploy --wait --json",
                         "tovuk logs --service <service> --json"
                       ],
@@ -12939,7 +12939,7 @@
         "type": "string",
         "description": "Tovuk project kind. Context: components.schemas.ProjectKind.",
         "enum": [
-          "worker_static",
+          "fullstack",
           "rust_worker",
           "static_frontend"
         ],
@@ -14560,7 +14560,7 @@
       },
       "TovukFrontendConfig": {
         "type": "object",
-        "description": "Frontend settings for kind = worker_static. Context: components.schemas.TovukFrontendConfig.",
+        "description": "Frontend settings for kind = fullstack. Context: components.schemas.TovukFrontendConfig.",
         "additionalProperties": false,
         "properties": {
           "root": {
@@ -14611,7 +14611,7 @@
       },
       "TovukWorkerConfig": {
         "type": "object",
-        "description": "Worker settings for kind = worker_static. Context: components.schemas.TovukWorkerConfig.",
+        "description": "Worker settings for kind = fullstack. Context: components.schemas.TovukWorkerConfig.",
         "additionalProperties": false,
         "properties": {
           "root": {
@@ -15939,7 +15939,7 @@
                     "Single-key serialized state"
                   ],
                   "commands": [
-                    "tovuk new hello-service --template worker-static-rust-tanstack",
+                    "tovuk new hello-service --template fullstack-rust-tanstack",
                     "tovuk deploy --wait --json",
                     "tovuk logs --service <service> --json"
                   ],
@@ -24667,7 +24667,7 @@
               "Single-key serialized state"
             ],
             "commands": [
-              "tovuk new hello-service --template worker-static-rust-tanstack",
+              "tovuk new hello-service --template fullstack-rust-tanstack",
               "tovuk deploy --wait --json",
               "tovuk logs --service <service> --json"
             ],

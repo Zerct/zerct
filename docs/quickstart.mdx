@@ -22,7 +22,7 @@ This creates `tovuk.toml`.
 For a new project, start from a template:
 
 ```sh
-tovuk new hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 ```
 
@@ -61,7 +61,7 @@ tovuk logs --build <build_id> --json
 
 Fix the first actionable error, rerun check, then redeploy.
 
-## Worker-static repos
+## Full-stack repos
 
 Put one `tovuk.toml` in the repo root, with explicit `[capabilities]`,
 `[worker]`, and `[frontend]` sections. Run one command from the repo root:

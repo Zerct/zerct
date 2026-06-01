@@ -1,13 +1,13 @@
 # tovuk
 
-Deploy Rust workers, static frontends, and worker-static services to Tovuk.
+Deploy Rust workers, static frontends, and full-stack services to Tovuk.
 
 ```sh
 npm install -g tovuk
 ```
 
 ```sh
-tovuk new hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
@@ -26,7 +26,7 @@ Static frontends must use TypeScript browser source, stable native type-aware
 TypeScript checks, native linting such as `oxlint`, `biome check`, or
 `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
 
-From a worker-static repo root, the same deploy command reads one root
+From a full-stack repo root, the same deploy command reads one root
 `tovuk.toml`, reads explicit `[capabilities]`, builds the worker and frontend
 roots, and returns one service URL with `/api/*` routed to the Rust worker.
 

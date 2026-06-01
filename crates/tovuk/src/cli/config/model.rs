@@ -79,11 +79,11 @@ impl CapabilitiesConfig {
         Self {
             static_frontend: CapabilityToggle::from_bool(matches!(
                 kind,
-                ProjectKind::StaticFrontend | ProjectKind::WorkerStatic
+                ProjectKind::StaticFrontend | ProjectKind::Fullstack
             )),
             worker: CapabilityToggle::from_bool(matches!(
                 kind,
-                ProjectKind::RustWorker | ProjectKind::WorkerStatic
+                ProjectKind::RustWorker | ProjectKind::Fullstack
             )),
             sqlite: CapabilityToggle::from_bool(false),
             object_storage: CapabilityToggle::from_bool(false),
@@ -204,11 +204,11 @@ mod tests {
     };
 
     #[test]
-    fn serializes_worker_static_backend_as_worker() {
+    fn serializes_fullstack_backend_as_worker() {
         let config = TovukConfig {
             name: Some("fullstack".to_owned()),
-            kind: ProjectKind::WorkerStatic,
-            capabilities: CapabilitiesConfig::for_kind(ProjectKind::WorkerStatic),
+            kind: ProjectKind::Fullstack,
+            capabilities: CapabilitiesConfig::for_kind(ProjectKind::Fullstack),
             build: BuildConfig {
                 command: "cargo build --release".to_owned(),
                 check: "cargo fmt --all --check".to_owned(),

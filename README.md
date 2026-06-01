@@ -2,8 +2,8 @@
 
 Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Tovuk hosts Rust workers, static frontends, and worker-static services. A
-worker-static service uses one `tovuk.toml`, one deployment URL, static files at
+Tovuk hosts Rust workers, static frontends, and full-stack services. A
+full-stack service uses one `tovuk.toml`, one deployment URL, static files at
 `/`, and a Rust worker under `/api/*`.
 
 ## Install
@@ -32,25 +32,25 @@ tovuk deploy --dry-run
 tovuk deploy --wait
 ```
 
-Create a worker-static starter:
+Create a full-stack starter:
 
 ```sh
-tovuk new hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 ```
 
-From a worker-static repo root, `tovuk deploy` reads the single root
+From a full-stack repo root, `tovuk deploy` reads the single root
 `tovuk.toml`, builds `api` and `web`, and returns one service URL. Create
 databases, KV namespaces, queues, cron triggers, State namespaces,
 service bindings, object storage objects, and usage caps through CLI resource
 commands. Service binding call chains can use up to 32 worker invocations per
 top-level request.
 
-Worker-static deploys use this `tovuk.toml` shape:
+Full-stack deploys use this `tovuk.toml` shape:
 
 ```toml
 name = "hello-service"
-kind = "worker_static"
+kind = "fullstack"
 
 [capabilities]
 static_frontend = true

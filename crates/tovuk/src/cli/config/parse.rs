@@ -155,7 +155,7 @@ fn parse_frontend_config(
     kind: ProjectKind,
     project_dir: &Path,
 ) -> std::result::Result<FrontendConfig, String> {
-    if !kind.is_worker_static() {
+    if !kind.is_fullstack() {
         return Ok(FrontendConfig::default());
     }
     let root = get_string(table, "root")?;
@@ -178,7 +178,7 @@ fn parse_backend_config(
     table: &toml::Table,
     kind: ProjectKind,
 ) -> std::result::Result<BackendConfig, String> {
-    if !kind.is_worker_static() {
+    if !kind.is_fullstack() {
         return Ok(BackendConfig::default());
     }
     Ok(BackendConfig {

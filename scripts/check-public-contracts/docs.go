@@ -81,6 +81,8 @@ func checkDocs() {
 		"targetApp",
 		"alwaysOnApps",
 		"appCount",
+		"worker_static",
+		"worker-static-rust-tanstack",
 	} {
 		rejectContains(openapi, retired, "retired public app contract")
 	}

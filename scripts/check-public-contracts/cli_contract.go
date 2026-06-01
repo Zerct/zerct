@@ -60,7 +60,7 @@ func checkCLIContract() {
 		requireContains(source, "billingEstimate", "agentic usage cost estimate docs")
 	}
 
-	requireContains(cargoCLI, "worker-static-rust-tanstack", "worker-static template option")
+	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
 	requireContains(cargoCLI, "rust-worker", "Rust worker template option")
 	requireContains(cargoCLI, "JavaScript and TypeScript are frontend-only on Tovuk", "Rust-only runtime policy")
@@ -86,6 +86,9 @@ func checkCLIContract() {
 		rejectContains(source, retiredOrgScope, "retired org scope")
 	}
 	for _, source := range []string{cargoCLI, cargoReadme, npmReadme, pythonReadme} {
+		rejectContains(source, "worker-static-rust-tanstack", "retired full-stack template name")
+		rejectContains(source, `kind = "worker_static"`, "retired full-stack project kind")
+		rejectContains(source, "worker-static", "retired worker-static wording")
 		rejectContains(source, "tovuk init", "retired init command")
 		rejectContains(source, "tovuk install", "retired install command")
 		rejectContains(source, "tovuk preview", "retired preview command")
