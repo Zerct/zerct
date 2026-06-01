@@ -1,6 +1,6 @@
 [package]
 name = "tovuk"
-version = "0.1.70"
+version = "0.1.71"
 edition = "2024"
 rust-version = "1.85"
 description = "Deploy Rust workers, static frontends, and worker-static apps to Tovuk."

@@ -8,6 +8,7 @@ Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
 
 ```sh
 tovuk doctor --json
+tovuk plan --json
 tovuk deploy --wait --json
 ```
 
@@ -19,11 +20,15 @@ Agent repair loop:
 2. If it fails, read the first failed check.
 3. Apply its `agent_instruction` exactly.
 4. Rerun doctor until it passes.
-5. Run `tovuk deploy --wait --json`.
-6. If deploy fails, read `build_job.id` or the failed build id.
-7. Run `tovuk logs --build <build_id> --json`.
-8. Fix the first actionable log error.
-9. Rerun doctor before redeploying.
+5. Run `tovuk plan --json`.
+6. Review warnings, enabled and disabled capabilities, meters, limits, and
+   `billingEstimate`.
+7. Set hard usage caps for expected load.
+8. Run `tovuk deploy --wait --json`.
+9. If deploy fails, read `build_job.id` or the failed build id.
+10. Run `tovuk logs --build <build_id> --json`.
+11. Fix the first actionable log error.
+12. Rerun doctor and plan before redeploying.
 
 Rust worker contract:
 
@@ -88,6 +93,7 @@ Useful commands:
 
 ```sh
 tovuk capabilities --json
+tovuk plan --json
 curl https://api.tovuk.com/v1/status
 tovuk activity --json
 tovuk service list --json
@@ -158,6 +164,8 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `products` catalog. Use each product's `features`, `meters`, `meter_details`,
 `pricing_fields`, and `limit_fields` before load tests, media uploads, or paid
 usage.
+`tovuk plan --json` is read-only and combines `tovuk.toml`, doctor checks,
+capability meters, account limits, usage, and `billingEstimate` before deploy.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
 Usage Caps.

@@ -23,6 +23,7 @@ use std::{
     path::Path,
     process::{Command, Stdio},
 };
+pub(crate) use types::DeployProjectInfo;
 use types::{DeployPlanProject, WorkspaceDeployResult};
 use wait::wait_for_workspace_builds;
 

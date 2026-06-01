@@ -9,6 +9,7 @@ mod doctor;
 mod errors;
 mod frontend_checks;
 mod help;
+mod plan;
 mod preview;
 mod project;
 mod project_kind;

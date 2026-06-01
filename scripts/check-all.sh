@@ -92,6 +92,7 @@ printf '%s\n' "$native_cli_version"
 "$native_cli" --help | grep -q 'tovuk support resolve'
 "$native_cli" --help | grep -q 'tovuk storage upload'
 "$native_cli" --help | grep -q 'tovuk storage download'
+"$native_cli" --help | grep -q 'tovuk plan'
 "$native_cli" --help | grep -q 'tovuk pricing'
 "$native_cli" --help | grep -q 'tovuk billing checkout'
 test "$("$native_cli" -V)" = "$native_cli_version"
@@ -108,6 +109,7 @@ PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk 
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support resolve'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage upload'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage download'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk plan'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk pricing'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"

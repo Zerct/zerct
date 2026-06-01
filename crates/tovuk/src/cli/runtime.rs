@@ -13,6 +13,7 @@ use super::{
     doctor::doctor_project,
     errors::{Result, agent_error},
     help::help_text,
+    plan::plan_project,
     preview::preview_project,
     templates::{init_project, install_project},
 };
@@ -46,6 +47,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "doctor" => doctor_project(&project_path(cli.args.first())?, cli.output.json),
         "preview" => preview_project(&project_path(cli.args.first())?, cli.port),
         "login" => login(&cli),
+        "plan" => plan_project(&project_path(cli.args.first())?, &cli),
         "deploy" => deploy(&project_path(cli.args.first())?, &cli),
         "capabilities" => capabilities(&cli),
         "pricing" => pricing(&cli),
