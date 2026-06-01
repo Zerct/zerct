@@ -36,7 +36,7 @@ The Cargo package exposes the same agent command surface as npm:
 tovuk capabilities
 tovuk pricing --json
 tovuk me
-tovuk usage
+tovuk usage --json
 tovuk activity --json
 tovuk service list
 tovuk service show service_1 --json
@@ -93,6 +93,9 @@ tovuk support create "Deploy failed" "Agent retried deploy after doctor." --serv
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
+
+`tovuk usage --json` includes `billingEstimate.lineItems` for current-month
+cost estimates.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.

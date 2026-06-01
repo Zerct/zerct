@@ -20,8 +20,9 @@ Use this page when an AI coding agent is deploying with Tovuk.
    `POST /.tovuk/queues/<queue>` in the Rust worker.
 10. For scheduled work, create a cron trigger and implement
    `POST /.tovuk/cron/<trigger>` in the Rust worker.
-11. Before high-throughput work, run `tovuk pricing --json` and set usage
-   caps for the relevant meters.
+11. Before high-throughput work, run `tovuk pricing --json`, then
+   `tovuk usage --json` and inspect `billingEstimate.lineItems`.
+   Set usage caps for the relevant meters.
 12. If a plan limit blocks the deploy or storage action, run
    `tovuk billing checkout --json` and show the returned
    `checkout.url` to the human.
@@ -48,8 +49,9 @@ Run `tovuk doctor --json`. Fix the first failed check by following
 `tovuk logs --build <build_id> --json`, fix the first actionable
 error, and redeploy. Use platform resource commands for SQLite, KV, queues,
 cron triggers, State, service bindings, and usage caps.
-Before load tests or production launch, run `tovuk pricing --json` and set
-hard usage caps with `tovuk limit set`.
+Before load tests or production launch, run `tovuk pricing --json`, inspect
+`billingEstimate` from `tovuk usage --json`, and set hard usage caps with
+`tovuk limit set`.
 For queue handlers, implement `POST /.tovuk/queues/<queue>` and return `2xx`
 only after the batch is safely handled. For cron handlers, implement
 `POST /.tovuk/cron/<trigger>` and keep it idempotent.

@@ -90,7 +90,12 @@ Check the live storage prices and included usage before heavy media work:
 
 ```sh
 tovuk pricing --json
+tovuk usage --json
 ```
+
+Use `billingEstimate.lineItems` for `object_storage_bytes`,
+`object_storage_class_a_operations`, and `object_storage_class_b_operations`
+before starting large uploads or public media load tests.
 
 When a storage limit blocks work, run:
 

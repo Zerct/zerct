@@ -91,6 +91,7 @@ Before high-throughput work or paid usage, read pricing and set hard caps:
 
 ```sh
 tovuk pricing --json
+tovuk usage --json
 tovuk limit set build_minutes --period month --value 6000 --json
 tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
@@ -114,6 +115,8 @@ larger than 100 MiB.
 Use `tovuk capabilities --json` to inspect product choices, meters, limit
 fields, and plan prices before selecting Worker, State, SQLite, KV, queues,
 cron, service bindings, or object storage.
+Use `tovuk usage --json` to inspect `billingEstimate.lineItems` before load
+tests or paid usage.
 
 When a plan limit blocks work:
 
