@@ -26,10 +26,11 @@ Use the authenticated usage view before heavy work:
 tovuk usage --json
 ```
 
-`usage.billingEstimate` returns current-month line items for every priced
-meter, including the usage amount, included amount, billable amount, billing
-unit, rounding rule, and estimated USD micro-units. Storage estimates use the
-current stored bytes as a full-month estimate so agents can plan conservatively.
+`usage.billingEstimate` returns current-month line items for every priced meter
+and every explicitly free transfer meter, including the usage amount, included
+amount, billable amount, billing unit, rounding rule, and estimated USD
+micro-units. Storage estimates use the current stored bytes as a full-month
+estimate so agents can plan conservatively.
 
 ## Free
 
@@ -43,6 +44,8 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   files per Worker version, `25 MiB` per file.
 - Transfer: metered for visibility with no default plan cap. Agents can set
   `static_transfer_bytes` and `worker_transfer_bytes` hard caps before launch.
+  These meters appear in `usage.billingEstimate.lineItems` with `free_transfer`
+  billing units, null prices, and zero estimated cost.
 - SQLite: `10` databases, `5 GB` total, `500 MB` per database, `5 million`
   rows read per day, `100,000` rows written per day, and `7 days` of backups.
 - KV: `1,000` namespaces, `1 GB` per account and namespace, `100,000`
@@ -83,7 +86,9 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   files per Worker version, `25 MiB` per file.
 - Transfer: metered for visibility with no default plan cap. Agents can set
   `static_transfer_bytes` and `worker_transfer_bytes` hard caps before
-  high-throughput launches.
+  high-throughput launches. These meters appear in
+  `usage.billingEstimate.lineItems` with `free_transfer` billing units, null
+  prices, and zero estimated cost.
 - SQLite: `50,000` databases, `1 TB` account hard cap, `10 GB` per database,
   `25 billion` rows read and `50 million` rows written per month included.
   Backups keep a `30 day` restore window. Overage is `$0.001` per million rows
@@ -137,6 +142,8 @@ tovuk limit set object_storage_class_a_operations --period month --value 1000000
 ```
 
 Tovuk reports prices in API JSON as USD micro-units. `1,000,000` means `$1.00`.
-`tovuk usage --json` reports the same unit in `billingEstimate`.
+`tovuk usage --json` reports the same unit in `billingEstimate`. Explicitly
+free meters stay visible in the same estimate with null prices so agents can
+audit and cap them.
 
 The live API catalog is the source of truth for current limits and prices.
