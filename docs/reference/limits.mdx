@@ -105,9 +105,9 @@ ambiguous to run.
   a `15 minute` wall-clock limit.
 - Cron deliveries are sent to `POST /.tovuk/cron/<trigger>` after Tovuk wakes
   the Rust worker if needed. Cron handlers have a `15 minute` wall-clock limit.
-- State SQLite storage is 10 GB per object on Free and Pro, with a 5 GB Free
-  account storage cap, 5 million SQLite rows read per day, and 100 thousand
-  SQLite rows written per day. Pro includes 1 million
+- State SQLite storage is 1 GB per object on Free and 10 GB per object on Pro,
+  with a 5 GB Free account storage cap, 5 million SQLite rows read per day,
+  and 100 thousand SQLite rows written per day. Pro includes 1 million
   requests, 400 thousand GB-s duration, 25 billion SQLite rows read, and
   50 million SQLite rows written per month before paid overage pricing.
 - State alarms allow one scheduled alarm per State object. A replaced alarm
