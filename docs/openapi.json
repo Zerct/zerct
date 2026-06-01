@@ -5153,6 +5153,261 @@
           }
         ]
       }
+    },
+    "/v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/alarm": {
+      "get": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Read State alarm",
+        "description": "Read the scheduled alarm for one State object.",
+        "operationId": "readServiceStateAlarm",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateAlarmLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name used when reading a State alarm.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name used when reading an alarm.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key used when reading its alarm.",
+            "example": "room-1"
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Set State alarm",
+        "description": "Set or replace the scheduled alarm for one State object.",
+        "operationId": "setServiceStateAlarm",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateAlarmLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name used when setting a State alarm.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name used when setting an alarm.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key used when setting its alarm.",
+            "example": "room-1"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StateAlarmSetRequest"
+              },
+              "examples": {
+                "delay": {
+                  "summary": "Relative alarm schedule.",
+                  "value": {
+                    "delaySeconds": 60
+                  }
+                },
+                "absolute": {
+                  "summary": "Absolute alarm schedule.",
+                  "value": {
+                    "scheduledAtUnixMs": 1780315260000
+                  }
+                }
+              }
+            }
+          },
+          "description": "Request body for setting one State alarm."
+        }
+      },
+      "delete": {
+        "tags": [
+          "Deploy"
+        ],
+        "summary": "Delete State alarm",
+        "description": "Delete the scheduled alarm for one State object.",
+        "operationId": "deleteServiceStateAlarm",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/StateAlarmDeleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(service_[a-z0-9_]{1,60}|[a-z0-9](?:[a-z0-9-]{0,46}[a-z0-9])?)$",
+              "maxLength": 512,
+              "examples": [
+                "service_1"
+              ]
+            },
+            "description": "Service id or service name used when deleting a State alarm.",
+            "example": "service_1"
+          },
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(state_namespace_[0-9]+|[A-Z][A-Za-z0-9]{0,63})$",
+              "maxLength": 128,
+              "examples": [
+                "Room"
+              ]
+            },
+            "description": "State namespace id or class name used when deleting an alarm.",
+            "example": "Room"
+          },
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[^/\\x00-\\x1F\\x7F]{1,512}$",
+              "examples": [
+                "room-1"
+              ]
+            },
+            "description": "State object key used when deleting its alarm.",
+            "example": "room-1"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -9370,7 +9625,11 @@
                       "lastSeenAt": "2026-05-31 12:00:00Z",
                       "hibernatedAt": null,
                       "createdAt": "2026-05-31 12:00:00Z",
-                      "updatedAt": "2026-05-31 12:00:00Z"
+                      "updatedAt": "2026-05-31 12:00:00Z",
+                      "alarmScheduledAt": null,
+                      "alarmScheduledAtUnixMs": null,
+                      "alarmLastFireAt": null,
+                      "alarmRetryCount": 0
                     }
                   ],
                   "nextCursor": null,
@@ -9424,7 +9683,11 @@
                     "lastSeenAt": "2026-05-31 12:00:00Z",
                     "hibernatedAt": null,
                     "createdAt": "2026-05-31 12:00:00Z",
-                    "updatedAt": "2026-05-31 12:00:00Z"
+                    "updatedAt": "2026-05-31 12:00:00Z",
+                    "alarmScheduledAt": null,
+                    "alarmScheduledAtUnixMs": null,
+                    "alarmLastFireAt": null,
+                    "alarmRetryCount": 0
                   },
                   "keys": [
                     {
@@ -9486,7 +9749,11 @@
                     "lastSeenAt": "2026-05-31 12:00:00Z",
                     "hibernatedAt": null,
                     "createdAt": "2026-05-31 12:00:00Z",
-                    "updatedAt": "2026-05-31 12:00:00Z"
+                    "updatedAt": "2026-05-31 12:00:00Z",
+                    "alarmScheduledAt": null,
+                    "alarmScheduledAtUnixMs": null,
+                    "alarmLastFireAt": null,
+                    "alarmRetryCount": 0
                   },
                   "entry": {
                     "key": "counter",
@@ -9546,7 +9813,11 @@
                     "lastSeenAt": "2026-05-31 12:00:00Z",
                     "hibernatedAt": null,
                     "createdAt": "2026-05-31 12:00:00Z",
-                    "updatedAt": "2026-05-31 12:00:00Z"
+                    "updatedAt": "2026-05-31 12:00:00Z",
+                    "alarmScheduledAt": null,
+                    "alarmScheduledAtUnixMs": null,
+                    "alarmLastFireAt": null,
+                    "alarmRetryCount": 0
                   },
                   "deleted": true,
                   "nextActions": [
@@ -9645,6 +9916,123 @@
           },
           "Retry-After": {
             "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "StateAlarmLoaded": {
+        "description": "State alarm loaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StateAlarmResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "State alarm loaded.",
+                "value": {
+                  "namespace": {
+                    "id": "state_namespace_1",
+                    "className": "Room",
+                    "storageLimitMib": 953
+                  },
+                  "object": {
+                    "id": "state_object_1",
+                    "namespaceId": "state_namespace_1",
+                    "objectKey": "room-1",
+                    "storageUsedBytes": 1,
+                    "storageUsedMib": 1,
+                    "lastSeenAt": "2026-05-31 12:00:00Z",
+                    "hibernatedAt": null,
+                    "alarmScheduledAt": "2026-05-31 12:01:00Z",
+                    "alarmScheduledAtUnixMs": 1780315260000,
+                    "alarmLastFireAt": null,
+                    "alarmRetryCount": 0,
+                    "createdAt": "2026-05-31 12:00:00Z",
+                    "updatedAt": "2026-05-31 12:00:00Z"
+                  },
+                  "scheduledAt": "2026-05-31 12:01:00Z",
+                  "scheduledAtUnixMs": 1780315260000,
+                  "lastFireAt": null,
+                  "retryCount": 0,
+                  "nextActions": [
+                    "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
+                    "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
+                    "Use SQLite for relational service data and KV for small cached values."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "StateAlarmDeleted": {
+        "description": "State alarm deleted.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StateAlarmDeleteResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "State alarm deleted.",
+                "value": {
+                  "namespace": {
+                    "id": "state_namespace_1",
+                    "className": "Room",
+                    "storageLimitMib": 953
+                  },
+                  "object": {
+                    "id": "state_object_1",
+                    "namespaceId": "state_namespace_1",
+                    "objectKey": "room-1",
+                    "storageUsedBytes": 1,
+                    "storageUsedMib": 1,
+                    "lastSeenAt": "2026-05-31 12:00:00Z",
+                    "hibernatedAt": null,
+                    "alarmScheduledAt": null,
+                    "alarmScheduledAtUnixMs": null,
+                    "alarmLastFireAt": null,
+                    "alarmRetryCount": 0,
+                    "createdAt": "2026-05-31 12:00:00Z",
+                    "updatedAt": "2026-05-31 12:00:00Z"
+                  },
+                  "deleted": true,
+                  "nextActions": [
+                    "Use State only for keyed state, locks, realtime rooms, counters, and coordination.",
+                    "Keep ordinary HTTP APIs in Rust workers and call objects only when one key needs serialized state.",
+                    "Use SQLite for relational service data and KV for small cached values."
+                  ]
+                }
+              }
+            }
           }
         }
       }
@@ -21904,7 +22292,11 @@
           "lastSeenAt",
           "hibernatedAt",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "alarmScheduledAt",
+          "alarmScheduledAtUnixMs",
+          "alarmLastFireAt",
+          "alarmRetryCount"
         ],
         "properties": {
           "id": {
@@ -21996,6 +22388,53 @@
             ],
             "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
             "maxLength": 20
+          },
+          "alarmScheduledAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTC timestamp when this State object alarm is scheduled.",
+            "examples": [
+              "2026-05-31 12:01:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "alarmScheduledAtUnixMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Scheduled alarm time as milliseconds since the UNIX epoch.",
+            "examples": [
+              1780315260000
+            ],
+            "format": "int64",
+            "maximum": 9007199254740991
+          },
+          "alarmLastFireAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "UTC timestamp when this State object alarm last fired.",
+            "examples": [
+              null
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "alarmRetryCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6,
+            "description": "Current alarm retry count.",
+            "examples": [
+              0
+            ],
+            "format": "int32"
           }
         },
         "examples": [
@@ -22008,7 +22447,11 @@
             "lastSeenAt": "2026-05-31 12:00:00Z",
             "hibernatedAt": null,
             "createdAt": "2026-05-31 12:00:00Z",
-            "updatedAt": "2026-05-31 12:00:00Z"
+            "updatedAt": "2026-05-31 12:00:00Z",
+            "alarmScheduledAt": null,
+            "alarmScheduledAtUnixMs": null,
+            "alarmLastFireAt": null,
+            "alarmRetryCount": 0
           }
         ]
       },
@@ -22041,7 +22484,11 @@
                   "lastSeenAt": "2026-05-31 12:00:00Z",
                   "hibernatedAt": null,
                   "createdAt": "2026-05-31 12:00:00Z",
-                  "updatedAt": "2026-05-31 12:00:00Z"
+                  "updatedAt": "2026-05-31 12:00:00Z",
+                  "alarmScheduledAt": null,
+                  "alarmScheduledAtUnixMs": null,
+                  "alarmLastFireAt": null,
+                  "alarmRetryCount": 0
                 }
               ]
             ]
@@ -22989,6 +23436,201 @@
             ]
           }
         ]
+      },
+      "StateAlarmSetRequest": {
+        "type": "object",
+        "description": "State alarm set request. Send exactly one scheduling field.",
+        "properties": {
+          "scheduledAtUnixMs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Absolute scheduled time as milliseconds since the UNIX epoch.",
+            "examples": [
+              1780315260000
+            ],
+            "format": "int64",
+            "maximum": 9007199254740991
+          },
+          "delaySeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647,
+            "description": "Relative delay in seconds from the API server clock.",
+            "examples": [
+              60
+            ],
+            "format": "int32"
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "scheduledAtUnixMs"
+            ],
+            "properties": {
+              "scheduledAtUnixMs": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Required absolute alarm schedule for this request.",
+                "examples": [
+                  1780315260000
+                ],
+                "format": "int64",
+                "maximum": 9007199254740991
+              }
+            }
+          },
+          {
+            "required": [
+              "delaySeconds"
+            ],
+            "properties": {
+              "delaySeconds": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647,
+                "description": "Required relative alarm delay for this request.",
+                "examples": [
+                  60
+                ],
+                "format": "int32"
+              }
+            }
+          }
+        ],
+        "examples": [
+          {
+            "delaySeconds": 60
+          },
+          {
+            "scheduledAtUnixMs": 1780315260000
+          }
+        ]
+      },
+      "StateAlarmResponse": {
+        "type": "object",
+        "description": "State alarm response.",
+        "required": [
+          "namespace",
+          "object",
+          "scheduledAt",
+          "scheduledAtUnixMs",
+          "lastFireAt",
+          "retryCount",
+          "nextActions"
+        ],
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/StateNamespace"
+          },
+          "object": {
+            "$ref": "#/components/schemas/StateInstance"
+          },
+          "scheduledAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Top-level UTC timestamp for the scheduled State alarm.",
+            "examples": [
+              "2026-05-31 12:01:00Z"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "scheduledAtUnixMs": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Top-level alarm schedule in milliseconds since the UNIX epoch.",
+            "examples": [
+              1780315260000
+            ],
+            "format": "int64",
+            "maximum": 9007199254740991
+          },
+          "lastFireAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Top-level UTC timestamp for the last completed State alarm delivery.",
+            "examples": [
+              null
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z$",
+            "maxLength": 20
+          },
+          "retryCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6,
+            "description": "Retry count returned for this alarm delivery state.",
+            "examples": [
+              0
+            ],
+            "format": "int32"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "Use State alarms for object-specific scheduled work."
+              ]
+            },
+            "examples": [
+              [
+                "Use State alarms for object-specific scheduled work."
+              ]
+            ]
+          }
+        }
+      },
+      "StateAlarmDeleteResponse": {
+        "type": "object",
+        "description": "State alarm deletion response.",
+        "required": [
+          "namespace",
+          "object",
+          "deleted",
+          "nextActions"
+        ],
+        "properties": {
+          "namespace": {
+            "$ref": "#/components/schemas/StateNamespace"
+          },
+          "object": {
+            "$ref": "#/components/schemas/StateInstance"
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Whether an alarm was removed.",
+            "examples": [
+              true
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{1,500}$",
+              "maxLength": 500,
+              "examples": [
+                "Set a new State alarm only when the object needs another scheduled wake-up."
+              ]
+            },
+            "examples": [
+              [
+                "Set a new State alarm only when the object needs another scheduled wake-up."
+              ]
+            ]
+          }
+        }
       }
     }
   }

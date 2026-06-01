@@ -277,6 +277,7 @@ pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
         "keys" => state_keys(cli),
         "get" => state_get(cli),
         "put" | "set" => state_put(cli),
+        "alarm" => state_alarm_command(cli),
         "delete-value" | "delete-state" | "del-state" | "rm-state" => state_delete_value(cli),
         "delete" | "del" | "rm" => delete_app_resource(
             cli,
@@ -287,6 +288,15 @@ pub(crate) fn state_command(cli: &CliOptions) -> Result<()> {
             "state/namespaces",
         ),
         _ => unknown_platform_command(cli, "state"),
+    }
+}
+
+fn state_alarm_command(cli: &CliOptions) -> Result<()> {
+    match cli.args.get(1).map_or("get", String::as_str) {
+        "get" | "show" => state_alarm_get(cli, 2),
+        "set" => state_alarm_set(cli, 2),
+        "delete" | "del" | "rm" => state_alarm_delete(cli, 2),
+        _ => state_alarm_get(cli, 1),
     }
 }
 
@@ -307,6 +317,78 @@ fn state_objects(cli: &CliOptions) -> Result<()> {
         None,
     )?;
     print_json(&response)
+}
+
+fn state_alarm_get(cli: &CliOptions, start_index: usize) -> Result<()> {
+    let (namespace, object_key) = state_alarm_args(
+        cli,
+        start_index,
+        "Use `tovuk state alarm get --service <service> Room room-1 --json`.",
+    )?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::GET,
+        &state_object_route(cli, &namespace, &object_key, "alarm")?,
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
+fn state_alarm_set(cli: &CliOptions, start_index: usize) -> Result<()> {
+    let (namespace, object_key) = state_alarm_args(
+        cli,
+        start_index,
+        "Use `tovuk state alarm set --service <service> Room room-1 --delay-seconds 60 --json` or pass a UNIX millisecond timestamp.",
+    )?;
+    let delay_seconds = optional_u32(&cli.queue.delay_seconds, "--delay-seconds", cli)?;
+    let scheduled_at_unix_ms = if cli.value.trim().is_empty() {
+        cli.args.get(start_index + 2).cloned().unwrap_or_default()
+    } else {
+        cli.value.clone()
+    };
+    if delay_seconds.is_some() && !scheduled_at_unix_ms.trim().is_empty() {
+        return Err(agent_error(
+            "state_alarm_schedule_conflict",
+            "State alarm schedule is ambiguous.",
+            "Use either `--delay-seconds <seconds>` or a UNIX millisecond timestamp, not both.",
+            cli.output.json,
+        ));
+    }
+    let mut body = Map::new();
+    if let Some(seconds) = delay_seconds {
+        body.insert("delaySeconds".to_owned(), json!(seconds));
+    } else if let Some(timestamp) = optional_u64(&scheduled_at_unix_ms, "scheduledAtUnixMs", cli)? {
+        body.insert("scheduledAtUnixMs".to_owned(), json!(timestamp));
+    } else {
+        return Err(agent_error(
+            "state_alarm_schedule_required",
+            "State alarm schedule is required.",
+            "Pass `--delay-seconds <seconds>` or a UNIX millisecond timestamp.",
+            cli.output.json,
+        ));
+    }
+    print_authenticated_mutation(
+        cli,
+        Method::PUT,
+        &state_object_route(cli, &namespace, &object_key, "alarm")?,
+        Some(Value::Object(body)),
+    )
+}
+
+fn state_alarm_delete(cli: &CliOptions, start_index: usize) -> Result<()> {
+    let (namespace, object_key) = state_alarm_args(
+        cli,
+        start_index,
+        "Use `tovuk state alarm delete --service <service> Room room-1 --json`.",
+    )?;
+    print_authenticated_mutation(
+        cli,
+        Method::DELETE,
+        &state_object_route(cli, &namespace, &object_key, "alarm")?,
+        None,
+    )
 }
 
 fn state_keys(cli: &CliOptions) -> Result<()> {
@@ -1136,6 +1218,28 @@ fn state_value_args(cli: &CliOptions, instruction: &str) -> Result<(String, Stri
         instruction,
     )?;
     Ok((namespace, object_key, key))
+}
+
+fn state_alarm_args(
+    cli: &CliOptions,
+    start_index: usize,
+    instruction: &str,
+) -> Result<(String, String)> {
+    let namespace = required_arg(
+        cli,
+        start_index,
+        "state_class_required",
+        "State class name is required.",
+        instruction,
+    )?;
+    let object_key = required_arg(
+        cli,
+        start_index + 1,
+        "state_object_key_required",
+        "State object key is required.",
+        instruction,
+    )?;
+    Ok((namespace, object_key))
 }
 
 fn state_objects_route(cli: &CliOptions, namespace: &str) -> Result<String> {

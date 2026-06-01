@@ -48,9 +48,11 @@ switches to multipart transfer for files larger than 100 MiB.
 
 State:
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and
-per-tenant state. Avoid general relational data, large files, and stateless HTTP
-handlers. Main meters: `state_requests`, `state_duration_gb_milliseconds`,
-`state_sqlite_rows_read`, and `state_sqlite_rows_written`.
+per-tenant state. Use State alarms for per-object scheduled wake-ups and retrying
+object-specific work. Avoid general relational data, large files, and stateless
+HTTP handlers. Main meters: `state_requests`,
+`state_duration_gb_milliseconds`, `state_sqlite_rows_read`, and
+`state_sqlite_rows_written`.
 
 KV:
 Use for small config, sessions, feature flags, cache metadata, and rate-limit
