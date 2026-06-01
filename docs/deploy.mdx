@@ -16,7 +16,7 @@ guessing.
    workers.
 6. Tovuk exposes the service on a `tovuk.app` deployment hostname.
 
-For worker-static repos, run `tovuk deploy` from the repo root. The CLI reads
+For full-stack repos, run `tovuk deploy` from the repo root. The CLI reads
 the root `tovuk.toml`, builds the configured worker and frontend roots, serves
 the frontend at `/`, and routes `/api/*` to the Rust worker.
 
@@ -28,7 +28,7 @@ tovuk check
 
 For Rust workers, check runs the configured quality gates before any remote
 build is queued. For static frontends, check runs the configured frontend
-quality command. For worker-static services, check validates both roots.
+quality command. For full-stack services, check validates both roots.
 
 ## Runtime contract
 

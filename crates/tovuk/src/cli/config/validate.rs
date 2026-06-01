@@ -21,7 +21,7 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
         return Err("name must be lowercase DNS-safe text up to 48 characters".to_owned());
     }
     validate_capabilities_config(config)?;
-    if config.kind.is_worker_static() {
+    if config.kind.is_fullstack() {
         validate_fullstack_config(config)?;
     } else {
         validate_build_config(config)?;
@@ -37,11 +37,11 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
 fn validate_capabilities_config(config: &TovukConfig) -> std::result::Result<(), String> {
     let expected_static_frontend = matches!(
         config.kind,
-        ProjectKind::StaticFrontend | ProjectKind::WorkerStatic
+        ProjectKind::StaticFrontend | ProjectKind::Fullstack
     );
     let expected_worker = matches!(
         config.kind,
-        ProjectKind::RustWorker | ProjectKind::WorkerStatic
+        ProjectKind::RustWorker | ProjectKind::Fullstack
     );
     if config.capabilities.static_frontend.is_enabled() != expected_static_frontend {
         return Err(format!(

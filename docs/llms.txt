@@ -1,7 +1,7 @@
 # Tovuk agent guide
 
-Tovuk deploys Rust workers, static frontends, and worker-static services.
-Worker-static services use one root tovuk.toml, serve the frontend at `/`, and route
+Tovuk deploys Rust workers, static frontends, and full-stack services.
+Full-stack services use one root tovuk.toml, serve the frontend at `/`, and route
 `/api/*` to the Rust worker.
 
 Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
@@ -76,9 +76,9 @@ Static frontend contract:
 - JavaScript and TypeScript are frontend-only. API routes, SSR handlers,
   middleware, and server logic must move to the Rust worker.
 
-Worker-static contract:
+Full-stack contract:
 
-- One root `tovuk.toml` sets `kind = "worker_static"`.
+- One root `tovuk.toml` sets `kind = "fullstack"`.
 - `[capabilities]` explicitly sets `static_frontend = true`, `worker = true`,
   platform capabilities to true, and unused optional resources to false.
 - `[worker].root` points to the Rust worker.

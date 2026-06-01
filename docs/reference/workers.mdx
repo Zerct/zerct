@@ -3,7 +3,7 @@ title: "Workers"
 description: "How Tovuk combines Rust workers with static frontends."
 ---
 
-Tovuk worker-static services use one deployable project:
+Tovuk full-stack services use one deployable project:
 
 - Rust worker: APIs, auth callbacks, writes, webhooks, and server-side rules.
 - Static frontend: TanStack, Vite, Astro, Svelte, plain HTML, or another build
@@ -31,7 +31,7 @@ URL.
 
 ```toml
 name = "hello-service"
-kind = "worker_static"
+kind = "fullstack"
 
 [capabilities]
 static_frontend = true

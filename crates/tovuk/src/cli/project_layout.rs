@@ -16,7 +16,7 @@ const PLAIN_STATIC_REQUIRED_FILES: &[&str] = &["index.html"];
 
 pub(crate) fn infer_project_kind(project_dir: &Path) -> ProjectKind {
     if detect_fullstack_roots(project_dir).is_some() {
-        ProjectKind::WorkerStatic
+        ProjectKind::Fullstack
     } else if project_dir.join("Cargo.toml").exists() {
         ProjectKind::RustWorker
     } else if project_dir.join("package.json").exists() || project_dir.join("index.html").exists() {
@@ -39,7 +39,7 @@ pub(crate) fn detect_fullstack_roots(project_dir: &Path) -> Option<(String, Stri
 
 pub(crate) fn required_files(project_dir: &Path, kind: ProjectKind) -> &'static [&'static str] {
     match kind {
-        ProjectKind::WorkerStatic | ProjectKind::RustWorker => RUST_REQUIRED_FILES,
+        ProjectKind::Fullstack | ProjectKind::RustWorker => RUST_REQUIRED_FILES,
         ProjectKind::StaticFrontend if is_plain_static_frontend(project_dir) => {
             PLAIN_STATIC_REQUIRED_FILES
         }

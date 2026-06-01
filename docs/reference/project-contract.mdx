@@ -42,7 +42,7 @@ tovuk.toml
 Plain static frontends do not need a package manager. Use `check = ":"`,
 `command = ":"`, and `output = "."`.
 
-Worker-static service:
+Full-stack service:
 
 ```txt
 tovuk.toml
@@ -117,11 +117,11 @@ command = "bun run build"
 output = "dist"
 ```
 
-## Worker-static tovuk.toml
+## Full-stack tovuk.toml
 
 ```toml
 name = "hello-service"
-kind = "worker_static"
+kind = "fullstack"
 
 [capabilities]
 static_frontend = true
@@ -164,7 +164,7 @@ output = "dist"
 - Keep secrets in server-side environment variables
 - Avoid build steps that require interactive input
 
-Static frontends do not run server code on Tovuk. Worker-static services keep the
+Static frontends do not run server code on Tovuk. Full-stack services keep the
 frontend static and proxy `/api/*` to the Rust worker inside the same service URL.
 JavaScript and TypeScript are frontend-only: Next API routes, Astro server
 endpoints, Svelte `+server` handlers, middleware, SSR handlers, and Node/Bun

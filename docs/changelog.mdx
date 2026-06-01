@@ -11,12 +11,12 @@ description: "Recent product updates from Tovuk."
   formula now ship under `tovuk`. Install with `npm install -g tovuk`,
   `brew install tovuk/tovuk/tovuk`, `pipx install tovuk`, or
   `cargo install tovuk`. See [Packages](/reference/packages).
-- **One-URL worker-static deploys.** Ship a Rust worker and static frontend
+- **One-URL full-stack deploys.** Ship a Rust worker and static frontend
   from one repo with a single root `tovuk.toml`. Run
   `tovuk deploy --wait --json` to get one `*.tovuk.app` URL serving static
   assets at `/` and the worker at `/api/*`. See [Workers](/reference/workers).
 - **Project templates and local checks.** Scaffold a Rust API, TanStack static
-  frontend, or worker-static project with `tovuk new`, then run
+  frontend, or full-stack project with `tovuk new`, then run
   `tovuk check` to test locally before deploying. See
   [Templates](/templates).
 - **Custom domain verification.** Verify and connect custom domains from the
@@ -44,7 +44,7 @@ description: "Recent product updates from Tovuk."
   surfaces before deploy.
 - **Deploy `--wait` mode in SDKs.** The npm, PyPI, and Cargo SDKs now wait for
   builds to finish and stream a final status, with concurrent waits for
-  worker-static workspaces.
+  full-stack workspaces.
 - **Preflight deploy limits in SDKs.** Plan-limit checks now run before a
   deploy starts, returning a Stripe checkout link via `tovuk billing checkout`
   when an upgrade is needed.
@@ -52,7 +52,7 @@ description: "Recent product updates from Tovuk."
   `agent_instruction` for every failed check so agents can repair issues in
   one loop. See the [Agent Loop](/agents#the-loop).
 - **Improved workspace check UX.** Faster checks and clearer output for
-  worker-static workspaces.
+  full-stack workspaces.
 - **Inline CLI flag values.** Flags now accept inline values
   (`--service=service_1`) alongside the existing space-separated form.
 - **CLIs are aligned across npm, PyPI, and Cargo.** The same commands,

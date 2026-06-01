@@ -2,7 +2,7 @@ use super::constants::VERSION;
 
 const HELP_BODY: &str = r#"
 Usage:
-  tovuk new [path] [--template rust-worker|tanstack-static-frontend|worker-static-rust-tanstack]
+  tovuk new [path] [--template rust-worker|tanstack-static-frontend|fullstack-rust-tanstack]
   tovuk check [path] [--json]
   tovuk login [--token <token>] [--api <url>]
   tovuk deploy --dry-run [path] [--api <url>] [--json]
@@ -82,7 +82,7 @@ Usage:
 
 Agent contract:
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
-  - Worker-static services set kind = "worker_static", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
+  - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
@@ -94,9 +94,9 @@ Agent contract:
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
   - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, and database metadata.
-  - Run deploy from a worker-static repo root with one tovuk.toml to build worker and frontend together.
+  - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.
-  - Prefer same-origin worker-static services over split services.
+  - Prefer same-origin full-stack services over split services.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.

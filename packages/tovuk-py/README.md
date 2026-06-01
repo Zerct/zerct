@@ -1,6 +1,6 @@
 # tovuk
 
-Python CLI package for deploying Rust workers, static frontends, and worker-static
+Python CLI package for deploying Rust workers, static frontends, and full-stack
 services to Tovuk.
 It installs or downloads the same native Tovuk binary used by npm, Homebrew,
 and Cargo. PyPI requires Python to install and launch the package, but it does
@@ -8,7 +8,7 @@ not require Node.js, npm, or any JavaScript runtime.
 
 ```sh
 pipx install tovuk
-tovuk new hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
@@ -16,7 +16,7 @@ tovuk check
 tovuk deploy --wait --json
 ```
 
-From a worker-static repo root, `tovuk deploy` reads one root `tovuk.toml`,
+From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
 reads explicit `[capabilities]`, builds the worker and frontend roots, and
 returns one service URL with `/api/*` routed to the Rust worker.
 

@@ -2,7 +2,7 @@ use serde::{Serialize, Serializer};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ProjectKind {
-    WorkerStatic,
+    Fullstack,
     RustWorker,
     StaticFrontend,
 }
@@ -10,16 +10,16 @@ pub(crate) enum ProjectKind {
 impl ProjectKind {
     pub(crate) fn parse(value: &str) -> std::result::Result<Self, String> {
         match value {
-            "worker_static" => Ok(Self::WorkerStatic),
+            "fullstack" => Ok(Self::Fullstack),
             "rust_worker" => Ok(Self::RustWorker),
             "static_frontend" => Ok(Self::StaticFrontend),
-            _ => Err("kind must be worker_static, rust_worker, or static_frontend".to_owned()),
+            _ => Err("kind must be fullstack, rust_worker, or static_frontend".to_owned()),
         }
     }
 
     pub(crate) const fn as_str(self) -> &'static str {
         match self {
-            Self::WorkerStatic => "worker_static",
+            Self::Fullstack => "fullstack",
             Self::RustWorker => "rust_worker",
             Self::StaticFrontend => "static_frontend",
         }
@@ -28,13 +28,13 @@ impl ProjectKind {
     pub(crate) const fn sort_order(self) -> u8 {
         match self {
             Self::RustWorker => 0,
-            Self::WorkerStatic => 1,
+            Self::Fullstack => 1,
             Self::StaticFrontend => 2,
         }
     }
 
-    pub(crate) const fn is_worker_static(self) -> bool {
-        matches!(self, Self::WorkerStatic)
+    pub(crate) const fn is_fullstack(self) -> bool {
+        matches!(self, Self::Fullstack)
     }
 
     pub(crate) const fn is_static_frontend(self) -> bool {

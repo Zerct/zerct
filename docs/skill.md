@@ -1,8 +1,8 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and worker-static services to Tovuk.
+description: Deploy Rust workers, static frontends, and full-stack services to Tovuk.
 license: MIT
-compatibility: Requires tovuk.toml. Worker-static services use one root tovuk.toml with worker and frontend roots. Rust workers require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
+compatibility: Requires tovuk.toml. Full-stack services use one root tovuk.toml with worker and frontend roots. Rust workers require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
 metadata:
   author: Tovuk
   version: "0.1"
@@ -26,9 +26,9 @@ source, native type-aware typechecking, native linting, Fallow dead-code and
 duplicate-code gates, and a lockfile. Plain static frontends can use
 `index.html`, `check = ":"`, `command = ":"`, and `output = "."`.
 
-For worker-static services, require one root `tovuk.toml` with:
+For full-stack services, require one root `tovuk.toml` with:
 
-- `kind = "worker_static"`
+- `kind = "fullstack"`
 - `[capabilities].static_frontend = true` and `[capabilities].worker = true`
 - `[worker].root`, `[worker].check`, `[worker].build`, `[worker].command`,
   `[worker].port`, and `[worker].health = "/api/healthz"`
@@ -43,7 +43,7 @@ handlers, middleware, and server logic to Rust workers.
 
 ```sh
 tovuk check --json
-tovuk new hello-service --template worker-static-rust-tanstack
+tovuk new hello-service --template fullstack-rust-tanstack
 tovuk deploy --dry-run --json
 tovuk check
 tovuk deploy --wait --json
