@@ -42,6 +42,7 @@ func checkCLIContract() {
 		requireContains(source, "tovuk queue send", "agentic queue send command")
 		requireContains(source, "tovuk pricing", "agentic pricing command")
 		requireContains(source, "tovuk deploy --dry-run", "agentic deploy dry-run command")
+		requireContains(source, "tovuk deploy cancel", "agentic deploy cancel command")
 		requireContains(source, "tovuk service show", "agentic service show command")
 		requireContains(source, "tovuk billing checkout --json", "agentic billing checkout command")
 		requireContains(source, "tovuk support create", "agentic support create command")

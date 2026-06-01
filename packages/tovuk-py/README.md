@@ -14,6 +14,7 @@ tovuk check --json
 tovuk deploy --dry-run --json
 tovuk check
 tovuk deploy --wait --json
+tovuk deploy cancel deploy_1 --json
 ```
 
 From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
@@ -46,6 +47,7 @@ The Python package exposes the same agent command surface as npm:
 tovuk pricing
 tovuk pricing --json
 tovuk deploy --dry-run --json
+tovuk deploy cancel deploy_1 --json
 tovuk usage
 tovuk usage --json
 tovuk service list

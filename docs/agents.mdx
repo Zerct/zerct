@@ -14,16 +14,17 @@ Use this page when an AI coding agent is deploying with Tovuk.
 5. Review warnings, capabilities, meters, limits, and `billingEstimate`.
 6. Set usage caps for expected load.
 7. Run `tovuk deploy --wait --json`.
-8. If the build fails, run `tovuk logs --build <build_id> --json`.
-9. Fix the first actionable error from the logs.
-10. Redeploy with the same deploy command.
-11. For service files or media, use `tovuk storage ... --json` instead of the
+8. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
+9. If the build fails, run `tovuk logs --build <build_id> --json`.
+10. Fix the first actionable error from the logs.
+11. Redeploy with the same deploy command.
+12. For service files or media, use `tovuk storage ... --json` instead of the
    dashboard.
-12. For background work, create a queue and implement
+13. For background work, create a queue and implement
    `POST /.tovuk/queues/<queue>` in the Rust worker.
-13. For scheduled work, create a cron trigger and implement
+14. For scheduled work, create a cron trigger and implement
    `POST /.tovuk/cron/<trigger>` in the Rust worker.
-14. Before high-throughput work, run `tovuk pricing --json`, then
+15. Before high-throughput work, run `tovuk pricing --json`, then
    `tovuk usage --json` and inspect `billingEstimate.lineItems`.
    Set usage caps for the relevant meters.
 15. If a plan limit blocks the deploy or storage action, run
@@ -49,10 +50,11 @@ Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
 Run `tovuk check --json`. Fix the first failed check by following
 `agent_instruction`, then rerun check. Run `tovuk deploy --dry-run --json` and review
 warnings, capabilities, meters, limits, and `billingEstimate`. Deploy with
-`tovuk deploy --wait --json`. If the build fails, read
-`tovuk logs --build <build_id> --json`, fix the first actionable
-error, and redeploy. Use service resource commands for SQLite, KV, queues,
-cron triggers, State, service bindings, and usage caps.
+`tovuk deploy --wait --json`. Cancel superseded queued work with
+`tovuk deploy cancel <deploy_id> --json`. If the build fails, read
+`tovuk logs --build <build_id> --json`, fix the first actionable error, and
+redeploy. Use service resource commands for SQLite, KV, queues, cron triggers,
+State, service bindings, and usage caps.
 Before load tests or production launch, run `tovuk pricing --json`, inspect
 `billingEstimate` from `tovuk usage --json`, and set hard usage caps with
 `tovuk limits set`.

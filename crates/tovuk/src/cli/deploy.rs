@@ -11,8 +11,8 @@ use super::{
     args::CliOptions,
     auth::read_or_login_token,
     check::run_check,
-    errors::{Result, agent_error},
-    project::nested_string,
+    errors::{Result, agent_error, print_json},
+    project::{encode_component, nested_string},
 };
 use archive::create_archive_base64;
 pub(crate) use discovery::discover_deploy_projects;
@@ -29,6 +29,9 @@ use types::{DeployPlanProject, WorkspaceDeployResult};
 use wait::wait_for_workspace_builds;
 
 pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
+    if cli.args.first().is_some_and(|arg| arg == "cancel") {
+        return cancel_deploy(cli);
+    }
     let projects = discover_deploy_projects(project_dir)?;
     if projects.is_empty() {
         return Err(agent_error(
@@ -52,6 +55,38 @@ pub(crate) fn deploy(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     } else {
         print_workspace_deploy_results(project_dir, &results, cli)
     }
+}
+
+fn cancel_deploy(cli: &CliOptions) -> Result<()> {
+    let deploy_id = deploy_cancel_id(cli)?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::POST,
+        &deploy_cancel_route(&deploy_id),
+        Some(&token),
+        None,
+    )?;
+    print_json(&response)
+}
+
+fn deploy_cancel_id(cli: &CliOptions) -> Result<String> {
+    cli.args
+        .get(1)
+        .cloned()
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| {
+            agent_error(
+                "deploy_id_required",
+                "Deploy id is required.",
+                "Pass a deploy id returned by `tovuk deploy --wait --json`, `tovuk service show <service> --json`, or build logs.",
+                cli.output.json,
+            )
+        })
+}
+
+fn deploy_cancel_route(deploy_id: &str) -> String {
+    format!("/v1/deploys/{}/cancel", encode_component(deploy_id))
 }
 
 fn deploy_projects(
@@ -125,4 +160,34 @@ fn git_commit_sha(project_dir: &Path) -> Option<String> {
         .filter(|output| output.status.success())
         .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_owned())
         .filter(|value| !value.is_empty())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{deploy_cancel_id, deploy_cancel_route};
+    use crate::cli::args::CliOptions;
+
+    #[test]
+    fn deploy_cancel_uses_target_route() {
+        assert_eq!(
+            deploy_cancel_route("deploy_0123456789abcdef0123"),
+            "/v1/deploys/deploy_0123456789abcdef0123/cancel"
+        );
+        assert_eq!(
+            deploy_cancel_route("deploy/id"),
+            "/v1/deploys/deploy%2Fid/cancel"
+        );
+    }
+
+    #[test]
+    fn deploy_cancel_requires_deploy_id() {
+        let cli = CliOptions {
+            command: "deploy".to_owned(),
+            args: vec!["cancel".to_owned()],
+            ..CliOptions::default()
+        };
+
+        let error_message = deploy_cancel_id(&cli).err().map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Deploy id is required."));
+    }
 }

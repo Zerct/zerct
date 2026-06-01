@@ -52,6 +52,9 @@ Review warnings, enabled capabilities, meters, limits, and `billingEstimate`.
 tovuk deploy --wait --json
 ```
 
+Cancel stale queued work with `tovuk deploy cancel <deploy_id> --json` when a
+newer deploy supersedes it.
+
 On first deploy, the CLI opens browser login for GitHub or Google, stores the
 Tovuk session, then continues automatically. Tovuk builds the worker, verifies
 health, and returns the deployment URL.
