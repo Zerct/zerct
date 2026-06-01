@@ -59,11 +59,11 @@ estimate so agents can plan conservatively.
   account cap is enforced before a single object can use its full per-object
   ceiling.
 - Object storage: `10 GB`, no object-count cap, `1 million` Class A
-  operations per month, `10 million` Class B operations per month, free egress,
-  free delete operations, `5 TB` maximum object size, `5 GB` maximum
-  single-part upload or multipart part size, `50` custom domains per storage
-  bucket, `50` bucket management operations per second, and `1` write per
-  second to the same object key.
+  operations per month, `10 million` Class B operations per month, `1 TB`
+  object storage egress per month, free delete operations, `5 TB` maximum
+  object size, `5 GB` maximum single-part upload or multipart part size,
+  `50` custom domains per storage bucket, `50` bucket management operations
+  per second, and `1` write per second to the same object key.
 - Builds: `3,000` minutes per month, `1` concurrent build, `20 minute`
   timeout, `2 vCPU`, `8 GB` memory, `20 GB` disk, `64` build environment
   variables, `5 KB` per build environment variable, `10` deploy hooks per
@@ -110,11 +110,12 @@ estimate so agents can plan conservatively.
 - Object storage: no storage or object-count hard cap, `10 GB` included
   storage, `1 million` Class A operations, and `10 million` Class B operations
   per month. Overage is `$0.015` per GB-month, `$4.50` per million
-  Class A operations, and `$0.36` per million Class B operations. Egress and
-  deletes are free. Objects can be up to `5 TB`, single uploads and multipart
-  parts can be up to `5 GB`, with `50` custom domains per storage bucket, `50`
-  bucket management operations per second, and `1` write per second to the same
-  object key.
+  Class A operations, `$0.36` per million Class B operations, and `$1.20` per
+  TB of object storage egress after the included `1 TB` per month. Deletes are
+  free. Objects can be up to `5 TB`, single uploads and multipart parts can be
+  up to `5 GB`, with `50` custom domains per storage bucket, `50` bucket
+  management operations per second, and `1` write per second to the same object
+  key.
 - Builds: `6,000` minutes per month, then `$0.005` per minute, `6` concurrent
   builds, `20 minute` timeout, `4 vCPU`, `8 GB` memory, `20 GB` disk, `64`
   build environment variables, `5 KB` per build environment variable, `10`
@@ -136,6 +137,7 @@ tovuk limit set worker_requests --period month --value 10000000 --json
 tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 tovuk limit set static_transfer_bytes --period month --value 107374182400 --json
 tovuk limit set worker_transfer_bytes --period month --value 107374182400 --json
+tovuk limit set object_storage_egress_bytes --period month --value 1000000000000 --json
 tovuk limit set state_requests --period month --value 1000000 --json
 tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json

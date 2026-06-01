@@ -54,15 +54,15 @@ ambiguous to run.
   5,115 MiB (`4.995 GiB`) single-part upload limit, a 5,237,760 MiB
   (`4.995 TiB`) multipart upload limit, 10 thousand
   multipart upload parts, 1 million Class A operations per month, 10 million
-  Class B operations per month, free egress, free delete operations,
-  50 custom domains per storage bucket, 50 bucket management operations per
-  second, and 1 write per second to the same object key.
+  Class B operations per month, 1 TB object storage egress per month, free
+  delete operations, 50 custom domains per storage bucket, 50 bucket management
+  operations per second, and 1 write per second to the same object key.
 - Pro service object storage has no storage or object-count hard cap, includes
   10 GB, has the same 5,237,760 MiB object ceiling, 5,115 MiB
   single-part upload limit, and 5,237,760 MiB multipart upload limit, includes
   1 million Class A operations and 10 million Class B operations per month,
-  keeps egress and deletes free, and exposes object storage paid overage rates
-  in `tovuk pricing --json`.
+  includes 1 TB object storage egress per month, keeps deletes free, and
+  exposes object storage paid overage rates in `tovuk pricing --json`.
 - `tovuk storage upload` automatically switches to multipart upload above
   100 MiB and plans upload parts before transfer so agents can fail early on
   byte or operation caps.
@@ -163,6 +163,7 @@ tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 tovuk limit set static_transfer_bytes --period month --value 107374182400 --json
 tovuk limit set worker_transfer_bytes --period month --value 107374182400 --json
 tovuk limit set object_storage_bytes --period month --value 10000000000 --json
+tovuk limit set object_storage_egress_bytes --period month --value 1000000000000 --json
 tovuk limit set state_requests --period month --value 1000000 --json
 tovuk limit set state_sqlite_rows_written --period month --value 50000000 --json
 tovuk limit set log_events --period month --value 20000000 --json

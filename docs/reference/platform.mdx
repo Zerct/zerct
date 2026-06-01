@@ -159,6 +159,7 @@ tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
 tovuk limit set object_storage_class_b_operations --period month --value 10000000 --json
+tovuk limit set object_storage_egress_bytes --period month --value 1000000000000 --json
 ```
 
 `tovuk storage upload` automatically switches to multipart transfer for files

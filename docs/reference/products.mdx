@@ -58,14 +58,15 @@ Object Storage:
 Use for user uploads, images, videos, documents, generated files, and downloads.
 Avoid relational data, secrets, and high-frequency tiny writes to one key. Main
 meters: `object_storage_bytes`, `object_storage_class_a_operations`, and
-`object_storage_class_b_operations`. Agent-readable limits include object size,
-part count, metadata size, custom domains per storage bucket, bucket management
-operations, and same-key write throughput. Objects can be up to `5 TB`;
-single-part uploads and multipart parts can be up to `5 GB`. `tovuk storage
-upload` automatically switches to multipart transfer for files larger than
-100 MiB. Features include service-scoped list, upload, download, delete,
-multipart planning, Class A and Class B operation metering, and private origin
-storage behind Tovuk API and media URLs.
+`object_storage_class_b_operations`, and `object_storage_egress_bytes`.
+Agent-readable limits include object size, part count, metadata size, custom
+domains per storage bucket, bucket management operations, egress allowance, and
+same-key write throughput. Objects can be up to `5 TB`; single-part uploads and
+multipart parts can be up to `5 GB`. `tovuk storage upload` automatically
+switches to multipart transfer for files larger than 100 MiB. Features include
+service-scoped list, upload, download, delete, multipart planning, Class A,
+Class B, and egress metering, and private origin storage behind Tovuk API and
+media URLs.
 
 State:
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and
@@ -156,6 +157,7 @@ tovuk limit set worker_cpu_ms --period month --value 30000000 --json
 tovuk limit set sqlite_rows_read --period month --value 25000000000 --json
 tovuk limit set queue_operations --period month --value 1000000 --json
 tovuk limit set object_storage_class_a_operations --period month --value 1000000 --json
+tovuk limit set object_storage_egress_bytes --period month --value 1000000000000 --json
 ```
 
 The live `tovuk pricing --json` response is the source of truth for current
