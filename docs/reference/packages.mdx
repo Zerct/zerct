@@ -14,8 +14,8 @@ tovuk deploy
 current platform.
 
 All official package CLIs expose the same agent commands for login, check,
-deploy, deploy dry-runs, pricing, usage, service inspection, logs, env,
-domains, storage, limits, billing, and support.
+deploy, deploy dry-runs, deploy cancellation, pricing, usage, service
+inspection, logs, env, domains, storage, limits, billing, and support.
 `tovuk usage --json` includes `billingEstimate.lineItems` so package users and
 agents can inspect current-month cost estimates without a dashboard.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
@@ -28,6 +28,7 @@ The agent repair loop is the same on every package surface:
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 tovuk usage --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
@@ -58,6 +59,7 @@ tovuk deploy
 ```sh
 pipx install tovuk
 tovuk deploy --wait
+tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 tovuk domains verify --service service_1 api.example.com
 tovuk storage list --service service_1 --json
@@ -72,6 +74,7 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 ```sh
 cargo install tovuk
 tovuk deploy --wait
+tovuk deploy cancel deploy_1 --json
 tovuk logs --deploy deploy_1 --json
 tovuk storage download --service service_1 media/media.png ./media.png --json
 tovuk billing checkout --json

@@ -7,6 +7,7 @@ Usage:
   tovuk login [--token <token>] [--api <url>]
   tovuk deploy --dry-run [path] [--api <url>] [--json]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
+  tovuk deploy cancel <deploy_id> [--api <url>] [--json]
   tovuk pricing [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
   tovuk service list [--api <url>] [--json]
@@ -97,6 +98,7 @@ Agent contract:
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
+  - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
   - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, resources, limits, pricing, usage caps, and next actions.
   - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.

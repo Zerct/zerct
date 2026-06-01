@@ -30,6 +30,7 @@ tovuk new
 tovuk check
 tovuk deploy --dry-run
 tovuk deploy --wait
+tovuk deploy cancel <deploy_id>
 ```
 
 `tovuk new` can scaffold a starter `tovuk.toml` from existing files, but deploy
@@ -218,6 +219,7 @@ Useful agent commands:
 tovuk pricing
 tovuk pricing --json
 tovuk deploy --dry-run --json
+tovuk deploy cancel deploy_1 --json
 tovuk usage
 tovuk usage --json
 tovuk service list
@@ -293,5 +295,6 @@ The same commands are available through PyPI and Cargo after installation:
 pipx install tovuk
 cargo install tovuk
 tovuk deploy --wait
+tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 ```

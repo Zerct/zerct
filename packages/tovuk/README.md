@@ -12,6 +12,7 @@ cd hello-service/web && bun install && cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy cancel deploy_1 --json
 ```
 
 The npm package installs the native Tovuk binary for the current platform.
@@ -46,6 +47,7 @@ Agent repair loop:
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 ```
 
