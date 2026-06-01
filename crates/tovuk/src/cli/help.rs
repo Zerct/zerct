@@ -12,7 +12,6 @@ Usage:
   tovuk service list [--api <url>] [--json]
   tovuk service show <service> [--api <url>] [--json]
   tovuk service status <service> [--api <url>] [--json]
-  tovuk service inspect <service> [--api <url>] [--json]
   tovuk service resources <service> [--api <url>] [--json]
   tovuk service deploys <service> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk service builds <service> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]

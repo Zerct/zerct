@@ -14,7 +14,6 @@ pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
         "list" => print_authenticated(cli, "/v1/services"),
         "show" => service_get(cli, 1, "overview"),
         "status" => service_get(cli, 1, "status"),
-        "inspect" => service_get(cli, 1, "inspect"),
         "resources" => service_get(cli, 1, "platform"),
         "deploys" => service_paged_get(cli, 1, "deploys"),
         "builds" => service_paged_get(cli, 1, "builds"),
