@@ -6293,7 +6293,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 9536
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -7217,7 +7217,7 @@
                         "stateSqliteRowsWrittenPerDay": 100000,
                         "stateSqliteRowsWrittenPerMonth": null,
                         "stateKeyValueSizeMib": 2,
-                        "stateSqliteStorageMibPerObject": 953
+                        "stateSqliteStorageMibPerObject": 9536
                       },
                       "pricing": {
                         "subscriptionUsdCentsPerMonth": 0,
@@ -7766,7 +7766,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 9536
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -8047,7 +8047,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 9536
                   },
                   "services": [
                     {
@@ -8985,7 +8985,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 9536
                   },
                   "sqliteDatabases": [
                     {
@@ -9030,7 +9030,7 @@
                     {
                       "id": "state_namespace_1",
                       "className": "Room",
-                      "storageLimitMib": 953
+                      "storageLimitMib": 9536
                     }
                   ],
                   "serviceBindings": [
@@ -9821,7 +9821,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 953
+                    "storageLimitMib": 9536
                   },
                   "objects": [
                     {
@@ -9880,7 +9880,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 953
+                    "storageLimitMib": 9536
                   },
                   "object": {
                     "id": "state_object_1",
@@ -9946,7 +9946,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 953
+                    "storageLimitMib": 9536
                   },
                   "object": {
                     "id": "state_object_1",
@@ -10010,7 +10010,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 953
+                    "storageLimitMib": 9536
                   },
                   "object": {
                     "id": "state_object_1",
@@ -10155,7 +10155,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 953
+                    "storageLimitMib": 9536
                   },
                   "object": {
                     "id": "state_object_1",
@@ -10215,7 +10215,7 @@
                   "namespace": {
                     "id": "state_namespace_1",
                     "className": "Room",
-                    "storageLimitMib": 953
+                    "storageLimitMib": 9536
                   },
                   "object": {
                     "id": "state_object_1",
@@ -11544,7 +11544,7 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 953
+              "stateSqliteStorageMibPerObject": 9536
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -14482,7 +14482,7 @@
                     "stateSqliteRowsWrittenPerDay": 100000,
                     "stateSqliteRowsWrittenPerMonth": null,
                     "stateKeyValueSizeMib": 2,
-                    "stateSqliteStorageMibPerObject": 953
+                    "stateSqliteStorageMibPerObject": 9536
                   },
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -15198,7 +15198,7 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 953
+              "stateSqliteStorageMibPerObject": 9536
             },
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
@@ -16644,7 +16644,7 @@
             "stateSqliteRowsWrittenPerDay": 100000,
             "stateSqliteRowsWrittenPerMonth": null,
             "stateKeyValueSizeMib": 2,
-            "stateSqliteStorageMibPerObject": 953
+            "stateSqliteStorageMibPerObject": 9536
           }
         ]
       },
@@ -17092,7 +17092,7 @@
               "stateSqliteRowsWrittenPerDay": 100000,
               "stateSqliteRowsWrittenPerMonth": null,
               "stateKeyValueSizeMib": 2,
-              "stateSqliteStorageMibPerObject": 953
+              "stateSqliteStorageMibPerObject": 9536
             },
             "services": [
               {
@@ -19448,7 +19448,7 @@
                 {
                   "id": "state_namespace_1",
                   "className": "Room",
-                  "storageLimitMib": 953
+                  "storageLimitMib": 9536
                 }
               ]
             ]
