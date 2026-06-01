@@ -40,7 +40,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-mintlify-
       - run: go run scripts/check-public-contracts/*.go docs
-      - run: go run scripts/check-prose-style.go
+      - run: |
+          go run scripts/check-prose-style.go --self-test
+          go run scripts/check-prose-style.go
       - name: Validate Mintlify build
         run: npx --yes mint@4.2.578 validate
         working-directory: docs

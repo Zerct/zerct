@@ -36,7 +36,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-npm-mintlify-
       - name: Check prose style
-        run: go run scripts/check-prose-style.go
+        run: |
+          go run scripts/check-prose-style.go --self-test
+          go run scripts/check-prose-style.go
       - name: Check public agent readiness
         run: |
           if go run scripts/check-public-contracts/*.go mintlify-agent-readiness https://docs.tovuk.com; then
