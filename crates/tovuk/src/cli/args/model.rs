@@ -19,6 +19,7 @@ pub(crate) struct CliOptions {
     pub(crate) token: String,
     pub(crate) template: String,
     pub(crate) severity: String,
+    pub(crate) account: AccountOptions,
     pub(crate) abuse: AbuseOptions,
     pub(crate) deployment: DeploymentOptions,
     pub(crate) kv: KvOptions,
@@ -60,6 +61,12 @@ pub(crate) struct StorageOptions {
 }
 
 #[derive(Clone, Debug)]
+pub(crate) struct AccountOptions {
+    pub(crate) handle: String,
+    pub(crate) display_name: String,
+}
+
+#[derive(Clone, Debug)]
 pub(crate) struct AbuseOptions {
     pub(crate) operator: bool,
     pub(crate) category: String,
@@ -97,6 +104,10 @@ impl Default for CliOptions {
             token: String::new(),
             template: String::new(),
             severity: String::new(),
+            account: AccountOptions {
+                handle: String::new(),
+                display_name: String::new(),
+            },
             abuse: AbuseOptions {
                 operator: false,
                 category: String::new(),

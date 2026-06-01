@@ -18,6 +18,8 @@ class Tovuk < Formula
     assert_match "tovuk deploy list", help
     assert_match "tovuk deploy show", help
     assert_match "tovuk deploy cancel", help
+    assert_match "tovuk account show", help
+    assert_match "tovuk account update", help
     assert_match "tovuk pricing", help
     assert_match "tovuk service show", help
     assert_match "tovuk billing [checkout|portal]", help

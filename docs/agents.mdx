@@ -10,32 +10,34 @@ Use this page when an AI coding agent is deploying with Tovuk.
 1. Run `tovuk check --json`.
 2. If it fails, fix the first failed check by following `agent_instruction`.
 3. Run `tovuk check --json` again.
-4. Run `tovuk deploy --dry-run --json`.
-5. Review warnings, capabilities, meters, limits, and `billingEstimate`.
-6. Set usage caps for expected load.
-7. Run `tovuk deploy --wait --json`.
-8. Inspect deploy state with `tovuk deploy list --json` or
+4. Run `tovuk account show --json`; if setup is incomplete, run
+   `tovuk account update --handle <handle> --display-name <name> --json`.
+5. Run `tovuk deploy --dry-run --json`.
+6. Review warnings, capabilities, meters, limits, and `billingEstimate`.
+7. Set usage caps for expected load.
+8. Run `tovuk deploy --wait --json`.
+9. Inspect deploy state with `tovuk deploy list --json` or
    `tovuk deploy show <deploy_id> --json` when the deploy result is not enough.
-9. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
-10. If the build fails, run `tovuk logs --build <build_id> --json`.
-11. Fix the first actionable error from the logs.
-12. Redeploy with the same deploy command.
-13. For service files or media, use `tovuk storage ... --json` instead of the
+10. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
+11. If the build fails, run `tovuk logs --build <build_id> --json`.
+12. Fix the first actionable error from the logs.
+13. Redeploy with the same deploy command.
+14. For service files or media, use `tovuk storage ... --json` instead of the
    dashboard.
-14. For background work, create a queue and implement
+15. For background work, create a queue and implement
    `POST /.tovuk/queues/<queue>` in the Rust worker.
-15. For scheduled work, create a cron trigger and implement
+16. For scheduled work, create a cron trigger and implement
    `POST /.tovuk/cron/<trigger>` in the Rust worker.
-16. Before high-throughput work, run `tovuk pricing --json`, then
+17. Before high-throughput work, run `tovuk pricing --json`, then
    `tovuk usage --json` and inspect `billingEstimate.lineItems`.
    Set usage caps for the relevant meters.
-17. If a plan limit blocks the deploy or storage action, run
+18. If a plan limit blocks the deploy or storage action, run
    `tovuk billing checkout --json` and show the returned
    `checkout.url` to the human.
-18. If Tovuk itself needs help, create a support ticket with the exact command,
+19. If Tovuk itself needs help, create a support ticket with the exact command,
    service id, build id, deploy id, and first actionable log line.
-19. Resolve the support ticket after the agent fixes the issue.
-20. Delete throwaway smoke-test services with
+20. Resolve the support ticket after the agent fixes the issue.
+21. Delete throwaway smoke-test services with
    `tovuk service delete <service> --json`.
 
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
@@ -50,8 +52,10 @@ to Rust.
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
 Run `tovuk check --json`. Fix the first failed check by following
-`agent_instruction`, then rerun check. Run `tovuk deploy --dry-run --json` and review
-warnings, capabilities, meters, limits, and `billingEstimate`. Deploy with
+`agent_instruction`, then rerun check. Run `tovuk account show --json` and use
+`tovuk account update --handle <handle> --display-name <name> --json` if setup
+is incomplete. Run `tovuk deploy --dry-run --json` and review warnings,
+capabilities, meters, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. Inspect deploy state with
 `tovuk deploy list --json` or `tovuk deploy show <deploy_id> --json`. Cancel
 superseded queued work with `tovuk deploy cancel <deploy_id> --json`. If the

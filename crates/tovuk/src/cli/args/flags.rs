@@ -90,6 +90,7 @@ fn apply_value_flag(
             apply_common_value_flag(cli, name, inline, argv, index)
         }
         "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
+        "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
         "--expiration" | "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
             apply_kv_value_flag(cli, name, inline, argv, index)
         }
@@ -157,6 +158,34 @@ fn apply_storage_value_flag(
     match name {
         "--content-type" => set_string_flag(
             &mut cli.storage.content_type,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_account_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--handle" => set_string_flag(
+            &mut cli.account.handle,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--display-name" => set_string_flag(
+            &mut cli.account.display_name,
             name,
             inline,
             argv,
