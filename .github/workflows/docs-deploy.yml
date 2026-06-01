@@ -1,0 +1,79 @@
+name: Deploy Mintlify docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs-deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: deploy docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Trigger docs deployment
+        id: trigger
+        env:
+          MINTLIFY_ADMIN_API_KEY: ${{ secrets.MINTLIFY_ADMIN_API_KEY }}
+          MINTLIFY_PROJECT_ID: ${{ secrets.MINTLIFY_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${MINTLIFY_ADMIN_API_KEY:-}" ] || [ -z "${MINTLIFY_PROJECT_ID:-}" ]; then
+            echo "MINTLIFY_ADMIN_API_KEY and MINTLIFY_PROJECT_ID are required." >&2
+            exit 1
+          fi
+
+          response="$(
+            curl -fsS \
+              --request POST \
+              --url "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
+              --header "Authorization: Bearer ${MINTLIFY_ADMIN_API_KEY}"
+          )"
+          status_id="$(printf '%s\n' "$response" | jq -er '.statusId')"
+          printf 'status_id=%s\n' "$status_id" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for deployment
+        env:
+          MINTLIFY_ADMIN_API_KEY: ${{ secrets.MINTLIFY_ADMIN_API_KEY }}
+          STATUS_ID: ${{ steps.trigger.outputs.status_id }}
+        run: |
+          set -euo pipefail
+
+          for attempt in $(seq 1 60); do
+            response="$(
+              curl -fsS \
+                --request GET \
+                --url "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
+                --header "Authorization: Bearer ${MINTLIFY_ADMIN_API_KEY}"
+            )"
+            status="$(printf '%s\n' "$response" | jq -r '.status // "unknown"')"
+            summary="$(printf '%s\n' "$response" | jq -r '.summary // ""')"
+            printf 'Mintlify deployment status: %s %s\n' "$status" "$summary"
+
+            case "$status" in
+              success)
+                exit 0
+                ;;
+              failure)
+                printf '%s\n' "$response" | jq -r '.logs[]?'
+                exit 1
+                ;;
+            esac
+
+            sleep 10
+          done
+
+          echo "Timed out waiting for Mintlify deployment." >&2
+          exit 1
