@@ -80,6 +80,9 @@ Usage:
   tovuk abuse resolve <report_id> "Resolution evidence summary" [--api <url>] [--json]
   tovuk abuse reject <report_id> "Rejection evidence summary" [--api <url>] [--json]
   tovuk abuse release <report_id> "Release evidence summary" [--api <url>] [--json]
+  tovuk nodes list [--token <operator_token>] [--api <url>] [--json]
+  tovuk nodes drain <node_id> [--token <operator_token>] [--api <url>] [--json]
+  tovuk nodes enable <node_id> [--token <operator_token>] [--api <url>] [--json]
 
 Agent contract:
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
@@ -102,6 +105,7 @@ Agent contract:
   - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Create abuse reports with target URL, category, reporter email, and evidence. Owners track and appeal service reports with tovuk abuse list --json and tovuk abuse appeal <report_id> --json; operators triage all reports with tovuk abuse list --operator --json, then use tovuk abuse triage, notify-owner, quarantine, resolve, reject, or release with an operator token.
+  - Operators use tovuk nodes list, tovuk nodes drain <node_id>, and tovuk nodes enable <node_id> with an operator token before and after origin-node maintenance.
   - Keep direct unsafe out of Rust source.
   - Keep Rust worker resources within Tovuk limits: 128mb memory, CPU allocation 1, metered worker_cpu_ms caps, and 1-60 minute idle timeout.
 "#;

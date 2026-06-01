@@ -103,6 +103,9 @@ tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and 
 tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
 tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
 tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
+tovuk nodes list --token "$TOVUK_OPERATOR_TOKEN" --json
+tovuk nodes drain tovuk-riesling --token "$TOVUK_OPERATOR_TOKEN" --json
+tovuk nodes enable tovuk-riesling --token "$TOVUK_OPERATOR_TOKEN" --json
 ```
 
 `tovuk pricing --json` includes plan pricing and product meter metadata, so

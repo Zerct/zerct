@@ -27,7 +27,7 @@ func checkCLIContract() {
 	for _, command := range []string{
 		"new", "check", "login", "deploy", "pricing", "usage", "service", "logs",
 		"database", "kv", "queue", "cron", "state", "binding", "limits", "env",
-		"domains", "storage", "billing", "support", "abuse",
+		"domains", "storage", "billing", "support", "abuse", "nodes",
 	} {
 		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
 	}
@@ -57,6 +57,11 @@ func checkCLIContract() {
 		requireContains(source, "tovuk abuse resolve", "agentic abuse resolve command")
 		requireContains(source, "tovuk abuse reject", "agentic abuse reject command")
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")
+	}
+	for _, source := range []string{cargoCLI, rootReadme, cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "tovuk nodes list", "operator node list command")
+		requireContains(source, "tovuk nodes drain", "operator node drain command")
+		requireContains(source, "tovuk nodes enable", "operator node enable command")
 	}
 	for _, source := range []string{cargoCLI, rootReadme, cargoReadme, npmReadme, pythonReadme} {
 		requireContains(source, "tovuk storage url", "agentic storage URL command")

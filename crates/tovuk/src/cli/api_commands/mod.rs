@@ -7,6 +7,7 @@ mod generic;
 mod http;
 mod lists;
 mod logs;
+mod nodes;
 mod resources;
 mod storage;
 mod support;
@@ -19,6 +20,7 @@ pub(crate) use generic::{pricing, print_authenticated};
 pub(crate) use http::{api_request, payment_required_agent_error};
 pub(crate) use lists::service_command;
 pub(crate) use logs::logs_command;
+pub(crate) use nodes::nodes_command;
 pub(crate) use resources::{
     binding_command, caps_command, cron_command, kv_command, queue_command, sqlite_command,
     state_command,
