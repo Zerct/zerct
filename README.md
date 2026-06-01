@@ -32,6 +32,11 @@ tovuk deploy --dry-run
 tovuk deploy --wait
 ```
 
+`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but the
+deploy contract is always the committed `tovuk.toml`. Agents must review
+`[capabilities]` before deploy instead of relying on automatic project
+detection.
+
 Create a full-stack starter:
 
 ```sh

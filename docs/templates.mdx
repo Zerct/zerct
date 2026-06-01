@@ -22,7 +22,7 @@ tovuk check
 tovuk deploy --dry-run --json
 ```
 
-## Worker Static
+## Full-stack Service
 
 ```sh
 tovuk new hello-service --template fullstack-rust-tanstack
@@ -35,3 +35,7 @@ Templates create one root `tovuk.toml` with explicit `[capabilities]`.
 The full-stack template also creates `api/` and `web/`. The Rust worker owns
 dynamic server behavior. The TanStack frontend builds to static files and calls
 same-origin `/api`.
+
+Without `--template`, `tovuk new` can scaffold a starter `tovuk.toml` from
+existing files. That scan is advisory. Deploy behavior is controlled only by
+the committed `tovuk.toml`.

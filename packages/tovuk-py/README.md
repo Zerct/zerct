@@ -20,6 +20,10 @@ From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
 reads explicit `[capabilities]`, builds the worker and frontend roots, and
 returns one service URL with `/api/*` routed to the Rust worker.
 
+`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but deploy
+behavior is controlled only by the committed `tovuk.toml`. Review explicit
+`[capabilities]` before deploy.
+
 Rust worker deploys require `cargo fmt --all --check`, locked release-mode
 `cargo check`, locked release-mode tests, and strict all-target, all-feature
 Clippy with panic/unwrap bans plus resource-sensitive lints.
