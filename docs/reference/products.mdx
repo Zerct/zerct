@@ -43,8 +43,11 @@ Object Storage:
 Use for user uploads, images, videos, documents, generated files, and downloads.
 Avoid relational data, secrets, and high-frequency tiny writes to one key. Main
 meters: `object_storage_bytes`, `object_storage_class_a_operations`, and
-`object_storage_class_b_operations`. `tovuk storage upload` automatically
-switches to multipart transfer for files larger than 100 MiB.
+`object_storage_class_b_operations`. Agent-readable limits include object size,
+part count, metadata size, minimum billable object size, bucket object count,
+request throughput, source-IP concurrency, and bucket bandwidth. `tovuk storage
+upload` automatically switches to multipart transfer for files larger than
+100 MiB.
 
 State:
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and
