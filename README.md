@@ -214,7 +214,8 @@ than 100 MiB, so agents can upload large media through the same command.
 
 `tovuk pricing --json` returns both plan pricing and product meter metadata,
 so agents can choose Worker, Static Frontend, SQLite, Object Storage, State,
-KV, Queue, Cron, or Builds and set the matching usage caps before heavy work.
+KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, or
+Usage Caps and set the matching usage caps before heavy work.
 
 The same commands are available through PyPI and Cargo after installation:
 

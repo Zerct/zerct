@@ -116,8 +116,9 @@ tovuk storage delete --service <service> uploads/logo.png --json
 larger than 100 MiB.
 
 Use `tovuk capabilities --json` to inspect product choices, meters, limit
-fields, and plan prices before selecting Worker, State, SQLite, KV, queues,
-cron, service bindings, or object storage.
+fields, and plan prices before selecting Worker, Static Frontend, SQLite,
+Object Storage, State, KV, Queues, Cron, Service Bindings, Secrets, Custom
+Domains, Logs, Builds, or Usage Caps.
 Use `tovuk usage --json` to inspect `billingEstimate.lineItems` before load
 tests or paid usage.
 
