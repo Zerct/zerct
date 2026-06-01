@@ -93,7 +93,7 @@ Agent contract:
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
-  - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, and database metadata.
+  - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, resources, limits, pricing, usage caps, and next actions.
   - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.
   - Prefer same-origin full-stack services over split services.
