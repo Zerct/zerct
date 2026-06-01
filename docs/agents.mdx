@@ -108,6 +108,14 @@ tovuk abuse list --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
 ```
 
+Operator agents can quarantine or release a confirmed report with preserved
+evidence:
+
+```sh
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
+```
+
 When a limit is the blocker, create a hosted Stripe subscription checkout link:
 
 ```sh

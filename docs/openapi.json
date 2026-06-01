@@ -52,6 +52,10 @@
     {
       "name": "Storage",
       "description": "Service object storage and media endpoints. Context: tags.Storage."
+    },
+    {
+      "name": "Operations",
+      "description": "Operator-only moderation and production controls. Context: tags.Operations."
     }
   ],
   "paths": {
@@ -5779,6 +5783,142 @@
           }
         }
       }
+    },
+    "/v1/operator/abuse/reports/{report_id}/quarantine": {
+      "post": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Quarantine abuse report service",
+        "description": "Quarantine the service attached to a confirmed abuse report. Context: paths./v1/operator/abuse/reports/{report_id}/quarantine.post.",
+        "operationId": "quarantineAbuseReportService",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/operator/abuse/reports/{report_id}/quarantine.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseModerationRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Quarantine service",
+                  "value": {
+                    "reason": "Confirmed malware object and preserved scanner evidence."
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with operator evidence summary. Context: paths./v1/operator/abuse/reports/{report_id}/quarantine.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseModerationApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/operator/abuse/reports/{report_id}/release": {
+      "post": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "Release abuse quarantine",
+        "description": "Release the service quarantine attached to an abuse report after remediation evidence is preserved. Context: paths./v1/operator/abuse/reports/{report_id}/release.post.",
+        "operationId": "releaseAbuseReportServiceQuarantine",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^abuse_[a-f0-9]{20}$",
+              "maxLength": 26
+            },
+            "description": "Abuse report id returned by abuse list or create. Context: paths./v1/operator/abuse/reports/{report_id}/release.post.parameters.report_id.",
+            "examples": {
+              "example": {
+                "summary": "Abuse report id",
+                "value": "abuse_0123456789abcdef0123"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbuseModerationRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Release quarantine",
+                  "value": {
+                    "reason": "Owner removed object and redeployed clean build."
+                  }
+                }
+              }
+            }
+          },
+          "description": "JSON body with operator release summary. Context: paths./v1/operator/abuse/reports/{report_id}/release.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseModerationApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -10783,6 +10923,59 @@
                   "agent_instruction": "Abuse report appeal received. Preserve remediation evidence and run `tovuk abuse list --json` to follow status.",
                   "created_at": "2026-06-01T12:00:00Z",
                   "updated_at": "2026-06-01T12:00:00Z"
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
+      },
+      "AbuseModerationApplied": {
+        "description": "Abuse moderation action applied. Context: components.responses.AbuseModerationApplied.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AbuseModerationResponse"
+            },
+            "examples": {
+              "quarantined": {
+                "summary": "Service quarantined.",
+                "value": {
+                  "report": {
+                    "id": "abuse_0123456789abcdef0123",
+                    "service_id": "service_1",
+                    "reporter_email": "reporter@example.com",
+                    "reporter_name": "Security Researcher",
+                    "category": "phishing",
+                    "target_url": "https://demo.tovuk.app/login",
+                    "target_path": "/login",
+                    "object_path": null,
+                    "summary": "Phishing page",
+                    "details": "Credential collection form is impersonating another service.",
+                    "evidence": "Screenshot URL and request id.",
+                    "severity": "urgent",
+                    "status": "quarantined",
+                    "quarantine_recommended": true,
+                    "owner_notification_allowed": true,
+                    "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine.",
+                    "created_at": "2026-06-01T12:00:00Z",
+                    "updated_at": "2026-06-01T12:00:00Z"
+                  },
+                  "service_quarantined": true,
+                  "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine."
                 }
               }
             }
@@ -25327,6 +25520,31 @@
           }
         ]
       },
+      "AbuseModerationRequest": {
+        "type": "object",
+        "description": "Operator request body for quarantining or releasing a service after abuse review. Context: components.schemas.AbuseModerationRequest.",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "description": "Operator evidence summary for the moderation action. Context: components.schemas.AbuseModerationRequest.properties.reason.",
+            "examples": [
+              "Confirmed phishing flow and preserved evidence in case abuse_0123456789abcdef0123."
+            ],
+            "pattern": "^[\\s\\S]{1,8000}$"
+          }
+        },
+        "examples": [
+          {
+            "reason": "Confirmed phishing flow and preserved evidence in case abuse_0123456789abcdef0123."
+          }
+        ]
+      },
       "AbuseReport": {
         "type": "object",
         "description": "Abuse report returned to users and agents. Context: components.schemas.AbuseReport.",
@@ -25709,6 +25927,64 @@
                 "updated_at": "2026-06-01T12:00:00Z"
               }
             ]
+          }
+        ]
+      },
+      "AbuseModerationResponse": {
+        "type": "object",
+        "description": "Operator abuse moderation response. Context: components.schemas.AbuseModerationResponse.",
+        "additionalProperties": false,
+        "required": [
+          "report",
+          "service_quarantined",
+          "agent_instruction"
+        ],
+        "properties": {
+          "report": {
+            "$ref": "#/components/schemas/AbuseReport",
+            "description": "Updated abuse report. Context: components.schemas.AbuseModerationResponse.properties.report."
+          },
+          "service_quarantined": {
+            "type": "boolean",
+            "description": "Whether the related service is currently quarantined. Context: components.schemas.AbuseModerationResponse.properties.service_quarantined.",
+            "examples": [
+              true
+            ]
+          },
+          "agent_instruction": {
+            "type": "string",
+            "maxLength": 1000,
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+            "description": "Next action for an operator agent. Context: components.schemas.AbuseModerationResponse.properties.agent_instruction.",
+            "examples": [
+              "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine."
+            ]
+          }
+        },
+        "examples": [
+          {
+            "report": {
+              "id": "abuse_0123456789abcdef0123",
+              "service_id": "service_1",
+              "reporter_email": "reporter@example.com",
+              "reporter_name": "Security Researcher",
+              "category": "phishing",
+              "target_url": "https://demo.tovuk.app/login",
+              "target_path": "/login",
+              "object_path": null,
+              "summary": "Phishing page",
+              "details": "Credential collection form is impersonating another service.",
+              "evidence": "Screenshot URL and request id.",
+              "severity": "urgent",
+              "status": "quarantined",
+              "quarantine_recommended": true,
+              "owner_notification_allowed": true,
+              "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine.",
+              "created_at": "2026-06-01T12:00:00Z",
+              "updated_at": "2026-06-01T12:00:00Z"
+            },
+            "service_quarantined": true,
+            "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine."
           }
         ]
       }

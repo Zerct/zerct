@@ -73,6 +73,8 @@ tovuk queue delete --service service_1 jobs --json
 tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
 tovuk abuse list --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk cron update --service service_1 nightly "*/15 * * * *" --json
 tovuk cron disable --service service_1 nightly --json

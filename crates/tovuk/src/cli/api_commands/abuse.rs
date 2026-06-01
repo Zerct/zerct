@@ -17,10 +17,12 @@ pub(crate) fn abuse_command(cli: &CliOptions) -> Result<()> {
         "list" => print_paged_authenticated(cli, "/v1/abuse/reports"),
         "report" => abuse_report(cli),
         "appeal" => abuse_appeal(cli),
+        "quarantine" => abuse_operator_action(cli, "quarantine"),
+        "release" => abuse_operator_action(cli, "release"),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown abuse command.",
-            "Use `tovuk abuse report <target_url> \"Summary\" \"Details\" --category phishing --reporter-email reporter@example.com --evidence \"Evidence\" --json`, `tovuk abuse list --json`, or `tovuk abuse appeal <report_id> \"Details\" --json`.",
+            "Use `tovuk abuse report <target_url> \"Summary\" \"Details\" --category phishing --reporter-email reporter@example.com --evidence \"Evidence\" --json`, `tovuk abuse list --json`, `tovuk abuse appeal <report_id> \"Details\" --json`, or an operator-only quarantine command.",
             cli.output.json,
         )),
     }
@@ -126,6 +128,44 @@ fn abuse_appeal(cli: &CliOptions) -> Result<()> {
         &format!("/v1/abuse/reports/{}/appeal", encode_component(&report_id)),
         Some(&token),
         Some(Value::Object(body)),
+    )?;
+    print_json(&response)
+}
+
+fn abuse_operator_action(cli: &CliOptions, action: &str) -> Result<()> {
+    let report_id = command_arg(
+        cli,
+        "invalid_abuse_report",
+        "Abuse report id is required.",
+        &format!("Use `tovuk abuse {action} <report_id> \"Operator evidence summary\" --json`."),
+    )?;
+    let reason = cli
+        .args
+        .iter()
+        .skip(2)
+        .cloned()
+        .collect::<Vec<_>>()
+        .join(" ");
+    if reason.trim().is_empty() {
+        return Err(agent_error(
+            "invalid_abuse_action",
+            "Abuse operator action reason is required.",
+            format!("Use `tovuk abuse {action} <report_id> \"Operator evidence summary\" --json`."),
+            cli.output.json,
+        ));
+    }
+
+    let token = read_or_login_token(cli)?;
+    let response = api_request(
+        cli,
+        Method::POST,
+        &format!(
+            "/v1/operator/abuse/reports/{}/{}",
+            encode_component(&report_id),
+            action
+        ),
+        Some(&token),
+        Some(serde_json::json!({ "reason": reason.trim() })),
     )?;
     print_json(&response)
 }

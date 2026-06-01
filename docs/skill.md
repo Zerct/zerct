@@ -115,6 +115,8 @@ tovuk storage delete --service <service> uploads/logo.png --json
 tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
 tovuk abuse list --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 ```
 
 `tovuk storage upload` automatically switches to multipart transfer for files
@@ -140,4 +142,5 @@ agent already tried. Resolve the ticket when the issue is fixed.
 Report abuse with a target URL, category, reporter email, and preserved
 evidence. Service owners should run `tovuk abuse list --json`, preserve
 remediation evidence, and appeal with `tovuk abuse appeal <report_id> --json`
-when the report was fixed or is incorrect.
+when the report was fixed or is incorrect. Operator agents can quarantine or
+release confirmed reports with preserved evidence.
