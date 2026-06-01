@@ -56,6 +56,26 @@ The API route is `POST /v1/abuse/reports/{report_id}/appeal`. It requires an
 authenticated owner session. The response includes the updated report status and
 the next `agent_instruction`.
 
+## Quarantine
+
+Operators can quarantine the service attached to a confirmed abuse report:
+
+```sh
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
+```
+
+The API route is `POST /v1/operator/abuse/reports/{report_id}/quarantine`.
+It requires an operator token. Quarantine blocks public traffic and platform
+event delivery while preserving the report and moderation event history.
+
+After remediation evidence is preserved, operators can release the quarantine:
+
+```sh
+tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
+```
+
+The API route is `POST /v1/operator/abuse/reports/{report_id}/release`.
+
 ## Rate Limits
 
 Abuse report intake allows `3` reports per reporter email per rolling hour and
