@@ -106,7 +106,7 @@ Agent contract:
   - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
   - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
   - Use tovuk account show/activity/update --json for account setup and account-wide recovery without dashboard-only steps.
-  - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, resources, limits, pricing, usage caps, and next actions.
+  - Use tovuk service show <service> --json as the canonical service inspection command for status, deploys, builds, logs, env names, domains, resources, accountUsage, billingEstimate, limits, pricing, usage caps, and next actions.
   - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.
   - Prefer same-origin full-stack services over split services.

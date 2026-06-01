@@ -89,6 +89,10 @@ units, use `pricing_fields` to read the relevant plan prices, and use the plan
 deployment. The authenticated usage response adds
 `billingEstimate.lineItems` for current-month cost planning.
 
+`tovuk service show <service> --json` is the canonical service snapshot for
+agents. It includes status, deploys, builds, logs, env names, domains,
+resources, `accountUsage`, `billingEstimate`, and next actions in one response.
+
 ## Runtime bindings
 
 Deployed Rust workers receive service-scoped environment variables at startup:

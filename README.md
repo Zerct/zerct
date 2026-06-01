@@ -206,6 +206,11 @@ expose the same agent-facing commands, recovery text, login behavior, deploy
 flow, logs, env, domains, usage, billing, and support operations so deploy UX
 does not drift.
 
+`tovuk service show <service> --json` is the canonical agent snapshot for one
+service. It includes service state, deploy history, build history, recent logs,
+env names, domains, resources, `accountUsage`, `billingEstimate`, and next
+actions.
+
 ## Example
 
 ```sh
