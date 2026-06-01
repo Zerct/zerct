@@ -47,7 +47,10 @@ tovuk usage --json
   and `2 MiB` key/value payloads.
 - Object storage: `10 GB`, no object-count cap, `1 million` Class A
   operations per month, `10 million` Class B operations per month, free egress.
-- Logs: `200,000` events per day, `3 day` retention.
+- Builds: `3,000` minutes per month, `1` concurrent build, `20 minute`
+  timeout, `2 vCPU`, `8 GB` memory, `20 GB` disk, `64` build environment
+  variables, and `5 KB` per build environment variable.
+- Logs: `200,000` events per day, `3 day` retention, `256 KB` per event.
 - API tokens: `10`.
 - Support tickets: `3` per day.
 
@@ -86,8 +89,11 @@ tovuk usage --json
   per month. Overage is `$0.015` per GB-month, `$4.50` per million
   Class A operations, and `$0.36` per million Class B operations. Egress and
   deletes are free.
+- Builds: `6,000` minutes per month, then `$0.005` per minute, `6` concurrent
+  builds, `20 minute` timeout, `4 vCPU`, `8 GB` memory, `20 GB` disk, `64`
+  build environment variables, and `5 KB` per build environment variable.
 - Logs: `20 million` events per month, then `$0.60` per million events, `7 day`
-  retention.
+  retention, `256 KB` per event.
 - API tokens: `100`.
 - Support tickets: `20` per day.
 
