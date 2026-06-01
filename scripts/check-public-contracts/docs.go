@@ -103,6 +103,7 @@ func checkDocs() {
 	requireContains(openapi, `"meter_details"`, "OpenAPI product meter details")
 	requireContains(openapi, `"ProductMeterEntry"`, "OpenAPI product meter schema")
 	requireContains(openapi, `"worker_transfer_bytes"`, "OpenAPI worker transfer meter detail")
+	requireContains(openapi, `"object_storage_egress_bytes"`, "OpenAPI object storage egress meter")
 	requireContains(openapi, `"pricing_fields"`, "OpenAPI product pricing fields")
 	requireContains(openapi, `"pricing.workers.includedRequestsPerMonth"`, "OpenAPI worker pricing field example")
 	requireContains(openapi, `"workerDefaultCpuMsPerRequest"`, "OpenAPI worker default CPU limit field")
@@ -127,6 +128,9 @@ func checkDocs() {
 	requireContains(openapi, `"storageMultipartUploadMaxMib": 5237760`, "OpenAPI multipart upload size limit")
 	requireContains(openapi, `"storageBucketManagementOperationsPerSecond": 50`, "OpenAPI storage bucket management limit")
 	requireContains(openapi, `"storageSameKeyWritesPerSecond": 1`, "OpenAPI storage same-key write limit")
+	requireContains(openapi, `"objectStorageEgressBytesPerMonth": 1000000000000`, "OpenAPI object storage egress limit")
+	requireContains(openapi, `"includedEgressBytesPerMonth": 1000000000000`, "OpenAPI object storage included egress pricing")
+	requireContains(openapi, `"egressOverageUsdMicrosPerTb": 1200000`, "OpenAPI object storage egress overage pricing")
 	requireContains(openapi, `"/v1/services/{service_id}/storage/multipart/create"`, "OpenAPI multipart create route")
 	requireContains(openapi, `"StorageMultipartCreateRequest"`, "OpenAPI multipart create schema")
 	requireContains(openapi, `"StorageMultipartCompleteRequest"`, "OpenAPI multipart complete schema")
@@ -155,6 +159,8 @@ func checkDocs() {
 	rejectContains(openapi, `"storageObjectMaxMib": 5242880`, "stale OpenAPI object size limit")
 	rejectContains(openapi, `"storageSinglePartUploadMaxMib": 4768`, "stale OpenAPI single-part upload limit")
 	rejectContains(openapi, `"storageSinglePartUploadMaxMib": 5120`, "stale OpenAPI single-part upload limit")
+	rejectContains(storage, "free egress", "stale object storage egress docs")
+	rejectContains(pricing, "free egress", "stale pricing object storage egress docs")
 
 	fmt.Printf("Checked %d Mintlify navigation entries.\n", len(pages))
 }
