@@ -71,9 +71,9 @@ Pro plan:
 - free egress and free delete operations
 
 Use Class A caps for write/list-heavy workflows and Class B caps for
-read/download-heavy workflows. Multipart upload create reserves Class A
-operations for create, every part upload, and complete so agents can know
-whether the full transfer fits before spending upload time. Use
+read/download-heavy workflows. Multipart upload create consumes Class A
+operations for create and every part upload URL; multipart complete consumes
+the completion Class A operation; multipart abort is free. Use
 `object_storage_bytes` to cap total stored bytes across the account:
 
 ```sh
