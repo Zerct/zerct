@@ -21,10 +21,11 @@ For Rust workers, require `Cargo.toml`, `Cargo.lock`, strict locked
 release-mode Rust checks, a health endpoint, and a server that listens on
 `0.0.0.0:$PORT`.
 
-For static frontends, require `kind = "static_frontend"`, TypeScript browser
-source, native type-aware typechecking, native linting, Fallow dead-code and
-duplicate-code gates, and a lockfile. Plain static frontends can use
-`index.html`, `check = ":"`, `command = ":"`, and `output = "."`.
+For package static frontends, require `kind = "static_frontend"`,
+TypeScript browser source, native type-aware typechecking, native linting,
+Fallow dead-code and duplicate-code gates, and a lockfile. Plain static
+frontends can use `index.html`, `check = ":"`, `command = ":"`, and
+`output = "."`.
 
 For full-stack services, require one root `tovuk.toml` with:
 

@@ -77,11 +77,12 @@ and `cargo test`, run strict all-target/all-feature Clippy with panic/unwrap
 bans and resource-sensitive lints, and avoid direct `unsafe` in workspace
 source.
 
-Static frontends must use `.ts` or `.tsx` browser source under `src`, `app`,
-`pages`, `routes`, or `components`; install dependencies, run stable native
-type-aware TypeScript checks, run native linting plus Fallow dead-code,
+Package static frontends must use `.ts` or `.tsx` browser source under `src`,
+`app`, `pages`, `routes`, or `components`; install dependencies, run stable
+native type-aware TypeScript checks, run native linting plus Fallow dead-code,
 semantic duplicate-code, and health gates; build to `[build].output`; and
-include `index.html`.
+include `index.html`. Plain static frontends without `package.json` can use
+`index.html`, `check = ":"`, `command = ":"`, and `output = "."`.
 
 Full-stack frontends call same-origin `/api` for APIs and server-side logic.
 JavaScript and TypeScript are frontend-only on Tovuk.
