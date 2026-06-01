@@ -53,6 +53,9 @@ fn apply_boolean_flag(
             json_output,
         ),
         "--wait" => set_boolean_flag(inline, || cli.deployment.wait = true, name, json_output),
+        "--dry-run" => {
+            set_boolean_flag(inline, || cli.deployment.dry_run = true, name, json_output)
+        }
         "--public" => {
             set_boolean_flag(inline, || cli.storage.public_read = true, name, json_output)
         }

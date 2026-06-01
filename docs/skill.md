@@ -43,7 +43,7 @@ handlers, middleware, and server logic to Rust workers.
 ```sh
 tovuk check --json
 tovuk init hello-service --template worker-static-rust-tanstack
-tovuk plan --json
+tovuk deploy --dry-run --json
 tovuk preview
 tovuk deploy --wait --json
 tovuk pricing --json

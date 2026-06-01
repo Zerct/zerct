@@ -10,7 +10,7 @@ Use this page when an AI coding agent is deploying with Tovuk.
 1. Run `tovuk check --json`.
 2. If it fails, fix the first failed check by following `agent_instruction`.
 3. Run `tovuk check --json` again.
-4. Run `tovuk plan --json`.
+4. Run `tovuk deploy --dry-run --json`.
 5. Review warnings, capabilities, meters, limits, and `billingEstimate`.
 6. Set usage caps for expected load.
 7. Run `tovuk deploy --wait --json`.
@@ -47,7 +47,7 @@ to Rust.
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
 Run `tovuk check --json`. Fix the first failed check by following
-`agent_instruction`, then rerun check. Run `tovuk plan --json` and review
+`agent_instruction`, then rerun check. Run `tovuk deploy --dry-run --json` and review
 warnings, capabilities, meters, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. If the build fails, read
 `tovuk logs --build <build_id> --json`, fix the first actionable

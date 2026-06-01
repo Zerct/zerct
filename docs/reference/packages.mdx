@@ -15,17 +15,17 @@ current platform.
 
 All official package CLIs expose the same agent commands for login, check,
 preview, deploy, wait, capabilities, account usage, services, deploys, builds,
-logs, env, domains, storage, billing, support, and read-only deploy planning.
+logs, env, domains, storage, billing, support, and deploy dry-runs.
 `tovuk usage --json` includes `billingEstimate.lineItems` so package users and
 agents can inspect current-month cost estimates without a dashboard.
-`tovuk plan --json` combines `tovuk.toml`, quality checks, capability meters,
+`tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks, capability meters,
 limits, and `billingEstimate` before deploy without creating a build.
 
 The agent repair loop is the same on every package surface:
 
 ```sh
 tovuk check --json
-tovuk plan --json
+tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 tovuk logs --build job_1 --json
 tovuk usage --json

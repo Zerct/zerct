@@ -1,50 +1,46 @@
 use super::{
-    api_commands::api_request,
-    args::CliOptions,
-    auth::read_or_login_token,
-    check::run_check,
-    deploy::{DeployProjectInfo, discover_deploy_projects},
-    errors::{Result, agent_error, print_json},
-    project::number_field,
-    project_kind::ProjectKind,
+    super::{
+        api_commands::api_request,
+        args::CliOptions,
+        check::run_check,
+        errors::{Result, print_json},
+        project::number_field,
+        project_kind::ProjectKind,
+    },
+    types::DeployProjectInfo,
 };
 use reqwest::Method;
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, path::Path};
 
-pub(crate) fn plan_project(project_dir: &Path, cli: &CliOptions) -> Result<()> {
-    let projects = discover_deploy_projects(project_dir)?;
-    if projects.is_empty() {
-        return Err(agent_error(
-            "missing_project_contract",
-            "No tovuk.toml was found.",
-            "Create and commit tovuk.toml, then rerun `tovuk plan --json` before deploy.",
-            cli.output.json,
-        ));
-    }
-
-    let token = read_or_login_token(cli)?;
+pub(super) fn print_deploy_dry_run(
+    project_dir: &Path,
+    projects: &[DeployProjectInfo],
+    cli: &CliOptions,
+    token: &str,
+) -> Result<()> {
     let capabilities = api_request(cli, Method::GET, "/v1/capabilities", None, None)?;
-    let usage = api_request(cli, Method::GET, "/v1/usage", Some(&token), None)?;
-    let services = api_request(cli, Method::GET, "/v1/services", Some(&token), None)?;
+    let usage = api_request(cli, Method::GET, "/v1/usage", Some(token), None)?;
+    let services = api_request(cli, Method::GET, "/v1/services", Some(token), None)?;
     let existing_service_names = service_name_set(&services);
-    let project_plans = projects
+    let service_dry_runs = projects
         .iter()
-        .map(|project| project_plan(project, &existing_service_names, &capabilities))
+        .map(|project| service_dry_run(project, &existing_service_names, &capabilities))
         .collect::<Vec<_>>();
-    let warnings = workspace_warnings(&project_plans, &usage);
+    let warnings = workspace_warnings(&service_dry_runs, &usage);
     let ok = warnings.is_empty()
-        && project_plans
+        && service_dry_runs
             .iter()
             .all(|project| project["check"]["ok"].as_bool().unwrap_or(false));
 
     print_json(&json!({
         "ok": ok,
-        "mode": "read_only",
+        "mode": "dry_run",
+        "dryRun": true,
         "sourceOfTruth": "tovuk.toml",
-        "deployBehavior": "explicit_config_only",
+        "deployBehavior": "read_only_no_upload_no_build",
         "workspace": project_dir.display().to_string(),
-        "services": project_plans,
+        "services": service_dry_runs,
         "warnings": warnings,
         "capabilityCatalog": capability_catalog(&capabilities),
         "limits": usage.get("limits").cloned().unwrap_or(Value::Null),
@@ -54,7 +50,7 @@ pub(crate) fn plan_project(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     }))
 }
 
-fn project_plan(
+fn service_dry_run(
     project: &DeployProjectInfo,
     existing_service_names: &BTreeSet<String>,
     capabilities: &Value,
@@ -88,7 +84,7 @@ fn project_plan(
         "exists": !service_name.is_empty() && existing_service_names.contains(&service_name),
         "kind": kind.map(ProjectKind::as_str),
         "config": config,
-        "capabilities": capability_plan(kind, capabilities),
+        "capabilities": capability_dry_run(kind, capabilities),
         "check": {
             "ok": report.ok,
             "checks": report.checks,
@@ -99,7 +95,7 @@ fn project_plan(
     })
 }
 
-fn capability_plan(kind: Option<ProjectKind>, capabilities: &Value) -> Value {
+fn capability_dry_run(kind: Option<ProjectKind>, capabilities: &Value) -> Value {
     let enabled = enabled_capabilities(kind);
     let all = all_service_capabilities(capabilities);
     let disabled = all
@@ -273,23 +269,25 @@ fn capability_catalog(capabilities: &Value) -> Value {
 
 fn project_next_actions(ok: bool, kind: Option<ProjectKind>) -> Vec<&'static str> {
     if !ok {
-        return vec!["Fix the first failed quality check, then rerun `tovuk plan --json`."];
+        return vec![
+            "Fix the first failed quality check, then rerun `tovuk deploy --dry-run --json`.",
+        ];
     }
     match kind {
         Some(ProjectKind::WorkerStatic) => vec![
             "Review enabled worker-static capabilities and billingEstimate.lineItems.",
             "Set usage caps for worker, static transfer, SQLite, KV, queues, State, and object storage meters before load.",
-            "Run `tovuk deploy --wait --json` only after this plan is acceptable.",
+            "Run `tovuk deploy --wait --json` only after this dry run is acceptable.",
         ],
         Some(ProjectKind::RustWorker) => vec![
             "Review Rust Worker meters and billingEstimate.lineItems.",
             "Set usage caps for worker and optional platform resource meters before load.",
-            "Run `tovuk deploy --wait --json` only after this plan is acceptable.",
+            "Run `tovuk deploy --wait --json` only after this dry run is acceptable.",
         ],
         Some(ProjectKind::StaticFrontend) => vec![
             "Review static frontend checks and billingEstimate.lineItems.",
             "Set static transfer usage caps before high traffic.",
-            "Run `tovuk deploy --wait --json` only after this plan is acceptable.",
+            "Run `tovuk deploy --wait --json` only after this dry run is acceptable.",
         ],
         None => vec!["Fix tovuk.toml so Tovuk can identify the service kind."],
     }
@@ -305,7 +303,7 @@ fn next_actions(ok: bool) -> Vec<&'static str> {
     }
     vec![
         "Fix warnings and failed quality checks.",
-        "Rerun `tovuk plan --json` before deploy.",
+        "Rerun `tovuk deploy --dry-run --json` before deploy.",
         "Use `tovuk billing checkout --json` if a limit blocks the plan.",
     ]
 }
@@ -314,11 +312,12 @@ fn next_actions(ok: bool) -> Vec<&'static str> {
 mod tests {
     use serde_json::json;
 
-    use super::{ProjectKind, capability_plan, meters_for_kind, workspace_warnings};
+    use super::{ProjectKind, capability_dry_run, meters_for_kind, workspace_warnings};
 
     #[test]
-    fn worker_static_plan_exposes_one_service_capability_set() {
-        let capabilities = capability_plan(Some(ProjectKind::WorkerStatic), &sample_capabilities());
+    fn worker_static_dry_run_exposes_one_service_capability_set() {
+        let capabilities =
+            capability_dry_run(Some(ProjectKind::WorkerStatic), &sample_capabilities());
 
         assert!(capabilities["enabled"].as_array().is_some_and(|enabled| {
             enabled.iter().any(|value| value == "worker")
@@ -330,7 +329,7 @@ mod tests {
     }
 
     #[test]
-    fn worker_static_plan_lists_public_meters_before_deploy() {
+    fn worker_static_dry_run_lists_public_meters_before_deploy() {
         let meters = meters_for_kind(Some(ProjectKind::WorkerStatic), &sample_capabilities());
 
         assert!(meters.contains(&"worker_cpu_ms".to_owned()));
@@ -343,7 +342,7 @@ mod tests {
     }
 
     #[test]
-    fn workspace_plan_warns_before_project_limit_overflow() {
+    fn workspace_dry_run_warns_before_project_limit_overflow() {
         let projects = vec![json!({
             "exists": false,
             "serviceName": "new-service",

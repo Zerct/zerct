@@ -30,6 +30,7 @@ pub(crate) struct CliOptions {
 #[derive(Clone, Debug)]
 pub(crate) struct DeploymentOptions {
     pub(crate) database: bool,
+    pub(crate) dry_run: bool,
     pub(crate) wait: bool,
     pub(crate) wait_timeout_seconds: u64,
 }
@@ -88,6 +89,7 @@ impl Default for CliOptions {
             port: 0,
             deployment: DeploymentOptions {
                 database: false,
+                dry_run: false,
                 wait: false,
                 wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
             },
