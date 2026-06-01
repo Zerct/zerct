@@ -45,8 +45,10 @@ Avoid relational data, secrets, and high-frequency tiny writes to one key. Main
 meters: `object_storage_bytes`, `object_storage_class_a_operations`, and
 `object_storage_class_b_operations`. Agent-readable limits include object size,
 part count, metadata size, custom domains per storage bucket, bucket management
-operations, and same-key write throughput. `tovuk storage upload` automatically
-switches to multipart transfer for files larger than 100 MiB.
+operations, and same-key write throughput. Objects can be up to `5 TB`;
+single-part uploads and multipart parts can be up to `5 GB`. `tovuk storage
+upload` automatically switches to multipart transfer for files larger than
+100 MiB.
 
 State:
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and

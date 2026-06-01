@@ -53,9 +53,10 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   single object can use its full per-object ceiling.
 - Object storage: `10 GB`, no object-count cap, `1 million` Class A
   operations per month, `10 million` Class B operations per month, free egress,
-  free delete operations, `4.995 TiB` maximum object size, `50` custom domains
-  per storage bucket, `50` bucket management operations per second, and `1`
-  write per second to the same object key.
+  free delete operations, `5 TB` maximum object size, `5 GB` maximum
+  single-part upload or multipart part size, `50` custom domains per storage
+  bucket, `50` bucket management operations per second, and `1` write per
+  second to the same object key.
 - Builds: `3,000` minutes per month, `1` concurrent build, `20 minute`
   timeout, `2 vCPU`, `8 GB` memory, `20 GB` disk, `64` build environment
   variables, `5 KB` per build environment variable, `10` deploy hooks per
@@ -99,9 +100,10 @@ current stored bytes as a full-month estimate so agents can plan conservatively.
   storage, `1 million` Class A operations, and `10 million` Class B operations
   per month. Overage is `$0.015` per GB-month, `$4.50` per million
   Class A operations, and `$0.36` per million Class B operations. Egress and
-  deletes are free. Objects can be up to `4.995 TiB`, with `50` custom domains
-  per storage bucket, `50` bucket management operations per second, and `1`
-  write per second to the same object key.
+  deletes are free. Objects can be up to `5 TB`, single uploads and multipart
+  parts can be up to `5 GB`, with `50` custom domains per storage bucket, `50`
+  bucket management operations per second, and `1` write per second to the same
+  object key.
 - Builds: `6,000` minutes per month, then `$0.005` per minute, `6` concurrent
   builds, `20 minute` timeout, `4 vCPU`, `8 GB` memory, `20 GB` disk, `64`
   build environment variables, `5 KB` per build environment variable, `10`
