@@ -60,6 +60,7 @@ tovuk domains verify --service service_1 api.example.com
 tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+tovuk storage url --service service_1 uploads/logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk database create --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
@@ -77,8 +78,14 @@ tovuk cron update --service service_1 nightly "*/15 * * * *" --json
 tovuk cron disable --service service_1 nightly --json
 tovuk cron enable --service service_1 nightly --json
 tovuk state create --service service_1 Room --json
+tovuk state objects --service service_1 Room --json
+tovuk state keys --service service_1 Room room-1 --json
 tovuk state put --service service_1 Room room-1 counter 1 --json
 tovuk state get --service service_1 Room room-1 counter --json
+tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json
+tovuk state alarm get --service service_1 Room room-1 --json
+tovuk state alarm delete --service service_1 Room room-1 --json
+tovuk state delete-value --service service_1 Room room-1 counter --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk limits set worker_requests --period day --value 100000 --json
 tovuk billing checkout --json
