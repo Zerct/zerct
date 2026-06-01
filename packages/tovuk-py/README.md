@@ -84,6 +84,7 @@ tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
 tovuk abuse list --json
+tovuk abuse list --operator --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
 tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
 tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json

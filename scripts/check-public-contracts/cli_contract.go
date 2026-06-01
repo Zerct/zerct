@@ -47,6 +47,7 @@ func checkCLIContract() {
 		requireContains(source, "tovuk support resolve", "agentic support resolve command")
 		requireContains(source, "tovuk abuse report", "agentic abuse report command")
 		requireContains(source, "tovuk abuse list", "agentic abuse list command")
+		requireContains(source, "tovuk abuse list --operator", "agentic operator abuse list command")
 		requireContains(source, "tovuk abuse appeal", "agentic abuse appeal command")
 		requireContains(source, "tovuk abuse quarantine", "agentic abuse quarantine command")
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")

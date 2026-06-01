@@ -5784,6 +5784,47 @@
         }
       }
     },
+    "/v1/operator/abuse/reports": {
+      "get": {
+        "tags": [
+          "Operations"
+        ],
+        "summary": "List operator abuse reports",
+        "description": "List abuse reports across services for operator triage. Context: paths./v1/operator/abuse/reports.get.",
+        "operationId": "listOperatorAbuseReports",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "format": "int32"
+            },
+            "description": "Maximum number of abuse reports to return. Context: paths./v1/operator/abuse/reports.get.parameters.limit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AbuseReportsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/operator/abuse/reports/{report_id}/quarantine": {
       "post": {
         "tags": [
