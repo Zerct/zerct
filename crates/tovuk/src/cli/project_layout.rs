@@ -8,8 +8,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const WORKER_STATIC_WORKER_ROOTS: &[&str] = &["api", "worker", "server"];
-const WORKER_STATIC_FRONTEND_ROOTS: &[&str] = &["web", "frontend", "app", "site"];
+const FULLSTACK_WORKER_ROOTS: &[&str] = &["api", "worker", "server"];
+const FULLSTACK_FRONTEND_ROOTS: &[&str] = &["web", "frontend", "app", "site"];
 const RUST_REQUIRED_FILES: &[&str] = &["Cargo.toml", "Cargo.lock"];
 const FRONTEND_PACKAGE_REQUIRED_FILES: &[&str] = &["package.json"];
 const PLAIN_STATIC_REQUIRED_FILES: &[&str] = &["index.html"];
@@ -27,10 +27,10 @@ pub(crate) fn infer_project_kind(project_dir: &Path) -> ProjectKind {
 }
 
 pub(crate) fn detect_fullstack_roots(project_dir: &Path) -> Option<(String, String)> {
-    let backend = WORKER_STATIC_WORKER_ROOTS
+    let backend = FULLSTACK_WORKER_ROOTS
         .iter()
         .find(|root| project_dir.join(root).join("Cargo.toml").exists())?;
-    let frontend = WORKER_STATIC_FRONTEND_ROOTS.iter().find(|root| {
+    let frontend = FULLSTACK_FRONTEND_ROOTS.iter().find(|root| {
         project_dir.join(root).join("package.json").exists()
             || project_dir.join(root).join("index.html").exists()
     })?;

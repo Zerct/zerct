@@ -118,12 +118,12 @@
         "tags": [
           "Health"
         ],
-        "summary": "Check platform status",
+        "summary": "Check service status",
         "description": "Returns structured Tovuk API and dependency health for humans, SDKs, and agents. Context: paths./v1/status.get.",
-        "operationId": "getPlatformStatus",
+        "operationId": "getServiceStatus",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformStatusLoaded"
+            "$ref": "#/components/responses/ServiceStatusLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -138,7 +138,7 @@
             "$ref": "#/components/responses/InternalServerError"
           },
           "503": {
-            "$ref": "#/components/responses/PlatformStatusUnavailable"
+            "$ref": "#/components/responses/ServiceStatusUnavailable"
           }
         }
       }
@@ -2535,17 +2535,17 @@
         }
       }
     },
-    "/v1/services/{service_id}/platform": {
+    "/v1/services/{service_id}/resources": {
       "get": {
         "tags": [
           "Deploy"
         ],
-        "summary": "List platform resources",
-        "description": "List worker platform resources for one service. Context: paths./v1/services/{service_id}/platform.get.",
-        "operationId": "getServicePlatformResources",
+        "summary": "List service resources",
+        "description": "List service resources for one service. Context: paths./v1/services/{service_id}/resources.get.",
+        "operationId": "getServiceResources",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2573,7 +2573,7 @@
                 "service_1"
               ]
             },
-            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/platform.get.parameters.0.",
+            "description": "Tovuk service id or service name. Context: paths./v1/services/{service_id}/resources.get.parameters.0.",
             "example": "service_1"
           }
         ]
@@ -2589,7 +2589,7 @@
         "operationId": "createServiceSqliteDatabase",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2652,7 +2652,7 @@
         "operationId": "createServiceKvNamespace",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2715,7 +2715,7 @@
         "operationId": "createServiceQueue",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2782,7 +2782,7 @@
         "operationId": "createServiceCronTrigger",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2846,7 +2846,7 @@
         "operationId": "createServiceStateNamespace",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -2909,7 +2909,7 @@
         "operationId": "createServiceBinding",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -3811,11 +3811,11 @@
           "Deploy"
         ],
         "summary": "Delete SQLite database",
-        "description": "Delete SQLite database. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/sqlite/databases/{database}.delete.",
+        "description": "Delete SQLite database. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/sqlite/databases/{database}.delete.",
         "operationId": "deleteServiceSqliteDatabase",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -3873,11 +3873,11 @@
           "Deploy"
         ],
         "summary": "Delete KV namespace",
-        "description": "Delete KV namespace. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/kv/namespaces/{namespace}.delete.",
+        "description": "Delete KV namespace. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/kv/namespaces/{namespace}.delete.",
         "operationId": "deleteServiceKvNamespace",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -3935,11 +3935,11 @@
           "Deploy"
         ],
         "summary": "Delete queue",
-        "description": "Delete queue. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/queues/{queue}.delete.",
+        "description": "Delete queue. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/queues/{queue}.delete.",
         "operationId": "deleteServiceQueue",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -3995,11 +3995,11 @@
           "Deploy"
         ],
         "summary": "Update queue",
-        "description": "Update queue retry, retention, batch, and dead-letter controls. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/queues/{queue}.put.",
+        "description": "Update queue retry, retention, batch, and dead-letter controls. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/queues/{queue}.put.",
         "operationId": "updateServiceQueue",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -4078,11 +4078,11 @@
           "Deploy"
         ],
         "summary": "Delete cron trigger",
-        "description": "Delete cron trigger. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/cron/{trigger}.delete.",
+        "description": "Delete cron trigger. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/cron/{trigger}.delete.",
         "operationId": "deleteServiceCronTrigger",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -4138,11 +4138,11 @@
           "Deploy"
         ],
         "summary": "Update cron trigger",
-        "description": "Update a service cron trigger expression, name, or enabled state. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/cron/{trigger}.put.",
+        "description": "Update a service cron trigger expression, name, or enabled state. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/cron/{trigger}.put.",
         "operationId": "updateServiceCronTrigger",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -4225,11 +4225,11 @@
           "Deploy"
         ],
         "summary": "Delete State namespace",
-        "description": "Delete State namespace. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/state/namespaces/{namespace}.delete.",
+        "description": "Delete State namespace. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/state/namespaces/{namespace}.delete.",
         "operationId": "deleteServiceStateNamespace",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -4287,11 +4287,11 @@
           "Deploy"
         ],
         "summary": "Delete service binding",
-        "description": "Delete service binding. Returns refreshed platform resources for agent verification. Context: paths./v1/services/{service_id}/service-bindings/{binding}.delete.",
+        "description": "Delete service binding. Returns refreshed service resources for agent verification. Context: paths./v1/services/{service_id}/service-bindings/{binding}.delete.",
         "operationId": "deleteServiceBinding",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/PlatformResourcesLoaded"
+            "$ref": "#/components/responses/ServiceResourcesLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -7515,7 +7515,7 @@
                       "dns_record_type": "CNAME",
                       "dns_record_name": "api.example.com",
                       "dns_record_value": "cname.tovuk.app",
-                      "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
+                      "dns_setup_url": "https://docs.tovuk.com/reference/resources#custom-domains",
                       "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                     }
                   ]
@@ -7560,7 +7560,7 @@
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
                   "dns_record_value": "cname.tovuk.app",
-                  "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
+                  "dns_setup_url": "https://docs.tovuk.com/reference/resources#custom-domains",
                   "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                 }
               }
@@ -8974,7 +8974,7 @@
                   "dns_record_type": "CNAME",
                   "dns_record_name": "api.example.com",
                   "dns_record_value": "cname.tovuk.app",
-                  "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
+                  "dns_setup_url": "https://docs.tovuk.com/reference/resources#custom-domains",
                   "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
                 }
               }
@@ -8982,8 +8982,8 @@
           }
         }
       },
-      "PlatformStatusLoaded": {
-        "description": "Tovuk platform status loaded. Context: components.responses.PlatformStatusLoaded.",
+      "ServiceStatusLoaded": {
+        "description": "Tovuk service status loaded. Context: components.responses.ServiceStatusLoaded.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -9001,11 +9001,11 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/PlatformStatusResponse"
+              "$ref": "#/components/schemas/ServiceStatusResponse"
             },
             "examples": {
               "example": {
-                "summary": "Tovuk platform status loaded.",
+                "summary": "Tovuk service status loaded.",
                 "value": {
                   "ok": true,
                   "service": "tovuk-api",
@@ -9025,8 +9025,8 @@
           }
         }
       },
-      "PlatformStatusUnavailable": {
-        "description": "Tovuk platform status is temporarily unavailable. Context: components.responses.PlatformStatusUnavailable.",
+      "ServiceStatusUnavailable": {
+        "description": "Tovuk service status is temporarily unavailable. Context: components.responses.ServiceStatusUnavailable.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -9044,11 +9044,11 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/PlatformStatusResponse"
+              "$ref": "#/components/schemas/ServiceStatusResponse"
             },
             "examples": {
               "example": {
-                "summary": "Tovuk platform status unavailable.",
+                "summary": "Tovuk service status unavailable.",
                 "value": {
                   "ok": false,
                   "service": "tovuk-api",
@@ -9519,16 +9519,16 @@
           }
         }
       },
-      "PlatformResourcesLoaded": {
-        "description": "Platform resources loaded. Context: components.responses.PlatformResourcesLoaded.",
+      "ServiceResourcesLoaded": {
+        "description": "Service resources loaded. Context: components.responses.ServiceResourcesLoaded.",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/PlatformResourcesResponse"
+              "$ref": "#/components/schemas/ServiceResourcesResponse"
             },
             "examples": {
               "example": {
-                "summary": "Platform resources loaded.",
+                "summary": "Service resources loaded.",
                 "value": {
                   "serviceId": "service_1",
                   "limits": {
@@ -11283,12 +11283,12 @@
                     "status": "quarantined",
                     "quarantine_recommended": true,
                     "owner_notification_allowed": true,
-                    "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine.",
+                    "agent_instruction": "Service quarantined. Public traffic and resource event delivery are blocked until an operator releases the quarantine.",
                     "created_at": "2026-06-01T12:00:00Z",
                     "updated_at": "2026-06-01T12:00:00Z"
                   },
                   "service_quarantined": true,
-                  "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine."
+                  "agent_instruction": "Service quarantined. Public traffic and resource event delivery are blocked until an operator releases the quarantine."
                 }
               }
             }
@@ -11574,7 +11574,7 @@
             "type": "boolean",
             "deprecated": true,
             "default": false,
-            "description": "Deprecated deploy-time database flag. Create SQLite databases through platform APIs instead."
+            "description": "Deprecated deploy-time database flag. Create SQLite databases through resource APIs instead."
           },
           "source_archive_base64": {
             "type": [
@@ -14174,7 +14174,7 @@
             "description": "DNS setup guide URL. Context: components.schemas.ServiceDomain.properties.dns_setup_url.",
             "format": "uri",
             "examples": [
-              "https://docs.tovuk.com/reference/platform#custom-domains"
+              "https://docs.tovuk.com/reference/resources#custom-domains"
             ]
           }
         },
@@ -14190,7 +14190,7 @@
             "dns_record_type": "CNAME",
             "dns_record_name": "api.example.com",
             "dns_record_value": "cname.tovuk.app",
-            "dns_setup_url": "https://docs.tovuk.com/reference/platform#custom-domains",
+            "dns_setup_url": "https://docs.tovuk.com/reference/resources#custom-domains",
             "agent_instruction": "Create a DNS-only CNAME for api.example.com pointing to cname.tovuk.app. Do not create an A record to Tovuk's origin IP."
           }
         ]
@@ -17374,7 +17374,7 @@
           "workerInternalSubrequestsPerRequest": {
             "type": "integer",
             "format": "int64",
-            "description": "Internal platform service operations allowed during one invocation. Context: components.schemas.PlanLimits.properties.workerInternalSubrequestsPerRequest.",
+            "description": "Internal service operations allowed during one invocation. Context: components.schemas.PlanLimits.properties.workerInternalSubrequestsPerRequest.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -18654,9 +18654,9 @@
           }
         ]
       },
-      "PlatformStatusCheck": {
+      "ServiceStatusCheck": {
         "type": "object",
-        "description": "Single Tovuk platform dependency health check. Context: components.schemas.PlatformStatusCheck.",
+        "description": "Single Tovuk service dependency health check. Context: components.schemas.ServiceStatusCheck.",
         "additionalProperties": false,
         "required": [
           "name",
@@ -18666,7 +18666,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Stable dependency name. Context: components.schemas.PlatformStatusCheck.properties.name.",
+            "description": "Stable dependency name. Context: components.schemas.ServiceStatusCheck.properties.name.",
             "pattern": "^[a-z0-9_]{1,80}$",
             "maxLength": 80,
             "examples": [
@@ -18675,14 +18675,14 @@
           },
           "ok": {
             "type": "boolean",
-            "description": "Whether this dependency is healthy. Context: components.schemas.PlatformStatusCheck.properties.ok.",
+            "description": "Whether this dependency is healthy. Context: components.schemas.ServiceStatusCheck.properties.ok.",
             "examples": [
               true
             ]
           },
           "message": {
             "type": "string",
-            "description": "Short dependency status message. Context: components.schemas.PlatformStatusCheck.properties.message.",
+            "description": "Short dependency status message. Context: components.schemas.ServiceStatusCheck.properties.message.",
             "pattern": "^[\\s\\S]{1,160}$",
             "maxLength": 160,
             "examples": [
@@ -18698,9 +18698,9 @@
           }
         ]
       },
-      "PlatformStatusResponse": {
+      "ServiceStatusResponse": {
         "type": "object",
-        "description": "Structured Tovuk platform status for humans, SDKs, and agents. Context: components.schemas.PlatformStatusResponse.",
+        "description": "Structured Tovuk service status for humans, SDKs, and agents. Context: components.schemas.ServiceStatusResponse.",
         "additionalProperties": false,
         "required": [
           "ok",
@@ -18713,14 +18713,14 @@
         "properties": {
           "ok": {
             "type": "boolean",
-            "description": "Whether Tovuk is available for normal API commands. Context: components.schemas.PlatformStatusResponse.properties.ok.",
+            "description": "Whether Tovuk is available for normal API commands. Context: components.schemas.ServiceStatusResponse.properties.ok.",
             "examples": [
               true
             ]
           },
           "service": {
             "type": "string",
-            "description": "Service identifier. Context: components.schemas.PlatformStatusResponse.properties.service.",
+            "description": "Service identifier. Context: components.schemas.ServiceStatusResponse.properties.service.",
             "enum": [
               "tovuk-api"
             ],
@@ -18730,7 +18730,7 @@
           },
           "api_version": {
             "type": "string",
-            "description": "Stable API version. Context: components.schemas.PlatformStatusResponse.properties.api_version.",
+            "description": "Stable API version. Context: components.schemas.ServiceStatusResponse.properties.api_version.",
             "pattern": "^v[0-9]+$",
             "maxLength": 16,
             "examples": [
@@ -18739,11 +18739,11 @@
           },
           "checks": {
             "type": "array",
-            "description": "Dependency health checks. Context: components.schemas.PlatformStatusResponse.properties.checks.",
+            "description": "Dependency health checks. Context: components.schemas.ServiceStatusResponse.properties.checks.",
             "minItems": 1,
             "maxItems": 32,
             "items": {
-              "$ref": "#/components/schemas/PlatformStatusCheck"
+              "$ref": "#/components/schemas/ServiceStatusCheck"
             },
             "examples": [
               [
@@ -18757,7 +18757,7 @@
           },
           "agent_instruction": {
             "type": "string",
-            "description": "Direct next step for coding agents. Context: components.schemas.PlatformStatusResponse.properties.agent_instruction.",
+            "description": "Direct next step for coding agents. Context: components.schemas.ServiceStatusResponse.properties.agent_instruction.",
             "pattern": "^[\\s\\S]{1,500}$",
             "maxLength": 500,
             "examples": [
@@ -18767,7 +18767,7 @@
           "docs_url": {
             "type": "string",
             "format": "uri",
-            "description": "Documentation URL for service status guidance. Context: components.schemas.PlatformStatusResponse.properties.docs_url.",
+            "description": "Documentation URL for service status guidance. Context: components.schemas.ServiceStatusResponse.properties.docs_url.",
             "examples": [
               "https://docs.tovuk.com/status"
             ]
@@ -20565,7 +20565,7 @@
         },
         "description": "Usage cap metadata. Context: components.schemas.UsageCap."
       },
-      "PlatformResourcesResponse": {
+      "ServiceResourcesResponse": {
         "type": "object",
         "additionalProperties": false,
         "required": [
@@ -20584,7 +20584,7 @@
         "properties": {
           "serviceId": {
             "type": "string",
-            "description": "Service id. Context: components.schemas.PlatformResourcesResponse.properties.serviceId.",
+            "description": "Service id. Context: components.schemas.ServiceResourcesResponse.properties.serviceId.",
             "minLength": 1,
             "maxLength": 512,
             "pattern": "^service_[a-z0-9_]{1,60}$",
@@ -20601,7 +20601,7 @@
             "items": {
               "$ref": "#/components/schemas/SqliteDatabaseBinding"
             },
-            "description": "SQLite database bindings. Context: components.schemas.PlatformResourcesResponse.properties.sqliteDatabases.",
+            "description": "SQLite database bindings. Context: components.schemas.ServiceResourcesResponse.properties.sqliteDatabases.",
             "examples": [
               [
                 {
@@ -20622,7 +20622,7 @@
             "items": {
               "$ref": "#/components/schemas/KvNamespaceBinding"
             },
-            "description": "KV namespace bindings. Context: components.schemas.PlatformResourcesResponse.properties.kvNamespaces.",
+            "description": "KV namespace bindings. Context: components.schemas.ServiceResourcesResponse.properties.kvNamespaces.",
             "examples": [
               [
                 {
@@ -20640,7 +20640,7 @@
             "items": {
               "$ref": "#/components/schemas/QueueBinding"
             },
-            "description": "Queue bindings. Context: components.schemas.PlatformResourcesResponse.properties.queues.",
+            "description": "Queue bindings. Context: components.schemas.ServiceResourcesResponse.properties.queues.",
             "examples": [
               [
                 {
@@ -20662,7 +20662,7 @@
             "items": {
               "$ref": "#/components/schemas/CronTrigger"
             },
-            "description": "Cron triggers. Context: components.schemas.PlatformResourcesResponse.properties.cronTriggers.",
+            "description": "Cron triggers. Context: components.schemas.ServiceResourcesResponse.properties.cronTriggers.",
             "examples": [
               [
                 {
@@ -20680,7 +20680,7 @@
             "items": {
               "$ref": "#/components/schemas/StateNamespace"
             },
-            "description": "State namespaces. Context: components.schemas.PlatformResourcesResponse.properties.stateNamespaces.",
+            "description": "State namespaces. Context: components.schemas.ServiceResourcesResponse.properties.stateNamespaces.",
             "examples": [
               [
                 {
@@ -20697,7 +20697,7 @@
             "items": {
               "$ref": "#/components/schemas/ServiceBinding"
             },
-            "description": "Service bindings. Context: components.schemas.PlatformResourcesResponse.properties.serviceBindings.",
+            "description": "Service bindings. Context: components.schemas.ServiceResourcesResponse.properties.serviceBindings.",
             "examples": [
               [
                 {
@@ -20713,7 +20713,7 @@
             "items": {
               "$ref": "#/components/schemas/UsageCap"
             },
-            "description": "Usage caps. Context: components.schemas.PlatformResourcesResponse.properties.usageCaps.",
+            "description": "Usage caps. Context: components.schemas.ServiceResourcesResponse.properties.usageCaps.",
             "examples": [
               [
                 {
@@ -20734,7 +20734,7 @@
               "maxLength": 512,
               "pattern": "^[\\s\\S]{1,512}$"
             },
-            "description": "Recommended next commands. Context: components.schemas.PlatformResourcesResponse.properties.nextActions.",
+            "description": "Recommended next commands. Context: components.schemas.ServiceResourcesResponse.properties.nextActions.",
             "examples": [
               [
                 "Run tovuk deploy --wait --json after resources are configured."
@@ -20762,13 +20762,13 @@
               "subscriptionUsdCentsPerMonth": {
                 "type": "integer",
                 "format": "int64",
-                "description": "Platform response plan subscription price in USD cents per month.",
+                "description": "Service response plan subscription price in USD cents per month.",
                 "minimum": 0,
                 "maximum": 1000000000000
               },
               "paidOveragesEnabled": {
                 "type": "boolean",
-                "description": "Platform response flag for paid overage availability."
+                "description": "Service response flag for paid overage availability."
               },
               "workers": {
                 "$ref": "#/components/schemas/WorkerPricing"
@@ -20946,7 +20946,7 @@
             ]
           }
         },
-        "description": "Service platform resources exposed to agents. Context: components.schemas.PlatformResourcesResponse."
+        "description": "Service resources exposed to agents. Context: components.schemas.ServiceResourcesResponse."
       },
       "SqliteDatabaseCreateRequest": {
         "type": "object",
@@ -26270,7 +26270,7 @@
             "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
             "description": "Next action for an operator agent. Context: components.schemas.AbuseModerationResponse.properties.agent_instruction.",
             "examples": [
-              "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine."
+              "Service quarantined. Public traffic and resource event delivery are blocked until an operator releases the quarantine."
             ]
           }
         },
@@ -26292,12 +26292,12 @@
               "status": "quarantined",
               "quarantine_recommended": true,
               "owner_notification_allowed": true,
-              "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine.",
+              "agent_instruction": "Service quarantined. Public traffic and resource event delivery are blocked until an operator releases the quarantine.",
               "created_at": "2026-06-01T12:00:00Z",
               "updated_at": "2026-06-01T12:00:00Z"
             },
             "service_quarantined": true,
-            "agent_instruction": "Service quarantined. Public traffic and platform event delivery are blocked until an operator releases the quarantine."
+            "agent_instruction": "Service quarantined. Public traffic and resource event delivery are blocked until an operator releases the quarantine."
           }
         ]
       }

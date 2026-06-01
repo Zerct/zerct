@@ -77,6 +77,9 @@ func checkCLIContract() {
 	}
 
 	retiredOrgScope := string([]byte{64, 122, 101, 114, 99, 116})
+	retiredFullstackTemplate := "worker" + "-static-rust-tanstack"
+	retiredFullstackKind := "kind = \"worker" + "_static\""
+	retiredFullstackWording := "worker" + "-static"
 	for _, source := range []string{cargoCLI, npmInstall, pythonCLI, cargoReadme, npmReadme, pythonReadme, homebrewFormula} {
 		rejectContains(source, "TOVUK_NPM_CLI", "retired npm delegation")
 		rejectContains(source, "NPM_PACKAGE_VERSION", "retired npm package pin")
@@ -86,9 +89,9 @@ func checkCLIContract() {
 		rejectContains(source, retiredOrgScope, "retired org scope")
 	}
 	for _, source := range []string{cargoCLI, cargoReadme, npmReadme, pythonReadme} {
-		rejectContains(source, "worker-static-rust-tanstack", "retired full-stack template name")
-		rejectContains(source, `kind = "worker_static"`, "retired full-stack project kind")
-		rejectContains(source, "worker-static", "retired worker-static wording")
+		rejectContains(source, retiredFullstackTemplate, "retired full-stack template name")
+		rejectContains(source, retiredFullstackKind, "retired full-stack project kind")
+		rejectContains(source, retiredFullstackWording, "retired hyphenated full-stack wording")
 		rejectContains(source, "tovuk init", "retired init command")
 		rejectContains(source, "tovuk install", "retired install command")
 		rejectContains(source, "tovuk preview", "retired preview command")

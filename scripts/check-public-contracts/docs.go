@@ -37,7 +37,7 @@ func checkDocs() {
 	openapi := readText("docs/openapi.json")
 	pricing := readText("docs/pricing.mdx")
 	limits := readText("docs/reference/limits.mdx")
-	platform := readText("docs/reference/platform.mdx")
+	resources := readText("docs/reference/resources.mdx")
 	products := readText("docs/reference/products.mdx")
 	abuse := readText("docs/abuse.mdx")
 	allUsageCapMeters := []string{
@@ -71,6 +71,8 @@ func checkDocs() {
 		requireContains(limits, "`"+meter+"`", "limits docs usage cap meter "+meter)
 		requireContains(openapi, `"`+meter+`"`, "OpenAPI usage meter "+meter)
 	}
+	retiredFullstackKind := "worker" + "_static"
+	retiredFullstackTemplate := "worker" + "-static-rust-tanstack"
 	for _, retired := range []string{
 		"/v1/apps",
 		"--app",
@@ -81,8 +83,8 @@ func checkDocs() {
 		"targetApp",
 		"alwaysOnApps",
 		"appCount",
-		"worker_static",
-		"worker-static-rust-tanstack",
+		retiredFullstackKind,
+		retiredFullstackTemplate,
 	} {
 		rejectContains(openapi, retired, "retired public app contract")
 	}
@@ -99,13 +101,13 @@ func checkDocs() {
 	requireContains(storage, "Direct Multipart API", "multipart API docs")
 	requireContains(storage, "5,237,760 MiB (`4.995 TiB`) object storage maximum object size", "object storage provider max docs")
 	requireContains(storage, "5,115 MiB (`4.995 GiB`) per single-part object upload", "object storage provider single-part docs")
-	requireContains(platform, "Free State objects get 1 GB per object", "platform State Free storage docs")
-	requireContains(platform, "Pro State objects get 10 GB per object", "platform State Pro storage docs")
-	requireContains(platform, "tovuk state alarm set", "platform State alarm CLI docs")
-	requireContains(platform, "TOVUK_RUNTIME_TOKEN=tovuk_runtime_...", "runtime token binding docs")
-	requireContains(platform, "TOVUK_SQLITE_DB=sqlite_1", "runtime SQLite binding docs")
-	requireContains(platform, "TOVUK_BINDING_AUTH_SERVICE=service_2", "runtime service binding docs")
-	requireContains(platform, "It cannot manage account settings", "runtime token scope docs")
+	requireContains(resources, "Free State objects get 1 GB per object", "resources State Free storage docs")
+	requireContains(resources, "Pro State objects get 10 GB per object", "resources State Pro storage docs")
+	requireContains(resources, "tovuk state alarm set", "resources State alarm CLI docs")
+	requireContains(resources, "TOVUK_RUNTIME_TOKEN=tovuk_runtime_...", "runtime token binding docs")
+	requireContains(resources, "TOVUK_SQLITE_DB=sqlite_1", "runtime SQLite binding docs")
+	requireContains(resources, "TOVUK_BINDING_AUTH_SERVICE=service_2", "runtime service binding docs")
+	requireContains(resources, "It cannot manage account settings", "runtime token scope docs")
 	requireContains(pricing, "Pro costs `$5/month`", "pricing Pro subscription docs")
 	requireContains(products, "Use `products[].features`", "product choice docs")
 	requireContains(products, "`products[].features`", "product feature docs")
@@ -206,7 +208,7 @@ func checkDocs() {
 	rejectContains(storage, "4,768,371 MiB", "stale object storage object docs")
 	rejectContains(storage, "4,768 MiB", "stale object storage single-part docs")
 	rejectContains(limits, "when multipart upload support is exposed", "stale multipart docs")
-	rejectContains(platform, "Free and Pro State objects get 10 GB per object", "stale platform State storage docs")
+	rejectContains(resources, "Free and Pro State objects get 10 GB per object", "stale resources State storage docs")
 	rejectContains(pricing, "$25/month", "stale Pro subscription docs")
 	rejectContains(openapi, `"subscriptionUsdCentsPerMonth": 2500`, "stale OpenAPI Pro subscription price")
 	rejectContains(openapi, `"subscriptionUsdMicrosPerMonth": 25000000`, "stale OpenAPI Pro subscription estimate")
