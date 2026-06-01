@@ -219,6 +219,9 @@ KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, or
 Usage Caps and set the matching usage caps before heavy work.
 It also exposes object storage object, single-part upload, and multipart upload
 ceilings so agents can plan large file transfers before reserving bytes.
+`tovuk usage --json` returns `billingEstimate.lineItems` for priced meters and
+explicitly free transfer meters, so agents can audit and cap usage before load
+tests or public launches.
 
 The same commands are available through PyPI and Cargo after installation:
 
