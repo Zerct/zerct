@@ -118,6 +118,54 @@ func mapKeys(values map[string]string) []string {
 	return keys
 }
 
+func interfaceMapKeys(values map[string]interface{}) []string {
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+func objectField(values map[string]interface{}, field string, label string) map[string]interface{} {
+	rawValue, ok := values[field]
+	if !ok {
+		fail("%s is missing field %s", label, field)
+	}
+	return objectValue(rawValue, label+"."+field)
+}
+
+func objectValue(value interface{}, label string) map[string]interface{} {
+	object, ok := value.(map[string]interface{})
+	if !ok {
+		fail("%s must be an object", label)
+	}
+	return object
+}
+
+func arrayField(values map[string]interface{}, field string, label string) []interface{} {
+	rawValue, ok := values[field]
+	if !ok {
+		fail("%s is missing field %s", label, field)
+	}
+	array, ok := rawValue.([]interface{})
+	if !ok {
+		fail("%s.%s must be an array", label, field)
+	}
+	return array
+}
+
+func stringField(values map[string]interface{}, field string, label string) string {
+	rawValue, ok := values[field]
+	if !ok {
+		fail("%s is missing field %s", label, field)
+	}
+	value, ok := rawValue.(string)
+	if !ok {
+		fail("%s.%s must be a string", label, field)
+	}
+	return value
+}
+
 func difference(left []string, right []string) []string {
 	rightSet := make(map[string]bool, len(right))
 	for _, value := range right {

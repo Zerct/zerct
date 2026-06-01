@@ -71,6 +71,7 @@ func checkDocs() {
 		requireContains(limits, "`"+meter+"`", "limits docs usage cap meter "+meter)
 		requireContains(openapi, `"`+meter+`"`, "OpenAPI usage meter "+meter)
 	}
+	checkOpenAPIMeterContracts("docs/openapi.json", allUsageCapMeters)
 	retiredFullstackKind := "worker" + "_static"
 	retiredFullstackTemplate := "worker" + "-static-rust-tanstack"
 	for _, retired := range []string{
@@ -233,6 +234,101 @@ func checkDocs() {
 	rejectContains(openapi, "tovuk caps", "retired usage caps command in OpenAPI")
 
 	fmt.Printf("Checked %d Mintlify navigation entries.\n", len(pages))
+}
+
+func checkOpenAPIMeterContracts(openapiPath string, expectedMeters []string) {
+	var openapi map[string]interface{}
+	readJSON(openapiPath, &openapi)
+
+	accountUsageMeterProperties := schemaProperties(
+		openapi,
+		"AccountUsageMeterWindow",
+		"OpenAPI AccountUsageMeterWindow",
+	)
+	requireStringSliceExactly(
+		interfaceMapKeys(accountUsageMeterProperties),
+		expectedMeters,
+		"OpenAPI AccountUsageMeterWindow meter properties",
+	)
+
+	for _, schema := range []string{"UsageCap", "UsageCapDeleteResponse"} {
+		pattern := schemaPropertyPattern(openapi, schema, "metric")
+		requireStringSliceExactly(
+			meterPatternValues(pattern, schema),
+			expectedMeters,
+			"OpenAPI "+schema+" metric pattern",
+		)
+	}
+
+	for _, route := range []struct {
+		path   string
+		method string
+	}{
+		{path: "/v1/usage/caps/{metric}", method: "put"},
+		{path: "/v1/usage/caps/{metric}/{period}", method: "delete"},
+	} {
+		pattern := operationParameterPattern(openapi, route.path, route.method, "metric")
+		requireStringSliceExactly(
+			meterPatternValues(pattern, route.path+" "+route.method),
+			expectedMeters,
+			"OpenAPI "+route.path+" "+route.method+" metric parameter pattern",
+		)
+	}
+}
+
+func schemaProperties(
+	openapi map[string]interface{},
+	schemaName string,
+	label string,
+) map[string]interface{} {
+	schema := openAPISchema(openapi, schemaName)
+	return objectField(schema, "properties", label+" properties")
+}
+
+func schemaPropertyPattern(openapi map[string]interface{}, schemaName string, propertyName string) string {
+	properties := schemaProperties(openapi, schemaName, "OpenAPI "+schemaName)
+	property := objectField(properties, propertyName, "OpenAPI "+schemaName+"."+propertyName)
+	return stringField(property, "pattern", "OpenAPI "+schemaName+"."+propertyName+" pattern")
+}
+
+func operationParameterPattern(
+	openapi map[string]interface{},
+	path string,
+	method string,
+	parameterName string,
+) string {
+	paths := objectField(openapi, "paths", "OpenAPI paths")
+	pathItem := objectField(paths, path, "OpenAPI path "+path)
+	operation := objectField(pathItem, method, "OpenAPI operation "+path+" "+method)
+	parameters := arrayField(operation, "parameters", "OpenAPI parameters "+path+" "+method)
+	for _, rawParameter := range parameters {
+		parameter := objectValue(rawParameter, "OpenAPI parameter "+path+" "+method)
+		name := stringField(parameter, "name", "OpenAPI parameter name")
+		if name != parameterName {
+			continue
+		}
+		schema := objectField(parameter, "schema", "OpenAPI parameter schema "+parameterName)
+		return stringField(schema, "pattern", "OpenAPI parameter pattern "+parameterName)
+	}
+	fail("OpenAPI %s %s missing parameter %s", path, method, parameterName)
+	return ""
+}
+
+func openAPISchema(openapi map[string]interface{}, schemaName string) map[string]interface{} {
+	components := objectField(openapi, "components", "OpenAPI components")
+	schemas := objectField(components, "schemas", "OpenAPI schemas")
+	return objectField(schemas, schemaName, "OpenAPI schema "+schemaName)
+}
+
+func meterPatternValues(pattern string, label string) []string {
+	if !strings.HasPrefix(pattern, "^(") || !strings.HasSuffix(pattern, ")$") {
+		fail("%s metric pattern must use ^(...)$ shape", label)
+	}
+	body := strings.TrimSuffix(strings.TrimPrefix(pattern, "^("), ")$")
+	if body == "" {
+		fail("%s metric pattern must not be empty", label)
+	}
+	return strings.Split(body, "|")
 }
 
 func collectPageEntry(entry interface{}, pages *[]string) {
