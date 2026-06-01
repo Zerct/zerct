@@ -1,4 +1,5 @@
 use super::super::{
+    config::CapabilitiesConfig,
     constants::{DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_RUST_CHECK_COMMAND},
     errors::{Result, agent_error},
     frontend_checks::{frontend_build_command, frontend_check_command, is_plain_static_frontend},
@@ -30,8 +31,9 @@ pub(super) fn rust_backend_config(project_dir: &Path) -> String {
     let name = service_name_from_cargo(project_dir)
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| service_name_from_dir(project_dir));
+    let capabilities = capabilities_toml(ProjectKind::RustWorker);
     format!(
-        "name = \"{name}\"\n\n[build]\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\ncommand = \"cargo build --release\"\n\n[run]\ncommand = \"./target/release/{name}\"\nport = 3000\nhealth = \"/healthz\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n"
+        "name = \"{name}\"\nkind = \"rust_worker\"\n\n{capabilities}\n[build]\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\ncommand = \"cargo build --release\"\n\n[run]\ncommand = \"./target/release/{name}\"\nport = 3000\nhealth = \"/healthz\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n"
     )
 }
 
@@ -40,8 +42,9 @@ pub(super) fn frontend_config(project_dir: &Path, prefer_bun: bool) -> String {
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| service_name_from_dir(project_dir));
     let settings = frontend_build_settings(project_dir, prefer_bun);
+    let capabilities = capabilities_toml(ProjectKind::StaticFrontend);
     format!(
-        "name = \"{name}\"\nkind = \"static_frontend\"\n\n[build]\ncheck = \"{}\"\ncommand = \"{}\"\noutput = \"{}\"\n",
+        "name = \"{name}\"\nkind = \"static_frontend\"\n\n{capabilities}\n[build]\ncheck = \"{}\"\ncommand = \"{}\"\noutput = \"{}\"\n",
         settings.check, settings.build, settings.output
     )
 }
@@ -59,10 +62,21 @@ pub(super) fn fullstack_config(
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| service_name_from_dir(&backend_dir));
     let settings = frontend_build_settings(&frontend_dir, prefer_bun);
+    let capabilities = capabilities_toml(ProjectKind::WorkerStatic);
     format!(
-        "name = \"{name}\"\nkind = \"worker_static\"\n\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n",
+        "name = \"{name}\"\nkind = \"worker_static\"\n\n{capabilities}\n[worker]\nroot = \"{backend}\"\ncheck = \"{DEFAULT_RUST_CHECK_COMMAND}\"\nbuild = \"cargo build --release\"\ncommand = \"./target/release/{backend_name}\"\nport = 3000\nhealth = \"/api/healthz\"\n\n[frontend]\nroot = \"{frontend}\"\ncheck = \"{}\"\nbuild = \"{}\"\noutput = \"{}\"\n\n[resources]\nmemory = \"128mb\"\ncpu = \"1\"\nidle_timeout_minutes = 15\n",
         settings.check, settings.build, settings.output
     )
+}
+
+fn capabilities_toml(kind: ProjectKind) -> String {
+    let capabilities = CapabilitiesConfig::for_kind(kind);
+    let body = CapabilitiesConfig::KEYS
+        .iter()
+        .map(|key| format!("{key} = {}", capabilities.value_for_key(key)))
+        .collect::<Vec<_>>()
+        .join("\n");
+    format!("[capabilities]\n{body}\n\n")
 }
 
 struct FrontendBuildSettings {

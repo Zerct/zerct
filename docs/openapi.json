@@ -13852,6 +13852,172 @@
           }
         ]
       },
+      "TovukCapabilitiesConfig": {
+        "type": "object",
+        "description": "Explicit service capabilities from tovuk.toml. Context: components.schemas.TovukCapabilitiesConfig.",
+        "additionalProperties": false,
+        "required": [
+          "static_frontend",
+          "worker",
+          "sqlite",
+          "object_storage",
+          "kv",
+          "state",
+          "queue",
+          "cron",
+          "service_bindings",
+          "secrets",
+          "custom_domains",
+          "logs",
+          "builds",
+          "usage_caps",
+          "billing",
+          "support",
+          "abuse"
+        ],
+        "properties": {
+          "static_frontend": {
+            "type": "boolean",
+            "description": "Whether static frontend files are part of this service.",
+            "examples": [
+              false
+            ]
+          },
+          "worker": {
+            "type": "boolean",
+            "description": "Whether a Rust Worker runtime is part of this service.",
+            "examples": [
+              true
+            ]
+          },
+          "sqlite": {
+            "type": "boolean",
+            "description": "Whether managed SQLite may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "object_storage": {
+            "type": "boolean",
+            "description": "Whether Object Storage may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "kv": {
+            "type": "boolean",
+            "description": "Whether KV namespaces may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "state": {
+            "type": "boolean",
+            "description": "Whether State namespaces may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "queue": {
+            "type": "boolean",
+            "description": "Whether Queues may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "cron": {
+            "type": "boolean",
+            "description": "Whether Cron triggers may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "service_bindings": {
+            "type": "boolean",
+            "description": "Whether Service Bindings may be used by this service.",
+            "examples": [
+              false
+            ]
+          },
+          "secrets": {
+            "type": "boolean",
+            "description": "Whether Secrets may be attached to this service.",
+            "examples": [
+              false
+            ]
+          },
+          "custom_domains": {
+            "type": "boolean",
+            "description": "Whether Custom Domains may be attached to this service.",
+            "examples": [
+              false
+            ]
+          },
+          "logs": {
+            "type": "boolean",
+            "description": "Whether Logs are available for this service.",
+            "examples": [
+              true
+            ]
+          },
+          "builds": {
+            "type": "boolean",
+            "description": "Whether Builds are available for this service.",
+            "examples": [
+              true
+            ]
+          },
+          "usage_caps": {
+            "type": "boolean",
+            "description": "Whether Usage Caps are available for this service.",
+            "examples": [
+              true
+            ]
+          },
+          "billing": {
+            "type": "boolean",
+            "description": "Whether billing guidance is available for this service.",
+            "examples": [
+              true
+            ]
+          },
+          "support": {
+            "type": "boolean",
+            "description": "Whether support tickets are available for this service.",
+            "examples": [
+              true
+            ]
+          },
+          "abuse": {
+            "type": "boolean",
+            "description": "Whether abuse reporting and quarantine controls are available for this service.",
+            "examples": [
+              true
+            ]
+          }
+        },
+        "examples": [
+          {
+            "static_frontend": false,
+            "worker": true,
+            "sqlite": false,
+            "object_storage": false,
+            "kv": false,
+            "state": false,
+            "queue": false,
+            "cron": false,
+            "service_bindings": false,
+            "secrets": false,
+            "custom_domains": false,
+            "logs": true,
+            "builds": true,
+            "usage_caps": true,
+            "billing": true,
+            "support": true,
+            "abuse": true
+          }
+        ]
+      },
       "TovukResourceConfig": {
         "type": "object",
         "description": "Runtime resource limits from tovuk.toml. Context: components.schemas.TovukResourceConfig.",
@@ -13899,7 +14065,8 @@
         "description": "Parsed tovuk.toml deploy contract. Context: components.schemas.TovukConfig.",
         "additionalProperties": false,
         "required": [
-          "name"
+          "name",
+          "capabilities"
         ],
         "properties": {
           "name": {
@@ -13916,6 +14083,30 @@
               "rust_worker"
             ],
             "$ref": "#/components/schemas/ProjectKind"
+          },
+          "capabilities": {
+            "examples": [
+              {
+                "static_frontend": false,
+                "worker": true,
+                "sqlite": false,
+                "object_storage": false,
+                "kv": false,
+                "state": false,
+                "queue": false,
+                "cron": false,
+                "service_bindings": false,
+                "secrets": false,
+                "custom_domains": false,
+                "logs": true,
+                "builds": true,
+                "usage_caps": true,
+                "billing": true,
+                "support": true,
+                "abuse": true
+              }
+            ],
+            "$ref": "#/components/schemas/TovukCapabilitiesConfig"
           },
           "build": {
             "examples": [
@@ -13976,6 +14167,25 @@
           {
             "name": "hello-rust",
             "kind": "rust_worker",
+            "capabilities": {
+              "static_frontend": false,
+              "worker": true,
+              "sqlite": false,
+              "object_storage": false,
+              "kv": false,
+              "state": false,
+              "queue": false,
+              "cron": false,
+              "service_bindings": false,
+              "secrets": false,
+              "custom_domains": false,
+              "logs": true,
+              "builds": true,
+              "usage_caps": true,
+              "billing": true,
+              "support": true,
+              "abuse": true
+            },
             "run": {
               "command": "./target/release/api",
               "port": 3000,

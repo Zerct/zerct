@@ -38,6 +38,18 @@ pub(crate) fn get_u16(
     })
 }
 
+pub(crate) fn get_bool(
+    table: &toml::map::Map<String, toml::Value>,
+    key: &str,
+) -> std::result::Result<Option<bool>, String> {
+    table.get(key).map_or(Ok(None), |value| {
+        value
+            .as_bool()
+            .map(Some)
+            .ok_or_else(|| format!("{key} must be true or false"))
+    })
+}
+
 pub(crate) fn reject_unknown_section_keys(
     table: &toml::map::Map<String, toml::Value>,
     section: &str,

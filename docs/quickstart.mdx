@@ -63,8 +63,8 @@ Fix the first actionable error, rerun check, then redeploy.
 
 ## Worker-static repos
 
-Put one `tovuk.toml` in the repo root, with `[worker]` and `[frontend]`
-sections. Run one command from the repo root:
+Put one `tovuk.toml` in the repo root, with explicit `[capabilities]`,
+`[worker]`, and `[frontend]` sections. Run one command from the repo root:
 
 ```sh
 tovuk deploy --wait --json

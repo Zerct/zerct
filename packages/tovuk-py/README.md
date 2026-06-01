@@ -17,8 +17,8 @@ tovuk deploy --wait --json
 ```
 
 From a worker-static repo root, `tovuk deploy` reads one root `tovuk.toml`,
-builds the worker and frontend roots, and returns one service URL with `/api/*`
-routed to the Rust worker.
+reads explicit `[capabilities]`, builds the worker and frontend roots, and
+returns one service URL with `/api/*` routed to the Rust worker.
 
 Rust worker deploys require `cargo fmt --all --check`, locked release-mode
 `cargo check`, locked release-mode tests, and strict all-target, all-feature
@@ -92,8 +92,9 @@ agents can choose the correct product and cap the right meters before heavy
 work.
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
-`tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks, capability meters,
-account limits, and `billingEstimate` before deploy, without creating a build.
+`tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
+disabled capabilities, quality checks, capability meters, account limits, and
+`billingEstimate` before deploy, without creating a build.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.

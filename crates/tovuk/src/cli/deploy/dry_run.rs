@@ -3,6 +3,7 @@ use super::{
         api_commands::api_request,
         args::CliOptions,
         check::run_check,
+        config::CapabilitiesConfig,
         errors::{Result, print_json},
         project::number_field,
         project_kind::ProjectKind,
@@ -84,70 +85,33 @@ fn service_dry_run(
         "exists": !service_name.is_empty() && existing_service_names.contains(&service_name),
         "kind": kind.map(ProjectKind::as_str),
         "config": config,
-        "capabilities": capability_dry_run(kind, capabilities),
+        "capabilities": capability_dry_run(config.map(|config| &config.capabilities), capabilities),
         "check": {
             "ok": report.ok,
             "checks": report.checks,
         },
         "missingConfig": missing_config,
-        "meters": meters_for_kind(kind, capabilities),
+        "meters": meters_for_capabilities(config.map(|config| &config.capabilities), capabilities),
         "nextAgentActions": project_next_actions(report.ok, kind),
     })
 }
 
-fn capability_dry_run(kind: Option<ProjectKind>, capabilities: &Value) -> Value {
-    let enabled = enabled_capabilities(kind);
-    let all = all_service_capabilities(capabilities);
-    let disabled = all
-        .iter()
-        .filter(|capability| {
-            !enabled
-                .iter()
-                .any(|enabled_capability| enabled_capability == &capability.as_str())
-        })
-        .cloned()
-        .collect::<Vec<_>>();
+fn capability_dry_run(config: Option<&CapabilitiesConfig>, capabilities: &Value) -> Value {
+    let Some(config) = config else {
+        return json!({
+            "enabled": [],
+            "disabled": all_service_capabilities(capabilities),
+            "source": "tovuk.toml [capabilities]",
+            "warning": "Fix tovuk.toml before Tovuk can identify enabled capabilities.",
+        });
+    };
 
     json!({
-        "enabled": enabled,
-        "disabled": disabled,
-        "source": "tovuk.toml kind and explicit platform resource commands",
-        "warning": "Use platform commands to create optional service resources before code depends on them.",
+        "enabled": config.enabled_keys(),
+        "disabled": config.disabled_keys(),
+        "source": "tovuk.toml [capabilities]",
+        "warning": "Enable optional capabilities in tovuk.toml before code depends on them, then create the matching resource through CLI or API.",
     })
-}
-
-fn enabled_capabilities(kind: Option<ProjectKind>) -> Vec<&'static str> {
-    let Some(kind) = kind else {
-        return Vec::new();
-    };
-    let mut enabled = enabled_product_keys(kind);
-    enabled.extend(["billing", "support", "abuse"]);
-    enabled.sort_unstable();
-    enabled
-}
-
-fn enabled_product_keys(kind: ProjectKind) -> Vec<&'static str> {
-    let mut enabled = vec!["builds", "logs", "secrets", "custom_domains", "usage_caps"];
-    if matches!(kind, ProjectKind::RustWorker | ProjectKind::WorkerStatic) {
-        enabled.push("worker");
-        enabled.extend([
-            "sqlite",
-            "object_storage",
-            "kv",
-            "state",
-            "queue",
-            "cron",
-            "service_bindings",
-        ]);
-    }
-    if matches!(
-        kind,
-        ProjectKind::StaticFrontend | ProjectKind::WorkerStatic
-    ) {
-        enabled.push("static_frontend");
-    }
-    enabled.sort_unstable();
-    enabled
 }
 
 fn all_service_capabilities(capabilities: &Value) -> Vec<String> {
@@ -162,11 +126,14 @@ fn all_service_capabilities(capabilities: &Value) -> Vec<String> {
     all
 }
 
-fn meters_for_kind(kind: Option<ProjectKind>, capabilities: &Value) -> Vec<String> {
-    let Some(kind) = kind else {
+fn meters_for_capabilities(
+    config: Option<&CapabilitiesConfig>,
+    capabilities: &Value,
+) -> Vec<String> {
+    let Some(config) = config else {
         return Vec::new();
     };
-    let enabled = enabled_product_keys(kind);
+    let enabled = config.enabled_product_keys();
     let mut meters = capabilities
         .get("products")
         .and_then(Value::as_array)
@@ -312,25 +279,39 @@ fn next_actions(ok: bool) -> Vec<&'static str> {
 mod tests {
     use serde_json::json;
 
-    use super::{ProjectKind, capability_dry_run, meters_for_kind, workspace_warnings};
+    use crate::cli::config::CapabilityToggle;
+
+    use super::{
+        CapabilitiesConfig, ProjectKind, capability_dry_run, meters_for_capabilities,
+        workspace_warnings,
+    };
 
     #[test]
     fn worker_static_dry_run_exposes_one_service_capability_set() {
-        let capabilities =
-            capability_dry_run(Some(ProjectKind::WorkerStatic), &sample_capabilities());
+        let service_capabilities = worker_static_capabilities();
+        let capabilities = capability_dry_run(Some(&service_capabilities), &sample_capabilities());
 
         assert!(capabilities["enabled"].as_array().is_some_and(|enabled| {
             enabled.iter().any(|value| value == "worker")
                 && enabled.iter().any(|value| value == "static_frontend")
-                && enabled.iter().any(|value| value == "sqlite")
-                && enabled.iter().any(|value| value == "object_storage")
                 && enabled.iter().any(|value| value == "usage_caps")
         }));
+        assert!(
+            capabilities["disabled"]
+                .as_array()
+                .is_some_and(|disabled| disabled.iter().any(|value| value == "sqlite"))
+        );
     }
 
     #[test]
     fn worker_static_dry_run_lists_public_meters_before_deploy() {
-        let meters = meters_for_kind(Some(ProjectKind::WorkerStatic), &sample_capabilities());
+        let mut service_capabilities = worker_static_capabilities();
+        service_capabilities.sqlite = CapabilityToggle::enabled();
+        service_capabilities.object_storage = CapabilityToggle::enabled();
+        service_capabilities.kv = CapabilityToggle::enabled();
+        service_capabilities.queue = CapabilityToggle::enabled();
+        service_capabilities.state = CapabilityToggle::enabled();
+        let meters = meters_for_capabilities(Some(&service_capabilities), &sample_capabilities());
 
         assert!(meters.contains(&"worker_cpu_ms".to_owned()));
         assert!(meters.contains(&"static_transfer_bytes".to_owned()));
@@ -356,6 +337,10 @@ mod tests {
 
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].contains("Project limit would be exceeded"));
+    }
+
+    fn worker_static_capabilities() -> CapabilitiesConfig {
+        CapabilitiesConfig::for_kind(ProjectKind::WorkerStatic)
     }
 
     fn sample_capabilities() -> serde_json::Value {
