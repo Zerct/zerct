@@ -1,8 +1,9 @@
 use super::{
     api_commands::{
-        billing_command, binding_command, caps_command, cron_command, domains_command, env_command,
-        kv_command, logs_command, pricing, print_authenticated, queue_command, service_command,
-        sqlite_command, state_command, storage_command, support_command,
+        abuse_command, billing_command, binding_command, caps_command, cron_command,
+        domains_command, env_command, kv_command, logs_command, pricing, print_authenticated,
+        queue_command, service_command, sqlite_command, state_command, storage_command,
+        support_command,
     },
     args::{parse_args, project_path},
     auth::login,
@@ -58,6 +59,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "storage" => storage_command(&cli),
         "billing" => billing_command(&cli),
         "support" => support_command(&cli),
+        "abuse" => abuse_command(&cli),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown Tovuk command.",

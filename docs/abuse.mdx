@@ -1,0 +1,79 @@
+---
+title: "Abuse"
+description: "Structured abuse reports, evidence, owner appeals, and rate limits."
+---
+
+Tovuk abuse workflows are API and CLI first. Agents can report abuse, preserve
+evidence, track owner-visible reports for their services, and appeal after
+remediation without dashboard access.
+
+## Report
+
+```sh
+tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
+```
+
+The report body must include:
+
+- `target_url`: affected public URL.
+- `category`: `phishing`, `malware`, `illegal_content`, `copyright`,
+  `trademark`, `network_abuse`, `privacy`, `emergency_safety`, or `other`.
+- `reporter_email`: reporter contact and rate-limit key.
+- `summary`: one-line issue summary.
+- `details`: reporter context.
+- `evidence`: screenshot URL, request id, object path, logs, or other
+  preserved evidence.
+
+Optional context:
+
+```sh
+tovuk abuse report https://demo.tovuk.app/files/logo.png "Malware file" "Reported object download" --category malware --reporter-email reporter@example.com --service service_1 --object-path uploads/logo.png --target-path /files/logo.png --evidence "scanner result and request id" --json
+```
+
+The API route is `POST /v1/abuse/reports`. It is public so third-party
+reporters can submit reports, but it rate-limits by reporter email.
+
+## Track
+
+Owners can list reports that Tovuk can associate with their services:
+
+```sh
+tovuk abuse list --json
+```
+
+The API route is `GET /v1/abuse/reports`. It requires an authenticated Tovuk
+session and returns newest-first reports visible to the account.
+
+## Appeal
+
+After remediation, owners can appeal a report with evidence:
+
+```sh
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
+```
+
+The API route is `POST /v1/abuse/reports/{report_id}/appeal`. It requires an
+authenticated owner session. The response includes the updated report status and
+the next `agent_instruction`.
+
+## Rate Limits
+
+Abuse report intake allows `3` reports per reporter email per rolling hour and
+`10` reports per reporter email per rolling day. If a reporter hits the limit,
+agents must preserve evidence locally and retry after the window resets.
+
+## Status
+
+Reports use stable statuses:
+
+- `open`
+- `triaged`
+- `quarantined`
+- `owner_notified`
+- `resolved`
+- `rejected`
+- `appealed`
+
+Urgent categories such as `malware`, `illegal_content`, and
+`emergency_safety` start with urgent severity and can be flagged for quarantine
+review.

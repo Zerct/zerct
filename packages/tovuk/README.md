@@ -55,7 +55,8 @@ Agents can also inspect pricing, usage, services, service summaries, deploys,
 builds, service/deploy/build logs, env metadata, custom domains, domain
 verification, service storage files and media, billing checkout links, billing
 portal links, service deletion, and support ticket create/list/resolve actions
-through the same CLI.
+through the same CLI. Abuse reports, owner-visible report lists, and owner
+appeals also use `tovuk abuse`.
 
 Before high-throughput work, read pricing and set hard caps:
 
@@ -107,6 +108,14 @@ When Tovuk support is needed, include enough evidence for a support agent:
 
 ```sh
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
+```
+
+Report and appeal abuse without dashboard access:
+
+```sh
+tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
+tovuk abuse list --json
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
 ```
 
 When the issue is fixed, resolve the ticket:

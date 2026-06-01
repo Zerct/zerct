@@ -91,6 +91,23 @@ After the issue is fixed, resolve the ticket:
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+## Abuse loop
+
+Report abuse with a target URL, category, reporter email, and preserved
+evidence:
+
+```sh
+tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
+```
+
+Owners can track reports associated with their services and appeal after
+remediation:
+
+```sh
+tovuk abuse list --json
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
+```
+
 When a limit is the blocker, create a hosted Stripe subscription checkout link:
 
 ```sh

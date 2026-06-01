@@ -19,6 +19,7 @@ pub(crate) struct CliOptions {
     pub(crate) token: String,
     pub(crate) template: String,
     pub(crate) severity: String,
+    pub(crate) abuse: AbuseOptions,
     pub(crate) deployment: DeploymentOptions,
     pub(crate) kv: KvOptions,
     pub(crate) queue: QueueOptions,
@@ -59,6 +60,16 @@ pub(crate) struct StorageOptions {
 }
 
 #[derive(Clone, Debug)]
+pub(crate) struct AbuseOptions {
+    pub(crate) category: String,
+    pub(crate) reporter_email: String,
+    pub(crate) reporter_name: String,
+    pub(crate) evidence: String,
+    pub(crate) object_path: String,
+    pub(crate) target_path: String,
+}
+
+#[derive(Clone, Debug)]
 pub(crate) struct OutputOptions {
     pub(crate) json: bool,
     pub(crate) help: bool,
@@ -85,6 +96,14 @@ impl Default for CliOptions {
             token: String::new(),
             template: String::new(),
             severity: String::new(),
+            abuse: AbuseOptions {
+                category: String::new(),
+                reporter_email: String::new(),
+                reporter_name: String::new(),
+                evidence: String::new(),
+                object_path: String::new(),
+                target_path: String::new(),
+            },
             deployment: DeploymentOptions {
                 database: false,
                 dry_run: false,
