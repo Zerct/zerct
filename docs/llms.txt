@@ -155,7 +155,7 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `object_storage_class_b_operations`.
 
 `tovuk capabilities --json` and `tovuk pricing --json` expose a
-`products` catalog. Use each product's `meters`, `meter_details`,
+`products` catalog. Use each product's `features`, `meters`, `meter_details`,
 `pricing_fields`, and `limit_fields` before load tests, media uploads, or paid
 usage.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,

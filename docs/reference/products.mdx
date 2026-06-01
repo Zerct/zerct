@@ -11,11 +11,14 @@ tovuk capabilities --json
 tovuk pricing --json
 ```
 
-Use `products[].best_for`, `products[].avoid_for`, `products[].meters`,
-`products[].meter_details`, `products[].pricing_fields`, and
-`products[].limit_fields` to choose the smallest resource that fits the job.
+Use `products[].features`, `products[].best_for`, `products[].avoid_for`,
+`products[].meters`, `products[].meter_details`, `products[].pricing_fields`,
+and `products[].limit_fields` to choose the smallest resource that fits the
+job.
 Use `plans[].limits` and `plans[].pricing` before load tests, media uploads,
 or paid usage.
+`features` is the concrete checklist of supported behavior agents can rely on
+before they design or deploy a service.
 `meter_details` explains each meter's unit and count semantics so agents can
 estimate work before running it.
 `limit_fields` includes the relevant runtime, storage, payload, batching,
@@ -30,18 +33,24 @@ before high-throughput work.
 Worker:
 Use for Rust public APIs, webhooks, auth callbacks, forms, queue handlers, and
 cron handlers. Avoid browser rendering, static files, large media storage, and
-single-key serialized state. Main meters: `worker_requests`, `worker_cpu_ms`,
-and `worker_transfer_bytes`.
+single-key serialized state. Features include Rust-only HTTP routes under
+`/api/*`, WebSocket upgrades, cron and queue event delivery, private service
+bindings, and request, CPU, and response transfer metering. Main meters:
+`worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes`.
 
 Static Frontend:
 Use for React, TanStack, Vite, Astro, Svelte, or plain HTML output served at
 `/`. Avoid JS or TS servers, SSR handlers, API routes, middleware, and secrets.
-Main meter: `static_transfer_bytes`.
+Features include static asset serving, same-origin `/api/*` proxying to the
+Rust worker, `_headers`, `_redirects`, and frontend-only JavaScript or
+TypeScript source. Main meter: `static_transfer_bytes`.
 
 SQLite:
 Use for service-local relational data, transactions, migrations, and data
 inspection. Create backups before destructive migrations. Avoid files, media,
-single-key counters, and cross-service shared storage. Main meters:
+single-key counters, and cross-service shared storage. Features include
+service-scoped bindings, transactional execution, row and storage metering,
+manual backups, restore, and storage guardrails. Main meters:
 `sqlite_rows_read`, `sqlite_rows_written`, and `sqlite_storage_bytes`.
 
 Object Storage:
@@ -53,15 +62,19 @@ part count, metadata size, custom domains per storage bucket, bucket management
 operations, and same-key write throughput. Objects can be up to `5 TB`;
 single-part uploads and multipart parts can be up to `5 GB`. `tovuk storage
 upload` automatically switches to multipart transfer for files larger than
-100 MiB.
+100 MiB. Features include service-scoped list, upload, download, delete,
+multipart planning, Class A and Class B operation metering, and private origin
+storage behind Tovuk API and media URLs.
 
 State:
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and
 per-tenant state. Use State alarms for per-object scheduled wake-ups and retrying
 object-specific work. Avoid general relational data, large files, and stateless
-HTTP handlers. Main meters: `state_requests`,
-`state_duration_gb_milliseconds`, `state_sqlite_rows_read`, and
-`state_sqlite_rows_written`.
+HTTP handlers. Features include State classes, keyed object instances,
+serialized key/value operations, one scheduled alarm per object, realtime
+coordination behind a Rust worker, and request, duration, row, and storage
+metering. Main meters: `state_requests`, `state_duration_gb_milliseconds`,
+`state_sqlite_rows_read`, and `state_sqlite_rows_written`.
 
 KV:
 Use for small config, sessions, feature flags, cache metadata, and rate-limit
@@ -142,7 +155,7 @@ tovuk limit set object_storage_class_a_operations --period month --value 1000000
 ```
 
 The live `tovuk pricing --json` response is the source of truth for current
-free limits, Pro included usage, overage prices, meters, meter details, pricing
-fields, and limit fields.
+free limits, Pro included usage, overage prices, features, meters, meter
+details, pricing fields, and limit fields.
 The live `tovuk usage --json` response is the source of truth for current
 meter usage and `billingEstimate` cost lines.
