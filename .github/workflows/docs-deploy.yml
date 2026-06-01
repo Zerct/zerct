@@ -51,6 +51,28 @@ jobs:
         run: |
           set -euo pipefail
 
+          print_status() {
+            local status="$1"
+            local summary="$2"
+            case "$summary" in
+              "Failed to revalidate subdomain:"*)
+                printf 'Mintlify deployment status: %s external generated subdomain revalidation failed after content update\n' "$status"
+                ;;
+              *)
+                printf 'Mintlify deployment status: %s %s\n' "$status" "$summary"
+                ;;
+            esac
+          }
+
+          content_update_finished() {
+            printf '%s\n' "$1" | jq -e '
+              [.logs[]?] |
+              any(. == "Successfully updated deployment") and
+              any(. == "Successfully saved config") and
+              any(test("^Successfully indexed [0-9]+ page\\(s\\)\\.$"))
+            ' >/dev/null
+          }
+
           for attempt in $(seq 1 60); do
             response="$(
               curl -fsS \
@@ -60,13 +82,17 @@ jobs:
             )"
             status="$(printf '%s\n' "$response" | jq -r '.status // "unknown"')"
             summary="$(printf '%s\n' "$response" | jq -r '.summary // ""')"
-            printf 'Mintlify deployment status: %s %s\n' "$status" "$summary"
+            print_status "$status" "$summary"
 
             case "$status" in
               success)
                 exit 0
                 ;;
               failure)
+                if [[ "$summary" == "Failed to revalidate subdomain:"* ]] && content_update_finished "$response"; then
+                  echo "::warning::Mintlify updated docs content but failed to revalidate an external generated subdomain. Custom-domain docs content is live."
+                  exit 0
+                fi
                 printf '%s\n' "$response" | jq -r '.logs[]?'
                 exit 1
                 ;;
