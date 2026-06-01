@@ -88,6 +88,7 @@ func checkCLIContract() {
 		rejectContains(source, "tovuk builds", "retired top-level builds command")
 		rejectContains(source, "tovuk status", "retired top-level status command")
 		rejectContains(source, "tovuk inspect", "retired top-level inspect command")
+		rejectContains(source, "tovuk service inspect", "retired service inspect command")
 		rejectContains(source, "tovuk platform", "retired platform command")
 		rejectContains(source, "tovuk services", "retired services command")
 		rejectContains(source, "tovuk limit ", "retired singular limit command")
