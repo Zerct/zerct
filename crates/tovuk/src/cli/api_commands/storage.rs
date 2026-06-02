@@ -15,6 +15,7 @@ use super::super::{
     auth::read_or_login_token,
     errors::{Result, agent_error, print_json},
 };
+use super::common::require_service;
 use api::{
     complete_upload_response, delete_response, download_url_response, list_response,
     multipart_abort_response, multipart_complete_response, multipart_create_response,
@@ -82,6 +83,7 @@ fn storage_upload(cli: &CliOptions) -> Result<()> {
     }
 
     let content_type = storage_content_type(cli, &local_path);
+    require_service(cli)?;
     let token = read_or_login_token(cli)?;
     if metadata.len() > MULTIPART_UPLOAD_THRESHOLD_BYTES {
         return storage_multipart_upload(
@@ -186,6 +188,7 @@ fn storage_delete(cli: &CliOptions) -> Result<()> {
         "Storage path is required.",
         "Use `tovuk storage delete --service <service> uploads/file.png --json`.",
     )?;
+    require_service(cli)?;
     let token = read_or_login_token(cli)?;
     let response = delete_response(cli, &token, &remote_path)?;
     if cli.output.json {
@@ -209,4 +212,33 @@ fn storage_download_url(cli: &CliOptions) -> Result<()> {
     }
     println!("{}", super::super::project::string_field(&response, "url"));
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::storage_command;
+    use crate::cli::args::CliOptions;
+
+    #[test]
+    fn storage_default_list_requires_service_before_login() {
+        let cli = CliOptions {
+            command: "storage".to_owned(),
+            ..CliOptions::default()
+        };
+
+        let error_message = storage_command(&cli).err().map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
+
+    #[test]
+    fn storage_url_requires_service_before_login() {
+        let cli = CliOptions {
+            command: "storage".to_owned(),
+            args: vec!["url".to_owned(), "uploads/logo.png".to_owned()],
+            ..CliOptions::default()
+        };
+
+        let error_message = storage_command(&cli).err().map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
 }

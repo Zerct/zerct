@@ -7,14 +7,9 @@ use crate::cli::{
 };
 
 pub(super) fn list_response(cli: &CliOptions) -> Result<Value> {
+    let route = service_route(cli, "storage")?;
     let token = read_or_login_token(cli)?;
-    api_request(
-        cli,
-        Method::GET,
-        &service_route(cli, "storage")?,
-        Some(&token),
-        None,
-    )
+    api_request(cli, Method::GET, &route, Some(&token), None)
 }
 
 pub(super) fn upload_url_response(
@@ -112,11 +107,12 @@ pub(super) fn multipart_abort_response(
 }
 
 pub(super) fn download_url_response(cli: &CliOptions, remote_path: &str) -> Result<Value> {
+    let route = service_route(cli, "storage/download-url")?;
     let token = read_or_login_token(cli)?;
     api_request(
         cli,
         Method::POST,
-        &service_route(cli, "storage/download-url")?,
+        &route,
         Some(&token),
         Some(json!({ "path": remote_path })),
     )
