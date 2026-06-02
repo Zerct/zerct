@@ -44,6 +44,7 @@ func checkDocs() {
 	products := readText("docs/reference/products.mdx")
 	projectContract := readText("docs/reference/project-contract.mdx")
 	kv := readText("docs/reference/kv.mdx")
+	sqlite := readText("docs/reference/sqlite.mdx")
 	queues := readText("docs/reference/queues.mdx")
 	cron := readText("docs/reference/cron.mdx")
 	bindings := readText("docs/reference/bindings.mdx")
@@ -67,6 +68,7 @@ func checkDocs() {
 		support,
 		agents,
 		readText("docs/reference/workers.mdx"),
+		sqlite,
 		readText("docs/reference/storage.mdx"),
 		readText("docs/changelog.mdx"),
 		readText("skills/tovuk/SKILL.md"),
@@ -215,9 +217,18 @@ func checkDocs() {
 	requireContains(resources, "same API routes and limits as the CLI", "dashboard resources parity docs")
 	requireContains(resources, "creating and deleting SQLite", "dashboard resources create delete docs")
 	requireContains(resources, "Binding resources through the same API routes as the CLI", "dashboard resources delete parity docs")
+	requireContains(resources, "single SQLite queries", "dashboard SQLite query resources docs")
+	requireContains(resources, "`POST /v1/services/{service_id}/sqlite/{database}/query`", "dashboard SQLite query API docs")
+	requireContains(resources, "`vmSteps`, `fullscanSteps`", "dashboard SQLite query metering docs")
+	requireContains(sqlite, "https://tovuk.com/account/resources", "SQLite dashboard route docs")
+	requireContains(sqlite, "`POST /v1/services/{service_id}/sqlite/{database}/query`", "SQLite dashboard query API docs")
+	requireContains(sqlite, "`vmSteps`, `fullscanSteps`", "SQLite dashboard metering docs")
+	requireContains(sqlite, "Use the CLI for batch statements", "SQLite dashboard batch guidance")
 	requireContains(llms, "Dashboard Resources is available", "llms dashboard resources guidance")
 	requireContains(llms, "creating and deleting SQLite", "llms dashboard resources create delete guidance")
 	requireContains(llms, "Binding resources through the same API routes as the CLI", "llms dashboard resources delete parity guidance")
+	requireContains(llms, "single SQLite queries", "llms dashboard SQLite query guidance")
+	requireContains(llms, "`vmSteps`, `fullscanSteps`", "llms dashboard SQLite metering guidance")
 	requireContains(bindings, "/v1/services/{service_id}/service-bindings", "service binding API docs")
 	requireContains(openapi, `"UsageCostEstimate"`, "OpenAPI usage estimate schema")
 	requireContains(openapi, `"UsageCostLineItem"`, "OpenAPI usage estimate line schema")

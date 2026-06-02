@@ -23,6 +23,15 @@ migrations in source control. Query responses include `rowsRead`,
 `meta.size_after`, `meta.rows_read`, and `meta.rows_written` fields so agents
 can fix slow or expensive queries without dashboard access.
 
+## Dashboard
+
+The dashboard Resources view at `https://tovuk.com/account/resources` can run a
+single SQLite statement against an existing service database. It uses
+`POST /v1/services/{service_id}/sqlite/{database}/query`, shows returned rows,
+and displays `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`, storage,
+duration, and next actions. Use the CLI for batch statements, parameter arrays,
+backups, and restore flows.
+
 Create a backup before schema migrations, backfills, imports, or destructive
 writes. Restore commands create a pre-restore safety backup first, replace the
 live database, update storage meters, and return both backup ids so agents can
