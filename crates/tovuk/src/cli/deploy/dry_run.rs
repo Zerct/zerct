@@ -2,7 +2,7 @@ use super::{
     super::{
         api_commands::api_request,
         args::CliOptions,
-        check::run_check,
+        check::{QualityCheck, run_check},
         config::CapabilitiesConfig,
         errors::{Result, print_json},
         project::number_field,
@@ -65,18 +65,8 @@ fn service_dry_run(
         .and_then(|config| config.name.clone())
         .filter(|name| !name.is_empty())
         .unwrap_or_else(|| project.name.clone());
-    let missing_config = report
-        .checks
-        .iter()
-        .filter(|check| !check.ok)
-        .map(|check| {
-            json!({
-                "check": check.name,
-                "message": check.message,
-                "agent_instruction": check.agent_instruction,
-            })
-        })
-        .collect::<Vec<_>>();
+    let required_fixes = required_fix_entries(&report.checks);
+    let missing_config = missing_config_entries(&required_fixes);
 
     json!({
         "relative": project.relative,
@@ -91,10 +81,33 @@ fn service_dry_run(
             "checks": report.checks,
         },
         "missingConfig": missing_config,
+        "requiredFixes": required_fixes,
         "meters": meters_for_capabilities(config.map(|config| &config.capabilities), capabilities),
         "meterPlan": meter_plan_for_capabilities(config.map(|config| &config.capabilities), capabilities),
         "nextAgentActions": project_next_actions(report.ok, kind),
     })
+}
+
+fn required_fix_entries(checks: &[QualityCheck]) -> Vec<Value> {
+    checks
+        .iter()
+        .filter(|check| !check.ok)
+        .map(|check| {
+            json!({
+                "check": check.name,
+                "message": check.message,
+                "agent_instruction": check.agent_instruction,
+            })
+        })
+        .collect()
+}
+
+fn missing_config_entries(required_fixes: &[Value]) -> Vec<Value> {
+    required_fixes
+        .iter()
+        .filter(|entry| entry["check"].as_str() == Some("tovuk.toml"))
+        .cloned()
+        .collect()
 }
 
 fn capability_dry_run(config: Option<&CapabilitiesConfig>, capabilities: &Value) -> Value {
@@ -362,10 +375,10 @@ mod tests {
     use crate::cli::config::CapabilityToggle;
 
     use super::{
-        CapabilitiesConfig, ProjectKind, capability_dry_run, meter_plan_for_capabilities,
-        meters_for_capabilities, workspace_warnings,
+        CapabilitiesConfig, ProjectKind, QualityCheck, capability_dry_run,
+        meter_plan_for_capabilities, meters_for_capabilities, missing_config_entries,
+        required_fix_entries, workspace_warnings,
     };
-
     #[test]
     fn fullstack_dry_run_exposes_one_service_capability_set() {
         let service_capabilities = fullstack_capabilities();
@@ -503,6 +516,29 @@ mod tests {
 
         assert_eq!(warnings.len(), 1);
         assert!(warnings[0].contains("Project limit would be exceeded"));
+    }
+
+    #[test]
+    fn dry_run_splits_missing_config_from_required_quality_fixes() {
+        let required_fixes = required_fix_entries(&[
+            QualityCheck {
+                name: "tovuk.toml".to_owned(),
+                ok: false,
+                message: "missing".to_owned(),
+                agent_instruction: Some("Create and commit tovuk.toml, then retry.".to_owned()),
+            },
+            QualityCheck {
+                name: "cargo clippy".to_owned(),
+                ok: false,
+                message: "strict Clippy failed".to_owned(),
+                agent_instruction: Some("Fix Clippy findings, then retry.".to_owned()),
+            },
+        ]);
+        let missing_config = missing_config_entries(&required_fixes);
+
+        assert_eq!(required_fixes.len(), 2);
+        assert_eq!(missing_config.len(), 1);
+        assert_eq!(missing_config[0]["check"], "tovuk.toml");
     }
 
     fn fullstack_capabilities() -> CapabilitiesConfig {

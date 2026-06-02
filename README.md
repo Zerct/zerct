@@ -316,10 +316,11 @@ explicitly free transfer meters, so agents can audit and cap usage before load
 tests or public launches.
 `tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, explicit
 enabled and disabled capabilities, quality checks, capability meters, account
-limits, and billing estimates before deploy. Each service includes `meterPlan`
-entries for enabled service meters with meter units, pricing fields, limit
-fields, and ready-to-fill `tovuk limits set` cap commands with
-`--notify-at-percent`.
+limits, and billing estimates before deploy. Each service includes
+`missingConfig` for `tovuk.toml` repair, `requiredFixes` for every failed
+quality check, and `meterPlan` entries for enabled service meters with meter
+units, pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
+commands with `--notify-at-percent`.
 
 The same commands are available through PyPI and Cargo after installation:
 
