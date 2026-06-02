@@ -72,7 +72,7 @@ fn native_lint_check(manifest: Option<&Value>) -> QualityCheck {
         ok,
         "accepted",
         "native linter missing",
-        "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings`, `biome check .`, or `deno lint`, then retry.",
+        "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings` or `biome check .`, then retry.",
     )
 }
 
