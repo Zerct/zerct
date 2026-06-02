@@ -10,6 +10,28 @@ rooms, or per-tenant state.
 Keep public HTTP APIs in the Rust worker. Call State from that worker only when
 the request needs keyed coordination or per-object alarm scheduling.
 
+## Dashboard
+
+Dashboard State controls are available at
+`https://tovuk.com/account/resources` and
+`https://tovuk.com/<handle>/resources`. The Resources view can list State
+objects, list State keys, read values, write values, delete values, read
+alarms, set alarms with delay seconds, and delete alarms through the same
+metered State API routes as the CLI.
+Dashboard State controls can list State objects and list State keys before an
+agent reads, writes, or deletes one value.
+
+The dashboard uses these State API routes:
+
+- `GET /v1/services/{service_id}/state/namespaces/{namespace}/objects`
+- `GET /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/keys`
+- `GET /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/values/{key}`
+- `PUT /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/values/{key}`
+- `DELETE /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/values/{key}`
+- `GET /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/alarm`
+- `PUT /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/alarm`
+- `DELETE /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/alarm`
+
 ## Commands
 
 ```sh
