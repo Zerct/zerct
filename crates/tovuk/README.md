@@ -150,6 +150,9 @@ Without `--json`, `tovuk service list` prints a compact table with Service
 kind, runtime status, URL, and resource counts. `tovuk service show` prints a
 compact Service snapshot with resource counts, usage, latest deploy, latest
 build, and next actions.
+Dashboard Overview Service rows expose copyable commands for `service show`,
+logs, storage listing, worker request caps, support tickets, and service
+deletion.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks,
 capability meters, account limits, and `billingEstimate` before deploy, without
 creating a build. Each service includes `meterPlan` entries for enabled service meters

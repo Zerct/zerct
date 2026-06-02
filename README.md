@@ -218,6 +218,9 @@ Without `--json`, `tovuk service list` prints a compact table with kind,
 runtime status, URL, and per-Service resource counts. `tovuk service show`
 prints a compact Service snapshot with resource counts, current usage, latest
 deploy, latest build, and next actions.
+Dashboard Overview Service rows expose copyable commands for `service show`,
+logs, storage listing, worker request caps, support tickets, and service
+deletion.
 
 ## Example
 

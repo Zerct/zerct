@@ -37,7 +37,11 @@ Resource references:
 Dashboard Overview is available at `https://tovuk.com/account` and shows
 Service kind, per-Service resource counts for SQLite, Object Storage, KV,
 Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, plus
-copyable `tovuk service show <service> --json` and
+copyable `tovuk service show <service> --json`,
+`tovuk logs --service <service> --limit 100 --json`,
+`tovuk storage list --service <service> --json`,
+`tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`,
+`tovuk support create "Service issue" ... --service <service> --json`, and
 `tovuk service delete <service> --json` commands.
 
 Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
@@ -259,8 +263,12 @@ commands for `tovuk new hello-service --template fullstack-rust-tanstack`,
 `tovuk deploy --wait --json`. The committed `tovuk.toml` remains the source of
 truth; agents should still use CLI and API commands for automation. Service
 rows expose `tovuk service show <service> --json`,
-`tovuk service delete <service> --json`, and the same
-`DELETE /v1/services/{service_id}` cleanup action for smoke-test Services.
+`tovuk logs --service <service> --limit 100 --json`,
+`tovuk storage list --service <service> --json`,
+`tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`,
+`tovuk support create "Service issue" ... --service <service> --json`,
+`tovuk service delete <service> --json`, and the same `DELETE /v1/services/{service_id}`
+cleanup action for smoke-test Services.
 
 Dashboard Support is available at `https://tovuk.com/account/support` and uses
 the same ticket API and rate limits as the CLI. Ticket rows expose copyable
