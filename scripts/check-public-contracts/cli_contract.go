@@ -105,6 +105,10 @@ func checkCLIContract() {
 	requireContains(pythonCLI, "TOVUK_NATIVE_BINARY", "PyPI local native binary override")
 	requireContains(homebrewFormula, `depends_on "rust" => :build`, "Homebrew builds native Rust CLI")
 	requireContains(homebrewFormula, "crates/tovuk", "Homebrew installs Rust crate path")
+	for _, source := range []string{rootReadme, cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "brew tap tovuk/tovuk https://github.com/tovuk/tovuk", "main-repo Homebrew tap command")
+		requireContains(source, "brew install tovuk", "simple Homebrew install command")
+	}
 
 	if npmPackage.Bin["tovuk"] != "bin/tovuk" {
 		fail("npm package must expose bin/tovuk")
@@ -118,10 +122,14 @@ func checkCLIContract() {
 	retiredFullstackKind := "kind = \"worker" + "_static\""
 	retiredFullstackWording := "worker" + "-static"
 	retiredDatabaseCommand := "tovuk " + "database"
+	retiredHomebrewTap := "tovuk" + "/tap"
+	retiredQualifiedHomebrew := "brew install " + "tovuk" + "/tovuk/tovuk"
 	for _, source := range []string{cargoCLI, npmInstall, pythonCLI, cargoReadme, npmReadme, pythonReadme, homebrewFormula} {
 		rejectContains(source, "TOVUK_NPM_CLI", "retired npm delegation")
 		rejectContains(source, "NPM_PACKAGE_VERSION", "retired npm package pin")
 		rejectContains(source, "npx -y", "retired npx delegation")
+		rejectContains(source, retiredHomebrewTap, "retired archived Homebrew tap")
+		rejectContains(source, retiredQualifiedHomebrew, "retired qualified Homebrew install")
 		rejectContains(source, "--app", "retired app flag")
 		rejectContains(source, "/v1/apps", "retired apps API path")
 		rejectContains(source, retiredOrgScope, "retired org scope")

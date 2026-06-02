@@ -43,6 +43,14 @@ npm install -g tovuk
 tovuk deploy
 ```
 
+Homebrew uses the main public repository tap:
+
+```sh
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+tovuk deploy
+```
+
 The Cargo package exposes the same agent command surface as npm:
 
 ```sh

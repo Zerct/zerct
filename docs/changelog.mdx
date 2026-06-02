@@ -9,8 +9,8 @@ description: "Recent product updates from Tovuk."
 
 - **Tovuk is the new name for the platform.** The CLI, packages, and Homebrew
   formula now ship under `tovuk`. Install with `npm install -g tovuk`,
-  `brew install tovuk/tovuk/tovuk`, `pipx install tovuk`, or
-  `cargo install tovuk`. See [Packages](/reference/packages).
+  `brew tap tovuk/tovuk https://github.com/tovuk/tovuk && brew install tovuk`,
+  `pipx install tovuk`, or `cargo install tovuk`. See [Packages](/reference/packages).
 - **One-URL full-stack deploys.** Ship a Rust worker and static frontend
   from one repo with a single root `tovuk.toml`. Run
   `tovuk deploy --wait --json` to get one `*.tovuk.app` URL serving static

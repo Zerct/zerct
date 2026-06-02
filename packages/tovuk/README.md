@@ -23,6 +23,14 @@ The npm package installs the native Tovuk binary for the current platform.
 Node is required by npm to install the package, but the installed `tovuk`
 command runs as a native binary.
 
+Homebrew uses the main public repository tap:
+
+```sh
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+tovuk deploy
+```
+
 Rust workers expect `Cargo.toml`, `Cargo.lock`, and `tovuk.toml`. They must
 pass `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
 listen on `0.0.0.0:$PORT`, and expose the configured health endpoint.

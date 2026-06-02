@@ -174,7 +174,7 @@ tovuk deploy
 - npm: `tovuk`
 - PyPI: `tovuk`
 - crates.io: `tovuk`
-- Homebrew: `tovuk/tovuk/tovuk`
+- Homebrew: main-repo tap, then `brew install tovuk`
 
 Agent prompt:
 
