@@ -16,8 +16,8 @@ tovuk binding delete --service service_1 AUTH_SERVICE --json
 
 ## API
 
-- `POST /v1/services/{service_id}/bindings`
-- `DELETE /v1/services/{service_id}/bindings/{binding}`
+- `POST /v1/services/{service_id}/service-bindings`
+- `DELETE /v1/services/{service_id}/service-bindings/{binding}`
 
 Bindings are injected into the Rust runtime as
 `TOVUK_BINDING_<NAME>=<target_service_id>`.
