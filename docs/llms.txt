@@ -197,6 +197,9 @@ tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeplo
 Dashboard Support is available at `https://tovuk.com/account/support` and uses
 the same ticket API and rate limits as the CLI.
 
+Dashboard Abuse is available at `https://tovuk.com/account/abuse` and uses the
+same abuse report, list, and appeal API routes and rate limits as the CLI.
+
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB. Object storage limits expose object size, part count,
 metadata size, custom domains per storage bucket, bucket management operations,
