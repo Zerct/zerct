@@ -89,7 +89,7 @@ tovuk deploy --dry-run --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json
 tovuk service show service_1 --json
-tovuk limits set worker_requests --period month --value 10000000 --json
+tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
 ```
 
 The pricing response includes plan pricing and product meter metadata, so agents
@@ -101,7 +101,7 @@ capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service
 includes `meterPlan` entries for enabled service meters with meter units,
 pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
-commands.
+commands with `--notify-at-percent`.
 
 Manage service files and media without dashboard access:
 

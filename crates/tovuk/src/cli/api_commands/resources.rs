@@ -12,6 +12,11 @@ use super::{
 use reqwest::Method;
 use serde_json::{Map, Value, json};
 
+const USAGE_CAP_SET_INSTRUCTION: &str = "Use `tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`.";
+const USAGE_CAP_DELETE_INSTRUCTION: &str =
+    "Use `tovuk limits delete worker_requests --period day --json`.";
+const USAGE_CAP_COMMAND_INSTRUCTION: &str = "Use `tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json` or `tovuk limits delete worker_requests --period day --json`.";
+
 pub(crate) fn resources_command(cli: &CliOptions) -> Result<()> {
     service_get_command(cli, "resources")
 }
@@ -493,7 +498,7 @@ pub(crate) fn caps_command(cli: &CliOptions) -> Result<()> {
         _ => Err(agent_error(
             "unknown_command",
             "Unknown usage cap command.",
-            "Use `tovuk limits set worker_requests --period day --value 100000 --json` or `tovuk limits delete worker_requests --period day --json`.",
+            USAGE_CAP_COMMAND_INSTRUCTION,
             cli.output.json,
         )),
     }
@@ -1403,7 +1408,7 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
         1,
         "cap_metric_required",
         "Usage cap metric is required.",
-        "Use `tovuk limits set worker_requests --period day --value 100000 --json`.",
+        USAGE_CAP_SET_INSTRUCTION,
     )?;
     let period = if cli.period.is_empty() {
         cli.args.get(2).cloned().unwrap_or_default()
@@ -1419,7 +1424,7 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "cap_period_or_value_required",
             "Usage cap period and value are required.",
-            "Use `tovuk limits set worker_requests --period day --value 100000 --json`.",
+            USAGE_CAP_SET_INSTRUCTION,
             cli.output.json,
         ));
     }
@@ -1431,6 +1436,7 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
             cli.output.json,
         )
     })?;
+    let notify_at_percent = usage_cap_notify_at_percent(cli)?;
     let token = read_or_login_token(cli)?;
     let response = api_request(
         cli,
@@ -1441,10 +1447,25 @@ fn set_usage_cap(cli: &CliOptions) -> Result<()> {
             "period": period,
             "capValue": cap_value,
             "hardStop": true,
-            "notifyAtPercent": 80,
+            "notifyAtPercent": notify_at_percent,
         })),
     )?;
     print_json(&response)
+}
+
+fn usage_cap_notify_at_percent(cli: &CliOptions) -> Result<u16> {
+    let Some(percent) = optional_u16(&cli.notify_at_percent, "--notify-at-percent", cli)? else {
+        return Ok(80);
+    };
+    if (1..=100).contains(&percent) {
+        return Ok(percent);
+    }
+    Err(agent_error(
+        "invalid_notify_threshold",
+        "Usage cap notification threshold must be between 1 and 100 percent.",
+        "Pass `--notify-at-percent 80` with a value from 1 to 100, then retry.",
+        cli.output.json,
+    ))
 }
 
 fn delete_usage_cap(cli: &CliOptions) -> Result<()> {
@@ -1453,7 +1474,7 @@ fn delete_usage_cap(cli: &CliOptions) -> Result<()> {
         1,
         "cap_metric_required",
         "Usage cap metric is required.",
-        "Use `tovuk limits delete worker_requests --period day --json`.",
+        USAGE_CAP_DELETE_INSTRUCTION,
     )?;
     let period = if cli.period.is_empty() {
         cli.args.get(2).cloned().unwrap_or_default()
@@ -1464,7 +1485,7 @@ fn delete_usage_cap(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "cap_period_required",
             "Usage cap period is required.",
-            "Use `tovuk limits delete worker_requests --period day --json`.",
+            USAGE_CAP_DELETE_INSTRUCTION,
             cli.output.json,
         ));
     }
@@ -1508,7 +1529,9 @@ fn unknown_resources_command(cli: &CliOptions, family: &str) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{kv_command, queue_command, sqlite_command, state_command};
+    use super::{
+        kv_command, queue_command, sqlite_command, state_command, usage_cap_notify_at_percent,
+    };
     use crate::cli::args::CliOptions;
 
     fn cli(command: &str, args: &[&str]) -> CliOptions {
@@ -1549,5 +1572,37 @@ mod tests {
             .err()
             .map(|error| error.to_string());
         assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
+
+    #[test]
+    fn usage_cap_notify_threshold_defaults_to_eighty() {
+        assert_eq!(
+            usage_cap_notify_at_percent(&CliOptions::default()).ok(),
+            Some(80),
+        );
+    }
+
+    #[test]
+    fn usage_cap_notify_threshold_accepts_one_to_one_hundred() {
+        let cli = CliOptions {
+            notify_at_percent: "100".to_owned(),
+            ..CliOptions::default()
+        };
+        assert_eq!(usage_cap_notify_at_percent(&cli).ok(), Some(100));
+    }
+
+    #[test]
+    fn usage_cap_notify_threshold_rejects_zero() {
+        let cli = CliOptions {
+            notify_at_percent: "0".to_owned(),
+            ..CliOptions::default()
+        };
+        let error_message = usage_cap_notify_at_percent(&cli)
+            .err()
+            .map(|error| error.to_string());
+        assert_eq!(
+            error_message.as_deref(),
+            Some("Usage cap notification threshold must be between 1 and 100 percent."),
+        );
     }
 }

@@ -93,10 +93,10 @@ tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
-tovuk limits set build_minutes --period month --value 6000 --json
-tovuk limits set worker_requests --period day --value 100000 --json
-tovuk limits set state_requests --period month --value 1000000 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
 tovuk limits delete worker_requests --period day --json
 ```
 
@@ -105,11 +105,11 @@ Before high-throughput work or paid usage, read pricing and set hard caps:
 ```sh
 tovuk pricing --json
 tovuk usage --json
-tovuk limits set build_minutes --period month --value 6000 --json
-tovuk limits set worker_requests --period month --value 10000000 --json
-tovuk limits set worker_cpu_ms --period month --value 30000000 --json
-tovuk limits set state_requests --period month --value 1000000 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
+tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
+tovuk limits set worker_cpu_ms --period month --value 30000000 --notify-at-percent 80 --json
+tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
 ```
 
 Manage service files and media without dashboard access:

@@ -28,7 +28,7 @@ Service Binding calls count as Worker subrequests and Worker invocations.
 Set caps for `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes`.
 
 ```sh
-tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
 ```
 
 ## Limits

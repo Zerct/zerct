@@ -174,28 +174,28 @@ Supported cap meters are `worker_requests`, `worker_cpu_ms`,
 
 ```sh
 tovuk pricing --json
-tovuk limits set build_minutes --period month --value 6000 --json
-tovuk limits set worker_requests --period month --value 10000000 --json
-tovuk limits set worker_cpu_ms --period month --value 30000000 --json
-tovuk limits set static_transfer_bytes --period month --value 107374182400 --json
-tovuk limits set worker_transfer_bytes --period month --value 107374182400 --json
-tovuk limits set sqlite_rows_read --period month --value 25000000000 --json
-tovuk limits set sqlite_rows_written --period month --value 50000000 --json
-tovuk limits set sqlite_storage_bytes --period month --value 5000000000 --json
-tovuk limits set kv_reads --period month --value 10000000 --json
-tovuk limits set kv_writes --period month --value 1000000 --json
-tovuk limits set kv_deletes --period month --value 1000000 --json
-tovuk limits set kv_lists --period month --value 1000000 --json
-tovuk limits set kv_storage_bytes --period month --value 1000000000 --json
-tovuk limits set queue_operations --period month --value 1000000 --json
-tovuk limits set state_requests --period month --value 1000000 --json
-tovuk limits set state_duration_gb_milliseconds --period month --value 400000000 --json
-tovuk limits set state_sqlite_rows_read --period month --value 25000000000 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
-tovuk limits set state_sqlite_storage_bytes --period month --value 5000000000 --json
-tovuk limits set object_storage_bytes --period month --value 10000000000 --json
-tovuk limits set object_storage_class_a_operations --period month --value 1000000 --json
-tovuk limits set object_storage_class_b_operations --period month --value 10000000 --json
-tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
-tovuk limits set log_events --period month --value 20000000 --json
+tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
+tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
+tovuk limits set worker_cpu_ms --period month --value 30000000 --notify-at-percent 80 --json
+tovuk limits set static_transfer_bytes --period month --value 107374182400 --notify-at-percent 80 --json
+tovuk limits set worker_transfer_bytes --period month --value 107374182400 --notify-at-percent 80 --json
+tovuk limits set sqlite_rows_read --period month --value 25000000000 --notify-at-percent 80 --json
+tovuk limits set sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
+tovuk limits set sqlite_storage_bytes --period month --value 5000000000 --notify-at-percent 80 --json
+tovuk limits set kv_reads --period month --value 10000000 --notify-at-percent 80 --json
+tovuk limits set kv_writes --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set kv_deletes --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set kv_lists --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set kv_storage_bytes --period month --value 1000000000 --notify-at-percent 80 --json
+tovuk limits set queue_operations --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_duration_gb_milliseconds --period month --value 400000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_read --period month --value 25000000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_storage_bytes --period month --value 5000000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_bytes --period month --value 10000000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_class_a_operations --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_class_b_operations --period month --value 10000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --notify-at-percent 80 --json
+tovuk limits set log_events --period month --value 20000000 --notify-at-percent 80 --json
 ```

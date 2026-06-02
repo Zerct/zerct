@@ -114,7 +114,7 @@ tovuk state alarm get --service service_1 Room room-1 --json
 tovuk state alarm delete --service service_1 Room room-1 --json
 tovuk state delete-value --service service_1 Room room-1 counter --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
 tovuk billing checkout --json
 tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
@@ -145,7 +145,7 @@ disabled capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service
 includes `meterPlan` entries for enabled service meters with meter units,
 pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
-commands.
+commands with `--notify-at-percent`.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.

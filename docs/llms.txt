@@ -36,7 +36,9 @@ Resource references:
 
 Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
 the same cap set and remove actions as `tovuk limits`, plus the same hosted
-checkout flow as `tovuk billing checkout --json`.
+checkout flow as `tovuk billing checkout --json`. Usage rows show copyable
+`tovuk limits set` commands with `--notify-at-percent` and copyable
+`tovuk limits delete` commands for the selected meter.
 
 Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service
@@ -212,9 +214,9 @@ tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
-tovuk limits set worker_requests --period day --value 100000 --json
-tovuk limits set state_requests --period month --value 1000000 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
 tovuk limits delete worker_requests --period day --json
 tovuk storage list --service <service> --json
 tovuk storage upload --service <service> ./file.png uploads/file.png --public --json

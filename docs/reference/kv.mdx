@@ -47,9 +47,9 @@ KV usage is metered as `kv_reads`, `kv_writes`, `kv_deletes`, `kv_lists`, and
 `kv_storage_bytes`.
 
 ```sh
-tovuk limits set kv_reads --period day --value 100000 --json
-tovuk limits set kv_writes --period day --value 1000 --json
-tovuk limits set kv_storage_bytes --period month --value 1000000000 --json
+tovuk limits set kv_reads --period day --value 100000 --notify-at-percent 80 --json
+tovuk limits set kv_writes --period day --value 1000 --notify-at-percent 80 --json
+tovuk limits set kv_storage_bytes --period month --value 1000000000 --notify-at-percent 80 --json
 ```
 
 ## Limits

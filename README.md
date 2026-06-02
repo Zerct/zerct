@@ -310,7 +310,8 @@ tests or public launches.
 enabled and disabled capabilities, quality checks, capability meters, account
 limits, and billing estimates before deploy. Each service includes `meterPlan`
 entries for enabled service meters with meter units, pricing fields, limit
-fields, and ready-to-fill `tovuk limits set` cap commands.
+fields, and ready-to-fill `tovuk limits set` cap commands with
+`--notify-at-percent`.
 
 The same commands are available through PyPI and Cargo after installation:
 

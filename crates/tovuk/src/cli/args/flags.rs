@@ -87,10 +87,19 @@ fn apply_value_flag(
     index: usize,
 ) -> Result<usize> {
     match name {
-        "--api" | "--service" | "--build" | "--deploy" | "--limit" | "--cursor" | "--period"
-        | "--value" | "--params" | "--target" | "--token" | "--template" => {
-            apply_common_value_flag(cli, name, inline, argv, index)
-        }
+        "--api"
+        | "--service"
+        | "--build"
+        | "--deploy"
+        | "--limit"
+        | "--cursor"
+        | "--period"
+        | "--value"
+        | "--notify-at-percent"
+        | "--params"
+        | "--target"
+        | "--token"
+        | "--template" => apply_common_value_flag(cli, name, inline, argv, index),
         "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
         "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
         "--expiration" | "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
@@ -135,6 +144,14 @@ fn apply_common_value_flag(
         "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
         "--period" => set_string_flag(&mut cli.period, name, inline, argv, index, cli.output.json),
         "--value" => set_string_flag(&mut cli.value, name, inline, argv, index, cli.output.json),
+        "--notify-at-percent" => set_string_flag(
+            &mut cli.notify_at_percent,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
         "--params" => set_string_flag(&mut cli.params, name, inline, argv, index, cli.output.json),
         "--target" => set_string_flag(&mut cli.target, name, inline, argv, index, cli.output.json),
         "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.output.json),
