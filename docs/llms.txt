@@ -237,6 +237,13 @@ tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the report
 tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 ```
 
+Dashboard Overview is available at `https://tovuk.com/account` and
+`https://tovuk.com/<handle>`. When no Services exist, it shows first Service
+commands for `tovuk new hello-service --template fullstack-rust-tanstack`,
+`tovuk check --json`, `tovuk deploy --dry-run --json`, and
+`tovuk deploy --wait --json`. The committed `tovuk.toml` remains the source of
+truth; agents should still use CLI and API commands for automation.
+
 Dashboard Support is available at `https://tovuk.com/account/support` and uses
 the same ticket API and rate limits as the CLI.
 

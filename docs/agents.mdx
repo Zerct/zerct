@@ -52,6 +52,22 @@ Deploy archives must contain source files only. Tovuk rejects generated
 directories, secret files, and compiled artifacts such as `.exe`, `.so`,
 `.dylib`, `.jar`, `.node`, and `.rlib`.
 
+## Dashboard overview
+
+Dashboard Overview is available at `https://tovuk.com/account` and
+`https://tovuk.com/<handle>`. When no Services exist, it shows the same first
+Service command sequence agents should use:
+
+```sh
+tovuk new hello-service --template fullstack-rust-tanstack
+tovuk check --json
+tovuk deploy --dry-run --json
+tovuk deploy --wait --json
+```
+
+The dashboard mirrors CLI and API state. The committed `tovuk.toml` remains
+the source of truth for enabled and disabled capabilities.
+
 ## Deploy prompt
 
 ```txt
