@@ -1,0 +1,47 @@
+---
+title: "Cron"
+description: "Scheduled Rust worker events."
+---
+
+Cron triggers run scheduled work for one Service. Use Cron for cleanup,
+reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
+
+## Agent commands
+
+```sh
+tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron delete --service service_1 nightly --json
+```
+
+## API
+
+- `POST /v1/services/{service_id}/cron/triggers`
+- `DELETE /v1/services/{service_id}/cron/triggers/{trigger}`
+
+Cron deliveries are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
+Public traffic to `/.tovuk/*` is blocked.
+
+## Meters and caps
+
+Cron delivery counts as Worker usage because it wakes and runs the Rust worker.
+Use `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes` caps.
+
+```sh
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set worker_cpu_ms --period day --value 1000000 --json
+```
+
+## Rules
+
+- Cron handlers must be idempotent.
+- Cron handlers must tolerate retries and overlapping manual agent actions.
+- Cron handlers have a 15 minute wall-clock limit.
+- Keep long fan-out work in Queues.
+
+## Agent loop
+
+1. Confirm `cron = true` in `tovuk.toml`.
+2. Create the trigger through CLI or API.
+3. Deploy the Rust worker handler.
+4. Tail logs after the first scheduled delivery.
+5. Delete stale triggers when a schedule is retired.

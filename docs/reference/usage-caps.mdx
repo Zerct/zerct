@@ -1,0 +1,61 @@
+---
+title: "Usage Caps"
+description: "Hard usage stops for predictable Tovuk spend."
+---
+
+Usage Caps stop activity at a configured meter threshold. Agents should set caps
+before load tests, media uploads, queue fan-out, and paid usage.
+
+## Agent commands
+
+```sh
+tovuk usage --json
+tovuk limits set worker_requests --period day --value 100000 --json
+tovuk limits set worker_cpu_ms --period day --value 1000000 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
+tovuk limits delete worker_requests --period day --json
+```
+
+## API
+
+- `GET /v1/usage`
+- `PUT /v1/usage/caps/{metric}`
+- `DELETE /v1/usage/caps/{metric}/{period}`
+
+## Meters
+
+Usage Caps support these public meters:
+
+- `worker_requests`
+- `worker_cpu_ms`
+- `worker_transfer_bytes`
+- `static_transfer_bytes`
+- `sqlite_rows_read`
+- `sqlite_rows_written`
+- `sqlite_storage_bytes`
+- `kv_reads`
+- `kv_writes`
+- `kv_deletes`
+- `kv_lists`
+- `kv_storage_bytes`
+- `queue_operations`
+- `state_requests`
+- `state_duration_gb_milliseconds`
+- `state_sqlite_rows_read`
+- `state_sqlite_rows_written`
+- `state_sqlite_storage_bytes`
+- `object_storage_bytes`
+- `object_storage_class_a_operations`
+- `object_storage_class_b_operations`
+- `object_storage_egress_bytes`
+- `build_minutes`
+- `log_events`
+
+## Agent loop
+
+1. Run `tovuk pricing --json` and read `products[].meter_details`.
+2. Run `tovuk deploy --dry-run --json` and read `meterPlan`.
+3. Set caps for every enabled capability before high traffic.
+4. Run `tovuk usage --json` during tests.
+5. If a limit blocks work, run `tovuk billing checkout --json` and show the
+   hosted URL to the human.

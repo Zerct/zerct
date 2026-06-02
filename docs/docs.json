@@ -80,9 +80,17 @@
               "reference/workers",
               "reference/sqlite",
               "reference/state",
+              "reference/kv",
+              "reference/queues",
+              "reference/cron",
+              "reference/bindings",
+              "reference/secrets",
               "reference/products",
               "reference/resources",
               "reference/storage",
+              "reference/domains",
+              "reference/logs-builds",
+              "reference/usage-caps",
               "reference/packages",
               "reference/limits"
             ]

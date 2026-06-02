@@ -1,0 +1,55 @@
+---
+title: "Queues"
+description: "Background jobs, retries, and dead-letter routing."
+---
+
+Queues move work out of public requests. Use them for emails, webhook retries,
+image processing, cleanup, and other tasks that can run after the response.
+
+## Agent commands
+
+```sh
+tovuk queue create --service service_1 failed_jobs --json
+tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
+tovuk queue send --service service_1 jobs '{"kind":"welcome","user_id":"user_1"}' --json
+tovuk queue update --service service_1 jobs --max-retries 5 --json
+tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
+tovuk queue delete --service service_1 jobs --json
+```
+
+## API
+
+- `POST /v1/services/{service_id}/queues`
+- `PATCH /v1/services/{service_id}/queues/{queue}`
+- `POST /v1/services/{service_id}/queues/{queue}/messages`
+- `GET /v1/services/{service_id}/queues/{queue}/metrics`
+- `DELETE /v1/services/{service_id}/queues/{queue}`
+
+Queue consumers are Rust worker routes at `POST /.tovuk/queues/<queue>`.
+Public traffic to `/.tovuk/*` is blocked.
+
+## Meters and caps
+
+Queue usage is metered as `queue_operations`.
+
+```sh
+tovuk limits set queue_operations --period month --value 1000000 --json
+```
+
+## Limits
+
+- Queue messages are capped at 128 KB total.
+- Send batches accept up to 100 messages and must fit 256 KB.
+- Consumer batches can process up to 100 messages.
+- Batch waits can be configured up to 60 seconds.
+- Visibility timeouts can be configured up to 12 hours.
+- Send delays can be configured up to 24 hours.
+- Consumer handlers have a 15 minute wall-clock limit.
+
+## Agent loop
+
+1. Confirm `queues = true` in `tovuk.toml`.
+2. Create a dead-letter queue before the primary queue.
+3. Set queue operation caps before load tests.
+4. Implement the Rust queue handler and return `2xx` only after safe handling.
+5. Inspect queue metrics and logs after each deploy.
