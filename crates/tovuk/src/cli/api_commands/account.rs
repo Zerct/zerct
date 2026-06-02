@@ -6,10 +6,12 @@ use super::generic::{print_authenticated_mutation, print_paged_authenticated};
 use reqwest::Method;
 use serde_json::{Value, json};
 
+const ACCOUNT_ACTIVITY_PATH: &str = "/v1/account/activity";
+
 pub(crate) fn account_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("show", String::as_str) {
         "show" => print_paged_authenticated(cli, "/v1/account"),
-        "activity" => print_paged_authenticated(cli, "/v1/activity"),
+        "activity" => print_paged_authenticated(cli, ACCOUNT_ACTIVITY_PATH),
         "update" => account_update(cli),
         _ => Err(agent_error(
             "unknown_account_command",
@@ -76,7 +78,7 @@ fn account_update_display_name(cli: &CliOptions, handle: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::account_update_body;
+    use super::{ACCOUNT_ACTIVITY_PATH, account_update_body};
     use crate::cli::args::CliOptions;
     use serde_json::json;
 
@@ -127,5 +129,12 @@ mod tests {
             .err()
             .map(|error| error.to_string());
         assert_eq!(message.as_deref(), Some("Account handle is required."));
+    }
+
+    #[test]
+    fn account_activity_uses_consolidated_account_route() {
+        assert_eq!(ACCOUNT_ACTIVITY_PATH, "/v1/account/activity");
+        let retired_path = format!("/v1/{}", "activity");
+        assert_ne!(ACCOUNT_ACTIVITY_PATH, retired_path);
     }
 }
