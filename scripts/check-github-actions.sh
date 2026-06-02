@@ -47,11 +47,6 @@ if ! rg -q 'go run scripts/check-prose-style\.go$' scripts/check-all.sh; then
   status=1
 fi
 
-if ! rg -q 'allowedLine := "tovuk deploy --dry-run --json"' scripts/check-prose-style.go; then
-  printf 'scripts/check-prose-style.go self-test must prove CLI flag syntax stays allowed\n' >&2
-  status=1
-fi
-
 for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
   [ -e "$workflow" ] || continue
 

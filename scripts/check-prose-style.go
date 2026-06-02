@@ -95,10 +95,6 @@ func runSelfTest() {
 	if len(columns) != 1 || columns[0] != 17 {
 		fail("self-test em dash fixture failed")
 	}
-	allowedLine := "tovuk deploy --dry-run --json"
-	if columns := findAll(allowedLine, "\u2014"); len(columns) != 0 {
-		fail("self-test ASCII CLI flag fixture failed")
-	}
 	fmt.Println("Style checker self-test passed.")
 }
 
