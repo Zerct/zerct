@@ -92,6 +92,7 @@ fn service_dry_run(
         },
         "missingConfig": missing_config,
         "meters": meters_for_capabilities(config.map(|config| &config.capabilities), capabilities),
+        "meterPlan": meter_plan_for_capabilities(config.map(|config| &config.capabilities), capabilities),
         "nextAgentActions": project_next_actions(report.ok, kind),
     })
 }
@@ -174,6 +175,76 @@ fn product_meters(product: &Value) -> Vec<String> {
         .collect()
 }
 
+fn meter_plan_for_capabilities(
+    config: Option<&CapabilitiesConfig>,
+    capabilities: &Value,
+) -> Vec<Value> {
+    let Some(config) = config else {
+        return Vec::new();
+    };
+    let enabled = config.enabled_product_keys();
+    let mut meter_plan = capabilities
+        .get("products")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter(|product| {
+            product
+                .get("key")
+                .and_then(Value::as_str)
+                .is_some_and(|key| enabled.contains(&key))
+        })
+        .flat_map(product_meter_plan)
+        .collect::<Vec<_>>();
+    meter_plan.sort_by(|left, right| {
+        let left_key = left["meter"].as_str().unwrap_or_default();
+        let right_key = right["meter"].as_str().unwrap_or_default();
+        left_key.cmp(right_key)
+    });
+    meter_plan.dedup_by(|left, right| left["meter"] == right["meter"]);
+    meter_plan
+}
+
+fn product_meter_plan(product: &Value) -> Vec<Value> {
+    let product_key = product
+        .get("key")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
+    product_meters(product)
+        .into_iter()
+        .map(|meter| {
+            let details = product_meter_details(product, &meter);
+            json!({
+                "meter": meter,
+                "product": product_key,
+                "unit": details.get("unit").cloned().unwrap_or(Value::Null),
+                "description": details.get("description").cloned().unwrap_or(Value::Null),
+                "limitFields": product.get("limit_fields").cloned().unwrap_or(Value::Null),
+                "pricingFields": product.get("pricing_fields").cloned().unwrap_or(Value::Null),
+                "capCommands": {
+                    "day": format!("tovuk limits set {meter} --period day --value <value> --json"),
+                    "month": format!("tovuk limits set {meter} --period month --value <value> --json"),
+                },
+            })
+        })
+        .collect()
+}
+
+fn product_meter_details<'a>(product: &'a Value, meter: &str) -> &'a Value {
+    product
+        .get("meter_details")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .find(|details| {
+            details
+                .get("name")
+                .and_then(Value::as_str)
+                .is_some_and(|name| name == meter)
+        })
+        .unwrap_or(&Value::Null)
+}
+
 fn service_name_set(response: &Value) -> BTreeSet<String> {
     response
         .get("services")
@@ -221,6 +292,7 @@ fn capability_catalog(capabilities: &Value) -> Value {
             json!({
                 "key": product.get("key").cloned().unwrap_or(Value::Null),
                 "meters": product.get("meters").cloned().unwrap_or(Value::Null),
+                "meterDetails": product.get("meter_details").cloned().unwrap_or(Value::Null),
                 "limitFields": product.get("limit_fields").cloned().unwrap_or(Value::Null),
                 "pricingFields": product.get("pricing_fields").cloned().unwrap_or(Value::Null),
             })
@@ -282,8 +354,8 @@ mod tests {
     use crate::cli::config::CapabilityToggle;
 
     use super::{
-        CapabilitiesConfig, ProjectKind, capability_dry_run, meters_for_capabilities,
-        workspace_warnings,
+        CapabilitiesConfig, ProjectKind, capability_dry_run, meter_plan_for_capabilities,
+        meters_for_capabilities, workspace_warnings,
     };
 
     #[test]
@@ -323,6 +395,43 @@ mod tests {
     }
 
     #[test]
+    fn fullstack_dry_run_exposes_meter_plan_for_usage_caps() {
+        let mut service_capabilities = fullstack_capabilities();
+        service_capabilities.object_storage = CapabilityToggle::enabled();
+        let plan = meter_plan_for_capabilities(Some(&service_capabilities), &sample_capabilities());
+
+        let missing_meter = json!({});
+        let object_storage_egress = plan
+            .iter()
+            .find(|entry| entry["meter"] == "object_storage_egress_bytes")
+            .unwrap_or(&missing_meter);
+        assert_eq!(
+            object_storage_egress["meter"],
+            "object_storage_egress_bytes"
+        );
+        assert_eq!(object_storage_egress["product"], "object_storage");
+        assert_eq!(object_storage_egress["unit"], "byte");
+        assert_eq!(
+            object_storage_egress["capCommands"]["month"],
+            "tovuk limits set object_storage_egress_bytes --period month --value <value> --json",
+        );
+        assert!(
+            object_storage_egress["pricingFields"]
+                .as_array()
+                .is_some_and(|fields| fields
+                    .iter()
+                    .any(|field| field == "pricing.objectStorage.egressOverageUsdMicrosPerTb"))
+        );
+        assert!(
+            object_storage_egress["limitFields"]
+                .as_array()
+                .is_some_and(|fields| fields
+                    .iter()
+                    .any(|field| field == "objectStorageEgressBytesPerMonth"))
+        );
+    }
+
+    #[test]
     fn workspace_dry_run_warns_before_project_limit_overflow() {
         let projects = vec![json!({
             "exists": false,
@@ -346,20 +455,65 @@ mod tests {
     fn sample_capabilities() -> serde_json::Value {
         json!({
             "products": [
-                { "key": "worker", "meters": ["worker_requests", "worker_cpu_ms"] },
-                { "key": "static_frontend", "meters": ["static_transfer_bytes"] },
-                { "key": "sqlite", "meters": ["sqlite_rows_read"] },
-                { "key": "object_storage", "meters": ["object_storage_egress_bytes"] },
-                { "key": "kv", "meters": ["kv_reads"] },
-                { "key": "queue", "meters": ["queue_operations"] },
-                { "key": "state", "meters": ["state_requests"] },
-                { "key": "cron", "meters": ["worker_cpu_ms"] },
-                { "key": "service_bindings", "meters": ["worker_cpu_ms"] },
-                { "key": "builds", "meters": ["build_minutes"] },
-                { "key": "logs", "meters": ["log_events"] },
-                { "key": "secrets", "meters": [] },
-                { "key": "custom_domains", "meters": [] },
-                { "key": "usage_caps", "meters": [] }
+                {
+                    "key": "worker",
+                    "meters": ["worker_requests", "worker_cpu_ms"],
+                    "meter_details": [
+                        { "name": "worker_requests", "unit": "request", "description": "Worker requests." },
+                        { "name": "worker_cpu_ms", "unit": "cpu_ms", "description": "Worker CPU milliseconds." }
+                    ],
+                    "pricing_fields": ["pricing.workers.requestOverageUsdMicrosPerMillion"],
+                    "limit_fields": ["workerRequestsPerDay"]
+                },
+                {
+                    "key": "static_frontend",
+                    "meters": ["static_transfer_bytes"],
+                    "meter_details": [{ "name": "static_transfer_bytes", "unit": "byte", "description": "Static transfer bytes." }],
+                    "pricing_fields": ["pricing.staticAssets.storageFree"],
+                    "limit_fields": ["staticAssetFilesPerVersion"]
+                },
+                {
+                    "key": "sqlite",
+                    "meters": ["sqlite_rows_read"],
+                    "meter_details": [{ "name": "sqlite_rows_read", "unit": "row", "description": "SQLite rows read." }],
+                    "pricing_fields": ["pricing.sqlite.rowsReadOverageUsdMicrosPerMillion"],
+                    "limit_fields": ["sqliteRowsReadPerDay"]
+                },
+                {
+                    "key": "object_storage",
+                    "meters": ["object_storage_egress_bytes"],
+                    "meter_details": [{ "name": "object_storage_egress_bytes", "unit": "byte", "description": "Object storage egress bytes." }],
+                    "pricing_fields": ["pricing.objectStorage.egressOverageUsdMicrosPerTb"],
+                    "limit_fields": ["objectStorageEgressBytesPerMonth"]
+                },
+                {
+                    "key": "kv",
+                    "meters": ["kv_reads"],
+                    "meter_details": [{ "name": "kv_reads", "unit": "read", "description": "KV reads." }],
+                    "pricing_fields": ["pricing.kv.readOverageUsdMicrosPerMillion"],
+                    "limit_fields": ["kvReadsPerDay"]
+                },
+                {
+                    "key": "queue",
+                    "meters": ["queue_operations"],
+                    "meter_details": [{ "name": "queue_operations", "unit": "operation", "description": "Queue operations." }],
+                    "pricing_fields": ["pricing.queues.operationOverageUsdMicrosPerMillion"],
+                    "limit_fields": ["queueOperationsPerDay"]
+                },
+                {
+                    "key": "state",
+                    "meters": ["state_requests"],
+                    "meter_details": [{ "name": "state_requests", "unit": "request", "description": "State requests." }],
+                    "pricing_fields": ["pricing.state.requestOverageUsdMicrosPerMillion"],
+                    "limit_fields": ["stateRequestsPerDay"]
+                },
+                { "key": "cron", "meters": ["worker_cpu_ms"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
+                { "key": "service_bindings", "meters": ["worker_cpu_ms"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
+                { "key": "builds", "meters": ["build_minutes"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
+                { "key": "logs", "meters": ["log_events"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
+                { "key": "secrets", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
+                { "key": "custom_domains", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
+                { "key": "usage_caps", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] }
             ]
         })
     }

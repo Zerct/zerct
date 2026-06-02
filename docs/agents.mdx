@@ -13,7 +13,8 @@ Use this page when an AI coding agent is deploying with Tovuk.
 4. Run `tovuk account show --json`; if setup is incomplete, run
    `tovuk account update --handle <handle> --display-name <name> --json`.
 5. Run `tovuk deploy --dry-run --json`.
-6. Review warnings, capabilities, meters, limits, and `billingEstimate`.
+6. Review warnings, capabilities, meters, `meterPlan`, limits, and
+   `billingEstimate`.
 7. Set usage caps for expected load.
 8. Run `tovuk deploy --wait --json`.
 9. Inspect deploy state with `tovuk deploy list --json` or
@@ -61,7 +62,7 @@ Run `tovuk check --json`. Fix the first failed check by following
 `agent_instruction`, then rerun check. Run `tovuk account show --json` and use
 `tovuk account update --handle <handle> --display-name <name> --json` if setup
 is incomplete. Run `tovuk deploy --dry-run --json` and review warnings,
-capabilities, meters, limits, and `billingEstimate`. Deploy with
+capabilities, meters, `meterPlan`, limits, and `billingEstimate`. Deploy with
 `tovuk deploy --wait --json`. Inspect deploy state with
 `tovuk deploy list --json` or `tovuk deploy show <deploy_id> --json`. Cancel
 superseded queued work with `tovuk deploy cancel <deploy_id> --json`. If the

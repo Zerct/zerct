@@ -10,6 +10,7 @@ func checkCLIContract() {
 		[]string{
 			readText("crates/tovuk/src/main.rs"),
 			readText("crates/tovuk/src/cli.rs"),
+			readText("crates/tovuk/src/cli/deploy/dry_run.rs"),
 		},
 		readSortedTexts("crates/tovuk/src/cli", ".rs")...,
 	), "\n")
@@ -80,9 +81,14 @@ func checkCLIContract() {
 	for _, source := range []string{rootReadme, cargoReadme, npmReadme, pythonReadme} {
 		requireContains(source, "controlled only by the committed `tovuk.toml`", "advisory scaffold wording")
 		requireContains(source, "billingEstimate", "agentic usage cost estimate docs")
+		requireContains(source, "meterPlan", "agentic deploy dry-run meter plan docs")
+		requireContains(source, "ready-to-fill", "agentic cap command fill-in docs")
+		requireContains(source, "`tovuk limits set`", "agentic cap command docs")
 	}
 
 	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
+	requireContains(cargoCLI, "meterPlan", "native deploy dry-run meter plan field")
+	requireContains(cargoCLI, "capCommands", "native deploy dry-run cap commands field")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
 	requireContains(cargoCLI, "rust-worker", "Rust worker template option")
 	requireContains(cargoTemplateCLI, "scaffolded {} config from existing files", "advisory new-project scaffold output")

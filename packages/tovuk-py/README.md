@@ -128,7 +128,9 @@ work.
 cost estimates.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
 disabled capabilities, quality checks, capability meters, account limits, and
-`billingEstimate` before deploy, without creating a build.
+`billingEstimate` before deploy, without creating a build. Each service
+includes `meterPlan` entries with meter units, pricing fields, limit fields,
+and ready-to-fill `tovuk limits set` cap commands.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.
