@@ -6,6 +6,13 @@ description: "Hard usage stops for predictable Tovuk spend."
 Usage Caps stop activity at a configured meter threshold. Agents should set caps
 before load tests, media uploads, queue fan-out, and paid usage.
 
+## Dashboard
+
+The dashboard Usage view is available at `https://tovuk.com/account/usage` or
+`https://tovuk.com/<handle>/usage`. It includes the same hard-cap action as
+`tovuk limits set` and the same removal action as `tovuk limits delete`, backed
+by the same API routes and rate limits as the CLI.
+
 ## Agent commands
 
 ```sh
