@@ -155,9 +155,10 @@ logs, storage listing, worker request caps, support tickets, and service
 deletion.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, quality checks,
 capability meters, account limits, and `billingEstimate` before deploy, without
-creating a build. Each service includes `meterPlan` entries for enabled service meters
-with meter units, pricing fields, limit fields, and ready-to-fill `tovuk limits set`
-cap commands with `--notify-at-percent`.
+creating a build. Each service includes `missingConfig` for `tovuk.toml`
+repair, `requiredFixes` for every failed quality check, and `meterPlan` entries
+for enabled service meters with meter units, pricing fields, limit fields, and
+ready-to-fill `tovuk limits set` cap commands with `--notify-at-percent`.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.

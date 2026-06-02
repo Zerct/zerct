@@ -87,6 +87,8 @@ func checkCLIContract() {
 	for _, source := range []string{rootReadme, cargoReadme, npmReadme, pythonReadme} {
 		requireContains(source, "controlled only by the committed `tovuk.toml`", "advisory scaffold wording")
 		requireContains(source, "billingEstimate", "agentic usage cost estimate docs")
+		requireContains(source, "missingConfig", "agentic deploy dry-run config repair docs")
+		requireContains(source, "requiredFixes", "agentic deploy dry-run required fixes docs")
 		requireContains(source, "meterPlan", "agentic deploy dry-run meter plan docs")
 		requireContains(source, "enabled service meters", "agentic meter plan scope docs")
 		requireContains(source, "ready-to-fill", "agentic cap command fill-in docs")
@@ -101,6 +103,8 @@ func checkCLIContract() {
 	}
 
 	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
+	requireContains(cargoCLI, "missingConfig", "native deploy dry-run missing config field")
+	requireContains(cargoCLI, "requiredFixes", "native deploy dry-run required fixes field")
 	requireContains(cargoCLI, "meterPlan", "native deploy dry-run meter plan field")
 	requireContains(cargoCLI, "capCommands", "native deploy dry-run cap commands field")
 	requireContains(cargoCLI, "--notify-at-percent", "native CLI usage cap notification threshold")
