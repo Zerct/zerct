@@ -43,7 +43,6 @@ func checkDocs() {
 	resources := readText("docs/reference/resources.mdx")
 	products := readText("docs/reference/products.mdx")
 	packages := readText("docs/reference/packages.mdx")
-	projectContract := readText("docs/reference/project-contract.mdx")
 	kv := readText("docs/reference/kv.mdx")
 	sqlite := readText("docs/reference/sqlite.mdx")
 	state := readText("docs/reference/state.mdx")
@@ -60,19 +59,16 @@ func checkDocs() {
 	agents := readText("docs/agents.mdx")
 	publicCopy := strings.Join([]string{
 		readme,
-		deploy,
-		pricing,
-		limits,
-		resources,
-		products,
-		projectContract,
-		abuse,
-		support,
-		agents,
-		readText("docs/reference/workers.mdx"),
-		sqlite,
-		readText("docs/reference/storage.mdx"),
-		readText("docs/changelog.mdx"),
+		openapi,
+		readText("docs/docs.json"),
+		readText("docs/llms.txt"),
+		readText("docs/skill.md"),
+		strings.Join(readSortedTextsRecursive("docs", ".mdx"), "\n"),
+		readText("crates/tovuk/README.md"),
+		readText("packages/tovuk/README.md"),
+		readText("packages/tovuk/package.json"),
+		readText("packages/tovuk-py/README.md"),
+		readText("packages/tovuk-py/pyproject.toml"),
 		readText("skills/tovuk/SKILL.md"),
 	}, "\n")
 	rejectForbiddenPublicCopyTerms("public docs and package copy", publicCopy)

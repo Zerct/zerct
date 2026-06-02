@@ -1,11 +1,11 @@
 ---
-title: "Workers"
-description: "How Tovuk combines Rust workers with static frontends."
+title: "Worker"
+description: "How Tovuk combines a Rust Worker with static frontends."
 ---
 
 Tovuk full-stack services use one deployable project:
 
-- Rust worker: APIs, auth callbacks, writes, webhooks, and server-side rules.
+- Rust Worker: APIs, auth callbacks, writes, webhooks, and server-side rules.
 - Static frontend: TanStack, Vite, Astro, Svelte, plain HTML, or another build
   that emits files.
 - One URL: frontend files at `/`, Rust worker requests under `/api/*`.
