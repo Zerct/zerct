@@ -46,6 +46,10 @@ Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
 supports listing, setting, and deleting write-only service secrets through the
 same API routes as `tovuk env`.
 
+Dashboard Activity is available at `https://tovuk.com/account/activity` and
+shows recent deploys, builds, runtime logs, next actions, and copyable repair
+commands through the same activity and log API routes as the CLI.
+
 Agent repair loop:
 
 1. Run `tovuk check --json`.

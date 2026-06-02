@@ -6,6 +6,14 @@ description: "Deploy evidence, build history, and runtime diagnosis."
 Logs and Builds help agents repair failed deploys without dashboard clicks.
 Use them after `tovuk check`, `tovuk deploy --dry-run`, and deploy attempts.
 
+## Dashboard
+
+The dashboard Activity view is available at `https://tovuk.com/account/activity`
+or `https://tovuk.com/<handle>/activity`. It shows recent deploys, recent
+builds, runtime logs for a selected Service, next actions, and copyable agent
+commands. It uses the same activity and log API routes, rate limits, and
+private account auth as the CLI.
+
 ## Agent commands
 
 ```sh
