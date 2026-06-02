@@ -44,6 +44,7 @@ tovuk storage list --service service_1 --json
 tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk billing checkout --json
+tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
@@ -75,6 +76,7 @@ tovuk domains verify --service service_1 api.example.com
 tovuk storage list --service service_1 --json
 tovuk storage upload --service service_1 ./media.png media/media.png --public --json
 tovuk billing checkout --json
+tovuk billing portal
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
@@ -89,6 +91,7 @@ tovuk deploy cancel deploy_1 --json
 tovuk logs --deploy deploy_1 --json
 tovuk storage download --service service_1 media/media.png ./media.png --json
 tovuk billing checkout --json
+tovuk billing portal
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```

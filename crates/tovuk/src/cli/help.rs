@@ -112,6 +112,7 @@ Agent contract:
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.
   - Prefer same-origin full-stack services over split services.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
+  - For invoices, payment methods, or subscription changes, run tovuk billing portal and show the returned URL to the human.
   - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Create abuse reports with target URL, category, reporter email, and evidence. Owners track and appeal service reports with tovuk abuse list --json and tovuk abuse appeal <report_id> --json; operators triage all reports with tovuk abuse list --operator --json, then use tovuk abuse triage, notify-owner, quarantine, resolve, reject, or release with an operator token.

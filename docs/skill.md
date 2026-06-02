@@ -146,6 +146,7 @@ When a plan limit blocks work:
 
 ```sh
 tovuk billing checkout "Plan limit reached" --json
+tovuk billing portal
 ```
 
 When Tovuk support is needed, create a ticket only after collecting the failing

@@ -146,6 +146,7 @@ When a free-tier limit blocks work, run:
 
 ```sh
 tovuk billing checkout --json
+tovuk billing portal
 ```
 
 When Tovuk support is needed, include enough evidence for a support agent:

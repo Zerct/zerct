@@ -35,6 +35,8 @@ Use this page when an AI coding agent is deploying with Tovuk.
 18. If a plan limit blocks the deploy or storage action, run
    `tovuk billing checkout --json` and show the returned
    `checkout.url` to the human.
+   For invoices, payment methods, or subscription changes, run
+   `tovuk billing portal` and show the returned URL to the human.
 19. If Tovuk itself needs help, create a support ticket with the exact command,
    service id, build id, deploy id, and first actionable log line.
 20. Resolve the support ticket after the agent fixes the issue.
@@ -44,7 +46,8 @@ Use this page when an AI coding agent is deploying with Tovuk.
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
 typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
 checks.
-Do not use Unicode em dashes in tracked text.
+Do not use Unicode em dashes in tracked text. ASCII hyphen pairs remain allowed
+for CLI flags, code, and normal technical text.
 Do not create JavaScript or TypeScript servers. Keep JS/TS in static frontend
 browser code only; move API routes, SSR handlers, middleware, and server logic
 to Rust.
@@ -218,6 +221,7 @@ tovuk limits set worker_requests --period day --value 100000 --notify-at-percent
 tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
 tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
 tovuk billing checkout --json
+tovuk billing portal
 tovuk support list --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
