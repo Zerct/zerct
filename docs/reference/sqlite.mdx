@@ -7,13 +7,13 @@ Tovuk service databases are SQLite databases owned by a service and attached to 
 workers as explicit resources.
 
 ```sh
-tovuk database create --service service_1 DB --json
-tovuk database query --service service_1 DB "select 1" --json
-tovuk database query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
-tovuk database backup create --service service_1 DB --json
-tovuk database backup list --service service_1 DB --json
-tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
-tovuk database delete --service service_1 DB --json
+tovuk sqlite create --service service_1 DB --json
+tovuk sqlite query --service service_1 DB "select 1" --json
+tovuk sqlite query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
+tovuk sqlite backup create --service service_1 DB --json
+tovuk sqlite backup list --service service_1 DB --json
+tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
+tovuk sqlite delete --service service_1 DB --json
 tovuk service show service_1 --json
 ```
 

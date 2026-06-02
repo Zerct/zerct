@@ -85,8 +85,8 @@ TypeScript servers.
 Use CLI resource commands for service features:
 
 ```sh
-tovuk database create --service service_1 DB --json
-tovuk database query --service service_1 DB "select 1" --json
+tovuk sqlite create --service service_1 DB --json
+tovuk sqlite query --service service_1 DB "select 1" --json
 tovuk kv create --service service_1 CACHE --json
 tovuk queue create --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json

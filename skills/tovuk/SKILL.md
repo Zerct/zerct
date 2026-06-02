@@ -43,7 +43,7 @@ Agents can manage runtime resources without dashboard access:
 
 ```sh
 tovuk service show <service> --json
-tovuk database create --service <service> DB --json
+tovuk sqlite create --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
 tovuk kv bulk get --service <service> CACHE feature:search user:1 --json

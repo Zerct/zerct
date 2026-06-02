@@ -10,12 +10,12 @@ need dashboard access.
 
 ```sh
 tovuk service show service_1 --json
-tovuk database create --service service_1 DB --json
-tovuk database query --service service_1 DB "select 1" --json
-tovuk database backup create --service service_1 DB --json
-tovuk database backup list --service service_1 DB --json
-tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
-tovuk database delete --service service_1 DB --json
+tovuk sqlite create --service service_1 DB --json
+tovuk sqlite query --service service_1 DB "select 1" --json
+tovuk sqlite backup create --service service_1 DB --json
+tovuk sqlite backup list --service service_1 DB --json
+tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
+tovuk sqlite delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
 tovuk kv put --service service_1 CACHE session:1 '{"ok":true}' --expiration 1780272000 --json

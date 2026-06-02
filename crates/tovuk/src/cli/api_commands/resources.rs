@@ -23,7 +23,7 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             cli,
             "sqlite_binding_required",
             "SQLite binding name is required.",
-            "Use `tovuk database create --service <service> DB --json`.",
+            "Use `tovuk sqlite create --service <service> DB --json`.",
             "sqlite/databases",
             "name",
         ),
@@ -35,7 +35,7 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             1,
             "sqlite_database_required",
             "SQLite database is required.",
-            "Use `tovuk database delete --service <service> DB --json`.",
+            "Use `tovuk sqlite delete --service <service> DB --json`.",
             "sqlite/databases",
         ),
         _ => unknown_resources_command(cli, "sqlite"),
@@ -50,7 +50,7 @@ fn sqlite_backup_command(cli: &CliOptions) -> Result<()> {
         _ => Err(agent_error(
             "unknown_command",
             "Unknown SQLite backup command.",
-            "Use `tovuk database backup list --service <service> DB --json`, `tovuk database backup create --service <service> DB --json`, or `tovuk database backup restore --service <service> DB <backup_id> --json`.",
+            "Use `tovuk sqlite backup list --service <service> DB --json`, `tovuk sqlite backup create --service <service> DB --json`, or `tovuk sqlite backup restore --service <service> DB <backup_id> --json`.",
             cli.output.json,
         )),
     }
@@ -565,7 +565,7 @@ fn sqlite_query(cli: &CliOptions) -> Result<()> {
         1,
         "sqlite_database_required",
         "SQLite database is required.",
-        "Use `tovuk database query --service <service> DB \"select 1\" --json`.",
+        "Use `tovuk sqlite query --service <service> DB \"select 1\" --json`.",
     )?;
     let sql = cli
         .args
@@ -605,7 +605,7 @@ fn sqlite_backups(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
         database_arg_index,
         "sqlite_database_required",
         "SQLite database is required.",
-        "Use `tovuk database backup list --service <service> DB --json`.",
+        "Use `tovuk sqlite backup list --service <service> DB --json`.",
     )?;
     let token = read_or_login_token(cli)?;
     let response = api_request(
@@ -628,7 +628,7 @@ fn sqlite_backup_create(cli: &CliOptions, database_arg_index: usize) -> Result<(
         database_arg_index,
         "sqlite_database_required",
         "SQLite database is required.",
-        "Use `tovuk database backup create --service <service> DB --json`.",
+        "Use `tovuk sqlite backup create --service <service> DB --json`.",
     )?;
     print_authenticated_mutation(
         cli,
@@ -648,14 +648,14 @@ fn sqlite_restore(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
         database_arg_index,
         "sqlite_database_required",
         "SQLite database is required.",
-        "Use `tovuk database backup restore --service <service> DB <backup_id> --json`.",
+        "Use `tovuk sqlite backup restore --service <service> DB <backup_id> --json`.",
     )?;
     let backup = required_arg(
         cli,
         database_arg_index + 1,
         "sqlite_backup_required",
         "SQLite backup id is required.",
-        "Use `tovuk database backup list --service <service> DB --json` and pass a backup id.",
+        "Use `tovuk sqlite backup list --service <service> DB --json` and pass a backup id.",
     )?;
     print_authenticated_mutation(
         cli,
