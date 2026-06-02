@@ -129,12 +129,12 @@ tovuk logs --build <build_id> --json
 tovuk logs --service <service> --json
 tovuk env list --service <service> --json
 tovuk domains list --service <service> --json
-tovuk database create --service <service> DB --json
-tovuk database query --service <service> DB "select 1" --json
-tovuk database backup create --service <service> DB --json
-tovuk database backup list --service <service> DB --json
-tovuk database backup restore --service <service> DB sqlite_backup_1 --json
-tovuk database delete --service <service> DB --json
+tovuk sqlite create --service <service> DB --json
+tovuk sqlite query --service <service> DB "select 1" --json
+tovuk sqlite backup create --service <service> DB --json
+tovuk sqlite backup list --service <service> DB --json
+tovuk sqlite backup restore --service <service> DB sqlite_backup_1 --json
+tovuk sqlite delete --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv namespace delete --service <service> CACHE --json
 tovuk queue create --service <service> failed_jobs --json

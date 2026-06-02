@@ -136,6 +136,7 @@ retired_alias_cases=(
   "storage put"
   "storage get"
   "storage rm"
+  "database"
   "database execute"
   "database backups"
   "database rm"

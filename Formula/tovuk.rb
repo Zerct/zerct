@@ -1,7 +1,7 @@
 class Tovuk < Formula
   desc "Deploy Rust workers, static frontends, and full-stack services to Tovuk"
   homepage "https://tovuk.com"
-  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.83"
+  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.84"
   license "MIT"
 
   depends_on "rust" => :build
@@ -27,6 +27,10 @@ class Tovuk < Formula
     assert_match "tovuk storage upload", help
     assert_match "tovuk storage download", help
     assert_match "tovuk storage delete", help
+    assert_match "tovuk sqlite create", help
+    assert_match "tovuk sqlite query", help
+    assert_match "tovuk sqlite backup", help
+    assert_match "tovuk sqlite delete", help
     assert_match "tovuk kv put", help
     assert_match "tovuk kv get", help
     assert_match "tovuk queue send", help

@@ -27,7 +27,7 @@ func checkCLIContract() {
 
 	for _, command := range []string{
 		"new", "check", "login", "deploy", "pricing", "usage", "service", "logs",
-		"database", "kv", "queue", "cron", "state", "binding", "limits", "env",
+		"sqlite", "kv", "queue", "cron", "state", "binding", "limits", "env",
 		"domains", "storage", "billing", "support", "abuse", "nodes",
 	} {
 		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
@@ -38,6 +38,10 @@ func checkCLIContract() {
 		requireContains(source, "tovuk storage upload", "agentic storage upload command")
 		requireContains(source, "tovuk storage download", "agentic storage download command")
 		requireContains(source, "tovuk storage delete", "agentic storage delete command")
+		requireContains(source, "tovuk sqlite create", "agentic SQLite create command")
+		requireContains(source, "tovuk sqlite query", "agentic SQLite query command")
+		requireContains(source, "tovuk sqlite backup", "agentic SQLite backup command")
+		requireContains(source, "tovuk sqlite delete", "agentic SQLite delete command")
 		requireContains(source, "tovuk kv put", "agentic kv put command")
 		requireContains(source, "tovuk kv get", "agentic kv get command")
 		requireContains(source, "tovuk queue send", "agentic queue send command")
@@ -113,6 +117,7 @@ func checkCLIContract() {
 	retiredFullstackTemplate := "worker" + "-static-rust-tanstack"
 	retiredFullstackKind := "kind = \"worker" + "_static\""
 	retiredFullstackWording := "worker" + "-static"
+	retiredDatabaseCommand := "tovuk " + "database"
 	for _, source := range []string{cargoCLI, npmInstall, pythonCLI, cargoReadme, npmReadme, pythonReadme, homebrewFormula} {
 		rejectContains(source, "TOVUK_NPM_CLI", "retired npm delegation")
 		rejectContains(source, "NPM_PACKAGE_VERSION", "retired npm package pin")
@@ -143,6 +148,7 @@ func checkCLIContract() {
 		rejectContains(source, "tovuk service builds", "retired service builds command")
 		rejectContains(source, "tovuk platform", "retired platform command")
 		rejectContains(source, "tovuk services", "retired services command")
+		rejectContains(source, retiredDatabaseCommand, "retired database command")
 		rejectContains(source, "tovuk caps", "retired caps command")
 		rejectContains(source, "tovuk limit ", "retired singular limit command")
 		rejectContains(source, "tovuk files", "retired storage alias")

@@ -48,7 +48,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "usage" => print_authenticated(&cli, "/v1/usage"),
         "service" => service_command(&cli),
         "logs" => logs_command(&cli),
-        "database" => sqlite_command(&cli),
+        "sqlite" => sqlite_command(&cli),
         "kv" => kv_command(&cli),
         "queue" => queue_command(&cli),
         "cron" => cron_command(&cli),

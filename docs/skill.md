@@ -62,9 +62,9 @@ Manage service resources without dashboard access:
 
 ```sh
 tovuk service show <service> --json
-tovuk database create --service <service> DB --json
-tovuk database query --service <service> DB "select 1" --json
-tovuk database delete --service <service> DB --json
+tovuk sqlite create --service <service> DB --json
+tovuk sqlite query --service <service> DB "select 1" --json
+tovuk sqlite delete --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json
 tovuk kv bulk get --service <service> CACHE feature:search user:1 --json

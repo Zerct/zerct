@@ -177,12 +177,12 @@ tovuk logs --build job_1 --json
 tovuk logs --deploy deploy_1 --json
 tovuk logs --service service_1 --json
 tovuk storage list --service service_1 --json
-tovuk database create --service service_1 DB --json
-tovuk database query --service service_1 DB "select 1" --json
-tovuk database backup create --service service_1 DB --json
-tovuk database backup list --service service_1 DB --json
-tovuk database backup restore --service service_1 DB sqlite_backup_1 --json
-tovuk database delete --service service_1 DB --json
+tovuk sqlite create --service service_1 DB --json
+tovuk sqlite query --service service_1 DB "select 1" --json
+tovuk sqlite backup create --service service_1 DB --json
+tovuk sqlite backup list --service service_1 DB --json
+tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
+tovuk sqlite delete --service service_1 DB --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv namespace delete --service service_1 CACHE --json
 tovuk queue create --service service_1 failed_jobs --json
