@@ -10,13 +10,24 @@ reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
 
 ```sh
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron update --service service_1 nightly "*/15 * * * *" --json
+tovuk cron disable --service service_1 nightly --json
+tovuk cron enable --service service_1 nightly --json
 tovuk cron delete --service service_1 nightly --json
 ```
 
+## Dashboard
+
+Dashboard Cron controls are available at
+`https://tovuk.com/account/resources` and
+`https://tovuk.com/<handle>/resources`. The Resources view can create, update,
+pause, resume, and delete Cron triggers through the same API routes as the CLI.
+
 ## API
 
-- `POST /v1/services/{service_id}/cron/triggers`
-- `DELETE /v1/services/{service_id}/cron/triggers/{trigger}`
+- `POST /v1/services/{service_id}/cron`
+- `PUT /v1/services/{service_id}/cron/{trigger}`
+- `DELETE /v1/services/{service_id}/cron/{trigger}`
 
 Cron deliveries are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
 Public traffic to `/.tovuk/*` is blocked.
@@ -44,4 +55,5 @@ tovuk limits set worker_cpu_ms --period day --value 1000000 --json
 2. Create the trigger through CLI or API.
 3. Deploy the Rust worker handler.
 4. Tail logs after the first scheduled delivery.
-5. Delete stale triggers when a schedule is retired.
+5. Pause or update triggers before changing worker assumptions.
+6. Delete stale triggers when a schedule is retired.

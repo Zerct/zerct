@@ -20,10 +20,12 @@ storage, duration, and next actions. It can also list KV keys, read one KV key,
 write one KV key, and delete one KV key through the same metered KV API routes
 as the CLI. It can also send one Queue message and send one Queue batch through
 the same metered Queue API routes as the CLI, then read Queue messages and read
-Queue metrics. It can also list State objects, list State keys, read one State
-value, write one State value, delete one State value, read State alarms, set
-State alarms, and delete State alarms through the same metered State API routes
-as the CLI. Use CLI bulk commands for bulk KV reads, writes, and removals.
+Queue metrics. It can update Cron schedules, pause Cron triggers, and resume
+Cron triggers through the same API routes as the CLI. It can also list State
+objects, list State keys, read one State value, write one State value, delete
+one State value, read State alarms, set State alarms, and delete State alarms
+through the same metered State API routes as the CLI. Use CLI bulk commands for
+bulk KV reads, writes, and removals.
 Dashboard State alarm actions include read State alarms, set State alarms, and
 delete State alarms.
 
@@ -46,6 +48,9 @@ tovuk kv namespace delete --service service_1 CACHE --json
 tovuk queue create --service service_1 jobs --max-retries 3 --retention-seconds 86400 --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk cron update --service service_1 nightly "*/15 * * * *" --json
+tovuk cron disable --service service_1 nightly --json
+tovuk cron enable --service service_1 nightly --json
 tovuk cron delete --service service_1 nightly --json
 tovuk state create --service service_1 Room --json
 tovuk state objects --service service_1 Room --json
