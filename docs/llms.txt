@@ -34,6 +34,12 @@ Resource references:
 - `docs/reference/logs-builds.mdx`: deploys, builds, logs, and cancellation.
 - `docs/reference/usage-caps.mdx`: hard caps for every public meter.
 
+Dashboard Overview is available at `https://tovuk.com/account` and shows
+Service kind, per-Service resource counts for SQLite, Object Storage, KV,
+Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, plus
+copyable `tovuk service show <service> --json` and
+`tovuk service delete <service> --json` commands.
+
 Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
 the same cap set and remove actions as `tovuk limits`, plus the same hosted
 checkout flow as `tovuk billing checkout --json` and billing portal flow as

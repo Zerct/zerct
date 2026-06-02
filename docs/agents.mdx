@@ -70,7 +70,9 @@ tovuk deploy --wait --json
 
 The dashboard mirrors CLI and API state. The committed `tovuk.toml` remains
 the source of truth for enabled and disabled capabilities. Service rows expose
-copyable `tovuk service show <service> --json` and
+Service kind, per-Service resource counts for SQLite, Object Storage, KV,
+Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, copyable
+`tovuk service show <service> --json` and
 `tovuk service delete <service> --json` commands, and the delete action uses
 `DELETE /v1/services/{service_id}` for smoke-test cleanup.
 

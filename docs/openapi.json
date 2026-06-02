@@ -6939,6 +6939,18 @@
                       "name": "hello-rust",
                       "slug": "hello-rust",
                       "url": "https://hello-rust.tovuk.app",
+                      "kind": "fullstack",
+                      "resources": {
+                        "sqliteDatabases": 1,
+                        "storageObjects": 2,
+                        "kvNamespaces": 1,
+                        "queues": 1,
+                        "cronTriggers": 1,
+                        "stateNamespaces": 1,
+                        "serviceBindings": 1,
+                        "secrets": 3,
+                        "customDomains": 1
+                      },
                       "plan": "free",
                       "runtimeStatus": "running",
                       "latestBuildStatus": "succeeded",
@@ -8635,6 +8647,18 @@
                       "name": "hello-rust",
                       "slug": "hello-rust",
                       "url": "https://hello-rust.tovuk.app",
+                      "kind": "fullstack",
+                      "resources": {
+                        "sqliteDatabases": 1,
+                        "storageObjects": 2,
+                        "kvNamespaces": 1,
+                        "queues": 1,
+                        "cronTriggers": 1,
+                        "stateNamespaces": 1,
+                        "serviceBindings": 1,
+                        "secrets": 3,
+                        "customDomains": 1
+                      },
                       "plan": "free",
                       "runtimeStatus": "running",
                       "latestBuildStatus": "succeeded",
@@ -12013,6 +12037,18 @@
                   "name": "hello-rust",
                   "slug": "hello-rust",
                   "url": "https://hello-rust.tovuk.app",
+                  "kind": "fullstack",
+                  "resources": {
+                    "sqliteDatabases": 1,
+                    "storageObjects": 2,
+                    "kvNamespaces": 1,
+                    "queues": 1,
+                    "cronTriggers": 1,
+                    "stateNamespaces": 1,
+                    "serviceBindings": 1,
+                    "secrets": 3,
+                    "customDomains": 1
+                  },
                   "plan": "free",
                   "runtimeStatus": "running",
                   "latestBuildStatus": "succeeded",
@@ -12505,6 +12541,8 @@
           "name",
           "slug",
           "url",
+          "kind",
+          "resources",
           "plan",
           "runtimeStatus",
           "latestBuildStatus",
@@ -12550,6 +12588,17 @@
             "examples": [
               "https://hello-rust.tovuk.app"
             ]
+          },
+          "kind": {
+            "description": "Service kind. Context: components.schemas.AccountOverviewService.properties.kind.",
+            "examples": [
+              "fullstack"
+            ],
+            "$ref": "#/components/schemas/ProjectKind"
+          },
+          "resources": {
+            "description": "Per-Service resource counts shown on the account overview. Context: components.schemas.AccountOverviewService.properties.resources.",
+            "$ref": "#/components/schemas/AccountOverviewServiceResources"
           },
           "plan": {
             "examples": [
@@ -12640,6 +12689,18 @@
             "name": "hello-rust",
             "slug": "hello-rust",
             "url": "https://hello-rust.tovuk.app",
+            "kind": "fullstack",
+            "resources": {
+              "sqliteDatabases": 1,
+              "storageObjects": 2,
+              "kvNamespaces": 1,
+              "queues": 1,
+              "cronTriggers": 1,
+              "stateNamespaces": 1,
+              "serviceBindings": 1,
+              "secrets": 3,
+              "customDomains": 1
+            },
             "plan": "free",
             "runtimeStatus": "running",
             "latestBuildStatus": "succeeded",
@@ -12649,6 +12710,127 @@
             "databaseStorageMib": 512,
             "idleTimeoutMinutes": 15,
             "latestDeployAt": "2026-05-25T12:00:00.000Z"
+          }
+        ]
+      },
+      "AccountOverviewServiceResources": {
+        "type": "object",
+        "description": "Per-Service resource counts for account overview rows. Context: components.schemas.AccountOverviewServiceResources.",
+        "additionalProperties": false,
+        "required": [
+          "sqliteDatabases",
+          "storageObjects",
+          "kvNamespaces",
+          "queues",
+          "cronTriggers",
+          "stateNamespaces",
+          "serviceBindings",
+          "secrets",
+          "customDomains"
+        ],
+        "properties": {
+          "sqliteDatabases": {
+            "type": "integer",
+            "description": "SQLite databases attached to this Service. Context: components.schemas.AccountOverviewServiceResources.properties.sqliteDatabases.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5000,
+            "examples": [
+              1
+            ]
+          },
+          "storageObjects": {
+            "type": "integer",
+            "description": "Object storage keys tracked for this Service. Context: components.schemas.AccountOverviewServiceResources.properties.storageObjects.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000,
+            "examples": [
+              2
+            ]
+          },
+          "kvNamespaces": {
+            "type": "integer",
+            "description": "KV namespaces attached to this Service. Context: components.schemas.AccountOverviewServiceResources.properties.kvNamespaces.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5000,
+            "examples": [
+              1
+            ]
+          },
+          "queues": {
+            "type": "integer",
+            "description": "Queues attached to this Service. Context: components.schemas.AccountOverviewServiceResources.properties.queues.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5000,
+            "examples": [
+              1
+            ]
+          },
+          "cronTriggers": {
+            "type": "integer",
+            "description": "Cron triggers attached to this Service. Context: components.schemas.AccountOverviewServiceResources.properties.cronTriggers.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5000,
+            "examples": [
+              1
+            ]
+          },
+          "stateNamespaces": {
+            "type": "integer",
+            "description": "State namespaces attached to this Service. Context: components.schemas.AccountOverviewServiceResources.properties.stateNamespaces.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5000,
+            "examples": [
+              1
+            ]
+          },
+          "serviceBindings": {
+            "type": "integer",
+            "description": "Private Service bindings from this Service. Context: components.schemas.AccountOverviewServiceResources.properties.serviceBindings.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 5000,
+            "examples": [
+              1
+            ]
+          },
+          "secrets": {
+            "type": "integer",
+            "description": "Secrets configured for this Service. Context: components.schemas.AccountOverviewServiceResources.properties.secrets.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "examples": [
+              3
+            ]
+          },
+          "customDomains": {
+            "type": "integer",
+            "description": "Custom domains attached to this Service. Context: components.schemas.AccountOverviewServiceResources.properties.customDomains.",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000,
+            "examples": [
+              1
+            ]
+          }
+        },
+        "examples": [
+          {
+            "sqliteDatabases": 1,
+            "storageObjects": 2,
+            "kvNamespaces": 1,
+            "queues": 1,
+            "cronTriggers": 1,
+            "stateNamespaces": 1,
+            "serviceBindings": 1,
+            "secrets": 3,
+            "customDomains": 1
           }
         ]
       },
@@ -13289,6 +13471,18 @@
                   "name": "hello-rust",
                   "slug": "hello-rust",
                   "url": "https://hello-rust.tovuk.app",
+                  "kind": "fullstack",
+                  "resources": {
+                    "sqliteDatabases": 1,
+                    "storageObjects": 2,
+                    "kvNamespaces": 1,
+                    "queues": 1,
+                    "cronTriggers": 1,
+                    "stateNamespaces": 1,
+                    "serviceBindings": 1,
+                    "secrets": 3,
+                    "customDomains": 1
+                  },
                   "plan": "free",
                   "runtimeStatus": "running",
                   "latestBuildStatus": "succeeded",
@@ -13311,6 +13505,18 @@
                 "name": "hello-rust",
                 "slug": "hello-rust",
                 "url": "https://hello-rust.tovuk.app",
+                "kind": "fullstack",
+                "resources": {
+                  "sqliteDatabases": 1,
+                  "storageObjects": 2,
+                  "kvNamespaces": 1,
+                  "queues": 1,
+                  "cronTriggers": 1,
+                  "stateNamespaces": 1,
+                  "serviceBindings": 1,
+                  "secrets": 3,
+                  "customDomains": 1
+                },
                 "plan": "free",
                 "runtimeStatus": "running",
                 "latestBuildStatus": "succeeded",
@@ -17759,6 +17965,18 @@
                   "name": "hello-rust",
                   "slug": "hello-rust",
                   "url": "https://hello-rust.tovuk.app",
+                  "kind": "fullstack",
+                  "resources": {
+                    "sqliteDatabases": 1,
+                    "storageObjects": 2,
+                    "kvNamespaces": 1,
+                    "queues": 1,
+                    "cronTriggers": 1,
+                    "stateNamespaces": 1,
+                    "serviceBindings": 1,
+                    "secrets": 3,
+                    "customDomains": 1
+                  },
                   "plan": "free",
                   "runtimeStatus": "running",
                   "latestBuildStatus": "succeeded",
@@ -18171,6 +18389,18 @@
                 "name": "hello-rust",
                 "slug": "hello-rust",
                 "url": "https://hello-rust.tovuk.app",
+                "kind": "fullstack",
+                "resources": {
+                  "sqliteDatabases": 1,
+                  "storageObjects": 2,
+                  "kvNamespaces": 1,
+                  "queues": 1,
+                  "cronTriggers": 1,
+                  "stateNamespaces": 1,
+                  "serviceBindings": 1,
+                  "secrets": 3,
+                  "customDomains": 1
+                },
                 "plan": "free",
                 "runtimeStatus": "running",
                 "latestBuildStatus": "succeeded",
