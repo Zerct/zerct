@@ -29,8 +29,15 @@ The dashboard Resources view at `https://tovuk.com/account/resources` can run a
 single SQLite statement against an existing service database. It uses
 `POST /v1/services/{service_id}/sqlite/{database}/query`, shows returned rows,
 and displays `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`, storage,
-duration, and next actions. Use the CLI for batch statements, parameter arrays,
-backups, and restore flows.
+duration, and next actions. It can also list SQLite backups, create a manual
+SQLite backup, and restore a selected backup through the same API routes as the
+CLI. Use the CLI for batch statements and parameter arrays.
+
+The dashboard uses these SQLite backup API routes:
+
+- `GET /v1/services/{service_id}/sqlite/{database}/backups`
+- `POST /v1/services/{service_id}/sqlite/{database}/backups`
+- `POST /v1/services/{service_id}/sqlite/{database}/backups/{backup}/restore`
 
 Create a backup before schema migrations, backfills, imports, or destructive
 writes. Restore commands create a pre-restore safety backup first, replace the
