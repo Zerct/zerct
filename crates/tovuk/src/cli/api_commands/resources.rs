@@ -318,14 +318,9 @@ fn state_objects(cli: &CliOptions) -> Result<()> {
         "State class name is required.",
         "Use `tovuk state objects --service <service> Room --json`.",
     )?;
+    let route = state_objects_route(cli, &namespace)?;
     let token = read_or_login_token(cli)?;
-    let response = api_request(
-        cli,
-        Method::GET,
-        &state_objects_route(cli, &namespace)?,
-        Some(&token),
-        None,
-    )?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
 
@@ -335,14 +330,9 @@ fn state_alarm_get(cli: &CliOptions, start_index: usize) -> Result<()> {
         start_index,
         "Use `tovuk state alarm get --service <service> Room room-1 --json`.",
     )?;
+    let route = state_object_route(cli, &namespace, &object_key, "alarm")?;
     let token = read_or_login_token(cli)?;
-    let response = api_request(
-        cli,
-        Method::GET,
-        &state_object_route(cli, &namespace, &object_key, "alarm")?,
-        Some(&token),
-        None,
-    )?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
 
@@ -416,14 +406,9 @@ fn state_keys(cli: &CliOptions) -> Result<()> {
         "State object key is required.",
         "Use `tovuk state keys --service <service> Room room-1 --json`.",
     )?;
+    let route = state_object_route(cli, &namespace, &object_key, "keys")?;
     let token = read_or_login_token(cli)?;
-    let response = api_request(
-        cli,
-        Method::GET,
-        &state_object_route(cli, &namespace, &object_key, "keys")?,
-        Some(&token),
-        None,
-    )?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
 
@@ -432,14 +417,9 @@ fn state_get(cli: &CliOptions) -> Result<()> {
         cli,
         "Use `tovuk state get --service <service> Room room-1 counter --json`.",
     )?;
+    let route = state_value_route(cli, &namespace, &object_key, &key)?;
     let token = read_or_login_token(cli)?;
-    let response = api_request(
-        cli,
-        Method::GET,
-        &state_value_route(cli, &namespace, &object_key, &key)?,
-        Some(&token),
-        None,
-    )?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
 
@@ -607,18 +587,13 @@ fn sqlite_backups(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
         "SQLite database is required.",
         "Use `tovuk sqlite backup list --service <service> DB --json`.",
     )?;
+    let route = format!(
+        "{}/sqlite/{}/backups",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&database)
+    );
     let token = read_or_login_token(cli)?;
-    let response = api_request(
-        cli,
-        Method::GET,
-        &format!(
-            "{}/sqlite/{}/backups",
-            service_route(cli, "")?.trim_end_matches('/'),
-            encode_component(&database)
-        ),
-        Some(&token),
-        None,
-    )?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
 
@@ -720,12 +695,12 @@ fn kv_keys(cli: &CliOptions) -> Result<()> {
         "KV namespace is required.",
         "Use `tovuk kv keys --service <service> CACHE --json`.",
     )?;
-    let token = read_or_login_token(cli)?;
     let route = format!(
         "{}/kv/{}/keys",
         service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&namespace)
     );
+    let token = read_or_login_token(cli)?;
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
@@ -1038,12 +1013,12 @@ fn queue_messages(cli: &CliOptions) -> Result<()> {
         "Queue name is required.",
         "Use `tovuk queue messages --service <service> jobs --json`.",
     )?;
-    let token = read_or_login_token(cli)?;
     let route = format!(
         "{}/queues/{}/messages",
         service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&queue)
     );
+    let token = read_or_login_token(cli)?;
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
@@ -1056,12 +1031,12 @@ fn queue_metrics(cli: &CliOptions) -> Result<()> {
         "Queue name is required.",
         "Use `tovuk queue metrics --service <service> jobs --json`.",
     )?;
-    let token = read_or_login_token(cli)?;
     let route = format!(
         "{}/queues/{}/metrics",
         service_route(cli, "")?.trim_end_matches('/'),
         encode_component(&queue)
     );
+    let token = read_or_login_token(cli)?;
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
@@ -1529,4 +1504,50 @@ fn unknown_resources_command(cli: &CliOptions, family: &str) -> Result<()> {
         "Use `list` or `create`, then retry with `--json` for agent-readable output.",
         cli.output.json,
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{kv_command, queue_command, sqlite_command, state_command};
+    use crate::cli::args::CliOptions;
+
+    fn cli(command: &str, args: &[&str]) -> CliOptions {
+        CliOptions {
+            command: command.to_owned(),
+            args: args.iter().map(|arg| (*arg).to_owned()).collect(),
+            ..CliOptions::default()
+        }
+    }
+
+    #[test]
+    fn state_inspection_requires_service_before_login() {
+        let error_message = state_command(&cli("state", &["objects", "Room"]))
+            .err()
+            .map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
+
+    #[test]
+    fn kv_key_listing_requires_service_before_login() {
+        let error_message = kv_command(&cli("kv", &["keys", "CACHE"]))
+            .err()
+            .map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
+
+    #[test]
+    fn queue_inspection_requires_service_before_login() {
+        let error_message = queue_command(&cli("queue", &["messages", "jobs"]))
+            .err()
+            .map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
+
+    #[test]
+    fn sqlite_backup_listing_requires_service_before_login() {
+        let error_message = sqlite_command(&cli("sqlite", &["backup", "list", "DB"]))
+            .err()
+            .map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
 }

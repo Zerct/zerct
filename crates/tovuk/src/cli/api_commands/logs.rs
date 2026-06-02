@@ -12,8 +12,8 @@ use reqwest::Method;
 use serde_json::Value;
 
 pub(crate) fn logs_command(cli: &CliOptions) -> Result<()> {
-    let token = read_or_login_token(cli)?;
     let (route, target) = log_route(cli)?;
+    let token = read_or_login_token(cli)?;
     let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     if cli.output.json {
         return print_json(&response);
@@ -74,4 +74,21 @@ fn log_route(cli: &CliOptions) -> Result<(String, String)> {
         ),
         format!("--service {service}"),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::logs_command;
+    use crate::cli::args::CliOptions;
+
+    #[test]
+    fn logs_require_service_before_login() {
+        let cli = CliOptions {
+            command: "logs".to_owned(),
+            ..CliOptions::default()
+        };
+
+        let error_message = logs_command(&cli).err().map(|error| error.to_string());
+        assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
 }

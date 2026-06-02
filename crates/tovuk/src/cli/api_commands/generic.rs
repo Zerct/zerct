@@ -37,14 +37,9 @@ pub(crate) fn print_paged_authenticated(cli: &CliOptions, route: &str) -> Result
 }
 
 pub(crate) fn service_get_command(cli: &CliOptions, suffix: &str) -> Result<()> {
+    let route = service_route(cli, suffix)?;
     let token = super::super::auth::read_or_login_token(cli)?;
-    let response = api_request(
-        cli,
-        Method::GET,
-        &service_route(cli, suffix)?,
-        Some(&token),
-        None,
-    )?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
     print_json(&response)
 }
 
