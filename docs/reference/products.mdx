@@ -8,7 +8,7 @@ deployment decisions without dashboard access:
 
 ```sh
 tovuk pricing --json
-tovuk pricing --json
+tovuk deploy --dry-run --json
 ```
 
 Use `products[].features`, `products[].best_for`, `products[].avoid_for`,
@@ -67,6 +67,10 @@ switches to multipart transfer for files larger than 100 MiB. Features include
 service-scoped list, upload, download, delete, multipart planning, Class A,
 Class B, and egress metering, and private origin storage behind Tovuk API and
 media URLs.
+Pricing fields include
+`pricing.objectStorage.classAOverageUsdMicrosPerMillion`,
+`pricing.objectStorage.classBOverageUsdMicrosPerMillion`, and
+`pricing.objectStorage.egressOverageUsdMicrosPerTb`.
 
 State:
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and
