@@ -199,8 +199,9 @@ Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 before load tests, media uploads, or paid usage.
 `tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, quality checks,
 capability meters, account limits, usage, and `billingEstimate` before deploy.
-Each service includes `meterPlan` entries with meter units, pricing fields,
-limit fields, and ready-to-fill `tovuk limits set` cap commands.
+Each service includes `meterPlan` entries for enabled service meters with meter
+units, pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
+commands.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
 Usage Caps.

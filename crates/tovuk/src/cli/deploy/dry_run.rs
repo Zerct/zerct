@@ -134,7 +134,7 @@ fn meters_for_capabilities(
     let Some(config) = config else {
         return Vec::new();
     };
-    let enabled = config.enabled_product_keys();
+    let enabled = enabled_meter_product_keys(config);
     let mut meters = capabilities
         .get("products")
         .and_then(Value::as_array)
@@ -182,7 +182,7 @@ fn meter_plan_for_capabilities(
     let Some(config) = config else {
         return Vec::new();
     };
-    let enabled = config.enabled_product_keys();
+    let enabled = enabled_meter_product_keys(config);
     let mut meter_plan = capabilities
         .get("products")
         .and_then(Value::as_array)
@@ -203,6 +203,14 @@ fn meter_plan_for_capabilities(
     });
     meter_plan.dedup_by(|left, right| left["meter"] == right["meter"]);
     meter_plan
+}
+
+fn enabled_meter_product_keys(config: &CapabilitiesConfig) -> Vec<&'static str> {
+    config
+        .enabled_product_keys()
+        .into_iter()
+        .filter(|key| *key != "usage_caps")
+        .collect()
 }
 
 fn product_meter_plan(product: &Value) -> Vec<Value> {
@@ -395,6 +403,29 @@ mod tests {
     }
 
     #[test]
+    fn usage_caps_catalog_does_not_leak_disabled_resource_meters() {
+        let service_capabilities = fullstack_capabilities();
+        let catalog = sample_capabilities();
+        let meters = meters_for_capabilities(Some(&service_capabilities), &catalog);
+        let plan = meter_plan_for_capabilities(Some(&service_capabilities), &catalog);
+
+        assert!(meters.contains(&"worker_requests".to_owned()));
+        assert!(meters.contains(&"static_transfer_bytes".to_owned()));
+        assert!(!meters.contains(&"sqlite_rows_read".to_owned()));
+        assert!(!meters.contains(&"object_storage_egress_bytes".to_owned()));
+        assert!(
+            !plan
+                .iter()
+                .any(|entry| entry["meter"] == "sqlite_rows_read")
+        );
+        assert!(
+            !plan
+                .iter()
+                .any(|entry| entry["meter"] == "object_storage_egress_bytes")
+        );
+    }
+
+    #[test]
     fn fullstack_dry_run_exposes_meter_plan_for_usage_caps() {
         let mut service_capabilities = fullstack_capabilities();
         service_capabilities.object_storage = CapabilityToggle::enabled();
@@ -513,7 +544,26 @@ mod tests {
                 { "key": "logs", "meters": ["log_events"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "secrets", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "custom_domains", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
-                { "key": "usage_caps", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] }
+                {
+                    "key": "usage_caps",
+                    "meters": [
+                        "worker_requests",
+                        "static_transfer_bytes",
+                        "sqlite_rows_read",
+                        "object_storage_egress_bytes"
+                    ],
+                    "meter_details": [
+                        { "name": "worker_requests", "unit": "request", "description": "Worker requests." },
+                        { "name": "static_transfer_bytes", "unit": "byte", "description": "Static transfer bytes." },
+                        { "name": "sqlite_rows_read", "unit": "row", "description": "SQLite rows read." },
+                        { "name": "object_storage_egress_bytes", "unit": "byte", "description": "Object storage egress bytes." }
+                    ],
+                    "pricing_fields": [
+                        "pricing.subscriptionUsdCentsPerMonth",
+                        "pricing.paidOveragesEnabled"
+                    ],
+                    "limit_fields": ["apiTokens", "supportTicketsPerDay"]
+                }
             ]
         })
     }

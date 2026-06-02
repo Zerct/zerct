@@ -91,8 +91,9 @@ estimates.
 The deploy dry-run response combines `tovuk.toml`, explicit enabled and disabled
 capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service
-includes `meterPlan` entries with meter units, pricing fields, limit fields,
-and ready-to-fill `tovuk limits set` cap commands.
+includes `meterPlan` entries for enabled service meters with meter units,
+pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
+commands.
 
 Manage service files and media without dashboard access:
 
