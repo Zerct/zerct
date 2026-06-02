@@ -19,8 +19,8 @@ Use `plans[].limits` and `plans[].pricing` before load tests, media uploads,
 or paid usage.
 `features` is the concrete checklist of supported behavior agents can rely on
 before they design or deploy a service.
-`meter_details` explains each meter's unit and count semantics so agents can
-estimate work before running it.
+`meter_details` explains each meter's unit, count semantics, and
+`cap_commands` so agents can estimate work and set hard caps before running it.
 `limit_fields` includes the relevant runtime, storage, payload, batching,
 retention, and monthly allowance fields for each product.
 `pricing_fields` includes the exact JSON paths agents should read under each
