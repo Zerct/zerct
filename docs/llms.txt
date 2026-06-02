@@ -64,10 +64,11 @@ supports listing, setting, and deleting write-only service secrets through the
 same API routes as `tovuk env`.
 
 Dashboard Storage is available at `https://tovuk.com/account/storage` and
-`https://tovuk.com/<handle>/storage`. It lists objects, completes ordinary file
-uploads, creates download URLs, and deletes objects through the same API routes
-and limits as the CLI. Use `tovuk storage upload --json` for multipart uploads
-above 100 MiB.
+`https://tovuk.com/<handle>/storage`. It lists objects, uploads ordinary files,
+automatically uses multipart transfer above 100 MiB, creates download URLs, and
+deletes objects through the same API routes and limits as the CLI. Use
+`tovuk storage upload --json` when an agent needs local-file automation outside
+the browser.
 
 Dashboard Activity is available at `https://tovuk.com/account/activity` and
 shows recent deploys, builds, runtime logs, next actions, and copyable repair
