@@ -25,6 +25,7 @@
   --tovuk-gray-600: #ffffff82;
   --tovuk-gray-900: #ffffff9c;
   --tovuk-gray-1000: #ffffffeb;
+  --tovuk-radius: 12px;
 }
 
 html,
@@ -51,6 +52,7 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
 }
 
 a,
@@ -114,7 +116,7 @@ samp {
 #search-bar-entry-mobile {
   background: var(--tovuk-gray-100);
   border: 1px solid var(--tovuk-gray-300);
-  border-radius: 8px;
+  border-radius: var(--tovuk-radius);
   box-shadow: none;
   color: var(--tovuk-gray-1000);
 }
@@ -122,7 +124,7 @@ samp {
 #topbar-cta-button {
   background: var(--tovuk-fg);
   border: 1px solid var(--tovuk-fg);
-  border-radius: 8px;
+  border-radius: var(--tovuk-radius);
   box-shadow: none;
   color: var(--tovuk-bg);
   font-weight: 560;
@@ -179,7 +181,7 @@ samp {
 #content code:not(pre code) {
   background: var(--tovuk-gray-100);
   border: 1px solid var(--tovuk-gray-300);
-  border-radius: 6px;
+  border-radius: 8px;
   color: var(--tovuk-fg);
   padding: 0.12rem 0.32rem;
 }
@@ -189,7 +191,7 @@ samp {
 #response-example {
   background: #050505;
   border: 1px solid var(--tovuk-gray-300);
-  border-radius: 8px;
+  border-radius: var(--tovuk-radius);
   box-shadow: none;
 }
 
