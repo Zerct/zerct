@@ -51,12 +51,38 @@ pub(crate) fn agent_error(
     agent_instruction: impl Into<String>,
     json_output: bool,
 ) -> CliError {
+    agent_error_payload(code, message, agent_instruction, None, json_output)
+}
+
+pub(crate) fn agent_error_with_docs(
+    code: impl Into<String>,
+    message: impl Into<String>,
+    agent_instruction: impl Into<String>,
+    docs_url: impl Into<String>,
+    json_output: bool,
+) -> CliError {
+    agent_error_payload(
+        code,
+        message,
+        agent_instruction,
+        Some(docs_url.into()),
+        json_output,
+    )
+}
+
+fn agent_error_payload(
+    code: impl Into<String>,
+    message: impl Into<String>,
+    agent_instruction: impl Into<String>,
+    docs_url: Option<String>,
+    json_output: bool,
+) -> CliError {
     CliError::new(CliFailure {
         payload: AgentErrorPayload {
             code: code.into(),
             message: message.into(),
             agent_instruction: Some(agent_instruction.into()),
-            docs_url: None,
+            docs_url,
             checkout_url: None,
         },
         json: json_output,
