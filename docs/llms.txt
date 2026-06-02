@@ -35,7 +35,8 @@ Resource references:
 - `docs/reference/usage-caps.mdx`: hard caps for every public meter.
 
 Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
-the same cap set and remove actions as `tovuk limits`.
+the same cap set and remove actions as `tovuk limits`, plus the same hosted
+checkout flow as `tovuk billing checkout --json`.
 
 Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service

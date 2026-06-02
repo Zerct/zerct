@@ -11,7 +11,9 @@ before load tests, media uploads, queue fan-out, and paid usage.
 The dashboard Usage view is available at `https://tovuk.com/account/usage` or
 `https://tovuk.com/<handle>/usage`. It includes the same hard-cap action as
 `tovuk limits set` and the same removal action as `tovuk limits delete`, backed
-by the same API routes and rate limits as the CLI.
+by the same API routes and rate limits as the CLI. It also opens the same
+hosted checkout flow as `tovuk billing checkout --json` for upgrades and paid
+overages.
 
 ## Agent commands
 
