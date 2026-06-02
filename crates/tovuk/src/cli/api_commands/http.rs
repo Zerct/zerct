@@ -1,7 +1,9 @@
 use super::super::{
     args::CliOptions,
     constants::{BILLING_CHECKOUT_ROUTE, VERSION},
-    errors::{AgentErrorPayload, CliError, CliFailure, Result, agent_error, internal_error},
+    errors::{
+        AgentErrorPayload, CliError, CliFailure, Result, agent_error_with_docs, internal_error,
+    },
 };
 use reqwest::{Method, blocking::Client};
 use serde_json::{Value, json};
@@ -29,10 +31,11 @@ pub(crate) fn api_request(
     }
 
     let response = request.send().map_err(|error| {
-        agent_error(
+        agent_error_with_docs(
             "api_unreachable",
             format!("Could not reach Tovuk API: {error}"),
             "Retry the command. If it keeps failing, check Tovuk status before changing your project.",
+            "https://docs.tovuk.com/status",
             cli.output.json,
         )
     })?;
@@ -149,4 +152,37 @@ fn create_checkout_url(cli: &CliOptions, token: Option<&str>, reason: &str) -> O
         .and_then(|checkout| checkout.get("url"))
         .and_then(Value::as_str)
         .map(str::to_owned)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::api_request;
+    use crate::cli::args::CliOptions;
+    use reqwest::Method;
+    use std::{error::Error, net::TcpListener};
+
+    #[test]
+    fn api_unreachable_points_agents_to_status_docs() -> Result<(), Box<dyn Error>> {
+        let listener = TcpListener::bind("127.0.0.1:0")?;
+        let api_url = format!("http://{}", listener.local_addr()?);
+        drop(listener);
+        let cli = CliOptions {
+            api_url,
+            ..CliOptions::default()
+        };
+
+        let error = match api_request(&cli, Method::GET, "/v1/status", None, None) {
+            Ok(_response) => return Err("request unexpectedly succeeded".into()),
+            Err(error) => error,
+        };
+        let payload = error.payload();
+
+        if payload.code != "api_unreachable" {
+            return Err(format!("unexpected code: {}", payload.code).into());
+        }
+        if payload.docs_url.as_deref() != Some("https://docs.tovuk.com/status") {
+            return Err(format!("unexpected docs url: {:?}", payload.docs_url).into());
+        }
+        Ok(())
+    }
 }
