@@ -1,6 +1,6 @@
 use super::super::{
     args::CliOptions,
-    errors::{Result, agent_error},
+    errors::{Result, agent_error, agent_error_with_docs},
     project::encode_component,
 };
 use serde_json::{Map, Value};
@@ -26,10 +26,11 @@ pub(crate) fn command_arg(
 
 pub(crate) fn require_service(cli: &CliOptions) -> Result<String> {
     if cli.service.is_empty() {
-        return Err(agent_error(
+        return Err(agent_error_with_docs(
             "missing_service",
             "Service is required.",
             "Pass `--service <service>` using either the service name from tovuk.toml or the service id printed by deploy.",
+            "https://docs.tovuk.com/reference/resources",
             cli.output.json,
         ));
     }
