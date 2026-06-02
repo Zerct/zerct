@@ -26,10 +26,12 @@ Dashboard Queue controls are available at
 `https://tovuk.com/account/resources` and
 `https://tovuk.com/<handle>/resources`. The Resources view can read recent
 Queue messages, read Queue metrics, send one Queue message, and send one Queue
-batch through the same metered Queue API routes as the CLI.
+batch through the same metered Queue API routes as the CLI. It can also update Queue retries,
+retention, batch size, batch timeout, and dead-letter Queue settings.
 
 The dashboard uses these Queue API routes:
 
+- `PUT /v1/services/{service_id}/queues/{queue}`
 - `GET /v1/services/{service_id}/queues/{queue}/messages`
 - `GET /v1/services/{service_id}/queues/{queue}/metrics`
 - `POST /v1/services/{service_id}/queues/{queue}/messages`

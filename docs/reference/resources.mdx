@@ -212,6 +212,12 @@ tovuk queue update --service service_1 jobs --max-batch-size 25 --max-batch-time
 tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 ```
 
+The dashboard Resources view can update Queue retries, retention, batch size,
+batch timeout, and dead-letter Queue settings through
+`PUT /v1/services/{service_id}/queues/{queue}`. It can also read Queue
+messages, read Queue metrics, send one Queue message, and send one Queue batch
+with `queue_operations` metering.
+
 State usage is metered with Tovuk counters:
 `state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
 `state_sqlite_rows_written`, and `state_sqlite_storage_bytes`.
