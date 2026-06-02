@@ -46,7 +46,8 @@ Use this page when an AI coding agent is deploying with Tovuk.
 Do not weaken Rust lints, TypeScript strictness, stable native frontend
 typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
 checks.
-Do not use Unicode em dashes in tracked text.
+Do not use Unicode em dashes in tracked text. ASCII double hyphens are allowed
+for CLI flags and ordinary text when useful.
 Do not create JavaScript or TypeScript servers. Keep JS/TS in static frontend
 browser code only; move API routes, SSR handlers, middleware, and server logic
 to Rust.
@@ -68,7 +69,10 @@ tovuk deploy --wait --json
 ```
 
 The dashboard mirrors CLI and API state. The committed `tovuk.toml` remains
-the source of truth for enabled and disabled capabilities.
+the source of truth for enabled and disabled capabilities. Service rows expose
+copyable `tovuk service show <service> --json` and
+`tovuk service delete <service> --json` commands, and the delete action uses
+`DELETE /v1/services/{service_id}` for smoke-test cleanup.
 
 ## Deploy prompt
 

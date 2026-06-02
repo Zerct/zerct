@@ -66,14 +66,7 @@ func main() {
 
 		textFileCount++
 		for lineIndex, line := range splitLines(string(contents)) {
-			for _, column := range findAll(line, "\u2014") {
-				findings = append(findings, finding{
-					column:  column,
-					file:    file,
-					line:    lineIndex + 1,
-					message: "em dash is not allowed in any tracked text file",
-				})
-			}
+			findings = appendLineFindings(findings, file, lineIndex, line)
 		}
 	}
 
@@ -91,11 +84,27 @@ func main() {
 
 func runSelfTest() {
 	line := "bad punctuation \u2014 stop"
-	columns := findAll(line, "\u2014")
-	if len(columns) != 1 || columns[0] != 17 {
+	findings := appendLineFindings(nil, "self-test", 0, line)
+	if len(findings) != 1 || findings[0].column != 17 {
 		fail("self-test em dash fixture failed")
 	}
+	allowedLine := "ASCII double hyphen --json and -- stays allowed"
+	if len(appendLineFindings(nil, "self-test", 0, allowedLine)) != 0 {
+		fail("self-test double hyphen fixture failed")
+	}
 	fmt.Println("Style checker self-test passed.")
+}
+
+func appendLineFindings(findings []finding, file string, lineIndex int, line string) []finding {
+	for _, column := range findAll(line, "\u2014") {
+		findings = append(findings, finding{
+			column:  column,
+			file:    file,
+			line:    lineIndex + 1,
+			message: "em dash is not allowed in any tracked text file",
+		})
+	}
+	return findings
 }
 
 func gitFiles() ([]string, error) {
