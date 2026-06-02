@@ -106,10 +106,10 @@ estimate so agents can plan conservatively.
   up to `14 days`.
 - State: `500` classes, `1 million` requests and `400,000 GB-s`
   duration per month included. SQLite includes `25 billion` rows read,
-  `50 million` rows written, `5 GB` storage per month, and `15 minute` State
-  alarm handlers. Overage is `$0.15` per million requests, `$12.50` per million
-  GB-s, `$0.001` per million rows read, `$1.00` per million rows written, and
-  `$0.20` per GB-month.
+  `50 million` rows written, `5 GB` included storage per month, a `10 GB`
+  per-object hard cap, and `15 minute` State alarm handlers. Overage is `$0.15`
+  per million requests, `$12.50` per million GB-s, `$0.001` per million rows
+  read, `$1.00` per million rows written, and `$0.20` per GB-month.
 - Object storage: no storage or object-count hard cap, `10 GB` included
   storage, `1 million` Class A operations, and `10 million` Class B operations
   per month. Overage is `$0.015` per GB-month, `$4.50` per million

@@ -154,6 +154,10 @@ func checkDocs() {
 	}
 
 	requireContains(pricing, "`1 GB` per object", "Free State per-object storage docs")
+	requireContains(pricing, "`5 GB` included storage per month", "Pro State included storage docs")
+	requireContains(pricing, "`10 GB`", "Pro State hard cap value docs")
+	requireContains(pricing, "per-object hard cap", "Pro State hard cap docs")
+	rejectContains(pricing, "`5 GB` storage per month", "ambiguous Pro State storage pricing docs")
 	requireContains(limits, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact docs")
 	requireContains(deploy, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact guide")
 	requireContains(readme, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact README")
