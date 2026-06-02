@@ -1,6 +1,7 @@
 use super::super::{
     args::CliOptions,
     auth::read_or_login_token,
+    config::CapabilitiesConfig,
     errors::{Result, agent_error},
     project::{encode_component, nested_string, number_field, string_field},
 };
@@ -88,19 +89,20 @@ fn service_list_lines(response: &Value) -> Vec<String> {
     }
 
     let mut lines = Vec::with_capacity(services.len() + 2);
-    lines.push("name\tservice\tkind\tstatus\tresources\turl".to_owned());
+    lines.push("name\tservice\tkind\tstatus\tcapabilities\tresources\turl".to_owned());
     for service in services {
         let name = string_field(service, "name");
         let service_id = string_field(service, "serviceId");
         let kind = string_field(service, "kind");
         let status = string_field(service, "runtimeStatus");
         let url = string_field(service, "url");
+        let capabilities = capability_summary(service.get("capabilities").unwrap_or(&Value::Null));
         let resources = resource_count_summary(
             service.get("resources").unwrap_or(&Value::Null),
             ACCOUNT_SERVICE_RESOURCE_COUNT_FIELDS,
         );
         lines.push(format!(
-            "{name}\t{service_id}\t{kind}\t{status}\t{resources}\t{url}"
+            "{name}\t{service_id}\t{kind}\t{status}\t{capabilities}\t{resources}\t{url}"
         ));
     }
     lines.push("next: tovuk service show <service> --json".to_owned());
@@ -128,6 +130,10 @@ fn service_show_lines(response: &Value) -> Vec<String> {
         format!("status {status}"),
         format!("url {url}"),
         format!("resources {}", service_show_resource_summary(response)),
+        format!(
+            "capabilities {}",
+            capability_summary(service.get("capabilities").unwrap_or(&Value::Null))
+        ),
         format!("usage {}", service_show_usage_summary(response)),
     ];
     if !latest_deploy.is_empty() {
@@ -199,6 +205,28 @@ fn resource_count_summary(value: &Value, fields: &[(&str, &str)]) -> String {
         .join(" ")
 }
 
+fn capability_summary(value: &Value) -> String {
+    format!(
+        "enabled={} disabled={}",
+        capability_state_summary(value, true),
+        capability_state_summary(value, false)
+    )
+}
+
+fn capability_state_summary(value: &Value, enabled: bool) -> String {
+    let items = CapabilitiesConfig::KEYS
+        .iter()
+        .copied()
+        .filter(|key| value.get(key).and_then(Value::as_bool) == Some(enabled))
+        .collect::<Vec<_>>();
+
+    if items.is_empty() {
+        "none".to_owned()
+    } else {
+        items.join(",")
+    }
+}
+
 fn usage_meter(usage: &Value, window: &str, meter: &str) -> u64 {
     usage
         .get("meters")
@@ -240,6 +268,25 @@ mod tests {
                     "kind": "fullstack",
                     "runtimeStatus": "running",
                     "url": "https://hello-rust.tovuk.app",
+                    "capabilities": {
+                        "static_frontend": true,
+                        "worker": true,
+                        "sqlite": true,
+                        "object_storage": true,
+                        "kv": true,
+                        "state": true,
+                        "queue": true,
+                        "cron": true,
+                        "service_bindings": true,
+                        "secrets": true,
+                        "custom_domains": true,
+                        "logs": true,
+                        "builds": true,
+                        "usage_caps": true,
+                        "billing": true,
+                        "support": true,
+                        "abuse": true
+                    },
                     "resources": {
                         "sqliteDatabases": 1,
                         "storageObjects": 2,
@@ -254,8 +301,8 @@ mod tests {
                 }]
             })),
             vec![
-                "name\tservice\tkind\tstatus\tresources\turl".to_owned(),
-                "hello-rust\tservice_1\tfullstack\trunning\tsqlite=1 storage=2 kv=3 queues=4 cron=5 state=6 bindings=7 secrets=8 domains=9\thttps://hello-rust.tovuk.app".to_owned(),
+                "name\tservice\tkind\tstatus\tcapabilities\tresources\turl".to_owned(),
+                "hello-rust\tservice_1\tfullstack\trunning\tenabled=static_frontend,worker,sqlite,object_storage,kv,state,queue,cron,service_bindings,secrets,custom_domains,logs,builds,usage_caps,billing,support,abuse disabled=none\tsqlite=1 storage=2 kv=3 queues=4 cron=5 state=6 bindings=7 secrets=8 domains=9\thttps://hello-rust.tovuk.app".to_owned(),
                 "next: tovuk service show <service> --json".to_owned(),
             ]
         );
@@ -271,7 +318,26 @@ mod tests {
                         "name": "hello-rust",
                         "kind": "fullstack",
                         "runtime_status": "running",
-                        "url": "https://hello-rust.tovuk.app"
+                        "url": "https://hello-rust.tovuk.app",
+                        "capabilities": {
+                            "static_frontend": true,
+                            "worker": true,
+                            "sqlite": true,
+                            "object_storage": true,
+                            "kv": true,
+                            "state": false,
+                            "queue": false,
+                            "cron": false,
+                            "service_bindings": false,
+                            "secrets": true,
+                            "custom_domains": true,
+                            "logs": true,
+                            "builds": true,
+                            "usage_caps": true,
+                            "billing": true,
+                            "support": true,
+                            "abuse": true
+                        }
                     },
                     "latest_deploy": { "id": "deploy_1" },
                     "latest_build_job": { "id": "job_1", "status": "succeeded" }
@@ -304,6 +370,7 @@ mod tests {
                 "status running".to_owned(),
                 "url https://hello-rust.tovuk.app".to_owned(),
                 "resources sqlite=1 storage=2 kv=1 queues=0 cron=0 state=0 bindings=0 secrets=1 domains=1 caps=1".to_owned(),
+                "capabilities enabled=static_frontend,worker,sqlite,object_storage,kv,secrets,custom_domains,logs,builds,usage_caps,billing,support,abuse disabled=state,queue,cron,service_bindings".to_owned(),
                 "usage requests_day=10 cpu_ms_day=4 build_minutes_month=2 storage_mib=24".to_owned(),
                 "latest_deploy deploy_1".to_owned(),
                 "latest_build job_1 succeeded".to_owned(),

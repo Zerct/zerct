@@ -97,6 +97,7 @@ func checkCLIContract() {
 	}
 	for _, source := range []string{rootReadme, cargoReadme, npmReadme, pythonReadme} {
 		requireContains(source, "compact table", "human-readable service list output docs")
+		requireContains(source, "enabled and disabled capabilities", "human-readable service capability docs")
 		requireContains(source, "resource counts", "human-readable service resource count docs")
 		requireContains(source, "compact Service snapshot", "human-readable service show output docs")
 		requireContains(source, "Dashboard Overview Service rows expose copyable commands", "dashboard overview row command docs")
@@ -110,7 +111,7 @@ func checkCLIContract() {
 	requireContains(cargoCLI, "--notify-at-percent", "native CLI usage cap notification threshold")
 	requireContains(cargoCLI, "service_list_lines", "native service list text renderer")
 	requireContains(cargoCLI, "service_show_resource_summary", "native service show resource summary")
-	requireContains(cargoCLI, "name\\tservice\\tkind\\tstatus\\tresources\\turl", "native service list table columns")
+	requireContains(cargoCLI, "name\\tservice\\tkind\\tstatus\\tcapabilities\\tresources\\turl", "native service list table columns")
 	requireContains(cargoCLI, "https://docs.tovuk.com/agents", "native check failure docs URL")
 	requireContains(cargoCLI, `"/v1/account/activity"`, "native account activity route")
 	requireContains(cargoCLI, "usage_caps_catalog_does_not_leak_disabled_resource_meters", "native deploy dry-run usage caps meter regression test")
