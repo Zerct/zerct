@@ -95,6 +95,7 @@ func checkCLIContract() {
 	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
 	requireContains(cargoCLI, "meterPlan", "native deploy dry-run meter plan field")
 	requireContains(cargoCLI, "capCommands", "native deploy dry-run cap commands field")
+	requireContains(cargoCLI, "https://docs.tovuk.com/agents", "native check failure docs URL")
 	requireContains(cargoCLI, `"/v1/account/activity"`, "native account activity route")
 	requireContains(cargoCLI, "usage_caps_catalog_does_not_leak_disabled_resource_meters", "native deploy dry-run usage caps meter regression test")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
