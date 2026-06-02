@@ -44,6 +44,7 @@ Usage:
   tovuk cron enable --service <service> nightly [--api <url>] [--json]
   tovuk cron disable --service <service> nightly [--api <url>] [--json]
   tovuk cron delete --service <service> nightly [--api <url>] [--json]
+  tovuk state list --service <service> [--api <url>] [--json]
   tovuk state create --service <service> Room [--api <url>] [--json]
   tovuk state objects --service <service> Room [--api <url>] [--json]
   tovuk state keys --service <service> Room room-1 [--api <url>] [--json]

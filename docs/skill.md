@@ -83,6 +83,7 @@ tovuk cron update --service <service> nightly "*/15 * * * *" --json
 tovuk cron disable --service <service> nightly --json
 tovuk cron enable --service <service> nightly --json
 tovuk cron delete --service <service> nightly --json
+tovuk state list --service <service> --json
 tovuk state create --service <service> Room --json
 tovuk state put --service <service> Room room-1 counter 1 --json
 tovuk state get --service <service> Room room-1 counter --json

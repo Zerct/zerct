@@ -117,6 +117,7 @@ tovuk cron update --service service_1 nightly "*/15 * * * *" --json
 tovuk cron disable --service service_1 nightly --json
 tovuk cron enable --service service_1 nightly --json
 tovuk cron delete --service service_1 nightly --json
+tovuk state list --service service_1 --json
 tovuk state create --service service_1 Room --json
 tovuk state objects --service service_1 Room --json
 tovuk state keys --service service_1 Room room-1 --json
