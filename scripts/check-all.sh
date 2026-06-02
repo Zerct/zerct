@@ -59,6 +59,17 @@ clone_on_ref_ptr = "deny"
 EOF
 }
 
+assert_contains() {
+  local haystack="$1"
+  local needle="$2"
+  local label="$3"
+
+  if ! grep -Fq "$needle" <<<"$haystack"; then
+    printf 'expected %s to contain: %s\n' "$label" "$needle" >&2
+    exit 1
+  fi
+}
+
 cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
 cargo check --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
 cargo test --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
@@ -89,22 +100,25 @@ fi
 
 native_cli_version="$("$native_cli" --version)"
 printf '%s\n' "$native_cli_version"
-"$native_cli" | grep -q 'tovuk deploy --dry-run'
-"$native_cli" help | grep -q 'tovuk deploy --dry-run'
-"$native_cli" --help | grep -q 'tovuk support create'
-"$native_cli" --help | grep -q 'tovuk support resolve'
-"$native_cli" --help | grep -q 'tovuk abuse report'
-"$native_cli" --help | grep -q 'tovuk abuse list --operator'
-"$native_cli" --help | grep -q 'tovuk abuse appeal'
-"$native_cli" --help | grep -q 'tovuk abuse quarantine'
-"$native_cli" --help | grep -q 'tovuk abuse release'
-"$native_cli" --help | grep -q 'tovuk storage upload'
-"$native_cli" --help | grep -q 'tovuk storage download'
-"$native_cli" --help | grep -q 'tovuk deploy --dry-run'
-"$native_cli" --help | grep -q 'tovuk pricing'
-"$native_cli" --help | grep -q 'tovuk service show'
-"$native_cli" --help | grep -q 'tovuk limits set'
-"$native_cli" --help | grep -q 'tovuk billing checkout'
+native_cli_default_output="$("$native_cli")"
+native_cli_help_output="$("$native_cli" help)"
+native_cli_flag_help_output="$("$native_cli" --help)"
+assert_contains "$native_cli_default_output" 'tovuk deploy --dry-run' 'native CLI default help'
+assert_contains "$native_cli_help_output" 'tovuk deploy --dry-run' 'native CLI help command'
+assert_contains "$native_cli_flag_help_output" 'tovuk support create' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk support resolve' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk abuse report' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk abuse list --operator' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk abuse appeal' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk abuse quarantine' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk abuse release' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk storage upload' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk storage download' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk deploy --dry-run' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk pricing' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk service show' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk limits set' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk billing checkout' 'native CLI flag help'
 test "$("$native_cli" -V)" = "$native_cli_version"
 test "$("$native_cli" --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
 if "$native_cli" --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
@@ -174,22 +188,25 @@ done
 
 "$python_bin" -m compileall -q packages/tovuk-py/src
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk | grep -q 'tovuk deploy --dry-run'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk help | grep -q 'tovuk deploy --dry-run'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support create'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support resolve'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk abuse report'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk abuse list --operator'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk abuse appeal'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk abuse quarantine'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk abuse release'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage upload'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk storage download'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk deploy --dry-run'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk pricing'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk service show'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk limits set'
-PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk billing checkout'
+python_cli_default_output="$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk)"
+python_cli_help_output="$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk help)"
+python_cli_flag_help_output="$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help)"
+assert_contains "$python_cli_default_output" 'tovuk deploy --dry-run' 'Python CLI default help'
+assert_contains "$python_cli_help_output" 'tovuk deploy --dry-run' 'Python CLI help command'
+assert_contains "$python_cli_flag_help_output" 'tovuk support create' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk support resolve' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk abuse report' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk abuse list --operator' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk abuse appeal' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk abuse quarantine' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk abuse release' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk storage upload' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk storage download' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk deploy --dry-run' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk pricing' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk service show' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk limits set' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk billing checkout' 'Python CLI flag help'
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
 if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
   printf 'expected Python CLI unknown flag to fail\n' >&2
