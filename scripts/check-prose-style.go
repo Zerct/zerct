@@ -95,6 +95,9 @@ func runSelfTest() {
 	if len(columns) != 1 || columns[0] != 17 {
 		fail("self-test em dash fixture failed")
 	}
+	if columns := findAll("valid CLI flags --dry-run --json", "\u2014"); len(columns) != 0 {
+		fail("self-test ASCII double hyphen fixture failed")
+	}
 	fmt.Println("Style checker self-test passed.")
 }
 
