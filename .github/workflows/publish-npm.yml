@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -86,11 +87,10 @@ jobs:
         working-directory: packages/tovuk
         env:
           TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
-      - if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+      - name: Publish package with npm trusted publishing
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
         run: npm publish --access public
         working-directory: packages/tovuk
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Verify npm package
         if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
         run: |
