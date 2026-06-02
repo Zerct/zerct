@@ -34,6 +34,29 @@ func readSortedTexts(directory string, suffix string) []string {
 	return texts
 }
 
+func readSortedTextsRecursive(directory string, suffix string) []string {
+	var paths []string
+	err := filepath.WalkDir(directory, func(path string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), suffix) {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+	if err != nil {
+		fail("walk directory %s: %v", directory, err)
+	}
+	sort.Strings(paths)
+
+	texts := make([]string, 0, len(paths))
+	for _, path := range paths {
+		texts = append(texts, readText(path))
+	}
+	return texts
+}
+
 func readText(path string) string {
 	content, err := os.ReadFile(path)
 	if err != nil {

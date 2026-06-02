@@ -35,7 +35,7 @@
   "tags": [
     {
       "name": "Accounts",
-      "description": "Private account onboarding and dashboard endpoints. Context: tags.0."
+      "description": "Private account onboarding and account overview endpoints. Context: tags.0."
     },
     {
       "name": "Auth",
@@ -219,9 +219,9 @@
         "tags": [
           "Accounts"
         ],
-        "summary": "Get account profile",
-        "description": "Returns the authenticated account profile used by web onboarding and SDK flows. Context: paths./v1/account.get.",
-        "operationId": "getAccountProfile",
+        "summary": "Get current account",
+        "description": "Returns the authenticated account profile. Context: paths./v1/account.get.",
+        "operationId": "getCurrentAccount",
         "responses": {
           "200": {
             "$ref": "#/components/responses/AccountProfileLoaded"
@@ -245,7 +245,7 @@
           "Accounts"
         ],
         "summary": "Update account profile",
-        "description": "Sets the private Tovuk handle and display name used for the authenticated dashboard. Context: paths./v1/account.put.",
+        "description": "Sets the private Tovuk handle and display name used for the authenticated overview. Context: paths./v1/account.put.",
         "operationId": "updateAccountProfile",
         "requestBody": {
           "description": "Account handle and display name. Context: paths./v1/account.put.requestBody.",
@@ -286,17 +286,17 @@
         }
       }
     },
-    "/v1/account/dashboard": {
+    "/v1/account/overview": {
       "get": {
         "tags": [
           "Accounts"
         ],
-        "summary": "Get account dashboard",
-        "description": "Returns deploys and usage for the authenticated account dashboard. Context: paths./v1/account/dashboard.get.",
-        "operationId": "getAccountDashboard",
+        "summary": "Get account overview",
+        "description": "Returns deploys and usage for the authenticated account overview. Context: paths./v1/account/overview.get.",
+        "operationId": "getAccountOverview",
         "responses": {
           "200": {
-            "$ref": "#/components/responses/AccountDashboardLoaded"
+            "$ref": "#/components/responses/AccountOverviewLoaded"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1512,33 +1512,6 @@
         }
       }
     },
-    "/v1/me": {
-      "get": {
-        "tags": [
-          "Accounts"
-        ],
-        "summary": "Get current account",
-        "description": "Returns the authenticated account profile. Context: paths./v1/me.get.",
-        "operationId": "getCurrentAccount",
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/AccountProfileLoaded"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/v1/usage": {
       "get": {
         "tags": [
@@ -1566,13 +1539,13 @@
         }
       }
     },
-    "/v1/activity": {
+    "/v1/account/activity": {
       "get": {
         "tags": [
           "Accounts"
         ],
         "summary": "Get account activity",
-        "description": "Returns account profile, usage, services, recent deploys, recent builds, and next actions. Context: paths./v1/activity.get.",
+        "description": "Returns account profile, usage, services, recent deploys, recent builds, and next actions. Context: paths./v1/account/activity.get.",
         "operationId": "getAccountActivity",
         "parameters": [
           {
@@ -1589,7 +1562,7 @@
                 100
               ]
             },
-            "description": "Maximum records to return. Context: paths./v1/activity.get.parameters.0.",
+            "description": "Maximum records to return. Context: paths./v1/account/activity.get.parameters.0.",
             "example": 100
           },
           {
@@ -1604,7 +1577,7 @@
                 "1000"
               ]
             },
-            "description": "Cursor returned by the previous response. Context: paths./v1/activity.get.parameters.1.",
+            "description": "Cursor returned by the previous response. Context: paths./v1/account/activity.get.parameters.1.",
             "example": "1000"
           }
         ],
@@ -6660,8 +6633,8 @@
           }
         }
       },
-      "AccountDashboardLoaded": {
-        "description": "Authenticated account dashboard. Context: components.responses.AccountDashboardLoaded.",
+      "AccountOverviewLoaded": {
+        "description": "Authenticated account overview. Context: components.responses.AccountOverviewLoaded.",
         "headers": {
           "X-RateLimit-Limit": {
             "$ref": "#/components/headers/RateLimitLimit"
@@ -6679,11 +6652,11 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/AccountDashboardResponse"
+              "$ref": "#/components/schemas/AccountOverviewResponse"
             },
             "examples": {
               "example": {
-                "summary": "Authenticated account dashboard.",
+                "summary": "Authenticated account overview.",
                 "value": {
                   "profile": {
                     "accountId": "acct_01HW0000000000000000000000",
@@ -11940,7 +11913,7 @@
               "string",
               "null"
             ],
-            "description": "Private account dashboard URL. Context: components.schemas.AccountProfileResponse.properties.accountUrl.",
+            "description": "Private account overview URL. Context: components.schemas.AccountProfileResponse.properties.accountUrl.",
             "format": "uri",
             "examples": [
               "https://tovuk.com/acme"
@@ -11983,7 +11956,7 @@
           },
           "displayName": {
             "type": "string",
-            "description": "Display name shown in the private dashboard. Context: components.schemas.AccountProfileUpdateRequest.properties.displayName.",
+            "description": "Display name shown in the private overview. Context: components.schemas.AccountProfileUpdateRequest.properties.displayName.",
             "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,79}$",
             "minLength": 1,
             "maxLength": 80,
@@ -11999,9 +11972,9 @@
           }
         ]
       },
-      "AccountDashboardResponse": {
+      "AccountOverviewResponse": {
         "type": "object",
-        "description": "Authenticated account dashboard response. Context: components.schemas.AccountDashboardResponse.",
+        "description": "Authenticated account overview response. Context: components.schemas.AccountOverviewResponse.",
         "additionalProperties": false,
         "required": [
           "profile",
@@ -12027,11 +12000,11 @@
           },
           "services": {
             "type": "array",
-            "description": "Deploys owned by the account. Context: components.schemas.AccountDashboardResponse.properties.services.",
+            "description": "Deploys owned by the account. Context: components.schemas.AccountOverviewResponse.properties.services.",
             "minItems": 0,
             "maxItems": 1000,
             "items": {
-              "$ref": "#/components/schemas/AccountDashboardService"
+              "$ref": "#/components/schemas/AccountOverviewService"
             },
             "examples": [
               [
@@ -12064,7 +12037,7 @@
                 "deployCount": 3
               }
             ],
-            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "$ref": "#/components/schemas/AccountOverviewUsage",
             "storageObjectCount": 2,
             "objectStorageMib": 24
           },
@@ -12230,7 +12203,7 @@
           },
           "billingEstimate": {
             "$ref": "#/components/schemas/UsageCostEstimate",
-            "description": "Current-month cost estimate computed from usage meters and plan pricing. Context: components.schemas.AccountDashboardResponse.properties.billingEstimate."
+            "description": "Current-month cost estimate computed from usage meters and plan pricing. Context: components.schemas.AccountOverviewResponse.properties.billingEstimate."
           }
         },
         "examples": [
@@ -12523,9 +12496,9 @@
           }
         ]
       },
-      "AccountDashboardService": {
+      "AccountOverviewService": {
         "type": "object",
-        "description": "Dashboard deploy row. Context: components.schemas.AccountDashboardService.",
+        "description": "Account service overview row. Context: components.schemas.AccountOverviewService.",
         "additionalProperties": false,
         "required": [
           "serviceId",
@@ -12545,7 +12518,7 @@
         "properties": {
           "serviceId": {
             "type": "string",
-            "description": "Service id shown on the account dashboard. Context: components.schemas.AccountDashboardService.properties.serviceId.",
+            "description": "Service id shown on the account overview. Context: components.schemas.AccountOverviewService.properties.serviceId.",
             "pattern": "^service_[0-9A-HJKMNP-TV-Z]{26}$",
             "examples": [
               "service_01HW0000000000000000000000"
@@ -12554,7 +12527,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Service name. Context: components.schemas.AccountDashboardService.properties.name.",
+            "description": "Service name. Context: components.schemas.AccountOverviewService.properties.name.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -12563,7 +12536,7 @@
           },
           "slug": {
             "type": "string",
-            "description": "Public deploy slug. Context: components.schemas.AccountDashboardService.properties.slug.",
+            "description": "Public deploy slug. Context: components.schemas.AccountOverviewService.properties.slug.",
             "pattern": "^[a-z][a-z0-9-]{2,62}$",
             "examples": [
               "hello-rust"
@@ -12572,7 +12545,7 @@
           },
           "url": {
             "type": "string",
-            "description": "HTTPS endpoint assigned to the deploy. Context: components.schemas.AccountDashboardService.properties.url.",
+            "description": "HTTPS endpoint assigned to the deploy. Context: components.schemas.AccountOverviewService.properties.url.",
             "format": "uri",
             "examples": [
               "https://hello-rust.tovuk.app"
@@ -12598,7 +12571,7 @@
           },
           "deployCount": {
             "type": "integer",
-            "description": "Number of deploy records. Context: components.schemas.AccountDashboardService.properties.deployCount.",
+            "description": "Number of deploy records. Context: components.schemas.AccountOverviewService.properties.deployCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -12608,7 +12581,7 @@
           },
           "runtimeMemoryMib": {
             "type": "integer",
-            "description": "Runtime memory limit in MiB. Context: components.schemas.AccountDashboardService.properties.runtimeMemoryMib.",
+            "description": "Runtime memory limit in MiB. Context: components.schemas.AccountOverviewService.properties.runtimeMemoryMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -12618,7 +12591,7 @@
           },
           "runtimeCpuMillis": {
             "type": "integer",
-            "description": "Runtime CPU limit in millis. Context: components.schemas.AccountDashboardService.properties.runtimeCpuMillis.",
+            "description": "Runtime CPU limit in millis. Context: components.schemas.AccountOverviewService.properties.runtimeCpuMillis.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -12631,7 +12604,7 @@
               "integer",
               "null"
             ],
-            "description": "SQLite storage limit in MiB when enabled. Context: components.schemas.AccountDashboardService.properties.databaseStorageMib.",
+            "description": "SQLite storage limit in MiB when enabled. Context: components.schemas.AccountOverviewService.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -12641,7 +12614,7 @@
           },
           "idleTimeoutMinutes": {
             "type": "integer",
-            "description": "Idle timeout in minutes. Context: components.schemas.AccountDashboardService.properties.idleTimeoutMinutes.",
+            "description": "Idle timeout in minutes. Context: components.schemas.AccountOverviewService.properties.idleTimeoutMinutes.",
             "format": "int64",
             "minimum": 0,
             "maximum": 10080,
@@ -12654,7 +12627,7 @@
               "string",
               "null"
             ],
-            "description": "Latest deploy creation timestamp. Context: components.schemas.AccountDashboardService.properties.latestDeployAt.",
+            "description": "Latest deploy creation timestamp. Context: components.schemas.AccountOverviewService.properties.latestDeployAt.",
             "format": "date-time",
             "examples": [
               "2026-05-25T12:00:00.000Z"
@@ -12679,9 +12652,9 @@
           }
         ]
       },
-      "AccountDashboardUsage": {
+      "AccountOverviewUsage": {
         "type": "object",
-        "description": "Aggregated account dashboard usage. Context: components.schemas.AccountDashboardUsage.",
+        "description": "Aggregated account overview usage. Context: components.schemas.AccountOverviewUsage.",
         "additionalProperties": false,
         "required": [
           "serviceCount",
@@ -12706,7 +12679,7 @@
         "properties": {
           "serviceCount": {
             "type": "integer",
-            "description": "Number of services. Context: components.schemas.AccountDashboardUsage.properties.serviceCount.",
+            "description": "Number of services. Context: components.schemas.AccountOverviewUsage.properties.serviceCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
@@ -12716,7 +12689,7 @@
           },
           "runningCount": {
             "type": "integer",
-            "description": "Number of running services. Context: components.schemas.AccountDashboardUsage.properties.runningCount.",
+            "description": "Number of running services. Context: components.schemas.AccountOverviewUsage.properties.runningCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000,
@@ -12726,7 +12699,7 @@
           },
           "runtimeMemoryMib": {
             "type": "integer",
-            "description": "Sum of runtime memory limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.runtimeMemoryMib.",
+            "description": "Sum of runtime memory limits in MiB. Context: components.schemas.AccountOverviewUsage.properties.runtimeMemoryMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -12736,7 +12709,7 @@
           },
           "runtimeCpuMillis": {
             "type": "integer",
-            "description": "Sum of runtime CPU limits in millis. Context: components.schemas.AccountDashboardUsage.properties.runtimeCpuMillis.",
+            "description": "Sum of runtime CPU limits in millis. Context: components.schemas.AccountOverviewUsage.properties.runtimeCpuMillis.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -12746,7 +12719,7 @@
           },
           "databaseStorageMib": {
             "type": "integer",
-            "description": "Sum of service SQLite database storage limits in MiB. Context: components.schemas.AccountDashboardUsage.properties.databaseStorageMib.",
+            "description": "Sum of service SQLite database storage limits in MiB. Context: components.schemas.AccountOverviewUsage.properties.databaseStorageMib.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576,
@@ -12756,7 +12729,7 @@
           },
           "deployCount": {
             "type": "integer",
-            "description": "Sum of deploy records. Context: components.schemas.AccountDashboardUsage.properties.deployCount.",
+            "description": "Sum of deploy records. Context: components.schemas.AccountOverviewUsage.properties.deployCount.",
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
@@ -12777,35 +12750,35 @@
           "kvNamespaceCount": {
             "type": "integer",
             "format": "int64",
-            "description": "Number of service KV namespaces. Context: components.schemas.AccountDashboardUsage.properties.kvNamespaceCount.",
+            "description": "Number of service KV namespaces. Context: components.schemas.AccountOverviewUsage.properties.kvNamespaceCount.",
             "minimum": 0,
             "maximum": 1000000000000
           },
           "queueCount": {
             "type": "integer",
             "format": "int64",
-            "description": "Number of service queues. Context: components.schemas.AccountDashboardUsage.properties.queueCount.",
+            "description": "Number of service queues. Context: components.schemas.AccountOverviewUsage.properties.queueCount.",
             "minimum": 0,
             "maximum": 1000000000000
           },
           "cronTriggerCount": {
             "type": "integer",
             "format": "int64",
-            "description": "Number of service cron triggers. Context: components.schemas.AccountDashboardUsage.properties.cronTriggerCount.",
+            "description": "Number of service cron triggers. Context: components.schemas.AccountOverviewUsage.properties.cronTriggerCount.",
             "minimum": 0,
             "maximum": 1000000000000
           },
           "stateNamespaceCount": {
             "type": "integer",
             "format": "int64",
-            "description": "Number of State namespaces. Context: components.schemas.AccountDashboardUsage.properties.stateNamespaceCount.",
+            "description": "Number of State namespaces. Context: components.schemas.AccountOverviewUsage.properties.stateNamespaceCount.",
             "minimum": 0,
             "maximum": 1000000000000
           },
           "usageCapCount": {
             "type": "integer",
             "format": "int64",
-            "description": "Number of account usage caps. Context: components.schemas.AccountDashboardUsage.properties.usageCapCount.",
+            "description": "Number of account usage caps. Context: components.schemas.AccountOverviewUsage.properties.usageCapCount.",
             "minimum": 0,
             "maximum": 1000000000000
           },
@@ -12844,7 +12817,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 1000000,
-            "description": "Number of service storage objects, including pending direct uploads. Context: components.schemas.AccountDashboardUsage.properties.storageObjectCount.",
+            "description": "Number of service storage objects, including pending direct uploads. Context: components.schemas.AccountOverviewUsage.properties.storageObjectCount.",
             "examples": [
               2
             ]
@@ -12854,7 +12827,7 @@
             "format": "int64",
             "minimum": 0,
             "maximum": 1048576000,
-            "description": "Service object storage used in MiB, rounded up from bytes. Context: components.schemas.AccountDashboardUsage.properties.objectStorageMib.",
+            "description": "Service object storage used in MiB, rounded up from bytes. Context: components.schemas.AccountOverviewUsage.properties.objectStorageMib.",
             "examples": [
               24
             ]
@@ -13306,7 +13279,7 @@
           "services": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AccountDashboardService"
+              "$ref": "#/components/schemas/AccountOverviewService"
             },
             "maxItems": 1000,
             "examples": [
@@ -15883,7 +15856,7 @@
             "$ref": "#/components/schemas/AccountProfileResponse"
           },
           "usage": {
-            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "$ref": "#/components/schemas/AccountOverviewUsage",
             "storageObjectCount": 2,
             "objectStorageMib": 24
           },
@@ -17739,7 +17712,7 @@
       },
       "AccountActivityResponse": {
         "type": "object",
-        "description": "Account-wide activity response optimized for dashboards and agents. Context: components.schemas.AccountActivityResponse.",
+        "description": "Account-wide activity response optimized for humans and agents. Context: components.schemas.AccountActivityResponse.",
         "additionalProperties": false,
         "required": [
           "profile",
@@ -17757,7 +17730,7 @@
             "$ref": "#/components/schemas/AccountProfileResponse"
           },
           "usage": {
-            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "$ref": "#/components/schemas/AccountOverviewUsage",
             "storageObjectCount": 2,
             "objectStorageMib": 24
           },
@@ -17776,7 +17749,7 @@
             "type": "array",
             "description": "Account services. Context: components.schemas.AccountActivityResponse.properties.services.",
             "items": {
-              "$ref": "#/components/schemas/AccountDashboardService"
+              "$ref": "#/components/schemas/AccountOverviewService"
             },
             "maxItems": 1000,
             "examples": [
@@ -18333,7 +18306,7 @@
       },
       "ServiceOverviewResponse": {
         "type": "object",
-        "description": "Single service overview response optimized for dashboards and agents. Context: components.schemas.ServiceOverviewResponse.",
+        "description": "Single service overview response optimized for humans and agents. Context: components.schemas.ServiceOverviewResponse.",
         "additionalProperties": false,
         "required": [
           "status",
@@ -18438,7 +18411,7 @@
             "$ref": "#/components/schemas/ServiceResourcesResponse"
           },
           "accountUsage": {
-            "$ref": "#/components/schemas/AccountDashboardUsage",
+            "$ref": "#/components/schemas/AccountOverviewUsage",
             "description": "Authenticated account usage snapshot so agents can reason about limits from service show. Context: components.schemas.ServiceOverviewResponse.properties.accountUsage."
           },
           "billingEstimate": {
@@ -21992,8 +21965,8 @@
                 },
                 {
                   "type": "number",
-                  "minimum": -1E+308,
-                  "maximum": 1E+308
+                  "minimum": -1E308,
+                  "maximum": 1E308
                 },
                 {
                   "type": "boolean"
@@ -22045,8 +22018,8 @@
                 },
                 {
                   "type": "number",
-                  "minimum": -1E+308,
-                  "maximum": 1E+308
+                  "minimum": -1E308,
+                  "maximum": 1E308
                 },
                 {
                   "type": "boolean"
