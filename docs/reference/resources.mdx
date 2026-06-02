@@ -16,7 +16,9 @@ resources, creating and deleting SQLite, KV, Queue, Cron, State, and Service
 Binding resources through the same API routes as the CLI. The same view can run
 single SQLite queries through `POST /v1/services/{service_id}/sqlite/{database}/query`
 and displays rows, `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`,
-storage, duration, and next actions.
+storage, duration, and next actions. It can also list KV keys, read one KV key,
+write one KV key, and delete one KV key through the same metered KV API routes
+as the CLI. Use CLI bulk commands for bulk KV reads, writes, and removals.
 
 ## Commands
 
