@@ -13,7 +13,10 @@ or `https://tovuk.com/<handle>/resources`. It can create SQLite databases, KV
 namespaces, queues, cron triggers, State namespaces, and private service
 bindings with the same API routes and limits as the CLI. It also lists existing
 resources, creating and deleting SQLite, KV, Queue, Cron, State, and Service
-Binding resources through the same API routes as the CLI.
+Binding resources through the same API routes as the CLI. The same view can run
+single SQLite queries through `POST /v1/services/{service_id}/sqlite/{database}/query`
+and displays rows, `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`,
+storage, duration, and next actions.
 
 ## Commands
 
