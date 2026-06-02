@@ -35,6 +35,11 @@ impl CliError {
     pub(crate) fn exit_code(&self) -> u8 {
         self.0.exit_code
     }
+
+    #[cfg(test)]
+    pub(crate) fn payload(&self) -> &AgentErrorPayload {
+        &self.0.payload
+    }
 }
 
 impl fmt::Display for CliError {
