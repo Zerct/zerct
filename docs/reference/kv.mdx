@@ -20,13 +20,26 @@ tovuk kv namespace delete --service service_1 CACHE --json
 ## API
 
 - `POST /v1/services/{service_id}/kv/namespaces`
-- `PUT /v1/services/{service_id}/kv/namespaces/{namespace}/values/{key}`
-- `GET /v1/services/{service_id}/kv/namespaces/{namespace}/values/{key}`
-- `GET /v1/services/{service_id}/kv/namespaces/{namespace}/keys`
+- `GET /v1/services/{service_id}/kv/{namespace}/keys`
+- `GET /v1/services/{service_id}/kv/{namespace}/values/{key}`
+- `PUT /v1/services/{service_id}/kv/{namespace}/values/{key}`
+- `DELETE /v1/services/{service_id}/kv/{namespace}/values/{key}`
+- `PUT /v1/services/{service_id}/kv/{namespace}/bulk`
+- `POST /v1/services/{service_id}/kv/{namespace}/bulk`
+- `POST /v1/services/{service_id}/kv/{namespace}/bulk/removals`
 - `DELETE /v1/services/{service_id}/kv/namespaces/{namespace}`
 
 Every response uses stable `code`, `message`, `agent_instruction`, and
 `docs_url` fields when the next action is not obvious.
+
+## Dashboard
+
+The dashboard Resources view at `https://tovuk.com/account/resources` can list
+KV keys, read one key, write one key, and delete one key through the same API
+routes, limits, and meters as the CLI. Key listing is metered as `kv_lists`,
+reads as `kv_reads`, writes as `kv_writes`, deletes as `kv_deletes`, and stored
+bytes as `kv_storage_bytes`. Use the CLI or API bulk routes for bulk reads,
+writes, and removals.
 
 ## Meters and caps
 

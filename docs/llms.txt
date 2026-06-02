@@ -42,7 +42,10 @@ Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service
 Binding resources through the same API routes as the CLI. It can also run
 single SQLite queries and shows returned rows, `rowsRead`, `rowsWritten`,
-`vmSteps`, `fullscanSteps`, storage, duration, and next actions.
+`vmSteps`, `fullscanSteps`, storage, duration, and next actions. It can list KV
+keys, read one KV key, write one KV key, and delete one KV key with `kv_lists`,
+`kv_reads`, `kv_writes`, `kv_deletes`, and `kv_storage_bytes` metering. Use CLI
+bulk commands for bulk KV reads, writes, and removals.
 
 Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
 supports listing, setting, and deleting write-only service secrets through the
