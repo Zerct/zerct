@@ -5,9 +5,7 @@ mod report;
 
 use super::{
     deploy::discover_deploy_projects,
-    errors::{
-        AgentErrorPayload, CliError, CliFailure, Result, agent_error, internal_error, print_json,
-    },
+    errors::{AgentErrorPayload, CliError, CliFailure, Result, internal_error, print_json},
     project_kind::ProjectKind,
 };
 pub(crate) use checks::first_output_line;
@@ -16,6 +14,8 @@ use config_file::read_config;
 use report::{ProjectQualityReport, WorkspaceQualityReport, print_quality_report, quality_report};
 pub(crate) use report::{QualityCheck, QualityReport, QualityReportKind, quality_check};
 use std::path::Path;
+
+const CHECK_DOCS_URL: &str = "https://docs.tovuk.com/agents";
 
 pub(crate) fn check_project(project_dir: &Path, json_output: bool) -> Result<()> {
     let report = run_check_workspace(project_dir);
@@ -26,31 +26,30 @@ pub(crate) fn check_project(project_dir: &Path, json_output: bool) -> Result<()>
         if report.ok() {
             return Ok(());
         }
-        return Err(CliError::new(CliFailure {
-            payload: AgentErrorPayload {
-                code: "check_failed".to_owned(),
-                message: "Tovuk check failed.".to_owned(),
-                agent_instruction: first_failed_instruction(&report),
-                docs_url: None,
-                checkout_url: None,
-            },
-            json: true,
-            exit_code: 1,
-        }));
+        return Err(check_failed_error(&report, true));
     }
 
     print_quality_report(&report);
     if !report.ok() {
-        let instruction = first_failed_instruction(&report)
-            .unwrap_or_else(|| "Fix the failed checks and retry `tovuk check`.".to_owned());
-        return Err(agent_error(
-            "check_failed",
-            "Tovuk check failed.",
-            instruction,
-            false,
-        ));
+        return Err(check_failed_error(&report, false));
     }
     Ok(())
+}
+
+fn check_failed_error(report: &QualityReportKind, json_output: bool) -> CliError {
+    let instruction = first_failed_instruction(report)
+        .unwrap_or_else(|| "Fix the failed checks and retry `tovuk check`.".to_owned());
+    CliError::new(CliFailure {
+        payload: AgentErrorPayload {
+            code: "check_failed".to_owned(),
+            message: "Tovuk check failed.".to_owned(),
+            agent_instruction: Some(instruction),
+            docs_url: Some(CHECK_DOCS_URL.to_owned()),
+            checkout_url: None,
+        },
+        json: json_output,
+        exit_code: 1,
+    })
 }
 
 pub(crate) fn run_check_workspace(project_dir: &Path) -> QualityReportKind {
@@ -107,4 +106,44 @@ fn first_failed_instruction(report: &QualityReportKind) -> Option<String> {
         .iter()
         .find(|check| !check.ok)
         .and_then(|check| check.agent_instruction.clone())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{QualityCheck, QualityReport, QualityReportKind, check_failed_error};
+
+    #[test]
+    fn check_failure_points_agents_to_repair_docs() -> Result<(), Box<dyn std::error::Error>> {
+        let report = QualityReportKind::Project(Box::new(QualityReport {
+            ok: false,
+            project: ".".to_owned(),
+            config: None,
+            checks: vec![QualityCheck {
+                name: "tovuk.toml".to_owned(),
+                ok: false,
+                message: "missing".to_owned(),
+                agent_instruction: Some("Create and commit tovuk.toml, then retry.".to_owned()),
+            }],
+        }));
+        let error = check_failed_error(&report, true);
+        let payload = error.payload();
+        if payload.code != "check_failed" {
+            return Err(format!("unexpected error code: {}", payload.code).into());
+        }
+        if payload.docs_url.as_deref() != Some("https://docs.tovuk.com/agents") {
+            return Err(format!("unexpected docs URL: {:?}", payload.docs_url).into());
+        }
+        if !payload
+            .agent_instruction
+            .as_deref()
+            .is_some_and(|instruction| instruction.contains("tovuk.toml"))
+        {
+            return Err(format!(
+                "unexpected agent instruction: {:?}",
+                payload.agent_instruction
+            )
+            .into());
+        }
+        Ok(())
+    }
 }
