@@ -247,6 +247,11 @@ tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the report
 tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
 ```
 
+Without `--json`, `tovuk service list` prints a compact table with Service
+kind, runtime status, URL, and resource counts. `tovuk service show` prints a
+compact Service snapshot with resource counts, usage, latest deploy, latest
+build, and next actions. Agents should still use `--json` for machine parsing.
+
 Dashboard Overview is available at `https://tovuk.com/account` and
 `https://tovuk.com/<handle>`. When no Services exist, it shows first Service
 commands for `tovuk new hello-service --template fullstack-rust-tanstack`,

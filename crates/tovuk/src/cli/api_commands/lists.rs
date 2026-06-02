@@ -1,18 +1,17 @@
 use super::super::{
     args::CliOptions,
+    auth::read_or_login_token,
     errors::{Result, agent_error},
-    project::encode_component,
+    project::{encode_component, nested_string, number_field, string_field},
 };
-use super::{
-    common::service_route,
-    generic::{print_authenticated, print_authenticated_mutation},
-};
+use super::{common::service_route, generic::print_authenticated_mutation, http::api_request};
 use reqwest::Method;
+use serde_json::Value;
 
 pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
-        "list" => print_authenticated(cli, "/v1/services"),
-        "show" => service_get(cli, 1, "overview"),
+        "list" => service_list(cli),
+        "show" => service_show(cli),
         "delete" => {
             let service = cli.args.get(1).cloned().filter(|value| !value.is_empty());
             let route = if let Some(service) = service {
@@ -31,8 +30,29 @@ pub(crate) fn service_command(cli: &CliOptions) -> Result<()> {
     }
 }
 
-fn service_get(cli: &CliOptions, arg_index: usize, suffix: &str) -> Result<()> {
-    print_authenticated(cli, &service_route_from_arg(cli, arg_index, suffix)?)
+fn service_list(cli: &CliOptions) -> Result<()> {
+    let token = read_or_login_token(cli)?;
+    let response = api_request(cli, Method::GET, "/v1/services", Some(&token), None)?;
+    if cli.output.json {
+        return super::super::errors::print_json(&response);
+    }
+    for line in service_list_lines(&response) {
+        println!("{line}");
+    }
+    Ok(())
+}
+
+fn service_show(cli: &CliOptions) -> Result<()> {
+    let route = service_route_from_arg(cli, 1, "overview")?;
+    let token = read_or_login_token(cli)?;
+    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
+    if cli.output.json {
+        return super::super::errors::print_json(&response);
+    }
+    for line in service_show_lines(&response) {
+        println!("{line}");
+    }
+    Ok(())
 }
 
 fn service_route_from_arg(cli: &CliOptions, arg_index: usize, suffix: &str) -> Result<String> {
@@ -53,4 +73,243 @@ fn service_route_from_arg(cli: &CliOptions, arg_index: usize, suffix: &str) -> R
         ));
     }
     service_route(cli, suffix)
+}
+
+fn service_list_lines(response: &Value) -> Vec<String> {
+    let services = response
+        .get("services")
+        .and_then(Value::as_array)
+        .map_or(EMPTY_VALUES, Vec::as_slice);
+    if services.is_empty() {
+        return vec![
+            "no services".to_owned(),
+            "next: tovuk deploy --dry-run --json".to_owned(),
+        ];
+    }
+
+    let mut lines = Vec::with_capacity(services.len() + 2);
+    lines.push("name\tservice\tkind\tstatus\tresources\turl".to_owned());
+    for service in services {
+        let name = string_field(service, "name");
+        let service_id = string_field(service, "serviceId");
+        let kind = string_field(service, "kind");
+        let status = string_field(service, "runtimeStatus");
+        let url = string_field(service, "url");
+        let resources = resource_count_summary(
+            service.get("resources").unwrap_or(&Value::Null),
+            ACCOUNT_SERVICE_RESOURCE_COUNT_FIELDS,
+        );
+        lines.push(format!(
+            "{name}\t{service_id}\t{kind}\t{status}\t{resources}\t{url}"
+        ));
+    }
+    lines.push("next: tovuk service show <service> --json".to_owned());
+    lines
+}
+
+fn service_show_lines(response: &Value) -> Vec<String> {
+    let service = response
+        .get("status")
+        .and_then(|status| status.get("service"))
+        .unwrap_or(&Value::Null);
+    let service_id = string_field(service, "id");
+    let name = string_field(service, "name");
+    let kind = string_field(service, "kind");
+    let status = string_field(service, "runtime_status");
+    let url = string_field(service, "url");
+    let latest_deploy = nested_string(response, &["status", "latest_deploy", "id"]);
+    let latest_build = nested_string(response, &["status", "latest_build_job", "id"]);
+    let latest_build_status = nested_string(response, &["status", "latest_build_job", "status"]);
+
+    let mut lines = vec![
+        format!("service {name}"),
+        format!("id {service_id}"),
+        format!("kind {kind}"),
+        format!("status {status}"),
+        format!("url {url}"),
+        format!("resources {}", service_show_resource_summary(response)),
+        format!("usage {}", service_show_usage_summary(response)),
+    ];
+    if !latest_deploy.is_empty() {
+        lines.push(format!("latest_deploy {latest_deploy}"));
+    }
+    if !latest_build.is_empty() {
+        lines.push(format!("latest_build {latest_build} {latest_build_status}"));
+    }
+    lines.push(format!("json: tovuk service show {service_id} --json"));
+    for action in response
+        .get("next_actions")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .take(3)
+    {
+        lines.push(format!("next: {action}"));
+    }
+    lines
+}
+
+fn service_show_resource_summary(response: &Value) -> String {
+    let resources = response.get("resources").unwrap_or(&Value::Null);
+    let usage = response.get("accountUsage").unwrap_or(&Value::Null);
+    let mut parts = Vec::from([
+        format!("sqlite={}", array_len(resources, "sqliteDatabases")),
+        format!("storage={}", number_field(usage, "storageObjectCount")),
+        format!("kv={}", array_len(resources, "kvNamespaces")),
+        format!("queues={}", array_len(resources, "queues")),
+        format!("cron={}", array_len(resources, "cronTriggers")),
+        format!("state={}", array_len(resources, "stateNamespaces")),
+        format!("bindings={}", array_len(resources, "serviceBindings")),
+        format!(
+            "secrets={}",
+            response
+                .get("env")
+                .and_then(Value::as_array)
+                .map_or(0, Vec::len)
+        ),
+        format!(
+            "domains={}",
+            response
+                .get("domains")
+                .and_then(Value::as_array)
+                .map_or(0, Vec::len)
+        ),
+    ]);
+    parts.push(format!("caps={}", array_len(resources, "usageCaps")));
+    parts.join(" ")
+}
+
+fn service_show_usage_summary(response: &Value) -> String {
+    let usage = response.get("accountUsage").unwrap_or(&Value::Null);
+    format!(
+        "requests_day={} cpu_ms_day={} build_minutes_month={} storage_mib={}",
+        usage_meter(usage, "day", "worker_requests"),
+        usage_meter(usage, "day", "worker_cpu_ms"),
+        usage_meter(usage, "month", "build_minutes"),
+        number_field(usage, "objectStorageMib"),
+    )
+}
+
+fn resource_count_summary(value: &Value, fields: &[(&str, &str)]) -> String {
+    fields
+        .iter()
+        .map(|(label, key)| format!("{label}={}", number_field(value, key)))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn usage_meter(usage: &Value, window: &str, meter: &str) -> u64 {
+    usage
+        .get("meters")
+        .and_then(|meters| meters.get(window))
+        .map_or(0, |meters| number_field(meters, meter))
+}
+
+fn array_len(value: &Value, key: &str) -> usize {
+    value.get(key).and_then(Value::as_array).map_or(0, Vec::len)
+}
+
+const ACCOUNT_SERVICE_RESOURCE_COUNT_FIELDS: &[(&str, &str)] = &[
+    ("sqlite", "sqliteDatabases"),
+    ("storage", "storageObjects"),
+    ("kv", "kvNamespaces"),
+    ("queues", "queues"),
+    ("cron", "cronTriggers"),
+    ("state", "stateNamespaces"),
+    ("bindings", "serviceBindings"),
+    ("secrets", "secrets"),
+    ("domains", "customDomains"),
+];
+
+const EMPTY_VALUES: &[Value] = &[];
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::{service_list_lines, service_show_lines};
+
+    #[test]
+    fn service_list_lines_show_resource_counts() {
+        assert_eq!(
+            service_list_lines(&json!({
+                "services": [{
+                    "name": "hello-rust",
+                    "serviceId": "service_1",
+                    "kind": "fullstack",
+                    "runtimeStatus": "running",
+                    "url": "https://hello-rust.tovuk.app",
+                    "resources": {
+                        "sqliteDatabases": 1,
+                        "storageObjects": 2,
+                        "kvNamespaces": 3,
+                        "queues": 4,
+                        "cronTriggers": 5,
+                        "stateNamespaces": 6,
+                        "serviceBindings": 7,
+                        "secrets": 8,
+                        "customDomains": 9
+                    }
+                }]
+            })),
+            vec![
+                "name\tservice\tkind\tstatus\tresources\turl".to_owned(),
+                "hello-rust\tservice_1\tfullstack\trunning\tsqlite=1 storage=2 kv=3 queues=4 cron=5 state=6 bindings=7 secrets=8 domains=9\thttps://hello-rust.tovuk.app".to_owned(),
+                "next: tovuk service show <service> --json".to_owned(),
+            ]
+        );
+    }
+
+    #[test]
+    fn service_show_lines_include_usage_and_next_actions() {
+        assert_eq!(
+            service_show_lines(&json!({
+                "status": {
+                    "service": {
+                        "id": "service_1",
+                        "name": "hello-rust",
+                        "kind": "fullstack",
+                        "runtime_status": "running",
+                        "url": "https://hello-rust.tovuk.app"
+                    },
+                    "latest_deploy": { "id": "deploy_1" },
+                    "latest_build_job": { "id": "job_1", "status": "succeeded" }
+                },
+                "resources": {
+                    "sqliteDatabases": [{ "name": "DB" }],
+                    "kvNamespaces": [{ "name": "CACHE" }],
+                    "queues": [],
+                    "cronTriggers": [],
+                    "stateNamespaces": [],
+                    "serviceBindings": [],
+                    "usageCaps": [{ "metric": "worker_requests" }]
+                },
+                "env": [{ "name": "API_KEY" }],
+                "domains": [{ "domain": "www.example.com" }],
+                "accountUsage": {
+                    "storageObjectCount": 2,
+                    "objectStorageMib": 24,
+                    "meters": {
+                        "day": { "worker_requests": 10, "worker_cpu_ms": 4 },
+                        "month": { "build_minutes": 2 }
+                    }
+                },
+                "next_actions": ["Inspect logs."]
+            })),
+            vec![
+                "service hello-rust".to_owned(),
+                "id service_1".to_owned(),
+                "kind fullstack".to_owned(),
+                "status running".to_owned(),
+                "url https://hello-rust.tovuk.app".to_owned(),
+                "resources sqlite=1 storage=2 kv=1 queues=0 cron=0 state=0 bindings=0 secrets=1 domains=1 caps=1".to_owned(),
+                "usage requests_day=10 cpu_ms_day=4 build_minutes_month=2 storage_mib=24".to_owned(),
+                "latest_deploy deploy_1".to_owned(),
+                "latest_build job_1 succeeded".to_owned(),
+                "json: tovuk service show service_1 --json".to_owned(),
+                "next: Inspect logs.".to_owned(),
+            ]
+        );
+    }
 }

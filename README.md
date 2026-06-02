@@ -214,6 +214,10 @@ does not drift.
 service. It includes service state, deploy history, build history, recent logs,
 env names, domains, resources, `accountUsage`, `billingEstimate`, and next
 actions.
+Without `--json`, `tovuk service list` prints a compact table with kind,
+runtime status, URL, and per-Service resource counts. `tovuk service show`
+prints a compact Service snapshot with resource counts, current usage, latest
+deploy, latest build, and next actions.
 
 ## Example
 
