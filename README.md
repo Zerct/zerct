@@ -99,7 +99,7 @@ output = "dist"
 Static frontend deploys use the same command with this `tovuk.toml`:
 
 ```toml
-name = "dashboard"
+name = "marketing-site"
 kind = "static_frontend"
 
 [capabilities]

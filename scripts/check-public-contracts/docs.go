@@ -41,6 +41,7 @@ func checkDocs() {
 	limits := readText("docs/reference/limits.mdx")
 	resources := readText("docs/reference/resources.mdx")
 	products := readText("docs/reference/products.mdx")
+	projectContract := readText("docs/reference/project-contract.mdx")
 	abuse := readText("docs/abuse.mdx")
 	agents := readText("docs/agents.mdx")
 	publicCopy := strings.Join([]string{
@@ -50,6 +51,7 @@ func checkDocs() {
 		limits,
 		resources,
 		products,
+		projectContract,
 		abuse,
 		agents,
 		readText("docs/reference/workers.mdx"),
@@ -117,6 +119,7 @@ func checkDocs() {
 		"app terms",
 		"app data",
 		"my-app",
+		"name = \"dashboard\"",
 	} {
 		rejectContains(publicCopy, retired, "retired service wording")
 	}
