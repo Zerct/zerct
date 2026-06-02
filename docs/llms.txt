@@ -245,10 +245,16 @@ commands for `tovuk new hello-service --template fullstack-rust-tanstack`,
 truth; agents should still use CLI and API commands for automation.
 
 Dashboard Support is available at `https://tovuk.com/account/support` and uses
-the same ticket API and rate limits as the CLI.
+the same ticket API and rate limits as the CLI. Ticket rows expose copyable
+`tovuk support list --json`, `tovuk support resolve <ticket_id> --json`,
+`tovuk service show <service> --json`, and
+`tovuk logs --build <build_id> --json` commands when context exists.
 
 Dashboard Abuse is available at `https://tovuk.com/account/abuse` and uses the
 same abuse report, list, and appeal API routes and rate limits as the CLI.
+Report rows expose copyable `tovuk abuse list --json`,
+`tovuk abuse appeal <report_id> "Remediation details" --json`, and
+`tovuk service show <service> --json` commands when report state supports them.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB. Object storage limits expose object size, part count,
