@@ -18,7 +18,9 @@ single SQLite queries through `POST /v1/services/{service_id}/sqlite/{database}/
 and displays rows, `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`,
 storage, duration, and next actions. It can also list KV keys, read one KV key,
 write one KV key, and delete one KV key through the same metered KV API routes
-as the CLI. It can also list State objects, list State keys, read one State
+as the CLI. It can also send one Queue message and send one Queue batch through
+the same metered Queue API routes as the CLI, then read Queue messages and read
+Queue metrics. It can also list State objects, list State keys, read one State
 value, write one State value, delete one State value, read State alarms, set
 State alarms, and delete State alarms through the same metered State API routes
 as the CLI. Use CLI bulk commands for bulk KV reads, writes, and removals.

@@ -12,17 +12,37 @@ image processing, cleanup, and other tasks that can run after the response.
 tovuk queue create --service service_1 failed_jobs --json
 tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 tovuk queue send --service service_1 jobs '{"kind":"welcome","user_id":"user_1"}' --json
+tovuk queue send-batch --service service_1 jobs '[{"body":"{\"kind\":\"welcome\"}"},{"body":"{\"kind\":\"index\"}"}]' --json
+tovuk queue messages --service service_1 jobs --json
+tovuk queue metrics --service service_1 jobs --json
 tovuk queue update --service service_1 jobs --max-retries 5 --json
 tovuk queue update --service service_1 jobs --clear-dead-letter-queue --json
 tovuk queue delete --service service_1 jobs --json
 ```
 
+## Dashboard
+
+Dashboard Queue controls are available at
+`https://tovuk.com/account/resources` and
+`https://tovuk.com/<handle>/resources`. The Resources view can read recent
+Queue messages, read Queue metrics, send one Queue message, and send one Queue
+batch through the same metered Queue API routes as the CLI.
+
+The dashboard uses these Queue API routes:
+
+- `GET /v1/services/{service_id}/queues/{queue}/messages`
+- `GET /v1/services/{service_id}/queues/{queue}/metrics`
+- `POST /v1/services/{service_id}/queues/{queue}/messages`
+- `POST /v1/services/{service_id}/queues/{queue}/messages/batch`
+
 ## API
 
 - `POST /v1/services/{service_id}/queues`
-- `PATCH /v1/services/{service_id}/queues/{queue}`
+- `PUT /v1/services/{service_id}/queues/{queue}`
+- `GET /v1/services/{service_id}/queues/{queue}/messages`
 - `POST /v1/services/{service_id}/queues/{queue}/messages`
 - `GET /v1/services/{service_id}/queues/{queue}/metrics`
+- `POST /v1/services/{service_id}/queues/{queue}/messages/batch`
 - `DELETE /v1/services/{service_id}/queues/{queue}`
 
 Queue consumers are Rust worker routes at `POST /.tovuk/queues/<queue>`.

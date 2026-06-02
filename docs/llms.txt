@@ -45,9 +45,11 @@ single SQLite queries and shows returned rows, `rowsRead`, `rowsWritten`,
 `vmSteps`, `fullscanSteps`, storage, duration, and next actions. It can list KV
 keys, read one KV key, write one KV key, and delete one KV key with `kv_lists`,
 `kv_reads`, `kv_writes`, `kv_deletes`, and `kv_storage_bytes` metering. It can
-list State objects, list State keys, read State values, write State values,
-delete State values, read State alarms, set State alarms, and delete State
-alarms with `state_requests`, `state_duration_gb_milliseconds`,
+read Queue messages, read Queue metrics, send one Queue message, and send one
+Queue batch with `queue_operations` metering. It can list State objects, list
+State keys, read State values, write State values, delete State values, read
+State alarms, set State alarms, and delete State alarms with `state_requests`,
+`state_duration_gb_milliseconds`,
 `state_sqlite_rows_read`, `state_sqlite_rows_written`, and
 `state_sqlite_storage_bytes` metering. Use CLI bulk commands for bulk KV reads,
 writes, and removals.
