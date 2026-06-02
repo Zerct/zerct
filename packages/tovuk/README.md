@@ -97,9 +97,10 @@ can choose the correct product and cap the right meters in one flow.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, and resource counts. `tovuk service show` prints a
-compact Service snapshot with resource counts, usage, latest deploy, latest
-build, and next actions.
+kind, runtime status, URL, enabled and disabled capabilities, and resource
+counts. `tovuk service show` prints a compact Service snapshot with
+capabilities, resource counts, usage, latest deploy, latest build, and next
+actions.
 Dashboard Overview Service rows expose copyable commands for `service show`,
 logs, storage listing, worker request caps, support tickets, and service
 deletion.

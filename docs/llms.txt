@@ -37,6 +37,7 @@ Resource references:
 Dashboard Overview is available at `https://tovuk.com/account` and shows
 Service kind, per-Service resource counts for SQLite, Object Storage, KV,
 Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, plus
+enabled and disabled capability summaries and
 copyable `tovuk service show <service> --json`,
 `tovuk logs --service <service> --limit 100 --json`,
 `tovuk storage list --service <service> --json`,
@@ -252,9 +253,10 @@ tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeplo
 ```
 
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, and resource counts. `tovuk service show` prints a
-compact Service snapshot with resource counts, usage, latest deploy, latest
-build, and next actions. Agents should still use `--json` for machine parsing.
+kind, runtime status, URL, enabled and disabled capabilities, and resource
+counts. `tovuk service show` prints a compact Service snapshot with
+capabilities, resource counts, usage, latest deploy, latest build, and next
+actions. Agents should still use `--json` for machine parsing.
 
 Dashboard Overview is available at `https://tovuk.com/account` and
 `https://tovuk.com/<handle>`. When no Services exist, it shows first Service
@@ -262,7 +264,8 @@ commands for `tovuk new hello-service --template fullstack-rust-tanstack`,
 `tovuk check --json`, `tovuk deploy --dry-run --json`, and
 `tovuk deploy --wait --json`. The committed `tovuk.toml` remains the source of
 truth; agents should still use CLI and API commands for automation. Service
-rows expose `tovuk service show <service> --json`,
+rows expose enabled and disabled capability summaries plus
+`tovuk service show <service> --json`,
 `tovuk logs --service <service> --limit 100 --json`,
 `tovuk storage list --service <service> --json`,
 `tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`,

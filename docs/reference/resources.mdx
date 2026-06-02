@@ -119,11 +119,13 @@ deployment. The authenticated usage response adds
 
 `tovuk service show <service> --json` is the canonical service snapshot for
 agents. It includes status, deploys, builds, logs, env names, domains,
-resources, `accountUsage`, `billingEstimate`, and next actions in one response.
+resources, capabilities, `accountUsage`, `billingEstimate`, and next actions
+in one response.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, and resource counts. `tovuk service show` prints a
-compact Service snapshot with resource counts, usage, latest deploy, latest
-build, and next actions.
+kind, runtime status, URL, enabled and disabled capabilities, and resource
+counts. `tovuk service show` prints a compact Service snapshot with
+capabilities, resource counts, usage, latest deploy, latest build, and next
+actions.
 
 ## Runtime bindings
 

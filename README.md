@@ -211,13 +211,14 @@ flow, logs, env, domains, usage, billing, and support operations so deploy UX
 does not drift.
 
 `tovuk service show <service> --json` is the canonical agent snapshot for one
-service. It includes service state, deploy history, build history, recent logs,
-env names, domains, resources, `accountUsage`, `billingEstimate`, and next
-actions.
+service. It includes service state, capabilities, deploy history, build
+history, recent logs, env names, domains, resources, `accountUsage`,
+`billingEstimate`, and next actions.
 Without `--json`, `tovuk service list` prints a compact table with kind,
-runtime status, URL, and per-Service resource counts. `tovuk service show`
-prints a compact Service snapshot with resource counts, current usage, latest
-deploy, latest build, and next actions.
+runtime status, URL, enabled and disabled capabilities, and per-Service
+resource counts. `tovuk service show` prints a compact Service snapshot with
+capabilities, resource counts, current usage, latest deploy, latest build, and
+next actions.
 Dashboard Overview Service rows expose copyable commands for `service show`,
 logs, storage listing, worker request caps, support tickets, and service
 deletion.

@@ -144,12 +144,13 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
 `tovuk service show <service> --json` includes `accountUsage` and
-`billingEstimate` beside service resources, recent deploys, builds, logs, env
-names, domains, and next actions.
+`billingEstimate` beside capabilities, service resources, recent deploys,
+builds, logs, env names, domains, and next actions.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, and resource counts. `tovuk service show` prints a
-compact Service snapshot with resource counts, usage, latest deploy, latest
-build, and next actions.
+kind, runtime status, URL, enabled and disabled capabilities, and resource
+counts. `tovuk service show` prints a compact Service snapshot with
+capabilities, resource counts, usage, latest deploy, latest build, and next
+actions.
 Dashboard Overview Service rows expose copyable commands for `service show`,
 logs, storage listing, worker request caps, support tickets, and service
 deletion.
