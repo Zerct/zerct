@@ -42,6 +42,10 @@ Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service
 Binding resources through the same API routes as the CLI.
 
+Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
+supports listing, setting, and deleting write-only service secrets through the
+same API routes as `tovuk env`.
+
 Agent repair loop:
 
 1. Run `tovuk check --json`.
