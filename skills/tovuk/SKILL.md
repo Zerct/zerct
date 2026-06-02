@@ -28,7 +28,7 @@ full-stack service to Tovuk.
    Fallow for new package frontends. Avoid JavaScript-based lint, format,
    typecheck, dead-code, or duplicate-code tooling.
 7. For a new full-stack project, run
-   `tovuk new my-app --template fullstack-rust-tanstack`.
+   `tovuk new hello-service --template fullstack-rust-tanstack`.
 8. Run `tovuk check --json`.
 9. Run `tovuk check` when local tools are available.
 10. Run `tovuk deploy --wait --json`.
