@@ -97,6 +97,7 @@ func checkCLIContract() {
 		requireContains(source, "compact table", "human-readable service list output docs")
 		requireContains(source, "resource counts", "human-readable service resource count docs")
 		requireContains(source, "compact Service snapshot", "human-readable service show output docs")
+		requireContains(source, "Dashboard Overview Service rows expose copyable commands", "dashboard overview row command docs")
 	}
 
 	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
