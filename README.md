@@ -147,6 +147,9 @@ bun add -d oxlint oxlint-tsgolint fallow
 Rust worker checks must include `cargo fmt --all --check`, locked release-mode
 `cargo check`, locked release-mode tests, and strict all-target, all-feature
 Clippy with panic/unwrap bans plus resource-sensitive lints.
+Deploy archives must contain source files only. Tovuk rejects generated
+directories, secret files, and compiled artifacts such as `.exe`, `.so`,
+`.dylib`, `.jar`, `.node`, and `.rlib`.
 Package frontend checks must install dependencies, run stable native type-aware
 TypeScript checks, and run native linting plus Fallow dead-code, semantic
 duplicate-code, and health gates before build work is queued. Package frontend

@@ -32,6 +32,16 @@ reject_match 'pull_request_target:' \
 reject_match '(^|[^[:alnum:]_-])(eslint|prettier|tsc)([^[:alnum:]_-]|$)' \
   'JavaScript linters and typecheckers are forbidden in CI; use Rust or Go based checks'
 
+if ! rg -q 'scripts/check-all\.sh' "$workflow_dir"; then
+  printf 'workflows must run scripts/check-all.sh so local and CI checks stay aligned\n' >&2
+  status=1
+fi
+
+if ! rg -q 'check-prose-style\.go' scripts/check-all.sh; then
+  printf 'scripts/check-all.sh must run the prose style checker\n' >&2
+  status=1
+fi
+
 for workflow in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
   [ -e "$workflow" ] || continue
 

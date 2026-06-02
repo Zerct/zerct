@@ -64,6 +64,9 @@ Rust worker contract:
 - The server listens on `0.0.0.0:$PORT`.
 - The configured health path returns HTTP 200.
 - Direct `unsafe` is not allowed in workspace source.
+- Deploy archives contain source files only, not generated directories, secret
+  files, or compiled artifacts such as `.exe`, `.so`, `.dylib`, `.jar`,
+  `.node`, and `.rlib`.
 
 Static frontend contract:
 

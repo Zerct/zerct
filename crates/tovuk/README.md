@@ -32,6 +32,9 @@ Package static frontend deploys require TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
 or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health
 gates.
+Deploy archives must contain source files only. Tovuk rejects generated
+directories, secret files, and compiled artifacts such as `.exe`, `.so`,
+`.dylib`, `.jar`, `.node`, and `.rlib`.
 
 The npm package is also available:
 
