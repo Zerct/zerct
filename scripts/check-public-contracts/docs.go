@@ -53,6 +53,7 @@ func checkDocs() {
 	usageCaps := readText("docs/reference/usage-caps.mdx")
 	llms := readText("docs/llms.txt")
 	abuse := readText("docs/abuse.mdx")
+	support := readText("docs/support.mdx")
 	agents := readText("docs/agents.mdx")
 	publicCopy := strings.Join([]string{
 		readme,
@@ -63,6 +64,7 @@ func checkDocs() {
 		products,
 		projectContract,
 		abuse,
+		support,
 		agents,
 		readText("docs/reference/workers.mdx"),
 		readText("docs/reference/storage.mdx"),
@@ -238,6 +240,9 @@ func checkDocs() {
 	requireContains(openapi, `"buildEnvVars": 64`, "OpenAPI build env var limit")
 	requireContains(openapi, `"buildEnvVarSizeKib": 5`, "OpenAPI build env var size limit")
 	requireContains(openapi, `"alwaysOnServices": 500`, "OpenAPI Pro always-on service limit")
+	requireContains(support, "https://tovuk.com/account/support", "dashboard support route docs")
+	requireContains(support, "same API routes and rate limits as the CLI", "dashboard support parity docs")
+	requireContains(llms, "Dashboard Support is available", "llms dashboard support guidance")
 	requireContains(openapi, `"logEventSizeBytes": 262144`, "OpenAPI log event size limit")
 	requireContains(openapi, `"stateSqliteStorageMibPerObject": 953`, "OpenAPI Free State storage limit")
 	requireContains(openapi, `"stateSqliteStorageMibPerObject": 9536`, "OpenAPI Pro State storage limit")
