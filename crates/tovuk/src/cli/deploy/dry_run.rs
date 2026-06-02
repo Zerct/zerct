@@ -399,6 +399,9 @@ mod tests {
         assert!(meters.contains(&"kv_reads".to_owned()));
         assert!(meters.contains(&"queue_operations".to_owned()));
         assert!(meters.contains(&"state_requests".to_owned()));
+        assert!(meters.contains(&"object_storage_bytes".to_owned()));
+        assert!(meters.contains(&"object_storage_class_a_operations".to_owned()));
+        assert!(meters.contains(&"object_storage_class_b_operations".to_owned()));
         assert!(meters.contains(&"object_storage_egress_bytes".to_owned()));
     }
 
@@ -412,11 +415,17 @@ mod tests {
         assert!(meters.contains(&"worker_requests".to_owned()));
         assert!(meters.contains(&"static_transfer_bytes".to_owned()));
         assert!(!meters.contains(&"sqlite_rows_read".to_owned()));
+        assert!(!meters.contains(&"object_storage_class_a_operations".to_owned()));
         assert!(!meters.contains(&"object_storage_egress_bytes".to_owned()));
         assert!(
             !plan
                 .iter()
                 .any(|entry| entry["meter"] == "sqlite_rows_read")
+        );
+        assert!(
+            !plan
+                .iter()
+                .any(|entry| entry["meter"] == "object_storage_class_a_operations")
         );
         assert!(
             !plan
@@ -432,6 +441,23 @@ mod tests {
         let plan = meter_plan_for_capabilities(Some(&service_capabilities), &sample_capabilities());
 
         let missing_meter = json!({});
+        let object_storage_class_a = plan
+            .iter()
+            .find(|entry| entry["meter"] == "object_storage_class_a_operations")
+            .unwrap_or(&missing_meter);
+        assert_eq!(
+            object_storage_class_a["capCommands"]["month"],
+            "tovuk limits set object_storage_class_a_operations --period month --value <value> --json",
+        );
+        assert!(
+            object_storage_class_a["pricingFields"]
+                .as_array()
+                .is_some_and(|fields| {
+                    fields.iter().any(|field| {
+                        field == "pricing.objectStorage.classAOverageUsdMicrosPerMillion"
+                    })
+                })
+        );
         let object_storage_egress = plan
             .iter()
             .find(|entry| entry["meter"] == "object_storage_egress_bytes")
@@ -486,85 +512,153 @@ mod tests {
     fn sample_capabilities() -> serde_json::Value {
         json!({
             "products": [
-                {
-                    "key": "worker",
-                    "meters": ["worker_requests", "worker_cpu_ms"],
-                    "meter_details": [
-                        { "name": "worker_requests", "unit": "request", "description": "Worker requests." },
-                        { "name": "worker_cpu_ms", "unit": "cpu_ms", "description": "Worker CPU milliseconds." }
-                    ],
-                    "pricing_fields": ["pricing.workers.requestOverageUsdMicrosPerMillion"],
-                    "limit_fields": ["workerRequestsPerDay"]
-                },
-                {
-                    "key": "static_frontend",
-                    "meters": ["static_transfer_bytes"],
-                    "meter_details": [{ "name": "static_transfer_bytes", "unit": "byte", "description": "Static transfer bytes." }],
-                    "pricing_fields": ["pricing.staticAssets.storageFree"],
-                    "limit_fields": ["staticAssetFilesPerVersion"]
-                },
-                {
-                    "key": "sqlite",
-                    "meters": ["sqlite_rows_read"],
-                    "meter_details": [{ "name": "sqlite_rows_read", "unit": "row", "description": "SQLite rows read." }],
-                    "pricing_fields": ["pricing.sqlite.rowsReadOverageUsdMicrosPerMillion"],
-                    "limit_fields": ["sqliteRowsReadPerDay"]
-                },
-                {
-                    "key": "object_storage",
-                    "meters": ["object_storage_egress_bytes"],
-                    "meter_details": [{ "name": "object_storage_egress_bytes", "unit": "byte", "description": "Object storage egress bytes." }],
-                    "pricing_fields": ["pricing.objectStorage.egressOverageUsdMicrosPerTb"],
-                    "limit_fields": ["objectStorageEgressBytesPerMonth"]
-                },
-                {
-                    "key": "kv",
-                    "meters": ["kv_reads"],
-                    "meter_details": [{ "name": "kv_reads", "unit": "read", "description": "KV reads." }],
-                    "pricing_fields": ["pricing.kv.readOverageUsdMicrosPerMillion"],
-                    "limit_fields": ["kvReadsPerDay"]
-                },
-                {
-                    "key": "queue",
-                    "meters": ["queue_operations"],
-                    "meter_details": [{ "name": "queue_operations", "unit": "operation", "description": "Queue operations." }],
-                    "pricing_fields": ["pricing.queues.operationOverageUsdMicrosPerMillion"],
-                    "limit_fields": ["queueOperationsPerDay"]
-                },
-                {
-                    "key": "state",
-                    "meters": ["state_requests"],
-                    "meter_details": [{ "name": "state_requests", "unit": "request", "description": "State requests." }],
-                    "pricing_fields": ["pricing.state.requestOverageUsdMicrosPerMillion"],
-                    "limit_fields": ["stateRequestsPerDay"]
-                },
+                worker_product(),
+                static_frontend_product(),
+                sqlite_product(),
+                object_storage_product(),
+                kv_product(),
+                queue_product(),
+                state_product(),
                 { "key": "cron", "meters": ["worker_cpu_ms"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "service_bindings", "meters": ["worker_cpu_ms"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "builds", "meters": ["build_minutes"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "logs", "meters": ["log_events"], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "secrets", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
                 { "key": "custom_domains", "meters": [], "meter_details": [], "pricing_fields": [], "limit_fields": [] },
-                {
-                    "key": "usage_caps",
-                    "meters": [
-                        "worker_requests",
-                        "static_transfer_bytes",
-                        "sqlite_rows_read",
-                        "object_storage_egress_bytes"
-                    ],
-                    "meter_details": [
-                        { "name": "worker_requests", "unit": "request", "description": "Worker requests." },
-                        { "name": "static_transfer_bytes", "unit": "byte", "description": "Static transfer bytes." },
-                        { "name": "sqlite_rows_read", "unit": "row", "description": "SQLite rows read." },
-                        { "name": "object_storage_egress_bytes", "unit": "byte", "description": "Object storage egress bytes." }
-                    ],
-                    "pricing_fields": [
-                        "pricing.subscriptionUsdCentsPerMonth",
-                        "pricing.paidOveragesEnabled"
-                    ],
-                    "limit_fields": ["apiTokens", "supportTicketsPerDay"]
-                }
+                usage_caps_product()
             ]
+        })
+    }
+
+    fn worker_product() -> serde_json::Value {
+        json!({
+            "key": "worker",
+            "meters": ["worker_requests", "worker_cpu_ms"],
+            "meter_details": [
+                { "name": "worker_requests", "unit": "request", "description": "Worker requests." },
+                { "name": "worker_cpu_ms", "unit": "cpu_ms", "description": "Worker CPU milliseconds." }
+            ],
+            "pricing_fields": ["pricing.workers.requestOverageUsdMicrosPerMillion"],
+            "limit_fields": ["workerRequestsPerDay"]
+        })
+    }
+
+    fn static_frontend_product() -> serde_json::Value {
+        json!({
+            "key": "static_frontend",
+            "meters": ["static_transfer_bytes"],
+            "meter_details": [
+                { "name": "static_transfer_bytes", "unit": "byte", "description": "Static transfer bytes." }
+            ],
+            "pricing_fields": ["pricing.staticAssets.storageFree"],
+            "limit_fields": ["staticAssetFilesPerVersion"]
+        })
+    }
+
+    fn sqlite_product() -> serde_json::Value {
+        json!({
+            "key": "sqlite",
+            "meters": ["sqlite_rows_read"],
+            "meter_details": [
+                { "name": "sqlite_rows_read", "unit": "row", "description": "SQLite rows read." }
+            ],
+            "pricing_fields": ["pricing.sqlite.rowsReadOverageUsdMicrosPerMillion"],
+            "limit_fields": ["sqliteRowsReadPerDay"]
+        })
+    }
+
+    fn object_storage_product() -> serde_json::Value {
+        json!({
+            "key": "object_storage",
+            "meters": [
+                "object_storage_bytes",
+                "object_storage_class_a_operations",
+                "object_storage_class_b_operations",
+                "object_storage_egress_bytes"
+            ],
+            "meter_details": [
+                { "name": "object_storage_bytes", "unit": "byte", "description": "Object storage bytes." },
+                { "name": "object_storage_class_a_operations", "unit": "operation", "description": "Object storage Class A operations." },
+                { "name": "object_storage_class_b_operations", "unit": "operation", "description": "Object storage Class B operations." },
+                { "name": "object_storage_egress_bytes", "unit": "byte", "description": "Object storage egress bytes." }
+            ],
+            "pricing_fields": [
+                "pricing.objectStorage.storageOverageUsdMicrosPerGbMonth",
+                "pricing.objectStorage.classAOverageUsdMicrosPerMillion",
+                "pricing.objectStorage.classBOverageUsdMicrosPerMillion",
+                "pricing.objectStorage.egressOverageUsdMicrosPerTb"
+            ],
+            "limit_fields": [
+                "objectStorageMib",
+                "objectStorageClassAOperationsPerMonth",
+                "objectStorageClassBOperationsPerMonth",
+                "objectStorageEgressBytesPerMonth"
+            ]
+        })
+    }
+
+    fn kv_product() -> serde_json::Value {
+        json!({
+            "key": "kv",
+            "meters": ["kv_reads"],
+            "meter_details": [
+                { "name": "kv_reads", "unit": "read", "description": "KV reads." }
+            ],
+            "pricing_fields": ["pricing.kv.readOverageUsdMicrosPerMillion"],
+            "limit_fields": ["kvReadsPerDay"]
+        })
+    }
+
+    fn queue_product() -> serde_json::Value {
+        json!({
+            "key": "queue",
+            "meters": ["queue_operations"],
+            "meter_details": [
+                { "name": "queue_operations", "unit": "operation", "description": "Queue operations." }
+            ],
+            "pricing_fields": ["pricing.queues.operationOverageUsdMicrosPerMillion"],
+            "limit_fields": ["queueOperationsPerDay"]
+        })
+    }
+
+    fn state_product() -> serde_json::Value {
+        json!({
+            "key": "state",
+            "meters": ["state_requests"],
+            "meter_details": [
+                { "name": "state_requests", "unit": "request", "description": "State requests." }
+            ],
+            "pricing_fields": ["pricing.state.requestOverageUsdMicrosPerMillion"],
+            "limit_fields": ["stateRequestsPerDay"]
+        })
+    }
+
+    fn usage_caps_product() -> serde_json::Value {
+        json!({
+            "key": "usage_caps",
+            "meters": [
+                "worker_requests",
+                "static_transfer_bytes",
+                "sqlite_rows_read",
+                "object_storage_bytes",
+                "object_storage_class_a_operations",
+                "object_storage_class_b_operations",
+                "object_storage_egress_bytes"
+            ],
+            "meter_details": [
+                { "name": "worker_requests", "unit": "request", "description": "Worker requests." },
+                { "name": "static_transfer_bytes", "unit": "byte", "description": "Static transfer bytes." },
+                { "name": "sqlite_rows_read", "unit": "row", "description": "SQLite rows read." },
+                { "name": "object_storage_bytes", "unit": "byte", "description": "Object storage bytes." },
+                { "name": "object_storage_class_a_operations", "unit": "operation", "description": "Object storage Class A operations." },
+                { "name": "object_storage_class_b_operations", "unit": "operation", "description": "Object storage Class B operations." },
+                { "name": "object_storage_egress_bytes", "unit": "byte", "description": "Object storage egress bytes." }
+            ],
+            "pricing_fields": [
+                "pricing.subscriptionUsdCentsPerMonth",
+                "pricing.paidOveragesEnabled"
+            ],
+            "limit_fields": ["apiTokens", "supportTicketsPerDay"]
         })
     }
 }
