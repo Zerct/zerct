@@ -112,10 +112,10 @@ the completion Class A operation; multipart abort is free. Use
 `object_storage_bytes` to cap total stored bytes across the account:
 
 ```sh
-tovuk limits set object_storage_bytes --period month --value 10000000000 --json
-tovuk limits set object_storage_class_a_operations --period month --value 1000000 --json
-tovuk limits set object_storage_class_b_operations --period month --value 10000000 --json
-tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
+tovuk limits set object_storage_bytes --period month --value 10000000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_class_a_operations --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_class_b_operations --period month --value 10000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --notify-at-percent 80 --json
 ```
 
 Upload URL creation reserves the requested bytes before returning the presigned

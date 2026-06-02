@@ -37,8 +37,8 @@ tovuk logs --service service_1 --json
 Builds use `build_minutes`. Logs use `log_events`.
 
 ```sh
-tovuk limits set build_minutes --period month --value 6000 --json
-tovuk limits set log_events --period month --value 1000000 --json
+tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
+tovuk limits set log_events --period month --value 1000000 --notify-at-percent 80 --json
 ```
 
 ## Rules

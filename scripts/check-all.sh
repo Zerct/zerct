@@ -64,7 +64,7 @@ assert_contains() {
   local needle="$2"
   local label="$3"
 
-  if ! grep -Fq "$needle" <<<"$haystack"; then
+  if ! grep -Fq -- "$needle" <<<"$haystack"; then
     printf 'expected %s to contain: %s\n' "$label" "$needle" >&2
     exit 1
   fi
@@ -118,6 +118,7 @@ assert_contains "$native_cli_flag_help_output" 'tovuk deploy --dry-run' 'native 
 assert_contains "$native_cli_flag_help_output" 'tovuk pricing' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk service show' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk limits set' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" '--notify-at-percent' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk billing checkout' 'native CLI flag help'
 test "$("$native_cli" -V)" = "$native_cli_version"
 test "$("$native_cli" --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
@@ -206,6 +207,7 @@ assert_contains "$python_cli_flag_help_output" 'tovuk deploy --dry-run' 'Python 
 assert_contains "$python_cli_flag_help_output" 'tovuk pricing' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk service show' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk limits set' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" '--notify-at-percent' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk billing checkout' 'Python CLI flag help'
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --wait-timeout=9 --version)" = "$native_cli_version"
 if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then

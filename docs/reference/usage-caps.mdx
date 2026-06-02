@@ -11,17 +11,15 @@ before load tests, media uploads, queue fan-out, and paid usage.
 The dashboard Usage view is available at `https://tovuk.com/account/usage` or
 `https://tovuk.com/<handle>/usage`. It includes the same hard-cap action as
 `tovuk limits set` and the same removal action as `tovuk limits delete`, backed
-by the same API routes and rate limits as the CLI. It also opens the same
-hosted checkout flow as `tovuk billing checkout --json` for upgrades and paid
-overages.
+by the same API routes and rate limits as the CLI. It shows copyable `tovuk limits set` commands with `--notify-at-percent` and copyable `tovuk limits delete` commands for the selected meter. It also opens the same hosted checkout flow as `tovuk billing checkout --json` for upgrades and paid overages.
 
 ## Agent commands
 
 ```sh
 tovuk usage --json
-tovuk limits set worker_requests --period day --value 100000 --json
-tovuk limits set worker_cpu_ms --period day --value 1000000 --json
-tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+tovuk limits set worker_cpu_ms --period day --value 1000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --notify-at-percent 80 --json
 tovuk limits delete worker_requests --period day --json
 ```
 
@@ -65,6 +63,8 @@ Usage Caps support these public meters:
 1. Run `tovuk pricing --json` and read `products[].meter_details`.
 2. Run `tovuk deploy --dry-run --json` and read `meterPlan`.
 3. Set caps for every enabled capability before high traffic.
-4. Run `tovuk usage --json` during tests.
-5. If a limit blocks work, run `tovuk billing checkout --json` and show the
+4. Pass `--notify-at-percent <1-100>` to choose when Tovuk warns before a hard
+   stop.
+5. Run `tovuk usage --json` during tests.
+6. If a limit blocks work, run `tovuk billing checkout --json` and show the
    hosted URL to the human.

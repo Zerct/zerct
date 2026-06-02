@@ -20,7 +20,7 @@ pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
             "Use the `products` entries to choose Worker, Static Frontend, SQLite, Object Storage, State, KV, Queue, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, or Usage Caps before changing code.",
             "Use each product's `features`, `meters`, `meter_details`, `pricing_fields`, and `limit_fields` to verify supported behavior, price work, and choose hard caps.",
             "Use `tovuk usage --json` after login to compare current usage against these limits.",
-            "Use `tovuk limits set <metric> --period month --value <n> --json` to set a hard cap before paid overages.",
+            "Use `tovuk limits set <metric> --period month --value <n> --notify-at-percent 80 --json` to set a hard cap before paid overages.",
             "Use `tovuk billing checkout --json` when an upgrade is required."
         ]
     }))

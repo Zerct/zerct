@@ -57,10 +57,10 @@ Usage:
   tovuk state delete --service <service> Room [--api <url>] [--json]
   tovuk binding create --service <service> AUTH_SERVICE --target <target_service> [--api <url>] [--json]
   tovuk binding delete --service <service> AUTH_SERVICE [--api <url>] [--json]
-  tovuk limits set build_minutes --period month --value 6000 [--api <url>] [--json]
-  tovuk limits set worker_requests --period day --value 100000 [--api <url>] [--json]
-  tovuk limits set state_requests --period month --value 1000000 [--api <url>] [--json]
-  tovuk limits set state_sqlite_rows_written --period month --value 50000000 [--api <url>] [--json]
+  tovuk limits set build_minutes --period month --value 6000 [--notify-at-percent <1-100>] [--api <url>] [--json]
+  tovuk limits set worker_requests --period day --value 100000 [--notify-at-percent <1-100>] [--api <url>] [--json]
+  tovuk limits set state_requests --period month --value 1000000 [--notify-at-percent <1-100>] [--api <url>] [--json]
+  tovuk limits set state_sqlite_rows_written --period month --value 50000000 [--notify-at-percent <1-100>] [--api <url>] [--json]
   tovuk limits delete worker_requests --period day [--api <url>] [--json]
   tovuk env list --service <service> [--api <url>] [--json]
   tovuk env set --service <service> KEY=value [--api <url>] [--json]
@@ -102,7 +102,7 @@ Agent contract:
   - Create SQLite backups before migrations or destructive writes; restore from CLI/API without dashboard access, then verify with read queries.
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
-  - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages.
+  - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages. Pass --notify-at-percent to control the warning threshold.
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
   - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
   - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.

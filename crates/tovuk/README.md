@@ -130,9 +130,9 @@ tovuk state delete-value --service service_1 Room room-1 counter --json
 tovuk state delete --service service_1 Room --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
-tovuk limits set worker_requests --period day --value 100000 --json
-tovuk limits set state_requests --period month --value 1000000 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
 tovuk limits delete worker_requests --period day --json
 tovuk billing checkout --json
 tovuk billing portal
@@ -150,7 +150,7 @@ names, domains, and next actions.
 capability meters, account limits, and `billingEstimate` before deploy, without
 creating a build. Each service includes `meterPlan` entries for enabled service meters
 with meter units, pricing fields, limit fields, and ready-to-fill `tovuk limits set`
-cap commands.
+cap commands with `--notify-at-percent`.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.

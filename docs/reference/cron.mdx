@@ -38,8 +38,8 @@ Cron delivery counts as Worker usage because it wakes and runs the Rust worker.
 Use `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes` caps.
 
 ```sh
-tovuk limits set worker_requests --period day --value 100000 --json
-tovuk limits set worker_cpu_ms --period day --value 1000000 --json
+tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+tovuk limits set worker_cpu_ms --period day --value 1000000 --notify-at-percent 80 --json
 ```
 
 ## Rules

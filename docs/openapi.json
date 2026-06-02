@@ -8066,8 +8066,8 @@
                           "unit": "request",
                           "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker.",
                           "cap_commands": {
-                            "day": "tovuk limits set worker_requests --period day --value <value> --json",
-                            "month": "tovuk limits set worker_requests --period month --value <value> --json"
+                            "day": "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json",
+                            "month": "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
                           }
                         },
                         {
@@ -8075,8 +8075,8 @@
                           "unit": "cpu_ms",
                           "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers.",
                           "cap_commands": {
-                            "day": "tovuk limits set worker_cpu_ms --period day --value <value> --json",
-                            "month": "tovuk limits set worker_cpu_ms --period month --value <value> --json"
+                            "day": "tovuk limits set worker_cpu_ms --period day --value <value> --notify-at-percent 80 --json",
+                            "month": "tovuk limits set worker_cpu_ms --period month --value <value> --notify-at-percent 80 --json"
                           }
                         },
                         {
@@ -8084,8 +8084,8 @@
                           "unit": "byte",
                           "description": "Rust Worker response body bytes plus response-side WebSocket tunnel bytes.",
                           "cap_commands": {
-                            "day": "tovuk limits set worker_transfer_bytes --period day --value <value> --json",
-                            "month": "tovuk limits set worker_transfer_bytes --period month --value <value> --json"
+                            "day": "tovuk limits set worker_transfer_bytes --period day --value <value> --notify-at-percent 80 --json",
+                            "month": "tovuk limits set worker_transfer_bytes --period month --value <value> --notify-at-percent 80 --json"
                           }
                         }
                       ],
@@ -15777,8 +15777,8 @@
                       "unit": "request",
                       "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker.",
                       "cap_commands": {
-                        "day": "tovuk limits set worker_requests --period day --value <value> --json",
-                        "month": "tovuk limits set worker_requests --period month --value <value> --json"
+                        "day": "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json",
+                        "month": "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
                       }
                     },
                     {
@@ -15786,8 +15786,8 @@
                       "unit": "cpu_ms",
                       "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers.",
                       "cap_commands": {
-                        "day": "tovuk limits set worker_cpu_ms --period day --value <value> --json",
-                        "month": "tovuk limits set worker_cpu_ms --period month --value <value> --json"
+                        "day": "tovuk limits set worker_cpu_ms --period day --value <value> --notify-at-percent 80 --json",
+                        "month": "tovuk limits set worker_cpu_ms --period month --value <value> --notify-at-percent 80 --json"
                       }
                     },
                     {
@@ -15795,8 +15795,8 @@
                       "unit": "byte",
                       "description": "Rust Worker response body bytes plus response-side WebSocket tunnel bytes.",
                       "cap_commands": {
-                        "day": "tovuk limits set worker_transfer_bytes --period day --value <value> --json",
-                        "month": "tovuk limits set worker_transfer_bytes --period month --value <value> --json"
+                        "day": "tovuk limits set worker_transfer_bytes --period day --value <value> --notify-at-percent 80 --json",
+                        "month": "tovuk limits set worker_transfer_bytes --period month --value <value> --notify-at-percent 80 --json"
                       }
                     }
                   ],
@@ -24694,8 +24694,8 @@
                   "unit": "request",
                   "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker.",
                   "cap_commands": {
-                    "day": "tovuk limits set worker_requests --period day --value <value> --json",
-                    "month": "tovuk limits set worker_requests --period month --value <value> --json"
+                    "day": "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json",
+                    "month": "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
                   }
                 },
                 {
@@ -24703,8 +24703,8 @@
                   "unit": "cpu_ms",
                   "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers.",
                   "cap_commands": {
-                    "day": "tovuk limits set worker_cpu_ms --period day --value <value> --json",
-                    "month": "tovuk limits set worker_cpu_ms --period month --value <value> --json"
+                    "day": "tovuk limits set worker_cpu_ms --period day --value <value> --notify-at-percent 80 --json",
+                    "month": "tovuk limits set worker_cpu_ms --period month --value <value> --notify-at-percent 80 --json"
                   }
                 }
               ]
@@ -24796,8 +24796,8 @@
                 "unit": "request",
                 "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker.",
                 "cap_commands": {
-                  "day": "tovuk limits set worker_requests --period day --value <value> --json",
-                  "month": "tovuk limits set worker_requests --period month --value <value> --json"
+                  "day": "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json",
+                  "month": "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
                 }
               },
               {
@@ -24805,8 +24805,8 @@
                 "unit": "cpu_ms",
                 "description": "Active CPU milliseconds consumed by Rust Worker request and event handlers.",
                 "cap_commands": {
-                  "day": "tovuk limits set worker_cpu_ms --period day --value <value> --json",
-                  "month": "tovuk limits set worker_cpu_ms --period month --value <value> --json"
+                  "day": "tovuk limits set worker_cpu_ms --period day --value <value> --notify-at-percent 80 --json",
+                  "month": "tovuk limits set worker_cpu_ms --period month --value <value> --notify-at-percent 80 --json"
                 }
               },
               {
@@ -24814,8 +24814,8 @@
                 "unit": "byte",
                 "description": "Rust Worker response body bytes plus response-side WebSocket tunnel bytes.",
                 "cap_commands": {
-                  "day": "tovuk limits set worker_transfer_bytes --period day --value <value> --json",
-                  "month": "tovuk limits set worker_transfer_bytes --period month --value <value> --json"
+                  "day": "tovuk limits set worker_transfer_bytes --period day --value <value> --notify-at-percent 80 --json",
+                  "month": "tovuk limits set worker_transfer_bytes --period month --value <value> --notify-at-percent 80 --json"
                 }
               }
             ],
@@ -24904,8 +24904,8 @@
             "unit": "request",
             "description": "One public request, cron delivery, queue delivery, State alarm delivery, or WebSocket upgrade routed to a Rust Worker.",
             "cap_commands": {
-              "day": "tovuk limits set worker_requests --period day --value <value> --json",
-              "month": "tovuk limits set worker_requests --period month --value <value> --json"
+              "day": "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json",
+              "month": "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
             }
           }
         ]
@@ -26450,7 +26450,7 @@
             "pattern": "^[\\s\\S]{1,220}$",
             "maxLength": 220,
             "examples": [
-              "tovuk limits set worker_requests --period day --value <value> --json"
+              "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json"
             ]
           },
           "month": {
@@ -26459,14 +26459,14 @@
             "pattern": "^[\\s\\S]{1,220}$",
             "maxLength": 220,
             "examples": [
-              "tovuk limits set worker_requests --period month --value <value> --json"
+              "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
             ]
           }
         },
         "examples": [
           {
-            "day": "tovuk limits set worker_requests --period day --value <value> --json",
-            "month": "tovuk limits set worker_requests --period month --value <value> --json"
+            "day": "tovuk limits set worker_requests --period day --value <value> --notify-at-percent 80 --json",
+            "month": "tovuk limits set worker_requests --period month --value <value> --notify-at-percent 80 --json"
           }
         ]
       }

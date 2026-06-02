@@ -135,15 +135,15 @@ Paid overage should never surprise a human. Before a high-throughput test or a
 production launch, set hard caps:
 
 ```sh
-tovuk limits set build_minutes --period month --value 6000 --json
-tovuk limits set worker_requests --period month --value 10000000 --json
-tovuk limits set worker_cpu_ms --period month --value 30000000 --json
-tovuk limits set static_transfer_bytes --period month --value 107374182400 --json
-tovuk limits set worker_transfer_bytes --period month --value 107374182400 --json
-tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --json
-tovuk limits set state_requests --period month --value 1000000 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --json
-tovuk limits set object_storage_class_a_operations --period month --value 1000000 --json
+tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
+tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
+tovuk limits set worker_cpu_ms --period month --value 30000000 --notify-at-percent 80 --json
+tovuk limits set static_transfer_bytes --period month --value 107374182400 --notify-at-percent 80 --json
+tovuk limits set worker_transfer_bytes --period month --value 107374182400 --notify-at-percent 80 --json
+tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --notify-at-percent 80 --json
+tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
+tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
+tovuk limits set object_storage_class_a_operations --period month --value 1000000 --notify-at-percent 80 --json
 ```
 
 Tovuk reports prices in API JSON as USD micro-units. `1,000,000` means `$1.00`.

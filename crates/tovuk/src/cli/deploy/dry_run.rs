@@ -230,8 +230,8 @@ fn product_meter_plan(product: &Value) -> Vec<Value> {
                 "limitFields": product.get("limit_fields").cloned().unwrap_or(Value::Null),
                 "pricingFields": product.get("pricing_fields").cloned().unwrap_or(Value::Null),
                 "capCommands": {
-                    "day": format!("tovuk limits set {meter} --period day --value <value> --json"),
-                    "month": format!("tovuk limits set {meter} --period month --value <value> --json"),
+                    "day": format!("tovuk limits set {meter} --period day --value <value> --notify-at-percent 80 --json"),
+                    "month": format!("tovuk limits set {meter} --period month --value <value> --notify-at-percent 80 --json"),
                 },
             })
         })
@@ -447,7 +447,7 @@ mod tests {
             .unwrap_or(&missing_meter);
         assert_eq!(
             object_storage_class_a["capCommands"]["month"],
-            "tovuk limits set object_storage_class_a_operations --period month --value <value> --json",
+            "tovuk limits set object_storage_class_a_operations --period month --value <value> --notify-at-percent 80 --json",
         );
         assert!(
             object_storage_class_a["pricingFields"]
@@ -470,7 +470,7 @@ mod tests {
         assert_eq!(object_storage_egress["unit"], "byte");
         assert_eq!(
             object_storage_egress["capCommands"]["month"],
-            "tovuk limits set object_storage_egress_bytes --period month --value <value> --json",
+            "tovuk limits set object_storage_egress_bytes --period month --value <value> --notify-at-percent 80 --json",
         );
         assert!(
             object_storage_egress["pricingFields"]
