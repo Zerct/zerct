@@ -20,7 +20,9 @@ inspection, logs, env, domains, storage, limits, billing, and support.
 agents can inspect current-month cost estimates without a dashboard.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
 disabled capabilities, quality checks, capability meters, limits, and
-`billingEstimate` before deploy without creating a build.
+`billingEstimate` before deploy without creating a build. Each service includes
+`meterPlan` entries with meter units, pricing fields, limit fields, and
+ready-to-fill `tovuk limits set` cap commands.
 
 The agent repair loop is the same on every package surface:
 

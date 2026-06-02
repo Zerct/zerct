@@ -37,8 +37,13 @@ if ! rg -q 'scripts/check-all\.sh' "$workflow_dir"; then
   status=1
 fi
 
-if ! rg -q 'check-prose-style\.go' scripts/check-all.sh; then
-  printf 'scripts/check-all.sh must run the prose style checker\n' >&2
+if ! rg -q 'go run scripts/check-prose-style\.go --self-test' scripts/check-all.sh; then
+  printf 'scripts/check-all.sh must run the prose style checker self-test\n' >&2
+  status=1
+fi
+
+if ! rg -q 'go run scripts/check-prose-style\.go$' scripts/check-all.sh; then
+  printf 'scripts/check-all.sh must run the prose style checker repository scan\n' >&2
   status=1
 fi
 
