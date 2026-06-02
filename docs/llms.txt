@@ -46,10 +46,11 @@ single SQLite queries and shows returned rows, `rowsRead`, `rowsWritten`,
 keys, read one KV key, write one KV key, and delete one KV key with `kv_lists`,
 `kv_reads`, `kv_writes`, `kv_deletes`, and `kv_storage_bytes` metering. It can
 read Queue messages, read Queue metrics, send one Queue message, and send one
-Queue batch with `queue_operations` metering. It can list State objects, list
-State keys, read State values, write State values, delete State values, read
-State alarms, set State alarms, and delete State alarms with `state_requests`,
-`state_duration_gb_milliseconds`,
+Queue batch with `queue_operations` metering. It can update Cron schedules,
+pause Cron triggers, and resume Cron triggers through the same API routes as
+the CLI. It can list State objects, list State keys, read State values, write
+State values, delete State values, read State alarms, set State alarms, and
+delete State alarms with `state_requests`, `state_duration_gb_milliseconds`,
 `state_sqlite_rows_read`, `state_sqlite_rows_written`, and
 `state_sqlite_storage_bytes` metering. Use CLI bulk commands for bulk KV reads,
 writes, and removals.
@@ -191,6 +192,9 @@ tovuk queue update --service <service> jobs --max-batch-size 25 --json
 tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
 tovuk queue delete --service <service> jobs --json
 tovuk cron create --service <service> nightly "0 0 * * *" --json
+tovuk cron update --service <service> nightly "*/15 * * * *" --json
+tovuk cron disable --service <service> nightly --json
+tovuk cron enable --service <service> nightly --json
 tovuk cron delete --service <service> nightly --json
 tovuk state create --service <service> Room --json
 tovuk state objects --service <service> Room --json
