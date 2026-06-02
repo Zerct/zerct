@@ -73,7 +73,9 @@ the browser.
 
 Dashboard Activity is available at `https://tovuk.com/account/activity` and
 shows recent deploys, builds, runtime logs, next actions, and copyable repair
-commands through the same activity and log API routes as the CLI.
+commands through the same activity, deploy cancel, and log API routes as the
+CLI. Deploy rows can cancel queued build work and expose the same
+`tovuk deploy cancel <deploy_id> --json` command.
 
 Agent repair loop:
 
