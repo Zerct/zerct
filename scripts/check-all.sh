@@ -89,6 +89,8 @@ fi
 
 native_cli_version="$("$native_cli" --version)"
 printf '%s\n' "$native_cli_version"
+"$native_cli" | grep -q 'tovuk deploy --dry-run'
+"$native_cli" help | grep -q 'tovuk deploy --dry-run'
 "$native_cli" --help | grep -q 'tovuk support create'
 "$native_cli" --help | grep -q 'tovuk support resolve'
 "$native_cli" --help | grep -q 'tovuk abuse report'
@@ -172,6 +174,8 @@ done
 
 "$python_bin" -m compileall -q packages/tovuk-py/src
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk | grep -q 'tovuk deploy --dry-run'
+PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk help | grep -q 'tovuk deploy --dry-run'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support create'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk support resolve'
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help | grep -q 'tovuk abuse report'

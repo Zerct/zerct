@@ -39,6 +39,10 @@ pub(crate) fn run() -> Result<ExitCode> {
     }
 
     match cli.command.as_str() {
+        "help" => {
+            println!("{}", help_text());
+            Ok(())
+        }
         "new" => new_project(&project_path(cli.args.first())?, &cli.template),
         "check" => check_project(&project_path(cli.args.first())?, cli.output.json),
         "login" => login(&cli),
