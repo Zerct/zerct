@@ -260,6 +260,7 @@ tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
 tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
 tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
 tovuk queue metrics --service service_1 jobs --json
+tovuk state list --service service_1 --json
 tovuk state objects --service service_1 Room --json
 tovuk state keys --service service_1 Room room-1 --json
 tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json

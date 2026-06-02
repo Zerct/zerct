@@ -190,6 +190,7 @@ tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-time
 tovuk queue update --service service_1 jobs --max-batch-size 25 --json
 tovuk queue delete --service service_1 jobs --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
+tovuk state list --service service_1 --json
 tovuk state create --service service_1 Room --json
 tovuk state put --service service_1 Room room-1 counter 1 --json
 tovuk state get --service service_1 Room room-1 counter --json

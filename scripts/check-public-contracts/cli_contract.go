@@ -75,6 +75,7 @@ func checkCLIContract() {
 	}
 	for _, source := range []string{cargoCLI, rootReadme, cargoReadme, npmReadme, pythonReadme} {
 		requireContains(source, "tovuk storage url", "agentic storage URL command")
+		requireContains(source, "tovuk state list", "agentic State namespace list command")
 		requireContains(source, "tovuk state objects", "agentic State objects command")
 		requireContains(source, "tovuk state keys", "agentic State keys command")
 		requireContains(source, "tovuk state alarm set", "agentic State alarm set command")
