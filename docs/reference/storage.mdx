@@ -11,6 +11,24 @@ instructions can be parsed without dashboard access.
 The storage origin is private and S3-compatible. Agents and users should use
 Tovuk API and CLI commands instead of provider bucket URLs.
 
+## Dashboard
+
+Dashboard Storage is available at `https://tovuk.com/account/storage` and
+`https://tovuk.com/<handle>/storage`. It lists objects, completes ordinary file
+uploads, creates download URLs, and deletes objects through the same API routes
+and limits as the CLI.
+
+The dashboard uses these storage API routes:
+
+- `GET /v1/services/{service_id}/storage`
+- `POST /v1/services/{service_id}/storage/upload-url`
+- `POST /v1/services/{service_id}/storage/complete`
+- `POST /v1/services/{service_id}/storage/download-url`
+- `DELETE /v1/services/{service_id}/storage?path=<path>`
+
+Use `tovuk storage upload --json` for files larger than 100 MiB because the CLI
+handles multipart upload and recovery without a manual dashboard step.
+
 ## CLI
 
 ```sh

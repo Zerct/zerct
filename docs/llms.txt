@@ -46,6 +46,12 @@ Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
 supports listing, setting, and deleting write-only service secrets through the
 same API routes as `tovuk env`.
 
+Dashboard Storage is available at `https://tovuk.com/account/storage` and
+`https://tovuk.com/<handle>/storage`. It lists objects, completes ordinary file
+uploads, creates download URLs, and deletes objects through the same API routes
+and limits as the CLI. Use `tovuk storage upload --json` for multipart uploads
+above 100 MiB.
+
 Dashboard Activity is available at `https://tovuk.com/account/activity` and
 shows recent deploys, builds, runtime logs, next actions, and copyable repair
 commands through the same activity and log API routes as the CLI.
