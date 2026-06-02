@@ -140,6 +140,10 @@ agents can choose the correct product and cap the right meters before heavy
 work.
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
+Without `--json`, `tovuk service list` prints a compact table with Service
+kind, runtime status, URL, and resource counts. `tovuk service show` prints a
+compact Service snapshot with resource counts, usage, latest deploy, latest
+build, and next actions.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
 disabled capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service

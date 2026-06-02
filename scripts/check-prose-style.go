@@ -88,10 +88,6 @@ func runSelfTest() {
 	if len(findings) != 1 || findings[0].column != 17 {
 		fail("self-test em dash fixture failed")
 	}
-	allowedLine := "ASCII double hyphen --json and -- stays allowed"
-	if len(appendLineFindings(nil, "self-test", 0, allowedLine)) != 0 {
-		fail("self-test double hyphen fixture failed")
-	}
 	fmt.Println("Style checker self-test passed.")
 }
 

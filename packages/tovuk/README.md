@@ -96,6 +96,10 @@ The pricing response includes plan pricing and product meter metadata, so agents
 can choose the correct product and cap the right meters in one flow.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
+Without `--json`, `tovuk service list` prints a compact table with Service
+kind, runtime status, URL, and resource counts. `tovuk service show` prints a
+compact Service snapshot with resource counts, usage, latest deploy, latest
+build, and next actions.
 The deploy dry-run response combines `tovuk.toml`, explicit enabled and disabled
 capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service

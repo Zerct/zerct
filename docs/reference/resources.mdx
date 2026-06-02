@@ -1,6 +1,6 @@
 ---
 title: "Service Resources"
-description: "Agent-ready commands for worker service resources."
+description: "Agent-ready commands for Service resources."
 ---
 
 Tovuk service resources are managed through the CLI, API, and dashboard so
@@ -120,6 +120,10 @@ deployment. The authenticated usage response adds
 `tovuk service show <service> --json` is the canonical service snapshot for
 agents. It includes status, deploys, builds, logs, env names, domains,
 resources, `accountUsage`, `billingEstimate`, and next actions in one response.
+Without `--json`, `tovuk service list` prints a compact table with Service
+kind, runtime status, URL, and resource counts. `tovuk service show` prints a
+compact Service snapshot with resource counts, usage, latest deploy, latest
+build, and next actions.
 
 ## Runtime bindings
 

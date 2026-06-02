@@ -93,11 +93,19 @@ func checkCLIContract() {
 		requireContains(source, "`tovuk limits set`", "agentic cap command docs")
 		requireContains(source, "--notify-at-percent", "agentic cap notification threshold docs")
 	}
+	for _, source := range []string{rootReadme, cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "compact table", "human-readable service list output docs")
+		requireContains(source, "resource counts", "human-readable service resource count docs")
+		requireContains(source, "compact Service snapshot", "human-readable service show output docs")
+	}
 
 	requireContains(cargoCLI, "fullstack-rust-tanstack", "full-stack template option")
 	requireContains(cargoCLI, "meterPlan", "native deploy dry-run meter plan field")
 	requireContains(cargoCLI, "capCommands", "native deploy dry-run cap commands field")
 	requireContains(cargoCLI, "--notify-at-percent", "native CLI usage cap notification threshold")
+	requireContains(cargoCLI, "service_list_lines", "native service list text renderer")
+	requireContains(cargoCLI, "service_show_resource_summary", "native service show resource summary")
+	requireContains(cargoCLI, "name\\tservice\\tkind\\tstatus\\tresources\\turl", "native service list table columns")
 	requireContains(cargoCLI, "https://docs.tovuk.com/agents", "native check failure docs URL")
 	requireContains(cargoCLI, `"/v1/account/activity"`, "native account activity route")
 	requireContains(cargoCLI, "usage_caps_catalog_does_not_leak_disabled_resource_meters", "native deploy dry-run usage caps meter regression test")
@@ -157,6 +165,7 @@ func checkCLIContract() {
 		rejectContains(source, "tovuk service inspect", "retired service inspect command")
 		rejectContains(source, "tovuk service status", "retired service status command")
 		rejectContains(source, "tovuk service resources", "retired service resources command")
+		rejectContains(source, "worker service resources", "stale worker-scoped resource wording")
 		rejectContains(source, "tovuk service deploys", "retired service deploys command")
 		rejectContains(source, "tovuk service builds", "retired service builds command")
 		rejectContains(source, "tovuk platform", "retired platform command")
