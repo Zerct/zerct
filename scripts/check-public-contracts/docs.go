@@ -43,6 +43,20 @@ func checkDocs() {
 	products := readText("docs/reference/products.mdx")
 	abuse := readText("docs/abuse.mdx")
 	agents := readText("docs/agents.mdx")
+	publicCopy := strings.Join([]string{
+		readme,
+		deploy,
+		pricing,
+		limits,
+		resources,
+		products,
+		abuse,
+		agents,
+		readText("docs/reference/workers.mdx"),
+		readText("docs/reference/storage.mdx"),
+		readText("docs/changelog.mdx"),
+		readText("skills/tovuk/SKILL.md"),
+	}, "\n")
 	allUsageCapMeters := []string{
 		"worker_requests",
 		"worker_cpu_ms",
@@ -96,6 +110,15 @@ func checkDocs() {
 		retiredFullstackTemplate,
 	} {
 		rejectContains(openapi, retired, "retired public app contract")
+	}
+	for _, retired := range []string{
+		"primary app URL",
+		"Customer Apps",
+		"app terms",
+		"app data",
+		"my-app",
+	} {
+		rejectContains(publicCopy, retired, "retired service wording")
 	}
 
 	requireContains(pricing, "`1 GB` per object", "Free State per-object storage docs")
