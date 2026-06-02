@@ -15,6 +15,10 @@ The dashboard Abuse view is available at `https://tovuk.com/account/abuse` or
 Users can create reports with target URL, category, reporter email, service
 context, object path, and evidence. Service owners can list owner-visible
 reports and submit appeal evidence from the same view.
+Report rows expose copyable `tovuk abuse list --json`,
+`tovuk abuse appeal <report_id> "Remediation details" --json`, and
+`tovuk service show <service> --json` commands when the current report state
+supports them.
 
 The dashboard uses the same API routes and rate limits as the CLI, so agents
 can switch between browser and CLI workflows without changing the abuse model.
