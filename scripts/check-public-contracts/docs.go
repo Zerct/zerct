@@ -34,6 +34,7 @@ func checkDocs() {
 		fail("Missing Mintlify pages:\n%s", strings.Join(missingPages, "\n"))
 	}
 
+	navPages := strings.Join(pages, "\n")
 	openapi := readText("docs/openapi.json")
 	readme := readText("README.md")
 	deploy := readText("docs/deploy.mdx")
@@ -42,6 +43,15 @@ func checkDocs() {
 	resources := readText("docs/reference/resources.mdx")
 	products := readText("docs/reference/products.mdx")
 	projectContract := readText("docs/reference/project-contract.mdx")
+	kv := readText("docs/reference/kv.mdx")
+	queues := readText("docs/reference/queues.mdx")
+	cron := readText("docs/reference/cron.mdx")
+	bindings := readText("docs/reference/bindings.mdx")
+	secrets := readText("docs/reference/secrets.mdx")
+	domains := readText("docs/reference/domains.mdx")
+	logsBuilds := readText("docs/reference/logs-builds.mdx")
+	usageCaps := readText("docs/reference/usage-caps.mdx")
+	llms := readText("docs/llms.txt")
 	abuse := readText("docs/abuse.mdx")
 	agents := readText("docs/agents.mdx")
 	publicCopy := strings.Join([]string{
@@ -89,6 +99,19 @@ func checkDocs() {
 		requireContains(products, "`"+meter+"`", "product docs usage meter "+meter)
 		requireContains(limits, "`"+meter+"`", "limits docs usage cap meter "+meter)
 		requireContains(openapi, `"`+meter+`"`, "OpenAPI usage meter "+meter)
+	}
+	for _, page := range []string{
+		"reference/kv",
+		"reference/queues",
+		"reference/cron",
+		"reference/bindings",
+		"reference/secrets",
+		"reference/domains",
+		"reference/logs-builds",
+		"reference/usage-caps",
+	} {
+		requireContains(navPages, page, "Mintlify resource navigation "+page)
+		requireContains(llms, "docs/"+page+".mdx", "llms resource reference "+page)
 	}
 	checkOpenAPIMeterContracts("docs/openapi.json", allUsageCapMeters)
 	retiredFullstackKind := "worker" + "_static"
@@ -264,6 +287,24 @@ func checkDocs() {
 	requireContains(limits, "WebSocket response-side tunnel bytes", "worker websocket transfer meter docs")
 	requireContains(limits, "Service binding call chains can use up to 32 worker invocations", "service binding invocation limit docs")
 	requireContains(readText("docs/reference/workers.mdx"), "response-side tunnel", "worker websocket transfer docs")
+	requireContains(kv, "tovuk kv create --service service_1 CACHE --json", "KV create docs")
+	requireContains(kv, "`kv_reads`, `kv_writes`, `kv_deletes`, `kv_lists`, and", "KV meter docs")
+	requireContains(kv, "Bulk reads accept 100 keys", "KV bulk limit docs")
+	requireContains(queues, "tovuk queue send --service service_1 jobs", "queue send docs")
+	requireContains(queues, "dead-letter queue", "queue dead-letter docs")
+	requireContains(queues, "`queue_operations`", "queue meter docs")
+	requireContains(cron, "tovuk cron create --service service_1 nightly", "cron create docs")
+	requireContains(cron, "POST /.tovuk/cron/<trigger>", "cron delivery docs")
+	requireContains(bindings, "tovuk binding create --service service_1 AUTH_SERVICE", "service binding create docs")
+	requireContains(bindings, "32 worker invocations", "service binding chain docs")
+	requireContains(secrets, "tovuk env set --service service_1 STRIPE_SECRET_KEY=sk_live_xxx --json", "secret set docs")
+	requireContains(secrets, "Secret values are write-only", "secret write-only docs")
+	requireContains(domains, "tovuk domains verify --service service_1 api.example.com --json", "domain verify docs")
+	requireContains(domains, "Never point an A record at Tovuk origin hosts", "domain safety docs")
+	requireContains(logsBuilds, "tovuk deploy cancel deploy_1 --json", "deploy cancel docs")
+	requireContains(logsBuilds, "`build_minutes`. Logs use `log_events`", "logs builds meter docs")
+	requireContains(usageCaps, "tovuk limits set object_storage_egress_bytes", "usage caps object egress docs")
+	requireContains(usageCaps, "`object_storage_class_a_operations`", "usage caps Class A meter docs")
 	rejectContains(pricing, "account SQLite storage, `10 GB` per object", "stale Free State storage docs")
 	rejectContains(limits, "State SQLite storage is 10 GB per object on Free and Pro", "stale State storage docs")
 	rejectContains(limits, "least 60 seconds", "stale KV minimum expiration docs")

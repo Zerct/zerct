@@ -1,0 +1,59 @@
+---
+title: "KV"
+description: "Small key-value storage for Tovuk Services."
+---
+
+KV stores small values for one Service. Use it for feature flags, sessions,
+configuration, rate-limit state, and cache metadata. Use SQLite for relational
+queries and Object Storage for large files.
+
+## Agent commands
+
+```sh
+tovuk kv create --service service_1 CACHE --json
+tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
+tovuk kv get --service service_1 CACHE user:1 --json
+tovuk kv keys --service service_1 CACHE --json
+tovuk kv namespace delete --service service_1 CACHE --json
+```
+
+## API
+
+- `POST /v1/services/{service_id}/kv/namespaces`
+- `PUT /v1/services/{service_id}/kv/namespaces/{namespace}/values/{key}`
+- `GET /v1/services/{service_id}/kv/namespaces/{namespace}/values/{key}`
+- `GET /v1/services/{service_id}/kv/namespaces/{namespace}/keys`
+- `DELETE /v1/services/{service_id}/kv/namespaces/{namespace}`
+
+Every response uses stable `code`, `message`, `agent_instruction`, and
+`docs_url` fields when the next action is not obvious.
+
+## Meters and caps
+
+KV usage is metered as `kv_reads`, `kv_writes`, `kv_deletes`, `kv_lists`, and
+`kv_storage_bytes`.
+
+```sh
+tovuk limits set kv_reads --period day --value 100000 --json
+tovuk limits set kv_writes --period day --value 1000 --json
+tovuk limits set kv_storage_bytes --period month --value 1000000000 --json
+```
+
+## Limits
+
+- KV keys are limited to 512 bytes.
+- Values are limited to 25 MiB.
+- Metadata is limited to 1024 bytes.
+- `expirationTtlSeconds` must be at least 30 seconds.
+- Key list pages default to 1000 keys and accept limits from 10 to 1000.
+- Bulk reads accept 100 keys. Bulk writes and deletes accept 10000 keys, and
+  bulk request bodies must fit 100 MB.
+
+## Agent loop
+
+1. Run `tovuk deploy --dry-run --json` and confirm KV is enabled in
+   `tovuk.toml`.
+2. Create the namespace with `tovuk kv create`.
+3. Set caps for reads, writes, lists, deletes, and storage.
+4. Deploy the Worker and read `TOVUK_KV_<NAME>` from the runtime environment.
+5. Use `tovuk service show <service> --json` to verify bindings and usage.

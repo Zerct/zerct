@@ -1,0 +1,47 @@
+---
+title: "Custom Domains"
+description: "Production hostnames for Tovuk Services."
+---
+
+Custom Domains attach user-owned hostnames to one Service. Tovuk returns DNS
+instructions that agents can apply through the user's DNS provider API.
+
+## Agent commands
+
+```sh
+tovuk domains list --service service_1 --json
+tovuk domains add --service service_1 api.example.com --json
+tovuk domains verify --service service_1 api.example.com --json
+tovuk domains delete --service service_1 api.example.com --json
+```
+
+## API
+
+- `GET /v1/services/{service_id}/domains`
+- `POST /v1/services/{service_id}/domains`
+- `POST /v1/services/{service_id}/domains/{domain}/verify`
+- `DELETE /v1/services/{service_id}/domains/{domain}`
+
+Responses include DNS record fields and `agent_instruction` so agents can act
+without dashboard access.
+
+## Meters and caps
+
+Custom Domains use the `customDomains` plan limit. They have no direct usage
+meter. Traffic served through the domain still counts against Worker, Static
+Frontend, and transfer meters.
+
+## Rules
+
+- Use the DNS record returned by Tovuk.
+- Never point an A record at Tovuk origin hosts.
+- Verify DNS after creating or changing a domain.
+- Delete stale domains when a Service is retired.
+
+## Agent loop
+
+1. Add the domain.
+2. Apply the returned DNS record.
+3. Run `tovuk domains verify`.
+4. Read `agent_instruction` if verification is still pending.
+5. Smoke-test the production hostname.

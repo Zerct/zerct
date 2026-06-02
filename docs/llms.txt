@@ -19,6 +19,21 @@ tovuk deploy cancel <deploy_id> --json
 
 Reference: [Tovuk docs](https://docs.tovuk.com).
 
+Resource references:
+
+- `docs/reference/workers.mdx`: Rust Worker routes, events, and frontend policy.
+- `docs/reference/sqlite.mdx`: managed SQLite commands, limits, and backups.
+- `docs/reference/state.mdx`: keyed State objects, storage, and alarms.
+- `docs/reference/kv.mdx`: KV commands, API routes, meters, and limits.
+- `docs/reference/queues.mdx`: queue producers, consumers, retries, and dead letters.
+- `docs/reference/cron.mdx`: scheduled Rust worker events.
+- `docs/reference/bindings.mdx`: private Service Binding calls.
+- `docs/reference/secrets.mdx`: server-only environment values.
+- `docs/reference/storage.mdx`: Object Storage uploads, downloads, multipart, and egress.
+- `docs/reference/domains.mdx`: Custom Domain DNS and verification.
+- `docs/reference/logs-builds.mdx`: deploys, builds, logs, and cancellation.
+- `docs/reference/usage-caps.mdx`: hard caps for every public meter.
+
 Agent repair loop:
 
 1. Run `tovuk check --json`.

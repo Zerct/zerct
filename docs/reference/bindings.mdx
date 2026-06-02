@@ -1,0 +1,48 @@
+---
+title: "Service Bindings"
+description: "Private worker-to-worker calls between Tovuk Services."
+---
+
+Service Bindings let one Rust Worker call another account-owned Rust Worker
+without exposing a public URL. Use them for internal auth, billing, webhooks,
+and shared APIs that should not be callable from browsers.
+
+## Agent commands
+
+```sh
+tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+tovuk binding delete --service service_1 AUTH_SERVICE --json
+```
+
+## API
+
+- `POST /v1/services/{service_id}/bindings`
+- `DELETE /v1/services/{service_id}/bindings/{binding}`
+
+Bindings are injected into the Rust runtime as
+`TOVUK_BINDING_<NAME>=<target_service_id>`.
+
+## Meters and caps
+
+Service Binding calls count as Worker subrequests and Worker invocations.
+Set caps for `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes`.
+
+```sh
+tovuk limits set worker_requests --period day --value 100000 --json
+```
+
+## Limits
+
+- One Service can bind up to 5000 service resources.
+- Service binding call chains can use up to 32 worker invocations per
+  top-level request.
+- Calls must stay private to Rust Workers. Static frontends cannot call Service
+  Bindings directly.
+
+## Agent loop
+
+1. Create the target Service first.
+2. Create the binding with an uppercase name.
+3. Deploy the caller Worker.
+4. Read `TOVUK_BINDING_<NAME>` from the runtime environment.
+5. Use `tovuk service show <service> --json` to verify the binding.

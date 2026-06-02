@@ -1,0 +1,50 @@
+---
+title: "Logs and Builds"
+description: "Deploy evidence, build history, and runtime diagnosis."
+---
+
+Logs and Builds help agents repair failed deploys without dashboard clicks.
+Use them after `tovuk check`, `tovuk deploy --dry-run`, and deploy attempts.
+
+## Agent commands
+
+```sh
+tovuk deploy list --json
+tovuk deploy show deploy_1 --json
+tovuk deploy cancel deploy_1 --json
+tovuk logs --build build_1 --json
+tovuk logs --service service_1 --json
+```
+
+## API
+
+- `GET /v1/account/activity`
+- `GET /v1/deploys/{deploy_id}`
+- `POST /v1/deploys/{deploy_id}/cancel`
+- `GET /v1/builds/{build_id}/logs`
+- `GET /v1/services/{service_id}/logs`
+
+## Meters and caps
+
+Builds use `build_minutes`. Logs use `log_events`.
+
+```sh
+tovuk limits set build_minutes --period month --value 6000 --json
+tovuk limits set log_events --period month --value 1000000 --json
+```
+
+## Rules
+
+- Run `tovuk check --json` before deploying.
+- Read the first actionable log error before making changes.
+- Cancel superseded queued deploys.
+- Include build id, deploy id, failing command, and first actionable log line
+  in support tickets.
+
+## Agent loop
+
+1. Run `tovuk deploy --wait --json`.
+2. If the deploy fails, read the returned build id.
+3. Run `tovuk logs --build <build_id> --json`.
+4. Fix the first actionable issue.
+5. Rerun `tovuk check --json` and deploy again.
