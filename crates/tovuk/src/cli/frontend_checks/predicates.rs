@@ -15,13 +15,11 @@ pub(crate) fn uses_javascript_linter(command: &str) -> bool {
 
 pub(super) fn uses_strict_frontend_typechecker(command: &str) -> bool {
     let tokens = command_tokens(command);
-    tokens.iter().enumerate().any(|(index, token)| {
+    tokens.iter().any(|token| {
         let command_name = command_name_from_token(token);
-        (command_name == "oxlint"
+        command_name == "oxlint"
             && tokens.iter().any(|value| value == "--type-aware")
-            && tokens.iter().any(|value| value == "--type-check"))
-            || (command_name == "deno"
-                && tokens.get(index + 1).is_some_and(|value| value == "check"))
+            && tokens.iter().any(|value| value == "--type-check")
     })
 }
 
@@ -34,8 +32,6 @@ pub(super) fn uses_native_frontend_linter(command: &str) -> bool {
                 && tokens
                     .get(index + 1)
                     .is_some_and(|value| value == "check" || value == "lint"))
-            || (command_name == "deno"
-                && tokens.get(index + 1).is_some_and(|value| value == "lint"))
     })
 }
 
@@ -114,4 +110,15 @@ fn script_name_after_run(tokens: &[String], start: usize) -> Option<String> {
         index += 1;
     }
     tokens.get(index).cloned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{uses_native_frontend_linter, uses_strict_frontend_typechecker};
+
+    #[test]
+    fn deno_commands_are_not_quality_gates() {
+        assert!(!uses_strict_frontend_typechecker("deno check src/main.ts"));
+        assert!(!uses_native_frontend_linter("deno lint src"));
+    }
 }

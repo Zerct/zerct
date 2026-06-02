@@ -245,7 +245,7 @@ fn validate_frontend_check_command(command: &str) -> std::result::Result<(), Str
         return Ok(());
     }
     if uses_javascript_linter(command) {
-        return Err("[build].check must not run JavaScript-based lint or format tooling; use oxlint, biome, or deno lint".to_owned());
+        return Err("[build].check must not run JavaScript-based lint or format tooling; use oxlint or biome".to_owned());
     }
     let tokens = command_tokens(command);
     if has_frontend_install_command(&tokens)

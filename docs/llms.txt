@@ -80,8 +80,7 @@ Static frontend contract:
 - Package `package.json` has `typecheck`, `lint`, and `build` scripts.
 - Package `typecheck` runs stable native type-aware TypeScript checks such as
   `oxlint --type-aware --type-check`.
-- Package `lint` runs native tooling such as `oxlint`, `biome check`, or
-  `deno lint`.
+- Package `lint` runs native tooling such as `oxlint` or `biome check`.
 - Package `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health`
   gates.
 - Package `[build].check` installs dependencies and runs package scripts for

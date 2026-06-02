@@ -37,8 +37,8 @@ directories, secret files, and compiled artifacts such as `.exe`, `.so`,
 `.dylib`, `.jar`, `.node`, and `.rlib`.
 
 Package static frontend deploys require TypeScript browser source, stable native
-type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
-or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health
+type-aware TypeScript checks, native linting such as `oxlint` or
+`biome check`, and Fallow dead-code, semantic duplicate-code, and health
 gates.
 
 The npm package is also available:
