@@ -11534,7 +11534,7 @@
               "string",
               "null"
             ],
-            "description": "Base64 encoded gzip tar source archive. Context: components.schemas.DeployRequest.properties.source_archive_base64.",
+            "description": "Base64 encoded gzip tar source archive. Archives must contain source files only; generated directories, secret files, and compiled artifacts are rejected. Context: components.schemas.DeployRequest.properties.source_archive_base64.",
             "maxLength": 67108864,
             "pattern": "^[\\s\\S]{0,8192}$",
             "examples": [

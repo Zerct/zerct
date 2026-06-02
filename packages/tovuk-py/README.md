@@ -32,6 +32,9 @@ behavior is controlled only by the committed `tovuk.toml`. Review explicit
 Rust worker deploys require `cargo fmt --all --check`, locked release-mode
 `cargo check`, locked release-mode tests, and strict all-target, all-feature
 Clippy with panic/unwrap bans plus resource-sensitive lints.
+Deploy archives must contain source files only. Tovuk rejects generated
+directories, secret files, and compiled artifacts such as `.exe`, `.so`,
+`.dylib`, `.jar`, `.node`, and `.rlib`.
 
 Package static frontend deploys require TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,

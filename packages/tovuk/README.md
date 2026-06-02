@@ -30,6 +30,9 @@ listen on `0.0.0.0:$PORT`, and expose the configured health endpoint.
 Package static frontends must use TypeScript browser source, stable native
 type-aware TypeScript checks, native linting such as `oxlint`, `biome check`,
 or `deno lint`, and Fallow dead-code, semantic duplicate-code, and health gates.
+Deploy archives must contain source files only. Tovuk rejects generated
+directories, secret files, and compiled artifacts such as `.exe`, `.so`,
+`.dylib`, `.jar`, `.node`, and `.rlib`.
 
 From a full-stack repo root, the same deploy command reads one root
 `tovuk.toml`, reads explicit `[capabilities]`, builds the worker and frontend

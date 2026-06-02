@@ -12,6 +12,9 @@ ambiguous to run.
 - Rust workers run locked release-mode `cargo check`, locked release-mode
   tests, and strict all-target, all-feature Clippy with panic/unwrap bans and
   resource-sensitive lints.
+- Deploy archives must contain source files only. Tovuk rejects generated
+  directories, secret files, and compiled artifacts such as `.exe`, `.so`,
+  `.dylib`, `.jar`, `.node`, and `.rlib`.
 - Runtime memory is fixed at `128mb` for Tovuk workers.
 - Runtime CPU allocation is fixed at `1`; usage is controlled by metered
   `worker_cpu_ms` caps.

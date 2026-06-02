@@ -35,11 +35,14 @@ func checkDocs() {
 	}
 
 	openapi := readText("docs/openapi.json")
+	readme := readText("README.md")
+	deploy := readText("docs/deploy.mdx")
 	pricing := readText("docs/pricing.mdx")
 	limits := readText("docs/reference/limits.mdx")
 	resources := readText("docs/reference/resources.mdx")
 	products := readText("docs/reference/products.mdx")
 	abuse := readText("docs/abuse.mdx")
+	agents := readText("docs/agents.mdx")
 	allUsageCapMeters := []string{
 		"worker_requests",
 		"worker_cpu_ms",
@@ -96,6 +99,10 @@ func checkDocs() {
 	}
 
 	requireContains(pricing, "`1 GB` per object", "Free State per-object storage docs")
+	requireContains(limits, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact docs")
+	requireContains(deploy, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact guide")
+	requireContains(readme, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact README")
+	requireContains(agents, "compiled artifacts such as `.exe`, `.so`,", "compiled deploy artifact agent docs")
 	requireContains(limits, "State SQLite storage is 1 GB per object on Free and 10 GB per object on Pro", "State Free storage limit docs")
 	requireContains(limits, "State alarms allow one scheduled alarm per State object", "State alarm limit docs")
 	requireContains(limits, "alarm handlers have a `15 minute` wall-clock limit", "State alarm wall-time docs")
@@ -182,6 +189,7 @@ func checkDocs() {
 	requireContains(openapi, `"StorageMultipartCreateRequest"`, "OpenAPI multipart create schema")
 	requireContains(openapi, `"StorageMultipartCompleteRequest"`, "OpenAPI multipart complete schema")
 	requireContains(openapi, "Public media rejects executable and script payloads", "OpenAPI public media scanning policy")
+	requireContains(openapi, "compiled artifacts are rejected", "OpenAPI deploy archive artifact policy")
 	requireContains(abuse, "tovuk abuse report", "abuse report CLI docs")
 	requireContains(abuse, "tovuk abuse list", "abuse list CLI docs")
 	requireContains(abuse, "tovuk abuse list --operator", "operator abuse list CLI docs")

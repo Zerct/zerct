@@ -34,6 +34,10 @@ For Rust workers, check runs the configured quality gates before any remote
 build is queued. For static frontends, check runs the configured frontend
 quality command. For full-stack services, check validates both roots.
 
+Deploy archives must contain source files only. Tovuk rejects generated
+directories, secret files, and compiled artifacts such as `.exe`, `.so`,
+`.dylib`, `.jar`, `.node`, and `.rlib`.
+
 ## Runtime contract
 
 Rust workers must listen on:
