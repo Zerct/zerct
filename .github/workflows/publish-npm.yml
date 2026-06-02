@@ -7,10 +7,11 @@ on:
       - main
     paths:
       - "packages/tovuk/package.json"
+      - "packages/tovuk/package-lock.json"
+      - "packages/tovuk/README.md"
       - "packages/tovuk/install.mjs"
       - "packages/tovuk/bin/tovuk"
       - "crates/tovuk/**"
-      - "scripts/check-public-contracts/**"
 
 permissions:
   contents: read
@@ -74,25 +75,50 @@ jobs:
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Install package dependencies
+      - name: Select npm publish auth
+        id: publish_auth
         if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        run: |
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            echo "method=token" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${NPM_TRUSTED_PUBLISHING_ENABLED:-}" = "true" ]; then
+            echo "method=trusted" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "method=skip" >> "$GITHUB_OUTPUT"
+          echo "::notice::Skipping npm publish for tovuk. Configure NPM_TOKEN or enable trusted publishing for package tovuk with owner tovuk, repository tovuk, workflow publish-npm.yml, environment npm, then set NPM_TRUSTED_PUBLISHING_ENABLED=true."
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TRUSTED_PUBLISHING_ENABLED: ${{ vars.NPM_TRUSTED_PUBLISHING_ENABLED }}
+      - name: Install package dependencies
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: npm ci --ignore-scripts
         working-directory: packages/tovuk
       - name: Build native CLI for package checks
-        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - name: Check package
-        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: npm run check
         working-directory: packages/tovuk
         env:
           TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
+      - name: Publish package with npm token
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'token'
+        run: npm publish --access public
+        working-directory: packages/tovuk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish package with npm trusted publishing
-        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'trusted'
         run: npm publish --access public
         working-directory: packages/tovuk
       - name: Verify npm package
-        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false'
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
         run: |
           version="${{ steps.version.outputs.version }}"
           for delay in 0 10 10 10 10 10; do
