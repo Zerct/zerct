@@ -19,6 +19,9 @@ The response includes both `plans` and `products`. Use `products[].features`,
 and `products[].limit_fields` to choose the right product, verify supported
 behavior, understand what each meter counts, price the relevant meters, and set
 hard caps before large deploys, media uploads, or paid usage.
+Each `products[].meter_details[]` entry includes `cap_commands.day` and
+`cap_commands.month` so agents can set the matching daily or monthly usage cap
+without hard-coded command templates.
 
 Use the authenticated usage view before heavy work:
 
