@@ -188,7 +188,8 @@ warnings, meters, limits, and `billingEstimate`. Deploy with
 If the build fails, read `tovuk logs --build <build_id> --json`, fix the
 first actionable error, rerun check, and redeploy. If a plan limit blocks work, run
 `tovuk billing checkout --json` and show the returned URL to the
-human. If Tovuk support is needed, run `tovuk support create` with
+human. For invoices, payment methods, or subscription changes, run
+`tovuk billing portal`. If Tovuk support is needed, run `tovuk support create` with
 `--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
 Resolve the support ticket after the issue is fixed.
 ```

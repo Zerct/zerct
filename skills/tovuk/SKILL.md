@@ -57,6 +57,8 @@ tovuk cron disable --service <service> nightly --json
 tovuk state create --service <service> Room --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+tovuk billing checkout --json
+tovuk billing portal
 tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
 tovuk abuse list --json
 tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json

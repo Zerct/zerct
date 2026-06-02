@@ -35,6 +35,7 @@ class Tovuk < Formula
     assert_match "tovuk kv get", help
     assert_match "tovuk queue send", help
     assert_match "tovuk billing checkout --json", help
+    assert_match "tovuk billing portal", help
     assert_match "tovuk support create", help
     assert_match "tovuk support list", help
     assert_match "tovuk support resolve", help

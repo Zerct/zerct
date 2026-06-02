@@ -36,9 +36,8 @@ Resource references:
 
 Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
 the same cap set and remove actions as `tovuk limits`, plus the same hosted
-checkout flow as `tovuk billing checkout --json`. Usage rows show copyable
-`tovuk limits set` commands with `--notify-at-percent` and copyable
-`tovuk limits delete` commands for the selected meter.
+checkout flow as `tovuk billing checkout --json` and billing portal flow as
+`tovuk billing portal`. Usage rows show copyable `tovuk limits set` commands with `--notify-at-percent` and copyable `tovuk limits delete` commands for the selected meter.
 
 Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service
@@ -224,6 +223,7 @@ tovuk storage download --service <service> uploads/file.png ./file.png --json
 tovuk storage url --service <service> uploads/file.png --json
 tovuk storage delete --service <service> uploads/file.png --json
 tovuk billing checkout --json
+tovuk billing portal
 tovuk support list --json
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
 tovuk support resolve <ticket_id> --json
@@ -292,7 +292,9 @@ Never print or commit secrets. Put secrets in Tovuk env vars with
 `tovuk env set --service <service> KEY=value`.
 
 When a free-tier limit blocks work, run `tovuk billing checkout --json` and
-show the returned URL to the human. When Tovuk support is needed, create a
+show the returned URL to the human. For invoices, payment methods, or
+subscription changes, run `tovuk billing portal` and show the returned URL to
+the human. When Tovuk support is needed, create a
 ticket only after collecting the failing command, service id, build id, deploy id,
 first actionable log line, and what the agent already tried. Resolve the ticket
 when the issue is fixed so future agents do not duplicate the same support

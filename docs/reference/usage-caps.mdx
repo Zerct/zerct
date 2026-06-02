@@ -11,7 +11,7 @@ before load tests, media uploads, queue fan-out, and paid usage.
 The dashboard Usage view is available at `https://tovuk.com/account/usage` or
 `https://tovuk.com/<handle>/usage`. It includes the same hard-cap action as
 `tovuk limits set` and the same removal action as `tovuk limits delete`, backed
-by the same API routes and rate limits as the CLI. It shows copyable `tovuk limits set` commands with `--notify-at-percent` and copyable `tovuk limits delete` commands for the selected meter. It also opens the same hosted checkout flow as `tovuk billing checkout --json` for upgrades and paid overages.
+by the same API routes and rate limits as the CLI. It shows copyable `tovuk limits set` commands with `--notify-at-percent` and copyable `tovuk limits delete` commands for the selected meter. It also opens the same hosted checkout flow as `tovuk billing checkout --json` for upgrades and the same hosted billing portal flow as `tovuk billing portal` for invoices, payment methods, and subscription changes.
 
 ## Agent commands
 
@@ -68,3 +68,5 @@ Usage Caps support these public meters:
 5. Run `tovuk usage --json` during tests.
 6. If a limit blocks work, run `tovuk billing checkout --json` and show the
    hosted URL to the human.
+7. If the human needs invoices, payment methods, or subscription changes, run
+   `tovuk billing portal` and show the hosted URL to the human.
