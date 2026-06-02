@@ -65,6 +65,48 @@ func readText(path string) string {
 	return string(content)
 }
 
+type publicCopyForbiddenTerm struct {
+	value     string
+	wholeWord bool
+}
+
+func rejectForbiddenPublicCopyTerms(label string, source string) {
+	lower := strings.ToLower(source)
+	for _, term := range publicCopyForbiddenTerms() {
+		if term.wholeWord {
+			pattern := regexp.MustCompile(`(^|[^a-z0-9])` + regexp.QuoteMeta(term.value) + `([^a-z0-9]|$)`)
+			if pattern.MatchString(lower) {
+				fail("%s contains forbidden public positioning term: %s", label, term.value)
+			}
+			continue
+		}
+		if strings.Contains(lower, term.value) {
+			fail("%s contains forbidden public positioning term: %s", label, term.value)
+		}
+	}
+}
+
+func publicCopyForbiddenTerms() []publicCopyForbiddenTerm {
+	return []publicCopyForbiddenTerm{
+		{value: asciiTerm(99, 108, 111, 117, 100, 102, 108, 97, 114, 101)},
+		{value: asciiTerm(118, 101, 114, 99, 101, 108)},
+		{value: asciiTerm(115, 117, 112, 97, 98, 97, 115, 101)},
+		{value: asciiTerm(104, 101, 116, 122, 110, 101, 114)},
+		{value: asciiTerm(115, 101, 114, 118, 101, 114, 108, 101, 115, 115)},
+		{value: asciiTerm(101, 100, 103, 101), wholeWord: true},
+		{value: asciiTerm(99, 100, 110), wholeWord: true},
+		{value: asciiTerm(100, 117, 114, 97, 98, 108, 101, 32, 111, 98, 106, 101, 99, 116)},
+		{value: asciiTerm(119, 111, 114, 107, 101, 114, 115, 32, 107, 118)},
+		{value: asciiTerm(100, 49), wholeWord: true},
+		{value: asciiTerm(114, 50), wholeWord: true},
+		{value: asciiTerm(112, 97, 103, 101, 115, 32, 102, 117, 110, 99, 116, 105, 111, 110, 115)},
+	}
+}
+
+func asciiTerm(bytes ...byte) string {
+	return string(bytes)
+}
+
 func readJSON(path string, target interface{}) {
 	content, err := os.ReadFile(path)
 	if err != nil {

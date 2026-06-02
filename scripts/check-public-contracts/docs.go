@@ -71,6 +71,7 @@ func checkDocs() {
 		readText("docs/changelog.mdx"),
 		readText("skills/tovuk/SKILL.md"),
 	}, "\n")
+	rejectForbiddenPublicCopyTerms("public docs and package copy", publicCopy)
 	allUsageCapMeters := []string{
 		"worker_requests",
 		"worker_cpu_ms",

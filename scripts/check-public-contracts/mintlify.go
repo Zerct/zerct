@@ -75,6 +75,7 @@ func rejectRetiredPublicNames(label string, source string) {
 			fail("%s contains retired public branding", label)
 		}
 	}
+	rejectForbiddenPublicCopyTerms(label, source)
 }
 
 func retiredPublicNames() []string {
