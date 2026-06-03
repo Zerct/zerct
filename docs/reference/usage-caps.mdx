@@ -7,6 +7,60 @@ description: "Set hard usage stops for predictable Tovuk spend."
 Usage Caps stop activity at a configured meter threshold. Agents should set caps
 before load tests, media uploads, queue fan-out, and paid usage.
 
+## Cap-setting workflow
+
+<Steps>
+  <Step title="Find the meter and plan fields">
+    ```sh
+    tovuk pricing --json
+    tovuk deploy --dry-run --json
+    ```
+
+    Use `products[].meter_details`, `products[].limit_fields`, and dry-run
+    `meterPlan` entries to pick the meter, period, and cap command before
+    traffic depends on a paid capability.
+  </Step>
+
+  <Step title="Set caps before traffic">
+    ```sh
+    tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+    tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --notify-at-percent 80 --json
+    ```
+
+    Pass `--notify-at-percent <1-100>` to choose when Tovuk warns before a
+    hard stop. If the flag is omitted, the CLI uses 80 percent.
+  </Step>
+
+  <Step title="Watch usage during tests">
+    ```sh
+    tovuk usage --json
+    ```
+
+    Compare current `usage`, configured caps, and `billingEstimate.lineItems`
+    before load tests, backfills, and media imports continue.
+  </Step>
+
+  <Step title="Open billing deliberately">
+    ```sh
+    tovuk billing checkout --json
+    tovuk billing portal
+    ```
+
+    Show the hosted checkout URL only when a human chooses higher paid
+    capacity. Use the billing portal for invoices, payment methods, and
+    subscription changes.
+  </Step>
+
+  <Step title="Remove stale caps">
+    ```sh
+    tovuk limits delete worker_requests --period day --json
+    ```
+
+    Delete a cap only after confirming replacement limits or accepted paid
+    capacity.
+  </Step>
+</Steps>
+
 ## Dashboard
 
 The dashboard Usage view is available at `https://tovuk.com/account/usage` or
@@ -58,38 +112,3 @@ Usage Caps support these public meters:
 - `object_storage_egress_bytes`
 - `build_minutes`
 - `log_events`
-
-## Agent loop
-
-<Steps>
-  <Step title="Read the meter catalog">
-    Run `tovuk pricing --json` and read `products[].meter_details`.
-  </Step>
-
-  <Step title="Dry-run the deploy">
-    Run `tovuk deploy --dry-run --json` and read `meterPlan`.
-  </Step>
-
-  <Step title="Set caps before traffic">
-    Set caps for every enabled capability before high traffic.
-  </Step>
-
-  <Step title="Choose the warning threshold">
-    Pass `--notify-at-percent <1-100>` to choose when Tovuk warns before a
-    hard stop.
-  </Step>
-
-  <Step title="Watch usage during tests">
-    Run `tovuk usage --json` during tests.
-  </Step>
-
-  <Step title="Open checkout when blocked">
-    If a limit blocks work, run `tovuk billing checkout --json` and show the
-    hosted URL to the human.
-  </Step>
-
-  <Step title="Open the billing portal">
-    If the human needs invoices, payment methods, or subscription changes, run
-    `tovuk billing portal` and show the hosted URL to the human.
-  </Step>
-</Steps>
