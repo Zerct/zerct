@@ -1,11 +1,11 @@
 ---
-title: "Agent Loop"
-description: "Copy-paste workflow for AI coding agents."
+title: "AI Agent Deployment Workflow"
+description: "Step-by-step Tovuk deploy, recovery, support, and abuse workflow for AI coding agents."
 ---
 
 Use this page when an AI coding agent is deploying with Tovuk.
 
-## The loop
+## Deploy workflow
 
 <Steps>
   <Step title="Check and fix the first failure">
@@ -98,7 +98,7 @@ Object Storage, KV, Queues, Cron, State, Service Bindings, Secrets, and Custom D
 `tovuk service delete <service> --json` commands. The delete action uses
 `DELETE /v1/services/{service_id}` for smoke-test cleanup.
 
-## Deploy prompt
+## Reusable deploy prompt
 
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
@@ -121,7 +121,7 @@ only after the batch is safely handled. For cron handlers, implement
 `POST /.tovuk/cron/<trigger>` and keep it idempotent.
 ```
 
-## Support loop
+## Support ticket workflow
 
 Create support tickets only with enough evidence for a Tovuk support agent or
 operator agent to act:
@@ -151,7 +151,7 @@ After the issue is fixed, resolve the ticket:
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
-## Abuse loop
+## Abuse report workflow
 
 Report abuse with a target URL, category, reporter email, and preserved
 evidence:
@@ -202,7 +202,7 @@ when the extension is missing or ambiguous.
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.
 
-## Starter prompt
+## Starter project prompt
 
 ```txt
 Create a Tovuk full-stack project. Run
@@ -213,7 +213,7 @@ check in JSON mode, run deploy dry-run from the repo root, then deploy from
 the repo root.
 ```
 
-## Log commands
+## Log and service commands
 
 ```sh
 tovuk service show service_1 --json
