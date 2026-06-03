@@ -40,8 +40,24 @@ Frontend, and transfer meters.
 
 ## Agent loop
 
-1. Add the domain.
-2. Apply the returned DNS record.
-3. Run `tovuk domains verify`.
-4. Read `agent_instruction` if verification is still pending.
-5. Smoke-test the production hostname.
+<Steps>
+  <Step title="Add the domain">
+    Run `tovuk domains add --service service_1 api.example.com --json`.
+  </Step>
+
+  <Step title="Apply the DNS record">
+    Apply the returned DNS record.
+  </Step>
+
+  <Step title="Verify DNS">
+    Run `tovuk domains verify --service service_1 api.example.com --json`.
+  </Step>
+
+  <Step title="Read pending instructions">
+    Read `agent_instruction` if verification is still pending.
+  </Step>
+
+  <Step title="Smoke-test the hostname">
+    Smoke-test the production hostname.
+  </Step>
+</Steps>
