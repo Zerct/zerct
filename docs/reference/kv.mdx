@@ -65,9 +65,25 @@ tovuk limits set kv_storage_bytes --period month --value 1000000000 --notify-at-
 
 ## Agent loop
 
-1. Run `tovuk deploy --dry-run --json` and confirm KV is enabled in
-   `tovuk.toml`.
-2. Create the namespace with `tovuk kv create`.
-3. Set caps for reads, writes, lists, deletes, and storage.
-4. Deploy the Worker and read `TOVUK_KV_<NAME>` from the runtime environment.
-5. Use `tovuk service show <service> --json` to verify bindings and usage.
+<Steps>
+  <Step title="Confirm KV in the dry run">
+    Run `tovuk deploy --dry-run --json` and confirm KV is enabled in
+    `tovuk.toml`.
+  </Step>
+
+  <Step title="Create the namespace">
+    Create the namespace with `tovuk kv create`.
+  </Step>
+
+  <Step title="Set usage caps">
+    Set caps for reads, writes, lists, deletes, and storage.
+  </Step>
+
+  <Step title="Read the runtime binding">
+    Deploy the Worker and read `TOVUK_KV_<NAME>` from the runtime environment.
+  </Step>
+
+  <Step title="Verify bindings and usage">
+    Use `tovuk service show <service> --json` to verify bindings and usage.
+  </Step>
+</Steps>
