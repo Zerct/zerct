@@ -11,6 +11,48 @@ rooms, or per-tenant state.
 Keep public HTTP APIs in the Rust worker. Call State from that worker only when
 the request needs keyed coordination or per-object alarm scheduling.
 
+## State setup flow
+
+<Steps>
+  <Step title="Enable State for the service">
+    Set `[capabilities].state = true` in `tovuk.toml`, then run
+    `tovuk deploy --dry-run --json` so the agent can confirm State meters,
+    limits, and required fixes before provisioning classes.
+  </Step>
+
+  <Step title="Create the State class">
+    Create the class that will own keyed objects for one coordination domain.
+
+    ```sh
+    tovuk state create --service service_1 Room --json
+    ```
+  </Step>
+
+  <Step title="Write and inspect one object">
+    Write one value, read it back, and list keys before relying on the object
+    from production traffic.
+
+    ```sh
+    tovuk state put --service service_1 Room room-1 counter 1 --json
+    tovuk state get --service service_1 Room room-1 counter --json
+    tovuk state keys --service service_1 Room room-1 --json
+    ```
+  </Step>
+
+  <Step title="Inspect the runtime binding">
+    Deploy the Rust worker, read `TOVUK_STATE_ROOM` from the runtime
+    environment (`TOVUK_STATE_<NAME>` for other class names), and use
+    `tovuk service show service_1 --json` to verify State resources, current
+    usage, limits, and next actions.
+  </Step>
+
+  <Step title="Schedule and verify alarms">
+    Use `TOVUK_RUNTIME_TOKEN` from the Rust worker to set an alarm for a keyed
+    object, then handle `POST /.tovuk/state/<class>/<object>/alarm`
+    idempotently. Confirm the scheduled alarm with `tovuk state alarm get`.
+  </Step>
+</Steps>
+
 ## Dashboard
 
 Dashboard State controls are available at
@@ -33,7 +75,7 @@ The dashboard uses these State API routes:
 - `PUT /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/alarm`
 - `DELETE /v1/services/{service_id}/state/namespaces/{namespace}/objects/{object_key}/alarm`
 
-## Commands
+## CLI workflow
 
 ```sh
 tovuk state list --service service_1 --json
