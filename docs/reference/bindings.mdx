@@ -41,8 +41,24 @@ tovuk limits set worker_requests --period day --value 100000 --notify-at-percent
 
 ## Agent loop
 
-1. Create the target Service first.
-2. Create the binding with an uppercase name.
-3. Deploy the caller Worker.
-4. Read `TOVUK_BINDING_<NAME>` from the runtime environment.
-5. Use `tovuk service show <service> --json` to verify the binding.
+<Steps>
+  <Step title="Create the target Service">
+    Create the target Service first.
+  </Step>
+
+  <Step title="Create the binding">
+    Create the binding with an uppercase name.
+  </Step>
+
+  <Step title="Deploy the caller Worker">
+    Deploy the caller Worker.
+  </Step>
+
+  <Step title="Read the runtime binding">
+    Read `TOVUK_BINDING_<NAME>` from the runtime environment.
+  </Step>
+
+  <Step title="Verify the binding">
+    Use `tovuk service show <service> --json` to verify the binding.
+  </Step>
+</Steps>
