@@ -10,9 +10,12 @@ image processing, cleanup, and other tasks that can run after the response.
 ## Queue flow
 
 <Steps>
-  <Step title="Create queues before load">
-    Confirm `queues = true` in `tovuk.toml`, then create the dead-letter queue
-    before the primary queue when failed work needs a separate recovery path.
+  <Step title="Enable and create queues">
+    Set `[capabilities].queue = true` in `tovuk.toml`, then run
+    `tovuk deploy --dry-run --json` so the agent can confirm Queue meters,
+    limits, and required fixes before provisioning resources. Create the
+    dead-letter queue before the primary queue when failed work needs a
+    separate recovery path.
   </Step>
 
   <Step title="Produce work">
@@ -23,15 +26,17 @@ image processing, cleanup, and other tasks that can run after the response.
   </Step>
 
   <Step title="Consume in Rust">
-    Handle queue deliveries in the Rust worker at
+    Read `TOVUK_QUEUE_JOBS` from the runtime environment for the example queue,
+    then handle queue deliveries in the Rust worker at
     `POST /.tovuk/queues/<queue>`. Return `2xx` only after the batch has been
     handled safely.
   </Step>
 
   <Step title="Inspect and tune">
-    Read Queue messages and metrics after deploy, then tune retries, retention,
-    batch size, batch timeout, and dead-letter settings with
-    `tovuk queue update`.
+    Read Queue messages and metrics after deploy, then use
+    `tovuk service show service_1 --json` to verify queues, usage, limits, and
+    next actions. Tune retries, retention, batch size, batch timeout, and
+    dead-letter settings with `tovuk queue update`.
   </Step>
 </Steps>
 
