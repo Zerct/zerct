@@ -4,6 +4,54 @@ sidebarTitle: "Packages"
 description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
 ---
 
+## Install workflow
+
+<Steps>
+  <Step title="Choose one package channel">
+    Install `tovuk` from npm, Homebrew, PyPI, or crates.io. Use one channel per
+    machine so upgrades stay predictable.
+  </Step>
+
+  <Step title="Confirm the installed command">
+    ```sh
+    tovuk --version
+    tovuk --help
+    ```
+
+    The installed command should print the Tovuk version and the current command
+    surface before you run deploy work.
+  </Step>
+
+  <Step title="Check account and project context">
+    ```sh
+    tovuk account show --json
+    tovuk check --json
+    ```
+
+    Confirm the account session, then follow the first failed
+    `agent_instruction` from project checks before creating a build.
+  </Step>
+
+  <Step title="Dry-run before deploy">
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Review explicit capabilities, missing config, quality checks, meters,
+    limits, and `billingEstimate` before queuing build work.
+  </Step>
+
+  <Step title="Deploy and keep build evidence">
+    ```sh
+    tovuk deploy --wait --json
+    tovuk logs --build job_1 --json
+    ```
+
+    Preserve the returned deploy and build ids. If the build fails, fix the
+    first actionable log line, rerun checks, and redeploy.
+  </Step>
+</Steps>
+
 ## npm
 
 ```sh
