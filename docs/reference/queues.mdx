@@ -7,7 +7,35 @@ description: "Create queues, send jobs, inspect metrics, tune retries, and route
 Queues move work out of public requests. Use them for emails, webhook retries,
 image processing, cleanup, and other tasks that can run after the response.
 
-## Agent commands
+## Queue flow
+
+<Steps>
+  <Step title="Create queues before load">
+    Confirm `queues = true` in `tovuk.toml`, then create the dead-letter queue
+    before the primary queue when failed work needs a separate recovery path.
+  </Step>
+
+  <Step title="Produce work">
+    Send one job with `tovuk queue send`, send batches with
+    `tovuk queue send-batch`, or use the same Queue API routes from the
+    dashboard. Add `--delay-seconds` when work should wait before it becomes
+    visible to the consumer.
+  </Step>
+
+  <Step title="Consume in Rust">
+    Handle queue deliveries in the Rust worker at
+    `POST /.tovuk/queues/<queue>`. Return `2xx` only after the batch has been
+    handled safely.
+  </Step>
+
+  <Step title="Inspect and tune">
+    Read Queue messages and metrics after deploy, then tune retries, retention,
+    batch size, batch timeout, and dead-letter settings with
+    `tovuk queue update`.
+  </Step>
+</Steps>
+
+## CLI workflow
 
 ```sh
 tovuk queue create --service service_1 failed_jobs --json
@@ -68,27 +96,3 @@ tovuk limits set queue_operations --period month --value 1000000 --notify-at-per
 - Visibility timeouts can be configured up to 12 hours.
 - Send delays can be configured up to 24 hours.
 - Consumer handlers have a 15 minute wall-clock limit.
-
-## Agent loop
-
-<Steps>
-  <Step title="Enable queues">
-    Confirm `queues = true` in `tovuk.toml`.
-  </Step>
-
-  <Step title="Create a dead-letter queue">
-    Create a dead-letter queue before the primary queue.
-  </Step>
-
-  <Step title="Cap queue operations">
-    Set queue operation caps before load tests.
-  </Step>
-
-  <Step title="Handle batches safely">
-    Implement the Rust queue handler and return `2xx` only after safe handling.
-  </Step>
-
-  <Step title="Inspect after deploy">
-    Inspect queue metrics and logs after each deploy.
-  </Step>
-</Steps>
