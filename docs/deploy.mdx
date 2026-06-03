@@ -6,23 +6,51 @@ description: "How Tovuk deploys Rust workers and frontends."
 Tovuk uses a small project contract so humans and agents can deploy without
 guessing.
 
-## Flow
+## Deploy flow
 
-1. Login with GitHub or Google.
-2. Run `tovuk check --json`.
-3. Run `tovuk deploy --dry-run --json` to verify deploy intent, meters, and limits.
-4. Run `tovuk deploy --wait --json`.
-5. Inspect deploy state with `tovuk deploy list --json` or
-   `tovuk deploy show <deploy_id> --json`.
-6. Cancel stale queued work with `tovuk deploy cancel <deploy_id> --json` when
-   a newer deploy supersedes it.
-7. Tovuk queues the build, runs checks, and verifies the health route for Rust
-   workers.
-8. Tovuk exposes the service on a `tovuk.app` deployment hostname.
+<Steps>
+  <Step title="Authenticate">
+    Login with GitHub or Google before running account-scoped commands.
+  </Step>
 
-For full-stack repos, run `tovuk deploy` from the repo root. The CLI reads
-the root `tovuk.toml`, builds the configured worker and frontend roots, serves
-the frontend at `/`, and routes `/api/*` to the Rust worker.
+  <Step title="Check locally">
+    ```sh
+    tovuk check --json
+    ```
+
+    Fix the first failed check or `agent_instruction` before creating a remote build.
+  </Step>
+
+  <Step title="Preview deploy intent">
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Review deploy intent, meters, limits, and billing estimates without creating a build.
+  </Step>
+
+  <Step title="Deploy and wait">
+    ```sh
+    tovuk deploy --wait --json
+    ```
+
+    Tovuk queues the build, runs checks, verifies the Rust worker health route, and exposes the service on a `tovuk.app` deployment hostname.
+  </Step>
+
+  <Step title="Inspect or cancel deploys">
+    ```sh
+    tovuk deploy list --json
+    tovuk deploy show <deploy_id> --json
+    tovuk deploy cancel <deploy_id> --json
+    ```
+
+    Cancel stale queued work only when a newer deploy supersedes it.
+  </Step>
+
+  <Step title="Use one root for full-stack repos">
+    Run `tovuk deploy` from the repo root. The CLI reads the root `tovuk.toml`, builds the configured worker and frontend roots, serves the frontend at `/`, and routes `/api/*` to the Rust worker.
+  </Step>
+</Steps>
 
 ## Local check
 
