@@ -65,13 +65,26 @@ Static Frontend for browser-executed web assets.
 Agents should prefer the CLI. Use the multipart HTTP flow only when custom
 transfer control is required:
 
-1. `POST /v1/services/{service_id}/storage/multipart/create` with `path`,
-   `contentType`, `sizeBytes`, optional `partSizeBytes`, and `publicRead`.
-2. Upload each returned part URL with `PUT` and keep its `ETag` header.
-3. `POST /v1/services/{service_id}/storage/multipart/complete` with `path`,
-   `uploadId`, and completed part numbers plus ETags.
-4. `POST /v1/services/{service_id}/storage/multipart/abort` after a failed
-   upload attempt so pending byte reservations are released.
+<Steps>
+  <Step title="Create the multipart upload">
+    `POST /v1/services/{service_id}/storage/multipart/create` with `path`,
+    `contentType`, `sizeBytes`, optional `partSizeBytes`, and `publicRead`.
+  </Step>
+
+  <Step title="Upload each part">
+    Upload each returned part URL with `PUT` and keep its `ETag` header.
+  </Step>
+
+  <Step title="Complete the upload">
+    `POST /v1/services/{service_id}/storage/multipart/complete` with `path`,
+    `uploadId`, and completed part numbers plus ETags.
+  </Step>
+
+  <Step title="Abort failed uploads">
+    `POST /v1/services/{service_id}/storage/multipart/abort` after a failed
+    upload attempt so pending byte reservations are released.
+  </Step>
+</Steps>
 
 ## Limits
 
