@@ -12,6 +12,45 @@ instructions can be parsed without dashboard access.
 The storage origin is private and S3-compatible. Agents and users should use
 Tovuk API and CLI commands instead of provider bucket URLs.
 
+## File and media workflow
+
+<Steps>
+  <Step title="Choose public or private access">
+    Use `--public` only for browser-safe media that should return a
+    `publicUrl`. Leave that flag off for private artifacts; private files use
+    short-lived download URLs.
+  </Step>
+
+  <Step title="Upload the file">
+    ```sh
+    tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
+    ```
+
+    The CLI uses single-part upload for ordinary files and switches to
+    multipart transfer above 100 MiB.
+  </Step>
+
+  <Step title="List and share the object">
+    ```sh
+    tovuk storage list --service service_1 --json
+    tovuk storage url --service service_1 uploads/logo.png --json
+    tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
+    ```
+
+    Use the returned `publicUrl` for public media, or the short-lived download
+    URL for private files.
+  </Step>
+
+  <Step title="Delete stale files">
+    ```sh
+    tovuk storage delete --service service_1 uploads/logo.png --json
+    ```
+
+    Delete abandoned upload paths so pending byte reservations and object
+    storage usage do not linger.
+  </Step>
+</Steps>
+
 ## Dashboard
 
 Dashboard Storage is available at `https://tovuk.com/account/storage` and
