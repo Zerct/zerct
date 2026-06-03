@@ -1,13 +1,61 @@
 ---
-title: "Add Custom Domains to Tovuk Services"
+title: "Add, Verify, and Delete Custom Domains"
 sidebarTitle: "Custom Domains"
 description: "Attach, verify, and delete production hostnames for Tovuk Services with CLI, API, and DNS-provider workflows."
 ---
 
-Custom Domains attach user-owned hostnames to one Service. Tovuk returns DNS
-instructions that agents can apply through the user's DNS provider API.
+Custom Domains attach one user-owned hostname to one Service. Tovuk returns
+CNAME fields and `agent_instruction` so agents can update DNS through the user's
+DNS provider API without dashboard access.
 
-## Agent commands
+## Custom domain flow
+
+<Steps>
+  <Step title="Add the hostname">
+    Run:
+
+    ```sh
+    tovuk domains add --service service_1 api.example.com --json
+    ```
+
+    The response includes `status`, `verified`, `dns_record_type`,
+    `dns_record_name`, `dns_record_value`, `dns_setup_url`, and
+    `agent_instruction`.
+  </Step>
+
+  <Step title="Create the DNS-only CNAME">
+    Create the returned DNS record exactly. Current Tovuk responses use a
+    `CNAME` from `api.example.com` to `cname.tovuk.app`. Do not create an A
+    record pointing at Tovuk origin hosts.
+  </Step>
+
+  <Step title="Verify the hostname">
+    Run:
+
+    ```sh
+    tovuk domains verify --service service_1 api.example.com --json
+    ```
+
+    If the response is still `pending`, read `agent_instruction` before
+    changing anything else.
+  </Step>
+
+  <Step title="Inspect or remove the hostname">
+    Inspect attached hostnames:
+
+    ```sh
+    tovuk domains list --service service_1 --json
+    ```
+
+    Delete a hostname when a Service no longer owns it:
+
+    ```sh
+    tovuk domains delete --service service_1 api.example.com --json
+    ```
+  </Step>
+</Steps>
+
+## CLI commands
 
 ```sh
 tovuk domains list --service service_1 --json
@@ -38,27 +86,3 @@ Frontend, and transfer meters.
 - Never point an A record at Tovuk origin hosts.
 - Verify DNS after creating or changing a domain.
 - Delete stale domains when a Service is retired.
-
-## Agent loop
-
-<Steps>
-  <Step title="Add the domain">
-    Run `tovuk domains add --service service_1 api.example.com --json`.
-  </Step>
-
-  <Step title="Apply the DNS record">
-    Apply the returned DNS record.
-  </Step>
-
-  <Step title="Verify DNS">
-    Run `tovuk domains verify --service service_1 api.example.com --json`.
-  </Step>
-
-  <Step title="Read pending instructions">
-    Read `agent_instruction` if verification is still pending.
-  </Step>
-
-  <Step title="Smoke-test the hostname">
-    Smoke-test the production hostname.
-  </Step>
-</Steps>
