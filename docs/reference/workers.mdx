@@ -1,7 +1,7 @@
 ---
-title: "Rust Worker Runtime and Routing"
+title: "Run Rust Worker APIs and Event Handlers"
 sidebarTitle: "Rust Workers"
-description: "How Tovuk routes Rust worker APIs, static frontends, service resources, and runtime events."
+description: "Route HTTP APIs, static frontends, service resources, queue deliveries, Cron triggers, State alarms, and WebSocket upgrades through Tovuk Rust workers."
 ---
 
 Tovuk full-stack services use one deployable project:
@@ -115,13 +115,14 @@ storage files without a dashboard or user token.
 
 ## Runtime events
 
-Queues and cron triggers are delivered to the same Rust worker process. Tovuk
-wakes a sleeping worker before delivery.
+Queues, cron triggers, and State alarms are delivered to the same Rust worker
+process. Tovuk wakes a sleeping worker before delivery.
 
 - Queue batches are sent as `POST /.tovuk/queues/<queue>`.
 - Queue batch size and batch timeout are configured per queue through
   `tovuk queue create` or `tovuk queue update`.
 - Cron triggers are sent as `POST /.tovuk/cron/<trigger>`.
+- State alarms are sent as `POST /.tovuk/state/<class>/<object>/alarm`.
 - WebSocket upgrades on worker routes are proxied to the Rust worker. Tovuk
   meters the initial worker request, handshake CPU, and response-side tunnel
   bytes under `worker_transfer_bytes`, not idle connection time.
