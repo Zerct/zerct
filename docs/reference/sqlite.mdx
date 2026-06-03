@@ -4,22 +4,54 @@ sidebarTitle: "SQLite"
 description: "Create, query, back up, restore, and delete SQLite databases for Tovuk Rust workers."
 ---
 
-Tovuk service databases are SQLite databases owned by a service and attached to Rust
-workers as explicit resources.
+Tovuk service databases are SQLite databases owned by a service and attached to
+Rust workers as explicit resources.
 
-```sh
-tovuk sqlite create --service service_1 DB --json
-tovuk sqlite query --service service_1 DB "select 1" --json
-tovuk sqlite query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
-tovuk sqlite backup create --service service_1 DB --json
-tovuk sqlite backup list --service service_1 DB --json
-tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
-tovuk sqlite delete --service service_1 DB --json
-tovuk service show service_1 --json
-```
+## Database lifecycle
 
-Agents should create databases before a deploy needs them, then keep schema
-migrations in source control. Query responses include `rowsRead`,
+<Steps>
+  <Step title="Create and verify the database">
+    ```sh
+    tovuk sqlite create --service service_1 DB --json
+    tovuk service show service_1 --json
+    ```
+
+    Create databases before a deploy needs them, then verify the service
+    resources before traffic depends on the binding.
+  </Step>
+
+  <Step title="Run one safe query">
+    ```sh
+    tovuk sqlite query --service service_1 DB "select 1" --json
+    tovuk sqlite query --service service_1 DB "select * from users where id = ?" --params '[1]' --json
+    ```
+
+    Use `--params` for user-controlled values so the SQL statement stays
+    stable and the parameter array stays JSON-parseable.
+  </Step>
+
+  <Step title="Back up before migrations">
+    ```sh
+    tovuk sqlite backup create --service service_1 DB --json
+    tovuk sqlite backup list --service service_1 DB --json
+    ```
+
+    Create backups before schema migrations, backfills, imports, or destructive
+    writes.
+  </Step>
+
+  <Step title="Restore or delete deliberately">
+    ```sh
+    tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
+    tovuk sqlite delete --service service_1 DB --json
+    ```
+
+    Restore commands create a pre-restore safety backup first. Delete stale
+    databases only after migrations, backups, or exports are complete.
+  </Step>
+</Steps>
+
+Keep schema migrations in source control. Query responses include `rowsRead`,
 `rowsWritten`, `vmSteps`, `fullscanSteps`, and `meta.duration`,
 `meta.size_after`, `meta.rows_read`, and `meta.rows_written` fields so agents
 can fix slow or expensive queries without dashboard access.
