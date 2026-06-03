@@ -7,6 +7,43 @@ description: "Use Tovuk health and status endpoints to check API availability be
 Use status endpoints only to understand Tovuk availability. Use logs and deploy
 responses to debug your project.
 
+## Status check workflow
+
+<Steps>
+  <Step title="Check whether the API is reachable">
+    ```sh
+    curl https://api.tovuk.com/health
+    ```
+
+    Use `/health` when the question is whether the public API is reachable.
+    Keep `/healthz` for infrastructure probes and deploy scripts.
+  </Step>
+
+  <Step title="Read structured status">
+    ```sh
+    curl https://api.tovuk.com/v1/status
+    ```
+
+    Use `/v1/status` when an SDK, CLI, or agent needs structured dependency
+    checks, `agent_instruction`, and the status docs URL.
+  </Step>
+
+  <Step title="Follow the returned instruction">
+    If `ok` is true, continue with `GET /v1/capabilities` or the Tovuk command
+    you were running. If `ok` is false, retry later before changing project
+    code.
+  </Step>
+
+  <Step title="Switch to logs for project failures">
+    ```sh
+    tovuk logs --build <build_id> --json
+    ```
+
+    Use build logs, deploy responses, and service logs when the Tovuk API is
+    available but a project check, build, or deploy failed.
+  </Step>
+</Steps>
+
 ## Endpoints
 
 ```sh
