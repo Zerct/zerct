@@ -61,13 +61,35 @@ Usage Caps support these public meters:
 
 ## Agent loop
 
-1. Run `tovuk pricing --json` and read `products[].meter_details`.
-2. Run `tovuk deploy --dry-run --json` and read `meterPlan`.
-3. Set caps for every enabled capability before high traffic.
-4. Pass `--notify-at-percent <1-100>` to choose when Tovuk warns before a hard
-   stop.
-5. Run `tovuk usage --json` during tests.
-6. If a limit blocks work, run `tovuk billing checkout --json` and show the
-   hosted URL to the human.
-7. If the human needs invoices, payment methods, or subscription changes, run
-   `tovuk billing portal` and show the hosted URL to the human.
+<Steps>
+  <Step title="Read the meter catalog">
+    Run `tovuk pricing --json` and read `products[].meter_details`.
+  </Step>
+
+  <Step title="Dry-run the deploy">
+    Run `tovuk deploy --dry-run --json` and read `meterPlan`.
+  </Step>
+
+  <Step title="Set caps before traffic">
+    Set caps for every enabled capability before high traffic.
+  </Step>
+
+  <Step title="Choose the warning threshold">
+    Pass `--notify-at-percent <1-100>` to choose when Tovuk warns before a
+    hard stop.
+  </Step>
+
+  <Step title="Watch usage during tests">
+    Run `tovuk usage --json` during tests.
+  </Step>
+
+  <Step title="Open checkout when blocked">
+    If a limit blocks work, run `tovuk billing checkout --json` and show the
+    hosted URL to the human.
+  </Step>
+
+  <Step title="Open the billing portal">
+    If the human needs invoices, payment methods, or subscription changes, run
+    `tovuk billing portal` and show the hosted URL to the human.
+  </Step>
+</Steps>
