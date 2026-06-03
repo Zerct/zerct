@@ -70,8 +70,24 @@ tovuk limits set queue_operations --period month --value 1000000 --notify-at-per
 
 ## Agent loop
 
-1. Confirm `queues = true` in `tovuk.toml`.
-2. Create a dead-letter queue before the primary queue.
-3. Set queue operation caps before load tests.
-4. Implement the Rust queue handler and return `2xx` only after safe handling.
-5. Inspect queue metrics and logs after each deploy.
+<Steps>
+  <Step title="Enable queues">
+    Confirm `queues = true` in `tovuk.toml`.
+  </Step>
+
+  <Step title="Create a dead-letter queue">
+    Create a dead-letter queue before the primary queue.
+  </Step>
+
+  <Step title="Cap queue operations">
+    Set queue operation caps before load tests.
+  </Step>
+
+  <Step title="Handle batches safely">
+    Implement the Rust queue handler and return `2xx` only after safe handling.
+  </Step>
+
+  <Step title="Inspect after deploy">
+    Inspect queue metrics and logs after each deploy.
+  </Step>
+</Steps>
