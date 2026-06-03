@@ -8,7 +8,42 @@ Service Bindings let one Rust Worker call another account-owned Rust Worker
 without exposing a public URL. Use them for internal auth, billing, webhooks,
 and shared APIs that should not be callable from browsers.
 
-## Agent commands
+## Service Binding flow
+
+<Steps>
+  <Step title="Create the target Service">
+    Create or deploy the private Rust Worker that owns the internal API before
+    adding it to callers.
+  </Step>
+
+  <Step title="Create the caller binding">
+    Choose a stable uppercase binding name, then bind the caller Service to the
+    target Service.
+
+    ```sh
+    tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
+    ```
+  </Step>
+
+  <Step title="Deploy the caller Worker">
+    Deploy the caller Rust Worker after the binding exists so its runtime
+    environment receives the private target Service id.
+  </Step>
+
+  <Step title="Read the runtime binding">
+    Read `TOVUK_BINDING_AUTH_SERVICE` from the Rust worker runtime
+    (`TOVUK_BINDING_<NAME>` for other binding names). Static frontends should
+    not call Service Bindings directly.
+  </Step>
+
+  <Step title="Verify and cap calls">
+    Run `tovuk service show service_1 --json` to verify `serviceBindings`,
+    limits, usage, and next actions. Set Worker caps before high-throughput
+    private calls.
+  </Step>
+</Steps>
+
+## CLI workflow
 
 ```sh
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
@@ -39,27 +74,3 @@ tovuk limits set worker_requests --period day --value 100000 --notify-at-percent
   top-level request.
 - Calls must stay private to Rust Workers. Static frontends cannot call Service
   Bindings directly.
-
-## Agent loop
-
-<Steps>
-  <Step title="Create the target Service">
-    Create the target Service first.
-  </Step>
-
-  <Step title="Create the binding">
-    Create the binding with an uppercase name.
-  </Step>
-
-  <Step title="Deploy the caller Worker">
-    Deploy the caller Worker.
-  </Step>
-
-  <Step title="Read the runtime binding">
-    Read `TOVUK_BINDING_<NAME>` from the runtime environment.
-  </Step>
-
-  <Step title="Verify the binding">
-    Use `tovuk service show <service> --json` to verify the binding.
-  </Step>
-</Steps>
