@@ -7,7 +7,43 @@ description: "Create, update, pause, resume, and delete UTC Cron triggers for sc
 Cron triggers run scheduled work for one Service. Use Cron for cleanup,
 reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
 
-## Agent commands
+## Scheduled job flow
+
+<Steps>
+  <Step title="Enable Cron for the Service">
+    Set `cron = true` in `tovuk.toml` before relying on scheduled Rust worker
+    jobs for that Service.
+  </Step>
+
+  <Step title="Implement the internal handler">
+    Handle `POST /.tovuk/cron/<trigger>` in the Rust worker. Keep the handler
+    idempotent because scheduled delivery can overlap with retries or manual
+    agent actions.
+  </Step>
+
+  <Step title="Create the UTC trigger">
+    Create a named trigger with a UTC `cronExpression`.
+
+    ```sh
+    tovuk cron create --service service_1 nightly "0 0 * * *" --json
+    ```
+  </Step>
+
+  <Step title="Inspect the first delivery">
+    After the first scheduled run, inspect runtime logs for the Service.
+
+    ```sh
+    tovuk logs --service service_1 --json
+    ```
+  </Step>
+
+  <Step title="Pause, update, or remove safely">
+    Pause or update a trigger before changing handler assumptions. Delete stale
+    triggers when the scheduled job is retired.
+  </Step>
+</Steps>
+
+## CLI workflow
 
 ```sh
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
@@ -49,31 +85,3 @@ tovuk limits set worker_cpu_ms --period day --value 1000000 --notify-at-percent 
 - Cron handlers must tolerate retries and overlapping manual agent actions.
 - Cron handlers have a 15 minute wall-clock limit.
 - Keep long fan-out work in Queues.
-
-## Agent loop
-
-<Steps>
-  <Step title="Confirm cron capability">
-    Confirm `cron = true` in `tovuk.toml`.
-  </Step>
-
-  <Step title="Create the trigger">
-    Create the trigger through CLI or API.
-  </Step>
-
-  <Step title="Deploy the handler">
-    Deploy the Rust worker handler.
-  </Step>
-
-  <Step title="Tail the first delivery">
-    Tail logs after the first scheduled delivery.
-  </Step>
-
-  <Step title="Pause before changes">
-    Pause or update triggers before changing worker assumptions.
-  </Step>
-
-  <Step title="Delete stale triggers">
-    Delete stale triggers when a schedule is retired.
-  </Step>
-</Steps>
