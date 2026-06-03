@@ -51,9 +51,28 @@ tovuk limits set worker_cpu_ms --period day --value 1000000 --notify-at-percent 
 
 ## Agent loop
 
-1. Confirm `cron = true` in `tovuk.toml`.
-2. Create the trigger through CLI or API.
-3. Deploy the Rust worker handler.
-4. Tail logs after the first scheduled delivery.
-5. Pause or update triggers before changing worker assumptions.
-6. Delete stale triggers when a schedule is retired.
+<Steps>
+  <Step title="Confirm cron capability">
+    Confirm `cron = true` in `tovuk.toml`.
+  </Step>
+
+  <Step title="Create the trigger">
+    Create the trigger through CLI or API.
+  </Step>
+
+  <Step title="Deploy the handler">
+    Deploy the Rust worker handler.
+  </Step>
+
+  <Step title="Tail the first delivery">
+    Tail logs after the first scheduled delivery.
+  </Step>
+
+  <Step title="Pause before changes">
+    Pause or update triggers before changing worker assumptions.
+  </Step>
+
+  <Step title="Delete stale triggers">
+    Delete stale triggers when a schedule is retired.
+  </Step>
+</Steps>
