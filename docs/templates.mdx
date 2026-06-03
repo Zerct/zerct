@@ -5,31 +5,41 @@ description: "Start with Rust APIs, TanStack static frontends, or both."
 
 Use templates when you want Tovuk to create the project shape.
 
-## Rust API
+## Choose a template
 
-```sh
-tovuk new api --template rust-worker
-tovuk check
-tovuk deploy --dry-run --json
-```
+<Tabs>
+  <Tab title="Rust API" icon="server">
+    Start with a Rust worker API when the service only needs backend routes.
 
-## TanStack Static Frontend
+    ```sh
+    tovuk new api --template rust-worker
+    tovuk check
+    tovuk deploy --dry-run --json
+    ```
+  </Tab>
 
-```sh
-tovuk new web --template tanstack-static-frontend
-bun install
-tovuk check
-tovuk deploy --dry-run --json
-```
+  <Tab title="Static frontend" icon="monitor">
+    Start with a TanStack static frontend when the app builds to static files.
 
-## Full-stack Service
+    ```sh
+    tovuk new web --template tanstack-static-frontend
+    bun install
+    tovuk check
+    tovuk deploy --dry-run --json
+    ```
+  </Tab>
 
-```sh
-tovuk new hello-service --template fullstack-rust-tanstack
-cd hello-service/web && bun install && cd ..
-tovuk check
-tovuk deploy --wait --json
-```
+  <Tab title="Full-stack" icon="layers">
+    Start with a Rust worker and TanStack static frontend in one service.
+
+    ```sh
+    tovuk new hello-service --template fullstack-rust-tanstack
+    cd hello-service/web && bun install && cd ..
+    tovuk check
+    tovuk deploy --wait --json
+    ```
+  </Tab>
+</Tabs>
 
 Templates create one root `tovuk.toml` with explicit `[capabilities]`.
 The full-stack template also creates `api/` and `web/`. The Rust worker owns
