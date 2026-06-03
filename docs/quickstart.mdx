@@ -9,82 +9,87 @@ description: "Deploy a Rust worker with Tovuk."
 - A Rust worker with a committed `Cargo.lock`
 - A server that reads the `PORT` environment variable
 
-## Create the project contract
+## Deploy flow
 
-From your worker directory:
+<Steps>
+  <Step title="Create the project contract">
+    From your worker directory:
 
-```sh
-tovuk new
-```
+    ```sh
+    tovuk new
+    ```
 
-This creates a starter `tovuk.toml` from the files already in the directory.
-Review `kind`, `[capabilities]`, and build commands before deploy. Tovuk
-deploys from `tovuk.toml`; the file scan used by `tovuk new` is scaffolding
-only.
+    This creates a starter `tovuk.toml` from the files already in the
+    directory. Review `kind`, `[capabilities]`, and build commands before
+    deploy. Tovuk deploys from `tovuk.toml`; the file scan used by `tovuk new`
+    is scaffolding only.
 
-For a new project, start from a template:
+    For a new project, start from a template:
 
-```sh
-tovuk new hello-service --template fullstack-rust-tanstack
-cd hello-service/web && bun install && cd ..
-```
+    ```sh
+    tovuk new hello-service --template fullstack-rust-tanstack
+    cd hello-service/web && bun install && cd ..
+    ```
+  </Step>
 
-## Check locally
+  <Step title="Check locally">
+    ```sh
+    tovuk check --json
+    ```
 
-```sh
-tovuk check --json
-```
+    Fix the first failed check before deploying. Tovuk errors include
+    `agent_instruction`, so agents can make the exact code change and rerun
+    check.
 
-Fix the first failed check before deploying. Tovuk errors include
-`agent_instruction`, so agents can make the exact code change and rerun check.
+    Confirm account setup:
 
-Confirm account setup:
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle your-handle --display-name "Your Team" --json
+    ```
 
-```sh
-tovuk account show --json
-tovuk account update --handle your-handle --display-name "Your Team" --json
-```
+    Dry-run the deploy before creating a build:
 
-Dry-run the deploy before creating a build:
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
 
-```sh
-tovuk deploy --dry-run --json
-```
+    Review warnings, enabled capabilities, `missingConfig`, `requiredFixes`,
+    meters, limits, and `billingEstimate`.
+  </Step>
 
-Review warnings, enabled capabilities, `missingConfig`, `requiredFixes`, meters,
-limits, and `billingEstimate`.
+  <Step title="Deploy">
+    ```sh
+    tovuk deploy --wait --json
+    ```
 
-## Deploy
+    Inspect deploy state with `tovuk deploy list --json` or
+    `tovuk deploy show <deploy_id> --json` when an agent needs to recover
+    context. Cancel stale queued work with
+    `tovuk deploy cancel <deploy_id> --json` when a newer deploy supersedes it.
 
-```sh
-tovuk deploy --wait --json
-```
+    On first deploy, the CLI opens browser login for GitHub or Google, stores
+    the Tovuk session, then continues automatically. Tovuk builds the worker,
+    verifies health, and returns the deployment URL.
 
-Inspect deploy state with `tovuk deploy list --json` or
-`tovuk deploy show <deploy_id> --json` when an agent needs to recover context.
-Cancel stale queued work with `tovuk deploy cancel <deploy_id> --json` when a
-newer deploy supersedes it.
+    If the build fails, inspect the build logs:
 
-On first deploy, the CLI opens browser login for GitHub or Google, stores the
-Tovuk session, then continues automatically. Tovuk builds the worker, verifies
-health, and returns the deployment URL.
+    ```sh
+    tovuk logs --build <build_id> --json
+    ```
 
-If the build fails, inspect the build logs:
+    Fix the first actionable error, rerun check, then redeploy.
+  </Step>
 
-```sh
-tovuk logs --build <build_id> --json
-```
+  <Step title="Use one root for full-stack repos">
+    Put one `tovuk.toml` in the repo root, with explicit `[capabilities]`,
+    `[worker]`, and `[frontend]` sections. Run one command from the repo root:
 
-Fix the first actionable error, rerun check, then redeploy.
+    ```sh
+    tovuk deploy --wait --json
+    ```
 
-## Full-stack repos
-
-Put one `tovuk.toml` in the repo root, with explicit `[capabilities]`,
-`[worker]`, and `[frontend]` sections. Run one command from the repo root:
-
-```sh
-tovuk deploy --wait --json
-```
-
-Tovuk builds both roots, serves the frontend at `/`, and routes `/api/*` to the
-Rust worker on the same service URL.
+    Tovuk builds both roots, serves the frontend at `/`, and routes `/api/*` to
+    the Rust worker on the same service URL.
+  </Step>
+</Steps>
