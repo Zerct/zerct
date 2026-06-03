@@ -8,13 +8,59 @@ KV stores small values for one Service. Use it for feature flags, sessions,
 configuration, rate-limit state, and cache metadata. Use SQLite for relational
 queries and Object Storage for large files.
 
-## Agent commands
+## Key-value setup flow
+
+<Steps>
+  <Step title="Enable KV for the Service">
+    Set `[capabilities].kv = true` in `tovuk.toml`, then run
+    `tovuk deploy --dry-run --json` so the agent can confirm enabled
+    capabilities, meters, limits, and required fixes before provisioning the
+    namespace.
+  </Step>
+
+  <Step title="Create the namespace">
+    Create the uppercase binding that the Service will use at runtime.
+
+    ```sh
+    tovuk kv create --service service_1 CACHE --json
+    ```
+  </Step>
+
+  <Step title="Write, read, and list one key">
+    Prove the single-key path before adding bulk operations.
+
+    ```sh
+    tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
+    tovuk kv get --service service_1 CACHE user:1 --json
+    tovuk kv keys --service service_1 CACHE --json
+    ```
+  </Step>
+
+  <Step title="Inspect the runtime binding">
+    Deploy the Worker, read `TOVUK_KV_CACHE` from the runtime environment
+    (`TOVUK_KV_<NAME>` for other binding names), and use
+    `tovuk service show service_1 --json` to verify `kvNamespaces`, current
+    usage, limits, and next actions.
+  </Step>
+
+  <Step title="Scale with bulk routes and caps">
+    Use bulk reads, writes, and removals only after the single-key path works.
+    Set caps for `kv_reads`, `kv_writes`, `kv_deletes`, `kv_lists`, and
+    `kv_storage_bytes` before high-volume traffic.
+  </Step>
+</Steps>
+
+## CLI workflow
 
 ```sh
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
 tovuk kv get --service service_1 CACHE user:1 --json
 tovuk kv keys --service service_1 CACHE --json
+tovuk kv delete --service service_1 CACHE user:1 --json
+tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
+tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
+tovuk kv bulk delete --service service_1 CACHE feature:search user:1 --json
 tovuk kv namespace delete --service service_1 CACHE --json
 ```
 
@@ -62,28 +108,3 @@ tovuk limits set kv_storage_bytes --period month --value 1000000000 --notify-at-
 - Key list pages default to 1000 keys and accept limits from 10 to 1000.
 - Bulk reads accept 100 keys. Bulk writes and deletes accept 10000 keys, and
   bulk request bodies must fit 100 MB.
-
-## Agent loop
-
-<Steps>
-  <Step title="Confirm KV in the dry run">
-    Run `tovuk deploy --dry-run --json` and confirm KV is enabled in
-    `tovuk.toml`.
-  </Step>
-
-  <Step title="Create the namespace">
-    Create the namespace with `tovuk kv create`.
-  </Step>
-
-  <Step title="Set usage caps">
-    Set caps for reads, writes, lists, deletes, and storage.
-  </Step>
-
-  <Step title="Read the runtime binding">
-    Deploy the Worker and read `TOVUK_KV_<NAME>` from the runtime environment.
-  </Step>
-
-  <Step title="Verify bindings and usage">
-    Use `tovuk service show <service> --json` to verify bindings and usage.
-  </Step>
-</Steps>
