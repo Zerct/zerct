@@ -53,13 +53,32 @@ the remaining service resources.
 
 Recommended pattern:
 
-1. Keep migrations in a tracked `migrations/` directory.
-2. Acquire one migration lock per service database.
-3. Apply pending migrations before serving traffic.
-4. Keep request handlers free of schema changes and long backfills.
-5. Create a backup before migrations that drop columns, rewrite tables, or
-   backfill large data.
-6. Use parameterized SQL with `--params` instead of interpolating user input.
+<Steps>
+  <Step title="Track migration files">
+    Keep migrations in a tracked `migrations/` directory.
+  </Step>
+
+  <Step title="Lock the database">
+    Acquire one migration lock per service database.
+  </Step>
+
+  <Step title="Apply migrations before traffic">
+    Apply pending migrations before serving traffic.
+  </Step>
+
+  <Step title="Keep handlers out of migrations">
+    Keep request handlers free of schema changes and long backfills.
+  </Step>
+
+  <Step title="Back up destructive changes">
+    Create a backup before migrations that drop columns, rewrite tables, or
+    backfill large data.
+  </Step>
+
+  <Step title="Bind SQL parameters">
+    Use parameterized SQL with `--params` instead of interpolating user input.
+  </Step>
+</Steps>
 
 Agents should reject database code that:
 
