@@ -54,8 +54,24 @@ tovuk limits set log_events --period month --value 1000000 --notify-at-percent 8
 
 ## Agent loop
 
-1. Run `tovuk deploy --wait --json`.
-2. If the deploy fails, read the returned build id.
-3. Run `tovuk logs --build <build_id> --json`.
-4. Fix the first actionable issue.
-5. Rerun `tovuk check --json` and deploy again.
+<Steps>
+  <Step title="Run the deploy">
+    Run `tovuk deploy --wait --json`.
+  </Step>
+
+  <Step title="Read the build id">
+    If the deploy fails, read the returned build id.
+  </Step>
+
+  <Step title="Inspect build logs">
+    Run `tovuk logs --build <build_id> --json`.
+  </Step>
+
+  <Step title="Fix the first issue">
+    Fix the first actionable issue.
+  </Step>
+
+  <Step title="Check and deploy again">
+    Rerun `tovuk check --json` and deploy again.
+  </Step>
+</Steps>
