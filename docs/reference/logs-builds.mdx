@@ -7,6 +7,63 @@ description: "Use deploy history, build logs, and runtime logs to repair failed 
 Logs and Builds help agents repair failed deploys without dashboard clicks.
 Use them after `tovuk check`, `tovuk deploy --dry-run`, and deploy attempts.
 
+## Deploy diagnostics workflow
+
+<Steps>
+  <Step title="Check before creating a build">
+    ```sh
+    tovuk check --json
+    tovuk deploy --dry-run --json
+    ```
+
+    Fix the first failed `agent_instruction` before creating another build.
+    Review dry-run warnings, enabled capabilities, meters, limits, and billing
+    estimates before deploy.
+  </Step>
+
+  <Step title="Deploy and keep the returned ids">
+    ```sh
+    tovuk deploy --wait --json
+    tovuk deploy list --json
+    tovuk deploy show deploy_1 --json
+    ```
+
+    Read the returned `build_job.id`, `final_build.status`, and deploy id from
+    the deploy output or deploy history. Keep those ids with the failing
+    command.
+  </Step>
+
+  <Step title="Inspect build and runtime logs">
+    ```sh
+    tovuk logs --build build_1 --json
+    tovuk logs --deploy deploy_1 --json
+    tovuk logs --service service_1 --json
+    ```
+
+    Read the first actionable log error before changing code. Use build logs
+    for build failures, deploy logs for one deploy, and service logs for latest
+    runtime output.
+  </Step>
+
+  <Step title="Cancel superseded queued work">
+    ```sh
+    tovuk deploy cancel deploy_1 --json
+    ```
+
+    Cancel only queued deploy work that a newer deploy has replaced.
+  </Step>
+
+  <Step title="Repair and redeploy">
+    ```sh
+    tovuk check --json
+    tovuk deploy --wait --json
+    ```
+
+    Rerun checks after the fix, then redeploy with the same command once the
+    first issue is resolved.
+  </Step>
+</Steps>
+
 ## Dashboard
 
 The dashboard Activity view is available at `https://tovuk.com/account/activity`
@@ -24,6 +81,7 @@ tovuk deploy list --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --build build_1 --json
+tovuk logs --deploy deploy_1 --json
 tovuk logs --service service_1 --json
 ```
 
@@ -32,6 +90,7 @@ tovuk logs --service service_1 --json
 - `GET /v1/account/activity`
 - `GET /v1/deploys/{deploy_id}`
 - `POST /v1/deploys/{deploy_id}/cancel`
+- `GET /v1/deploys/{deploy_id}/logs`
 - `GET /v1/builds/{build_id}/logs`
 - `GET /v1/services/{service_id}/logs`
 
@@ -51,27 +110,3 @@ tovuk limits set log_events --period month --value 1000000 --notify-at-percent 8
 - Cancel superseded queued deploys.
 - Include build id, deploy id, failing command, and first actionable log line
   in support tickets.
-
-## Agent loop
-
-<Steps>
-  <Step title="Run the deploy">
-    Run `tovuk deploy --wait --json`.
-  </Step>
-
-  <Step title="Read the build id">
-    If the deploy fails, read the returned build id.
-  </Step>
-
-  <Step title="Inspect build logs">
-    Run `tovuk logs --build <build_id> --json`.
-  </Step>
-
-  <Step title="Fix the first issue">
-    Fix the first actionable issue.
-  </Step>
-
-  <Step title="Check and deploy again">
-    Rerun `tovuk check --json` and deploy again.
-  </Step>
-</Steps>
