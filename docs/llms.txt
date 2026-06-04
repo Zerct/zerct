@@ -51,7 +51,7 @@ Workflow references:
 
 Operational references:
 
-- `docs/status.mdx`: API health endpoints, `/v1/status`, and project-failure handoff to logs.
+- `docs/status.mdx`: `/health`, `/healthz`, `/v1/status`, CLI `api_unreachable`, and project-failure handoff to logs.
 - `docs/support.mdx`: support ticket evidence, Dashboard Support, and support CLI/API routes.
 - `docs/abuse.mdx`: public abuse reports, owner appeals, operator quarantine, and abuse rate limits.
 
