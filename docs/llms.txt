@@ -41,6 +41,7 @@ Resource references:
 
 Workflow references:
 
+- `docs/deploy.mdx`: check, dry-run, deploy, inspect, and recover services.
 - `docs/templates.mdx`: project templates, `tovuk new`, and starter workflows.
 - `docs/changelog.mdx`: dated changes, fixes, and release-note review links.
 
