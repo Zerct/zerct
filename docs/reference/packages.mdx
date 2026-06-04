@@ -61,6 +61,9 @@ tovuk deploy
 
 `tovuk` is the live unscoped npm package. It installs a native binary for the
 current platform.
+The npm package downloads that binary during `postinstall`. If npm scripts are
+disabled and `tovuk` reports that the native binary was not installed, reinstall
+with npm scripts enabled before retrying.
 
 All official package CLIs expose the same agent commands for login, account
 setup, check, deploy, deploy dry-runs, deploy history, deploy cancellation,
