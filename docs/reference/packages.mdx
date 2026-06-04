@@ -22,14 +22,14 @@ description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
     surface before you run deploy work.
   </Step>
 
-  <Step title="Check account and project context">
+  <Step title="Check project and account context">
     ```sh
-    tovuk account show --json
     tovuk check --json
+    tovuk account show --json
     ```
 
-    Confirm the account session, then follow the first failed
-    `agent_instruction` from project checks before creating a build.
+    Follow the first failed `agent_instruction` from project checks, then
+    confirm the account session before creating a build.
   </Step>
 
   <Step title="Dry-run before deploy">
