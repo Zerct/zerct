@@ -23,6 +23,7 @@ Resource references:
 
 - `docs/reference/project-contract.mdx`: tovuk.toml contract, capabilities, build commands, and runtime behavior.
 - `docs/reference/workers.mdx`: Rust Worker routes, events, and frontend policy.
+- `docs/reference/resources.mdx`: Service Resources workflow, dashboard parity, runtime bindings, and resource routes.
 - `docs/reference/sqlite.mdx`: managed SQLite commands, limits, and backups.
 - `docs/reference/state.mdx`: keyed State objects, storage, and alarms.
 - `docs/reference/kv.mdx`: KV commands, API routes, meters, and limits.
