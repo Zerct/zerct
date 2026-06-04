@@ -1,7 +1,7 @@
 ---
 title: "Deployment Limits and Guardrails"
 sidebarTitle: "Limits"
-description: "Deployment guardrails, plan-limit recovery, and paid usage caps for Tovuk projects."
+description: "Deployment guardrails, account setup, plan-limit recovery, and paid usage caps for Tovuk projects."
 ---
 
 Tovuk keeps deploys predictable by rejecting projects that are expensive or
@@ -138,25 +138,48 @@ ambiguous to run.
 
 ## Plan limit recovery
 
-When a free-tier account reaches a plan limit, agents can create a hosted
-subscription link without dashboard work:
+When a free-tier account reaches a plan limit, recover in this order so
+account-scoped actions have the right context:
 
-```sh
-tovuk billing checkout "Plan limit reached" --json
-```
+<Steps>
+  <Step title="Confirm account setup">
+    Billing checkout, usage, and cap changes are account-scoped. Check the
+    account first, then run the update command only when setup is incomplete.
 
-Show the returned `checkout.url` to the human. If the issue is not a payment
-problem, create a support ticket with command output and ids:
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    ```
+  </Step>
 
-```sh
-tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
-```
+  <Step title="Check current usage">
+    Compare current usage, plan limits, billing estimates, and existing caps
+    before creating checkout links or changing hard caps.
 
-Resolve the ticket after the issue is fixed:
+    ```sh
+    tovuk usage --json
+    ```
+  </Step>
 
-```sh
-tovuk support resolve ticket_0123456789abcdef0123 --json
-```
+  <Step title="Create checkout when payment is the blocker">
+    If the limit requires a plan change or paid usage, create a hosted
+    subscription link and show the returned `checkout.url` to the human.
+
+    ```sh
+    tovuk billing checkout "Plan limit reached" --json
+    ```
+  </Step>
+
+  <Step title="Escalate non-payment blockers">
+    If usage and checkout do not explain the blocker, create a support ticket
+    with command output and ids. Resolve the ticket after the issue is fixed.
+
+    ```sh
+    tovuk support create "Limit issue" "Agent could not proceed after checking usage." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "plan limit reached" --json
+    tovuk support resolve ticket_0123456789abcdef0123 --json
+    ```
+  </Step>
+</Steps>
 
 ## Paid usage caps
 
@@ -174,7 +197,9 @@ Supported cap meters are `worker_requests`, `worker_cpu_ms`,
 `build_minutes`, and `log_events`.
 
 ```sh
+tovuk account show --json
 tovuk pricing --json
+tovuk usage --json
 tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
 tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
 tovuk limits set worker_cpu_ms --period month --value 30000000 --notify-at-percent 80 --json
