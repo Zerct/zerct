@@ -54,7 +54,7 @@ Workflow references:
 Operational references:
 
 - `docs/status.mdx`: `/health`, `/healthz`, `/v1/status`, CLI `api_unreachable`, and project-failure handoff to logs.
-- `docs/support.mdx`: support ticket evidence, Dashboard Support, and support CLI/API routes.
+- `docs/support.mdx`: support ticket evidence, account setup, Dashboard Support, and support CLI/API routes.
 - `docs/abuse.mdx`: public abuse reports, owner appeals, operator quarantine, and abuse rate limits.
 
 Dashboard Overview is available at `https://tovuk.com/account` and shows
@@ -260,6 +260,7 @@ tovuk storage url --service <service> uploads/file.png --json
 tovuk storage delete --service <service> uploads/file.png --json
 tovuk billing checkout --json
 tovuk billing portal
+tovuk account show --json
 tovuk support list --json
 tovuk support create "Deploy failed" "Agent retried deploy after check." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
 tovuk support resolve <ticket_id> --json
