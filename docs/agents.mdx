@@ -207,11 +207,14 @@ larger than 100 MiB.
 
 <Prompt description="Create a full-stack Tovuk starter project." actions={["copy"]}>
 Create a Tovuk full-stack project. Run
-`tovuk new hello-service --template fullstack-rust-tanstack`, then install
-frontend packages in `hello-service/web`. Keep dynamic server logic in the Rust worker.
-Keep the TanStack frontend static at runtime and call same-origin `/api`. Run
-check in JSON mode, run deploy dry-run from the repo root, then deploy from
-the repo root.
+`tovuk new hello-service --template fullstack-rust-tanstack`.
+Run `cd hello-service/web`.
+Run `bun install`.
+Run `cd ..`.
+Keep dynamic server logic in the Rust worker. Keep the TanStack frontend static
+at runtime and call same-origin `/api`. Run `tovuk check --json`, then
+`tovuk deploy --dry-run --json`, then `tovuk deploy --wait --json` from the
+repo root.
 </Prompt>
 
 ## Log and service commands
