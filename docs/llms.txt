@@ -31,7 +31,7 @@ Resource references:
 - `docs/reference/cron.mdx`: scheduled Rust worker events.
 - `docs/reference/bindings.mdx`: private Service Binding calls.
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
-- `docs/reference/storage.mdx`: Object Storage uploads, downloads, multipart, and egress.
+- `docs/reference/storage.mdx`: Object Storage account setup, Service context, uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain account setup, Service context, DNS records, verification, and cleanup.
 - `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
 - `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.

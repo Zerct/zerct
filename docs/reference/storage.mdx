@@ -1,7 +1,7 @@
 ---
 title: "Manage Files and Media in Object Storage"
 sidebarTitle: "Object Storage"
-description: "Upload, list, download, and delete service files and media with Tovuk Object Storage."
+description: "Confirm account and Service context, then upload, list, download, and delete service files and media with Tovuk Object Storage."
 ---
 
 Tovuk object storage is scoped to a service and is available through the native
@@ -15,6 +15,20 @@ Tovuk API and CLI commands instead of provider bucket URLs.
 ## File and media workflow
 
 <Steps>
+  <Step title="Confirm account and service context">
+    Storage changes are account-authenticated and Service-scoped. Confirm
+    account setup, then inspect the target Service before listing, uploading,
+    sharing, or deleting files.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
+
+    Check `accountUsage`, `limits`, `billingEstimate`, and storage-related
+    `next_actions` before starting large uploads or public media work.
+  </Step>
+
   <Step title="Choose public or private access">
     Use `--public` only for browser-safe media that should return a
     `publicUrl`. Leave that flag off for private artifacts; private files use
