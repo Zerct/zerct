@@ -64,16 +64,16 @@
             "pages": [
               "index",
               "quickstart",
+              "agents",
               "templates",
-              "deploy",
-              "production-readiness"
+              "deploy"
             ]
           },
           {
-            "group": "Plan and Operate",
+            "group": "Production and Cost",
             "pages": [
+              "production-readiness",
               "pricing",
-              "agents",
               "status"
             ]
           },
