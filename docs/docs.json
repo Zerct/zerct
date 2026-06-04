@@ -4,9 +4,9 @@
   "name": "Tovuk",
   "description": "Free Rust worker cloud for agents.",
   "colors": {
-    "primary": "#FFFFFF",
-    "light": "#FFFFFF",
-    "dark": "#FFFFFF"
+    "primary": "#171717",
+    "light": "#FAFAFA",
+    "dark": "#666666"
   },
   "favicon": "/favicon.svg",
   "logo": {
@@ -15,8 +15,8 @@
     "href": "https://tovuk.com"
   },
   "appearance": {
-    "default": "dark",
-    "strict": true
+    "default": "system",
+    "strict": false
   },
   "fonts": {
     "family": "Geist",
@@ -41,8 +41,8 @@
   },
   "background": {
     "color": {
-      "light": "#000000",
-      "dark": "#000000"
+      "light": "#FAFAFA",
+      "dark": "#0A0A0A"
     }
   },
   "styling": {
