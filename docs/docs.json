@@ -65,7 +65,8 @@
               "index",
               "quickstart",
               "templates",
-              "deploy"
+              "deploy",
+              "production-readiness"
             ]
           },
           {

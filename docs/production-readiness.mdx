@@ -1,0 +1,132 @@
+---
+title: "Prepare Tovuk Projects for Production"
+sidebarTitle: "Production Readiness"
+description: "Source-backed launch checklist for Tovuk checks, dry-runs, usage caps, deploy evidence, status checks, secrets, domains, and cleanup."
+---
+
+Use this checklist before real users, load tests, or paid usage depend on a
+Tovuk Service. It is not a guarantee that every app-specific production risk is
+handled. It keeps the Tovuk-specific checks, limits, and recovery commands in
+one place so humans and agents can launch with less guesswork.
+
+## Launch workflow
+
+<Steps>
+  <Step title="Lock the project contract">
+    ```sh
+    tovuk check --json
+    ```
+
+    Confirm required files, explicit `[capabilities]`, release-mode checks, and
+    the configured health path before remote build work begins. Keep generated
+    directories, compiled artifacts, and secrets out of deploy archives.
+  </Step>
+
+  <Step title="Dry-run before creating a build">
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Review `missingConfig`, `requiredFixes`, enabled and disabled
+    capabilities, `meterPlan`, `limits`, `usage`, and `billingEstimate`. Do not
+    deploy until the dry-run output matches the intended service shape.
+  </Step>
+
+  <Step title="Set caps for expected load">
+    ```sh
+    tovuk pricing --json
+    tovuk usage --json
+    tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
+    tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
+    ```
+
+    Use the product catalog and current `billingEstimate.lineItems` to pick the
+    meters that match the service. Set hard caps before load tests, media
+    imports, queue fan-out, or paid usage.
+  </Step>
+
+  <Step title="Prepare runtime dependencies">
+    ```sh
+    tovuk service show <service> --json
+    tovuk env list --service <service> --json
+    tovuk domains list --service <service> --json
+    ```
+
+    Verify resources, env names, domains, `accountUsage`, `billingEstimate`,
+    and next actions. Add secrets with `tovuk env set`, create required
+    service resources, and verify custom domains before traffic depends on
+    them.
+  </Step>
+
+  <Step title="Deploy and keep ids">
+    ```sh
+    tovuk deploy --wait --json
+    tovuk deploy list --json
+    tovuk deploy show <deploy_id> --json
+    ```
+
+    Preserve the deploy id, `build_job.id`, and `final_build.status` from the
+    deploy response. If a newer deploy supersedes queued work, cancel the stale
+    deploy with `tovuk deploy cancel <deploy_id> --json`.
+  </Step>
+
+  <Step title="Separate platform status from project failures">
+    ```sh
+    curl https://api.tovuk.com/health
+    curl https://api.tovuk.com/healthz
+    curl https://api.tovuk.com/v1/status
+    tovuk logs --build <build_id> --json
+    tovuk logs --service <service> --json
+    ```
+
+    Use `/health`, `/healthz`, and `/v1/status` only to check Tovuk API
+    availability. When the API is available but a project build or runtime
+    fails, inspect build, deploy, and service logs before changing code.
+  </Step>
+
+  <Step title="Clean up launch leftovers">
+    ```sh
+    tovuk service delete <service> --json
+    tovuk support create \
+      "Deploy failed" \
+      "Agent retried deploy after check." \
+      --service <service> \
+      --build <build_id> \
+      --deploy <deploy_id> \
+      --failing-command "tovuk deploy --wait --json" \
+      --first-log-line "first actionable log line" \
+      --json
+    ```
+
+    Delete smoke-test Services that should not keep resources. Open support
+    tickets only with the service id, build id, deploy id, failing command,
+    first actionable log line, and what already changed.
+  </Step>
+</Steps>
+
+## Readiness checks
+
+| Area | Production Check | Source |
+| --- | --- | --- |
+| Project Contract | `tovuk check --json` passes, `tovuk.toml` names the kind and explicit capabilities, and the worker health path is configured. | [tovuk.toml](/reference/project-contract) |
+| Deploy Plan | `tovuk deploy --dry-run --json` returns the intended capabilities, meters, `meterPlan`, `limits`, and `billingEstimate`. | [Deploy](/deploy) |
+| Cost Guardrails | `tovuk pricing --json` and `tovuk usage --json` are reviewed, then caps are set for expected traffic and resource usage. | [Usage Caps](/reference/usage-caps) |
+| Runtime Resources | SQLite, Object Storage, KV, Queues, Cron, State, and Service Bindings are created only when the Service needs them, then verified with `tovuk service show <service> --json`. | [Service Resources](/reference/resources) |
+| Secrets | Secrets are stored with `tovuk env set`, listed only as metadata, and never printed, committed, or exposed to browser code. | [Secrets](/reference/secrets) |
+| Hostnames | Custom domains are added and verified with the returned DNS record. Do not point A records at Tovuk origin hosts. | [Custom Domains](/reference/domains) |
+| Deploy Evidence | The deploy id, `build_job.id`, `final_build.status`, service URL, and first actionable log line are preserved for recovery. | [Logs and Builds](/reference/logs-builds) |
+| Platform Status | `/health`, `/healthz`, and `/v1/status` are used for Tovuk API availability, not project debugging. | [Status](/status) |
+
+## Agent handoff
+
+```text
+Prepare this Tovuk project for production. Read https://docs.tovuk.com/production-readiness and https://docs.tovuk.com/llms.txt.
+Run `tovuk check --json`.
+Run `tovuk deploy --dry-run --json`.
+Review `missingConfig`, `requiredFixes`, `meterPlan`, `limits`, `usage`, and `billingEstimate`.
+Run `tovuk pricing --json` and `tovuk usage --json`, then set hard caps for expected load.
+Verify required resources, secrets, and domains.
+Deploy with `tovuk deploy --wait --json`.
+Keep the deploy id, `build_job.id`, `final_build.status`, and first actionable log line.
+If the API is unavailable, check `/v1/status`; otherwise use build and service logs for project failures.
+```
