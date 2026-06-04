@@ -5,8 +5,7 @@ description: "Use deploy history, build logs, and runtime logs to repair failed 
 ---
 
 Logs and Builds help agents repair failed deploys without dashboard clicks.
-Use them after `tovuk check --json`, `tovuk deploy --dry-run --json`, and
-deploy attempts.
+Use them after local checks, account setup, dry-run planning, and deploy attempts.
 
 ## Deploy diagnostics workflow
 
@@ -14,10 +13,26 @@ deploy attempts.
   <Step title="Check before creating a build">
     ```sh
     tovuk check --json
-    tovuk deploy --dry-run --json
     ```
 
     Fix the first failed `agent_instruction` before creating another build.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    ```
+
+    Run the update command only when setup is incomplete. Deploy history,
+    Activity, logs, and build diagnostics are account-authenticated.
+  </Step>
+
+  <Step title="Dry-run before creating a build">
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
     Review dry-run warnings, enabled capabilities, meters, limits, and billing
     estimates before deploy.
   </Step>
@@ -78,6 +93,7 @@ CLI.
 ## Agent commands
 
 ```sh
+tovuk account show --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json

@@ -33,7 +33,7 @@ Resource references:
 - `docs/reference/secrets.mdx`: server-only environment values.
 - `docs/reference/storage.mdx`: Object Storage uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain DNS and verification.
-- `docs/reference/logs-builds.mdx`: `tovuk check --json`, dry-run, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
+- `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
 - `docs/reference/limits.mdx`: deployment guardrails, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields and the product selection workflow.
 - `docs/reference/packages.mdx`: install channels, account setup checks, package parity, and native binary recovery.
