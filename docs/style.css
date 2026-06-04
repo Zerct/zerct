@@ -187,12 +187,18 @@ samp {
   padding: 0.12rem 0.32rem;
 }
 
-#content pre,
 #request-example,
 #response-example {
   background: #050505;
   border: 1px solid var(--tovuk-gray-300);
   border-radius: var(--tovuk-radius);
+  box-shadow: none;
+}
+
+#content pre {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
 }
 
