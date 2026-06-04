@@ -1,7 +1,7 @@
 ---
 title: "Add, Verify, and Delete Custom Domains"
 sidebarTitle: "Custom Domains"
-description: "Attach, verify, and delete production hostnames for Tovuk Services with CLI, API, and DNS-provider workflows."
+description: "Confirm account and Service context, then attach, verify, and delete production hostnames for Tovuk Services."
 ---
 
 Custom Domains attach one user-owned hostname to one Service. Tovuk returns
@@ -11,6 +11,19 @@ DNS provider API without dashboard access.
 ## Custom domain flow
 
 <Steps>
+  <Step title="Confirm account and service context">
+    Domain changes are account-authenticated and Service-scoped. Confirm account
+    setup, then inspect the target Service before adding or removing hostnames.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
+
+    Check the Service `capabilities`, current `domains`, and `next_actions`
+    before changing DNS.
+  </Step>
+
   <Step title="Add the hostname">
     Run:
 
@@ -58,6 +71,8 @@ DNS provider API without dashboard access.
 ## CLI commands
 
 ```sh
+tovuk account show --json
+tovuk service show service_1 --json
 tovuk domains list --service service_1 --json
 tovuk domains add --service service_1 api.example.com --json
 tovuk domains verify --service service_1 api.example.com --json
