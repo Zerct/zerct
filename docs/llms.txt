@@ -27,7 +27,7 @@ Resource references:
 - `docs/reference/sqlite.mdx`: managed SQLite commands, limits, and backups.
 - `docs/reference/state.mdx`: keyed State objects, storage, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
-- `docs/reference/queues.mdx`: queue producers, consumers, retries, and dead letters.
+- `docs/reference/queues.mdx`: queue account setup, Service context, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: scheduled Rust worker events.
 - `docs/reference/bindings.mdx`: private Service Binding calls.
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
@@ -228,6 +228,8 @@ tovuk sqlite backup restore --service <service> DB sqlite_backup_1 --json
 tovuk sqlite delete --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv namespace delete --service <service> CACHE --json
+tovuk account show --json
+tovuk service show <service> --json
 tovuk queue create --service <service> failed_jobs --json
 tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 tovuk queue update --service <service> jobs --max-batch-size 25 --json
