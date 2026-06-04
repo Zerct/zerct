@@ -16,6 +16,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk new api --template rust-worker
     tovuk check --json
     tovuk deploy --dry-run --json
+    tovuk deploy --wait --json
     ```
   </Tab>
 
@@ -27,6 +28,7 @@ Use templates when you want Tovuk to create the project shape.
     bun install
     tovuk check --json
     tovuk deploy --dry-run --json
+    tovuk deploy --wait --json
     ```
   </Tab>
 
@@ -35,7 +37,9 @@ Use templates when you want Tovuk to create the project shape.
 
     ```sh
     tovuk new hello-service --template fullstack-rust-tanstack
-    cd hello-service/web && bun install && cd ..
+    cd hello-service/web
+    bun install
+    cd ..
     tovuk check --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
