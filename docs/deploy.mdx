@@ -1,7 +1,7 @@
 ---
 title: "Deploy Rust Workers and Frontends"
 sidebarTitle: "Deploy"
-description: "Check, dry-run, deploy, inspect, and recover Tovuk Rust workers, static frontends, and full-stack services."
+description: "Check, confirm account setup, dry-run, deploy, inspect, and recover Tovuk Rust workers, static frontends, and full-stack services."
 ---
 
 Tovuk uses a small project contract so humans and agents can deploy without
@@ -20,6 +20,15 @@ guessing.
     ```
 
     Fix the first failed check or `agent_instruction` before creating a remote build.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    ```
+
+    Run the update command only when account setup is incomplete.
   </Step>
 
   <Step title="Preview deploy intent">
