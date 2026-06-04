@@ -56,7 +56,7 @@ description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
 
 ```sh
 npm install -g tovuk
-tovuk deploy
+tovuk deploy --wait --json
 ```
 
 `tovuk` is the live unscoped npm package. It installs a native binary for the
@@ -117,7 +117,7 @@ line, rerun check, then redeploy.
 ```sh
 brew tap tovuk/tovuk https://github.com/tovuk/tovuk
 brew install tovuk
-tovuk deploy
+tovuk deploy --wait --json
 ```
 
 ## PyPI
@@ -125,7 +125,7 @@ tovuk deploy
 ```sh
 pipx install tovuk
 tovuk account show --json
-tovuk deploy --wait
+tovuk deploy --wait --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
@@ -147,7 +147,7 @@ Cargo, or npm.
 
 ```sh
 cargo install tovuk
-tovuk deploy --wait
+tovuk deploy --wait --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --deploy deploy_1 --json
