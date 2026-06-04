@@ -1,7 +1,7 @@
 ---
 title: "Manage Background Jobs and Queues"
 sidebarTitle: "Queues"
-description: "Create queues, send jobs, inspect metrics, tune retries, and route dead-letter work for Tovuk Services."
+description: "Confirm account and Service context, then create queues, send jobs, inspect metrics, tune retries, and route dead-letter work for Tovuk Services."
 ---
 
 Queues move work out of public requests. Use them for emails, webhook retries,
@@ -10,6 +10,20 @@ image processing, cleanup, and other tasks that can run after the response.
 ## Queue flow
 
 <Steps>
+  <Step title="Confirm account and service context">
+    Queue changes are account-authenticated and Service-scoped. Confirm account
+    setup, then inspect the target Service before creating queues, sending
+    jobs, or changing retry and dead-letter settings.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
+
+    Check `queues`, `accountUsage`, `limits`, `billingEstimate`, and
+    `next_actions` before high-volume producers or retry tuning.
+  </Step>
+
   <Step title="Enable and create queues">
     Set `[capabilities].queue = true` in `tovuk.toml`, then run
     `tovuk deploy --dry-run --json` so the agent can confirm Queue meters,
@@ -43,6 +57,8 @@ image processing, cleanup, and other tasks that can run after the response.
 ## CLI workflow
 
 ```sh
+tovuk account show --json
+tovuk service show service_1 --json
 tovuk queue create --service service_1 failed_jobs --json
 tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 tovuk queue send --service service_1 jobs '{"kind":"welcome","user_id":"user_1"}' --json
