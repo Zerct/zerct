@@ -49,7 +49,7 @@ tovuk new hello-service --template fullstack-rust-tanstack
 tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
 tovuk deploy --dry-run --json
-tovuk check
+tovuk check --json
 tovuk deploy --wait --json
 tovuk deploy list --json
 tovuk deploy show <deploy_id> --json
