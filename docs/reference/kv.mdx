@@ -1,7 +1,7 @@
 ---
 title: "Manage Key-Value Storage"
 sidebarTitle: "KV"
-description: "Create KV namespaces, read and write keys, use bulk routes, and set usage caps for Tovuk Services."
+description: "Confirm account and Service context, then create KV namespaces, read and write keys, use bulk routes, and set usage caps for Tovuk Services."
 ---
 
 KV stores small values for one Service. Use it for feature flags, sessions,
@@ -11,6 +11,20 @@ queries and Object Storage for large files.
 ## Key-value setup flow
 
 <Steps>
+  <Step title="Confirm account and service context">
+    KV changes are account-authenticated and Service-scoped. Confirm account
+    setup, then inspect the target Service before creating namespaces or
+    writing keys.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
+
+    Check `kvNamespaces`, `accountUsage`, `limits`, `billingEstimate`, and
+    `next_actions` before provisioning high-volume cache or session data.
+  </Step>
+
   <Step title="Enable KV for the Service">
     Set `[capabilities].kv = true` in `tovuk.toml`, then run
     `tovuk deploy --dry-run --json` so the agent can confirm enabled
