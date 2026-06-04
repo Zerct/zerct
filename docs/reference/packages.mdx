@@ -66,6 +66,8 @@ All official package CLIs expose the same agent commands for login, account
 setup, check, deploy, deploy dry-runs, deploy history, deploy cancellation,
 pricing, usage, service inspection, logs, env, domains, storage, SQLite, KV,
 queues, cron, State, service bindings, usage caps, billing, support, and abuse.
+Value flags accept both `--flag value` and `--flag=value` forms. Boolean flags
+such as `--json`, `--wait`, and `--dry-run` do not take a value.
 `tovuk usage --json` includes `billingEstimate.lineItems` so package users and
 agents can inspect current-month cost estimates without a dashboard.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
