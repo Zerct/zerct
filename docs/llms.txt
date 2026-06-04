@@ -45,8 +45,8 @@ Workflow references:
 - `docs/quickstart.mdx`: first Rust worker or full-stack deploy flow.
 - `docs/deploy.mdx`: check, dry-run, deploy, inspect, and recover services.
 - `docs/production-readiness.mdx`: production launch workflow, usage caps, deploy evidence, status distinction, secrets, domains, and cleanup.
-- `docs/agents.mdx`: agent deploy workflow, reusable deploy prompt, recovery,
-  support, and abuse workflow.
+- `docs/agents.mdx`: agent deploy workflow, reusable deploy and starter
+  prompts, recovery, support, and abuse workflow.
 - `docs/pricing.mdx`: pricing, usage limits, cost estimates, and hard caps.
 - `docs/templates.mdx`: project templates, `tovuk new`, and starter workflows.
 - `docs/changelog.mdx`: dated changes, fixes, and release-note review links.
