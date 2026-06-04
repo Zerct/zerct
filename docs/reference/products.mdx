@@ -30,6 +30,44 @@ Use `tovuk usage --json` for the authenticated `billingEstimate` line items
 before high-throughput work. Every public meter must appear there as either a
 priced line item or an explicit zero-price line item.
 
+## Product selection workflow
+
+<Steps>
+  <Step title="Read the product catalog">
+    ```sh
+    tovuk pricing --json
+    ```
+
+    Start with `products[]`, not guesswork. Use each product's `features`,
+    `best_for`, `avoid_for`, `meters`, `meter_details`, `pricing_fields`, and
+    `limit_fields` before changing code.
+  </Step>
+
+  <Step title="Dry-run the current project">
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Compare the catalog with the project's enabled capabilities, `meters`,
+    `meterPlan`, limits, warnings, and `billingEstimate`.
+  </Step>
+
+  <Step title="Choose the smallest fit">
+    Prefer the product whose `features` match the job and whose `avoid_for`
+    list does not describe the workload. Use `limit_fields` and
+    `pricing_fields` to confirm the relevant plan limits and overage fields.
+  </Step>
+
+  <Step title="Check usage before load">
+    ```sh
+    tovuk usage --json
+    ```
+
+    Review `billingEstimate.lineItems`, then set hard caps for the meters you
+    expect to exercise before load tests, media imports, or paid traffic.
+  </Step>
+</Steps>
+
 ## Product Guide
 
 Worker:
