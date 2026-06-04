@@ -44,6 +44,7 @@ Workflow references:
 Operational references:
 
 - `docs/status.mdx`: API health endpoints, `/v1/status`, and project-failure handoff to logs.
+- `docs/support.mdx`: support ticket evidence, Dashboard Support, and support CLI/API routes.
 
 Dashboard Overview is available at `https://tovuk.com/account` and shows
 Service kind, per-Service resource counts for SQLite, Object Storage, KV,
