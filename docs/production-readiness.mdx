@@ -1,7 +1,7 @@
 ---
 title: "Prepare Tovuk Projects for Production"
 sidebarTitle: "Production Readiness"
-description: "Source-backed launch checklist for Tovuk checks, dry-runs, usage caps, deploy evidence, status checks, secrets, domains, and cleanup."
+description: "Source-backed launch checklist for Tovuk checks, account setup, dry-runs, usage caps, deploy evidence, status checks, secrets, domains, and cleanup."
 ---
 
 Use this checklist before real users, load tests, or paid usage depend on a
@@ -20,6 +20,16 @@ one place so humans and agents can launch with less guesswork.
     Confirm required files, explicit `[capabilities]`, release-mode checks, and
     the configured health path before remote build work begins. Keep generated
     directories, compiled artifacts, and secrets out of deploy archives.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    ```
+
+    Run the update command only when setup is incomplete so dry-runs, caps, and
+    billing actions use the intended account.
   </Step>
 
   <Step title="Dry-run before creating a build">
@@ -122,6 +132,8 @@ one place so humans and agents can launch with less guesswork.
 ```text
 Prepare this Tovuk project for production. Read https://docs.tovuk.com/production-readiness and https://docs.tovuk.com/llms.txt.
 Run `tovuk check --json`.
+Run `tovuk account show --json`.
+If setup is incomplete, run `tovuk account update --handle <handle> --display-name <name> --json`.
 Run `tovuk deploy --dry-run --json`.
 Review `missingConfig`, `requiredFixes`, `meterPlan`, `limits`, `usage`, and `billingEstimate`.
 Run `tovuk pricing --json` and `tovuk usage --json`, then set hard caps for expected load.
