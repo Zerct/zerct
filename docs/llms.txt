@@ -34,6 +34,7 @@ Resource references:
 - `docs/reference/storage.mdx`: Object Storage uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain DNS and verification.
 - `docs/reference/logs-builds.mdx`: deploys, builds, logs, and cancellation.
+- `docs/reference/limits.mdx`: deployment guardrails, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields and the product selection workflow.
 - `docs/reference/packages.mdx`: install channels, package parity, and native binary recovery.
 - `docs/reference/usage-caps.mdx`: hard caps for every public meter.
