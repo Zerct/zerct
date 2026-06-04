@@ -41,7 +41,7 @@ Resource references:
 
 Workflow references:
 
-- `docs/index.mdx`: docs start page, path chooser, and visible Copy prompt for AI coding agents.
+- `docs/index.mdx`: docs start page, path chooser, package install snippet, and visible Copy prompt for AI coding agents.
 - `docs/quickstart.mdx`: first Rust worker or full-stack deploy flow.
 - `docs/deploy.mdx`: check, dry-run, deploy, inspect, and recover services.
 - `docs/production-readiness.mdx`: production launch workflow, usage caps, deploy evidence, status distinction, secrets, domains, and cleanup.
