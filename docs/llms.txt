@@ -34,7 +34,7 @@ Resource references:
 - `docs/reference/storage.mdx`: Object Storage uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain DNS and verification.
 - `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
-- `docs/reference/limits.mdx`: deployment guardrails, plan-limit recovery, and paid usage caps.
+- `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields and the product selection workflow.
 - `docs/reference/packages.mdx`: install channels, account setup checks, package parity, and native binary recovery.
 - `docs/reference/usage-caps.mdx`: account setup and hard caps for every public meter.
@@ -348,11 +348,12 @@ logs instead of changing status checks.
 Never print or commit secrets. Put secrets in Tovuk env vars with
 `tovuk env set --service <service> KEY=value`.
 
-When a free-tier limit blocks work, run `tovuk billing checkout --json` and
-show the returned URL to the human. For invoices, payment methods, or
-subscription changes, run `tovuk billing portal` and show the returned URL to
-the human. When Tovuk support is needed, create a
-ticket only after collecting the failing command, service id, build id, deploy id,
-first actionable log line, and what the agent already tried. Resolve the ticket
-when the issue is fixed so future agents do not duplicate the same support
-work.
+When a free-tier limit blocks work, confirm account setup with
+`tovuk account show --json`, inspect `tovuk usage --json`, then run
+`tovuk billing checkout --json` when payment is the blocker and show the
+returned URL to the human. For invoices, payment methods, or subscription
+changes, run `tovuk billing portal` and show the returned URL to the human.
+When Tovuk support is needed, create a ticket only after collecting the
+failing command, service id, build id, deploy id, first actionable log line,
+and what the agent already tried. Resolve the ticket when the issue is fixed
+so future agents do not duplicate the same support work.
