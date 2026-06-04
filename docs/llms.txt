@@ -44,7 +44,7 @@ Workflow references:
 - `docs/index.mdx`: docs start page, path chooser, package install snippet with account setup check, and visible Copy prompt with check, account setup, dry-run, and wait deploy commands for AI coding agents.
 - `docs/quickstart.mdx`: first Rust worker or full-stack deploy flow.
 - `docs/deploy.mdx`: check, account setup, dry-run, deploy, inspect, and recover services.
-- `docs/production-readiness.mdx`: production launch workflow, usage caps, deploy evidence, status distinction, secrets, domains, and cleanup.
+- `docs/production-readiness.mdx`: production launch workflow, account setup, usage caps, deploy evidence, status distinction, secrets, domains, and cleanup.
 - `docs/agents.mdx`: agent deploy workflow, reusable deploy and starter
   prompts with account checks, recovery, support, and abuse workflow.
 - `docs/pricing.mdx`: pricing, usage limits, cost estimates, and hard caps.
