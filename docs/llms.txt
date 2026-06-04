@@ -41,6 +41,10 @@ Workflow references:
 
 - `docs/templates.mdx`: project templates, `tovuk new`, and starter workflows.
 
+Operational references:
+
+- `docs/status.mdx`: API health endpoints, `/v1/status`, and project-failure handoff to logs.
+
 Dashboard Overview is available at `https://tovuk.com/account` and shows
 Service kind, per-Service resource counts for SQLite, Object Storage, KV,
 Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, plus
