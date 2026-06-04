@@ -60,17 +60,27 @@
         "icon": "book-open",
         "groups": [
           {
-            "group": "Start",
+            "group": "Start and Deploy",
             "pages": [
               "index",
               "quickstart",
               "templates",
+              "deploy"
+            ]
+          },
+          {
+            "group": "Plan and Operate",
+            "pages": [
               "pricing",
               "agents",
+              "status"
+            ]
+          },
+          {
+            "group": "Help and Updates",
+            "pages": [
               "support",
               "abuse",
-              "status",
-              "deploy",
               "changelog"
             ]
           }
@@ -81,25 +91,40 @@
         "icon": "square-terminal",
         "groups": [
           {
-            "group": "Reference",
+            "group": "Build and Deploy",
             "pages": [
               "reference/project-contract",
               "reference/workers",
+              "reference/products",
+              "reference/packages",
+              "reference/limits"
+            ]
+          },
+          {
+            "group": "Resources and Data",
+            "pages": [
+              "reference/resources",
               "reference/sqlite",
               "reference/state",
               "reference/kv",
+              "reference/secrets",
+              "reference/storage"
+            ]
+          },
+          {
+            "group": "Jobs and Connectivity",
+            "pages": [
               "reference/queues",
               "reference/cron",
               "reference/bindings",
-              "reference/secrets",
-              "reference/products",
-              "reference/resources",
-              "reference/storage",
-              "reference/domains",
+              "reference/domains"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
               "reference/logs-builds",
-              "reference/usage-caps",
-              "reference/packages",
-              "reference/limits"
+              "reference/usage-caps"
             ]
           }
         ]
@@ -138,16 +163,20 @@
     }
   },
   "contextual": {
-    "display": "toc",
+    "display": "header",
     "options": [
       "copy",
       "view",
       "chatgpt",
       "claude",
       "perplexity",
+      "grok",
+      "aistudio",
       "mcp",
+      "add-mcp",
       "cursor",
-      "vscode"
+      "vscode",
+      "windsurf"
     ]
   },
   "metadata": {
