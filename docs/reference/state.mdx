@@ -1,7 +1,7 @@
 ---
 title: "Manage Stateful Objects and Alarms"
 sidebarTitle: "State"
-description: "Manage keyed State objects, alarms, runtime bindings, and coordination for Rust workers."
+description: "Confirm account and Service context, then manage keyed State objects, alarms, runtime bindings, and coordination for Rust workers."
 ---
 
 State gives each service named classes of keyed objects. Use it when one object
@@ -14,6 +14,20 @@ the request needs keyed coordination or per-object alarm scheduling.
 ## State setup flow
 
 <Steps>
+  <Step title="Confirm account and service context">
+    State changes are account-authenticated and Service-scoped. Confirm account
+    setup, then inspect the target Service before creating classes, writing
+    values, or scheduling object alarms.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
+
+    Check `stateNamespaces`, `accountUsage`, `limits`, `billingEstimate`, and
+    `next_actions` before high-volume coordination work or alarm scheduling.
+  </Step>
+
   <Step title="Enable State for the service">
     Set `[capabilities].state = true` in `tovuk.toml`, then run
     `tovuk deploy --dry-run --json` so the agent can confirm State meters,
@@ -78,6 +92,8 @@ The dashboard uses these State API routes:
 ## CLI workflow
 
 ```sh
+tovuk account show --json
+tovuk service show service_1 --json
 tovuk state list --service service_1 --json
 tovuk state create --service service_1 Room --json
 tovuk state objects --service service_1 Room --json

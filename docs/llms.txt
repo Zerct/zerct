@@ -25,7 +25,7 @@ Resource references:
 - `docs/reference/workers.mdx`: Rust Worker HTTP/API routing, runtime events, WebSocket upgrades, and frontend policy.
 - `docs/reference/resources.mdx`: Service Resources workflow, CLI/API/dashboard parity, resource routes, and runtime bindings.
 - `docs/reference/sqlite.mdx`: managed SQLite commands, limits, and backups.
-- `docs/reference/state.mdx`: keyed State objects, storage, and alarms.
+- `docs/reference/state.mdx`: State account setup, Service context, keyed objects, storage, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: scheduled Rust worker events.
@@ -240,6 +240,8 @@ tovuk cron update --service <service> nightly "*/15 * * * *" --json
 tovuk cron disable --service <service> nightly --json
 tovuk cron enable --service <service> nightly --json
 tovuk cron delete --service <service> nightly --json
+tovuk account show --json
+tovuk service show <service> --json
 tovuk state create --service <service> Room --json
 tovuk state objects --service <service> Room --json
 tovuk state keys --service <service> Room room-1 --json
