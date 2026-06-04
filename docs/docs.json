@@ -57,6 +57,7 @@
     "tabs": [
       {
         "tab": "Guides",
+        "icon": "book-open",
         "groups": [
           {
             "group": "Start",
@@ -72,7 +73,13 @@
               "deploy",
               "changelog"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "icon": "square-terminal",
+        "groups": [
           {
             "group": "Reference",
             "pages": [
