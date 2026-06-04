@@ -68,11 +68,14 @@ Run `tovuk deploy --wait --json`.
 
 ## Packages
 
+Choose one package channel. This example uses npm; see
+[Packages](/reference/packages) for Homebrew, PyPI, and Cargo.
+
 ```sh
 npm install -g tovuk
-brew tap tovuk/tovuk https://github.com/tovuk/tovuk
-brew install tovuk
-pipx install tovuk
-cargo install tovuk
+tovuk --version
+tovuk --help
+tovuk check --json
+tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 ```
