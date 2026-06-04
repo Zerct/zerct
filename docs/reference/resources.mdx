@@ -7,6 +7,48 @@ description: "Create, inspect, and delete Tovuk service resources with CLI, API,
 Tovuk service resources are managed through the CLI, API, and dashboard so
 agents do not need hidden manual actions.
 
+## Resource workflow
+
+<Steps>
+  <Step title="Inspect the service snapshot">
+    ```sh
+    tovuk service show service_1 --json
+    ```
+
+    Use the snapshot to review current resources, capabilities,
+    `accountUsage`, `billingEstimate`, and next actions before creating more
+    resources.
+  </Step>
+
+  <Step title="Create the required resource">
+    ```sh
+    tovuk sqlite create --service service_1 DB --json
+    tovuk kv create --service service_1 CACHE --json
+    ```
+
+    Use the resource-specific CLI or API route for the capability your worker
+    needs. The dashboard uses the same routes and limits.
+  </Step>
+
+  <Step title="Verify the refreshed resources">
+    ```sh
+    tovuk service show service_1 --json
+    ```
+
+    Confirm the new resource appears in the service resources payload and
+    follow the returned `nextActions`.
+  </Step>
+
+  <Step title="Deploy after resources are ready">
+    ```sh
+    tovuk deploy --wait --json
+    ```
+
+    Deploy after required service resources exist. If the deploy fails, switch
+    to Logs and Builds before changing resource setup.
+  </Step>
+</Steps>
+
 ## Dashboard
 
 The dashboard Resources view is available at `https://tovuk.com/account/resources`
