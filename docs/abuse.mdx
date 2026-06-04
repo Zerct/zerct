@@ -8,22 +8,6 @@ Tovuk abuse workflows are API and CLI first. Agents can report abuse, preserve
 evidence, track owner-visible reports for their services, and appeal after
 remediation without dashboard access.
 
-## Dashboard
-
-The dashboard Abuse view is available at `https://tovuk.com/account/abuse` or
-`https://tovuk.com/<handle>/abuse`.
-
-Users can create reports with target URL, category, reporter email, service
-context, object path, and evidence. Service owners can list owner-visible
-reports and submit appeal evidence from the same view.
-Report rows expose copyable `tovuk abuse list --json`,
-`tovuk abuse appeal <report_id> "Remediation details" --json`, and
-`tovuk service show <service> --json` commands when the current report state
-supports them.
-
-The dashboard uses the same API routes and rate limits as the CLI, so agents
-can switch between browser and CLI workflows without changing the abuse model.
-
 ## Reporter and owner workflow
 
 <Steps>
@@ -119,6 +103,22 @@ can switch between browser and CLI workflows without changing the abuse model.
     Both actions release any active quarantine for the report before returning.
   </Step>
 </Steps>
+
+## Dashboard
+
+The dashboard Abuse view is available at `https://tovuk.com/account/abuse` or
+`https://tovuk.com/<handle>/abuse`.
+
+Users can create reports with target URL, category, reporter email, service
+context, object path, and evidence. Service owners can list owner-visible
+reports and submit appeal evidence from the same view.
+Report rows expose copyable `tovuk abuse list --json`,
+`tovuk abuse appeal <report_id> "Remediation details" --json`, and
+`tovuk service show <service> --json` commands when the current report state
+supports them.
+
+The dashboard uses the same API routes and rate limits as the CLI, so agents
+can switch between browser and CLI workflows without changing the abuse model.
 
 ## Report body
 
