@@ -52,26 +52,30 @@ agents do not need hidden manual actions.
 ## Dashboard
 
 The dashboard Resources view is available at `https://tovuk.com/account/resources`
-or `https://tovuk.com/<handle>/resources`. It can create SQLite databases, KV
-namespaces, queues, cron triggers, State namespaces, and private service
-bindings with the same API routes and limits as the CLI. It also lists existing
-resources, creating and deleting SQLite, KV, Queue, Cron, State, and Service
-Binding resources through the same API routes as the CLI. The same view can run
-single SQLite queries through `POST /v1/services/{service_id}/sqlite/{database}/query`
-and displays rows, `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`,
-storage, duration, and next actions. It can also list SQLite backups, create
-SQLite backups, restore SQLite backups, list KV keys, read one KV key, write
-one KV key, and delete one KV key through the same metered KV API routes as the
-CLI. It can also send one Queue message and send one Queue batch through
-the same metered Queue API routes as the CLI, then read Queue messages and read
-Queue metrics. It can update Cron schedules, pause Cron triggers, and resume
-Cron triggers through the same API routes as the CLI. It can also list State
-objects, list State keys, read one State value, write one State value, delete
-one State value, read State alarms, set State alarms, and delete State alarms
-through the same metered State API routes as the CLI. Use CLI bulk commands for
-bulk KV reads, writes, and removals.
-Dashboard State alarm actions include read State alarms, set State alarms, and
-delete State alarms.
+or `https://tovuk.com/<handle>/resources`. It uses CLI-equivalent routes and
+limits for resource work. Dashboard resource actions use the same API routes and limits as the CLI.
+
+- Create, list, and delete SQLite databases, KV namespaces, queues, Cron
+  triggers, State namespaces, and Service Binding resources through the same API routes as the CLI. This includes creating and deleting SQLite databases
+  and the other service resources.
+- Run single SQLite queries through
+  `POST /v1/services/{service_id}/sqlite/{database}/query` and inspect rows,
+  `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`, storage, duration,
+  and next actions.
+- Use the dashboard to list SQLite backups, create SQLite backups, and restore SQLite backups.
+- Use the dashboard to list KV keys, read one KV key, write one KV key, and delete one KV key
+  through the same metered KV API routes as the CLI.
+- Send one Queue message, send one Queue batch, read Queue messages, read Queue
+  metrics, and update Queue retries, retention, batch size, batch timeout, and
+  dead-letter Queue settings through
+  `PUT /v1/services/{service_id}/queues/{queue}`.
+- Use the dashboard to update Cron schedules, pause Cron triggers, and resume
+  Cron triggers.
+- List State objects, list State keys, read one State value, write one State
+  value, delete one State value, read State alarms, set State alarms, and delete
+  State alarms through the same metered State API routes as the CLI.
+
+Use CLI bulk commands for bulk KV reads, writes, and removals.
 
 ## Commands
 
