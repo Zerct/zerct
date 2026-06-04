@@ -46,6 +46,9 @@ handlers, middleware, and server logic to Rust workers.
 ```sh
 tovuk check --json
 tovuk new hello-service --template fullstack-rust-tanstack
+cd hello-service/web
+bun install
+cd ..
 tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
 tovuk deploy --dry-run --json
