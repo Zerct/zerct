@@ -37,7 +37,7 @@ Resource references:
 - `docs/reference/limits.mdx`: deployment guardrails, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields and the product selection workflow.
 - `docs/reference/packages.mdx`: install channels, account setup checks, package parity, and native binary recovery.
-- `docs/reference/usage-caps.mdx`: hard caps for every public meter.
+- `docs/reference/usage-caps.mdx`: account setup and hard caps for every public meter.
 
 Workflow references:
 
@@ -315,7 +315,9 @@ metadata size, custom domains per storage bucket, bucket management operations,
 and same-key write throughput.
 
 Before load tests, production launch, or paid usage, run
-`tovuk pricing --json` and set hard usage caps with `tovuk limits set`.
+`tovuk pricing --json`, confirm account setup with `tovuk account show --json`,
+inspect `tovuk deploy --dry-run --json` and `tovuk usage --json`, then set hard
+usage caps with `tovuk limits set`.
 Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
 `sqlite_rows_read`, `sqlite_rows_written`, `kv_reads`, `queue_operations`,
 `state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,

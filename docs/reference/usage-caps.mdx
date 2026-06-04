@@ -10,15 +10,32 @@ before load tests, media uploads, queue fan-out, and paid usage.
 ## Cap-setting workflow
 
 <Steps>
-  <Step title="Find the meter and plan fields">
+  <Step title="Read the meter catalog">
     ```sh
     tovuk pricing --json
+    ```
+
+    Use `products[].meter_details` and `products[].limit_fields` to pick the
+    meter, period, and cap command before traffic depends on a paid capability.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    ```
+
+    Run the update command only when setup is incomplete. Usage, caps, and
+    hosted billing links are account-scoped.
+  </Step>
+
+  <Step title="Dry-run the service plan">
+    ```sh
     tovuk deploy --dry-run --json
     ```
 
-    Use `products[].meter_details`, `products[].limit_fields`, and dry-run
-    `meterPlan` entries to pick the meter, period, and cap command before
-    traffic depends on a paid capability.
+    Compare the catalog with dry-run `meterPlan` entries, limits, usage, and
+    `billingEstimate` before setting caps or creating a build.
   </Step>
 
   <Step title="Set caps before traffic">
@@ -71,6 +88,9 @@ by the same API routes and rate limits as the CLI. It shows copyable `tovuk limi
 ## Agent commands
 
 ```sh
+tovuk pricing --json
+tovuk account show --json
+tovuk deploy --dry-run --json
 tovuk usage --json
 tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
 tovuk limits set worker_cpu_ms --period day --value 1000000 --notify-at-percent 80 --json
