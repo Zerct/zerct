@@ -41,6 +41,7 @@ Resource references:
 
 Workflow references:
 
+- `docs/index.mdx`: docs start page, path chooser, and basic deploy prompt.
 - `docs/quickstart.mdx`: first Rust worker or full-stack deploy flow.
 - `docs/deploy.mdx`: check, dry-run, deploy, inspect, and recover services.
 - `docs/agents.mdx`: agent deploy, recovery, support, and abuse workflow.
