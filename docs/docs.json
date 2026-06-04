@@ -15,7 +15,7 @@
     "href": "https://tovuk.com"
   },
   "appearance": {
-    "default": "system",
+    "default": "dark",
     "strict": false
   },
   "fonts": {
