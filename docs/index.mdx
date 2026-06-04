@@ -45,13 +45,13 @@ tovuk deploy
 ## Start
 
 - Add a `tovuk.toml` project contract.
-- Run `check` before `deploy`.
+- Run `tovuk check --json` before `tovuk deploy --wait --json`.
 - Fix any JSON `agent_instruction`.
 - Deploy when the checks pass.
 
 ```sh
-tovuk check
-tovuk deploy
+tovuk check --json
+tovuk deploy --wait --json
 ```
 
 ## Agent prompt
