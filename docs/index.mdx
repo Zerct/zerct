@@ -47,10 +47,12 @@ tovuk deploy
 - Add a `tovuk.toml` project contract.
 - Run `tovuk check --json` before `tovuk deploy --dry-run --json`.
 - Fix any JSON `agent_instruction`.
+- Confirm account setup with `tovuk account show --json`.
 - Review dry-run output before `tovuk deploy --wait --json`.
 
 ```sh
 tovuk check --json
+tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 ```
@@ -62,6 +64,8 @@ Use Tovuk to deploy this project.
 Read https://docs.tovuk.com/llms.txt.
 Run `tovuk check --json`.
 Fix any JSON `agent_instruction`.
+Run `tovuk account show --json`.
+If setup is incomplete, run `tovuk account update --handle <handle> --display-name <name> --json`.
 Run `tovuk deploy --dry-run --json`.
 Run `tovuk deploy --wait --json`.
 </Prompt>
