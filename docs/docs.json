@@ -123,13 +123,17 @@
   "navbar": {
     "links": [
       {
+        "label": "Dashboard",
+        "href": "https://tovuk.com/account"
+      },
+      {
         "type": "github",
         "href": "https://github.com/tovuk/tovuk"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Start free",
+      "label": "Get Started",
       "href": "https://tovuk.com"
     }
   },
