@@ -1,7 +1,7 @@
 ---
 title: "Connect Rust Workers with Service Bindings"
 sidebarTitle: "Service Bindings"
-description: "Create Service Bindings for private worker-to-worker calls between account-owned Tovuk Rust Workers."
+description: "Confirm account and Service context before creating Service Bindings for private worker-to-worker calls between Tovuk Rust Workers."
 ---
 
 Service Bindings let one Rust Worker call another account-owned Rust Worker
@@ -14,6 +14,17 @@ and shared APIs that should not be callable from browsers.
   <Step title="Create the target Service">
     Create or deploy the private Rust Worker that owns the internal API before
     adding it to callers.
+  </Step>
+
+  <Step title="Confirm account and Service context">
+    Confirm account setup and inspect the caller Service before changing
+    bindings. Check `service_bindings`, existing `serviceBindings`,
+    `accountUsage`, `billingEstimate`, limits, and next actions.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
   </Step>
 
   <Step title="Create the caller binding">
@@ -46,6 +57,8 @@ and shared APIs that should not be callable from browsers.
 ## CLI workflow
 
 ```sh
+tovuk account show --json
+tovuk service show service_1 --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```

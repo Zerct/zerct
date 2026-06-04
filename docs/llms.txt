@@ -29,7 +29,7 @@ Resource references:
 - `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: Cron account setup, Service context, scheduled Rust worker events, and trigger lifecycle commands.
-- `docs/reference/bindings.mdx`: private Service Binding calls.
+- `docs/reference/bindings.mdx`: Service Binding account setup, Service context, private calls, and runtime binding environment names.
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
 - `docs/reference/storage.mdx`: Object Storage account setup, Service context, uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain account setup, Service context, DNS records, verification, and cleanup.
@@ -253,6 +253,8 @@ tovuk state alarm set --service <service> Room room-1 --delay-seconds 60 --json
 tovuk state alarm get --service <service> Room room-1 --json
 tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
+tovuk account show --json
+tovuk service show <service> --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
 tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
