@@ -4,7 +4,8 @@ sidebarTitle: "Support"
 description: "Create, list, and resolve Tovuk support tickets with CLI, dashboard, and API workflows."
 ---
 
-Tovuk support is API and CLI first. Agents should create tickets only after
+Tovuk support is API and CLI first. Ticket list, create, and resolve actions
+belong to the authenticated account. Agents should create tickets only after
 they have collected the exact command, service id, build id, deploy id, and first
 actionable log line.
 
@@ -14,6 +15,16 @@ actionable log line.
   <Step title="Collect evidence">
     Collect the exact command, service id, build id, deploy id, and first
     actionable log line before opening a ticket.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    ```
+
+    Run the update command only when setup is incomplete. Support tickets are
+    account-scoped and rate-limited per account.
   </Step>
 
   <Step title="Check existing tickets">
