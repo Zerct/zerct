@@ -34,13 +34,9 @@ export function CartDrawer({
   const orderReceipt = checkout.orderReceipt;
   const drawerContent =
     orderReceipt !== null && cart.cartLines.length === 0 ? (
-      <OrderReceiptSummary orderReceipt={orderReceipt} />
+      <OrderReceiptSummary onClose={onClose} orderReceipt={orderReceipt} />
     ) : (
-      <>
-        <OrderSummary cart={cart} onAdd={onAdd} />
-        <CartTotals cart={cart} />
-        <CheckoutForm checkout={checkout} isCartEmpty={cart.cartLines.length === 0} />
-      </>
+      <CheckoutLayout cart={cart} checkout={checkout} isCartEmpty={cart.cartLines.length === 0} onAdd={onAdd} />
     );
 
   return (
@@ -49,6 +45,30 @@ export function CartDrawer({
       <aside aria-label="Cart and checkout" aria-modal="true" className="cart-drawer" role="dialog">
         <CartTop onClose={onClose} totalItems={cart.totalItems} />
         {drawerContent}
+      </aside>
+    </div>
+  );
+}
+
+function CheckoutLayout({
+  cart,
+  checkout,
+  isCartEmpty,
+  onAdd,
+}: {
+  cart: CartState;
+  checkout: CheckoutState;
+  isCartEmpty: boolean;
+  onAdd: (productId: string) => void;
+}) {
+  return (
+    <div className="checkout-layout">
+      <div className="checkout-primary">
+        <CheckoutForm checkout={checkout} isCartEmpty={isCartEmpty} />
+      </div>
+      <aside className="checkout-summary-panel" aria-label="Order summary">
+        <OrderSummary cart={cart} onAdd={onAdd} />
+        <CartTotals cart={cart} />
       </aside>
     </div>
   );
@@ -159,13 +179,22 @@ function CartTotals({ cart }: { cart: CartState }) {
   );
 }
 
-function OrderReceiptSummary({ orderReceipt }: { orderReceipt: OrderReceipt }) {
+function OrderReceiptSummary({ onClose, orderReceipt }: { onClose: () => void; orderReceipt: OrderReceipt }) {
   return (
-    <section className="receipt" role="status" aria-label="Order receipt">
-      <span>ORDER</span>
-      <strong>{orderReceipt.id}</strong>
-      <span>{orderReceipt.statusLabel ?? "RESERVED"}</span>
-      <strong>{formatCurrency(orderReceipt.totalCents)}</strong>
+    <section className="receipt checkout-success" role="status" aria-label="Order receipt">
+      <h2>ORDER CONFIRMED</h2>
+      <p>YOUR ORDER HAS BEEN RESERVED.</p>
+      <div className="receipt-grid">
+        <span>ORDER</span>
+        <strong>{orderReceipt.id}</strong>
+        <span>STATUS</span>
+        <strong>{orderReceipt.statusLabel ?? "RESERVED"}</strong>
+        <span>TOTAL</span>
+        <strong>{formatCurrency(orderReceipt.totalCents)}</strong>
+      </div>
+      <button className="primary-action" onClick={onClose} type="button">
+        CONTINUE SHOPPING
+      </button>
     </section>
   );
 }
@@ -191,11 +220,96 @@ function CheckoutForm({
       <h2>CONTACT INFORMATION</h2>
       <CheckoutInput autoComplete="email" field="email" label="EMAIL ADDRESS" type="email" checkout={checkout} />
       <h2>SHIPPING ADDRESS</h2>
-      <CheckoutInput autoComplete="name" field="name" label="FIRST NAME" checkout={checkout} />
-      <CheckoutTextArea checkout={checkout} />
+      <div className="checkout-field-row">
+        <CheckoutInput autoComplete="given-name" field="firstName" label="FIRST NAME" checkout={checkout} />
+        <CheckoutInput autoComplete="family-name" field="lastName" label="LAST NAME" checkout={checkout} />
+      </div>
+      <CheckoutInput
+        autoComplete="shipping street-address"
+        field="address"
+        label="ADDRESS"
+        placeholder="START TYPING YOUR ADDRESS..."
+        checkout={checkout}
+      />
+      <CheckoutInput
+        autoComplete="shipping address-line2"
+        field="apartment"
+        label="APARTMENT, SUITE, UNIT, FLOOR, ETC."
+        placeholder="OPTIONAL"
+        required={false}
+        checkout={checkout}
+      />
+      <div className="checkout-field-row">
+        <CheckoutInput autoComplete="shipping address-level2" field="city" label="CITY" checkout={checkout} />
+        <CheckoutInput autoComplete="shipping country-name" field="country" label="COUNTRY" checkout={checkout} />
+      </div>
+      <CheckoutInput
+        autoComplete="tel"
+        field="phone"
+        inputMode="tel"
+        label="PHONE"
+        placeholder="123 456 7890"
+        required={false}
+        type="tel"
+        checkout={checkout}
+      />
+      <PaymentDetails />
+      <BillingAddress />
       <CheckoutErrorMessage message={checkout.checkoutError} />
       <CheckoutSubmitButton disabled={isCartEmpty || checkout.isExpressSubmitting} isSubmitting={checkout.isSubmitting} />
     </form>
+  );
+}
+
+function PaymentDetails() {
+  return (
+    <section className="checkout-payment" aria-label="Payment details">
+      <h2>PAYMENT DETAILS</h2>
+      <label>
+        CARD NUMBER
+        <input
+          autoComplete="cc-number"
+          inputMode="numeric"
+          name="demoCardNumber"
+          placeholder="4242 4242 4242 4242"
+          type="text"
+        />
+      </label>
+      <div className="checkout-field-row">
+        <label>
+          EXPIRATION
+          <input
+            autoComplete="cc-exp"
+            inputMode="numeric"
+            name="demoCardExpiry"
+            placeholder="04 / 28"
+            type="text"
+          />
+        </label>
+        <label>
+          SECURITY CODE
+          <input
+            autoComplete="cc-csc"
+            inputMode="numeric"
+            name="demoCardSecurityCode"
+            placeholder="123"
+            type="text"
+          />
+        </label>
+      </div>
+    </section>
+  );
+}
+
+function BillingAddress() {
+  return (
+    <section className="checkout-billing" aria-label="Billing address">
+      <h2>BILLING ADDRESS</h2>
+      <label className="checkout-checkbox">
+        <input defaultChecked name="sameAsShipping" type="checkbox" />
+        <span>SAME AS SHIPPING ADDRESS</span>
+      </label>
+    </section>
   );
 }
 
@@ -260,13 +374,19 @@ function CheckoutInput({
   autoComplete,
   checkout,
   field,
+  inputMode,
   label,
+  placeholder = "",
+  required = true,
   type = "text",
 }: {
   autoComplete: string;
   checkout: CheckoutState;
-  field: keyof Pick<CheckoutFields, "email" | "name">;
+  field: keyof CheckoutFields;
+  inputMode?: "email" | "numeric" | "search" | "tel" | "text" | "url";
   label: string;
+  placeholder?: string;
+  required?: boolean;
   type?: string;
 }) {
   return (
@@ -274,28 +394,14 @@ function CheckoutInput({
       {label}
       <input
         autoComplete={autoComplete}
+        inputMode={inputMode}
         name={field}
         onChange={(event) => checkout.updateCheckoutField(field, event.currentTarget.value)}
-        required
+        placeholder={placeholder}
+        required={required}
         spellCheck={field === "email" ? false : undefined}
         type={type}
         value={checkout.checkoutFields[field]}
-      />
-    </label>
-  );
-}
-
-function CheckoutTextArea({ checkout }: { checkout: CheckoutState }) {
-  return (
-    <label>
-      ADDRESS
-      <textarea
-        autoComplete="shipping street-address"
-        name="address"
-        onChange={(event) => checkout.updateCheckoutField("address", event.currentTarget.value)}
-        required
-        rows={3}
-        value={checkout.checkoutFields.address}
       />
     </label>
   );
@@ -336,11 +442,7 @@ export function useCart(products: Product[]) {
 }
 
 export function useCheckout(cartLines: CartLine[], totalCents: number, clearCart: () => void) {
-  const [checkoutFields, setCheckoutFields] = useState<CheckoutFields>({
-    address: "",
-    email: "",
-    name: "",
-  });
+  const [checkoutFields, setCheckoutFields] = useState<CheckoutFields>(emptyCheckoutFields);
   const [checkoutError, setCheckoutError] = useState("");
   const [isExpressSubmitting, setIsExpressSubmitting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -353,7 +455,7 @@ export function useCheckout(cartLines: CartLine[], totalCents: number, clearCart
     try {
       const orderId = await reserveOrder(checkoutFields, cartLines, totalCents);
       setOrderReceipt({ id: orderId, totalCents });
-      setCheckoutFields({ address: "", email: "", name: "" });
+      setCheckoutFields(emptyCheckoutFields());
       clearCart();
     } catch {
       setCheckoutError("ORDER FAILED");
@@ -372,7 +474,7 @@ export function useCheckout(cartLines: CartLine[], totalCents: number, clearCart
         return;
       }
       setOrderReceipt({ id: result.orderId, statusLabel: "STRIPE DEMO", totalCents });
-      setCheckoutFields({ address: "", email: "", name: "" });
+      setCheckoutFields(emptyCheckoutFields());
       clearCart();
     } catch {
       setCheckoutError("EXPRESS CHECKOUT FAILED");
@@ -395,6 +497,19 @@ export function useCheckout(cartLines: CartLine[], totalCents: number, clearCart
     submitOrder,
     updateCheckoutField: (field: keyof CheckoutFields, value: string) =>
       setCheckoutFields((currentFields) => ({ ...currentFields, [field]: value })),
+  };
+}
+
+function emptyCheckoutFields(): CheckoutFields {
+  return {
+    apartment: "",
+    address: "",
+    city: "",
+    country: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
   };
 }
 

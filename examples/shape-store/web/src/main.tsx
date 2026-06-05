@@ -2,6 +2,7 @@ import { createRootRoute, createRouter, RouterProvider } from "@tanstack/react-r
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import "./styles.css";
+import "./checkout.css";
 
 const rootRoute = createRootRoute({ component: App });
 const router = createRouter({ routeTree: rootRoute });

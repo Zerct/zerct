@@ -1,0 +1,157 @@
+.cart-drawer {
+  padding: 0 0 calc(48px + env(safe-area-inset-bottom));
+}
+
+.checkout-top {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.checkout-layout {
+  display: grid;
+  gap: 28px;
+  padding: 10px 16px 64px;
+}
+
+.checkout-primary {
+  order: 2;
+  min-width: 0;
+}
+
+.checkout-summary-panel {
+  order: 1;
+  display: grid;
+  min-width: 0;
+  gap: 22px;
+}
+
+.checkout-summary-panel .order-summary {
+  padding-top: 0;
+}
+
+.checkout-form {
+  gap: 18px;
+  padding-top: 0;
+}
+
+.checkout-form .discount-code-button {
+  margin: 0 0 34px;
+}
+
+.checkout-field-row {
+  display: grid;
+  gap: 16px;
+}
+
+.checkout-form input,
+.checkout-form textarea {
+  min-height: 48px;
+  border-color: #d8d8d8;
+  padding: 12px;
+  text-transform: uppercase;
+}
+
+.checkout-form input::placeholder,
+.checkout-form textarea::placeholder {
+  color: #9a9a9a;
+  opacity: 1;
+}
+
+.checkout-payment,
+.checkout-billing {
+  display: grid;
+  gap: 16px;
+  padding-top: 10px;
+}
+
+.checkout-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkout-checkbox input {
+  width: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  accent-color: #000;
+}
+
+.checkout-checkbox span {
+  min-width: 0;
+}
+
+.checkout-success {
+  width: min(100%, 640px);
+  margin: 72px auto 0;
+  gap: 22px;
+  border-bottom: 0;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.checkout-success h2,
+.checkout-success p {
+  margin: 0;
+}
+
+.checkout-success h2 {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.checkout-success p {
+  font-size: 13px;
+}
+
+.receipt-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 18px;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #000;
+  padding: 18px 0;
+  text-align: left;
+}
+
+.receipt-grid strong {
+  text-align: right;
+}
+
+.checkout-success .primary-action {
+  width: 100%;
+}
+
+@media (min-width: 760px) {
+  .checkout-layout {
+    padding: 34px 48px 80px;
+  }
+
+  .checkout-field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkout-success {
+    margin-top: 92px;
+    padding: 0;
+  }
+}
+
+@media (min-width: 1120px) {
+  .checkout-layout {
+    grid-template-columns: minmax(0, 640px) minmax(300px, 420px);
+    gap: clamp(48px, 8vw, 128px);
+    align-items: start;
+  }
+
+  .checkout-primary {
+    order: 1;
+  }
+
+  .checkout-summary-panel {
+    position: sticky;
+    top: 76px;
+    order: 2;
+    gap: 30px;
+  }
+}

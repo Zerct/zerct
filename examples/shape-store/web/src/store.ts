@@ -38,9 +38,14 @@ export type CartLine = {
 };
 
 export type CheckoutFields = {
+  apartment: string;
   address: string;
+  city: string;
+  country: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
 };
 
 export type OrderReceipt = {
