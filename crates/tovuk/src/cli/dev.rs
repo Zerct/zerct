@@ -2,7 +2,7 @@ use super::{
     args::CliOptions,
     config::{TovukConfig, parse_tovuk_toml, validate_config},
     errors::{Result, agent_error, print_json},
-    frontend_checks::frontend_package_manager,
+    frontend_checks::{frontend_package_manager, is_next_static_frontend},
     project_kind::ProjectKind,
 };
 use serde::Serialize;
@@ -112,7 +112,12 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
         let command = local_frontend_command(&frontend_root);
         let mut env = BTreeMap::new();
         if let Some(url) = worker_url.as_deref() {
-            env.insert("VITE_API_URL".to_owned(), format!("{url}/api"));
+            let key = if is_next_static_frontend(&frontend_root) {
+                "NEXT_PUBLIC_API_URL"
+            } else {
+                "VITE_API_URL"
+            };
+            env.insert(key.to_owned(), format!("{url}/api"));
         }
         frontend_url = Some(format!("http://{LOCAL_HOST}:{DEFAULT_FRONTEND_PORT}"));
         processes.push(DevProcess {
@@ -150,6 +155,12 @@ fn local_worker_command(worker_root: &Path, config: &TovukConfig) -> String {
 }
 
 fn local_frontend_command(frontend_root: &Path) -> String {
+    if is_next_static_frontend(frontend_root) {
+        return match frontend_package_manager(frontend_root) {
+            "bun" => format!("bun run dev --hostname {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT}"),
+            _ => format!("npm run dev -- --hostname {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT}"),
+        };
+    }
     match frontend_package_manager(frontend_root) {
         "bun" => {
             format!("bun run dev --host {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT} --strictPort")
@@ -363,6 +374,79 @@ output = "dist"
             return Err(format!("unexpected frontend env: {:?}", plan.processes[1].env).into());
         }
         if plan.processes[1].command != "bun run dev --host 127.0.0.1 --port 5173 --strictPort" {
+            return Err(
+                format!("unexpected frontend command: {}", plan.processes[1].command).into(),
+            );
+        }
+
+        let _ignore = fs::remove_dir_all(project_dir);
+        Ok(())
+    }
+
+    #[test]
+    fn fullstack_plan_uses_next_dev_flags() -> Result<(), Box<dyn std::error::Error>> {
+        let project_dir = temp_project_dir("next-fullstack-plan")?;
+        fs::create_dir_all(project_dir.join("api"))?;
+        fs::create_dir_all(project_dir.join("web"))?;
+        fs::write(
+            project_dir.join("api/Cargo.toml"),
+            "[package]\nname = \"api\"\n",
+        )?;
+        fs::write(
+            project_dir.join("web/package.json"),
+            "{\"dependencies\":{\"next\":\"^16.2.7\"},\"scripts\":{\"dev\":\"next dev\"}}",
+        )?;
+        fs::write(project_dir.join("web/next.config.mjs"), "")?;
+        fs::write(
+            project_dir.join("tovuk.toml"),
+            r#"
+name = "demo"
+kind = "fullstack"
+
+[capabilities]
+static_frontend = true
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
+
+[worker]
+root = "api"
+command = "./target/release/api"
+port = 3000
+health = "/api/healthz"
+
+[frontend]
+root = "web"
+output = "out"
+"#,
+        )?;
+
+        let cli = CliOptions::default();
+        let config = read_dev_config(&project_dir, &cli)?;
+        let plan = create_dev_plan(&project_dir, &config);
+
+        if plan.processes[1]
+            .env
+            .get("NEXT_PUBLIC_API_URL")
+            .map(String::as_str)
+            != Some("http://127.0.0.1:3000/api")
+        {
+            return Err(format!("unexpected frontend env: {:?}", plan.processes[1].env).into());
+        }
+        if plan.processes[1].command != "npm run dev -- --hostname 127.0.0.1 --port 5173" {
             return Err(
                 format!("unexpected frontend command: {}", plan.processes[1].command).into(),
             );

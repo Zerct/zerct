@@ -46,7 +46,7 @@ Create a full-stack starter:
 
 ```sh
 tovuk new hello-service --template fullstack-rust-tanstack
-cd hello-service/web && bun install && cd ..
+cd hello-service/web && npm install && cd ..
 ```
 
 From a full-stack repo root, `tovuk deploy` reads the single root
@@ -91,8 +91,8 @@ health = "/api/healthz"
 
 [frontend]
 root = "web"
-check = "bun ci && bun run typecheck && bun run lint"
-build = "bun run build"
+check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+build = "npm run build"
 output = "dist"
 ```
 
@@ -122,8 +122,8 @@ support = true
 abuse = true
 
 [build]
-check = "bun ci && bun run typecheck && bun run lint"
-command = "bun run build"
+check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+command = "npm run build"
 output = "dist"
 ```
 

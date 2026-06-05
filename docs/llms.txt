@@ -346,7 +346,7 @@ actions. Agents should still use `--json` for machine parsing.
 Dashboard Overview is available at `https://tovuk.com/account` and
 `https://tovuk.com/<handle>`. When no Services exist, it shows first Service
 commands for `tovuk new hello-service --template fullstack-rust-tanstack`,
-`cd hello-service/web`, `bun install`, `cd ..`, `tovuk check --json`,
+`cd hello-service/web`, `npm install`, `cd ..`, `tovuk check --json`,
 `tovuk deploy --dry-run --json`, and `tovuk deploy --wait --json`. The
 committed `tovuk.toml` remains the source of
 truth; agents should still use CLI and API commands for automation. Service

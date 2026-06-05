@@ -221,8 +221,11 @@ mod tests {
             },
             frontend: FrontendConfig {
                 root: Some("web".to_owned()),
-                check: Some("bun ci && bun run typecheck && bun run lint".to_owned()),
-                build: Some("bun run build".to_owned()),
+                check: Some(
+                    "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+                        .to_owned(),
+                ),
+                build: Some("npm run build".to_owned()),
                 output: Some("dist".to_owned()),
             },
             backend: BackendConfig {

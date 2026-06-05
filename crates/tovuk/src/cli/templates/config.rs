@@ -2,7 +2,10 @@ use super::super::{
     config::CapabilitiesConfig,
     constants::{DEFAULT_BUN_FRONTEND_CHECK_COMMAND, DEFAULT_RUST_CHECK_COMMAND},
     errors::{Result, agent_error},
-    frontend_checks::{frontend_build_command, frontend_check_command, is_plain_static_frontend},
+    frontend_checks::{
+        frontend_build_command, frontend_check_command, is_next_static_frontend,
+        is_plain_static_frontend,
+    },
     project::{service_name_from_cargo, service_name_from_dir, service_name_from_package},
     project_kind::ProjectKind,
     project_layout::detect_fullstack_roots,
@@ -88,6 +91,8 @@ struct FrontendBuildSettings {
 fn frontend_build_settings(project_dir: &Path, prefer_bun: bool) -> FrontendBuildSettings {
     let output = if is_plain_static_frontend(project_dir) {
         "."
+    } else if is_next_static_frontend(project_dir) {
+        "out"
     } else {
         "dist"
     };

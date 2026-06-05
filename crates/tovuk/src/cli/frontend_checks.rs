@@ -8,7 +8,7 @@ use std::path::Path;
 
 pub(crate) use layout::{
     frontend_build_command, frontend_check_command, frontend_package_manager,
-    is_plain_static_frontend,
+    is_next_static_frontend, is_plain_static_frontend,
 };
 pub(crate) use predicates::{
     has_frontend_install_command, has_frontend_script_run, uses_javascript_linter,

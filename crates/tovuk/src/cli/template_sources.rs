@@ -18,6 +18,7 @@ pub(crate) fn frontend_package_json(name: &str) -> String {
         "private": true,
         "type": "module",
         "scripts": {
+            "dev": "vite",
             "typecheck": "oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
             "lint": "oxlint src vite.config.ts --deny-warnings && fallow dead-code --production --include-dupes --include-entry-exports --fail-on-issues && fallow dupes --production --mode semantic --threshold 1 --ignore-imports --fail-on-issues && fallow health --production --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity",
             "build": "vite build"
@@ -36,6 +37,35 @@ pub(crate) fn frontend_package_json(name: &str) -> String {
             "oxlint": "^1.67.0",
             "oxlint-tsgolint": "^0.23.0",
             "vite": "^8.0.14"
+        }
+    }))
+    .map_or_else(|_error| "{}\n".to_owned(), |source| format!("{source}\n"))
+}
+
+pub(crate) fn next_package_json(name: &str) -> String {
+    serde_json::to_string_pretty(&json!({
+        "name": name,
+        "private": true,
+        "type": "module",
+        "scripts": {
+            "dev": "next dev",
+            "typecheck": "oxlint app next.config.mjs --deny-warnings --type-aware --type-check --tsconfig tsconfig.json",
+            "lint": "oxlint app next.config.mjs --deny-warnings && fallow dead-code --include-dupes --fail-on-issues && fallow dupes --mode semantic --threshold 1 --ignore-imports --fail-on-issues && fallow health --max-cyclomatic 10 --max-cognitive 15 --max-crap 20 --complexity",
+            "build": "next build"
+        },
+        "dependencies": {
+            "next": "^16.2.7",
+            "react": "^19.2.7",
+            "react-dom": "^19.2.7"
+        },
+        "devDependencies": {
+            "@types/node": "^25.9.1",
+            "@types/react": "^19.2.16",
+            "@types/react-dom": "^19.2.3",
+            "fallow": "^2.88.3",
+            "oxlint": "^1.68.0",
+            "oxlint-tsgolint": "^0.23.0",
+            "typescript": "^6.0.3"
         }
     }))
     .map_or_else(|_error| "{}\n".to_owned(), |source| format!("{source}\n"))
@@ -79,6 +109,60 @@ pub(crate) fn frontend_ts_config() -> String {
             "verbatimModuleSyntax": true
         },
         "include": ["src", "vite.config.ts"]
+    }))
+    .map_or_else(|_error| "{}\n".to_owned(), |source| format!("{source}\n"))
+}
+
+pub(crate) fn next_ts_config() -> String {
+    serde_json::to_string_pretty(&json!({
+        "compilerOptions": {
+            "allowJs": false,
+            "allowUnreachableCode": false,
+            "allowUnusedLabels": false,
+            "alwaysStrict": true,
+            "exactOptionalPropertyTypes": true,
+            "forceConsistentCasingInFileNames": true,
+            "incremental": true,
+            "isolatedModules": true,
+            "jsx": "react-jsx",
+            "lib": ["DOM", "DOM.Iterable", "ESNext"],
+            "module": "ESNext",
+            "moduleDetection": "force",
+            "moduleResolution": "Bundler",
+            "esModuleInterop": true,
+            "noEmit": true,
+            "noFallthroughCasesInSwitch": true,
+            "noImplicitAny": true,
+            "noImplicitOverride": true,
+            "noImplicitReturns": true,
+            "noImplicitThis": true,
+            "noPropertyAccessFromIndexSignature": true,
+            "noUncheckedIndexedAccess": true,
+            "noUncheckedSideEffectImports": true,
+            "noUnusedLocals": true,
+            "noUnusedParameters": true,
+            "plugins": [{ "name": "next" }],
+            "resolveJsonModule": true,
+            "skipLibCheck": false,
+            "strict": true,
+            "strictBindCallApply": true,
+            "strictFunctionTypes": true,
+            "strictNullChecks": true,
+            "strictPropertyInitialization": true,
+            "target": "ES2022",
+            "types": ["node"],
+            "useUnknownInCatchVariables": true,
+            "verbatimModuleSyntax": true
+        },
+        "include": [
+            "next-env.d.ts",
+            "app/**/*.ts",
+            "app/**/*.tsx",
+            "next.config.mjs",
+            ".next/types/**/*.ts",
+            ".next/dev/types/**/*.ts"
+        ],
+        "exclude": ["node_modules", "out"]
     }))
     .map_or_else(|_error| "{}\n".to_owned(), |source| format!("{source}\n"))
 }
@@ -226,4 +310,167 @@ pub(crate) fn frontend_source(api_base_url: &str) -> String {
 
 pub(crate) fn frontend_vite_env_source() -> &'static str {
     "/// <reference types=\"vite/client\" />\n\ninterface ViteTypeOptions {\n  strictImportMetaEnv: unknown\n}\n\ninterface ImportMetaEnv {\n  readonly VITE_API_URL?: string\n}\n"
+}
+
+pub(crate) fn next_config_source() -> &'static str {
+    "const nextConfig = {\n  output: \"export\",\n};\n\nexport default nextConfig;\n"
+}
+
+pub(crate) fn next_env_source() -> &'static str {
+    "/// <reference types=\"next\" />\n/// <reference types=\"next/image-types/global\" />\n\n// This file is generated by Tovuk's Next.js static frontend template.\n"
+}
+
+pub(crate) fn next_app_layout_source() -> &'static str {
+    r#"import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Tovuk Next Static Frontend",
+  description: "Static Next.js export deployed on Tovuk.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: ReactNode }>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+"#
+}
+
+pub(crate) fn next_app_page_source() -> &'static str {
+    r#"const checks = [
+  "Static export",
+  "Strict TypeScript",
+  "Native lint",
+  "Fallow quality gates",
+];
+
+export default function Page() {
+  return (
+    <main>
+      <section className="intro">
+        <p className="eyebrow">Tovuk static frontend</p>
+        <h1>Next.js, exported to static files.</h1>
+        <p>
+          Browser code stays in the frontend. API routes, databases, queues,
+          and server-side behavior belong in a Rust worker.
+        </p>
+      </section>
+      <section className="checks" aria-label="Template checks">
+        {checks.map((check) => (
+          <div className="check" key={check}>
+            <span aria-hidden="true" />
+            <p>{check}</p>
+          </div>
+        ))}
+      </section>
+    </main>
+  );
+}
+"#
+}
+
+pub(crate) fn next_app_globals_source() -> &'static str {
+    r#"* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  background: #f7f7f7;
+  color: #111;
+  font-family:
+    "Times New Roman",
+    Times,
+    serif;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 3rem;
+  padding: 2rem;
+}
+
+.intro {
+  max-width: 54rem;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: 4rem;
+  font-weight: 400;
+  line-height: 0.83;
+}
+
+.intro > p:last-child {
+  max-width: 38rem;
+  margin: 1.5rem 0 0;
+  font-size: 1.1rem;
+  line-height: 1.45;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1px;
+  background: #111;
+  border: 1px solid #111;
+}
+
+.check {
+  min-height: 7rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f7f7f7;
+}
+
+.check span {
+  width: 0.65rem;
+  height: 0.65rem;
+  flex: 0 0 auto;
+  background: #111;
+  border-radius: 50%;
+}
+
+.check p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@media (min-width: 48rem) {
+  main {
+    padding: 4rem;
+  }
+
+  h1 {
+    font-size: 7rem;
+  }
+
+  .intro > p:last-child {
+    font-size: 1.25rem;
+  }
+}
+"#
 }

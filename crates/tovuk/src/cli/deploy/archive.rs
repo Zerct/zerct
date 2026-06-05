@@ -101,3 +101,25 @@ fn basename_has_extension(basename: &str, extension: &str) -> bool {
         .extension()
         .is_some_and(|value| value.eq_ignore_ascii_case(extension))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::is_archive_excluded;
+
+    #[test]
+    fn excludes_common_frontend_build_outputs() {
+        for path in [
+            ".next/server/app/page.js",
+            "out/index.html",
+            "dist/assets/app.js",
+            "build/static/app.js",
+            ".cache/tool/state",
+            ".turbo/cache/file",
+        ] {
+            assert!(
+                is_archive_excluded(path, false),
+                "{path} should be excluded"
+            );
+        }
+    }
+}

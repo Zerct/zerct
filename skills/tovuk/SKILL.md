@@ -27,9 +27,11 @@ command must force JSON without changing the session environment.
 5. For full-stack services, set `kind = "fullstack"` in one root
    `tovuk.toml`, configure `[worker].root` and `[frontend].root`, serve the
    frontend at `/`, and route API calls through same-origin `/api`.
-6. Prefer Bun with `bun.lock`, source-scoped Oxlint type-aware checks, and
-   Fallow for new package frontends. Avoid JavaScript-based lint, format,
-   typecheck, dead-code, or duplicate-code tooling.
+6. Prefer the package manager that matches the committed lockfile. Generated
+   templates default to npm; Bun remains supported when `bun.lock` is present.
+   Use source-scoped Oxlint type-aware checks and Fallow for new package
+   frontends. Avoid JavaScript-based lint, format, typecheck, dead-code, or
+   duplicate-code tooling.
 7. For a new full-stack project, run
    `tovuk new hello-service --template fullstack-rust-tanstack`.
 8. Run `tovuk check`.

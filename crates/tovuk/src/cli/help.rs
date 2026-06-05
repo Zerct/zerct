@@ -2,7 +2,7 @@ use super::constants::VERSION;
 
 const HELP_BODY: &str = r#"
 Usage:
-  tovuk new [path] [--template rust-worker|tanstack-static-frontend|fullstack-rust-tanstack]
+  tovuk new [path] [--template rust-worker|tanstack-static-frontend|next-static-frontend|fullstack-rust-tanstack]
   tovuk check [path] [--json|--output json|text]
   tovuk dev [path] [--json|--output json|text]
   tovuk login [--token <token>] [--api <url>]
@@ -99,6 +99,7 @@ Agent contract:
   - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
   - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
+  - Static Next.js frontends must use `output: "export"` and `[build].output = "out"`; move API routes and server logic to a Rust worker.
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
