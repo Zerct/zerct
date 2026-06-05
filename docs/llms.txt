@@ -115,7 +115,8 @@ writes, and removals.
 
 Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
 supports listing, setting, and deleting Service-scoped write-only environment
-variables through the same API routes as `tovuk env`.
+variables through the same API routes as `tovuk secrets` and the
+backwards-compatible `tovuk env` surface.
 
 Dashboard Storage is available at `https://tovuk.com/account/storage` and
 `https://tovuk.com/<handle>/storage`. It lists objects, uploads ordinary files,
@@ -268,7 +269,7 @@ tovuk service status <service> --json
 tovuk service delete <service> --json
 tovuk logs --build <build_id> --json
 tovuk logs --service <service> --json
-tovuk env list --service <service> --json
+tovuk secrets list --service <service> --json
 tovuk domains list --service <service> --json
 tovuk account show --json
 tovuk service show <service> --json
