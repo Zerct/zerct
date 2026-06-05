@@ -31,10 +31,23 @@ pub(crate) struct CliOptions {
 
 #[derive(Clone, Debug)]
 pub(crate) struct DeploymentOptions {
+    pub(crate) artifact_build: ArtifactBuild,
     pub(crate) database: bool,
     pub(crate) dry_run: bool,
     pub(crate) wait: bool,
     pub(crate) wait_timeout_seconds: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ArtifactBuild {
+    Build,
+    Skip,
+}
+
+impl ArtifactBuild {
+    pub(crate) fn requested(self) -> bool {
+        matches!(self, Self::Build)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -120,6 +133,7 @@ impl Default for CliOptions {
                 target_path: String::new(),
             },
             deployment: DeploymentOptions {
+                artifact_build: ArtifactBuild::Skip,
                 database: false,
                 dry_run: false,
                 wait: false,

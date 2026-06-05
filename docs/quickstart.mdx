@@ -65,14 +65,15 @@ description: "Create a Tovuk project contract, run checks, and deploy a Rust wor
   <Step title="Deploy">
     ```sh
     tovuk deploy --wait --json
-    tovuk service status <service> --json
     tovuk service show <service> --json
+    tovuk service status <service> --json
     ```
 
-    Use the returned service id with `tovuk service status <service> --json` to
-    confirm runtime status, latest deploy, latest build, URL, and `live`.
-    Use `tovuk service show <service> --json` when agents need capabilities,
-    deploys, builds, logs, usage, billing estimate, resources, and next actions.
+    Use the returned service id with `tovuk service show <service> --json` to
+    capture capabilities, deploys, builds, logs, usage, billing estimate,
+    resources, and next actions. Use
+    `tovuk service status <service> --json` when agents need only compact
+    runtime status, latest deploy, latest build, URL, and `live`.
     Inspect deploy history with `tovuk deploy list --json` or
     `tovuk deploy show <deploy_id> --json` only when needed. Cancel stale queued
     work with `tovuk deploy cancel <deploy_id> --json` when a newer deploy
@@ -97,8 +98,8 @@ description: "Create a Tovuk project contract, run checks, and deploy a Rust wor
 
     ```sh
     tovuk deploy --wait --json
-    tovuk service status <service> --json
     tovuk service show <service> --json
+    tovuk service status <service> --json
     ```
 
     Tovuk builds both roots, serves the frontend at `/`, and routes `/api/*` to

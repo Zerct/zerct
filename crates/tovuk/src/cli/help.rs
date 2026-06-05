@@ -6,7 +6,7 @@ Usage:
   tovuk check [path] [--json|--output json|text]
   tovuk dev [path] [--json|--output json|text]
   tovuk login [--token <token>] [--api <url>]
-  tovuk deploy --dry-run [path] [--api <url>] [--json|--output json|text]
+  tovuk deploy --dry-run [path] [--build-artifact] [--api <url>] [--json|--output json|text]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json|--output json|text]
   tovuk deploy list [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk deploy show <deploy_id> [--api <url>] [--json]
@@ -100,7 +100,7 @@ Usage:
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
-  - Use tovuk dev --json to inspect local worker/frontend commands, ports, and env wiring without starting processes; use tovuk dev --output text to run them.
+  - Use tovuk dev --json to inspect local worker/frontend commands, ports, port_statuses, and env wiring without starting processes; use tovuk dev --output text to run them.
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
   - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
@@ -115,7 +115,7 @@ Agent contract:
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages. Pass --notify-at-percent to control the warning threshold.
-  - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions.
+  - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions. Add --build-artifact after dependency changes to build the local release binary and compare its gzip size against the account worker limit before upload.
   - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
   - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
   - Use tovuk account show/activity/update --json for account setup and account-wide recovery without dashboard-only steps.

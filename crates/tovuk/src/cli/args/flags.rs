@@ -1,352 +1,473 @@
 use super::{
-    CliOptions, MetaAction,
-    values::{FlagValue, arg_has_inline_value, set_boolean_flag},
+    model::{ArtifactBuild, CliOptions},
+    values::{set_boolean_flag, set_string_flag, set_u64_flag},
 };
-use crate::cli::errors::{OutputFormat, Result, agent_error};
+use crate::cli::errors::{Result, agent_error};
 
-/// Prefix used by long-form command-line flags.
 const LONG_FLAG_PREFIX: &str = "\x2d\x2d";
 
-/// Applies a boolean flag to parsed CLI options.
-trait ApplyBooleanFlag {
-    /// Validates and applies the boolean flag.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error when the flag incorrectly includes a value.
-    fn apply(self, cli: &mut CliOptions) -> Result<usize>;
-}
-
-/// Applies a parsed flag while tracking consumed arguments.
-pub(super) trait ApplyFlag {
-    /// Applies the flag and returns the number of consumed arguments.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error when the flag or its value is invalid.
-    fn apply(self, cli: &mut CliOptions, argv: &[String], index: usize) -> Result<usize>;
-}
-
-/// Applies a flag that requires a value.
-trait ApplyValueFlag {
-    /// Parses and assigns the flag value, returning consumed arguments.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error when the flag is unknown, missing a value, or invalid.
-    fn apply(self, cli: &mut CliOptions, argv: &[String], index: usize) -> Result<usize>;
-}
-
-/// Assigns an already parsed flag value to its destination option.
-trait AssignFlagValue {
-    /// Assigns the value selected by the flag action.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error when an output format value is unsupported.
-    fn assign(self, cli: &mut CliOptions) -> Result<()>;
-}
-
-#[derive(Debug)]
-/// Parsed value ready to be assigned to the matching CLI option.
-struct AssignedFlagValue {
-    /// Destination option selected by the flag name.
-    action: FlagAction,
-    /// Output format active while emitting validation errors.
-    output_format: OutputFormat,
-    /// Original flag name used in diagnostics.
-    source: String,
-    /// Parsed flag value.
-    value: String,
-}
-
-impl AssignFlagValue for AssignedFlagValue {
-    fn assign(self, cli: &mut CliOptions) -> Result<()> {
-        match self.action {
-            FlagAction::Cursor => cli.cursor = self.value,
-            FlagAction::FailingCommand => cli.failing_command = self.value,
-            FlagAction::FirstLogLine => cli.first_log_line = self.value,
-            FlagAction::Limit => cli.limit = self.value,
-            FlagAction::Output => {
-                return set_output_format(
-                    cli,
-                    self.value.as_str(),
-                    self.source.as_str(),
-                    self.output_format,
-                );
-            }
-            FlagAction::RequestId => cli.request_id = self.value,
-            FlagAction::ScraperId => cli.scraper_id = self.value,
-            FlagAction::Severity => cli.severity = self.value,
-            FlagAction::Token => cli.token = self.value,
-            FlagAction::TopUpUsdCents => cli.top_up_usd_cents = self.value,
-            FlagAction::Help | FlagAction::Json | FlagAction::Unknown | FlagAction::Version => {
-                return Ok(());
-            }
-        }
-        return Ok(());
+pub(super) fn parse_flag(arg: &str) -> Option<(&str, Option<String>)> {
+    if !arg.starts_with('-') {
+        return None;
     }
+    if arg.starts_with(LONG_FLAG_PREFIX)
+        && let Some(index) = arg.find('=')
+        && index > 2
+    {
+        return Some((&arg[..index], Some(arg[index + 1..].to_owned())));
+    }
+    Some((arg, None))
 }
 
-#[derive(Debug)]
-/// Boolean flag awaiting application to CLI options.
-struct BooleanFlagApplication {
-    /// Boolean action selected by the flag name.
-    action: FlagAction,
-    /// Unsupported inline value, when one was supplied.
+pub(super) fn apply_flag(
+    cli: &mut CliOptions,
+    name: &str,
     inline: Option<String>,
-    /// Original flag name used in diagnostics.
-    name: String,
-}
-
-impl ApplyBooleanFlag for BooleanFlagApplication {
-    fn apply(self, cli: &mut CliOptions) -> Result<usize> {
-        let output_format = cli.output_format();
-        match self.action {
-            FlagAction::Help => {
-                return set_boolean_flag(
-                    self.inline.as_ref(),
-                    || cli.meta_action = MetaAction::Help,
-                    self.name.as_str(),
-                    output_format,
-                );
-            }
-            FlagAction::Json => {
-                return set_boolean_flag(
-                    self.inline.as_ref(),
-                    || cli.output_format = OutputFormat::Json,
-                    self.name.as_str(),
-                    output_format,
-                );
-            }
-            FlagAction::Version => {
-                return set_boolean_flag(
-                    self.inline.as_ref(),
-                    || cli.meta_action = MetaAction::Version,
-                    self.name.as_str(),
-                    output_format,
-                );
-            }
-            FlagAction::Cursor
-            | FlagAction::FailingCommand
-            | FlagAction::FirstLogLine
-            | FlagAction::Limit
-            | FlagAction::Output
-            | FlagAction::RequestId
-            | FlagAction::ScraperId
-            | FlagAction::Severity
-            | FlagAction::Token
-            | FlagAction::TopUpUsdCents
-            | FlagAction::Unknown => return Ok(0b1),
-        }
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    let json_output = cli.output.json;
+    if let Some(consumed) = apply_boolean_flag(cli, name, inline.as_ref(), json_output)? {
+        return Ok(consumed);
     }
+    apply_value_flag(cli, name, inline, argv, index)
 }
 
-#[derive(Clone, Copy, Debug)]
-/// Action associated with a recognized flag name.
-enum FlagAction {
-    /// Set the pagination cursor.
-    Cursor,
-    /// Set the command attached to a support request.
-    FailingCommand,
-    /// Set the first relevant support log line.
-    FirstLogLine,
-    /// Request help output.
-    Help,
-    /// Select JSON output.
-    Json,
-    /// Set the result limit.
-    Limit,
-    /// Select an output format by name.
-    Output,
-    /// Set the support request identifier.
-    RequestId,
-    /// Set the data-source identifier.
-    ScraperId,
-    /// Set the support severity.
-    Severity,
-    /// Set an explicit session token.
-    Token,
-    /// Set a billing top-up amount in United States dollar cents.
-    TopUpUsdCents,
-    /// Represent an unsupported flag.
-    Unknown,
-    /// Request version output.
-    Version,
-}
-
-impl From<&str> for FlagAction {
-    fn from(value: &str) -> Self {
-        match value {
-            "--cursor" => return Self::Cursor,
-            "--failing-command" => return Self::FailingCommand,
-            "--first-log-line" => return Self::FirstLogLine,
-            "--help" | "-h" => return Self::Help,
-            "--json" => return Self::Json,
-            "--limit" => return Self::Limit,
-            "--output" => return Self::Output,
-            "--request-id" => return Self::RequestId,
-            "--scraper-id" => return Self::ScraperId,
-            "--severity" => return Self::Severity,
-            "--token" => return Self::Token,
-            "--top-up-usd-cents" => return Self::TopUpUsdCents,
-            "--version" | "-v" | "-V" => return Self::Version,
-            _ => return Self::Unknown,
+fn apply_boolean_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<&String>,
+    json_output: bool,
+) -> Result<Option<usize>> {
+    match name {
+        "--help" | "-h" => set_boolean_flag(inline, || cli.output.help = true, name, json_output),
+        "--version" | "-v" | "-V" => {
+            set_boolean_flag(inline, || cli.output.version = true, name, json_output)
         }
-    }
-}
-
-#[derive(Debug)]
-/// Parsed flag ready for semantic application.
-pub(super) struct FlagApplication {
-    /// Parsed flag name and optional inline value.
-    parsed: ParsedFlag,
-}
-
-impl ApplyFlag for FlagApplication {
-    fn apply(self, cli: &mut CliOptions, argv: &[String], index: usize) -> Result<usize> {
-        let ParsedFlag {
-            action,
+        "--json" => set_boolean_flag(inline, || cli.output.json = true, name, json_output),
+        "--database" => {
+            set_boolean_flag(inline, || cli.deployment.database = true, name, json_output)
+        }
+        "--no-database" => set_boolean_flag(
             inline,
+            || cli.deployment.database = false,
             name,
-        } = self.parsed;
-        match action {
-            FlagAction::Help | FlagAction::Json | FlagAction::Version => {
-                return ApplyBooleanFlag::apply(
-                    BooleanFlagApplication {
-                        action,
-                        inline,
-                        name,
-                    },
-                    cli,
-                );
-            }
-            FlagAction::Cursor
-            | FlagAction::FailingCommand
-            | FlagAction::FirstLogLine
-            | FlagAction::Limit
-            | FlagAction::Output
-            | FlagAction::RequestId
-            | FlagAction::ScraperId
-            | FlagAction::Severity
-            | FlagAction::Token
-            | FlagAction::TopUpUsdCents
-            | FlagAction::Unknown => {
-                return ApplyValueFlag::apply(
-                    ValueFlagApplication {
-                        action,
-                        inline,
-                        name,
-                    },
-                    cli,
-                    argv,
-                    index,
-                );
-            }
+            json_output,
+        ),
+        "--wait" => set_boolean_flag(inline, || cli.deployment.wait = true, name, json_output),
+        "--dry-run" => {
+            set_boolean_flag(inline, || cli.deployment.dry_run = true, name, json_output)
         }
-    }
-}
-
-impl From<ParsedFlag> for FlagApplication {
-    fn from(value: ParsedFlag) -> Self {
-        return Self { parsed: value };
-    }
-}
-
-#[derive(Debug)]
-/// Flag action plus its original spelling and optional inline value.
-pub(super) struct ParsedFlag {
-    /// Action selected by the flag name.
-    action: FlagAction,
-    /// Value supplied through `--name=value` syntax.
-    inline: Option<String>,
-    /// Original flag name.
-    name: String,
-}
-
-impl From<&str> for ParsedFlag {
-    fn from(value: &str) -> Self {
-        let (name, inline) = if value.starts_with(LONG_FLAG_PREFIX)
-            && let Some((name, inline)) = value.split_once('=')
-            && name.len() > 0b10
-        {
-            (name.to_owned(), Some(inline.to_owned()))
-        } else {
-            (value.to_owned(), None)
-        };
-        return Self {
-            action: FlagAction::from(name.as_str()),
+        "--build-artifact" => set_boolean_flag(
             inline,
+            || cli.deployment.artifact_build = ArtifactBuild::Build,
             name,
-        };
+            json_output,
+        ),
+        "--public" => {
+            set_boolean_flag(inline, || cli.storage.public_read = true, name, json_output)
+        }
+        "--private" => set_boolean_flag(
+            inline,
+            || cli.storage.public_read = false,
+            name,
+            json_output,
+        ),
+        "--clear-dead-letter-queue" => set_boolean_flag(
+            inline,
+            || cli.queue.clear_dead_letter_queue = true,
+            name,
+            json_output,
+        ),
+        "--operator" => set_boolean_flag(inline, || cli.abuse.operator = true, name, json_output),
+        _ => return Ok(None),
+    }
+    .map(Some)
+}
+
+fn apply_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--api"
+        | "--service"
+        | "--build"
+        | "--deploy"
+        | "--limit"
+        | "--cursor"
+        | "--period"
+        | "--value"
+        | "--notify-at-percent"
+        | "--params"
+        | "--target"
+        | "--token"
+        | "--template"
+        | "--output" => apply_common_value_flag(cli, name, inline, argv, index),
+        "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
+        "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
+        "--expiration" | "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
+            apply_kv_value_flag(cli, name, inline, argv, index)
+        }
+        "--delay-seconds"
+        | "--max-retries"
+        | "--retention-seconds"
+        | "--max-batch-size"
+        | "--max-batch-timeout-seconds"
+        | "--dead-letter-queue" => apply_queue_value_flag(cli, name, inline, argv, index),
+        "--failing-command" | "--first-log-line" | "--severity" => {
+            apply_support_value_flag(cli, name, inline, argv, index)
+        }
+        "--category" | "--reporter-email" | "--reporter-name" | "--evidence" | "--object-path"
+        | "--target-path" => apply_abuse_value_flag(cli, name, inline, argv, index),
+        "--wait-timeout" => apply_numeric_value_flag(cli, name, inline, argv, index),
+        _ => Err(agent_error(
+            "unknown_argument",
+            format!("Unknown Tovuk option: {name}."),
+            "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
+            cli.output.json,
+        )),
     }
 }
 
-#[derive(Debug)]
-/// Value-bearing flag awaiting application to CLI options.
-struct ValueFlagApplication {
-    /// Value action selected by the flag name.
-    action: FlagAction,
-    /// Value supplied through `--name=value` syntax.
+fn apply_common_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
     inline: Option<String>,
-    /// Original flag name used in diagnostics.
-    name: String,
-}
-
-impl ApplyValueFlag for ValueFlagApplication {
-    fn apply(self, cli: &mut CliOptions, argv: &[String], index: usize) -> Result<usize> {
-        let output_format = cli.output_format();
-        if matches!(self.action, FlagAction::Unknown) {
-            return Err(agent_error(
-                "unknown_argument",
-                format!("Unknown Tovuk option: {}.", self.name),
-                "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
-                output_format,
-            ));
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.output.json),
+        "--service" => {
+            set_string_flag(&mut cli.service, name, inline, argv, index, cli.output.json)
         }
-        let source = self.name.clone();
-        let value = String::from(result_or_return!(FlagValue::try_from((
-            self.name,
-            self.inline,
+        "--build" => set_string_flag(&mut cli.build, name, inline, argv, index, cli.output.json),
+        "--deploy" => set_string_flag(&mut cli.deploy, name, inline, argv, index, cli.output.json),
+        "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.output.json),
+        "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
+        "--period" => set_string_flag(&mut cli.period, name, inline, argv, index, cli.output.json),
+        "--value" => set_string_flag(&mut cli.value, name, inline, argv, index, cli.output.json),
+        "--notify-at-percent" => set_string_flag(
+            &mut cli.notify_at_percent,
+            name,
+            inline,
             argv,
             index,
-            output_format,
-        ))));
-        result_or_return!(AssignFlagValue::assign(
-            AssignedFlagValue {
-                action: self.action,
-                output_format,
-                source,
-                value,
-            },
-            cli,
-        ));
-        if arg_has_inline_value(argv, index) {
-            return Ok(0b1);
+            cli.output.json,
+        ),
+        "--params" => set_string_flag(&mut cli.params, name, inline, argv, index, cli.output.json),
+        "--target" => set_string_flag(&mut cli.target, name, inline, argv, index, cli.output.json),
+        "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.output.json),
+        "--template" => set_string_flag(
+            &mut cli.template,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--output" => {
+            let value = super::values::flag_value(name, inline, argv, index, cli.output.json)?;
+            set_output_format(cli, &value, name, cli.output.json)?;
+            Ok(super::values::flag_consumed(argv, index))
         }
-        return Ok(0b10);
+        _ => invalid_value_flag_dispatch(cli, name),
     }
 }
 
-/// Selects JSON output from an explicit output-format value.
-///
-/// # Errors
-///
-/// Returns an error when `value` does not name the supported JSON format.
 pub(super) fn set_output_format(
     cli: &mut CliOptions,
     value: &str,
     source: &str,
-    output_format: OutputFormat,
+    json_output: bool,
 ) -> Result<()> {
     if value.eq_ignore_ascii_case("json") {
-        cli.output_format = OutputFormat::Json;
+        cli.output.json = true;
         return Ok(());
     }
-    return Err(agent_error(
+    if value.eq_ignore_ascii_case("text") {
+        cli.output.json = false;
+        return Ok(());
+    }
+    Err(agent_error(
         "invalid_argument",
-        format!("{source} must be `json`."),
-        format!("Set {source} to `json`, or omit it for default command output."),
-        output_format,
-    ));
+        format!("{source} must be `json` or `text`."),
+        format!(
+            "Set {source} to `json` for agent-readable output or `text` for human-readable output."
+        ),
+        json_output,
+    ))
+}
+
+fn apply_storage_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--content-type" => set_string_flag(
+            &mut cli.storage.content_type,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_account_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--handle" => set_string_flag(
+            &mut cli.account.handle,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--display-name" => set_string_flag(
+            &mut cli.account.display_name,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_kv_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--expiration" => set_string_flag(
+            &mut cli.kv.expiration,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--expiration-ttl-seconds" | "--ttl" => set_string_flag(
+            &mut cli.kv.expiration_ttl_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--metadata" => set_string_flag(
+            &mut cli.kv.metadata,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_queue_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--delay-seconds" => set_string_flag(
+            &mut cli.queue.delay_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--max-retries" => set_string_flag(
+            &mut cli.queue.max_retries,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--max-batch-size" => set_string_flag(
+            &mut cli.queue.max_batch_size,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--max-batch-timeout-seconds" => set_string_flag(
+            &mut cli.queue.max_batch_timeout_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--dead-letter-queue" => set_string_flag(
+            &mut cli.queue.dead_letter_queue,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--retention-seconds" => set_string_flag(
+            &mut cli.queue.retention_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_support_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--failing-command" => set_string_flag(
+            &mut cli.failing_command,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--first-log-line" => set_string_flag(
+            &mut cli.first_log_line,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--severity" => set_string_flag(
+            &mut cli.severity,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_abuse_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--category" => set_string_flag(
+            &mut cli.abuse.category,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--reporter-email" => set_string_flag(
+            &mut cli.abuse.reporter_email,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--reporter-name" => set_string_flag(
+            &mut cli.abuse.reporter_name,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--evidence" => set_string_flag(
+            &mut cli.abuse.evidence,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--object-path" => set_string_flag(
+            &mut cli.abuse.object_path,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--target-path" => set_string_flag(
+            &mut cli.abuse.target_path,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_numeric_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--wait-timeout" => set_u64_flag(
+            &mut cli.deployment.wait_timeout_seconds,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn invalid_value_flag_dispatch(cli: &CliOptions, name: &str) -> Result<usize> {
+    Err(agent_error(
+        "unknown_argument",
+        format!("Unknown Tovuk option: {name}."),
+        "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
+        cli.output.json,
+    ))
 }
