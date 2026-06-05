@@ -30,7 +30,7 @@ Resource references:
 - `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
 - `docs/reference/state.mdx`: State account setup, Service context, keyed objects, storage, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
-- `docs/reference/queues.mdx`: queue account setup, Service context, producers, consumers, retries, and dead letters.
+- `docs/reference/queues.mdx`: queue account setup, Service context, explicit `queue` capability, dry-run planning, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: Cron account setup, Service context, explicit `cron` capability, dry-run planning, scheduled Rust worker events, and trigger lifecycle commands.
 - `docs/reference/bindings.mdx`: Service Binding account setup, Service context, private calls, and runtime binding environment names.
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
@@ -216,6 +216,9 @@ Full-stack contract:
   are configurable through the CLI/API.
 - Queue handler payloads contain base64 message bodies. Return `2xx` only after
   the batch is safely handled.
+- Before Queue mutations, confirm `[capabilities] queue = true` in `tovuk.toml`
+  when the Service does not already expose Queues, then inspect
+  `tovuk deploy --dry-run --json`.
 - Cron handlers are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
 - Cron handlers must be idempotent because schedules can overlap with retries
   or manual agent actions.
@@ -253,6 +256,7 @@ tovuk kv create --service <service> CACHE --json
 tovuk kv namespace delete --service <service> CACHE --json
 tovuk account show --json
 tovuk service show <service> --json
+tovuk deploy --dry-run --json
 tovuk queue create --service <service> failed_jobs --json
 tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 tovuk queue update --service <service> jobs --max-batch-size 25 --json
