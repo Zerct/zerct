@@ -29,7 +29,7 @@ Resource references:
   and runtime bindings.
 - `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
 - `docs/reference/state.mdx`: State account setup, Service context, keyed objects, storage, and alarms.
-- `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
+- `docs/reference/kv.mdx`: KV account setup, Service context, explicit `kv` capability, dry-run planning, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, explicit `queue` capability, dry-run planning, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: Cron account setup, Service context, explicit `cron` capability, dry-run planning, scheduled Rust worker events, and trigger lifecycle commands.
 - `docs/reference/bindings.mdx`: Service Binding account setup, Service context, private calls, and runtime binding environment names.
@@ -211,6 +211,9 @@ Full-stack contract:
 - The worker health path is `/api/healthz`.
 - Worker build and runtime commands must use `cargo build --release` and a
   `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
+- Before KV mutations, confirm `[capabilities] kv = true` in `tovuk.toml` when
+  the Service does not already expose KV, then inspect
+  `tovuk deploy --dry-run --json`.
 - Queue handlers are Rust worker routes at `POST /.tovuk/queues/<queue>`.
 - Queue batch size, batch timeout, retries, retention, and dead-letter routing
   are configurable through the CLI/API.
@@ -252,6 +255,9 @@ tovuk sqlite backup create --service <service> DB --json
 tovuk sqlite backup list --service <service> DB --json
 tovuk sqlite backup restore --service <service> DB sqlite_backup_1 --json
 tovuk sqlite delete --service <service> DB --json
+tovuk account show --json
+tovuk service show <service> --json
+tovuk deploy --dry-run --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv namespace delete --service <service> CACHE --json
 tovuk account show --json
