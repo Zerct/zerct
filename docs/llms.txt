@@ -28,7 +28,7 @@ Resource references:
   post-deploy Service snapshots, CLI/API/dashboard parity, resource routes,
   and runtime bindings.
 - `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
-- `docs/reference/state.mdx`: State account setup, Service context, keyed objects, storage, and alarms.
+- `docs/reference/state.mdx`: State account setup, Service context, explicit `state` capability, dry-run planning, keyed objects, storage, meters, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, explicit `kv` capability, dry-run planning, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, explicit `queue` capability, dry-run planning, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: Cron account setup, Service context, explicit `cron` capability, dry-run planning, scheduled Rust worker events, and trigger lifecycle commands.
@@ -228,6 +228,9 @@ Full-stack contract:
 - Before Cron trigger mutations, confirm `[capabilities] cron = true` in
   `tovuk.toml` when the Service does not already expose Cron, then inspect
   `tovuk deploy --dry-run --json`.
+- Before State mutations, confirm `[capabilities] state = true` in
+  `tovuk.toml` when the Service does not already expose State, then inspect
+  `tovuk deploy --dry-run --json`.
 - WebSocket upgrades on worker routes are proxied to Rust workers and meter
   response-side tunnel bytes as `worker_transfer_bytes`.
 
@@ -278,6 +281,7 @@ tovuk cron enable --service <service> nightly --json
 tovuk cron delete --service <service> nightly --json
 tovuk account show --json
 tovuk service show <service> --json
+tovuk deploy --dry-run --json
 tovuk state create --service <service> Room --json
 tovuk state objects --service <service> Room --json
 tovuk state keys --service <service> Room room-1 --json

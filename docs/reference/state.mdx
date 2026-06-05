@@ -29,9 +29,21 @@ the request needs keyed coordination or per-object alarm scheduling.
   </Step>
 
   <Step title="Enable State for the service">
-    Set `[capabilities].state = true` in `tovuk.toml`, then run
-    `tovuk deploy --dry-run --json` so the agent can confirm State meters,
-    limits, and required fixes before provisioning classes.
+    If `tovuk service show --json` does not include `"state": true`, enable the
+    explicit capability in `tovuk.toml` before code depends on State classes.
+
+    ```toml
+    [capabilities]
+    state = true
+    ```
+
+    Then run a dry run so agents can inspect `capabilities.enabled`,
+    `capabilities.disabled`, `meters`, `meterPlan`, `limits`,
+    `billingEstimate`, and `nextActions` before provisioning classes.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
   </Step>
 
   <Step title="Create the State class">
@@ -94,6 +106,7 @@ The dashboard uses these State API routes:
 ```sh
 tovuk account show --json
 tovuk service show service_1 --json
+tovuk deploy --dry-run --json
 tovuk state list --service service_1 --json
 tovuk state create --service service_1 Room --json
 tovuk state objects --service service_1 Room --json
