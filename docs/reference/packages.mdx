@@ -99,8 +99,11 @@ After adding or upgrading Rust dependencies, run
 build without uploading or promoting, then reports
 `artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
 `tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
-and `dev.port_statuses` without starting processes so agents can avoid opening
-a different app already serving the planned port.
+and `dev.port_statuses` without starting processes. When a planned port is
+already occupied, JSON mode returns `ok: false` and
+`dev.port_statuses[].owner` when the PID/command can be detected. Text mode
+refuses to start child processes until ports are free, so agents can avoid
+opening a stale worker or a different app already serving the planned port.
 
 The agent repair loop is the same on every package surface:
 

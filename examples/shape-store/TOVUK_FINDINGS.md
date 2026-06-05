@@ -24,6 +24,10 @@ Date: 2026-06-05
 - Added and released Tovuk CLI `0.1.96` during this pass to improve
   agent-readable service status output, add `checks[].status`, and make npm
   frontend checks install dev dependencies.
+- Added Tovuk CLI `0.1.97` changes during this pass to make `tovuk dev`
+  occupied-port handling explicit before release: JSON returns `ok: false` and
+  owner details, while text mode refuses to launch child processes until ports
+  are free.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
@@ -1562,20 +1566,34 @@ Failure/friction:
 - This is high-friction for AI agents because a stale local worker can produce
   plausible but wrong UI data.
 
-Fix/status:
+Fix included in local Tovuk CLI changes after the `deploy_61` pass:
 
-- For this pass, I killed only the stale `api` listener on port `3000`,
-  restarted the current Rust API, and reran Browser checks before deploying.
-- This should become a Tovuk CLI improvement: `tovuk dev` should make stale
-  bound ports obvious, ideally by reporting the PID/command and requiring an
-  explicit reuse/replace decision when the configured worker port is already in
-  use.
+- `tovuk dev --json` now returns `ok: false` when a planned dev port is
+  occupied.
+- `dev.port_statuses[].owner` includes the owning PID and command when the
+  platform can detect them.
+- Human-readable `tovuk dev --output text` prints the plan, port owner rows,
+  and then exits `1` before starting any child processes when a planned port is
+  occupied.
+- The port-specific `agent_instruction` explicitly tells agents not to use that
+  URL for verification until the planned Tovuk dev process owns it.
 
 Verification:
 
 - Before restart: local product detail rendered `YS-02$20+`.
 - After restart: `curl http://127.0.0.1:3000/api/products` returned
   `priceCents: 5000`, and Browser detail rendered `YS-02$50+`.
+- Real conflict test: ran a temporary Python listener on `127.0.0.1:3000`.
+  Local CLI `tovuk dev examples/shape-store --json` returned `ok: false`,
+  `available: false`, and owner details such as `pid 31927 (Python)`.
+- Text-mode conflict test printed the planned worker/frontend commands,
+  reported `owner_pid` and `owner_command`, and exited `1` without launching
+  dev child processes.
+- Positive-path JSON test after freeing the port returned `ok: true` with both
+  worker and frontend ports available and `owner: null`.
+- Follow-up production Browser smoke check after the CLI patch confirmed the
+  live storefront still has 50 products, 6 desktop columns, no API fallback, no
+  overflow, and `YS-02` gallery image 2 centered at `720`.
 
 ## Remaining Tovuk friction
 

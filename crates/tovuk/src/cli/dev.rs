@@ -1,6 +1,7 @@
 use super::{
     args::CliOptions,
     config::{TovukConfig, parse_tovuk_toml, validate_config},
+    dev_ports::{DevPortOwner, port_owner},
     errors::{Result, agent_error, print_json},
     frontend_checks::{frontend_package_manager, is_next_static_frontend},
     project_kind::ProjectKind,
@@ -10,6 +11,7 @@ use serde_json::json;
 use std::{
     collections::BTreeMap,
     fs,
+    io::{self, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
@@ -45,6 +47,7 @@ struct DevPortStatus {
     available: bool,
     host: &'static str,
     name: &'static str,
+    owner: Option<DevPortOwner>,
     port: u16,
     url: String,
 }
@@ -54,13 +57,15 @@ pub(crate) fn dev(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     let plan = create_dev_plan(project_dir, &config);
     if cli.output.json {
         return print_json(&json!({
-            "ok": true,
+            "ok": plan.ports_available(),
             "mode": "plan",
             "dev": plan,
             "agent_instruction": dev_agent_instruction(&plan)
         }));
     }
     print_dev_plan(&plan);
+    flush_stdout();
+    fail_on_port_conflicts(&plan, cli)?;
     run_dev_processes(&plan, cli)
 }
 
@@ -163,17 +168,17 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
 fn dev_port_status(name: &'static str, port: u16, url: &str) -> DevPortStatus {
     let has_listener = TcpStream::connect((LOCAL_HOST, port)).is_ok();
     let available = !has_listener && TcpListener::bind((LOCAL_HOST, port)).is_ok();
+    let owner = if available { None } else { port_owner(port) };
     DevPortStatus {
         agent_instruction: if available {
             None
         } else {
-            Some(format!(
-                "Port {port} is already in use. Stop the process using {url} before running `tovuk dev --output text`, or run the printed commands manually on free ports with matching API URLs."
-            ))
+            Some(port_conflict_instruction(port, url, owner.as_ref()))
         },
         available,
         host: LOCAL_HOST,
         name,
+        owner,
         port,
         url: url.to_owned(),
     }
@@ -184,6 +189,35 @@ fn dev_agent_instruction(plan: &DevPlan) -> &'static str {
         "One or more planned dev ports are already in use. Inspect dev.port_statuses before running `tovuk dev --output text`."
     } else {
         "Run `tovuk dev --output text` to start these local processes. JSON mode returns the plan only so child process logs do not corrupt machine-readable output."
+    }
+}
+
+fn port_conflict_instruction(port: u16, url: &str, owner: Option<&DevPortOwner>) -> String {
+    let owner_text = owner.map_or_else(
+        || "another local process".to_owned(),
+        |owner| format!("pid {} ({})", owner.pid, owner.command),
+    );
+    format!(
+        "Port {port} is already in use by {owner_text}. Stop that process before running `tovuk dev --output text`, or run the printed commands manually on free ports with matching API URLs. Do not use {url} for verification until the planned Tovuk dev process owns it."
+    )
+}
+
+fn fail_on_port_conflicts(plan: &DevPlan, cli: &CliOptions) -> Result<()> {
+    if plan.ports_available() {
+        return Ok(());
+    }
+
+    Err(agent_error(
+        "dev_port_in_use",
+        "One or more planned Tovuk dev ports are already in use.",
+        "Inspect the printed port rows, stop the owning process, then rerun `tovuk dev`. Use `tovuk dev --json` for machine-readable owner details.",
+        cli.output.json,
+    ))
+}
+
+impl DevPlan {
+    fn ports_available(&self) -> bool {
+        self.port_statuses.iter().all(|status| status.available)
     }
 }
 
@@ -230,7 +264,13 @@ fn print_dev_plan(plan: &DevPlan) {
         } else {
             "in-use"
         };
-        println!("port {} {} {}", status.name, status.url, availability);
+        let owner = status.owner.as_ref().map_or_else(String::new, |owner| {
+            format!(" owner_pid={} owner_command={}", owner.pid, owner.command)
+        });
+        println!(
+            "port {} {} {}{}",
+            status.name, status.url, availability, owner
+        );
     }
     for process in &plan.processes {
         let env = process
@@ -249,6 +289,10 @@ fn print_dev_plan(plan: &DevPlan) {
             process.name, process.cwd, prefix, process.command
         );
     }
+}
+
+fn flush_stdout() {
+    let _ignore = io::stdout().flush();
 }
 
 fn run_dev_processes(plan: &DevPlan, cli: &CliOptions) -> Result<()> {
@@ -344,7 +388,10 @@ fn display_path(path: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{LOCAL_HOST, create_dev_plan, dev_port_status, read_dev_config};
+    use super::{
+        DevPlan, LOCAL_HOST, create_dev_plan, dev_port_status, fail_on_port_conflicts,
+        port_conflict_instruction, read_dev_config,
+    };
     use crate::cli::args::CliOptions;
     use std::{env, fs, net::TcpListener, path::PathBuf, time::SystemTime};
 
@@ -521,9 +568,61 @@ output = "out"
         if status.agent_instruction.is_none() {
             return Err("expected occupied port to include an agent instruction".into());
         }
+        if !status
+            .agent_instruction
+            .as_deref()
+            .unwrap_or_default()
+            .contains("Do not use")
+        {
+            return Err(format!(
+                "expected stale verification warning, got {:?}",
+                status.agent_instruction
+            )
+            .into());
+        }
 
         drop(listener);
         Ok(())
+    }
+
+    #[test]
+    fn occupied_ports_stop_text_dev_before_process_start() -> Result<(), Box<dyn std::error::Error>>
+    {
+        let listener = TcpListener::bind((LOCAL_HOST, 0))?;
+        let port = listener.local_addr()?.port();
+        let status = dev_port_status("worker", port, &format!("http://{LOCAL_HOST}:{port}"));
+        let plan = DevPlan {
+            frontend_url: None,
+            kind: "rust-worker",
+            next_actions: Vec::new(),
+            port_statuses: vec![status],
+            processes: Vec::new(),
+            project: "/tmp/demo".to_owned(),
+            worker_url: Some(format!("http://{LOCAL_HOST}:{port}")),
+        };
+        let cli = CliOptions::default();
+
+        let error = fail_on_port_conflicts(&plan, &cli)
+            .err()
+            .ok_or("expected occupied port to fail")?;
+        if error.payload().code != "dev_port_in_use" {
+            return Err(format!("unexpected error: {:?}", error.payload()).into());
+        }
+
+        drop(listener);
+        Ok(())
+    }
+
+    #[test]
+    fn port_conflict_instruction_names_owner() {
+        let owner = super::DevPortOwner {
+            command: "api".to_owned(),
+            pid: 123,
+        };
+        let instruction = port_conflict_instruction(3000, "http://127.0.0.1:3000", Some(&owner));
+
+        assert!(instruction.contains("pid 123 (api)"));
+        assert!(instruction.contains("Do not use http://127.0.0.1:3000"));
     }
 
     fn temp_project_dir(name: &str) -> Result<PathBuf, Box<dyn std::error::Error>> {

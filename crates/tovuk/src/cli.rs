@@ -7,6 +7,7 @@ mod config;
 mod constants;
 mod deploy;
 mod dev;
+mod dev_ports;
 mod errors;
 mod frontend_checks;
 mod help;
