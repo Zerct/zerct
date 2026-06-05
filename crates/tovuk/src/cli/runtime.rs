@@ -10,6 +10,7 @@ use super::{
     check::check_project,
     constants::VERSION,
     deploy::deploy,
+    dev::dev,
     errors::{Result, agent_error},
     help::help_text,
     templates::new_project,
@@ -45,6 +46,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         }
         "new" => new_project(&project_path(cli.args.first())?, &cli.template),
         "check" => check_project(&project_path(cli.args.first())?, cli.output.json),
+        "dev" => dev(&project_path(cli.args.first())?, &cli),
         "login" => login(&cli),
         "deploy" => deploy(&project_path(cli.args.first())?, &cli),
         "pricing" => pricing(&cli),
