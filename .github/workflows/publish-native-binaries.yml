@@ -79,6 +79,10 @@ jobs:
             echo "exists=true" >> "$GITHUB_OUTPUT"
             if gh release view "$tag" --json assets --jq '.assets[].name' \
               | grep -Fx "${{ steps.asset.outputs.name }}" >/dev/null; then
+              if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+                echo "::error::${{ steps.asset.outputs.name }} already exists on $tag. Bump every public package version before pushing CLI changes."
+                exit 1
+              fi
               echo "asset_exists=true" >> "$GITHUB_OUTPUT"
               echo "::notice::${{ steps.asset.outputs.name }} already exists on $tag."
             else

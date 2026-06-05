@@ -1259,7 +1259,7 @@ checksum = "756daf9b1013ebe47a8776667b466417e2d4c5679d441c26230efd9ef78692db"
 
 [[package]]
 name = "tovuk"
-version = "0.1.97"
+version = "0.1.98"
 dependencies = [
  "base64",
  "flate2",
