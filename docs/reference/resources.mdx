@@ -40,13 +40,16 @@ agents do not need hidden manual actions.
     follow the returned `nextActions`.
   </Step>
 
-  <Step title="Deploy after resources are ready">
+  <Step title="Deploy and inspect resources">
     ```sh
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     ```
 
-    Deploy after required service resources exist. If the deploy fails, switch
-    to Logs and Builds before changing resource setup.
+    Deploy after required service resources exist, then use the post-deploy
+    Service snapshot to confirm runtime bindings, resource counts,
+    `accountUsage`, `billingEstimate`, and next actions. If the deploy fails,
+    switch to Logs and Builds before changing resource setup.
   </Step>
 </Steps>
 
