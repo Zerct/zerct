@@ -226,9 +226,10 @@ history, recent logs, env names, domains, resources, `accountUsage`,
 Set `TOVUK_OUTPUT=json` when an agent should receive JSON by default.
 Without `--json`, `tovuk service list` prints a compact table with kind,
 runtime status, URL, enabled and disabled capabilities, and per-Service
-resource counts. `tovuk service status --json` returns top-level `ok`, `url`,
-and `agent_instruction` fields for smoke tests; text mode prints only the
-live/deploy/build summary. `tovuk service show` prints the broader Service snapshot.
+resource counts. `tovuk service status <service> --json` returns top-level
+`ok`, `url`, and `agent_instruction` fields for smoke tests; text mode prints
+only the live/deploy/build summary. `tovuk service show <service>` prints the
+broader Service snapshot.
 Dashboard Overview Service rows expose copyable commands for `service status`,
 `service show`, logs, storage listing, worker request caps, support tickets,
 and service deletion.
