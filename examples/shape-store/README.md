@@ -59,3 +59,9 @@ npx -y tovuk@latest secrets set --service shape-store PUBLIC_BASE_URL=https://sh
 ```
 
 Use Stripe test keys first when validating a new deployment.
+
+## Product Catalog
+
+The Rust API and TanStack frontend use `web/src/catalog.json` as the single
+catalog source. Edit products there, then run the API and frontend checks before
+deploying.

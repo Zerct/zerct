@@ -52,7 +52,7 @@ tovuk check --json
 tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
 tovuk dev --json
-tovuk deploy --dry-run --build-artifact --json
+tovuk deploy --dry-run --json
 tovuk deploy --wait --json
 tovuk service show <service> --json
 tovuk service status <service> --json
@@ -62,6 +62,10 @@ tovuk deploy cancel <deploy_id> --json
 tovuk pricing --json
 tovuk logs --build <build_id> --json
 ```
+
+After adding or upgrading Rust dependencies, run
+`tovuk deploy --dry-run --build-artifact --json` before the wait deploy to
+build the local release binary and check compressed worker size.
 
 Manage service resources without dashboard access:
 

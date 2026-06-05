@@ -1300,6 +1300,48 @@ Verification:
 - `cargo test --manifest-path crates/tovuk/Cargo.toml --locked --all-targets
   --all-features` passed with 54 tests.
 
+### 37. Ecommerce API needed cleaner module boundaries before more payment/database work
+
+Finding:
+
+- The Rust API had product data, checkout parsing, Stripe Checkout calls, CORS,
+  HTTP parsing, server threading, and route dispatch in one `main.rs`.
+- That worked, but it made future agent edits risky. Adding Stripe, database, or
+  worker-resource behavior would keep increasing one mixed-responsibility file.
+- The API also duplicated the product catalog instead of sharing the committed
+  frontend fallback catalog.
+
+Fix included after the Tovuk CLI 0.1.95 release:
+
+- Split the API into focused modules:
+  - `catalog.rs` owns product catalog parsing and uses `web/src/catalog.json`.
+  - `checkout.rs` owns order reservation, Stripe demo mode, and Stripe Checkout
+    session parameter generation.
+  - `http.rs` owns request parsing, JSON responses, CORS, and response writes.
+  - `server.rs` owns listener setup, worker threads, and request handling.
+  - `main.rs` is now a small route table.
+- Added Rust unit coverage proving checkout prices come from the shared catalog
+  and Stripe Checkout parameters include the expected product line item.
+
+Verification:
+
+- `cargo fmt --all --check` passed in `examples/shape-store/api`.
+- `cargo check --locked --release --all-targets --all-features` passed.
+- `cargo test --locked --release --all-targets --all-features` passed with 2
+  tests.
+- `cargo clippy --locked --release --all-targets --all-features -- -D warnings
+  ...` passed with the existing strict lint set.
+- Local Browser verification against `http://127.0.0.1:5176/` with the API on
+  port `3002` confirmed:
+  - 50 products loaded from the worker API with no `API FALLBACK`.
+  - mobile `390x844` uses 3 product columns and no horizontal overflow.
+  - tablet `768x1024` and desktop `1280x800` use 6 product columns and no
+    horizontal overflow.
+  - opening `YS-02`, selecting size `9`, and opening the bag still shows the
+    full-screen `YZY WALLET` checkout with `$50` subtotal/total.
+- Direct API smoke tests passed for `/api/healthz`, `/api/products`, and
+  demo-mode `POST /api/checkout`.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1346,5 +1388,8 @@ Hard:
   the bag without leaving product detail, and the bag opens a full-screen
   wallet/order-summary checkout overlay.
 - Cart, quantity, and checkout flows work from the deployed site.
+- Refactored the Rust API into focused modules and made `web/src/catalog.json`
+  the single product catalog source for both frontend fallback data and the
+  worker API.
 - I fixed the mobile cart trigger alignment after visual inspection.
 - No demo label/bar is present.
