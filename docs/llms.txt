@@ -43,7 +43,7 @@ Workflow references:
 
 - `docs/index.mdx`: docs start page, path chooser, package install snippet with account setup check, and visible Copy prompt with check, account setup, dry-run, and wait deploy commands for AI coding agents.
 - `docs/quickstart.mdx`: first Rust worker or full-stack deploy flow.
-- `docs/deploy.mdx`: check, account setup, dry-run, deploy, inspect, and recover services.
+- `docs/deploy.mdx`: check, account setup, dry-run, deploy, service snapshot, deploy history, cancellation, and recovery.
 - `docs/production-readiness.mdx`: production launch workflow, account setup, usage caps, deploy evidence, status distinction, secrets, domains, and cleanup.
 - `docs/agents.mdx`: agent deploy workflow, reusable deploy and starter
   prompts with account checks, recovery, support, and abuse workflow.
@@ -125,13 +125,14 @@ Agent repair loop:
    `requiredFixes`, meters, `meterPlan`, limits, and `billingEstimate`.
 9. Set hard usage caps for expected load.
 10. Run `tovuk deploy --wait --json`.
-11. Inspect deploy state with `tovuk deploy list --json` or
+11. Inspect the Service snapshot with `tovuk service show <service> --json`.
+12. Inspect deploy history with `tovuk deploy list --json` or
    `tovuk deploy show <deploy_id> --json` when needed.
-12. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
-13. If deploy fails, read `build_job.id` or the failed build id.
-14. Run `tovuk logs --build <build_id> --json`.
-15. Fix the first actionable log error.
-16. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
+13. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
+14. If deploy fails, read `build_job.id` or the failed build id.
+15. Run `tovuk logs --build <build_id> --json`.
+16. Fix the first actionable log error.
+17. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
 
 Rust worker contract:
 
