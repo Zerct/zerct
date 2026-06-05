@@ -23,6 +23,7 @@ export type LoadState = "loading" | "ready" | "error";
 
 export type Product = {
   categories: readonly Category[];
+  galleryImages: readonly string[];
   id: string;
   image: string;
   inventory: number;
@@ -59,12 +60,16 @@ type StripeCheckoutResult =
       orderId: string;
     };
 
+type RawProduct = Omit<Product, "galleryImages"> & {
+  galleryImages?: readonly string[];
+};
+
 type ProductCatalog = {
-  products: Product[];
+  products: RawProduct[];
 };
 
 type ProductsResponse = {
-  products: Product[];
+  products: RawProduct[];
 };
 
 type CheckoutApiResponse = {
@@ -82,9 +87,7 @@ type CartApiResponse = {
 
 const productCatalog = productCatalogJson as ProductCatalog;
 
-export const fallbackProducts: Product[] = productCatalog.products.map((product) =>
-  shapeProduct(product.id, product.name, product.image, product.priceCents, product.inventory, product.categories),
-);
+export const fallbackProducts: Product[] = shapeProducts(productCatalog.products);
 
 export async function fetchProducts() {
   const response = await fetch(`${apiBaseUrl}/products`);
@@ -97,7 +100,7 @@ export async function fetchProducts() {
     throw new Error("Product API returned an empty catalog");
   }
 
-  return data.products;
+  return shapeProducts(data.products);
 }
 
 export async function reserveOrder(checkoutFields: CheckoutFields, cartLines: CartLine[], totalCents: number) {
@@ -176,15 +179,43 @@ export function formatCurrency(cents: number) {
   return formatter.format(cents / 100);
 }
 
-function shapeProduct(
-  id: string,
-  name: string,
-  image: string,
-  priceCents: number,
-  inventory: number,
-  categories: readonly Category[],
-): Product {
-  return { categories, id, image, inventory, name, priceCents };
+function shapeProducts(products: readonly RawProduct[]): Product[] {
+  return products.map((product, index) => shapeProduct(product, index, products));
+}
+
+function shapeProduct(product: RawProduct, index: number, products: readonly RawProduct[]): Product {
+  return {
+    ...product,
+    galleryImages: galleryImagesForProduct(product, index, products),
+  };
+}
+
+function galleryImagesForProduct(product: RawProduct, index: number, products: readonly RawProduct[]) {
+  const explicitImages = product.galleryImages?.filter(Boolean);
+  if (explicitImages !== undefined && explicitImages.length > 0) {
+    return explicitImages;
+  }
+
+  return galleryImageSequence(product.image, productImages(products), index);
+}
+
+function productImages(products: readonly RawProduct[]) {
+  return products.map((product) => product.image);
+}
+
+function galleryImageSequence(fallbackImage: string, images: readonly string[], index: number) {
+  const imagePool = images.length > 0 ? images : [fallbackImage];
+  return Array.from({ length: 3 }, (_value, offset) =>
+    galleryImageAt(fallbackImage, imagePool, index + offset),
+  );
+}
+
+function galleryImageAt(fallbackImage: string, images: readonly string[], index: number) {
+  return images[wrappedIndex(images, index)] ?? fallbackImage;
+}
+
+function wrappedIndex(items: readonly unknown[], index: number) {
+  return (index + items.length) % items.length;
 }
 
 function hasProducts(data: ProductsResponse) {

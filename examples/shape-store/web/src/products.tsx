@@ -12,10 +12,15 @@ type ProductGridProps = {
 
 type ProductFocusViewProps = {
   onAdd: (productId: string, selectedSize?: string) => void;
-  onViewProduct: (product: Product) => void;
   product: Product;
-  products: Product[];
-  selectedIndex: number;
+};
+
+type GalleryPosition = "previous" | "active" | "next";
+
+type GalleryItem = {
+  image: string;
+  imageIndex: number;
+  position: GalleryPosition;
 };
 
 export function ProductGrid({
@@ -28,15 +33,7 @@ export function ProductGrid({
   const productFocus = getProductFocus(products, selectedProduct);
 
   if (productFocus !== null) {
-    return (
-      <ProductFocusView
-        onAdd={onAdd}
-        onViewProduct={onViewProduct}
-        product={productFocus.product}
-        products={products}
-        selectedIndex={productFocus.index}
-      />
-    );
+    return <ProductFocusView onAdd={onAdd} product={productFocus.product} />;
   }
 
   return (
@@ -49,32 +46,15 @@ export function ProductGrid({
 }
 
 function ProductTile({ onViewProduct, product }: { onViewProduct: (product: Product) => void; product: Product }) {
-  return <ProductButton className="product-tile" onViewProduct={onViewProduct} product={product} />;
-}
-
-function ProductButton({
-  ariaCurrent,
-  className,
-  loading = "lazy",
-  onViewProduct,
-  product,
-}: {
-  ariaCurrent?: "true" | undefined;
-  className: string;
-  loading?: "eager" | "lazy";
-  onViewProduct: (product: Product) => void;
-  product: Product;
-}) {
   return (
     <button
-      aria-current={ariaCurrent}
       aria-label={`View ${product.name}`}
-      className={className}
+      className="product-tile"
       data-testid="product-card"
       onClick={() => onViewProduct(product)}
       type="button"
     >
-      <ProductFigure loading={loading} product={product} />
+      <ProductFigure product={product} />
     </button>
   );
 }
@@ -97,65 +77,243 @@ function ProductFigure({ loading = "lazy", product }: { loading?: "eager" | "laz
 
 function ProductFocusView({
   onAdd,
-  onViewProduct,
   product,
-  products,
-  selectedIndex,
 }: ProductFocusViewProps) {
+  const gallery = useProductGallery(product);
   const [isSizePickerOpen, setIsSizePickerOpen] = useState(false);
-  const focusProducts = getFocusProducts(products, selectedIndex);
+  const addFeedback = useAddFeedback(product.id);
 
   useEffect(() => {
     setIsSizePickerOpen(false);
   }, [product.id]);
 
+  function addSelectedSize(selectedSize: string) {
+    onAdd(product.id, selectedSize);
+    setIsSizePickerOpen(false);
+    addFeedback.show();
+  }
+
   return (
     <section aria-label={`${product.name} details`} className="product-focus">
       <div className="product-focus-stage">
-        <div className={focusProducts.length === 1 ? "product-focus-rail single-product" : "product-focus-rail"}>
-          {focusProducts.map((focusProduct) => (
-            <ProductButton
-              ariaCurrent={getFocusAriaCurrent(focusProduct.id === product.id)}
-              className={getFocusTileClass(focusProduct.id === product.id)}
-              key={focusProduct.id}
-              loading={getFocusImageLoading(focusProduct.id === product.id)}
-              onViewProduct={onViewProduct}
-              product={focusProduct}
+        <div
+          className={gallery.hasMultipleImages ? "product-focus-rail" : "product-focus-rail single-image"}
+          key={`${product.id}-${gallery.selectedImageIndex}`}
+        >
+          {gallery.items.map((item) => (
+            <GalleryImageButton
+              isActive={item.position === "active"}
+              item={item}
+              key={`${product.id}-${item.imageIndex}-${item.position}`}
+              onSelect={() => gallery.selectImage(item.imageIndex)}
+              product={product}
             />
           ))}
         </div>
-        <ProductDots />
-        {isSizePickerOpen ? (
-          <SizePicker
-            onAdd={(selectedSize) => {
-              onAdd(product.id, selectedSize);
-              setIsSizePickerOpen(false);
-            }}
-            onClose={() => setIsSizePickerOpen(false)}
-            product={product}
-          />
-        ) : (
-          <div className="product-detail-meta">
-            <strong>{product.name}</strong>
-            <span>{formatCurrency(product.priceCents)}</span>
-            <button aria-label={`Select size for ${product.name}`} onClick={() => setIsSizePickerOpen(true)} type="button">
-              +
-            </button>
-          </div>
-        )}
+        <GalleryArrows gallery={gallery} productName={product.name} />
+        <ProductDots
+          imageCount={gallery.images.length}
+          onSelect={gallery.selectImage}
+          selectedImageIndex={gallery.selectedImageIndex}
+        />
+        <ProductPurchaseControls
+          addFeedbackKey={addFeedback.key}
+          isSizePickerOpen={isSizePickerOpen}
+          onAdd={addSelectedSize}
+          onSizePickerClose={() => setIsSizePickerOpen(false)}
+          onSizePickerOpen={() => setIsSizePickerOpen(true)}
+          product={product}
+        />
       </div>
     </section>
   );
 }
 
-function ProductDots() {
+function useProductGallery(product: Product) {
+  const images = getProductGalleryImages(product);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const items = getGalleryItems(images, selectedImageIndex);
+  const hasMultipleImages = images.length > 1;
+
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [product.id]);
+
+  return {
+    hasMultipleImages,
+    images,
+    items,
+    selectedImageIndex,
+    selectImage: setSelectedImageIndex,
+    showNext: () => setSelectedImageIndex((currentIndex) => wrappedGalleryIndex(images, currentIndex + 1)),
+    showPrevious: () => setSelectedImageIndex((currentIndex) => wrappedGalleryIndex(images, currentIndex - 1)),
+  };
+}
+
+function useAddFeedback(productId: string) {
+  const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    setKey(0);
+  }, [productId]);
+
+  useEffect(() => {
+    if (key === 0) {
+      return undefined;
+    }
+
+    const timeout = window.setTimeout(() => setKey(0), 1100);
+    return () => window.clearTimeout(timeout);
+  }, [key]);
+
+  return {
+    key,
+    show: () => setKey(Date.now()),
+  };
+}
+
+function GalleryImageButton({
+  isActive,
+  item,
+  onSelect,
+  product,
+}: {
+  isActive: boolean;
+  item: GalleryItem;
+  onSelect: () => void;
+  product: Product;
+}) {
   return (
-    <div aria-hidden="true" className="product-dots">
-      {Array.from({ length: 8 }, (_value, index) => (
-        <span className={index === 0 ? "active" : ""} key={index} />
+    <button
+      aria-current={getFocusAriaCurrent(isActive)}
+      aria-label={`View ${product.name} image ${item.imageIndex + 1}`}
+      className={getFocusTileClass(isActive)}
+      onClick={onSelect}
+      type="button"
+    >
+      <img
+        alt={product.name}
+        height="512"
+        loading={getFocusImageLoading(isActive)}
+        src={item.image}
+        style={isActive && item.imageIndex === 0 ? getProductTransitionStyle(product.id) : undefined}
+        width="512"
+      />
+      <span>{product.name}</span>
+    </button>
+  );
+}
+
+function GalleryArrow({
+  direction,
+  onClick,
+  productName,
+}: {
+  direction: "previous" | "next";
+  onClick: () => void;
+  productName: string;
+}) {
+  const label = direction === "previous" ? `Previous image for ${productName}` : `Next image for ${productName}`;
+  return (
+    <button aria-label={label} className={`gallery-arrow ${direction}`} onClick={onClick} type="button">
+      <span aria-hidden="true" />
+    </button>
+  );
+}
+
+function GalleryArrows({
+  gallery,
+  productName,
+}: {
+  gallery: ReturnType<typeof useProductGallery>;
+  productName: string;
+}) {
+  if (!gallery.hasMultipleImages) {
+    return null;
+  }
+
+  return (
+    <>
+      <GalleryArrow direction="previous" onClick={gallery.showPrevious} productName={productName} />
+      <GalleryArrow direction="next" onClick={gallery.showNext} productName={productName} />
+    </>
+  );
+}
+
+function ProductDots({
+  imageCount,
+  onSelect,
+  selectedImageIndex,
+}: {
+  imageCount: number;
+  onSelect: (index: number) => void;
+  selectedImageIndex: number;
+}) {
+  if (imageCount <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="product-dots" role="group" aria-label="Product images">
+      {Array.from({ length: imageCount }, (_value, index) => (
+        <button
+          aria-label={`Show image ${index + 1}`}
+          aria-pressed={index === selectedImageIndex}
+          className={index === selectedImageIndex ? "active" : ""}
+          key={index}
+          onClick={() => onSelect(index)}
+          type="button"
+        />
       ))}
     </div>
   );
+}
+
+function ProductDetailMeta({
+  addFeedbackKey,
+  onSizePickerOpen,
+  product,
+}: {
+  addFeedbackKey: number;
+  onSizePickerOpen: () => void;
+  product: Product;
+}) {
+  return (
+    <div className="product-detail-meta">
+      <strong>{product.name}</strong>
+      <span>{formatCurrency(product.priceCents)}</span>
+      <button aria-label={`Select size for ${product.name}`} onClick={onSizePickerOpen} type="button">
+        +
+      </button>
+      {addFeedbackKey > 0 ? (
+        <p className="add-feedback" key={addFeedbackKey} role="status">
+          ADDED TO BAG
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ProductPurchaseControls({
+  addFeedbackKey,
+  isSizePickerOpen,
+  onAdd,
+  onSizePickerClose,
+  onSizePickerOpen,
+  product,
+}: {
+  addFeedbackKey: number;
+  isSizePickerOpen: boolean;
+  onAdd: (selectedSize: string) => void;
+  onSizePickerClose: () => void;
+  onSizePickerOpen: () => void;
+  product: Product;
+}) {
+  if (isSizePickerOpen) {
+    return <SizePicker onAdd={onAdd} onClose={onSizePickerClose} product={product} />;
+  }
+
+  return <ProductDetailMeta addFeedbackKey={addFeedbackKey} onSizePickerOpen={onSizePickerOpen} product={product} />;
 }
 
 function SizePicker({
@@ -198,32 +356,37 @@ function getProductFocus(products: Product[], selectedProduct: Product | null) {
     return null;
   }
 
-  const selectedIndex = products.findIndex((product) => product.id === selectedProduct.id);
-  return selectedIndex >= 0 ? { index: selectedIndex, product: selectedProduct } : null;
+  const productExists = products.some((product) => product.id === selectedProduct.id);
+  return productExists ? { product: selectedProduct } : null;
 }
 
-function getFocusProducts(products: Product[], selectedIndex: number) {
-  const selectedProduct = products[selectedIndex];
-  if (selectedProduct === undefined) {
-    return [];
+function getProductGalleryImages(product: Product) {
+  return product.galleryImages.length > 0 ? product.galleryImages : [product.image];
+}
+
+function getGalleryItems(images: readonly string[], selectedIndex: number): GalleryItem[] {
+  if (images.length === 1) {
+    return [{ image: images[0] ?? "", imageIndex: 0, position: "active" }];
   }
 
-  return buildFocusProducts(products, selectedIndex, selectedProduct);
+  return [
+    galleryItem(images, selectedIndex - 1, "previous"),
+    galleryItem(images, selectedIndex, "active"),
+    galleryItem(images, selectedIndex + 1, "next"),
+  ];
 }
 
-function buildFocusProducts(products: Product[], selectedIndex: number, selectedProduct: Product) {
-  if (products.length === 1) {
-    return [selectedProduct];
-  }
-
-  const previousProduct = getWrappedProduct(products, selectedIndex - 1, selectedProduct);
-  const nextProduct = getWrappedProduct(products, selectedIndex + 1, selectedProduct);
-  return [previousProduct, selectedProduct, nextProduct];
+function galleryItem(images: readonly string[], index: number, position: GalleryPosition): GalleryItem {
+  const imageIndex = wrappedGalleryIndex(images, index);
+  return {
+    image: images[imageIndex] ?? "",
+    imageIndex,
+    position,
+  };
 }
 
-function getWrappedProduct(products: Product[], index: number, fallbackProduct: Product) {
-  const wrappedIndex = (index + products.length) % products.length;
-  return products[wrappedIndex] ?? fallbackProduct;
+function wrappedGalleryIndex(images: readonly string[], index: number) {
+  return (index + images.length) % images.length;
 }
 
 function getFocusAriaCurrent(isActive: boolean): "true" | undefined {

@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_57`, `job_58`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_61`, `job_62`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -21,11 +21,14 @@ Date: 2026-06-05
 - Added and released Tovuk CLI `0.1.93` during this pass to remove the
   misleading `queued <job>` summary line after `tovuk deploy --wait` has
   already streamed a final build status.
+- Added and released Tovuk CLI `0.1.96` during this pass to improve
+  agent-readable service status output, add `checks[].status`, and make npm
+  frontend checks install dev dependencies.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
-  a full-screen product rail with adjacent products offscreen, and the `+`
-  opens the inline size selector in place.
+  a full-screen product gallery, left/right arrows and dots switch images for
+  the selected product, and the `+` opens the inline size selector in place.
 - Updated the ecommerce example cart flow to match the same reference more
   closely: selecting size `9` adds `YS-02` at `$50`, keeps the product overlay
   open, and the bag opens a full-screen `YZY WALLET`-style order summary.
@@ -34,6 +37,9 @@ Date: 2026-06-05
 - Patched a desktop-only product focus rail bug found during the latest UX
   pass: the active product image now centers with its title, price, plus button,
   size picker, and cart flow at `1440x900`.
+- Patched the product-detail carousel model found during the latest UX pass:
+  arrows now move through multiple images for the selected product instead of
+  switching to neighboring products.
 
 ## What I built
 
@@ -51,7 +57,8 @@ Date: 2026-06-05
   - category filters
   - name-only product grid
   - full-page Yeezy-like product detail state with back control, bag icon,
-    carousel dots, price, plus button, and inline size selector
+    per-product gallery arrows, carousel dots, price, plus button, and inline
+    size selector
   - full-screen wallet/order-summary cart overlay
   - quantity controls
   - checkout form
@@ -87,6 +94,8 @@ Production deploy and API checks:
   Tovuk CLI `0.1.95`.
 - Latest production deploy passed for `deploy_57` / `job_58`, using public
   Tovuk CLI `0.1.95`.
+- Latest production deploy passed for `deploy_61` / `job_62`, using public
+  Tovuk CLI `0.1.96`.
 - Latest artifact dry-run passed with `services[0].artifactCheck.status:
   "passed"`, gzip size `935494`, and limit `3145728`.
 - `curl https://shape-store.tovuk.app/api/healthz`: returned `{"ok":true}`
@@ -160,6 +169,24 @@ Browser and UX checks:
   - `YS-02` product detail has active tile center `720`, image center `720`,
     meta center `720`, and viewport center `720`
   - product detail text shows `YS-02$50+`
+- Confirmed production Browser desktop flow on `deploy_61`:
+  - 50 products loaded from the worker API with no `API FALLBACK`
+  - desktop `1440x900` uses 6 product columns and no horizontal overflow
+  - `YS-02` product detail has active tile center `720`, image center `720`,
+    meta center `720`, and viewport center `720`
+  - detail gallery has 3 image dots and 2 arrow controls
+  - next arrow changes the active image from `/products/shape-capsule.svg` to
+    `/products/shape-square.svg`
+  - every visible gallery tile remains labeled as `YS-02` image 1/2/3 rather
+    than a neighboring product
+  - selecting size `9` shows `ADDED TO BAG`, increments the bag count to `1`,
+    and runs the `cart-count-bump` animation
+- Confirmed production Browser mobile flow on `deploy_61`:
+  - mobile `390x844` uses 3 product columns and no horizontal overflow
+  - next arrow changes `YS-02` to image 2 while product text remains
+    `YS-02$50+`
+  - active tile center, image center, meta center, and viewport center are all
+    `195`
 - Confirmed local desktop patch at `1440x900`:
   - listing has 50 products, 6 columns, and no horizontal overflow
   - `YS-02` product detail has active tile center `720`, image center `720`,
@@ -1480,6 +1507,76 @@ Verification:
   `status: "passed"` alongside `ok: true`.
 - Added unit coverage for serializing `QualityCheck` with `status: "failed"`.
 
+### 41. Product detail carousel moved through products instead of images
+
+Failure/friction:
+
+- The example product detail reused the catalog rail as the carousel model.
+- Opening `YS-02` produced a detail rail with neighboring product buttons, so
+  carousel movement implied product-to-product navigation.
+- The reference behavior should keep the selected product stable and move
+  through images for that product.
+
+Fix included in the shape-store example:
+
+- Added a frontend `galleryImages` model for every product while preserving the
+  existing `image` catalog/API field.
+- The detail rail now renders `View <product> image 1/2/3` controls for the
+  selected product instead of adjacent product controls.
+- Added left/right arrow buttons and real image-dot buttons.
+- Added an `ADDED TO BAG` status animation and a cart-count bump animation
+  after size selection.
+
+Verification:
+
+- Local Browser desktop `1440x900`:
+  - `YS-02` detail shows 3 image tiles, 3 dots, and 2 arrows.
+  - next arrow changes the active image from
+    `/products/shape-capsule.svg` to `/products/shape-square.svg`.
+  - product metadata remains `YS-02$50+`.
+  - active tile center, image center, meta center, and viewport center are all
+    `720`.
+- Local Browser mobile `390x844`:
+  - next arrow changes to image 2 while keeping product metadata as
+    `YS-02$50+`.
+  - no horizontal overflow.
+- Production Browser desktop on `deploy_61`:
+  - same image-arrow behavior verified.
+  - selecting size `9` shows `ADDED TO BAG`, increments the cart count to `1`,
+    and runs `cart-count-bump`.
+- Production Browser mobile on `deploy_61`:
+  - image 2 is selected after the next arrow, product metadata remains
+    `YS-02$50+`, and no horizontal overflow is present.
+
+### 42. Local fullstack dev can silently reuse a stale worker process
+
+Failure/friction:
+
+- While testing the patched storefront locally, `cargo run --locked` failed with
+  `Address already in use` on port `3000`.
+- `curl http://127.0.0.1:3000/api/healthz` returned `{"ok":true}`, so the
+  obvious health check looked fine.
+- Browser verification then showed `YS-02$20+` even though the current catalog
+  says `YS-02` is `$50`; the running API process was a stale example binary
+  from an earlier run.
+- This is high-friction for AI agents because a stale local worker can produce
+  plausible but wrong UI data.
+
+Fix/status:
+
+- For this pass, I killed only the stale `api` listener on port `3000`,
+  restarted the current Rust API, and reran Browser checks before deploying.
+- This should become a Tovuk CLI improvement: `tovuk dev` should make stale
+  bound ports obvious, ideally by reporting the PID/command and requiring an
+  explicit reuse/replace decision when the configured worker port is already in
+  use.
+
+Verification:
+
+- Before restart: local product detail rendered `YS-02$20+`.
+- After restart: `curl http://127.0.0.1:3000/api/products` returned
+  `priceCents: 5000`, and Browser detail rendered `YS-02$50+`.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1487,6 +1584,9 @@ Verification:
 - `--json` auth flows still need a more agent-readable shape. Agents need `login_url`, `user_code`, expiry, and current wait state as JSON before any long wait.
 - Generated fullstack templates still make ordinary API work harder than necessary because the Rust worker is a raw TCP HTTP server. It is lightweight, but agents must hand-build routing, body parsing, CORS, and JSON handling.
 - New static Next.js support is static-export only. That is correct for the current Tovuk runtime model, but users coming from Vercel will expect SSR and API routes unless docs and check errors keep saying "move server logic to Rust".
+- Local fullstack dev can silently test against a stale worker process when the
+  configured port is already occupied. `tovuk dev` should surface the owning
+  PID/command and offer an explicit replace/reuse path.
 
 ### Medium
 

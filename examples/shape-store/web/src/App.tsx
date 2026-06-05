@@ -135,7 +135,9 @@ function SiteHeader({
       />
       <button aria-label={`Open cart with ${totalItems} items`} className="cart-trigger" onClick={onCartOpen} type="button">
         <span aria-hidden="true" className="cart-icon" />
-        <span className="cart-count">{totalItems}</span>
+        <span className="cart-count" key={totalItems}>
+          {totalItems}
+        </span>
       </button>
     </header>
   );

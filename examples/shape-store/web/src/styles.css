@@ -167,6 +167,7 @@ button:disabled {
   top: 15px;
   font-size: 10px;
   font-weight: 700;
+  animation: cart-count-bump 360ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 .api-state {
@@ -345,7 +346,7 @@ button:disabled {
   animation: focus-rail-in 300ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
-.product-focus-rail.single-product {
+.product-focus-rail.single-image {
   animation-name: single-focus-in;
   transform: none;
 }
@@ -390,15 +391,53 @@ button:disabled {
   margin-top: 12px;
 }
 
-.product-dots span {
+.product-dots button {
   width: 4px;
+  min-width: 4px;
   height: 4px;
+  min-height: 4px;
+  padding: 0;
   border-radius: 50%;
   background: #d9d9d9;
 }
 
 .product-dots .active {
   background: #000;
+}
+
+.gallery-arrow {
+  position: fixed;
+  z-index: 12;
+  top: 50%;
+  display: grid;
+  width: 52px;
+  min-height: 72px;
+  place-items: center;
+  transform: translateY(-50%);
+}
+
+.gallery-arrow.previous {
+  left: max(10px, env(safe-area-inset-left));
+}
+
+.gallery-arrow.next {
+  right: max(10px, env(safe-area-inset-right));
+}
+
+.gallery-arrow span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-top: 2px solid #000;
+  border-left: 2px solid #000;
+}
+
+.gallery-arrow.previous span {
+  transform: rotate(-45deg);
+}
+
+.gallery-arrow.next span {
+  transform: rotate(135deg);
 }
 
 .product-detail-meta,
@@ -427,6 +466,14 @@ button:disabled {
   font-size: 32px;
   font-weight: 400;
   line-height: 1;
+}
+
+.add-feedback {
+  min-height: 18px;
+  margin: -12px 0 0;
+  font-size: 12px;
+  letter-spacing: 0;
+  animation: add-feedback-in 900ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 .size-picker {
@@ -485,6 +532,38 @@ button:disabled {
 
   to {
     opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes add-feedback-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  24%,
+  72% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes cart-count-bump {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  45% {
+    transform: translateY(-2px) scale(1.28);
+  }
+
+  100% {
     transform: translateY(0) scale(1);
   }
 }
