@@ -113,8 +113,8 @@ alarms, set State alarms, and delete State alarms with `state_requests`,
 writes, and removals.
 
 Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
-supports listing, setting, and deleting write-only service secrets through the
-same API routes as `tovuk env`.
+supports listing, setting, and deleting Service-scoped write-only environment
+variables through the same API routes as `tovuk env`.
 
 Dashboard Storage is available at `https://tovuk.com/account/storage` and
 `https://tovuk.com/<handle>/storage`. It lists objects, uploads ordinary files,
