@@ -4,6 +4,78 @@ sidebarTitle: "Changelog"
 description: "Track dated Tovuk product changes, fixes, and release notes."
 ---
 
+## Week of June 1, 2026
+
+### New
+
+- **Deploy history and cancellation.** Inspect and stop in-flight deploys from
+  the CLI with `tovuk deploy list`, `tovuk deploy show <deploy_id>`, and
+  `tovuk deploy cancel <deploy_id>`. See the
+  [AI agent deploy workflow](/agents#deploy-workflow).
+- **Read-only deploy planning with `--dry-run`.** Preview a deploy before
+  running it with `tovuk deploy --dry-run`, which now returns warnings,
+  enabled meters, plan limits, object storage meter coverage, and a
+  `billingEstimate` so agents can audit cost and capability impact before
+  shipping. The standalone `tovuk plan` command has been removed in favor of
+  this flag. See the [AI agent deploy workflow](/agents#deploy-workflow).
+- **Account management from the CLI.** Inspect and update your account with
+  `tovuk account show`, `tovuk account update --handle <handle>
+  --display-name "<name>"`, and `tovuk account activity --json` for a
+  structured activity feed. See the [AI agent deploy workflow](/agents#deploy-workflow).
+- **Abuse reporting and lifecycle commands.** Report, appeal, and track abuse
+  cases from the CLI with `tovuk abuse report`, `tovuk abuse list`, and
+  `tovuk abuse appeal <case_id>`, with operator-side `quarantine`, `resolve`,
+  `reject`, and `release` actions for confirmed cases. See the
+  [Abuse reporting workflow](/abuse).
+- **Multipart object storage uploads.** `tovuk storage upload` now switches
+  to multipart transfer automatically for large files, so agents can ship
+  big assets without hitting single-request limits. See
+  [Object Storage](/reference/storage).
+- **Usage cap notifications.** `tovuk limits set` now accepts
+  `--notify-at-percent` so you can get an early warning before a meter hits
+  its hard cap. See [Deployment Limits and Guardrails](/reference/limits).
+- **Persistent JSON output mode.** Set `TOVUK_OUTPUT=json` for a session (or
+  pass `--output json`) instead of repeating `--json` on every command.
+  Useful for agent and CI environments that always want structured output.
+  See [Packages](/reference/packages).
+- **Full-stack `shape-store` example.** A new end-to-end Rust worker plus
+  TanStack frontend example ships in the `tovuk` crate, showing the
+  one-URL full-stack deploy pattern with the latest service contract. See
+  [Templates](/templates).
+- **Dark mode by default.** The docs site now defaults to dark mode.
+
+### Updates
+
+- **`tovuk doctor` is now `tovuk check`.** The command name aligns with how
+  agents and humans actually describe it. The behavior, flags, and JSON
+  shape are unchanged. See the [AI agent deploy workflow](/agents#deploy-workflow).
+- **`tovuk database` is now `tovuk sqlite`.** Query, backup, and restore
+  commands moved to `tovuk sqlite query`, `tovuk sqlite backup create`, and
+  `tovuk sqlite backup restore` to match the underlying product. See
+  [SQLite](/reference/sqlite).
+- **Explicit service capabilities are required.** `tovuk.toml` now requires
+  the `[capabilities]` table on every service so enabled and disabled
+  surfaces are visible before deploy. See [tovuk.toml](/reference/project-contract).
+- **Service inspect retired in favor of `service show`.** `tovuk service show`
+  returns the full service snapshot agents previously read from
+  `service inspect`. See [Service resources](/reference/resources).
+- **Service is validated before re-prompting auth.** The CLI now checks the
+  `--service` value first, so a typo no longer triggers an unnecessary
+  login flow.
+- **Friendlier `tovuk help` output.** Help text now lists commands in the
+  order agents use them and includes JSON-mode hints.
+- **Missing service errors link to docs.** When a command references a
+  service that does not exist, the error now points to the relevant
+  reference page so you can fix it in one step. See [Service resources](/reference/resources).
+
+### Fixes
+
+- **Homebrew install guidance.** Install instructions now show the correct
+  tap and formula path. See [Packages](/reference/packages).
+- **Object storage meters in deploy dry run.** Object storage usage meters
+  now appear in `tovuk deploy --dry-run` output alongside other priced
+  meters, so estimates match the post-deploy bill.
+
 ## Week of May 25, 2026
 
 ### New
