@@ -20,7 +20,7 @@ pub(crate) fn is_plain_static_frontend(project_dir: &Path) -> bool {
     !project_dir.join("package.json").exists() && project_dir.join("index.html").exists()
 }
 
-pub(super) fn frontend_package_manager(project_dir: &Path) -> &'static str {
+pub(crate) fn frontend_package_manager(project_dir: &Path) -> &'static str {
     if project_dir.join("bun.lock").exists() || project_dir.join("bun.lockb").exists() {
         "bun"
     } else {

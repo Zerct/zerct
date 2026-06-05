@@ -4,6 +4,7 @@ const HELP_BODY: &str = r#"
 Usage:
   tovuk new [path] [--template rust-worker|tanstack-static-frontend|fullstack-rust-tanstack]
   tovuk check [path] [--json|--output json|text]
+  tovuk dev [path] [--json|--output json|text]
   tovuk login [--token <token>] [--api <url>]
   tovuk deploy --dry-run [path] [--api <url>] [--json|--output json|text]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json|--output json|text]
@@ -93,6 +94,7 @@ Usage:
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
+  - Use tovuk dev --json to inspect local worker/frontend commands, ports, and env wiring without starting processes; use tovuk dev --output text to run them.
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
   - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.

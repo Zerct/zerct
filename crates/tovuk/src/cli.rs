@@ -6,6 +6,7 @@ mod command_policy;
 mod config;
 mod constants;
 mod deploy;
+mod dev;
 mod errors;
 mod frontend_checks;
 mod help;
