@@ -32,10 +32,13 @@ Use this page when an AI coding agent is deploying with Tovuk.
   </Step>
 
   <Step title="Deploy and recover context">
-    Run `tovuk deploy --wait --json`. Inspect deploy state with
-    `tovuk deploy list --json` or `tovuk deploy show <deploy_id> --json` when
-    the deploy result is not enough. If a newer deploy supersedes queued work,
-    run `tovuk deploy cancel <deploy_id> --json`.
+    Run `tovuk deploy --wait --json`, then inspect the Service with
+    `tovuk service show <service> --json`. Use the snapshot to confirm runtime
+    status, URL, capabilities, deploys, builds, logs, usage, billing estimate,
+    and next actions. Inspect deploy state with `tovuk deploy list --json` or
+    `tovuk deploy show <deploy_id> --json` when the Service snapshot is not
+    enough. If a newer deploy supersedes queued work, run
+    `tovuk deploy cancel <deploy_id> --json`.
   </Step>
 
   <Step title="Fix build failures">
@@ -89,6 +92,7 @@ cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 ```
 
 The dashboard mirrors CLI and API state. The committed `tovuk.toml` remains
@@ -111,12 +115,14 @@ Run `tovuk check --json`. Fix the first failed check by following
 `tovuk account update --handle <handle> --display-name <name> --json` if setup
 is incomplete. Run `tovuk deploy --dry-run --json` and review warnings,
 capabilities, `missingConfig`, `requiredFixes`, meters, `meterPlan`, limits,
-and `billingEstimate`. Deploy with `tovuk deploy --wait --json`. Inspect deploy state with
-`tovuk deploy list --json` or `tovuk deploy show <deploy_id> --json`. Cancel
-superseded queued work with `tovuk deploy cancel <deploy_id> --json`. If the
-build fails, read `tovuk logs --build <build_id> --json`, fix the first
-actionable error, and redeploy. Use service resource commands for SQLite, KV,
-queues, cron triggers, State, service bindings, and usage caps.
+and `billingEstimate`. Deploy with `tovuk deploy --wait --json`, then inspect
+the Service with `tovuk service show <service> --json`. If the Service snapshot
+does not explain the state, run `tovuk deploy list --json` or
+`tovuk deploy show <deploy_id> --json`. Cancel superseded queued work with
+`tovuk deploy cancel <deploy_id> --json`. If the build fails, read
+`tovuk logs --build <build_id> --json`, fix the first actionable error, and
+redeploy. Use service resource commands for SQLite, KV, queues, cron triggers,
+State, service bindings, and usage caps.
 Before load tests or production launch, run `tovuk pricing --json`, inspect
 `billingEstimate` from `tovuk usage --json`, and set hard usage caps with
 `tovuk limits set`.
@@ -217,7 +223,8 @@ Run `cd ..`.
 Keep dynamic server logic in the Rust worker. Keep the TanStack frontend static
 at runtime and call same-origin `/api`. Run `tovuk check --json`, then
 `tovuk account show --json`, then `tovuk deploy --dry-run --json`, then
-`tovuk deploy --wait --json` from the repo root.
+`tovuk deploy --wait --json`, then `tovuk service show <service> --json` from
+the repo root.
 </Prompt>
 
 ## Log and service commands

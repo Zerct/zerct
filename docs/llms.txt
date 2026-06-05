@@ -47,7 +47,8 @@ Workflow references:
 - `docs/deploy.mdx`: check, account setup, dry-run, deploy, service snapshot, deploy history, cancellation, and recovery.
 - `docs/production-readiness.mdx`: production launch workflow, account setup, usage caps, deploy evidence, status distinction, secrets, domains, and cleanup.
 - `docs/agents.mdx`: agent deploy workflow, reusable deploy and starter
-  prompts with account checks, recovery, support, and abuse workflow.
+  prompts with account checks, post-deploy Service snapshots, recovery,
+  support, and abuse workflow.
 - `docs/pricing.mdx`: pricing, account setup, usage limits, cost estimates, and hard caps.
 - `docs/templates.mdx`: project templates, `tovuk new`, starter account checks, and starter workflows.
 - `docs/changelog.mdx`: dated changes, fixes, and release-note review links.
