@@ -9,7 +9,7 @@ runtime as bindings. Use them for feature flags, sessions, configuration,
 rate-limit state, and cache metadata. Use SQLite for relational queries and
 Object Storage for large files.
 
-## Key-value setup flow
+## KV Setup Workflow
 
 <Steps>
   <Step title="Confirm account and service context">
@@ -77,7 +77,7 @@ Object Storage for large files.
   </Step>
 </Steps>
 
-## CLI workflow
+## CLI Workflow
 
 ```sh
 tovuk account show --json
@@ -118,7 +118,7 @@ reads as `kv_reads`, writes as `kv_writes`, deletes as `kv_deletes`, and stored
 bytes as `kv_storage_bytes`. Use the CLI or API bulk routes for bulk reads,
 writes, and removals.
 
-## Meters and caps
+## Meters and Caps
 
 KV usage is metered as `kv_reads`, `kv_writes`, `kv_deletes`, `kv_lists`, and
 `kv_storage_bytes`.
