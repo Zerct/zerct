@@ -36,6 +36,16 @@ actionable log line.
     not duplicate the same issue.
   </Step>
 
+  <Step title="Capture service context">
+    ```sh
+    tovuk service show service_1 --json
+    ```
+
+    Confirm the related Service, latest deploy, latest build, recent logs, and
+    `agent_instruction` before creating the ticket. Keep that snapshot with the
+    command, ids, and first actionable log line.
+  </Step>
+
   <Step title="Create the ticket">
     ```sh
     tovuk support create \
