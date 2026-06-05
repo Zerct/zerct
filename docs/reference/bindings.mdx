@@ -27,6 +27,25 @@ and shared APIs that should not be callable from browsers.
     ```
   </Step>
 
+  <Step title="Enable Service Bindings for the caller">
+    If `tovuk service show --json` does not include `"service_bindings": true`,
+    enable the explicit capability in `tovuk.toml` before code depends on
+    private worker-to-worker calls.
+
+    ```toml
+    [capabilities]
+    service_bindings = true
+    ```
+
+    Then run a dry run so agents can inspect enabled and disabled capabilities,
+    meters, `meterPlan`, limits, `billingEstimate`, and `nextActions` before
+    creating bindings.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+  </Step>
+
   <Step title="Create the caller binding">
     Choose a stable uppercase binding name, then bind the caller Service to the
     target Service.
@@ -59,6 +78,7 @@ and shared APIs that should not be callable from browsers.
 ```sh
 tovuk account show --json
 tovuk service show service_1 --json
+tovuk deploy --dry-run --json
 tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service service_1 AUTH_SERVICE --json
 ```

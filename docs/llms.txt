@@ -32,7 +32,7 @@ Resource references:
 - `docs/reference/kv.mdx`: KV account setup, Service context, explicit `kv` capability, dry-run planning, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, explicit `queue` capability, dry-run planning, producers, consumers, retries, and dead letters.
 - `docs/reference/cron.mdx`: Cron account setup, Service context, explicit `cron` capability, dry-run planning, scheduled Rust worker events, and trigger lifecycle commands.
-- `docs/reference/bindings.mdx`: Service Binding account setup, Service context, private calls, and runtime binding environment names.
+- `docs/reference/bindings.mdx`: Service Binding account setup, Service context, explicit `service_bindings` capability, dry-run planning, private calls, and runtime binding environment names.
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
 - `docs/reference/storage.mdx`: Object Storage account setup, Service context, explicit `object_storage` capability, dry-run planning, uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain account setup, Service context, explicit `custom_domains` capability, DNS records, verification, and cleanup.
@@ -231,6 +231,10 @@ Full-stack contract:
 - Before State mutations, confirm `[capabilities] state = true` in
   `tovuk.toml` when the Service does not already expose State, then inspect
   `tovuk deploy --dry-run --json`.
+- Before Service Binding mutations, confirm
+  `[capabilities] service_bindings = true` in `tovuk.toml` when the Service
+  does not already expose Service Bindings, then inspect
+  `tovuk deploy --dry-run --json`.
 - WebSocket upgrades on worker routes are proxied to Rust workers and meter
   response-side tunnel bytes as `worker_transfer_bytes`.
 
@@ -293,6 +297,7 @@ tovuk state alarm delete --service <service> Room room-1 --json
 tovuk state delete --service <service> Room --json
 tovuk account show --json
 tovuk service show <service> --json
+tovuk deploy --dry-run --json
 tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
 tovuk binding delete --service <service> AUTH_SERVICE --json
 tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
