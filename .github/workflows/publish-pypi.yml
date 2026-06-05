@@ -7,9 +7,10 @@ on:
       - main
     paths:
       - "packages/tovuk-py/pyproject.toml"
-      - "packages/tovuk-py/src/tovuk/__init__.py"
-      - "packages/tovuk-py/src/tovuk/cli.py"
-      - "crates/tovuk/**"
+      - "packages/tovuk-py/src/tovuk/**"
+      - "crates/tovuk/Cargo.toml"
+      - "crates/tovuk/Cargo.lock"
+      - "crates/tovuk/src/**"
 
 permissions:
   contents: read

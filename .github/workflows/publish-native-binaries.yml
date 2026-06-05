@@ -6,7 +6,9 @@ on:
     branches:
       - main
     paths:
-      - "crates/tovuk/**"
+      - "crates/tovuk/Cargo.toml"
+      - "crates/tovuk/Cargo.lock"
+      - "crates/tovuk/src/**"
 
 permissions:
   contents: write
