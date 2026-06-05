@@ -145,6 +145,9 @@ Agent repair loop:
 15. Run `tovuk logs --build <build_id> --json`.
 16. Fix the first actionable log error.
 17. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
+18. Run `tovuk deploy --wait --json` after the fix.
+19. Inspect the Service snapshot again with `tovuk service show <service> --json`
+    before reading more build or deploy logs.
 
 Rust worker contract:
 
