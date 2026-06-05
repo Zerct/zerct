@@ -261,8 +261,8 @@ curl https://api.tovuk.com/v1/status
 curl https://api.tovuk.com/v1/capabilities
 tovuk usage --json
 tovuk service list --json
-tovuk service status <service> --json
 tovuk service show <service> --json
+tovuk service status <service> --json
 tovuk service delete <service> --json
 tovuk logs --build <build_id> --json
 tovuk logs --service <service> --json

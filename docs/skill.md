@@ -70,8 +70,8 @@ build the local release binary and check compressed worker size.
 Manage service resources without dashboard access:
 
 ```sh
-tovuk service status <service> --json
 tovuk service show <service> --json
+tovuk service status <service> --json
 tovuk sqlite create --service <service> DB --json
 tovuk sqlite query --service <service> DB "select 1" --json
 tovuk sqlite batch --service <service> DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
