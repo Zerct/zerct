@@ -102,18 +102,37 @@ pub(super) fn print_quality_report(report: &QualityReportKind) {
 }
 
 pub(super) fn print_checks(checks: &[QualityCheck]) {
-    for check in checks {
-        println!(
-            "{} {}{}",
-            if check.ok { "ok" } else { "fail" },
-            check.name,
-            if check.message.is_empty() {
-                String::new()
-            } else {
-                format!(" - {}", check.message)
-            }
-        );
+    for line in quality_check_lines(checks) {
+        println!("{line}");
     }
+}
+
+fn quality_check_lines(checks: &[QualityCheck]) -> Vec<String> {
+    checks
+        .iter()
+        .flat_map(quality_check_lines_for_check)
+        .collect()
+}
+
+fn quality_check_lines_for_check(check: &QualityCheck) -> Vec<String> {
+    let mut lines = vec![format!(
+        "{} {}{}",
+        if check.ok { "ok" } else { "fail" },
+        check.name,
+        if check.message.is_empty() {
+            String::new()
+        } else {
+            format!(" - {}", check.message)
+        }
+    )];
+
+    if !check.ok
+        && let Some(instruction) = &check.agent_instruction
+    {
+        lines.push(format!("  fix {instruction}"));
+    }
+
+    lines
 }
 
 pub(crate) fn quality_check(
@@ -141,7 +160,7 @@ fn quality_check_status(ok: bool) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::QualityCheck;
+    use super::{QualityCheck, quality_check_lines};
 
     #[test]
     fn quality_check_json_includes_status() -> Result<(), Box<dyn std::error::Error>> {
@@ -162,5 +181,32 @@ mod tests {
             return Err(format!("unexpected name: {}", value["name"]).into());
         }
         Ok(())
+    }
+
+    #[test]
+    fn human_check_output_includes_failed_fix_instruction() {
+        let lines = quality_check_lines(&[
+            QualityCheck {
+                name: "source archive".to_owned(),
+                ok: true,
+                message: "ready".to_owned(),
+                agent_instruction: None,
+            },
+            QualityCheck {
+                name: "Next static export".to_owned(),
+                ok: false,
+                message: "next.config missing".to_owned(),
+                agent_instruction: Some("Add output: \"export\" and rerun tovuk check.".to_owned()),
+            },
+        ]);
+
+        assert_eq!(
+            lines,
+            vec![
+                "ok source archive - ready",
+                "fail Next static export - next.config missing",
+                "  fix Add output: \"export\" and rerun tovuk check.",
+            ]
+        );
     }
 }

@@ -206,6 +206,10 @@ fn deploy_project(project_dir: &Path, cli: &CliOptions, token: &str) -> Result<V
 }
 
 fn git_commit_sha(project_dir: &Path) -> Option<String> {
+    if !git_worktree_is_clean(project_dir) {
+        return None;
+    }
+
     Command::new("git")
         .args(["rev-parse", "HEAD"])
         .current_dir(project_dir)
@@ -218,9 +222,28 @@ fn git_commit_sha(project_dir: &Path) -> Option<String> {
         .filter(|value| !value.is_empty())
 }
 
+fn git_worktree_is_clean(project_dir: &Path) -> bool {
+    Command::new("git")
+        .args(["status", "--porcelain"])
+        .current_dir(project_dir)
+        .stdin(Stdio::null())
+        .stderr(Stdio::null())
+        .output()
+        .ok()
+        .filter(|output| output.status.success())
+        .is_some_and(|output| git_porcelain_is_clean(&output.stdout))
+}
+
+fn git_porcelain_is_clean(stdout: &[u8]) -> bool {
+    String::from_utf8_lossy(stdout).trim().is_empty()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{deploy_cancel_route, deploy_id_arg, deploy_list_route, deploy_show_route};
+    use super::{
+        deploy_cancel_route, deploy_id_arg, deploy_list_route, deploy_show_route,
+        git_porcelain_is_clean,
+    };
     use crate::cli::args::CliOptions;
 
     #[test]
@@ -278,5 +301,17 @@ mod tests {
             .err()
             .map(|error| error.to_string());
         assert_eq!(error_message.as_deref(), Some("Deploy id is required."));
+    }
+
+    #[test]
+    fn git_porcelain_cleanliness_detects_dirty_worktree() {
+        assert!(git_porcelain_is_clean(b""));
+        assert!(git_porcelain_is_clean(b"\n"));
+        assert!(!git_porcelain_is_clean(
+            b" M crates/tovuk/src/cli/deploy.rs\n"
+        ));
+        assert!(!git_porcelain_is_clean(
+            b"?? examples/shape-store/web/dist/\n"
+        ));
     }
 }
