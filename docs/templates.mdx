@@ -19,6 +19,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     ```
   </Tab>
 
@@ -33,6 +34,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     ```
   </Tab>
 
@@ -48,6 +50,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     ```
   </Tab>
 </Tabs>
@@ -56,6 +59,8 @@ Templates create one root `tovuk.toml` with explicit `[capabilities]`.
 The full-stack template also creates `api/` and `web/`. The Rust worker owns
 dynamic server behavior. The TanStack frontend builds to static files and calls
 same-origin `/api`.
+After deploy, use `tovuk service show <service> --json` to inspect the
+created Service before changing resources, logs, domains, or usage caps.
 
 Without `--template`, `tovuk new` can scaffold a starter `tovuk.toml` from
 existing files. That scan is advisory. Deploy behavior is controlled only by
