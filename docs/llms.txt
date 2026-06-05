@@ -41,7 +41,8 @@ Resource references:
 - `docs/reference/products.mdx`: product catalog fields, account setup, dry-run, usage, and usage-cap selection workflow.
 - `docs/reference/packages.mdx`: install channels, account setup checks,
   post-deploy Service snapshots, package parity, and native binary recovery.
-- `docs/reference/usage-caps.mdx`: account setup and hard caps for every public meter.
+- `docs/reference/usage-caps.mdx`: account setup, warning thresholds,
+  hard stops, cap removal, and public meter names.
 
 Workflow references:
 
