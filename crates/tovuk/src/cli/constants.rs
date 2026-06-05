@@ -1,4 +1,4 @@
-pub(crate) const VERSION: &str = "0.1.93";
+pub(crate) const VERSION: &str = "0.1.94";
 pub(crate) const DEFAULT_API_URL: &str = "https://api.tovuk.com";
 pub(crate) const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 pub(crate) const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: u64 = 900;

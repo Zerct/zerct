@@ -29,6 +29,9 @@ pub(super) fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> V
         native_quality_gate_check(manifest.as_ref()),
     ];
     if run_scripts && checks.iter().all(|check| check.ok) {
+        checks.push(frontend_dependency_check(project_dir));
+    }
+    if run_scripts && checks.iter().all(|check| check.ok) {
         checks.push(package_script_check(project_dir, "typecheck"));
         checks.push(package_script_check(project_dir, "lint"));
     }
@@ -133,6 +136,72 @@ fn package_script_tree_uses(
         .any(|referenced| package_script_tree_uses(manifest, referenced, predicate, seen))
 }
 
+fn frontend_dependency_check(project_dir: &Path) -> QualityCheck {
+    if project_dir.join("node_modules").exists() {
+        return QualityCheck {
+            name: "frontend dependencies".to_owned(),
+            ok: true,
+            message: "installed".to_owned(),
+            agent_instruction: None,
+        };
+    }
+
+    let manager = frontend_package_manager(project_dir);
+    let args = frontend_install_args(manager);
+    let result = Command::new(manager)
+        .args(&args)
+        .current_dir(project_dir)
+        .stdin(Stdio::null())
+        .output();
+    let output = match result {
+        Ok(output) => output,
+        Err(error) => {
+            return QualityCheck {
+                name: format!("{manager} install"),
+                ok: false,
+                message: error.to_string(),
+                agent_instruction: Some(format!(
+                    "Install {}, then rerun `tovuk check`.",
+                    if manager == "bun" {
+                        "Bun"
+                    } else {
+                        "Node.js and npm"
+                    }
+                )),
+            };
+        }
+    };
+    QualityCheck {
+        name: format!("{manager} install"),
+        ok: output.status.success(),
+        message: if output.status.success() {
+            "passed".to_owned()
+        } else {
+            first_output_line(
+                &output.stderr,
+                &output.stdout,
+                &format!("{manager} install"),
+            )
+        },
+        agent_instruction: if output.status.success() {
+            None
+        } else {
+            Some(format!(
+                "Run `{manager} {}` in the frontend directory, fix dependency installation, then rerun `tovuk check`.",
+                args.join(" ")
+            ))
+        },
+    }
+}
+
+fn frontend_install_args(manager: &str) -> Vec<&'static str> {
+    if manager == "bun" {
+        vec!["ci"]
+    } else {
+        vec!["ci", "--prefer-offline", "--no-audit", "--fund=false"]
+    }
+}
+
 fn package_script_check(project_dir: &Path, script: &str) -> QualityCheck {
     let manager = frontend_package_manager(project_dir);
     let args = if manager == "bun" {
@@ -182,5 +251,19 @@ fn package_script_check(project_dir: &Path, script: &str) -> QualityCheck {
                 "Run `{manager} run {script}`, fix every error, then redeploy."
             ))
         },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::frontend_install_args;
+
+    #[test]
+    fn frontend_install_args_match_template_checks() {
+        assert_eq!(
+            frontend_install_args("npm"),
+            vec!["ci", "--prefer-offline", "--no-audit", "--fund=false"]
+        );
+        assert_eq!(frontend_install_args("bun"), vec!["ci"]);
     }
 }
