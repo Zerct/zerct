@@ -11,6 +11,48 @@ Tovuk full-stack services use one deployable project:
   that emits files.
 - One URL: frontend files at `/`, Rust worker requests under `/api/*`.
 
+## Worker deploy workflow
+
+<Steps>
+  <Step title="Check the project contract">
+    ```sh
+    tovuk check --json
+    ```
+
+    Fix the first failed `agent_instruction`, then rerun the check until the
+    Rust worker contract and local quality gates pass.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    ```
+
+    Confirm the CLI is using the intended account before reading usage,
+    applying caps, or creating deploy work.
+  </Step>
+
+  <Step title="Review the dry run">
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Review enabled and disabled capabilities, `missingConfig`,
+    `requiredFixes`, worker meters, `meterPlan`, limits, and
+    `billingEstimate` before creating a build.
+  </Step>
+
+  <Step title="Deploy and inspect the service">
+    ```sh
+    tovuk deploy --wait --json
+    tovuk service show <service> --json
+    ```
+
+    Use the service snapshot to confirm runtime status, URL, capabilities,
+    deploy state, builds, logs, `accountUsage`, and next actions.
+  </Step>
+</Steps>
+
 ## One command
 
 Put one `tovuk.toml` in the repo root:

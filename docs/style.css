@@ -236,6 +236,10 @@ html.dark img.nav-logo {
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 #pagination a,
