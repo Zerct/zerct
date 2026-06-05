@@ -8,7 +8,7 @@ Service Bindings are Service-scoped private links from one Rust Worker to
 another account-owned Rust Worker. Use them for internal auth, billing,
 webhooks, and shared APIs that should not be callable from browsers.
 
-## Service Binding flow
+## Service Binding Workflow
 
 <Steps>
   <Step title="Create the target Service">
@@ -73,7 +73,7 @@ webhooks, and shared APIs that should not be callable from browsers.
   </Step>
 </Steps>
 
-## CLI workflow
+## CLI Workflow
 
 ```sh
 tovuk account show --json
@@ -91,7 +91,7 @@ tovuk binding delete --service service_1 AUTH_SERVICE --json
 Bindings are injected into the Rust runtime as
 `TOVUK_BINDING_<NAME>=<target_service_id>`.
 
-## Meters and caps
+## Meters and Caps
 
 Service Binding calls count as Worker subrequests and Worker invocations.
 Set caps for `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes`.
