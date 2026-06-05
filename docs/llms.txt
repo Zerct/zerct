@@ -36,7 +36,7 @@ Resource references:
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
 - `docs/reference/storage.mdx`: Object Storage account setup, Service context, uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain account setup, Service context, DNS records, verification, and cleanup.
-- `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, service snapshot, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
+- `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, service snapshots before history and after repair redeploys, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
 - `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields, account setup, dry-run, usage, and usage-cap selection workflow.
 - `docs/reference/packages.mdx`: install channels, account setup checks,
