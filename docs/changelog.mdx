@@ -76,6 +76,10 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
   Human-readable `tovuk dev` prints the owner row and exits before launching
   child processes, so agents do not smoke-test a stale worker by accident. See
   [Packages](/reference/packages).
+- **Local dev can reroute around busy ports.** `tovuk dev` now accepts
+  `--worker-port <port>` and `--frontend-port <port>`, so agents can keep one
+  Tovuk-managed local dev command instead of copying manual fallback commands
+  when a default port is already occupied. See [Packages](/reference/packages).
 - **Homebrew install guidance.** Install instructions now show the correct
   tap and formula path. See [Packages](/reference/packages).
 - **Object storage meters in deploy dry run.** Object storage usage meters

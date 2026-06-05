@@ -65,7 +65,8 @@ tovuk logs --build <build_id> --json
 
 Before opening a local dev URL, inspect `tovuk dev --json`. If it returns
 `ok: false`, read `dev.port_statuses[].owner`, stop the process using the
-planned port, and rerun `tovuk dev`; do not smoke-test a stale worker.
+planned port or rerun with `--worker-port <port>` / `--frontend-port <port>`;
+do not smoke-test a stale worker.
 
 After adding or upgrading Rust dependencies, run
 `tovuk deploy --dry-run --build-artifact --json` before the wait deploy to
