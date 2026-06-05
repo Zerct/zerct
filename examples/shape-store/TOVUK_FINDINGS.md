@@ -2201,6 +2201,13 @@ Verification:
   - production desktop `1440x900`: cart showed one `CHECKOUT` action, no
     forbidden wallet/provider copy, no horizontal overflow.
   - production Browser console logs were clean for the smoke flow.
+- Public `0.1.101` release verification passed:
+  - npm latest and `tovuk@0.1.101` both returned `0.1.101`.
+  - PyPI returned `0.1.101`.
+  - crates.io downloaded `tovuk v0.1.101`.
+  - GitHub release `v0.1.101` is published with 4 native binary assets.
+  - `npx -y tovuk@0.1.101 dev examples/shape-store --frontend-port 5174
+    --json` returned `ok: true` and the expected port/env plan.
 
 ## Remaining Tovuk friction
 
