@@ -29,8 +29,9 @@ the request needs keyed coordination or per-object alarm scheduling.
   </Step>
 
   <Step title="Enable State for the service">
-    If `tovuk service show --json` does not include `"state": true`, enable the
-    explicit capability in `tovuk.toml` before code depends on State classes.
+    If `tovuk service show service_1 --json` does not include `"state": true`,
+    enable the explicit capability in `tovuk.toml` before code depends on
+    State classes.
 
     ```toml
     [capabilities]

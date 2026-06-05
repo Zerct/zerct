@@ -30,8 +30,9 @@ Tovuk API and CLI commands instead of provider bucket URLs.
   </Step>
 
   <Step title="Enable object storage capability">
-    If `tovuk service show --json` does not include `"object_storage": true`,
-    enable the explicit capability in `tovuk.toml` before storage mutations.
+    If `tovuk service show service_1 --json` does not include
+    `"object_storage": true`, enable the explicit capability in `tovuk.toml`
+    before storage mutations.
 
     ```toml
     [capabilities]

@@ -26,9 +26,9 @@ queries and Object Storage for large files.
   </Step>
 
   <Step title="Enable KV for the Service">
-    If `tovuk service show --json` does not include `"kv": true`, enable the
-    explicit capability in `tovuk.toml` before relying on KV namespaces for
-    that Service.
+    If `tovuk service show service_1 --json` does not include `"kv": true`,
+    enable the explicit capability in `tovuk.toml` before relying on KV
+    namespaces for that Service.
 
     ```toml
     [capabilities]
