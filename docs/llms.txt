@@ -141,7 +141,7 @@ Agent repair loop:
    `requiredFixes`, meters, `meterPlan`, limits, and `billingEstimate`.
 9. Set hard usage caps for expected load.
 10. Run `tovuk deploy --wait --json`.
-11. Inspect the Service snapshot with `tovuk service show <service> --json`.
+11. Inspect live deploy state with `tovuk service status <service> --json`.
 12. Inspect deploy history with `tovuk deploy list --json` or
    `tovuk deploy show <deploy_id> --json` when needed.
 13. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
@@ -150,8 +150,9 @@ Agent repair loop:
 16. Fix the first actionable log error.
 17. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
 18. Run `tovuk deploy --wait --json` after the fix.
-19. Inspect the Service snapshot again with `tovuk service show <service> --json`
-    before reading more build or deploy logs.
+19. Inspect live deploy state again with `tovuk service status <service> --json`;
+    use `tovuk service show <service> --json` when resource, billing, env, or
+    domain context is needed before reading more build or deploy logs.
 
 Rust worker contract:
 
@@ -255,6 +256,7 @@ curl https://api.tovuk.com/v1/status
 curl https://api.tovuk.com/v1/capabilities
 tovuk usage --json
 tovuk service list --json
+tovuk service status <service> --json
 tovuk service show <service> --json
 tovuk service delete <service> --json
 tovuk logs --build <build_id> --json
@@ -340,9 +342,9 @@ tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeplo
 
 Without `--json`, `tovuk service list` prints a compact table with Service
 kind, runtime status, URL, enabled and disabled capabilities, and resource
-counts. `tovuk service show` prints a compact Service snapshot with
-capabilities, resource counts, usage, latest deploy, latest build, and next
-actions. Agents should still use `--json` for machine parsing.
+counts. `tovuk service status` prints only the live/deploy/build summary, while
+`tovuk service show` prints the broader Service snapshot. Agents should still
+use `--json` for machine parsing.
 
 Dashboard Overview is available at `https://tovuk.com/account` and
 `https://tovuk.com/<handle>`. When no Services exist, it shows first Service

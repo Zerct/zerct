@@ -211,19 +211,21 @@ expose the same agent-facing commands, recovery text, login behavior, deploy
 flow, logs, env, domains, usage, billing, and support operations so deploy UX
 does not drift.
 
-`tovuk service show <service> --json` is the canonical agent snapshot for one
+`tovuk service status <service> --json` is the compact post-deploy status
+check for one service. It returns runtime status, latest deploy, latest build,
+URL, and a `live` boolean.
+`tovuk service show <service> --json` is the full agent snapshot for one
 service. It includes service state, capabilities, deploy history, build
 history, recent logs, env names, domains, resources, `accountUsage`,
 `billingEstimate`, and next actions.
 Set `TOVUK_OUTPUT=json` when an agent should receive JSON by default.
 Without `--json`, `tovuk service list` prints a compact table with kind,
 runtime status, URL, enabled and disabled capabilities, and per-Service
-resource counts. `tovuk service show` prints a compact Service snapshot with
-capabilities, resource counts, current usage, latest deploy, latest build, and
-next actions.
-Dashboard Overview Service rows expose copyable commands for `service show`,
-logs, storage listing, worker request caps, support tickets, and service
-deletion.
+resource counts. `tovuk service status` prints only the live/deploy/build
+summary, while `tovuk service show` prints the broader Service snapshot.
+Dashboard Overview Service rows expose copyable commands for `service status`,
+`service show`, logs, storage listing, worker request caps, support tickets,
+and service deletion.
 
 ## Example
 
@@ -252,6 +254,7 @@ tovuk deploy cancel deploy_1 --json
 tovuk usage
 tovuk usage --json
 tovuk service list
+tovuk service status service_1 --json
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
 tovuk logs --service service_1 --limit 100 --json

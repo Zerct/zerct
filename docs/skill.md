@@ -53,6 +53,7 @@ tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service status <service> --json
 tovuk service show <service> --json
 tovuk deploy list --json
 tovuk deploy show <deploy_id> --json
@@ -64,6 +65,7 @@ tovuk logs --build <build_id> --json
 Manage service resources without dashboard access:
 
 ```sh
+tovuk service status <service> --json
 tovuk service show <service> --json
 tovuk sqlite create --service <service> DB --json
 tovuk sqlite query --service <service> DB "select 1" --json

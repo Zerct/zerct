@@ -19,6 +19,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service status <service> --json
     tovuk service show <service> --json
     ```
   </Tab>
@@ -34,6 +35,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service status <service> --json
     tovuk service show <service> --json
     ```
   </Tab>
@@ -50,6 +52,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service status <service> --json
     tovuk service show <service> --json
     ```
   </Tab>
@@ -66,6 +69,7 @@ Use templates when you want Tovuk to create the project shape.
     tovuk account show --json
     tovuk deploy --dry-run --json
     tovuk deploy --wait --json
+    tovuk service status <service> --json
     tovuk service show <service> --json
     ```
   </Tab>
@@ -79,8 +83,9 @@ The Next static frontend template sets `output: "export"` in
 `next.config.mjs` and uses `[build].output = "out"`. Keep Next API routes,
 middleware, SSR handlers, and other server logic out of static frontends; move
 that work to a Rust worker.
-After deploy, use `tovuk service show <service> --json` to inspect the
-created Service before changing resources, logs, domains, or usage caps.
+After deploy, use `tovuk service status <service> --json` to confirm the
+Service is live. Use `tovuk service show <service> --json` before changing
+resources, logs, domains, or usage caps.
 
 Without `--template`, `tovuk new` can scaffold a starter `tovuk.toml` from
 existing files. That scan is advisory. Deploy behavior is controlled only by

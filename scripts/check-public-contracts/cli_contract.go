@@ -70,6 +70,7 @@ func checkCLIContract() {
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")
 	}
 	for _, source := range []string{cargoCLI, rootReadme, cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "tovuk service status", "agentic service status command")
 		requireContains(source, "tovuk nodes list", "operator node list command")
 		requireContains(source, "tovuk nodes drain", "operator node drain command")
 		requireContains(source, "tovuk nodes enable", "operator node enable command")
@@ -99,7 +100,8 @@ func checkCLIContract() {
 		requireContains(source, "compact table", "human-readable service list output docs")
 		requireContains(source, "enabled and disabled capabilities", "human-readable service capability docs")
 		requireContains(source, "resource counts", "human-readable service resource count docs")
-		requireContains(source, "compact Service snapshot", "human-readable service show output docs")
+		requireContains(source, "live/deploy/build", "human-readable service status output docs")
+		requireContains(source, "broader Service snapshot", "human-readable service show output docs")
 		requireContains(source, "Dashboard Overview Service rows expose copyable commands", "dashboard overview row command docs")
 	}
 
@@ -110,6 +112,8 @@ func checkCLIContract() {
 	requireContains(cargoCLI, "capCommands", "native deploy dry-run cap commands field")
 	requireContains(cargoCLI, "--notify-at-percent", "native CLI usage cap notification threshold")
 	requireContains(cargoCLI, "service_list_lines", "native service list text renderer")
+	requireContains(cargoCLI, "service_status_summary", "native service status JSON summary")
+	requireContains(cargoCLI, "service_status_lines", "native service status text renderer")
 	requireContains(cargoCLI, "service_show_resource_summary", "native service show resource summary")
 	requireContains(cargoCLI, "name\\tservice\\tkind\\tstatus\\tcapabilities\\tresources\\turl", "native service list table columns")
 	requireContains(cargoCLI, "https://docs.tovuk.com/agents", "native check failure docs URL")
@@ -170,7 +174,6 @@ func checkCLIContract() {
 		rejectContains(source, "tovuk status", "retired top-level status command")
 		rejectContains(source, "tovuk inspect", "retired top-level inspect command")
 		rejectContains(source, "tovuk service inspect", "retired service inspect command")
-		rejectContains(source, "tovuk service status", "retired service status command")
 		rejectContains(source, "tovuk service resources", "retired service resources command")
 		rejectContains(source, "worker service resources", "stale worker-scoped resource wording")
 		rejectContains(source, "tovuk service deploys", "retired service deploys command")
