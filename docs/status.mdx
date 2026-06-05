@@ -99,6 +99,18 @@ If `ok` is true, call `/v1/capabilities` to confirm the public product, meter,
 docs, and OpenAPI catalog before retrying the CLI command you were running. If
 `ok` is false, retry later before changing project code.
 
+## Capability catalog
+
+`/v1/capabilities` is public and machine-readable. It returns the current
+`product`, `api_version`, `docs_url`, `openapi_url`, `auth`,
+`agent_workflow`, `endpoints`, `commands`, `plans`, and `products`.
+
+Use `plans[].limits` and `plans[].pricing` for current plan limits and pricing.
+Use `products[].features`, `products[].meters`, `products[].meter_details`,
+`products[].pricing_fields`, and `products[].limit_fields` before enabling
+capabilities, changing paid-resource code, or retrying a command after a
+platform reachability error.
+
 ## CLI reachability errors
 
 When any Tovuk CLI command cannot reach the API, the CLI emits a local
