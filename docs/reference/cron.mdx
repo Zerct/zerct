@@ -1,11 +1,12 @@
 ---
-title: "Schedule Rust Worker Jobs with Cron"
+title: "Schedule Service Cron Triggers"
 sidebarTitle: "Cron"
-description: "Confirm account and Service context, then create, update, pause, resume, and delete UTC Cron triggers for scheduled Tovuk Rust worker jobs."
+description: "Confirm account and Service context, then create, update, pause, resume, and delete UTC Cron triggers for Tovuk Services."
 ---
 
-Cron triggers run scheduled work for one Service. Use Cron for cleanup,
-reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
+Cron triggers schedule work for one Service and deliver it to Rust worker
+handlers. Use Cron for cleanup, reports, polling, cache refreshes, and
+maintenance jobs that are safe to retry.
 
 ## Scheduled job flow
 
@@ -27,7 +28,7 @@ reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
   <Step title="Enable Cron for the Service">
     If `tovuk service show service_1 --json` does not include `"cron": true`,
     enable the explicit capability in `tovuk.toml` before relying on scheduled
-    Rust worker jobs for that Service.
+    handlers for that Service.
 
     ```toml
     [capabilities]
