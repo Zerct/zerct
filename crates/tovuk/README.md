@@ -159,9 +159,10 @@ a `live` boolean.
 `billingEstimate` beside capabilities, service resources, recent deploys,
 builds, logs, env names, domains, and next actions.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, enabled and disabled capabilities, and resource counts.
-`tovuk service status` prints only the live/deploy/build summary, while
-`tovuk service show` prints the broader Service snapshot.
+kind, runtime status, URL, enabled and disabled capabilities, and resource
+counts. `tovuk service status <service>` prints only the live/deploy/build
+summary, while `tovuk service show <service>` prints the broader Service
+snapshot.
 Dashboard Overview Service rows expose copyable commands for `service status`,
 `service show`, logs, storage listing, worker request caps, support tickets,
 and service deletion.
