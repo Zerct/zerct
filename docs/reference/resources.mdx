@@ -1,7 +1,7 @@
 ---
 title: "Manage Service Resources"
 sidebarTitle: "Service Resources"
-description: "Create, inspect, and delete Tovuk service resources with CLI, API, and dashboard workflows."
+description: "Confirm account setup, then create, inspect, and delete Tovuk service resources with CLI, API, and dashboard workflows."
 ---
 
 Tovuk service resources are managed through the CLI, API, and dashboard so
@@ -10,14 +10,15 @@ agents do not need hidden manual actions.
 ## Resource workflow
 
 <Steps>
-  <Step title="Inspect the service snapshot">
+  <Step title="Confirm account and Service context">
     ```sh
+    tovuk account show --json
     tovuk service show service_1 --json
     ```
 
-    Use the snapshot to review current resources, capabilities,
-    `accountUsage`, `billingEstimate`, and next actions before creating more
-    resources.
+    Confirm account setup first, then use the Service snapshot to review
+    current resources, capabilities, `accountUsage`, `billingEstimate`, and
+    next actions before creating more resources.
   </Step>
 
   <Step title="Create the required resource">
@@ -80,6 +81,7 @@ Use CLI bulk commands for bulk KV reads, writes, and removals.
 ## Commands
 
 ```sh
+tovuk account show --json
 tovuk service show service_1 --json
 tovuk sqlite create --service service_1 DB --json
 tovuk sqlite query --service service_1 DB "select 1" --json
