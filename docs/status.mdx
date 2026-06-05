@@ -44,10 +44,14 @@ responses to debug your project.
     code until status is healthy.
   </Step>
 
-  <Step title="Follow the returned instruction">
-    If `ok` is true, continue with `GET /v1/capabilities` or the Tovuk command
-    you were running. If `ok` is false, retry later before changing project
-    code.
+  <Step title="Confirm the capability catalog">
+    ```sh
+    curl https://api.tovuk.com/v1/capabilities
+    ```
+
+    If `ok` is true, call `/v1/capabilities` to confirm the public product,
+    meter, docs, and OpenAPI catalog before retrying the Tovuk command you were
+    running. If `ok` is false, retry later before changing project code.
   </Step>
 
   <Step title="Switch to logs for project failures">
@@ -66,6 +70,7 @@ responses to debug your project.
 curl https://api.tovuk.com/health
 curl https://api.tovuk.com/healthz
 curl https://api.tovuk.com/v1/status
+curl https://api.tovuk.com/v1/capabilities
 ```
 
 `/health` is the simple human-friendly health alias. `/healthz` remains the
@@ -90,8 +95,9 @@ infrastructure probe for load balancers and deploy scripts.
 }
 ```
 
-If `ok` is true, continue with `GET /v1/capabilities` or the CLI command you
-were running. If `ok` is false, retry later before changing project code.
+If `ok` is true, call `/v1/capabilities` to confirm the public product, meter,
+docs, and OpenAPI catalog before retrying the CLI command you were running. If
+`ok` is false, retry later before changing project code.
 
 ## CLI reachability errors
 

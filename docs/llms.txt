@@ -229,6 +229,7 @@ tovuk pricing --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 curl https://api.tovuk.com/v1/status
+curl https://api.tovuk.com/v1/capabilities
 tovuk usage --json
 tovuk service list --json
 tovuk service show <service> --json
@@ -371,8 +372,10 @@ Usage Caps.
 
 Use `GET /v1/status` only when Tovuk itself appears unavailable. If a Tovuk CLI
 command returns `api_unreachable`, retry it, then check `/v1/status` before
-changing project code. If the API is available and a deploy fails, inspect build
-logs instead of changing status checks.
+changing project code. When status is healthy, call
+`GET /v1/capabilities` to confirm the current public product, meter, docs, and
+OpenAPI catalog before retrying the command. If the API is available and a
+deploy fails, inspect build logs instead of changing status checks.
 
 Never print or commit secrets. Put secrets in Tovuk env vars with
 `tovuk env set --service <service> KEY="$KEY"` after loading the local shell
