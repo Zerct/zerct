@@ -27,7 +27,7 @@ Resource references:
 - `docs/reference/resources.mdx`: Service Resources account setup,
   post-deploy Service snapshots, CLI/API/dashboard parity, resource routes,
   and runtime bindings.
-- `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
+- `docs/reference/sqlite.mdx`: SQLite account setup, Service context, explicit `sqlite` capability, dry-run planning, commands, limits, backups, and query metrics.
 - `docs/reference/state.mdx`: State account setup, Service context, explicit `state` capability, dry-run planning, keyed objects, storage, meters, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, explicit `kv` capability, dry-run planning, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, explicit `queue` capability, dry-run planning, producers, consumers, retries, and dead letters.
@@ -211,6 +211,9 @@ Full-stack contract:
 - The worker health path is `/api/healthz`.
 - Worker build and runtime commands must use `cargo build --release` and a
   `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
+- Before SQLite mutations, confirm `[capabilities] sqlite = true` in
+  `tovuk.toml` when the Service does not already expose SQLite, then inspect
+  `tovuk deploy --dry-run --json`.
 - Before KV mutations, confirm `[capabilities] kv = true` in `tovuk.toml` when
   the Service does not already expose KV, then inspect
   `tovuk deploy --dry-run --json`.
@@ -256,6 +259,7 @@ tovuk env list --service <service> --json
 tovuk domains list --service <service> --json
 tovuk account show --json
 tovuk service show <service> --json
+tovuk deploy --dry-run --json
 tovuk sqlite create --service <service> DB --json
 tovuk sqlite query --service <service> DB "select 1" --json
 tovuk sqlite backup create --service <service> DB --json
