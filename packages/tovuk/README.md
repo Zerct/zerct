@@ -19,6 +19,10 @@ tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 ```
 
+For agent sessions, set `TOVUK_OUTPUT=json` once and run the same commands
+without repeating `--json`. Use `--output text` on a single command when you
+want human-readable output.
+
 The npm package installs the native Tovuk binary for the current platform.
 Node is required by npm to install the package, but the installed `tovuk`
 command runs as a native binary.

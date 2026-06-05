@@ -3,10 +3,10 @@ use super::constants::VERSION;
 const HELP_BODY: &str = r#"
 Usage:
   tovuk new [path] [--template rust-worker|tanstack-static-frontend|fullstack-rust-tanstack]
-  tovuk check [path] [--json]
+  tovuk check [path] [--json|--output json|text]
   tovuk login [--token <token>] [--api <url>]
-  tovuk deploy --dry-run [path] [--api <url>] [--json]
-  tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json]
+  tovuk deploy --dry-run [path] [--api <url>] [--json|--output json|text]
+  tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json|--output json|text]
   tovuk deploy list [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk deploy show <deploy_id> [--api <url>] [--json]
   tovuk deploy cancel <deploy_id> [--api <url>] [--json]
@@ -92,6 +92,7 @@ Usage:
   tovuk nodes enable <node_id> [--token <operator_token>] [--api <url>] [--json]
 
 Agent contract:
+  - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
   - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.

@@ -10,6 +10,9 @@ full-stack service to Tovuk.
 
 ## Workflow
 
+Set `TOVUK_OUTPUT=json` for agent sessions. Keep `--json` only when a single
+command must force JSON without changing the session environment.
+
 1. Ensure the project has `tovuk.toml`.
 2. For Rust workers, ensure `Cargo.toml`, `Cargo.lock`, a health endpoint,
    `cargo fmt --all --check`, locked release-mode check/test/Clippy gates,
@@ -29,12 +32,12 @@ full-stack service to Tovuk.
    typecheck, dead-code, or duplicate-code tooling.
 7. For a new full-stack project, run
    `tovuk new hello-service --template fullstack-rust-tanstack`.
-8. Run `tovuk check --json`.
+8. Run `tovuk check`.
 9. Run `tovuk check` when local tools are available.
-10. Run `tovuk deploy --wait --json`.
+10. Run `tovuk deploy --wait`.
 11. If Tovuk returns an `agent_instruction`, apply it, rerun check, and
     redeploy.
-12. If a build fails, run `tovuk logs --build <build_id> --json`, fix the
+12. If a build fails, run `tovuk logs --build <build_id>`, fix the
     first actionable log error, rerun check, and redeploy.
 
 ## Service resources

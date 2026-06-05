@@ -21,6 +21,10 @@ tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 ```
 
+For agent sessions, set `TOVUK_OUTPUT=json` once and run the same commands
+without repeating `--json`. Use `--output text` on a single command when you
+want human-readable output.
+
 From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
 reads explicit `[capabilities]`, builds the worker and frontend roots, and
 returns one service URL with `/api/*` routed to the Rust worker.

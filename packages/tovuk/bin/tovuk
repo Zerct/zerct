@@ -1,3 +1,46 @@
 #!/bin/sh
+json_output=false
+case "${TOVUK_OUTPUT:-}" in
+  json|JSON) json_output=true ;;
+esac
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --json)
+      json_output=true
+      ;;
+    --output)
+      shift
+      if [ "$#" -eq 0 ]; then
+        break
+      fi
+      case "${1:-}" in
+        json|JSON) json_output=true ;;
+        text|TEXT) json_output=false ;;
+      esac
+      ;;
+    --output=json|--output=JSON)
+      json_output=true
+      ;;
+    --output=text|--output=TEXT)
+      json_output=false
+      ;;
+  esac
+  shift
+done
+
+if [ "$json_output" = true ]; then
+  cat >&2 <<'EOF'
+{
+  "code": "native_binary_unavailable",
+  "message": "Tovuk native binary was not installed.",
+  "agent_instruction": "Reinstall with npm scripts enabled, install from GitHub Releases, Homebrew, Cargo, or rerun with TOVUK_NATIVE_BINARY pointing to a supported native binary.",
+  "docs_url": "https://docs.tovuk.com/reference/packages",
+  "checkout_url": null
+}
+EOF
+  exit 1
+fi
+
 echo "Tovuk native binary was not installed. Reinstall with npm scripts enabled, or install from https://github.com/tovuk/tovuk/releases." >&2
 exit 1

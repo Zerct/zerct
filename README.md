@@ -180,14 +180,15 @@ Agent prompt:
 
 ```txt
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
-Run `tovuk check --json`. Fix the first failed check by following
-`agent_instruction`, then rerun check. Run `tovuk deploy --dry-run --json` and review
+Set `TOVUK_OUTPUT=json` for the session, or pass `--json` on each command.
+Run `tovuk check`. Fix the first failed check by following
+`agent_instruction`, then rerun check. Run `tovuk deploy --dry-run` and review
 warnings, meters, limits, and `billingEstimate`. Deploy with
-`tovuk deploy --wait --json`. Inspect deploy history with
-`tovuk deploy list --json` and `tovuk deploy show <deploy_id> --json`.
-If the build fails, read `tovuk logs --build <build_id> --json`, fix the
+`tovuk deploy --wait`. Inspect deploy history with
+`tovuk deploy list` and `tovuk deploy show <deploy_id>`.
+If the build fails, read `tovuk logs --build <build_id>`, fix the
 first actionable error, rerun check, and redeploy. If a plan limit blocks work, run
-`tovuk billing checkout --json` and show the returned URL to the
+`tovuk billing checkout` and show the returned URL to the
 human. For invoices, payment methods, or subscription changes, run
 `tovuk billing portal`. If Tovuk support is needed, run `tovuk support create` with
 `--failing-command`, `--service`, `--build`, `--deploy`, and `--first-log-line`.
@@ -214,6 +215,7 @@ does not drift.
 service. It includes service state, capabilities, deploy history, build
 history, recent logs, env names, domains, resources, `accountUsage`,
 `billingEstimate`, and next actions.
+Set `TOVUK_OUTPUT=json` when an agent should receive JSON by default.
 Without `--json`, `tovuk service list` prints a compact table with kind,
 runtime status, URL, enabled and disabled capabilities, and per-Service
 resource counts. `tovuk service show` prints a compact Service snapshot with

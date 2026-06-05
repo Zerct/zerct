@@ -48,7 +48,7 @@ pub(super) fn set_boolean_flag(
     Ok(1)
 }
 
-fn flag_value(
+pub(super) fn flag_value(
     name: &str,
     inline: Option<String>,
     argv: &[String],
@@ -80,7 +80,7 @@ fn flag_value(
     Ok(value)
 }
 
-fn flag_consumed(argv: &[String], index: usize) -> usize {
+pub(super) fn flag_consumed(argv: &[String], index: usize) -> usize {
     if arg_has_inline_value(argv, index) {
         1
     } else {

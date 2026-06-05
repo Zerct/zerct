@@ -25,7 +25,7 @@ def main(argv: list[str] | None = None) -> None:
     try:
         binary = _native_binary()
     except RuntimeError as error:
-        _print_agent_error(str(error), "--json" in args)
+        _print_agent_error(str(error), _wants_json(args))
         raise SystemExit(1) from error
 
     os.execv(str(binary), [str(binary), *args])
@@ -33,6 +33,23 @@ def main(argv: list[str] | None = None) -> None:
 
 def _wants_version(args: list[str]) -> bool:
     return len(args) == 1 and args[0] in {"--version", "-v", "-V"}
+
+
+def _wants_json(args: list[str]) -> bool:
+    output = os.environ.get("TOVUK_OUTPUT", "").strip().lower()
+    json_output = output == "json"
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if arg == "--json":
+            json_output = True
+        elif arg == "--output" and index + 1 < len(args):
+            json_output = args[index + 1].strip().lower() == "json"
+            index += 1
+        elif arg.startswith("--output="):
+            json_output = arg.split("=", 1)[1].strip().lower() == "json"
+        index += 1
+    return json_output
 
 
 def _native_binary() -> pathlib.Path:
