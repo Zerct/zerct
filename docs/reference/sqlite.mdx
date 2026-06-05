@@ -1,15 +1,26 @@
 ---
 title: "Manage SQLite Databases for Rust Workers"
 sidebarTitle: "SQLite"
-description: "Create, query, back up, restore, and delete SQLite databases for Tovuk Rust workers."
+description: "Confirm account and Service context before creating, querying, backing up, restoring, and deleting SQLite databases for Tovuk Rust Workers."
 ---
 
 Tovuk service databases are SQLite databases owned by a service and attached to
-Rust workers as explicit resources.
+Rust Workers as explicit resources.
 
 ## Database lifecycle
 
 <Steps>
+  <Step title="Confirm account and Service context">
+    Confirm account setup and inspect the Service before changing databases.
+    Check `sqlite`, existing `sqliteDatabases`, `accountUsage`,
+    `billingEstimate`, limits, and next actions.
+
+    ```sh
+    tovuk account show --json
+    tovuk service show service_1 --json
+    ```
+  </Step>
+
   <Step title="Create and verify the database">
     ```sh
     tovuk sqlite create --service service_1 DB --json
