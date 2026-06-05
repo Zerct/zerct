@@ -24,6 +24,23 @@ DNS provider API without dashboard access.
     before changing DNS.
   </Step>
 
+  <Step title="Enable the domain capability">
+    If the Service does not already show `custom_domains: true`, set the
+    explicit capability in `tovuk.toml`, then dry-run before changing hostnames.
+
+    ```toml
+    [capabilities]
+    custom_domains = true
+    ```
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Review `missingConfig`, `requiredFixes`, plan limits, and
+    `billingEstimate` before adding a domain.
+  </Step>
+
   <Step title="Add the hostname">
     Run:
 
@@ -73,6 +90,7 @@ DNS provider API without dashboard access.
 ```sh
 tovuk account show --json
 tovuk service show service_1 --json
+tovuk deploy --dry-run --json
 tovuk domains list --service service_1 --json
 tovuk domains add --service service_1 api.example.com --json
 tovuk domains verify --service service_1 api.example.com --json
