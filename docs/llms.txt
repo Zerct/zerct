@@ -34,7 +34,7 @@ Resource references:
 - `docs/reference/cron.mdx`: Cron account setup, Service context, scheduled Rust worker events, and trigger lifecycle commands.
 - `docs/reference/bindings.mdx`: Service Binding account setup, Service context, private calls, and runtime binding environment names.
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
-- `docs/reference/storage.mdx`: Object Storage account setup, Service context, uploads, downloads, multipart, and egress.
+- `docs/reference/storage.mdx`: Object Storage account setup, Service context, explicit `object_storage` capability, dry-run planning, uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain account setup, Service context, explicit `custom_domains` capability, DNS records, verification, and cleanup.
 - `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, service snapshots before history and after repair redeploys, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
 - `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.
@@ -281,6 +281,7 @@ tovuk limits set worker_requests --period day --value 100000 --notify-at-percent
 tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
 tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
 tovuk limits delete worker_requests --period day --json
+tovuk deploy --dry-run --json
 tovuk storage list --service <service> --json
 tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
 tovuk storage download --service <service> uploads/file.png ./file.png --json
@@ -341,10 +342,12 @@ owner-visible list, or appeal work. Report rows expose copyable `tovuk abuse lis
 `tovuk abuse appeal <report_id> "Remediation details" --json`, and
 `tovuk service show <service> --json` commands when report state supports them.
 
-`tovuk storage upload` automatically switches to multipart transfer for files
-larger than 100 MiB. Object storage limits expose object size, part count,
-metadata size, custom domains per storage bucket, bucket management operations,
-and same-key write throughput.
+Before storage mutations, confirm `[capabilities] object_storage = true` in
+`tovuk.toml` when the Service does not already expose object storage, then
+inspect `tovuk deploy --dry-run --json`. `tovuk storage upload` automatically
+switches to multipart transfer for files larger than 100 MiB. Object storage
+limits expose object size, part count, metadata size, custom domains per
+storage bucket, bucket management operations, and same-key write throughput.
 
 Before load tests, production launch, or paid usage, run
 `tovuk pricing --json`, confirm account setup with `tovuk account show --json`,

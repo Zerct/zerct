@@ -29,6 +29,24 @@ Tovuk API and CLI commands instead of provider bucket URLs.
     `next_actions` before starting large uploads or public media work.
   </Step>
 
+  <Step title="Enable object storage capability">
+    If `tovuk service show --json` does not include `"object_storage": true`,
+    enable the explicit capability in `tovuk.toml` before storage mutations.
+
+    ```toml
+    [capabilities]
+    object_storage = true
+    ```
+
+    Then run a dry run so agents can inspect `capabilities.enabled`,
+    `capabilities.disabled`, `meters`, `accountUsage`, `billingEstimate`, and
+    `nextActions` before uploading, sharing, or deleting files.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+  </Step>
+
   <Step title="Choose public or private access">
     Use `--public` only for browser-safe media that should return a
     `publicUrl`. Leave that flag off for private artifacts; private files use
