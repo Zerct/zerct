@@ -149,11 +149,10 @@ work.
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, enabled and disabled capabilities, and resource
-counts. `tovuk service status <service> --json` returns top-level `ok`, `url`,
-and `agent_instruction` fields for smoke tests; text mode prints only the
-live/deploy/build summary. `tovuk service show <service>` prints the broader
-Service snapshot.
+kind, runtime status, URL, enabled and disabled capabilities, and resource counts.
+`tovuk service status <service> --json` returns top-level `ok`, `url`, and
+`agent_instruction` fields for smoke tests; text mode prints only the
+live/deploy/build summary. `tovuk service show <service>` prints the broader Service snapshot.
 Dashboard Overview Service rows expose copyable commands for `service status`,
 `service show`, logs, storage listing, worker request caps, support tickets,
 and service deletion.
