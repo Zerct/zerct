@@ -1,14 +1,15 @@
 ---
 title: "Choose Tovuk Products Before Deploying"
 sidebarTitle: "Product Choices"
-description: "Use the Tovuk product catalog to choose Worker, Static Frontend, SQLite, Object Storage, and other resources before deploys."
+description: "Use the Tovuk product catalog and account setup checks to choose Worker, Static Frontend, SQLite, Object Storage, and other resources before deploys."
 ---
 
 Tovuk exposes the product catalog through the CLI and API so agents can make
-deployment decisions without dashboard access:
+deployment decisions without dashboard-only steps:
 
 ```sh
 tovuk pricing --json
+tovuk account show --json
 tovuk deploy --dry-run --json
 ```
 
@@ -29,6 +30,8 @@ plan's `pricing` object for included usage and overage costs.
 Use `tovuk usage --json` for the authenticated `billingEstimate` line items
 before high-throughput work. Every public meter must appear there as either a
 priced line item or an explicit zero-price line item.
+Confirm account setup before authenticated dry-runs, usage reads, or usage-cap
+changes so billing and caps apply to the intended account.
 
 ## Product selection workflow
 
@@ -41,6 +44,16 @@ priced line item or an explicit zero-price line item.
     Start with `products[]`, not guesswork. Use each product's `features`,
     `best_for`, `avoid_for`, `meters`, `meter_details`, `pricing_fields`, and
     `limit_fields` before changing code.
+  </Step>
+
+  <Step title="Confirm account setup">
+    ```sh
+    tovuk account show --json
+    ```
+
+    Confirm setup before authenticated dry-runs, current usage reads, or
+    usage-cap changes. If setup is incomplete, finish the returned account
+    update command before planning paid work.
   </Step>
 
   <Step title="Dry-run the current project">
