@@ -50,7 +50,6 @@ export type CheckoutFields = {
 
 export type OrderReceipt = {
   id: string;
-  statusLabel?: string;
   totalCents: number;
 };
 

@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_75`, `job_76`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_77`, `job_78`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -54,7 +54,8 @@ Date: 2026-06-05
 - Removed product-reference-specific `YZY` checkout copy from the example. The
   cart now says `SHOPPING BAG` and `DISCOUNT CODE`.
 - Simplified the mobile order-confirmed state into a focused full-screen
-  receipt with no bag header and a centered stacked receipt summary.
+  receipt with no bag header, no provider-specific status copy, and compact
+  two-row order/total receipt rows.
 
 ## What I built
 
@@ -111,6 +112,8 @@ Production deploy and API checks:
   Tovuk CLI `0.1.95`.
 - Latest production deploy passed for `deploy_61` / `job_62`, using public
   Tovuk CLI `0.1.96`.
+- Latest production deploy passed for `deploy_77` / `job_78`, using public
+  Tovuk CLI `0.1.99`.
 - Latest artifact dry-run passed with `services[0].artifactCheck.status:
   "passed"`, gzip size `935494`, and limit `3145728`.
 - `curl https://shape-store.tovuk.app/api/healthz`: returned `{"ok":true}`
@@ -222,6 +225,12 @@ Browser and UX checks:
   - `ORDER TOV-1780661758 RESERVED FOR $44.00`
 - Confirmed latest receipt state in production after `deploy_43`:
   - `ORDER TOV-1780663538 RESERVED FOR $44.00`
+- Confirmed latest receipt state in production after `deploy_77`:
+  - mobile `375x667` shows a compact two-row receipt with `ORDER`, `TOTAL`,
+    and a visible `CONTINUE SHOPPING` button without scrolling
+  - mobile `320x568`, tablet `768x1024`, and desktop `1440x900` have no
+    horizontal overflow, two receipt rows, and no `STRIPE`, `YZY`, `YEEZY`, or
+    `WALLET` copy in the confirmation state
 - Captured desktop screenshot:
   - `output/browser/ecommerce-local-desktop.png`
   - `output/browser/yeezy-browser-reference.png`

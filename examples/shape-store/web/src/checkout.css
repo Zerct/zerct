@@ -2,6 +2,10 @@
   padding: 0 0 calc(48px + env(safe-area-inset-bottom));
 }
 
+.receipt-drawer {
+  padding-bottom: 0;
+}
+
 .checkout-top {
   padding-right: 16px;
   padding-left: 16px;
@@ -88,7 +92,7 @@
   align-content: center;
   justify-items: center;
   margin: 0 auto;
-  gap: 22px;
+  gap: 18px;
   border-bottom: 0;
   padding: calc(64px + env(safe-area-inset-top)) 20px calc(48px + env(safe-area-inset-bottom));
   text-align: center;
@@ -106,23 +110,42 @@
 
 .checkout-success p {
   font-size: 13px;
+  line-height: 1.25;
 }
 
 .receipt-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
   width: min(100%, 360px);
-  gap: 6px;
+  gap: 0;
+  margin: 0;
   border-top: 1px solid #000;
   border-bottom: 1px solid #000;
-  padding: 18px 0;
-  text-align: center;
+  padding: 5px 0;
+  text-align: left;
 }
 
-.receipt-grid strong {
+.receipt-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  gap: 18px;
+  align-items: baseline;
+  padding: 12px 0;
+}
+
+.receipt-row + .receipt-row {
+  border-top: 1px solid #000;
+}
+
+.receipt-grid dt,
+.receipt-grid dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.receipt-grid dd {
   min-width: 0;
   overflow-wrap: anywhere;
-  text-align: center;
+  text-align: right;
 }
 
 .checkout-success .primary-action {
@@ -144,14 +167,7 @@
   }
 
   .receipt-grid {
-    grid-template-columns: minmax(0, 1fr) auto;
     width: 100%;
-    gap: 12px 18px;
-    text-align: left;
-  }
-
-  .receipt-grid strong {
-    text-align: right;
   }
 }
 

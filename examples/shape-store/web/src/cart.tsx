@@ -42,7 +42,7 @@ function ReceiptCartDrawer({ onClose, orderReceipt }: { onClose: () => void; ord
   return (
     <div className="overlay-layer" role="presentation">
       <button aria-label="Close cart" className="overlay-scrim" onClick={onClose} type="button" />
-      <aside aria-label="Cart and checkout" aria-modal="true" className="cart-drawer" role="dialog">
+      <aside aria-label="Cart and checkout" aria-modal="true" className="cart-drawer receipt-drawer" role="dialog">
         <OrderReceiptSummary onClose={onClose} orderReceipt={orderReceipt} />
       </aside>
     </div>
@@ -205,14 +205,16 @@ function OrderReceiptSummary({ onClose, orderReceipt }: { onClose: () => void; o
     <section className="receipt checkout-success" role="status" aria-label="Order receipt">
       <h2>ORDER CONFIRMED</h2>
       <p>YOUR ORDER HAS BEEN RESERVED.</p>
-      <div className="receipt-grid">
-        <span>ORDER</span>
-        <strong>{orderReceipt.id}</strong>
-        <span>STATUS</span>
-        <strong>{orderReceipt.statusLabel ?? "RESERVED"}</strong>
-        <span>TOTAL</span>
-        <strong>{formatCurrency(orderReceipt.totalCents)}</strong>
-      </div>
+      <dl className="receipt-grid">
+        <div className="receipt-row">
+          <dt>ORDER</dt>
+          <dd>{orderReceipt.id}</dd>
+        </div>
+        <div className="receipt-row">
+          <dt>TOTAL</dt>
+          <dd>{formatCurrency(orderReceipt.totalCents)}</dd>
+        </div>
+      </dl>
       <button className="primary-action" onClick={onClose} type="button">
         CONTINUE SHOPPING
       </button>
@@ -494,7 +496,7 @@ export function useCheckout(cartLines: CartLine[], totalCents: number, clearCart
         window.location.assign(result.checkoutUrl);
         return;
       }
-      setOrderReceipt({ id: result.orderId, statusLabel: "STRIPE DEMO", totalCents });
+      setOrderReceipt({ id: result.orderId, totalCents });
       setCheckoutFields(emptyCheckoutFields());
       clearCart();
     } catch {
