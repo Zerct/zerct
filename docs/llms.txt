@@ -414,9 +414,12 @@ After adding or upgrading Rust dependencies, run
 build without uploading or promoting, then reports
 `artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
 `tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
-and `dev.port_statuses` without starting child processes. Inspect
-`dev.port_statuses` before opening `frontend_url` so a port conflict does not
-send the browser to a different app.
+and `dev.port_statuses` without starting child processes. If a planned port is
+occupied, JSON mode returns `ok: false` and `dev.port_statuses[].owner` when
+the PID/command can be detected. Text mode refuses to start child processes
+until ports are free. Inspect `dev.port_statuses` before opening
+`frontend_url` so a port conflict does not send the browser to a stale worker
+or a different app.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
 Usage Caps.

@@ -70,6 +70,12 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
 
 ### Fixes
 
+- **Local dev port conflicts are explicit.** `tovuk dev --json` now returns
+  `ok: false` plus `dev.port_statuses[].owner` when a planned worker or
+  frontend port is already occupied and the PID/command can be detected.
+  Human-readable `tovuk dev` prints the owner row and exits before launching
+  child processes, so agents do not smoke-test a stale worker by accident. See
+  [Packages](/reference/packages).
 - **Homebrew install guidance.** Install instructions now show the correct
   tap and formula path. See [Packages](/reference/packages).
 - **Object storage meters in deploy dry run.** Object storage usage meters

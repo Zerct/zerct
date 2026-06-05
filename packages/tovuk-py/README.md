@@ -169,9 +169,11 @@ build without uploading or promoting, then reports
 `artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
 
 `tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
-and `port_statuses` without starting processes. Check `dev.port_statuses`
-before opening a local URL so agents do not inspect a different app already
-using the planned port.
+and `port_statuses` without starting processes. When a planned port is already
+occupied, JSON mode returns `ok: false` and `dev.port_statuses[].owner` when the
+PID/command can be detected. Text mode refuses to start child processes until
+ports are free, so agents do not inspect a stale worker or a different app
+already using the planned port.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.
