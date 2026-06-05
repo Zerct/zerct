@@ -12,6 +12,7 @@ tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 tovuk deploy list --json
 tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json
@@ -33,7 +34,7 @@ Resource references:
 - `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
 - `docs/reference/storage.mdx`: Object Storage account setup, Service context, uploads, downloads, multipart, and egress.
 - `docs/reference/domains.mdx`: Custom Domain account setup, Service context, DNS records, verification, and cleanup.
-- `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
+- `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, service snapshot, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
 - `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields, account setup, dry-run, usage, and usage-cap selection workflow.
 - `docs/reference/packages.mdx`: install channels, account setup checks, package parity, and native binary recovery.
