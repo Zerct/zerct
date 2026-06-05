@@ -415,8 +415,9 @@ OpenAPI catalog before retrying the command. If the API is available and a
 deploy fails, inspect build logs instead of changing status checks.
 
 Never print or commit secrets. Put secrets in Tovuk env vars with
-`tovuk env set --service <service> KEY="$KEY"` after loading the local shell
-variable from a password manager or secure prompt.
+`tovuk secrets set --service <service> KEY="$KEY"` after loading the local
+shell variable from a password manager or secure prompt. `tovuk env set`
+remains supported for existing scripts.
 
 When a free-tier limit blocks work, confirm account setup with
 `tovuk account show --json`, inspect `tovuk usage --json`, then run

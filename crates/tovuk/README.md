@@ -72,6 +72,9 @@ tovuk logs --build job_1 --limit 100 --json
 tovuk env list --service service_1
 tovuk env set --service service_1 API_KEY=value
 tovuk env delete --service service_1 API_KEY
+tovuk secrets list --service service_1
+tovuk secrets set --service service_1 API_KEY=value
+tovuk secrets delete --service service_1 API_KEY
 tovuk domains add --service service_1 api.example.com
 tovuk domains verify --service service_1 api.example.com
 tovuk storage list --service service_1 --json
