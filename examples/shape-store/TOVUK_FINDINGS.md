@@ -1649,7 +1649,8 @@ Verification:
   examples/shape-store/api/Cargo.toml --locked`.
 - Public Tovuk check passed with `npx -y tovuk@latest check --json`.
 - Tovuk dry-run passed with no required fixes or warnings.
-- Production deploy `deploy_63` / `job_64` succeeded and is live at
+- Production deploy `deploy_65` / `job_66` succeeded from commit
+  `57192c76be50cabde22d25913030df30ba390274` and is live at
   `https://shape-store.tovuk.app`.
 - Production API checks passed:
   - `GET /api/healthz` returned `{"ok":true}`.
