@@ -77,10 +77,13 @@ Use them after local checks, account setup, dry-run planning, and deploy attempt
     ```sh
     tovuk check --json
     tovuk deploy --wait --json
+    tovuk service show service_1 --json
     ```
 
-    Rerun checks after the fix, then redeploy with the same command once the
-    first issue is resolved.
+    Rerun checks after the fix, redeploy, then inspect the Service snapshot
+    before reading another build or deploy log. Confirm the latest deploy,
+    latest build, recent logs, `accountUsage`, `billingEstimate`, and next
+    actions.
   </Step>
 </Steps>
 
