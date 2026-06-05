@@ -7,7 +7,7 @@ description: "Use the Tovuk product catalog and account setup checks to choose W
 Use this page to choose the smallest Tovuk product surface before enabling
 capabilities, creating resources, or running paid work.
 
-## Product selection workflow
+## Product Selection Workflow
 
 <Steps>
   <Step title="Read the product catalog">
@@ -55,7 +55,7 @@ capabilities, creating resources, or running paid work.
   </Step>
 </Steps>
 
-## Catalog fields
+## Catalog Fields
 
 Tovuk exposes the product catalog through the CLI and API so agents can make
 deployment decisions without dashboard-only steps:
@@ -88,7 +88,8 @@ changes so billing and caps apply to the intended account.
 
 ## Product Guide
 
-Worker:
+### Worker
+
 Use for Rust public APIs, webhooks, auth callbacks, forms, queue handlers, and
 cron handlers. Avoid browser rendering, static files, large media storage, and
 single-key serialized state. Features include Rust-only HTTP routes under
@@ -96,14 +97,16 @@ single-key serialized state. Features include Rust-only HTTP routes under
 bindings, and request, CPU, and response transfer metering. Main meters:
 `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes`.
 
-Static Frontend:
+### Static Frontend
+
 Use for React, TanStack, Vite, Astro, Svelte, or plain HTML output served at
 `/`. Avoid JS or TS servers, SSR handlers, API routes, middleware, and secrets.
 Features include static asset serving, same-origin `/api/*` proxying to the
 Rust worker, `_headers`, `_redirects`, and frontend-only JavaScript or
 TypeScript source. Main meter: `static_transfer_bytes`.
 
-SQLite:
+### SQLite
+
 Use for service-local relational data, transactions, migrations, and data
 inspection. Create backups before destructive migrations. Avoid files, media,
 single-key counters, and cross-service shared storage. Features include
@@ -111,7 +114,8 @@ service-scoped bindings, transactional execution, row and storage metering,
 manual backups, restore, and storage guardrails. Main meters:
 `sqlite_rows_read`, `sqlite_rows_written`, and `sqlite_storage_bytes`.
 
-Object Storage:
+### Object Storage
+
 Use for user uploads, images, videos, documents, generated files, and downloads.
 Avoid relational data, secrets, and high-frequency tiny writes to one key. Main
 meters: `object_storage_bytes`, `object_storage_class_a_operations`, and
@@ -129,7 +133,8 @@ Pricing fields include
 `pricing.objectStorage.classBOverageUsdMicrosPerMillion`, and
 `pricing.objectStorage.egressOverageUsdMicrosPerTb`.
 
-State:
+### State
+
 Use for keyed realtime coordination, rooms, locks, counters, sessions, and
 per-tenant state. Use State alarms for per-object scheduled wake-ups and retrying
 object-specific work. Avoid general relational data, large files, and stateless
@@ -142,47 +147,55 @@ metering. Main meters: `state_requests`, `state_duration_gb_milliseconds`,
 request and duration allowances, storage, payload, WebSocket message size,
 soft per-object throughput, CPU, and alarm wall-time.
 
-KV:
+### KV
+
 Use for small config, sessions, feature flags, cache metadata, and rate-limit
 metadata. Avoid SQL queries, large file storage, and strongly serialized
 coordination. Main meters: `kv_reads`, `kv_writes`, `kv_deletes`, `kv_lists`,
 and `kv_storage_bytes`.
 
-Queues:
+### Queues
+
 Use for background jobs, webhook retries, email tasks, batching, and dead-letter
 recovery. Avoid synchronous reads, large payloads without object storage, and
 strict global ordering. Main meter: `queue_operations`.
 
-Cron:
+### Cron
+
 Use for UTC scheduled cleanup, polling, reports, and sync tasks. Avoid
 long-running workflows without checkpoints and user-facing request handling.
 Main meters: `worker_requests` and `worker_cpu_ms`.
 
-Service Bindings:
+### Service Bindings
+
 Use for private worker-to-worker calls between account-owned Rust Worker
 services. Avoid browser calls, cross-account public APIs, and retryable
 background work that belongs in Queues. Main meters: `worker_requests` and
 `worker_cpu_ms` on the called workers.
 
-Secrets:
+### Secrets
+
 Use for server-only environment variables, API keys, and build-time
 configuration that must not be committed. Avoid frontend public variables,
 large files, and secrets that should be encrypted before leaving the user
 system. Secrets have no direct usage meter; agents should use the worker and
 build environment limit fields.
 
-Custom Domains:
+### Custom Domains
+
 Use for production hostnames on public services with agent-verifiable DNS setup.
 Avoid pointing A records at origin hosts, using Tovuk-owned hostnames, or using
 domains for private service-to-service calls. Custom domains have no direct
 usage meter; agents should use the `customDomains` limit field.
 
-Logs:
+### Logs
+
 Use for build, deploy, and runtime diagnosis in agent repair loops and support
 tickets. Avoid long-term analytics storage, secrets, and full user payload
 dumps. Main meter: `log_events`.
 
-Builds:
+### Builds
+
 Use for pre-deploy quality gates, release builds, frontend builds, and deploy
 promotion. Avoid runtime request handling, background jobs, and artifact storage
 after deploy. Main meter: `build_minutes`. Agent-readable limits include build
@@ -190,7 +203,8 @@ CPU in millicores, memory, disk, duration, concurrency, environment variable
 count, and environment variable size, plus deploy hook rates per service and per
 account.
 
-Usage Caps:
+### Usage Caps
+
 Use for load tests, launch guardrails, and paid-usage hard stops. Avoid using
 caps as a replacement for code-level rate limits or as a way to hide inefficient
 code. Main meters: any supported meter from `tovuk pricing --json`.
