@@ -25,11 +25,26 @@ image processing, cleanup, and other tasks that can run after the response.
   </Step>
 
   <Step title="Enable and create queues">
-    Set `[capabilities].queue = true` in `tovuk.toml`, then run
-    `tovuk deploy --dry-run --json` so the agent can confirm Queue meters,
-    limits, and required fixes before provisioning resources. Create the
-    dead-letter queue before the primary queue when failed work needs a
-    separate recovery path.
+    If `tovuk service show --json` does not include `"queue": true`, enable
+    the explicit capability in `tovuk.toml` before relying on background jobs
+    for that Service.
+
+    ```toml
+    [capabilities]
+    queue = true
+    ```
+
+    Then run a dry run so agents can inspect `capabilities.enabled`,
+    `capabilities.disabled`, `meters`, `limits`, `billingEstimate`, and
+    `nextActions` before creating queues, sending jobs, or tuning retry and
+    dead-letter settings.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+
+    Create the dead-letter queue before the primary queue when failed work
+    needs a separate recovery path.
   </Step>
 
   <Step title="Produce work">
@@ -59,6 +74,7 @@ image processing, cleanup, and other tasks that can run after the response.
 ```sh
 tovuk account show --json
 tovuk service show service_1 --json
+tovuk deploy --dry-run --json
 tovuk queue create --service service_1 failed_jobs --json
 tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
 tovuk queue send --service service_1 jobs '{"kind":"welcome","user_id":"user_1"}' --json
