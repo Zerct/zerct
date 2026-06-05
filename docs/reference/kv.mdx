@@ -26,10 +26,22 @@ queries and Object Storage for large files.
   </Step>
 
   <Step title="Enable KV for the Service">
-    Set `[capabilities].kv = true` in `tovuk.toml`, then run
-    `tovuk deploy --dry-run --json` so the agent can confirm enabled
-    capabilities, meters, limits, and required fixes before provisioning the
-    namespace.
+    If `tovuk service show --json` does not include `"kv": true`, enable the
+    explicit capability in `tovuk.toml` before relying on KV namespaces for
+    that Service.
+
+    ```toml
+    [capabilities]
+    kv = true
+    ```
+
+    Then run a dry run so agents can inspect `capabilities.enabled`,
+    `capabilities.disabled`, `meters`, `limits`, `billingEstimate`, and
+    `nextActions` before creating namespaces or mutating keys.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
   </Step>
 
   <Step title="Create the namespace">
@@ -67,6 +79,9 @@ queries and Object Storage for large files.
 ## CLI workflow
 
 ```sh
+tovuk account show --json
+tovuk service show service_1 --json
+tovuk deploy --dry-run --json
 tovuk kv create --service service_1 CACHE --json
 tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --metadata '{"kind":"profile"}' --ttl 3600 --json
 tovuk kv get --service service_1 CACHE user:1 --json
