@@ -104,9 +104,10 @@ update Queue retries, retention, batch size, batch timeout, and dead-letter
 Queue settings, read Queue messages, read Queue metrics, send one Queue message,
 and send one Queue batch with `queue_operations` metering.
 It can update Cron schedules, pause Cron triggers, and resume Cron triggers
-through the same API routes as the CLI. It can list State objects, list State
-keys, read State values, write State values, delete State values, read State
-alarms, set State alarms, and delete State alarms with `state_requests`,
+through the same API routes as the CLI. State classes are Service-scoped keyed
+objects accessed from the Rust Worker runtime. The dashboard can list State objects,
+list State keys, read State values, write State values, delete State values,
+read State alarms, set State alarms, and delete State alarms with `state_requests`,
 `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
 `state_sqlite_rows_written`, and
 `state_sqlite_storage_bytes` metering. Use CLI bulk commands for bulk KV reads,
