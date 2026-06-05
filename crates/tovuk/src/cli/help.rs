@@ -101,7 +101,7 @@ Usage:
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
   - Use tovuk check --json before deploy; filter failed checks with checks[].status == "failed" and follow agent_instruction.
-  - Use tovuk dev --json to inspect local worker/frontend commands, ports, port_statuses, and env wiring without starting processes; use tovuk dev --output text to run them.
+  - Use tovuk dev --json to inspect local worker/frontend commands, ports, port_statuses, owner PID/command, and env wiring without starting processes; ok=false means a planned port is occupied. Use tovuk dev --output text to run only after ports are free.
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
   - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
   - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
