@@ -25,9 +25,9 @@ image processing, cleanup, and other tasks that can run after the response.
   </Step>
 
   <Step title="Enable and create queues">
-    If `tovuk service show --json` does not include `"queue": true`, enable
-    the explicit capability in `tovuk.toml` before relying on background jobs
-    for that Service.
+    If `tovuk service show service_1 --json` does not include
+    `"queue": true`, enable the explicit capability in `tovuk.toml` before
+    relying on background jobs for that Service.
 
     ```toml
     [capabilities]
