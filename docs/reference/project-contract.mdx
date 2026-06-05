@@ -181,7 +181,7 @@ support = true
 abuse = true
 
 [build]
-check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+check = "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 command = "npm run build"
 output = "dist"
 ```
@@ -221,7 +221,7 @@ health = "/api/healthz"
 
 [frontend]
 root = "web"
-check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+check = "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 build = "npm run build"
 output = "dist"
 ```

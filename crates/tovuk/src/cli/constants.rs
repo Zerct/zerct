@@ -1,4 +1,4 @@
-pub(crate) const VERSION: &str = "0.1.95";
+pub(crate) const VERSION: &str = "0.1.96";
 pub(crate) const DEFAULT_API_URL: &str = "https://api.tovuk.com";
 pub(crate) const ARCHIVE_LIMIT_BYTES: usize = 48 * 1024 * 1024;
 pub(crate) const DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS: u64 = 900;
@@ -31,8 +31,7 @@ pub(crate) const RUST_STRICT_CLIPPY_DENY_LINTS: &[&str] = &[
 ];
 
 pub(crate) const DEFAULT_RUST_CHECK_COMMAND: &str = "cargo fmt --all --check && cargo check --locked --release --all-targets --all-features && cargo test --locked --release --all-targets --all-features && cargo clippy --locked --release --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic -D clippy::dbg_macro -D clippy::todo -D clippy::unimplemented -D clippy::panic -D clippy::unwrap_used -D clippy::expect_used -D clippy::large_futures -D clippy::large_include_file -D clippy::large_stack_frames -D clippy::mem_forget -D clippy::rc_buffer -D clippy::rc_mutex -D clippy::redundant_clone -D clippy::clone_on_ref_ptr";
-pub(crate) const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str =
-    "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
+pub(crate) const DEFAULT_NPM_FRONTEND_CHECK_COMMAND: &str = "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint";
 pub(crate) const DEFAULT_BUN_FRONTEND_CHECK_COMMAND: &str =
     "bun ci && bun run typecheck && bun run lint";
 

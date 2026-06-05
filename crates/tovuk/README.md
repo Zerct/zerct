@@ -148,9 +148,13 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
+`tovuk check --json` returns top-level `ok` plus `checks[]` entries with
+`ok`, `status`, `message`, and `agent_instruction`, so agents can filter
+`checks[] | select(.status == "failed")`.
 `tovuk service status <service> --json` is the compact post-deploy status
-check for one service. It returns runtime status, latest deploy, latest build,
-URL, and a `live` boolean.
+check for one service. It returns top-level `ok`, `url`, and
+`agent_instruction`, plus runtime status, latest deploy, latest build, URL, and
+a `live` boolean.
 `tovuk service show <service> --json` includes `accountUsage` and
 `billingEstimate` beside capabilities, service resources, recent deploys,
 builds, logs, env names, domains, and next actions.
