@@ -68,16 +68,19 @@ one place so humans and agents can launch with less guesswork.
     them.
   </Step>
 
-  <Step title="Deploy and keep ids">
+  <Step title="Deploy, inspect, and keep ids">
     ```sh
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     tovuk deploy list --json
     tovuk deploy show <deploy_id> --json
     ```
 
     Preserve the deploy id, `build_job.id`, and `final_build.status` from the
-    deploy response. If a newer deploy supersedes queued work, cancel the stale
-    deploy with `tovuk deploy cancel <deploy_id> --json`.
+    deploy response. Use the Service snapshot to keep the runtime URL,
+    resources, limits, `accountUsage`, `billingEstimate`, and next actions with
+    the deploy evidence. If a newer deploy supersedes queued work, cancel the
+    stale deploy with `tovuk deploy cancel <deploy_id> --json`.
   </Step>
 
   <Step title="Separate platform status from project failures">
@@ -139,6 +142,7 @@ Review `missingConfig`, `requiredFixes`, `meterPlan`, `limits`, `usage`, and `bi
 Run `tovuk pricing --json` and `tovuk usage --json`, then set hard caps for expected load.
 Verify required resources, secrets, and domains.
 Deploy with `tovuk deploy --wait --json`.
-Keep the deploy id, `build_job.id`, `final_build.status`, and first actionable log line.
+Run `tovuk service show <service> --json`.
+Keep the deploy id, `build_job.id`, `final_build.status`, Service snapshot, and first actionable log line.
 If the API is unavailable, check `/v1/status`; otherwise use build and service logs for project failures.
 ```
