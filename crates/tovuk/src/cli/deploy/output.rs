@@ -14,7 +14,9 @@ pub(super) fn print_deploy_result(response: &Value, cli: &CliOptions) -> Result<
     if cli.output.json {
         return print_json(response);
     }
-    println!("queued {}", nested_string(response, &["build_job", "id"]));
+    if let Some(line) = deploy_status_line(response) {
+        println!("{line}");
+    }
     println!("service {}", service_field(response, "id"));
     println!("url {}", service_field(response, "url"));
     println!(
@@ -57,4 +59,38 @@ pub(super) fn print_workspace_deploy_results(
 
 fn service_field(response: &Value, field: &str) -> String {
     nested_string(response, &["service", field])
+}
+
+fn deploy_status_line(response: &Value) -> Option<String> {
+    let build_id = nested_string(response, &["build_job", "id"]);
+    let final_status = nested_string(response, &["final_build", "status"]);
+    if !final_status.is_empty() {
+        return None;
+    }
+    Some(format!("queued {build_id}"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::deploy_status_line;
+    use serde_json::json;
+
+    #[test]
+    fn deploy_status_line_reports_queued_without_wait_result() {
+        assert_eq!(
+            deploy_status_line(&json!({ "build_job": { "id": "job_1" } })),
+            Some("queued job_1".to_owned())
+        );
+    }
+
+    #[test]
+    fn deploy_status_line_omits_duplicate_final_build_after_wait() {
+        assert_eq!(
+            deploy_status_line(&json!({
+                "build_job": { "id": "job_1" },
+                "final_build": { "id": "job_1", "status": "succeeded" }
+            })),
+            None
+        );
+    }
 }
