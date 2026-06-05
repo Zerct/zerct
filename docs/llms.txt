@@ -429,7 +429,8 @@ Usage Caps.
 
 Use `GET /v1/status` only when Tovuk itself appears unavailable. If a Tovuk CLI
 command returns `api_unreachable`, retry it, then check `/v1/status` before
-changing project code. When status is healthy, call
+changing project code. Healthy status currently reports control-plane SQLite
+and Redis dependency checks. When status is healthy, call
 `GET /v1/capabilities` to confirm the current public product, meter, docs, and
 OpenAPI catalog before retrying the command. If the API is available and a
 deploy fails, inspect build logs instead of changing status checks.
