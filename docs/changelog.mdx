@@ -151,6 +151,9 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
 
 ### Fixes
 
+- **Deploy wait fails on failed builds.** `tovuk deploy --wait` now exits with
+  an agent-readable error when the remote build ends as `failed` or `canceled`,
+  pointing agents to `tovuk logs --build <build_id> --limit 100 --json`.
 - **Clearer deploy wait summary.** `tovuk deploy --wait` now streams the final
   build status without repeating `queued <job>` after a successful wait.
 - **Reject unknown CLI flags.** The CLI now errors clearly instead of silently
