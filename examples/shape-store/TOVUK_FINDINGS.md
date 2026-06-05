@@ -1850,6 +1850,19 @@ Verification:
   `output = "dist"`.
 - The release fix was added before re-running the public pipeline so
   `tovuk@latest` can be verified against `0.1.98` after publish.
+- After the `0.1.98` release:
+  - GitHub CI, npm publish, crates.io publish, PyPI publish, and native binary
+    publish all completed successfully for commit
+    `b23431a4b0c74f3958ab5c71d6329043a0e12c16`.
+  - `npm view tovuk version` returned `0.1.98`.
+  - `npx -y tovuk@0.1.98 --version` and `npx -y tovuk@latest --version`
+    both returned `0.1.98`.
+  - public `tovuk@0.1.98 new <imported-next>` generated
+    `output = "out"`.
+  - public `tovuk@0.1.98 check <imported-next> --json` returned the new
+    `Next static export` failure with the first `agent_instruction` pointing to
+    `next.config.mjs`, `output: "export"`, `out`, and moving server logic to
+    the Rust worker.
 
 ## Remaining Tovuk friction
 
