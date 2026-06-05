@@ -350,10 +350,10 @@ tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeplo
 
 Without `--json`, `tovuk service list` prints a compact table with Service
 kind, runtime status, URL, enabled and disabled capabilities, and resource
-counts. `tovuk service status --json` returns top-level `ok`, `url`, and
-`agent_instruction` fields for smoke tests; text mode prints only the
-live/deploy/build summary. `tovuk service show` prints the broader Service
-snapshot.
+counts. `tovuk service status <service> --json` returns top-level `ok`, `url`,
+and `agent_instruction` fields for smoke tests; text mode prints only the
+live/deploy/build summary. `tovuk service show <service>` prints the broader
+Service snapshot.
 
 Dashboard Overview is available at `https://tovuk.com/account` and
 `https://tovuk.com/<handle>`. When no Services exist, it shows first Service
