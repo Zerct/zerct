@@ -58,7 +58,7 @@ fn wait_for_build(cli: &CliOptions, token: &str, build_id: &str) -> Result<Value
             );
             last_status.clone_from(&status);
         }
-        if ["succeeded", "failed", "canceled"].contains(&status.as_str()) {
+        if let Some(build) = terminal_build_result(cli, build_id, &status, build)? {
             return Ok(build);
         }
         thread::sleep(Duration::from_secs(3));
@@ -69,4 +69,86 @@ fn wait_for_build(cli: &CliOptions, token: &str, build_id: &str) -> Result<Value
         format!("Run `tovuk logs --build {build_id}` to continue watching."),
         cli.output.json,
     ))
+}
+
+fn terminal_build_result(
+    cli: &CliOptions,
+    build_id: &str,
+    status: &str,
+    build: Value,
+) -> Result<Option<Value>> {
+    match status {
+        "succeeded" => Ok(Some(build)),
+        "failed" | "canceled" => Err(agent_error(
+            format!("build_{status}"),
+            format!("Build {build_id} {status}."),
+            format!(
+                "Run `tovuk logs --build {build_id} --limit 100 --json`, fix the first actionable error, then run `tovuk deploy --wait --json` again."
+            ),
+            cli.output.json,
+        )),
+        _ => Ok(None),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::terminal_build_result;
+    use crate::cli::args::CliOptions;
+    use serde_json::json;
+
+    #[test]
+    fn terminal_build_result_returns_succeeded_build() {
+        let build = json!({"id":"job_1","status":"succeeded"});
+        let result =
+            terminal_build_result(&CliOptions::default(), "job_1", "succeeded", build.clone())
+                .ok()
+                .flatten();
+
+        assert_eq!(result, Some(build));
+    }
+
+    #[test]
+    fn terminal_build_result_errors_on_failed_build() {
+        let error = terminal_build_result(
+            &CliOptions::default(),
+            "job_1",
+            "failed",
+            json!({"id":"job_1","status":"failed"}),
+        )
+        .err();
+
+        assert_eq!(
+            error.as_ref().map(|error| error.payload().code.as_str()),
+            Some("build_failed")
+        );
+        assert_eq!(
+            error.as_ref().map(|error| error.payload().message.as_str()),
+            Some("Build job_1 failed.")
+        );
+        assert_eq!(
+            error
+                .as_ref()
+                .and_then(|error| error.payload().agent_instruction.as_deref()),
+            Some(
+                "Run `tovuk logs --build job_1 --limit 100 --json`, fix the first actionable error, then run `tovuk deploy --wait --json` again."
+            )
+        );
+    }
+
+    #[test]
+    fn terminal_build_result_errors_on_canceled_build() {
+        let error = terminal_build_result(
+            &CliOptions::default(),
+            "job_1",
+            "canceled",
+            json!({"id":"job_1","status":"canceled"}),
+        )
+        .err();
+
+        assert_eq!(
+            error.as_ref().map(|error| error.payload().code.as_str()),
+            Some("build_canceled")
+        );
+    }
 }

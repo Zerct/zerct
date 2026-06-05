@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_79`, `job_80`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_81`, `job_82`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -32,6 +32,9 @@ Date: 2026-06-05
 - Added and released Tovuk CLI `0.1.99` during this pass to show failed
   `tovuk check` fix instructions in normal text output and avoid reporting a
   clean Git commit SHA for dirty-worktree source archives.
+- Prepared Tovuk CLI `0.1.100` during this pass so `tovuk deploy --wait` exits
+  with an agent-readable error when the remote build ends as `failed` or
+  `canceled`.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
@@ -53,9 +56,9 @@ Date: 2026-06-05
   filling the available column width.
 - Removed product-reference-specific `YZY` checkout copy from the example. The
   cart now says `SHOPPING BAG` and `DISCOUNT CODE`.
-- Simplified the mobile order-confirmed state into a focused full-screen
-  receipt with no bag header, no provider-specific status copy, and compact
-  two-row order/total receipt rows.
+- Simplified the mobile order-confirmed state into a compact centered receipt
+  with no bag header, no provider-specific status copy, and short order/total
+  label-value rows.
 - Hardened `POST /api/orders` so manual reservations use the same typed,
   catalog-backed parser as Stripe Checkout, reject missing email and unknown
   products, and return the server-computed order total.
@@ -118,6 +121,8 @@ Production deploy and API checks:
 - Latest production deploy passed for `deploy_77` / `job_78`, using public
   Tovuk CLI `0.1.99`.
 - Latest production deploy passed for `deploy_79` / `job_80`, using public
+  Tovuk CLI `0.1.99`.
+- Latest production deploy passed for `deploy_81` / `job_82`, using public
   Tovuk CLI `0.1.99`.
 - Latest artifact dry-run passed with `services[0].artifactCheck.status:
   "passed"`, gzip size `935494`, and limit `3145728`.
@@ -2081,6 +2086,42 @@ Verification:
   locally.
 - `go run scripts/check-public-contracts/*.go cli-contract` passed locally
   after the README wording fix.
+
+### 51. `deploy --wait` treated failed remote builds as successful terminal results
+
+Failure/friction:
+
+- The CLI waited for terminal build statuses, but returned the build object for
+  `succeeded`, `failed`, and `canceled`.
+- That meant a user or agent running `tovuk deploy --wait --json` could receive
+  a zero-exit command even though the remote build failed or was canceled.
+- This is high-friction for agents because the command outcome contradicts the
+  repair path: agents should immediately inspect build logs and fix the first
+  actionable error.
+
+Fix included in this pass:
+
+- Changed `tovuk deploy --wait` so only `succeeded` returns the final build.
+- `failed` and `canceled` now return agent-readable errors with `build_failed`
+  or `build_canceled` and a direct `tovuk logs --build <id> --limit 100 --json`
+  repair command.
+- Bumped the public CLI package metadata to `0.1.100` so the fix can publish
+  through npm, PyPI, crates.io, native binaries, and Homebrew metadata.
+
+Verification:
+
+- Added unit coverage for succeeded, failed, and canceled terminal build
+  statuses.
+- Local package-version consistency passed for `0.1.100`.
+- `cargo test --manifest-path crates/tovuk/Cargo.toml --locked` passed with
+  66 tests.
+- `cargo clippy --manifest-path crates/tovuk/Cargo.toml --locked --release
+  --all-targets --all-features -- -D warnings` passed.
+- `./scripts/check-all.sh` passed.
+- Production Browser express checkout reached `ORDER CONFIRMED` on
+  `https://shape-store.tovuk.app` at mobile `320x568`; the same receipt state
+  had no horizontal overflow at tablet `768x1024` or desktop `1440x900`.
+- Production Browser console logs were clean for that checkout receipt flow.
 
 ## Remaining Tovuk friction
 
