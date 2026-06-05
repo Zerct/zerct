@@ -9,7 +9,7 @@ deliver background jobs to Rust worker handlers. Use them for emails, webhook
 retries, image processing, cleanup, and other tasks that can run after the
 response.
 
-## Queue flow
+## Queue Workflow
 
 <Steps>
   <Step title="Confirm account and service context">
@@ -71,7 +71,7 @@ response.
   </Step>
 </Steps>
 
-## CLI workflow
+## CLI Workflow
 
 ```sh
 tovuk account show --json
@@ -118,7 +118,7 @@ The dashboard uses these Queue API routes:
 Queue consumers are Rust worker routes at `POST /.tovuk/queues/<queue>`.
 Public traffic to `/.tovuk/*` is blocked.
 
-## Meters and caps
+## Meters and Caps
 
 Queue usage is metered as `queue_operations`.
 
