@@ -27,10 +27,15 @@ func checkCLIContract() {
 
 	for _, command := range []string{
 		"new", "check", "login", "deploy", "pricing", "usage", "service", "logs",
-		"sqlite", "kv", "queue", "cron", "state", "binding", "limits", "env",
+		"sqlite", "kv", "queue", "cron", "state", "binding", "limits", "env", "secrets",
 		"domains", "storage", "billing", "support", "abuse", "nodes",
 	} {
 		requireContains(cargoCLI, fmt.Sprintf("%q", command), fmt.Sprintf("native command %s", command))
+	}
+
+	for _, source := range []string{cargoReadme, pythonReadme} {
+		requireContains(source, "tovuk secrets set", "agentic secret set command")
+		requireContains(source, "tovuk secrets delete", "agentic secret delete command")
 	}
 
 	for _, source := range []string{cargoCLI, cargoReadme, npmReadme, pythonReadme, homebrewFormula} {

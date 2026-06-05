@@ -1,0 +1,9 @@
+.DS_Store
+.playwright-cli/
+output/playwright/
+api/target/
+target/
+web/dist/
+web/.fallow/
+web/node_modules/
+node_modules/

@@ -68,6 +68,10 @@ Usage:
   tovuk env list --service <service> [--api <url>] [--json]
   tovuk env set --service <service> KEY=value [--api <url>] [--json]
   tovuk env delete --service <service> KEY [--api <url>] [--json]
+  tovuk secrets list --service <service> [--api <url>] [--json]
+  tovuk secrets set --service <service> KEY=value [--api <url>] [--json]
+  tovuk secrets put --service <service> KEY=value [--api <url>] [--json]
+  tovuk secrets delete --service <service> KEY [--api <url>] [--json]
   tovuk domains list --service <service> [--api <url>] [--json]
   tovuk domains add --service <service> <domain> [--api <url>] [--json]
   tovuk domains verify --service <service> <domain> [--api <url>] [--json]
@@ -106,6 +110,7 @@ Agent contract:
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
   - Use tovuk sqlite batch for migrations and imports that need multiple statements in one transaction.
+  - Use tovuk secrets set --service <service> KEY=value for server-only secrets; tovuk env set remains supported as the same API surface.
   - Create SQLite backups before migrations or destructive writes; restore from CLI/API without dashboard access, then verify with read queries.
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.

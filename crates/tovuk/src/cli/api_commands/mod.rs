@@ -17,7 +17,7 @@ pub(crate) use abuse::abuse_command;
 pub(crate) use account::account_command;
 pub(crate) use billing::billing_command;
 pub(crate) use domains::domains_command;
-pub(crate) use env::env_command;
+pub(crate) use env::{env_command, secrets_command};
 pub(crate) use generic::{pricing, print_authenticated};
 pub(crate) use http::{api_request, payment_required_agent_error};
 pub(crate) use lists::service_command;
