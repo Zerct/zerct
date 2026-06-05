@@ -1820,6 +1820,37 @@ Verification:
   category/product-code grid, stable product `aria-label` values, no horizontal
   overflow, and product detail text revealed after clicking `YS-02`.
 
+### 46. Publish workflows could silently skip a CLI fix on main
+
+Failure/friction:
+
+- After the Next static-export fix reached `main`, every publish workflow
+  reported success, but `npx -y tovuk@latest` still behaved like the old CLI.
+- The npm publish workflow had detected that `tovuk@0.1.97` already existed and
+  skipped every package/build/publish verification step while still reporting a
+  successful workflow.
+- For an AI agent, this is a dangerous false positive: the repo is green, but
+  the public command users run does not include the fix.
+
+Fix included in Tovuk release tooling:
+
+- Bumped public package/version metadata to `0.1.98` across the Rust crate, npm
+  package, Python package, CLI constant, package locks, and Homebrew formula.
+- Patched npm, crates.io, PyPI, and native-binary publish workflows so pushes
+  that touch CLI release paths fail when the target version or asset already
+  exists.
+- Manual workflow dispatches can still observe an existing version for rerun
+  purposes, but normal main pushes now force a version bump instead of silently
+  skipping publication.
+
+Verification:
+
+- `npm view tovuk version` showed `0.1.97` before the version bump, and a public
+  `npx -y tovuk@latest new <imported-next>` smoke test still generated
+  `output = "dist"`.
+- The release fix was added before re-running the public pipeline so
+  `tovuk@latest` can be verified against `0.1.98` after publish.
+
 ## Remaining Tovuk friction
 
 ### High

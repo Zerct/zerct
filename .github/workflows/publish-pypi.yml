@@ -61,6 +61,7 @@ jobs:
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import tomllib
+          import os
           import urllib.error
           import urllib.request
 
@@ -74,6 +75,8 @@ jobs:
               else:
                   raise
           else:
+              if os.environ.get("GITHUB_EVENT_NAME") == "push":
+                  raise SystemExit(f"tovuk {version} already exists on PyPI. Bump every public package version before pushing CLI changes.")
               print("exists=true")
           PY
       - name: Select PyPI publish auth
