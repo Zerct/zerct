@@ -1594,6 +1594,79 @@ Verification:
   live storefront still has 50 products, 6 desktop columns, no API fallback, no
   overflow, and `YS-02` gallery image 2 centered at `720`.
 
+### 43. Product detail needed keyboard parity with the reference flow
+
+Failure/friction:
+
+- Browser and user testing found that pressing `Escape` in product-detail mode
+  did not return to the product grid.
+- Left and right arrow keys also did not move between the selected product's
+  own gallery images.
+- This was a real desktop UX gap: the visible arrow controls worked, but
+  keyboard users and agents simulating keyboard input could not exercise the
+  same gallery flow.
+
+Fix included in the shape-store example:
+
+- Product detail now registers scoped keyboard handlers only while the product
+  view is active and no menu/cart dialog is open.
+- `Escape` exits product-detail mode and returns to the product grid.
+- `ArrowRight` and `ArrowLeft` move through the selected product's gallery
+  images without switching products.
+- The implementation uses a direct key-to-handler map so the strict frontend
+  health gate stays below the configured complexity threshold.
+
+Tovuk/agent friction found and fixed during this pass:
+
+- `npx -y tovuk@latest check --json` caught the first implementation as a
+  frontend lint failure: `fallow health` reported one function above the CRAP
+  threshold.
+- The agent instruction was actionable: run `npm run lint`, fix the error, then
+  redeploy.
+- I fixed the example code instead of weakening the lint rule, then reran the
+  same public Tovuk check path successfully.
+
+Cloudflare product comparison:
+
+- Cloudflare's current Wrangler docs emphasize preflight validation and
+  framework-aware deploy flows: Wrangler can
+  [auto-configure projects with `npx wrangler deploy`](https://developers.cloudflare.com/changelog/post/2026-02-25-wrangler-autoconfig-ga/),
+  and its
+  [`secrets.required` config validates required secrets during local development and deploy](https://developers.cloudflare.com/changelog/post/2026-03-24-secrets-config-property/).
+- Tovuk's explicit `tovuk.toml`, `tovuk check --json`, and deploy dry-run
+  already give agents strong gates. The next comparable product improvement is
+  still static frontend framework detection, especially a Next.js static-export
+  path that tells users clearly when SSR/API routes must move to the Rust
+  worker.
+
+Verification:
+
+- Local frontend gates passed:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Local API unit tests passed with `cargo test --manifest-path
+  examples/shape-store/api/Cargo.toml --locked`.
+- Public Tovuk check passed with `npx -y tovuk@latest check --json`.
+- Tovuk dry-run passed with no required fixes or warnings.
+- Production deploy `deploy_63` / `job_64` succeeded and is live at
+  `https://shape-store.tovuk.app`.
+- Production API checks passed:
+  - `GET /api/healthz` returned `{"ok":true}`.
+  - `GET /api/products` returned 50 products.
+  - demo-mode `POST /api/checkout` returned an order id.
+- Production Browser checks passed:
+  - desktop `1440x900`: 50 products, 6 columns, no API fallback, no overflow;
+    `ArrowRight` moves `YS-02` image 1 to image 2, `ArrowLeft` moves back, and
+    `Escape` returns to the 50-product grid.
+  - tablet `768x1024`: 50 products, 6 columns, no overflow; keyboard gallery
+    and `Escape` behavior passed.
+  - mobile `390x844`: 50 products, 3 columns, no overflow; keyboard gallery and
+    `Escape` behavior passed.
+  - visible next-arrow click still moves `YS-02` image 1 to image 2.
+  - selecting size `9` shows `ADDED TO BAG`, increments the cart count to `1`,
+    and runs `cart-count-bump`.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1601,9 +1674,10 @@ Verification:
 - `--json` auth flows still need a more agent-readable shape. Agents need `login_url`, `user_code`, expiry, and current wait state as JSON before any long wait.
 - Generated fullstack templates still make ordinary API work harder than necessary because the Rust worker is a raw TCP HTTP server. It is lightweight, but agents must hand-build routing, body parsing, CORS, and JSON handling.
 - New static Next.js support is static-export only. That is correct for the current Tovuk runtime model, but users coming from Vercel will expect SSR and API routes unless docs and check errors keep saying "move server logic to Rust".
-- Local fullstack dev can silently test against a stale worker process when the
-  configured port is already occupied. `tovuk dev` should surface the owning
-  PID/command and offer an explicit replace/reuse path.
+- Static frontend framework detection is still behind the Cloudflare Wrangler
+  auto-config bar. A Next.js static export should be detectable from
+  `package.json`, and Tovuk should emit the exact config/build/output changes
+  needed before deploy.
 
 ### Medium
 

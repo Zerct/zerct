@@ -53,7 +53,9 @@ export function App() {
       />
       <ApiStateBanner loadState={loadState} />
       <ProductGrid
+        isKeyboardEnabled={!isCartOpen && !isMenuOpen}
         onAdd={addProduct}
+        onProductClose={closeProduct}
         products={visibleProducts}
         selectedCategory={selectedCategory}
         selectedProduct={selectedProduct}

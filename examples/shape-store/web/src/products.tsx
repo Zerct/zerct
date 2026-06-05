@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { formatCurrency, productSizes, type Category, type Product } from "./store";
 import { getProductTransitionStyle } from "./transitions";
 
 type ProductGridProps = {
+  isKeyboardEnabled: boolean;
   onAdd: (productId: string, selectedSize?: string) => void;
+  onProductClose: () => void;
   onViewProduct: (product: Product) => void;
   products: Product[];
   selectedCategory: Category;
@@ -11,7 +13,9 @@ type ProductGridProps = {
 };
 
 type ProductFocusViewProps = {
+  isKeyboardEnabled: boolean;
   onAdd: (productId: string, selectedSize?: string) => void;
+  onProductClose: () => void;
   product: Product;
 };
 
@@ -23,8 +27,12 @@ type GalleryItem = {
   position: GalleryPosition;
 };
 
+type ProductKeyboardKey = "ArrowLeft" | "ArrowRight" | "Escape";
+
 export function ProductGrid({
+  isKeyboardEnabled,
   onAdd,
+  onProductClose,
   onViewProduct,
   products,
   selectedCategory,
@@ -33,7 +41,14 @@ export function ProductGrid({
   const productFocus = getProductFocus(products, selectedProduct);
 
   if (productFocus !== null) {
-    return <ProductFocusView onAdd={onAdd} product={productFocus.product} />;
+    return (
+      <ProductFocusView
+        isKeyboardEnabled={isKeyboardEnabled}
+        onAdd={onAdd}
+        onProductClose={onProductClose}
+        product={productFocus.product}
+      />
+    );
   }
 
   return (
@@ -76,7 +91,9 @@ function ProductFigure({ loading = "lazy", product }: { loading?: "eager" | "laz
 }
 
 function ProductFocusView({
+  isKeyboardEnabled,
   onAdd,
+  onProductClose,
   product,
 }: ProductFocusViewProps) {
   const gallery = useProductGallery(product);
@@ -86,6 +103,14 @@ function ProductFocusView({
   useEffect(() => {
     setIsSizePickerOpen(false);
   }, [product.id]);
+
+  useProductKeyboardControls({
+    hasMultipleImages: gallery.hasMultipleImages,
+    isEnabled: isKeyboardEnabled,
+    onNext: gallery.showNext,
+    onProductClose,
+    onPrevious: gallery.showPrevious,
+  });
 
   function addSelectedSize(selectedSize: string) {
     onAdd(product.id, selectedSize);
@@ -134,6 +159,14 @@ function useProductGallery(product: Product) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const items = getGalleryItems(images, selectedImageIndex);
   const hasMultipleImages = images.length > 1;
+  const showNext = useCallback(
+    () => setSelectedImageIndex((currentIndex) => wrappedGalleryIndex(images, currentIndex + 1)),
+    [images],
+  );
+  const showPrevious = useCallback(
+    () => setSelectedImageIndex((currentIndex) => wrappedGalleryIndex(images, currentIndex - 1)),
+    [images],
+  );
 
   useEffect(() => {
     setSelectedImageIndex(0);
@@ -145,8 +178,8 @@ function useProductGallery(product: Product) {
     items,
     selectedImageIndex,
     selectImage: setSelectedImageIndex,
-    showNext: () => setSelectedImageIndex((currentIndex) => wrappedGalleryIndex(images, currentIndex + 1)),
-    showPrevious: () => setSelectedImageIndex((currentIndex) => wrappedGalleryIndex(images, currentIndex - 1)),
+    showNext,
+    showPrevious,
   };
 }
 
@@ -170,6 +203,44 @@ function useAddFeedback(productId: string) {
     key,
     show: () => setKey(Date.now()),
   };
+}
+
+function useProductKeyboardControls({
+  hasMultipleImages,
+  isEnabled,
+  onNext,
+  onProductClose,
+  onPrevious,
+}: {
+  hasMultipleImages: boolean;
+  isEnabled: boolean;
+  onNext: () => void;
+  onProductClose: () => void;
+  onPrevious: () => void;
+}) {
+  useEffect(() => {
+    if (!isEnabled) {
+      return undefined;
+    }
+
+    const keyboardHandlers = {
+      Escape: onProductClose,
+      ...(hasMultipleImages ? { ArrowLeft: onPrevious, ArrowRight: onNext } : {}),
+    } satisfies Partial<Record<ProductKeyboardKey, () => void>>;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      const handler = keyboardHandlers[event.key as ProductKeyboardKey];
+      if (handler === undefined) {
+        return;
+      }
+
+      event.preventDefault();
+      handler();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hasMultipleImages, isEnabled, onNext, onProductClose, onPrevious]);
 }
 
 function GalleryImageButton({
