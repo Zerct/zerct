@@ -1,11 +1,13 @@
 ---
-title: "Manage Background Jobs and Queues"
+title: "Manage Service Queues and Background Jobs"
 sidebarTitle: "Queues"
-description: "Confirm account and Service context, then create queues, send jobs, inspect metrics, tune retries, and route dead-letter work for Tovuk Services."
+description: "Confirm account and Service context, then create Service queues, send jobs, inspect metrics, tune retries, and route dead-letter work."
 ---
 
-Queues move work out of public requests. Use them for emails, webhook retries,
-image processing, cleanup, and other tasks that can run after the response.
+Queues are Service-scoped resources that move work out of public requests and
+deliver background jobs to Rust worker handlers. Use them for emails, webhook
+retries, image processing, cleanup, and other tasks that can run after the
+response.
 
 ## Queue flow
 
