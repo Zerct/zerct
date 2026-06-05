@@ -25,8 +25,23 @@ reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
   </Step>
 
   <Step title="Enable Cron for the Service">
-    Set `cron = true` in `tovuk.toml` before relying on scheduled Rust worker
+    If `tovuk service show --json` does not include `"cron": true`, enable the
+    explicit capability in `tovuk.toml` before relying on scheduled Rust worker
     jobs for that Service.
+
+    ```toml
+    [capabilities]
+    cron = true
+    ```
+
+    Then run a dry run so agents can inspect `capabilities.enabled`,
+    `capabilities.disabled`, `meters`, `limits`, `billingEstimate`, and
+    `nextActions` before creating, updating, pausing, resuming, or deleting
+    triggers.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
   </Step>
 
   <Step title="Implement the internal handler">
@@ -62,6 +77,7 @@ reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
 ```sh
 tovuk account show --json
 tovuk service show service_1 --json
+tovuk deploy --dry-run --json
 tovuk cron create --service service_1 nightly "0 0 * * *" --json
 tovuk cron update --service service_1 nightly "*/15 * * * *" --json
 tovuk cron disable --service service_1 nightly --json
