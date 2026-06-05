@@ -21,6 +21,25 @@ Rust Workers as explicit resources.
     ```
   </Step>
 
+  <Step title="Enable SQLite for the Service">
+    If `tovuk service show --json` does not include `"sqlite": true`, enable
+    the explicit capability in `tovuk.toml` before code or migrations depend
+    on managed SQLite.
+
+    ```toml
+    [capabilities]
+    sqlite = true
+    ```
+
+    Then run a dry run so agents can inspect enabled and disabled capabilities,
+    meters, `meterPlan`, limits, `billingEstimate`, and `nextActions` before
+    creating databases.
+
+    ```sh
+    tovuk deploy --dry-run --json
+    ```
+  </Step>
+
   <Step title="Create and verify the database">
     ```sh
     tovuk sqlite create --service service_1 DB --json
