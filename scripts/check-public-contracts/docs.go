@@ -457,6 +457,8 @@ func checkDocs() {
 	requireContains(llms, "automatically uses multipart transfer above 100 MiB", "llms dashboard storage multipart guidance")
 	requireContains(domains, "tovuk domains verify --service service_1 api.example.com --json", "domain verify docs")
 	requireContains(domains, "Never point an A record at Tovuk origin hosts", "domain safety docs")
+	requireContains(domains, "custom_domains = true", "domain capability docs")
+	requireContains(llms, "explicit `custom_domains` capability", "llms domain capability guidance")
 	requireContains(status, "curl https://api.tovuk.com/v1/capabilities", "status capabilities follow-up docs")
 	requireContains(llms, "GET /v1/capabilities", "llms status capabilities follow-up guidance")
 	requireContains(logsBuilds, "tovuk deploy cancel deploy_1 --json", "deploy cancel docs")
