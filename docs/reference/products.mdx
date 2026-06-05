@@ -4,34 +4,8 @@ sidebarTitle: "Product Choices"
 description: "Use the Tovuk product catalog and account setup checks to choose Worker, Static Frontend, SQLite, Object Storage, and other resources before deploys."
 ---
 
-Tovuk exposes the product catalog through the CLI and API so agents can make
-deployment decisions without dashboard-only steps:
-
-```sh
-tovuk pricing --json
-tovuk account show --json
-tovuk deploy --dry-run --json
-```
-
-Use `products[].features`, `products[].best_for`, `products[].avoid_for`,
-`products[].meters`, `products[].meter_details`, `products[].pricing_fields`,
-and `products[].limit_fields` to choose the smallest resource that fits the
-job.
-Use `plans[].limits` and `plans[].pricing` before load tests, media uploads,
-or paid usage.
-`features` is the concrete checklist of supported behavior agents can rely on
-before they design or deploy a service.
-`meter_details` explains each meter's unit, count semantics, and
-`cap_commands` so agents can estimate work and set hard caps before running it.
-`limit_fields` includes the relevant runtime, storage, payload, batching,
-retention, and monthly allowance fields for each product.
-`pricing_fields` includes the exact JSON paths agents should read under each
-plan's `pricing` object for included usage and overage costs.
-Use `tovuk usage --json` for the authenticated `billingEstimate` line items
-before high-throughput work. Every public meter must appear there as either a
-priced line item or an explicit zero-price line item.
-Confirm account setup before authenticated dry-runs, usage reads, or usage-cap
-changes so billing and caps apply to the intended account.
+Use this page to choose the smallest Tovuk product surface before enabling
+capabilities, creating resources, or running paid work.
 
 ## Product selection workflow
 
@@ -80,6 +54,37 @@ changes so billing and caps apply to the intended account.
     expect to exercise before load tests, media imports, or paid traffic.
   </Step>
 </Steps>
+
+## Catalog fields
+
+Tovuk exposes the product catalog through the CLI and API so agents can make
+deployment decisions without dashboard-only steps:
+
+```sh
+tovuk pricing --json
+tovuk account show --json
+tovuk deploy --dry-run --json
+```
+
+Use `products[].features`, `products[].best_for`, `products[].avoid_for`,
+`products[].meters`, `products[].meter_details`, `products[].pricing_fields`,
+and `products[].limit_fields` to choose the smallest resource that fits the
+job.
+Use `plans[].limits` and `plans[].pricing` before load tests, media uploads,
+or paid usage.
+`features` is the concrete checklist of supported behavior agents can rely on
+before they design or deploy a service.
+`meter_details` explains each meter's unit, count semantics, and
+`cap_commands` so agents can estimate work and set hard caps before running it.
+`limit_fields` includes the relevant runtime, storage, payload, batching,
+retention, and monthly allowance fields for each product.
+`pricing_fields` includes the exact JSON paths agents should read under each
+plan's `pricing` object for included usage and overage costs.
+Use `tovuk usage --json` for the authenticated `billingEstimate` line items
+before high-throughput work. Every public meter must appear there as either a
+priced line item or an explicit zero-price line item.
+Confirm account setup before authenticated dry-runs, usage reads, or usage-cap
+changes so billing and caps apply to the intended account.
 
 ## Product Guide
 
