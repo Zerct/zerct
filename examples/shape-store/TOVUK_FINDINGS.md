@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_81`, `job_82`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_83`, `job_84`, status `succeeded`, service runtime status `sleeping`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -2190,6 +2190,17 @@ Verification:
     examples/shape-store --json` passed.
   - `./scripts/check-all.sh` passed with 69 CLI tests and package version
     `0.1.101`.
+- Production deploy and Browser checks passed:
+  - `cargo run --manifest-path crates/tovuk/Cargo.toml -- deploy
+    examples/shape-store --wait --wait-timeout 600 --json` succeeded for
+    `deploy_83` / `job_84` from clean commit
+    `56be723e2106886225286868954d9899cd2d82b4`.
+  - production mobile `320x568`: `CHECKOUT` reached `ORDER CONFIRMED`, no
+    forbidden wallet/provider copy, no horizontal overflow, receipt width
+    `320px`.
+  - production desktop `1440x900`: cart showed one `CHECKOUT` action, no
+    forbidden wallet/provider copy, no horizontal overflow.
+  - production Browser console logs were clean for the smoke flow.
 
 ## Remaining Tovuk friction
 
