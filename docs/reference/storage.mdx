@@ -1,13 +1,14 @@
 ---
-title: "Manage Files and Media in Object Storage"
+title: "Manage Service Object Storage"
 sidebarTitle: "Storage"
-description: "Confirm account and Service context, then upload, list, download, and delete service files and media with Tovuk Object Storage."
+description: "Confirm account and Service context, then upload, list, share, download, and delete Service-scoped files and media."
 ---
 
-Tovuk object storage is scoped to a service and is available through the native
-CLI, SDK-compatible HTTP API, and presigned upload/download URLs. Agents should
-prefer JSON output so paths, public URLs, byte counts, and error recovery
-instructions can be parsed without dashboard access.
+Object Storage keeps Service-scoped files and media behind a private
+S3-compatible origin. Use the native CLI, SDK-compatible HTTP API, and
+presigned upload/download URLs for uploads, downloads, public media, and
+cleanup. Agents should prefer JSON output so paths, public URLs, byte counts,
+and error recovery instructions can be parsed without dashboard access.
 
 The storage origin is private and S3-compatible. Agents and users should use
 Tovuk API and CLI commands instead of provider bucket URLs.
