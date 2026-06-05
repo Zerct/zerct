@@ -80,6 +80,7 @@ tovuk storage url --service service_1 uploads/logo.png --json
 tovuk storage delete --service service_1 uploads/logo.png --json
 tovuk sqlite create --service service_1 DB --json
 tovuk sqlite query --service service_1 DB "select 1" --json
+tovuk sqlite batch --service service_1 DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
 tovuk sqlite backup create --service service_1 DB --json
 tovuk sqlite backup list --service service_1 DB --json
 tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json

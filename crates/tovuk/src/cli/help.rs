@@ -22,6 +22,7 @@ Usage:
   tovuk logs --service <service> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk sqlite create --service <service> DB [--api <url>] [--json]
   tovuk sqlite query --service <service> DB "select 1" [--params <json_array>] [--api <url>] [--json]
+  tovuk sqlite batch --service <service> DB '[{"sql":"select 1"}]' [--api <url>] [--json]
   tovuk sqlite backup [list|create|restore] --service <service> DB [backup_id] [--api <url>] [--json]
   tovuk sqlite delete --service <service> DB [--api <url>] [--json]
   tovuk kv create --service <service> CACHE [--api <url>] [--json]
@@ -103,6 +104,7 @@ Agent contract:
   - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
   - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
   - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
+  - Use tovuk sqlite batch for migrations and imports that need multiple statements in one transaction.
   - Create SQLite backups before migrations or destructive writes; restore from CLI/API without dashboard access, then verify with read queries.
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.

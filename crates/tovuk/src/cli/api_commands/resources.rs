@@ -33,6 +33,7 @@ pub(crate) fn sqlite_command(cli: &CliOptions) -> Result<()> {
             "name",
         ),
         "query" => sqlite_query(cli),
+        "batch" => sqlite_batch(cli),
         "backup" => sqlite_backup_command(cli),
         "restore" => sqlite_restore(cli, 1),
         "delete" => delete_app_resource(
@@ -584,6 +585,57 @@ fn sqlite_query(cli: &CliOptions) -> Result<()> {
     )
 }
 
+fn sqlite_batch(cli: &CliOptions) -> Result<()> {
+    let database = required_arg(
+        cli,
+        1,
+        "sqlite_database_required",
+        "SQLite database is required.",
+        "Use `tovuk sqlite batch --service <service> DB '[{\"sql\":\"create table users (id integer primary key)\"}]' --json`.",
+    )?;
+    let source = raw_json_input(
+        cli,
+        2,
+        "sqlite_batch_required",
+        "SQLite batch JSON is required.",
+        "Pass a JSON array of statements or an object with `statements`, such as `--value '[{\"sql\":\"select 1\"}]'`.",
+    )?;
+    let route = format!(
+        "{}/sqlite/{}/query",
+        service_route(cli, "")?.trim_end_matches('/'),
+        encode_component(&database)
+    );
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        &route,
+        Some(sqlite_batch_payload(&source, cli)?),
+    )
+}
+
+fn sqlite_batch_payload(source: &str, cli: &CliOptions) -> Result<Value> {
+    let value = serde_json::from_str::<Value>(source).map_err(|_error| {
+        agent_error(
+            "invalid_sqlite_batch",
+            "SQLite batch JSON is invalid.",
+            "Pass an array such as `[{\"sql\":\"select 1\"}]`.",
+            cli.output.json,
+        )
+    })?;
+    match value {
+        Value::Array(statements) => Ok(json!({ "statements": statements })),
+        Value::Object(object) if matches!(object.get("statements"), Some(Value::Array(_))) => {
+            Ok(Value::Object(object))
+        }
+        _other => Err(agent_error(
+            "invalid_sqlite_batch",
+            "SQLite batch JSON must be an array or object with statements.",
+            "Pass an array such as `[{\"sql\":\"select 1\"}]` or an object like `{\"statements\":[{\"sql\":\"select 1\"}]}`.",
+            cli.output.json,
+        )),
+    }
+}
+
 fn sqlite_backups(cli: &CliOptions, database_arg_index: usize) -> Result<()> {
     let database = required_arg(
         cli,
@@ -958,6 +1010,22 @@ fn raw_bulk_json(
     message: &'static str,
     instruction: &'static str,
 ) -> Result<String> {
+    raw_json_input(
+        cli,
+        first_value_index,
+        "kv_bulk_json_required",
+        message,
+        instruction,
+    )
+}
+
+fn raw_json_input(
+    cli: &CliOptions,
+    first_value_index: usize,
+    code: &str,
+    message: &'static str,
+    instruction: &'static str,
+) -> Result<String> {
     let raw = if cli.value.trim().is_empty() {
         cli.args
             .iter()
@@ -969,12 +1037,7 @@ fn raw_bulk_json(
         cli.value.clone()
     };
     if raw.trim().is_empty() {
-        return Err(agent_error(
-            "kv_bulk_json_required",
-            message,
-            instruction,
-            cli.output.json,
-        ));
+        return Err(agent_error(code, message, instruction, cli.output.json));
     }
     Ok(raw)
 }
@@ -1530,9 +1593,11 @@ fn unknown_resources_command(cli: &CliOptions, family: &str) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::{
-        kv_command, queue_command, sqlite_command, state_command, usage_cap_notify_at_percent,
+        kv_command, queue_command, sqlite_batch_payload, sqlite_command, state_command,
+        usage_cap_notify_at_percent,
     };
     use crate::cli::args::CliOptions;
+    use serde_json::json;
 
     fn cli(command: &str, args: &[&str]) -> CliOptions {
         CliOptions {
@@ -1572,6 +1637,51 @@ mod tests {
             .err()
             .map(|error| error.to_string());
         assert_eq!(error_message.as_deref(), Some("Service is required."));
+    }
+
+    #[test]
+    fn sqlite_batch_payload_wraps_statement_array() {
+        let payload = sqlite_batch_payload(
+            r#"[{"sql":"select 1"},{"sql":"select ?","params":[2]}]"#,
+            &cli("sqlite", &[]),
+        )
+        .ok();
+
+        assert_eq!(
+            payload,
+            Some(json!({
+                "statements": [
+                    { "sql": "select 1" },
+                    { "sql": "select ?", "params": [2] }
+                ]
+            }))
+        );
+    }
+
+    #[test]
+    fn sqlite_batch_payload_accepts_statements_object() {
+        let payload = sqlite_batch_payload(
+            r#"{"statements":[{"sql":"select 1"}]}"#,
+            &cli("sqlite", &[]),
+        )
+        .ok();
+
+        assert_eq!(
+            payload,
+            Some(json!({ "statements": [{ "sql": "select 1" }] }))
+        );
+    }
+
+    #[test]
+    fn sqlite_batch_payload_rejects_wrong_shape() {
+        let error_message = sqlite_batch_payload(r#"{"sql":"select 1"}"#, &cli("sqlite", &[]))
+            .err()
+            .map(|error| error.to_string());
+
+        assert_eq!(
+            error_message.as_deref(),
+            Some("SQLite batch JSON must be an array or object with statements."),
+        );
     }
 
     #[test]

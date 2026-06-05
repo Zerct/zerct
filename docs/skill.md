@@ -67,6 +67,7 @@ Manage service resources without dashboard access:
 tovuk service show <service> --json
 tovuk sqlite create --service <service> DB --json
 tovuk sqlite query --service <service> DB "select 1" --json
+tovuk sqlite batch --service <service> DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
 tovuk sqlite delete --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json

@@ -60,6 +60,16 @@ Rust Workers as explicit resources.
     stable and the parameter array stays JSON-parseable.
   </Step>
 
+  <Step title="Run a transaction batch">
+    ```sh
+    tovuk sqlite batch --service service_1 DB '[{"sql":"create table users (id integer primary key, name text not null)"},{"sql":"insert into users (id, name) values (?, ?)","params":[1,"Ada"]}]' --json
+    ```
+
+    Use `sqlite batch` for migrations, seed data, and imports that need
+    multiple statements to succeed or fail together. Pass either a JSON array
+    of statement objects or an object with a `statements` array.
+  </Step>
+
   <Step title="Back up before migrations">
     ```sh
     tovuk sqlite backup create --service service_1 DB --json
