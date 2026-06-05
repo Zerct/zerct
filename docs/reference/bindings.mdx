@@ -28,9 +28,9 @@ and shared APIs that should not be callable from browsers.
   </Step>
 
   <Step title="Enable Service Bindings for the caller">
-    If `tovuk service show --json` does not include `"service_bindings": true`,
-    enable the explicit capability in `tovuk.toml` before code depends on
-    private worker-to-worker calls.
+    If `tovuk service show service_1 --json` does not include
+    `"service_bindings": true`, enable the explicit capability in `tovuk.toml`
+    before code depends on private worker-to-worker calls.
 
     ```toml
     [capabilities]

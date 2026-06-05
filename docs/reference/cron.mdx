@@ -25,9 +25,9 @@ reports, polling, cache refreshes, and maintenance jobs that are safe to retry.
   </Step>
 
   <Step title="Enable Cron for the Service">
-    If `tovuk service show --json` does not include `"cron": true`, enable the
-    explicit capability in `tovuk.toml` before relying on scheduled Rust worker
-    jobs for that Service.
+    If `tovuk service show service_1 --json` does not include `"cron": true`,
+    enable the explicit capability in `tovuk.toml` before relying on scheduled
+    Rust worker jobs for that Service.
 
     ```toml
     [capabilities]

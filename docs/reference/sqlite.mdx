@@ -22,9 +22,9 @@ Rust Workers as explicit resources.
   </Step>
 
   <Step title="Enable SQLite for the Service">
-    If `tovuk service show --json` does not include `"sqlite": true`, enable
-    the explicit capability in `tovuk.toml` before code or migrations depend
-    on managed SQLite.
+    If `tovuk service show service_1 --json` does not include
+    `"sqlite": true`, enable the explicit capability in `tovuk.toml` before
+    code or migrations depend on managed SQLite.
 
     ```toml
     [capabilities]
