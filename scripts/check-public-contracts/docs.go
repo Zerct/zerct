@@ -444,7 +444,7 @@ func checkDocs() {
 	requireContains(cron, "POST /.tovuk/cron/<trigger>", "cron delivery docs")
 	requireContains(bindings, "tovuk binding create --service service_1 AUTH_SERVICE", "service binding create docs")
 	requireContains(bindings, "32 worker invocations", "service binding chain docs")
-	requireContains(secrets, "tovuk env set --service service_1 STRIPE_SECRET_KEY=sk_live_xxx --json", "secret set docs")
+	requireContains(secrets, "API_KEY=\"$API_KEY\"", "secret set docs")
 	requireContains(secrets, "`PUT /v1/services/{service_id}/env`", "secret set API docs")
 	requireContains(secrets, "Secret values are write-only", "secret write-only docs")
 	requireContains(secrets, "https://tovuk.com/account/secrets", "dashboard secrets route docs")
