@@ -37,16 +37,20 @@ Use them after local checks, account setup, dry-run planning, and deploy attempt
     estimates before deploy.
   </Step>
 
-  <Step title="Deploy and keep the returned ids">
+  <Step title="Deploy and keep service context">
     ```sh
     tovuk deploy --wait --json
+    tovuk service show service_1 --json
     tovuk deploy list --json
     tovuk deploy show deploy_1 --json
     ```
 
     Read the returned `build_job.id`, `final_build.status`, and deploy id from
-    the deploy output or deploy history. Keep those ids with the failing
-    command.
+    the deploy output or Service snapshot. Use
+    `tovuk service show service_1 --json` to confirm the latest deploy,
+    latest build, recent logs,
+    `accountUsage`, `billingEstimate`, and next actions before narrowing to
+    deploy history. Keep those ids with the failing command.
   </Step>
 
   <Step title="Inspect build and runtime logs">
@@ -94,6 +98,7 @@ CLI.
 
 ```sh
 tovuk account show --json
+tovuk service show service_1 --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
