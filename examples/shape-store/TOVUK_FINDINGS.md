@@ -6,8 +6,8 @@ Date: 2026-06-05
 
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
-- Live URL: https://hello-service.tovuk.app
-- Latest verified deploy: `deploy_53`, `job_54`, status `succeeded`, service runtime status `running`.
+- Live URL: https://shape-store.tovuk.app
+- Latest verified deploy: `deploy_57`, `job_58`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -29,6 +29,11 @@ Date: 2026-06-05
 - Updated the ecommerce example cart flow to match the same reference more
   closely: selecting size `9` adds `YS-02` at `$50`, keeps the product overlay
   open, and the bag opens a full-screen `YZY WALLET`-style order summary.
+- Deployed the refactored Rust API module split to production and verified
+  product, checkout, and Browser flows on `https://shape-store.tovuk.app`.
+- Patched a desktop-only product focus rail bug found during the latest UX
+  pass: the active product image now centers with its title, price, plus button,
+  size picker, and cart flow at `1440x900`.
 
 ## What I built
 
@@ -36,6 +41,7 @@ Date: 2026-06-05
   - `GET /api/healthz`
   - `GET /api/products`
   - `POST /api/orders`
+  - `POST /api/checkout`
 - TanStack/Vite storefront with:
   - sparse product-code grid inspired by the current minimal visual pattern at https://yeezy.com/
   - no admin dashboard
@@ -79,9 +85,14 @@ Production deploy and API checks:
   for `deploy_45` / `job_46`, using public CLI `0.1.93`.
 - Latest local CLI deploy passed for `deploy_53` / `job_54`, using local
   Tovuk CLI `0.1.95`.
-- `curl https://hello-service.tovuk.app/api/healthz`: returned `{"ok":true}`
-- `curl https://hello-service.tovuk.app/api/products`: returned 50 products
-- `curl -X POST https://hello-service.tovuk.app/api/orders ...`: returned an order receipt
+- Latest production deploy passed for `deploy_57` / `job_58`, using public
+  Tovuk CLI `0.1.95`.
+- Latest artifact dry-run passed with `services[0].artifactCheck.status:
+  "passed"`, gzip size `935494`, and limit `3145728`.
+- `curl https://shape-store.tovuk.app/api/healthz`: returned `{"ok":true}`
+- `curl https://shape-store.tovuk.app/api/products`: returned 50 products
+- `curl -X POST https://shape-store.tovuk.app/api/checkout ...`: returned a
+  demo Stripe Checkout response when Stripe secrets are not configured
 - Latest deploy logs show `Checks passed`, Vite build output, and `Deploy promoted.`
   Production `https://shape-store.tovuk.app/api/healthz` returned `{"ok":true}`,
   and `https://shape-store.tovuk.app/api/products` returned 50 products with
@@ -136,6 +147,27 @@ Browser and UX checks:
   - cart opens as a full-screen `YZY WALLET` order summary
   - cart subtotal and total are `$50`
   - no horizontal overflow at `429px`
+- Confirmed production Browser flow on `deploy_55`:
+  - 50 products loaded from the worker API with no `API FALLBACK`
+  - mobile `390x844` uses 3 product columns and no horizontal overflow
+  - tablet `768x1024` and desktop `1280x800` use 6 product columns and no
+    horizontal overflow
+  - `YS-02 -> size 9 -> bag` opens the full-screen `YZY WALLET` checkout
+  - cart subtotal and total are `$50`
+- Confirmed production Browser desktop flow on `deploy_57`:
+  - 50 products loaded from the worker API with no `API FALLBACK`
+  - desktop `1440x900` uses 6 product columns and no horizontal overflow
+  - `YS-02` product detail has active tile center `720`, image center `720`,
+    meta center `720`, and viewport center `720`
+  - product detail text shows `YS-02$50+`
+- Confirmed local desktop patch at `1440x900`:
+  - listing has 50 products, 6 columns, and no horizontal overflow
+  - `YS-02` product detail has active tile center `720`, image center `720`,
+    meta center `720`, and viewport center `720`
+  - size picker centers at `720` and the cart drawer covers the full `1440x900`
+    viewport without horizontal overflow
+  - added stable `data-testid="product-grid"` and `data-testid="product-card"`
+    hooks so agents can measure grid/card state without guessing selectors
 - Confirmed mobile viewport at `390x844`:
   - `50` product tiles
   - `3` columns
@@ -478,7 +510,7 @@ Failure/friction:
 Fix released:
 
 - Generated frontend templates now default to npm commands:
-  - `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`
+  - `npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`
   - `npm run build`
 - The scaffold message now gives one exact next step: run `npm install`.
 - The TanStack starter now includes `"dev": "vite"`.
@@ -572,7 +604,7 @@ Friction:
 Fix applied to the example:
 
 - Replaced frontend check/build commands with:
-  - `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`
+  - `npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`
   - `npm run build`
 - Removed `web/bun.lock`.
 - Added `web/package-lock.json`.
@@ -1342,6 +1374,112 @@ Verification:
 - Direct API smoke tests passed for `/api/healthz`, `/api/products`, and
   demo-mode `POST /api/checkout`.
 
+### 38. `service status --json` needed top-level smoke-test fields
+
+Failure/friction:
+
+- After deploying `deploy_55`, I naturally checked:
+  `tovuk service status shape-store --json | jq '{ok, live, url, ...}'`.
+- The command returned nested `service.url` and `latestDeploy.url`, and a
+  `live` boolean, but no top-level `ok`, no top-level `url`, and no direct
+  `agent_instruction`.
+- That is a small but real AI-agent friction: post-deploy smoke tests should not
+  require every agent to remember the nested shape before checking whether the
+  service is live and which URL to open.
+
+Fix included in Tovuk CLI 0.1.96:
+
+- Added top-level `ok`, `url`, and `agent_instruction` to
+  `tovuk service status <service> --json`.
+- Kept the existing nested `service`, `latestDeploy`, `latestBuildJob`, `live`,
+  and `nextActions` fields intact for compatibility.
+- Updated CLI help and docs so agents use `service status --json` as the quick
+  live/smoke answer and reserve `service show --json` for the full resource
+  snapshot.
+
+Verification:
+
+- Unit coverage for `service_status_summary_is_compact_and_agent_readable`
+  now asserts the new top-level fields.
+- Public deploy `deploy_55` / `job_56` was live before this change, and the
+  observed nested status shape is the evidence that triggered the fix.
+
+### 39. Desktop product focus rail was not centered
+
+Failure/friction:
+
+- Desktop listing checks at `1440x900` passed at first glance: 50 products, 6
+  columns, and no horizontal overflow.
+- The product-detail state still had a real desktop UX bug: after opening
+  `YS-02`, the active shape sat far left while the title, price, and plus button
+  stayed near the center. This made the transition feel broken even though the
+  page had no overflow.
+- The in-app Browser was useful for the first visual confirmation, but after one
+  timed-out local tab it stopped capturing screenshots reliably. I used the
+  bundled Playwright CLI fallback for the repeatable local desktop metrics.
+
+Fix included in the shape-store example:
+
+- Reworked `.product-focus-rail` CSS so the active product tile centers against
+  the viewport while adjacent products stay offscreen/partially visible.
+- Kept the mobile behavior intact because the same formula resolves to the
+  existing 20px mobile offset.
+- Added `data-testid="product-grid"` and `data-testid="product-card"` hooks so
+  future Browser/Playwright/AI-agent checks can measure grid state without
+  depending on visual text or inferred CSS selectors.
+
+Verification:
+
+- `npm run build` passed.
+- `npm run typecheck` passed.
+- `npm run lint` passed with no duplication or complexity failures.
+- Local desktop `1440x900` Playwright verification passed:
+  - active tile center: `720`
+  - active image center: `720`
+  - product meta center: `720`
+  - viewport center: `720`
+  - size picker center: `720`
+  - cart drawer: `1440x900`
+  - horizontal overflow: `false`
+- Production Browser verification on `deploy_57` passed:
+  - 50 products, 6 desktop columns, no `API FALLBACK`, and no horizontal
+    overflow
+  - active tile center: `720`
+  - active image center: `720`
+  - product meta center: `720`
+  - viewport center: `720`
+
+### 40. npm frontend checks needed dev dependencies and check statuses
+
+Failure/friction:
+
+- After the desktop patch, `npx -y tovuk@latest check --json` failed even
+  though direct `npm run typecheck` and `npm run lint` passed.
+- The configured frontend check ran `npm ci` in an environment that omitted
+  dev-only type packages, so TypeScript reported that `react-dom` or its type
+  declarations could not be found.
+- The same JSON check report had top-level `ok`, but each `checks[]` item had
+  `ok` and `message` without a `status` string. My first agent-style jq filter
+  could not simply select failed checks by status.
+
+Fix included in Tovuk CLI 0.1.96 and the shape-store example:
+
+- Updated generated/default npm frontend check commands to use
+  `npm ci --include=dev --prefer-offline --no-audit --fund=false`.
+- Updated the shape-store `tovuk.toml` to use the same command.
+- Added JSON `checks[].status` derived from `ok` so agents can filter
+  `checks[] | select(.status == "failed")`.
+- Updated README, docs, package READMEs, and CLI help with the new check
+  contract.
+
+Verification:
+
+- Reran `npx -y tovuk@latest check --json` from `examples/shape-store`; with
+  the example command fixed, public CLI `0.1.95` returned `ok: true`.
+- Ran local CLI `0.1.96` artifact dry-run; nested check entries now include
+  `status: "passed"` alongside `ok: true`.
+- Added unit coverage for serializing `QualityCheck` with `status: "failed"`.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1382,8 +1520,9 @@ Hard:
 - Product grid shows product codes only; prices, size selection, and add-to-cart
   live in the full-page product detail state.
 - Product detail now mirrors the current Yeezy flow more closely: the route
-  does not change, the selected product is shown in a full-screen rail, and the
-  inline size selector replaces the plus controls without showing the footer.
+  does not change, the selected product is shown centered in a full-screen rail,
+  and the inline size selector replaces the plus controls without showing the
+  footer.
 - Cart now mirrors the current Yeezy flow more closely: size selection adds to
   the bag without leaving product detail, and the bag opens a full-screen
   wallet/order-summary checkout overlay.

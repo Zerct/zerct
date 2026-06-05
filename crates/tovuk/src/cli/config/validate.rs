@@ -254,6 +254,6 @@ fn validate_frontend_check_command(command: &str) -> std::result::Result<(), Str
     {
         Ok(())
     } else {
-        Err("[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`".to_owned())
+        Err("[build].check must install dependencies and run package scripts, for example `bun ci && bun run typecheck && bun run lint` or `npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint`".to_owned())
     }
 }

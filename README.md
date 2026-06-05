@@ -91,7 +91,7 @@ health = "/api/healthz"
 
 [frontend]
 root = "web"
-check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+check = "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 build = "npm run build"
 output = "dist"
 ```
@@ -122,7 +122,7 @@ support = true
 abuse = true
 
 [build]
-check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+check = "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
 command = "npm run build"
 output = "dist"
 ```
@@ -195,6 +195,10 @@ human. For invoices, payment methods, or subscription changes, run
 Resolve the support ticket after the issue is fixed.
 ```
 
+`tovuk check --json` returns top-level `ok` plus `checks[]` entries with
+`ok`, `status`, `message`, and `agent_instruction`, so agents can filter
+`checks[] | select(.status == "failed")`.
+
 ## Repository
 
 - `packages/tovuk`: npm CLI.
@@ -212,8 +216,9 @@ flow, logs, env, domains, usage, billing, and support operations so deploy UX
 does not drift.
 
 `tovuk service status <service> --json` is the compact post-deploy status
-check for one service. It returns runtime status, latest deploy, latest build,
-URL, and a `live` boolean.
+check for one service. It returns top-level `ok`, `url`, and
+`agent_instruction`, plus runtime status, latest deploy, latest build, URL, and
+a `live` boolean.
 `tovuk service show <service> --json` is the full agent snapshot for one
 service. It includes service state, capabilities, deploy history, build
 history, recent logs, env names, domains, resources, `accountUsage`,
@@ -221,8 +226,9 @@ history, recent logs, env names, domains, resources, `accountUsage`,
 Set `TOVUK_OUTPUT=json` when an agent should receive JSON by default.
 Without `--json`, `tovuk service list` prints a compact table with kind,
 runtime status, URL, enabled and disabled capabilities, and per-Service
-resource counts. `tovuk service status` prints only the live/deploy/build
-summary, while `tovuk service show` prints the broader Service snapshot.
+resource counts. `tovuk service status --json` returns top-level `ok`, `url`,
+and `agent_instruction` fields for smoke tests; text mode prints only the
+live/deploy/build summary. `tovuk service show` prints the broader Service snapshot.
 Dashboard Overview Service rows expose copyable commands for `service status`,
 `service show`, logs, storage listing, worker request caps, support tickets,
 and service deletion.

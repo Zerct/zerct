@@ -99,19 +99,28 @@ fn service_status_summary(response: &Value) -> Value {
     let runtime_status = string_field(service, "runtime_status");
     let latest_build_status = string_field(latest_build, "status");
     let live = runtime_status == "running" && latest_build_status == "succeeded";
+    let service_url = string_field(service, "url");
+    let latest_deploy_url = string_field(latest_deploy, "url");
+    let url = if service_url.is_empty() {
+        latest_deploy_url.clone()
+    } else {
+        service_url.clone()
+    };
 
     json!({
+        "ok": live,
+        "url": url,
         "service": {
             "id": string_field(service, "id"),
             "name": string_field(service, "name"),
             "kind": string_field(service, "kind"),
             "runtimeStatus": runtime_status,
-            "url": string_field(service, "url")
+            "url": service_url
         },
         "latestDeploy": {
             "id": string_field(latest_deploy, "id"),
             "buildJobId": string_field(latest_deploy, "build_job_id"),
-            "url": string_field(latest_deploy, "url")
+            "url": latest_deploy_url
         },
         "latestBuildJob": {
             "id": string_field(latest_build, "id"),
@@ -119,12 +128,25 @@ fn service_status_summary(response: &Value) -> Value {
             "message": string_field(latest_build, "message")
         },
         "live": live,
+        "agent_instruction": service_status_agent_instruction(live, &url),
         "nextActions": [
             "Use `tovuk service show <service> --json` for the full resource, usage, billing, logs, env, domain, and next-action snapshot.",
             "Use `tovuk logs --service <service> --limit 100 --json` when the latest build is not succeeded or the runtime is not running.",
             "Use `tovuk deploy list --service <service> --json` to compare recent deploy history."
         ]
     })
+}
+
+fn service_status_agent_instruction(live: bool, url: &str) -> String {
+    if live && !url.is_empty() {
+        return format!(
+            "Smoke test {url}. Use `tovuk service show <service> --json` only when resources, usage, billing, logs, env, domains, or next actions are needed."
+        );
+    }
+    if live {
+        return "Service is live, but no service URL was returned. Inspect service.url or latestDeploy.url before smoke testing.".to_owned();
+    }
+    "Service is not live. Inspect latestBuildJob, then run `tovuk logs --service <service> --limit 100 --json` if the latest build is not succeeded or runtime is not running.".to_owned()
 }
 
 fn service_status_lines(status: &Value) -> Vec<String> {
@@ -504,6 +526,8 @@ mod tests {
         assert_eq!(
             status,
             json!({
+                "ok": true,
+                "url": "https://hello-rust.tovuk.app",
                 "service": {
                     "id": "service_1",
                     "name": "hello-rust",
@@ -522,6 +546,7 @@ mod tests {
                     "message": "Deploy is live."
                 },
                 "live": true,
+                "agent_instruction": "Smoke test https://hello-rust.tovuk.app. Use `tovuk service show <service> --json` only when resources, usage, billing, logs, env, domains, or next actions are needed.",
                 "nextActions": [
                     "Use `tovuk service show <service> --json` for the full resource, usage, billing, logs, env, domain, and next-action snapshot.",
                     "Use `tovuk logs --service <service> --limit 100 --json` when the latest build is not succeeded or the runtime is not running.",
@@ -535,6 +560,8 @@ mod tests {
     fn service_status_lines_point_to_compact_and_full_outputs() {
         assert_eq!(
             service_status_lines(&json!({
+                "ok": false,
+                "url": "https://hello-rust.tovuk.app",
                 "service": {
                     "id": "service_1",
                     "name": "hello-rust",
@@ -553,6 +580,7 @@ mod tests {
                     "message": "Build running."
                 },
                 "live": false,
+                "agent_instruction": "Service is not live. Inspect latestBuildJob, then run `tovuk logs --service <service> --limit 100 --json` if the latest build is not succeeded or runtime is not running.",
                 "nextActions": []
             })),
             vec![

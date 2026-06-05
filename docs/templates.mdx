@@ -85,8 +85,8 @@ middleware, SSR handlers, and other server logic out of static frontends; move
 that work to a Rust worker.
 After deploy, use `tovuk service show <service> --json` before changing
 resources, logs, domains, or usage caps. Use
-`tovuk service status <service> --json` when you only need the compact live
-state.
+`tovuk service status <service> --json` when you only need top-level `ok`,
+`url`, `agent_instruction`, and compact live state.
 
 Without `--template`, `tovuk new` can scaffold a starter `tovuk.toml` from
 existing files. That scan is advisory. Deploy behavior is controlled only by

@@ -40,7 +40,7 @@ export function ProductGrid({
   }
 
   return (
-    <section className="product-grid" aria-label={`${selectedCategory} products`}>
+    <section className="product-grid" data-testid="product-grid" aria-label={`${selectedCategory} products`}>
       {products.map((product) => (
         <ProductTile key={product.id} onViewProduct={onViewProduct} product={product} />
       ))}
@@ -70,6 +70,7 @@ function ProductButton({
       aria-current={ariaCurrent}
       aria-label={`View ${product.name}`}
       className={className}
+      data-testid="product-card"
       onClick={() => onViewProduct(product)}
       type="button"
     >

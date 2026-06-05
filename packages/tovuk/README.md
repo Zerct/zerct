@@ -72,8 +72,9 @@ tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
 ```
 
-Fix the first failed `agent_instruction`. If a build fails, inspect build logs,
-fix the first actionable log error, rerun check, then redeploy.
+Fix the first failed `agent_instruction`. In JSON mode, filter failed checks
+with `checks[] | select(.status == "failed")`. If a build fails, inspect build
+logs, fix the first actionable log error, rerun check, then redeploy.
 
 Agents can create service SQLite databases, KV namespaces, queues, cron triggers,
 State namespaces, service bindings, and usage caps through the CLI.
@@ -103,8 +104,9 @@ The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
 Without `--json`, `tovuk service list` prints a compact table with Service
 kind, runtime status, URL, enabled and disabled capabilities, and resource counts.
-`tovuk service status` prints only the live/deploy/build summary, while
-`tovuk service show` prints the broader Service snapshot.
+`tovuk service status --json` returns top-level `ok`, `url`, and
+`agent_instruction` fields for smoke tests; text mode prints only the
+live/deploy/build summary. `tovuk service show` prints the broader Service snapshot.
 Dashboard Overview Service rows expose copyable commands for `service status`,
 `service show`, logs, storage listing, worker request caps, support tickets,
 and service deletion.
