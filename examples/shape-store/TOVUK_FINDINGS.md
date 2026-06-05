@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_83`, `job_84`, status `succeeded`, service runtime status `sleeping`.
+- Latest verified deploy: `deploy_85`, `job_86`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -2229,6 +2229,21 @@ Verification:
     `cargo test --manifest-path examples/shape-store/api/Cargo.toml --locked`,
     and `cargo run --manifest-path crates/tovuk/Cargo.toml -- check
     examples/shape-store --json`.
+- Latest production deploy and Browser pass:
+  - `cargo run --manifest-path crates/tovuk/Cargo.toml -- deploy
+    examples/shape-store --wait --wait-timeout 600 --json` succeeded for
+    `deploy_85` / `job_86` from clean commit
+    `b882a85cb9f4a178930c1adab14ca1e917e11125`.
+  - production mobile `320x568`: product detail showed neutral
+    `RESTOCKS IN 4 WEEKS` copy, no API fallback, no horizontal overflow, and
+    the size-picker product-information block was reachable by vertical scroll.
+  - production desktop `1440x900`: product detail showed the same neutral copy,
+    no API fallback, no horizontal overflow, and the size-picker
+    product-information block fit without scrolling.
+  - production mobile checkout `YS-02 -> size 9 -> CHECKOUT` reached
+    `ORDER CONFIRMED` for `$50`; receipt width was `320px`, with no horizontal
+    overflow and no forbidden provider/branded copy.
+  - production Browser console logs were clean for the smoke flow.
 
 ## Remaining Tovuk friction
 
