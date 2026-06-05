@@ -5,8 +5,8 @@ description: "Report abuse, preserve evidence, submit owner appeals, and review 
 ---
 
 Tovuk abuse workflows are API and CLI first. Agents can report abuse, preserve
-evidence, confirm owner account setup, track owner-visible reports for their
-services, and appeal after remediation without dashboard access.
+evidence, confirm owner account and Service context, track owner-visible reports
+for their services, and appeal after remediation without dashboard access.
 
 ## Reporter and owner workflow
 
@@ -20,6 +20,19 @@ services, and appeal after remediation without dashboard access.
     intake by reporter email.
   </Step>
 
+  <Step title="Confirm owner account and service context">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    tovuk service show service_1 --json
+    ```
+
+    Run the update command only when setup is incomplete. Owner-visible report
+    tracking and appeals are account-scoped. Use the Service snapshot to keep
+    deploy ids, build ids, domains, object paths, and current report context
+    attached to the same Service before reporting or appealing.
+  </Step>
+
   <Step title="Attach service evidence">
     ```sh
     tovuk abuse report https://demo.tovuk.app/files/logo.png "Malware file" "Reported object download" --category malware --reporter-email reporter@example.com --service service_1 --object-path uploads/logo.png --target-path /files/logo.png --evidence "scanner result and request id" --json
@@ -27,16 +40,6 @@ services, and appeal after remediation without dashboard access.
 
     Include service, object path, target path, screenshot URL, request id, logs,
     or other preserved evidence when that context exists.
-  </Step>
-
-  <Step title="Confirm owner account setup">
-    ```sh
-    tovuk account show --json
-    tovuk account update --handle <handle> --display-name <name> --json
-    ```
-
-    Run the update command only when setup is incomplete. Owner-visible report
-    tracking and appeals are account-scoped.
   </Step>
 
   <Step title="Track owner-visible reports">

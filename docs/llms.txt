@@ -67,7 +67,7 @@ Operational references:
 
 - `docs/status.mdx`: `/health`, `/healthz`, `/v1/status`, the CLI `api_unreachable` payload, and project-failure handoff to logs.
 - `docs/support.mdx`: support ticket evidence, account setup, service snapshot, Dashboard Support, and support CLI/API routes.
-- `docs/abuse.mdx`: public abuse reports, account setup for owner-visible reports, owner appeals, operator quarantine, and abuse rate limits.
+- `docs/abuse.mdx`: public abuse reports, account and Service context for owner-visible reports, owner appeals, operator quarantine, and abuse rate limits.
 
 Dashboard Overview is available at `https://tovuk.com/account` and shows
 Service kind, per-Service resource counts for SQLite, Object Storage, KV,
@@ -334,8 +334,9 @@ the same ticket API and rate limits as the CLI. Ticket rows expose copyable
 
 Dashboard Abuse is available at `https://tovuk.com/account/abuse` and uses the
 same abuse report, list, and appeal API routes and rate limits as the CLI.
-Owner agents should confirm account setup with `tovuk account show --json`
-before owner-visible list or appeal work. Report rows expose copyable `tovuk abuse list --json`,
+Owner agents should confirm account setup with `tovuk account show --json` and
+inspect `tovuk service show <service> --json` before service-scoped reports,
+owner-visible list, or appeal work. Report rows expose copyable `tovuk abuse list --json`,
 `tovuk abuse appeal <report_id> "Remediation details" --json`, and
 `tovuk service show <service> --json` commands when report state supports them.
 
