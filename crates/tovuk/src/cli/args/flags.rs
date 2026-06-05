@@ -99,7 +99,8 @@ fn apply_value_flag(
         | "--params"
         | "--target"
         | "--token"
-        | "--template" => apply_common_value_flag(cli, name, inline, argv, index),
+        | "--template"
+        | "--output" => apply_common_value_flag(cli, name, inline, argv, index),
         "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
         "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
         "--expiration" | "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
@@ -163,8 +164,37 @@ fn apply_common_value_flag(
             index,
             cli.output.json,
         ),
+        "--output" => {
+            let value = super::values::flag_value(name, inline, argv, index, cli.output.json)?;
+            set_output_format(cli, &value, name, cli.output.json)?;
+            Ok(super::values::flag_consumed(argv, index))
+        }
         _ => invalid_value_flag_dispatch(cli, name),
     }
+}
+
+pub(super) fn set_output_format(
+    cli: &mut CliOptions,
+    value: &str,
+    source: &str,
+    json_output: bool,
+) -> Result<()> {
+    if value.eq_ignore_ascii_case("json") {
+        cli.output.json = true;
+        return Ok(());
+    }
+    if value.eq_ignore_ascii_case("text") {
+        cli.output.json = false;
+        return Ok(());
+    }
+    Err(agent_error(
+        "invalid_argument",
+        format!("{source} must be `json` or `text`."),
+        format!(
+            "Set {source} to `json` for agent-readable output or `text` for human-readable output."
+        ),
+        json_output,
+    ))
 }
 
 fn apply_storage_value_flag(
