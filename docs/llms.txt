@@ -266,6 +266,7 @@ tovuk service show <service> --json
 tovuk deploy --dry-run --json
 tovuk sqlite create --service <service> DB --json
 tovuk sqlite query --service <service> DB "select 1" --json
+tovuk sqlite batch --service <service> DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
 tovuk sqlite backup create --service <service> DB --json
 tovuk sqlite backup list --service <service> DB --json
 tovuk sqlite backup restore --service <service> DB sqlite_backup_1 --json

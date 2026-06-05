@@ -62,7 +62,7 @@ limits for resource work. Dashboard resource actions use the same API routes and
 - Create, list, and delete SQLite databases, KV namespaces, queues, Cron
   triggers, State namespaces, and Service Binding resources through the same API routes as the CLI. This includes creating and deleting SQLite databases
   and the other service resources.
-- Run single SQLite queries through
+- Run single SQLite queries and transaction batches through
   `POST /v1/services/{service_id}/sqlite/{database}/query` and inspect rows,
   `rowsRead`, `rowsWritten`, `vmSteps`, `fullscanSteps`, storage, duration,
   and next actions.
@@ -88,6 +88,7 @@ tovuk account show --json
 tovuk service show service_1 --json
 tovuk sqlite create --service service_1 DB --json
 tovuk sqlite query --service service_1 DB "select 1" --json
+tovuk sqlite batch --service service_1 DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
 tovuk sqlite backup create --service service_1 DB --json
 tovuk sqlite backup list --service service_1 DB --json
 tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
