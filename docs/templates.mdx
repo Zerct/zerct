@@ -1,7 +1,7 @@
 ---
 title: "Create Projects from Tovuk Templates"
 sidebarTitle: "Templates"
-description: "Create Rust worker APIs, TanStack static frontends, or full-stack Rust services with Tovuk templates."
+description: "Create Rust worker APIs, TanStack or Next static frontends, or full-stack Rust services with Tovuk templates."
 ---
 
 Use templates when you want Tovuk to create the project shape.
@@ -29,7 +29,23 @@ Use templates when you want Tovuk to create the project shape.
     ```sh
     tovuk new web --template tanstack-static-frontend
     cd web
-    bun install
+    npm install
+    tovuk check --json
+    tovuk account show --json
+    tovuk deploy --dry-run --json
+    tovuk deploy --wait --json
+    tovuk service show <service> --json
+    ```
+  </Tab>
+
+  <Tab title="Next static frontend" icon="panel-top">
+    Start with a static Next.js export when the app only needs browser-rendered
+    pages.
+
+    ```sh
+    tovuk new web --template next-static-frontend
+    cd web
+    npm install
     tovuk check --json
     tovuk account show --json
     tovuk deploy --dry-run --json
@@ -44,7 +60,7 @@ Use templates when you want Tovuk to create the project shape.
     ```sh
     tovuk new hello-service --template fullstack-rust-tanstack
     cd hello-service/web
-    bun install
+    npm install
     cd ..
     tovuk check --json
     tovuk account show --json
@@ -59,6 +75,10 @@ Templates create one root `tovuk.toml` with explicit `[capabilities]`.
 The full-stack template also creates `api/` and `web/`. The Rust worker owns
 dynamic server behavior. The TanStack frontend builds to static files and calls
 same-origin `/api`.
+The Next static frontend template sets `output: "export"` in
+`next.config.mjs` and uses `[build].output = "out"`. Keep Next API routes,
+middleware, SSR handlers, and other server logic out of static frontends; move
+that work to a Rust worker.
 After deploy, use `tovuk service show <service> --json` to inspect the
 created Service before changing resources, logs, domains, or usage caps.
 

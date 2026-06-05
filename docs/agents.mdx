@@ -87,7 +87,7 @@ Service command sequence agents should use:
 ```sh
 tovuk new hello-service --template fullstack-rust-tanstack
 cd hello-service/web
-bun install
+npm install
 cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
@@ -218,7 +218,7 @@ larger than 100 MiB.
 Create a Tovuk full-stack project. Run
 `tovuk new hello-service --template fullstack-rust-tanstack`.
 Run `cd hello-service/web`.
-Run `bun install`.
+Run `npm install`.
 Run `cd ..`.
 Keep dynamic server logic in the Rust worker. Keep the TanStack frontend static
 at runtime and call same-origin `/api`. Run `tovuk check --json`, then

@@ -116,6 +116,7 @@ func checkCLIContract() {
 	requireContains(cargoCLI, `"/v1/account/activity"`, "native account activity route")
 	requireContains(cargoCLI, "usage_caps_catalog_does_not_leak_disabled_resource_meters", "native deploy dry-run usage caps meter regression test")
 	requireContains(cargoCLI, "tanstack-static-frontend", "frontend template option")
+	requireContains(cargoCLI, "next-static-frontend", "Next.js frontend template option")
 	requireContains(cargoCLI, "rust-worker", "Rust worker template option")
 	requireContains(cargoTemplateCLI, "scaffolded {} config from existing files", "advisory new-project scaffold output")
 	requireContains(cargoTemplateCLI, "deploy reads tovuk.toml only", "tovuk.toml-only scaffold guidance")

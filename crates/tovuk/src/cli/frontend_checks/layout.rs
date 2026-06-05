@@ -20,6 +20,17 @@ pub(crate) fn is_plain_static_frontend(project_dir: &Path) -> bool {
     !project_dir.join("package.json").exists() && project_dir.join("index.html").exists()
 }
 
+pub(crate) fn is_next_static_frontend(project_dir: &Path) -> bool {
+    [
+        "next.config.js",
+        "next.config.mjs",
+        "next.config.ts",
+        "next.config.mts",
+    ]
+    .iter()
+    .any(|file| project_dir.join(file).exists())
+}
+
 pub(crate) fn frontend_package_manager(project_dir: &Path) -> &'static str {
     if project_dir.join("bun.lock").exists() || project_dir.join("bun.lockb").exists() {
         "bun"

@@ -8,7 +8,7 @@ Node.js, npm, Python, or any JavaScript runtime.
 ```sh
 cargo install tovuk
 tovuk new hello-service --template fullstack-rust-tanstack
-cd hello-service/web && bun install && cd ..
+cd hello-service/web && npm install && cd ..
 tovuk check --json
 tovuk account show --json
 tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json

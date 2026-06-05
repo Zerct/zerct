@@ -5,6 +5,8 @@ use super::{
         project::service_name_from_dir,
         template_sources::{
             frontend_package_json, frontend_source, frontend_ts_config, frontend_vite_env_source,
+            next_app_globals_source, next_app_layout_source, next_app_page_source,
+            next_config_source, next_env_source, next_package_json, next_ts_config,
             rust_api_source, rust_template_cargo_lock, rust_template_cargo_toml,
         },
     },
@@ -33,6 +35,9 @@ pub(super) fn create_template(project_dir: &Path, template: &str) -> Result<()> 
                 true,
             )?;
         }
+        "next-static-frontend" => {
+            write_next_static_frontend_template(project_dir, &service_name_from_dir(project_dir))?;
+        }
         "fullstack-rust-tanstack" => write_fullstack_template(project_dir)?,
         _ => {}
     }
@@ -45,7 +50,7 @@ fn write_fullstack_template(project_dir: &Path) -> Result<()> {
     write_frontend_template(&project_dir.join("web"), "web", "/api", false)?;
     write_new_file(
         &project_dir.join("tovuk.toml"),
-        &fullstack_config(project_dir, "api", "web", true),
+        &fullstack_config(project_dir, "api", "web", false),
     )
 }
 
@@ -106,12 +111,34 @@ fn write_frontend_template(
     if include_config {
         write_new_file(
             &project_dir.join("tovuk.toml"),
-            &frontend_config(project_dir, true),
+            &frontend_config(project_dir, false),
         )?;
     }
-    println!(
-        "run package install in the frontend directory before check: bun install or npm install"
-    );
+    print_npm_install_next_step(project_dir);
+    Ok(())
+}
+
+fn write_next_static_frontend_template(project_dir: &Path, name: &str) -> Result<()> {
+    fs::create_dir_all(project_dir.join("app"))
+        .map_err(|error| internal_error(error.to_string()))?;
+    write_new_file(&project_dir.join("package.json"), &next_package_json(name))?;
+    write_new_file(&project_dir.join("next.config.mjs"), next_config_source())?;
+    write_new_file(&project_dir.join("next-env.d.ts"), next_env_source())?;
+    write_new_file(&project_dir.join("tsconfig.json"), &next_ts_config())?;
+    write_new_file(
+        &project_dir.join("app/layout.tsx"),
+        next_app_layout_source(),
+    )?;
+    write_new_file(&project_dir.join("app/page.tsx"), next_app_page_source())?;
+    write_new_file(
+        &project_dir.join("app/globals.css"),
+        next_app_globals_source(),
+    )?;
+    write_new_file(
+        &project_dir.join("tovuk.toml"),
+        &frontend_config(project_dir, false),
+    )?;
+    print_npm_install_next_step(project_dir);
     Ok(())
 }
 
@@ -128,4 +155,11 @@ fn write_new_file(path: &Path, source: &str) -> Result<()> {
         fs::create_dir_all(parent).map_err(|error| internal_error(error.to_string()))?;
     }
     fs::write(path, source).map_err(|error| internal_error(error.to_string()))
+}
+
+fn print_npm_install_next_step(project_dir: &Path) {
+    println!(
+        "next: run `npm install` in {} before `tovuk check`",
+        project_dir.display()
+    );
 }

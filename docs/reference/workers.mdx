@@ -108,8 +108,8 @@ health = "/api/healthz"
 
 [frontend]
 root = "web"
-check = "bun ci && bun run typecheck && bun run lint"
-build = "bun run build"
+check = "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+build = "npm run build"
 output = "dist"
 ```
 
