@@ -41,14 +41,16 @@ description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
     limits, and `billingEstimate` before queuing build work.
   </Step>
 
-  <Step title="Deploy and keep build evidence">
+  <Step title="Deploy and inspect the Service">
     ```sh
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     tovuk logs --build job_1 --json
     ```
 
-    Preserve the returned deploy and build ids. If the build fails, fix the
-    first actionable log line, rerun checks, and redeploy.
+    Inspect the Service snapshot before reaching for logs. Preserve the
+    returned deploy and build ids. If the build fails, fix the first actionable
+    log line, rerun checks, and redeploy.
   </Step>
 </Steps>
 
@@ -62,6 +64,7 @@ tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 ```
 
 `tovuk` is the live unscoped npm package. It installs a native binary for the
@@ -96,6 +99,7 @@ tovuk account show --json
 tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show service_1 --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
@@ -128,6 +132,7 @@ tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 ```
 
 ## PyPI
@@ -140,6 +145,7 @@ tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 ```
 
 The PyPI package launches the same native Tovuk binary as npm, Homebrew, and
@@ -157,4 +163,5 @@ tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 ```

@@ -37,7 +37,8 @@ Resource references:
 - `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, service snapshot, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
 - `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.
 - `docs/reference/products.mdx`: product catalog fields, account setup, dry-run, usage, and usage-cap selection workflow.
-- `docs/reference/packages.mdx`: install channels, account setup checks, package parity, and native binary recovery.
+- `docs/reference/packages.mdx`: install channels, account setup checks,
+  post-deploy Service snapshots, package parity, and native binary recovery.
 - `docs/reference/usage-caps.mdx`: account setup and hard caps for every public meter.
 
 Workflow references:
