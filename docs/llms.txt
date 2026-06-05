@@ -55,7 +55,8 @@ Workflow references:
   prompts with account checks, post-deploy Service snapshots, recovery,
   support, and abuse workflow.
 - `docs/pricing.mdx`: pricing, account setup, usage limits, cost estimates, and hard caps.
-- `docs/templates.mdx`: project templates, `tovuk new`, starter account checks, and starter workflows.
+- `docs/templates.mdx`: project templates, `tovuk new`, starter account
+  checks, post-deploy Service snapshots, and starter workflows.
 - `docs/changelog.mdx`: dated changes, fixes, and release-note review links.
 
 Operational references:
