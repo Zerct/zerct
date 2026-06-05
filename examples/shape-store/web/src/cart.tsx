@@ -31,20 +31,41 @@ export function CartDrawer({
   onAdd: (productId: string, selectedSize?: string) => void;
   onClose: () => void;
 }) {
-  const orderReceipt = checkout.orderReceipt;
-  const drawerContent =
-    orderReceipt !== null && cart.cartLines.length === 0 ? (
-      <OrderReceiptSummary onClose={onClose} orderReceipt={orderReceipt} />
-    ) : (
-      <CheckoutLayout cart={cart} checkout={checkout} isCartEmpty={cart.cartLines.length === 0} onAdd={onAdd} />
-    );
+  if (checkout.orderReceipt !== null && cart.cartLines.length === 0) {
+    return <ReceiptCartDrawer onClose={onClose} orderReceipt={checkout.orderReceipt} />;
+  }
 
+  return <CheckoutCartDrawer cart={cart} checkout={checkout} onAdd={onAdd} onClose={onClose} />;
+}
+
+function ReceiptCartDrawer({ onClose, orderReceipt }: { onClose: () => void; orderReceipt: OrderReceipt }) {
+  return (
+    <div className="overlay-layer" role="presentation">
+      <button aria-label="Close cart" className="overlay-scrim" onClick={onClose} type="button" />
+      <aside aria-label="Cart and checkout" aria-modal="true" className="cart-drawer" role="dialog">
+        <OrderReceiptSummary onClose={onClose} orderReceipt={orderReceipt} />
+      </aside>
+    </div>
+  );
+}
+
+function CheckoutCartDrawer({
+  cart,
+  checkout,
+  onAdd,
+  onClose,
+}: {
+  cart: CartState;
+  checkout: CheckoutState;
+  onAdd: (productId: string, selectedSize?: string) => void;
+  onClose: () => void;
+}) {
   return (
     <div className="overlay-layer" role="presentation">
       <button aria-label="Close cart" className="overlay-scrim" onClick={onClose} type="button" />
       <aside aria-label="Cart and checkout" aria-modal="true" className="cart-drawer" role="dialog">
         <CartTop onClose={onClose} totalItems={cart.totalItems} />
-        {drawerContent}
+        <CheckoutLayout cart={cart} checkout={checkout} isCartEmpty={cart.cartLines.length === 0} onAdd={onAdd} />
       </aside>
     </div>
   );
@@ -80,8 +101,8 @@ function CartTop({ onClose, totalItems }: { onClose: () => void; totalItems: num
       <button aria-label="Back to products" className="back-trigger" onClick={onClose} type="button">
         <span aria-hidden="true" />
       </button>
-      <div className="checkout-wallet" aria-label={`Cart has ${totalItems} items`}>
-        <span>YZY WALLET</span>
+      <div className="checkout-bag" aria-label={`Cart has ${totalItems} items`}>
+        <span>SHOPPING BAG</span>
         <span>{totalItems}</span>
         <span aria-hidden="true" className="cart-icon" />
       </div>
@@ -209,7 +230,7 @@ function CheckoutForm({
   return (
     <form className="checkout-form" onSubmit={checkout.submitOrder}>
       <button className="discount-code-button" type="button">
-        YZY CODE
+        DISCOUNT CODE
       </button>
       <ExpressCheckoutButtons
         disabled={isCartEmpty}
@@ -329,10 +350,10 @@ function ExpressCheckoutButtons({
       <button className="express-checkout-button apple-pay" disabled={disabled || isSubmitting} onClick={onClick} type="button">
         {label}
       </button>
-      <button className="express-checkout-button wallet-pay" disabled type="button">
+      <button className="express-checkout-button secondary-pay" disabled type="button">
         G PAY
       </button>
-      <button className="express-checkout-button wallet-pay paypal" disabled type="button">
+      <button className="express-checkout-button secondary-pay paypal" disabled type="button">
         PayPal
       </button>
     </section>

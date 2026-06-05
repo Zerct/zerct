@@ -3,7 +3,7 @@
 A no-admin fullstack ecommerce example for Tovuk.
 
 The storefront mirrors the sparse product-grid, full-screen product overlay,
-size-selection, and wallet-style checkout flow of the current Yeezy storefront,
+size-selection, and full-screen bag checkout flow of the current Yeezy storefront,
 but all product visuals are local black SVG shape assets. No Yeezy branding or
 product imagery is copied.
 

@@ -189,8 +189,7 @@ button:disabled {
   display: grid;
   width: 100%;
   min-width: 0;
-  min-height: 146px;
-  gap: 22px;
+  gap: clamp(22px, 4vw, 52px);
   justify-items: center;
   align-content: start;
   text-align: center;
@@ -199,8 +198,8 @@ button:disabled {
 .product-tile img {
   display: block;
   width: 100%;
-  height: 100px;
-  max-width: 118px;
+  height: auto;
+  max-width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: contain;
 }
@@ -323,8 +322,8 @@ button:disabled {
 .product-focus-stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  --focus-gap: clamp(48px, 8vw, 74px);
-  --focus-tile-width: min(calc(100vw - 40px), 560px);
+  --focus-gap: clamp(40px, 4vw, 48px);
+  --focus-tile-width: min(100vw, 560px);
   --focus-center-offset: calc((100vw - var(--focus-tile-width)) / 2);
   --focus-rail-step: calc(var(--focus-tile-width) + var(--focus-gap));
   width: 100%;
@@ -333,7 +332,7 @@ button:disabled {
   overflow: hidden;
   justify-items: center;
   align-content: start;
-  padding: 102px 0 26px;
+  padding: 74px 0 26px;
 }
 
 .product-focus-rail {
@@ -357,7 +356,6 @@ button:disabled {
   gap: 28px;
   justify-items: center;
   align-content: start;
-  padding-top: clamp(78px, 17vh, 150px);
   text-align: center;
 }
 
@@ -367,8 +365,8 @@ button:disabled {
 
 .product-focus-tile img {
   display: block;
-  width: min(70vw, 360px);
-  height: min(31dvh, 300px);
+  width: min(100%, 560px);
+  height: min(62dvh, var(--focus-tile-width));
   object-fit: contain;
 }
 
@@ -593,7 +591,7 @@ button:disabled {
   background: #fff;
 }
 
-.checkout-wallet {
+.checkout-bag {
   justify-self: end;
   display: grid;
   grid-template-columns: max-content max-content 16px;
@@ -605,13 +603,13 @@ button:disabled {
   text-transform: uppercase;
 }
 
-.checkout-wallet .cart-icon {
+.checkout-bag .cart-icon {
   position: relative;
   width: 14px;
   height: 15px;
 }
 
-.checkout-wallet .cart-icon::before {
+.checkout-bag .cart-icon::before {
   top: -8px;
 }
 
@@ -807,7 +805,7 @@ button:disabled {
   background: #000;
 }
 
-.express-checkout .wallet-pay {
+.express-checkout .secondary-pay {
   border-color: #8d8d8d;
   color: #fff;
   background: #8d8d8d;
@@ -864,20 +862,14 @@ textarea:focus-visible {
   }
 
   .product-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 82px 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 74px 16px;
     padding-block-start: 96px;
-    padding-inline: 28px;
+    padding-inline: 16px;
   }
 
   .product-tile {
-    min-height: 244px;
-    gap: 82px;
-  }
-
-  .product-tile img {
-    height: 120px;
-    max-width: 144px;
+    gap: clamp(42px, 5vw, 72px);
   }
 
   .product-tile span {

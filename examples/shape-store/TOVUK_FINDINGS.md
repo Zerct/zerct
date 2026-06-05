@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_61`, `job_62`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_75`, `job_76`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -27,6 +27,11 @@ Date: 2026-06-05
 - Added and released Tovuk CLI `0.1.97` during this pass to make `tovuk dev`
   occupied-port handling explicit: JSON returns `ok: false` and owner details,
   while text mode refuses to launch child processes until ports are free.
+- Added and released Tovuk CLI `0.1.98` during this pass to catch imported
+  Next.js static-export misconfiguration before deploy.
+- Added and released Tovuk CLI `0.1.99` during this pass to show failed
+  `tovuk check` fix instructions in normal text output and avoid reporting a
+  clean Git commit SHA for dirty-worktree source archives.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
@@ -34,7 +39,7 @@ Date: 2026-06-05
   the selected product, and the `+` opens the inline size selector in place.
 - Updated the ecommerce example cart flow to match the same reference more
   closely: selecting size `9` adds `YS-02` at `$50`, keeps the product overlay
-  open, and the bag opens a full-screen `YZY WALLET`-style order summary.
+  open, and the bag opens a full-screen shopping-bag order summary.
 - Deployed the refactored Rust API module split to production and verified
   product, checkout, and Browser flows on `https://shape-store.tovuk.app`.
 - Patched a desktop-only product focus rail bug found during the latest UX
@@ -43,6 +48,13 @@ Date: 2026-06-05
 - Patched the product-detail carousel model found during the latest UX pass:
   arrows now move through multiple images for the selected product instead of
   switching to neighboring products.
+- Patched the product grid sizing found during the latest Yeezy comparison:
+  mobile, tablet, and desktop now use three product columns with product art
+  filling the available column width.
+- Removed product-reference-specific `YZY` checkout copy from the example. The
+  cart now says `SHOPPING BAG` and `DISCOUNT CODE`.
+- Simplified the mobile order-confirmed state into a focused full-screen
+  receipt with no bag header and a centered stacked receipt summary.
 
 ## What I built
 
@@ -62,7 +74,7 @@ Date: 2026-06-05
   - full-page Yeezy-like product detail state with back control, bag icon,
     per-product gallery arrows, carousel dots, price, plus button, and inline
     size selector
-  - full-screen wallet/order-summary cart overlay
+  - full-screen bag/order-summary cart overlay
   - quantity controls
   - checkout form
   - order receipt
@@ -136,8 +148,8 @@ Browser and UX checks:
     `4` through `16`
   - selecting size `9` increments the bag count while staying in the product
     detail state
-  - bag opens a full-screen order summary with `YZY WALLET`, product thumbnail,
-    size, quantity controls, `$50` subtotal/total, `YZY CODE`, and express
+  - bag opens a full-screen order summary with shopping-bag copy, product thumbnail,
+    size, quantity controls, `$50` subtotal/total, discount code, and express
     checkout buttons
   - no horizontal overflow at `429px` viewport width
 - Confirmed responsive Browser screenshots at:
@@ -156,7 +168,7 @@ Browser and UX checks:
 - Confirmed production Browser flow on `deploy_53`:
   - product detail shows `YS-02` at `$50`
   - selecting size `9` increments the bag count to `1`
-  - cart opens as a full-screen `YZY WALLET` order summary
+  - cart opens as a full-screen shopping-bag order summary
   - cart subtotal and total are `$50`
   - no horizontal overflow at `429px`
 - Confirmed production Browser flow on `deploy_55`:
@@ -164,7 +176,7 @@ Browser and UX checks:
   - mobile `390x844` uses 3 product columns and no horizontal overflow
   - tablet `768x1024` and desktop `1280x800` use 6 product columns and no
     horizontal overflow
-  - `YS-02 -> size 9 -> bag` opens the full-screen `YZY WALLET` checkout
+  - `YS-02 -> size 9 -> bag` opens the full-screen shopping-bag checkout
   - cart subtotal and total are `$50`
 - Confirmed production Browser desktop flow on `deploy_57`:
   - 50 products loaded from the worker API with no `API FALLBACK`
@@ -1152,7 +1164,7 @@ Finding:
 - Stripe Checkout is the pragmatic payment path for this public ecommerce
   example.
 - True Stripe Express Checkout Elements need publishable keys, HTTPS/domain
-  setup, browser wallet eligibility, and a server-created Checkout Session.
+  setup, express checkout eligibility, and a server-created Checkout Session.
 - A public Tovuk example cannot require private Stripe keys just to complete a
   smoke test.
 
@@ -1400,7 +1412,7 @@ Verification:
   - tablet `768x1024` and desktop `1280x800` use 6 product columns and no
     horizontal overflow.
   - opening `YS-02`, selecting size `9`, and opening the bag still shows the
-    full-screen `YZY WALLET` checkout with `$50` subtotal/total.
+    full-screen shopping-bag checkout with `$50` subtotal/total.
 - Direct API smoke tests passed for `/api/healthz`, `/api/products`, and
   demo-mode `POST /api/checkout`.
 
@@ -1685,8 +1697,8 @@ Reference signals from `https://yeezy.com/`:
 
 - Cart/checkout stays in-page with the storefront visible behind the checkout
   state.
-- Top right shows `YZY wallet` and the item count.
-- The checkout surface includes order summary, `YZY code`, express checkout,
+- Top right shows the bag label and item count.
+- The checkout surface includes order summary, discount code, express checkout,
   contact information, shipping address, payment details, and billing address.
 - Desktop form fields are around 640px wide, with paired first/last name and
   payment sub-fields.
@@ -1864,6 +1876,79 @@ Verification:
     `next.config.mjs`, `output: "export"`, `out`, and moving server logic to
     the Rust worker.
 
+### 47. Desktop product grid and text-mode CLI output still had agent friction
+
+Failure/friction:
+
+- Yeezy's current storefront renders the product grid as three large product
+  columns across desktop, tablet, and mobile. The example still used six
+  columns on tablet and desktop, which made the product art too small and
+  visibly less faithful on desktop.
+- The product-detail gallery matched the interaction model, but the active
+  product image was still smaller than the current Yeezy detail rail.
+- `tovuk check --json` had actionable `agent_instruction` values, but normal
+  `tovuk check` text output only printed the failed check and message. That
+  kept nudging agents toward `--json` even when a human-readable repair line
+  would be enough.
+- Dirty-worktree deploys uploaded the current source archive but still sent the
+  clean `HEAD` commit SHA. That is misleading for users and agents comparing a
+  deployment result to Git history.
+
+Fix included in this pass:
+
+- Updated the example storefront grid so all tested viewport sizes use three
+  product columns and product art fills the column width.
+- Enlarged the product-detail rail art so the selected product uses the full
+  Yeezy-like stage at desktop, tablet, and mobile sizes.
+- Changed normal `tovuk check` output to print a `fix ...` line for each failed
+  check that has an `agent_instruction`, while preserving the JSON contract.
+- Changed deploy source metadata so the CLI only sends `commit_sha` when
+  `git status --porcelain` is clean. Dirty source archive deploys now send
+  `commit_sha: null`.
+- Bumped public package metadata to `0.1.99` so the CLI fix can publish through
+  the corrected release pipeline.
+- Removed product-reference-specific `YZY` checkout copy and replaced it with
+  neutral `SHOPPING BAG` and `DISCOUNT CODE` labels.
+- Simplified the order-confirmed view on mobile: the receipt-only state no
+  longer renders the cart header, uses one centered column, and wraps long
+  receipt values safely.
+
+Verification:
+
+- Local shape-store checks passed:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `cargo test --manifest-path examples/shape-store/api/Cargo.toml --locked`
+- CLI checks passed:
+  - `cargo test --manifest-path crates/tovuk/Cargo.toml --locked`
+  - `cargo clippy --manifest-path crates/tovuk/Cargo.toml --locked --release
+    --all-targets --all-features -- -D warnings`
+  - `./scripts/check-all.sh`
+- Temporary imported Next project text-mode check now prints direct `fix ...`
+  lines, including the `Next static export` instruction for
+  `next.config.mjs`, `output: "export"`, `out`, and moving server logic to the
+  Rust worker.
+- Production deploy `deploy_75` / `job_76` succeeded and is live at
+  `https://shape-store.tovuk.app`.
+- The dirty-worktree deploy result returned `commit_sha: null`, proving the CLI
+  no longer mislabels locally modified source archives as a clean commit.
+- Production API checks passed:
+  - `GET /api/healthz` returned `{"ok":true}`.
+  - `GET /api/products` returned 50 products.
+- Production Browser real-user transaction checks passed:
+  - desktop `1440x900`: three product columns, first product image `447x447`,
+    no API fallback, no horizontal overflow, `ArrowRight` changed the active
+    `YS-02` image, `Escape` returned to the grid, size `9` added to cart, and
+    `APPLE PAY` reached `ORDER CONFIRMED`. Cart copy showed `SHOPPING BAG` and
+    `DISCOUNT CODE`, with no `YZY` or wallet wording.
+  - tablet `768x1024`: three product columns, first product image `223x223`,
+    no horizontal overflow, keyboard gallery and checkout flow passed.
+  - mobile `390x844`: three product columns, first product image `97x97`, no
+    horizontal overflow, keyboard gallery and checkout flow passed. The
+    production order-confirmed state had no cart header, no forbidden copy, no
+    horizontal overflow, and a centered `350px` stacked receipt grid.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1899,7 +1984,7 @@ Hard:
 
 - Desktop layout is intentionally stark and sparse.
 - Mobile layout uses three product columns and no horizontal scrolling.
-- Tablet and desktop layouts use six product columns and no horizontal
+- Tablet and desktop layouts use three product columns and no horizontal
   scrolling.
 - Product grid shows product codes only; prices, size selection, and add-to-cart
   live in the full-page product detail state.
@@ -1909,7 +1994,7 @@ Hard:
   footer.
 - Cart now mirrors the current Yeezy flow more closely: size selection adds to
   the bag without leaving product detail, and the bag opens a full-screen
-  wallet/order-summary checkout overlay.
+  bag/order-summary checkout overlay.
 - Cart, quantity, and checkout flows work from the deployed site.
 - Refactored the Rust API into focused modules and made `web/src/catalog.json`
   the single product catalog source for both frontend fallback data and the
