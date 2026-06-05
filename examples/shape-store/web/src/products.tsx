@@ -29,6 +29,19 @@ type GalleryItem = {
 
 type ProductKeyboardKey = "ArrowLeft" | "ArrowRight" | "Escape";
 
+type ProductDetailCopy = {
+  categoryLabel: string;
+  lines: readonly string[];
+  status: string;
+};
+
+const productCategoryLabels = {
+  ACCESSORIES: "SHAPE ACCESSORY",
+  FOOTWEAR: "SHAPE FOOTWEAR",
+  SLIDES: "SHAPE SLIDE",
+} as const satisfies Partial<Record<Category, string>>;
+const productCategoryPriority = ["SLIDES", "FOOTWEAR", "ACCESSORIES"] as const satisfies readonly Category[];
+
 export function ProductGrid({
   isKeyboardEnabled,
   onAdd,
@@ -120,7 +133,7 @@ function ProductFocusView({
 
   return (
     <section aria-label={`${product.name} details`} className="product-focus">
-      <div className="product-focus-stage">
+      <div className={productFocusStageClass(isSizePickerOpen)}>
         <div
           className={gallery.hasMultipleImages ? "product-focus-rail" : "product-focus-rail single-image"}
           key={`${product.id}-${gallery.selectedImageIndex}`}
@@ -349,10 +362,11 @@ function ProductDetailMeta({
   onSizePickerOpen: () => void;
   product: Product;
 }) {
+  const detailCopy = productDetailCopy(product);
   return (
     <div className="product-detail-meta">
       <strong>{product.name}</strong>
-      <span>{formatCurrency(product.priceCents)}</span>
+      <ProductPriceStatus detailCopy={detailCopy} product={product} />
       <button aria-label={`Select size for ${product.name}`} onClick={onSizePickerOpen} type="button">
         +
       </button>
@@ -396,6 +410,7 @@ function SizePicker({
   onClose: () => void;
   product: Product;
 }) {
+  const detailCopy = productDetailCopy(product);
   return (
     <div className="size-picker" role="group" aria-label={`Select size for ${product.name}`}>
       <div className="size-picker-top">
@@ -407,7 +422,7 @@ function SizePicker({
           X
         </button>
       </div>
-      <span>{formatCurrency(product.priceCents)}</span>
+      <ProductPriceStatus detailCopy={detailCopy} product={product} />
       <div className="size-grid">
         {productSizes.map((size) => (
           <button key={size} onClick={() => onAdd(size)} type="button">
@@ -418,7 +433,34 @@ function SizePicker({
       <button className="size-picker-info" type="button">
         INFORMATION
       </button>
+      <ProductInformation detailCopy={detailCopy} />
     </div>
+  );
+}
+
+function ProductPriceStatus({
+  detailCopy,
+  product,
+}: {
+  detailCopy: ProductDetailCopy;
+  product: Product;
+}) {
+  return (
+    <span className="product-price-status">
+      <span>{formatCurrency(product.priceCents)}</span>
+      <span>{detailCopy.status}</span>
+    </span>
+  );
+}
+
+function ProductInformation({ detailCopy }: { detailCopy: ProductDetailCopy }) {
+  return (
+    <dl className="product-information" aria-label="Product information">
+      <dt>{detailCopy.categoryLabel}</dt>
+      {detailCopy.lines.map((line) => (
+        <dd key={line}>{line}</dd>
+      ))}
+    </dl>
   );
 }
 
@@ -433,6 +475,23 @@ function getProductFocus(products: Product[], selectedProduct: Product | null) {
 
 function getProductGalleryImages(product: Product) {
   return product.galleryImages.length > 0 ? product.galleryImages : [product.image];
+}
+
+function productDetailCopy(product: Product): ProductDetailCopy {
+  return {
+    categoryLabel: productCategoryLabel(product),
+    lines: [
+      "100% SOLID BLACK VECTOR",
+      "FITS TRUE TO SIZE",
+      "SHIPS 3 TO 5 BUSINESS DAYS",
+    ],
+    status: product.inventory <= 12 ? "LIMITED RUN" : "RESTOCKS IN 4 WEEKS",
+  };
+}
+
+function productCategoryLabel(product: Product) {
+  const category = productCategoryPriority.find((candidate) => product.categories.includes(candidate));
+  return category === undefined ? "SHAPE PIECE" : productCategoryLabels[category];
 }
 
 function getGalleryItems(images: readonly string[], selectedIndex: number): GalleryItem[] {
@@ -470,4 +529,8 @@ function getFocusImageLoading(isActive: boolean): "eager" | "lazy" {
 
 function getFocusTileClass(isActive: boolean) {
   return isActive ? "product-focus-tile active" : "product-focus-tile";
+}
+
+function productFocusStageClass(isSizePickerOpen: boolean) {
+  return isSizePickerOpen ? "product-focus-stage size-picker-open" : "product-focus-stage";
 }

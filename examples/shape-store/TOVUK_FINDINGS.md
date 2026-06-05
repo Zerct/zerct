@@ -67,6 +67,9 @@ Date: 2026-06-05
 - Hardened `POST /api/orders` so manual reservations use the same typed,
   catalog-backed parser as Stripe Checkout, reject missing email and unknown
   products, and return the server-computed order total.
+- Added neutral product-detail copy to the shape-store product view so the
+  selected product feels more like a complete ecommerce detail page without
+  introducing Yeezy-specific branding or wallet/provider language.
 
 ## What I built
 
@@ -2208,6 +2211,24 @@ Verification:
   - GitHub release `v0.1.101` is published with 4 native binary assets.
   - `npx -y tovuk@0.1.101 dev examples/shape-store --frontend-port 5174
     --json` returned `ok: true` and the expected port/env plan.
+- Latest local product-detail pass:
+  - Browser comparison with `https://yeezy.com/` confirmed the current Yeezy
+    product state includes availability and compact product-information copy.
+  - Added neutral `RESTOCKS IN 4 WEEKS` / `LIMITED RUN` availability copy and
+    a small product-information block generated from existing product category
+    data.
+  - `320x568` mobile product detail has no horizontal overflow; the size picker
+    scrolls vertically so the product-information block is reachable.
+  - `768x1024` tablet and `1440x900` desktop product size picker fit the full
+    product-information block without scrolling and without horizontal overflow.
+  - Local Browser checkout from `YS-02 -> size 9 -> CHECKOUT` reached
+    `ORDER CONFIRMED` for `$50` with no `YZY`, `YEEZY`, `WALLET`,
+    `APPLE PAY`, `G PAY`, or `PayPal` copy.
+  - Local checks passed:
+    `npm run typecheck`, `npm run lint`, `npm run build`,
+    `cargo test --manifest-path examples/shape-store/api/Cargo.toml --locked`,
+    and `cargo run --manifest-path crates/tovuk/Cargo.toml -- check
+    examples/shape-store --json`.
 
 ## Remaining Tovuk friction
 
@@ -2250,8 +2271,8 @@ Hard:
   live in the full-page product detail state.
 - Product detail now mirrors the current Yeezy flow more closely: the route
   does not change, the selected product is shown centered in a full-screen rail,
-  and the inline size selector replaces the plus controls without showing the
-  footer.
+  neutral price/status copy appears before size selection, and the inline size
+  selector replaces the plus controls without showing the footer.
 - Cart now mirrors the current Yeezy flow more closely: size selection adds to
   the bag without leaving product detail, and the bag opens a full-screen
   bag/order-summary checkout overlay.
