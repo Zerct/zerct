@@ -85,7 +85,12 @@ infrastructure probe for load balancers and deploy scripts.
   "api_version": "v1",
   "checks": [
     {
-      "name": "control_plane_database",
+      "name": "control_plane_sqlite",
+      "ok": true,
+      "message": "reachable"
+    },
+    {
+      "name": "redis",
       "ok": true,
       "message": "reachable"
     }
@@ -95,9 +100,10 @@ infrastructure probe for load balancers and deploy scripts.
 }
 ```
 
-If `ok` is true, call `/v1/capabilities` to confirm the public product, meter,
-docs, and OpenAPI catalog before retrying the CLI command you were running. If
-`ok` is false, retry later before changing project code.
+Healthy status currently reports control-plane SQLite and Redis dependency
+checks. If `ok` is true, call `/v1/capabilities` to confirm the public product,
+meter, docs, and OpenAPI catalog before retrying the CLI command you were
+running. If `ok` is false, retry later before changing project code.
 
 ## Capability catalog
 

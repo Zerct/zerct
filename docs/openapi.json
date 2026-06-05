@@ -9113,7 +9113,12 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "control_plane_database",
+                      "name": "control_plane_sqlite",
+                      "ok": true,
+                      "message": "reachable"
+                    },
+                    {
+                      "name": "redis",
                       "ok": true,
                       "message": "reachable"
                     }
@@ -9156,7 +9161,7 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "control_plane_database",
+                      "name": "control_plane_sqlite",
                       "ok": false,
                       "message": "unavailable"
                     }
@@ -19495,7 +19500,8 @@
             "pattern": "^[a-z0-9_]{1,80}$",
             "maxLength": 80,
             "examples": [
-              "control_plane_database"
+              "control_plane_sqlite",
+              "redis"
             ]
           },
           "ok": {
@@ -19517,7 +19523,7 @@
         },
         "examples": [
           {
-            "name": "control_plane_database",
+            "name": "control_plane_sqlite",
             "ok": true,
             "message": "reachable"
           }
@@ -19573,7 +19579,12 @@
             "examples": [
               [
                 {
-                  "name": "control_plane_database",
+                  "name": "control_plane_sqlite",
+                  "ok": true,
+                  "message": "reachable"
+                },
+                {
+                  "name": "redis",
                   "ok": true,
                   "message": "reachable"
                 }
@@ -19605,7 +19616,12 @@
             "api_version": "v1",
             "checks": [
               {
-                "name": "control_plane_database",
+                "name": "control_plane_sqlite",
+                "ok": true,
+                "message": "reachable"
+              },
+              {
+                "name": "redis",
                 "ok": true,
                 "message": "reachable"
               }
