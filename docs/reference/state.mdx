@@ -1,15 +1,15 @@
 ---
-title: "Manage Stateful Objects and Alarms"
+title: "Manage State Objects and Alarms"
 sidebarTitle: "State"
-description: "Confirm account and Service context, then manage keyed State objects, alarms, runtime bindings, and coordination for Rust workers."
+description: "Confirm account and Service context, then manage keyed State objects, alarms, runtime bindings, and coordination for Tovuk Services."
 ---
 
-State gives each service named classes of keyed objects. Use it when one object
+State gives each Service named classes of keyed objects. Use it when one object
 key needs serialized coordination, realtime session data, counters, locks,
 rooms, or per-tenant state.
 
-Keep public HTTP APIs in the Rust worker. Call State from that worker only when
-the request needs keyed coordination or per-object alarm scheduling.
+Keep public HTTP APIs in the Rust worker runtime. Call State from that worker
+only when the request needs keyed coordination or per-object alarm scheduling.
 
 ## State setup flow
 
