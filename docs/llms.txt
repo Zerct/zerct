@@ -137,23 +137,26 @@ Agent repair loop:
 5. Run `tovuk account show --json`.
 6. If account setup is incomplete, run
    `tovuk account update --handle <handle> --display-name <name> --json`.
-7. Run `tovuk deploy --dry-run --json`.
+7. Run `tovuk deploy --dry-run --json`; after Rust dependency changes, run
+   `tovuk deploy --dry-run --build-artifact --json`.
 8. Review warnings, enabled and disabled capabilities, `missingConfig`,
    `requiredFixes`, meters, `meterPlan`, limits, and `billingEstimate`.
 9. Set hard usage caps for expected load.
 10. Run `tovuk deploy --wait --json`.
-11. Inspect live deploy state with `tovuk service status <service> --json`.
+11. Inspect the Service snapshot with `tovuk service show <service> --json`.
 12. Inspect deploy history with `tovuk deploy list --json` or
    `tovuk deploy show <deploy_id> --json` when needed.
 13. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
 14. If deploy fails, read `build_job.id` or the failed build id.
 15. Run `tovuk logs --build <build_id> --json`.
 16. Fix the first actionable log error.
-17. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`.
+17. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`; after
+    Rust dependency changes, rerun
+    `tovuk deploy --dry-run --build-artifact --json`.
 18. Run `tovuk deploy --wait --json` after the fix.
-19. Inspect live deploy state again with `tovuk service status <service> --json`;
-    use `tovuk service show <service> --json` when resource, billing, env, or
-    domain context is needed before reading more build or deploy logs.
+19. Inspect the Service snapshot again with
+    `tovuk service show <service> --json` before reading more build or deploy
+    logs.
 
 Rust worker contract:
 
@@ -404,6 +407,14 @@ Each service includes `missingConfig` for `tovuk.toml` repair, `requiredFixes`
 for every failed quality check, and `meterPlan` entries for enabled service
 meters with meter units, pricing fields, limit fields, and ready-to-fill
 `tovuk limits set` cap commands.
+After adding or upgrading Rust dependencies, run
+`tovuk deploy --dry-run --build-artifact --json`; it performs the local release
+build without uploading or promoting, then reports
+`artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
+`tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
+and `dev.port_statuses` without starting child processes. Inspect
+`dev.port_statuses` before opening `frontend_url` so a port conflict does not
+send the browser to a different app.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
 Usage Caps.

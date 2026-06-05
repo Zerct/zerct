@@ -67,6 +67,10 @@ Tovuk deploys projects that are explicit and reproducible.
     Run the account update command only when setup is incomplete. Use the
     dry-run response to review enabled and disabled capabilities, missing
     config, meters, `meterPlan`, limits, and `billingEstimate` before deploying.
+    After adding or upgrading Rust dependencies, run
+    `tovuk deploy --dry-run --build-artifact --json` to build the local release
+    binary without upload and compare `artifactCheck.compressedBytes` against
+    the worker compressed-size limit.
   </Step>
 </Steps>
 

@@ -1,4 +1,5 @@
 mod archive;
+mod artifact;
 mod discovery;
 mod dry_run;
 mod output;
