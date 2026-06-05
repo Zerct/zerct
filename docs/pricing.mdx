@@ -1,7 +1,7 @@
 ---
 title: "Pricing and Usage Limits"
 sidebarTitle: "Pricing"
-description: "Free and Pro pricing, usage limits, overage meters, and hard caps for agent-ready deploys."
+description: "Free and Pro pricing, usage limits, overage meters, and usage caps for agent-ready deploys."
 ---
 
 Tovuk uses usage meters so agents can predict cost before they deploy. Free
@@ -185,10 +185,10 @@ estimate so agents can plan conservatively.
 - API tokens: `100`.
 - Support tickets: `20` per day.
 
-## Hard Caps
+## Usage Caps
 
 Paid overage should never surprise a human. Before a high-throughput test or a
-production launch, set hard caps:
+production launch, set usage caps with hard stops:
 
 ```sh
 tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
