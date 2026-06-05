@@ -39,12 +39,17 @@ guessing.
     Review deploy intent, meters, limits, and billing estimates without creating a build.
   </Step>
 
-  <Step title="Deploy and wait">
+  <Step title="Deploy and inspect the service">
     ```sh
     tovuk deploy --wait --json
+    tovuk service show <service> --json
     ```
 
-    Tovuk queues the build, runs checks, verifies the Rust worker health route, and exposes the service on a `tovuk.app` deployment hostname.
+    Tovuk queues the build, runs checks, verifies the Rust worker health route,
+    and exposes the service on a `tovuk.app` deployment hostname. Use the
+    returned service id with `tovuk service show <service> --json` to confirm
+    runtime status, URL, capabilities, deploy history, builds, logs,
+    `accountUsage`, `billingEstimate`, and next actions.
   </Step>
 
   <Step title="Inspect or cancel deploys">
