@@ -8,7 +8,7 @@ Cron triggers are Service-scoped scheduled deliveries to Rust worker handlers.
 Use Cron for cleanup, reports, polling, cache refreshes, and maintenance jobs
 that are safe to retry.
 
-## Scheduled job flow
+## Cron Trigger Workflow
 
 <Steps>
   <Step title="Confirm account and service context">
@@ -73,7 +73,7 @@ that are safe to retry.
   </Step>
 </Steps>
 
-## CLI workflow
+## CLI Workflow
 
 ```sh
 tovuk account show --json
@@ -102,7 +102,7 @@ pause, resume, and delete Cron triggers through the same API routes as the CLI.
 Cron deliveries are Rust worker routes at `POST /.tovuk/cron/<trigger>`.
 Public traffic to `/.tovuk/*` is blocked.
 
-## Meters and caps
+## Meters and Caps
 
 Cron delivery counts as Worker usage because it wakes and runs the Rust worker.
 Use `worker_requests`, `worker_cpu_ms`, and `worker_transfer_bytes` caps.
