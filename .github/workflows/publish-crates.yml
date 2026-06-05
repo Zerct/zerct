@@ -42,6 +42,10 @@ jobs:
             -H "User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)" \
             "https://crates.io/api/v1/crates/tovuk/$version")"
           if [ "$status" = "200" ]; then
+            if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+              echo "::error::tovuk@$version already exists on crates.io. Bump every public package version before pushing CLI changes."
+              exit 1
+            fi
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "::notice::tovuk@$version already exists on crates.io; skipping publish."
           elif [ "$status" = "404" ]; then
