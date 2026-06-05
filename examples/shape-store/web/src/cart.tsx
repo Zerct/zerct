@@ -476,8 +476,8 @@ export function useCheckout(cartLines: CartLine[], totalCents: number, clearCart
     setCheckoutError("");
     setIsSubmitting(true);
     try {
-      const orderId = await reserveOrder(checkoutFields, cartLines, totalCents);
-      setOrderReceipt({ id: orderId, totalCents });
+      const receipt = await reserveOrder(checkoutFields, cartLines, totalCents);
+      setOrderReceipt(receipt);
       setCheckoutFields(emptyCheckoutFields());
       clearCart();
     } catch {

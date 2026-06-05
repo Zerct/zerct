@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_77`, `job_78`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_79`, `job_80`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -56,6 +56,9 @@ Date: 2026-06-05
 - Simplified the mobile order-confirmed state into a focused full-screen
   receipt with no bag header, no provider-specific status copy, and compact
   two-row order/total receipt rows.
+- Hardened `POST /api/orders` so manual reservations use the same typed,
+  catalog-backed parser as Stripe Checkout, reject missing email and unknown
+  products, and return the server-computed order total.
 
 ## What I built
 
@@ -113,6 +116,8 @@ Production deploy and API checks:
 - Latest production deploy passed for `deploy_61` / `job_62`, using public
   Tovuk CLI `0.1.96`.
 - Latest production deploy passed for `deploy_77` / `job_78`, using public
+  Tovuk CLI `0.1.99`.
+- Latest production deploy passed for `deploy_79` / `job_80`, using public
   Tovuk CLI `0.1.99`.
 - Latest artifact dry-run passed with `services[0].artifactCheck.status:
   "passed"`, gzip size `935494`, and limit `3145728`.
@@ -231,6 +236,13 @@ Browser and UX checks:
   - mobile `320x568`, tablet `768x1024`, and desktop `1440x900` have no
     horizontal overflow, two receipt rows, and no `STRIPE`, `YZY`, `YEEZY`, or
     `WALLET` copy in the confirmation state
+- Confirmed latest manual order path in production after `deploy_79`:
+  - valid `POST /api/orders` with client-submitted `totalCents: 1` returned
+    the server-computed `totalCents: 10000`
+  - unknown product and missing email payloads returned structured
+    `invalid_order` responses
+  - Browser manual checkout flow reached `ORDER CONFIRMED` with `$50` total on
+    mobile, tablet, and desktop without horizontal overflow
 - Captured desktop screenshot:
   - `output/browser/ecommerce-local-desktop.png`
   - `output/browser/yeezy-browser-reference.png`
@@ -1957,6 +1969,53 @@ Verification:
     horizontal overflow, keyboard gallery and checkout flow passed. The
     production order-confirmed state had no cart header, no forbidden copy, no
     horizontal overflow, and a centered `350px` stacked receipt grid.
+
+### 48. Manual order API trusted a brittle string-presence check
+
+Failure/friction:
+
+- `POST /api/orders` only checked whether the raw request body contained
+  `"email"` and `"items"`.
+- That meant the copyable ecommerce backend could accept an unknown product or
+  inconsistent order payload, while `POST /api/checkout` correctly parsed the
+  same cart through the shared catalog.
+- The frontend also rendered the manual reservation receipt from the local cart
+  total instead of the API's reserved-order total, which made the example less
+  useful as a production pattern.
+
+Fix included in this pass:
+
+- Reused the typed `checkout_order` parser for manual order reservation.
+- Added a `reserved_order` boundary that requires a customer email only for
+  manual reservations; express checkout can still create demo/Stripe checkout
+  sessions without a typed email.
+- Returned `totalCents` from `POST /api/orders` using server-side catalog
+  pricing, and changed the frontend manual receipt to use that API total.
+- Added Rust tests covering catalog totals, missing email validation, unknown
+  product rejection, and the server-computed total response.
+
+Verification:
+
+- `cargo test --manifest-path examples/shape-store/api/Cargo.toml --locked`
+  passed with five API tests.
+- `npm run typecheck`, `npm run lint`, and `npm run build` passed for the
+  storefront.
+- `npx -y tovuk@latest check` passed.
+- Production deploy `deploy_79` / `job_80` succeeded and is live at
+  `https://shape-store.tovuk.app`.
+- Production API checks passed:
+  - `GET /api/healthz` returned `{"ok":true}`.
+  - valid `POST /api/orders` with client-submitted `totalCents: 1` returned
+    `totalCents: 10000`.
+  - missing email and unknown product payloads returned structured
+    `invalid_order` responses.
+- Production Browser manual checkout passed at:
+  - mobile `320x568`
+  - tablet `768x1024`
+  - desktop `1440x900`
+- Yeezy Browser reference check on desktop still showed the sparse category and
+  product-code grid with no horizontal overflow, matching the example's visual
+  direction.
 
 ## Remaining Tovuk friction
 

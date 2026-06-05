@@ -82,6 +82,7 @@ type CheckoutApiResponse = {
   message?: string;
   mode?: "demo" | "stripe";
   orderId?: string;
+  totalCents?: number;
 };
 
 type CartApiResponse = {
@@ -109,10 +110,10 @@ export async function fetchProducts() {
 
 export async function reserveOrder(checkoutFields: CheckoutFields, cartLines: CartLine[], totalCents: number) {
   const response = await postCartRequest("orders", checkoutFields, cartLines, totalCents);
-  if (!response.ok || typeof response.data.orderId !== "string") {
+  if (!response.ok) {
     throw new Error("Order API did not return a receipt");
   }
-  return response.data.orderId;
+  return orderReceipt(response.data);
 }
 
 export async function createStripeCheckout(
@@ -161,6 +162,13 @@ function stripeCheckoutResult(data: CheckoutApiResponse): StripeCheckoutResult {
     throw new Error("Checkout API did not return a supported payment result");
   }
   return result;
+}
+
+function orderReceipt(data: CheckoutApiResponse): OrderReceipt {
+  if (typeof data.orderId !== "string" || typeof data.totalCents !== "number") {
+    throw new Error("Order API did not return a receipt");
+  }
+  return { id: data.orderId, totalCents: data.totalCents };
 }
 
 function stripeRedirectResult(data: CheckoutApiResponse): StripeCheckoutResult | null {

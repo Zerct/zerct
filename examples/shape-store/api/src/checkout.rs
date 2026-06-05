@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::{
     catalog::product_catalog,
-    http::{Response, json, json_value},
+    http::{Response, json_value},
 };
 
 const FREE_SHIPPING_THRESHOLD_CENTS: u64 = 20_000;
@@ -49,19 +49,25 @@ struct StripeCheckoutSession {
 
 #[must_use]
 pub(crate) fn create_order(body: &str) -> Response {
-    if !(body.contains(r#""email""#) && body.contains(r#""items""#)) {
-        return json(
-            "400 Bad Request",
-            r#"{"error":"invalid_order","message":"customer email and items are required"}"#,
-        );
-    }
+    let order = match reserved_order(body) {
+        Ok(order) => order,
+        Err(message) => {
+            return json_value(
+                "400 Bad Request",
+                &serde_json::json!({"error":"invalid_order","message":message}),
+            );
+        }
+    };
 
-    json(
+    json_value(
         "201 Created",
-        &format!(
-            r#"{{"ok":true,"orderId":"{}","status":"reserved","message":"Order reserved for manual fulfillment"}}"#,
-            new_order_id()
-        ),
+        &serde_json::json!({
+            "ok": true,
+            "orderId": new_order_id(),
+            "status": "reserved",
+            "totalCents": order.total_cents(),
+            "message": "Order reserved for manual fulfillment"
+        }),
     )
 }
 
@@ -144,6 +150,21 @@ fn checkout_order(body: &str) -> Result<CheckoutOrder, String> {
         lines,
         subtotal_cents,
     })
+}
+
+fn reserved_order(body: &str) -> Result<CheckoutOrder, String> {
+    let order = checkout_order(body)?;
+    if order.customer_email.is_none() {
+        return Err("customer email is required".to_owned());
+    }
+    Ok(order)
+}
+
+impl CheckoutOrder {
+    #[must_use]
+    fn total_cents(&self) -> u64 {
+        self.subtotal_cents + shipping_cents_for(self.subtotal_cents)
+    }
 }
 
 fn checkout_customer_email(customer: Option<&CheckoutCustomer>) -> Option<String> {
@@ -289,6 +310,15 @@ fn should_charge_shipping(subtotal_cents: u64) -> bool {
 }
 
 #[must_use]
+fn shipping_cents_for(subtotal_cents: u64) -> u64 {
+    if should_charge_shipping(subtotal_cents) {
+        SHIPPING_CENTS
+    } else {
+        0
+    }
+}
+
+#[must_use]
 fn stripe_checkout_response(session: StripeCheckoutSession) -> Response {
     match session.url {
         Some(checkout_url) if !checkout_url.is_empty() => json_value(
@@ -312,7 +342,7 @@ fn new_order_id() -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{checkout_order, stripe_checkout_parameters};
+    use super::{checkout_order, create_order, reserved_order, stripe_checkout_parameters};
 
     #[test]
     fn checkout_order_uses_shared_catalog_prices() -> Result<(), Box<dyn std::error::Error>> {
@@ -324,6 +354,35 @@ mod tests {
         assert_eq!(order.customer_email.as_deref(), Some("shopper@example.com"));
 
         Ok(())
+    }
+
+    #[test]
+    fn reserved_order_requires_customer_email() {
+        let error = reserved_order(r#"{"items":[{"productId":"shape-slide","quantity":1}]}"#).err();
+
+        assert_eq!(error.as_deref(), Some("customer email is required"));
+    }
+
+    #[test]
+    fn create_order_rejects_unknown_products() {
+        let response = create_order(
+            r#"{"customer":{"email":"shopper@example.com"},"items":[{"productId":"missing","quantity":1}]}"#,
+        );
+
+        assert!(response.status.starts_with("400"));
+        assert!(response.body.contains(r#""error":"invalid_order""#));
+        assert!(response.body.contains("unknown product missing"));
+    }
+
+    #[test]
+    fn create_order_returns_server_computed_total() {
+        let response = create_order(
+            r#"{"customer":{"email":"shopper@example.com"},"items":[{"productId":"shape-slide","quantity":2}]}"#,
+        );
+
+        assert_eq!(response.status, "201 Created");
+        assert!(response.body.contains(r#""totalCents":10000"#));
+        assert!(response.body.contains(r#""status":"reserved""#));
     }
 
     #[test]
