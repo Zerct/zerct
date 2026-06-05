@@ -5,7 +5,7 @@ use super::{
         check::{QualityCheck, run_check},
         config::CapabilitiesConfig,
         errors::{Result, print_json},
-        project::number_field,
+        project::{number_field, string_field},
         project_kind::ProjectKind,
     },
     types::DeployProjectInfo,
@@ -33,8 +33,7 @@ pub(super) fn print_deploy_dry_run(
         && service_dry_runs
             .iter()
             .all(|project| project["check"]["ok"].as_bool().unwrap_or(false));
-
-    print_json(&json!({
+    let report = json!({
         "ok": ok,
         "mode": "dry_run",
         "dryRun": true,
@@ -48,7 +47,15 @@ pub(super) fn print_deploy_dry_run(
         "usage": usage.get("usage").cloned().unwrap_or(Value::Null),
         "billingEstimate": usage.get("billingEstimate").cloned().unwrap_or(Value::Null),
         "nextActions": next_actions(ok),
-    }))
+    });
+
+    if cli.output.json {
+        return print_json(&report);
+    }
+    for line in dry_run_text_lines(&report) {
+        println!("{line}");
+    }
+    Ok(())
 }
 
 fn service_dry_run(
@@ -368,6 +375,139 @@ fn next_actions(ok: bool) -> Vec<&'static str> {
     ]
 }
 
+fn dry_run_text_lines(report: &Value) -> Vec<String> {
+    let ok = report["ok"].as_bool().unwrap_or(false);
+    let services = report
+        .get("services")
+        .and_then(Value::as_array)
+        .map_or(&[][..], Vec::as_slice);
+    let mut lines = Vec::with_capacity(services.len() + 12);
+    lines.push(format!(
+        "dry_run {}",
+        if ok { "ok" } else { "needs_changes" }
+    ));
+    lines.push(format!("workspace {}", string_field(report, "workspace")));
+
+    for service in services {
+        lines.extend(service_dry_run_text_lines(service));
+    }
+
+    let warnings = string_array(report.get("warnings").unwrap_or(&Value::Null));
+    for warning in warnings {
+        lines.push(format!("warning {warning}"));
+    }
+
+    if let Some(billing) = billing_summary(report.get("billingEstimate").unwrap_or(&Value::Null)) {
+        lines.push(format!("billing {billing}"));
+    }
+    if let Some(usage) = usage_summary(report.get("usage").unwrap_or(&Value::Null)) {
+        lines.push(format!("usage {usage}"));
+    }
+
+    lines.push("json: tovuk deploy --dry-run --json".to_owned());
+    for action in report
+        .get("nextActions")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .take(3)
+    {
+        lines.push(format!("next: {action}"));
+    }
+    lines
+}
+
+fn service_dry_run_text_lines(service: &Value) -> Vec<String> {
+    let check_ok = service
+        .get("check")
+        .and_then(|check| check.get("ok"))
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let exists = service["exists"].as_bool().unwrap_or(false);
+    let service_name = string_field(service, "serviceName");
+    let kind = service
+        .get("kind")
+        .and_then(Value::as_str)
+        .unwrap_or("unknown");
+    let mut lines = Vec::with_capacity(8);
+    lines.push(format!(
+        "service {service_name} kind={kind} exists={exists} check={}",
+        if check_ok { "passed" } else { "failed" }
+    ));
+
+    let capabilities = service.get("capabilities").unwrap_or(&Value::Null);
+    lines.push(format!(
+        "capabilities enabled={} disabled={}",
+        comma_strings(capabilities.get("enabled").unwrap_or(&Value::Null)),
+        comma_strings(capabilities.get("disabled").unwrap_or(&Value::Null))
+    ));
+
+    let meters = comma_strings(service.get("meters").unwrap_or(&Value::Null));
+    if !meters.is_empty() {
+        lines.push(format!("meters {meters}"));
+    }
+
+    let required_fixes = service
+        .get("requiredFixes")
+        .and_then(Value::as_array)
+        .map_or(&[][..], Vec::as_slice);
+    for fix in required_fixes.iter().take(5) {
+        lines.push(format!(
+            "fix {}: {}",
+            string_field(fix, "check"),
+            string_field(fix, "message")
+        ));
+        if let Some(instruction) = fix.get("agent_instruction").and_then(Value::as_str) {
+            lines.push(format!("agent_instruction: {instruction}"));
+        }
+    }
+
+    lines
+}
+
+fn billing_summary(billing: &Value) -> Option<String> {
+    let plan = billing.get("plan").and_then(Value::as_str)?;
+    let monthly = number_field(billing, "estimatedMonthlyTotalUsdMicros");
+    let overage = number_field(billing, "currentMonthOverageUsdMicros");
+    Some(format!(
+        "plan={plan} estimated_monthly_total={} current_overage={}",
+        usd_micros(monthly),
+        usd_micros(overage)
+    ))
+}
+
+fn usage_summary(usage: &Value) -> Option<String> {
+    let meters = usage.get("meters")?;
+    let day = meters.get("day").unwrap_or(&Value::Null);
+    let month = meters.get("month").unwrap_or(&Value::Null);
+    Some(format!(
+        "requests_day={} build_minutes_month={} log_events_month={}",
+        number_field(day, "worker_requests"),
+        number_field(month, "build_minutes"),
+        number_field(month, "log_events")
+    ))
+}
+
+fn usd_micros(micros: u64) -> String {
+    let dollars = micros / 1_000_000;
+    let cents = (micros % 1_000_000) / 10_000;
+    format!("${dollars}.{cents:02}")
+}
+
+fn comma_strings(value: &Value) -> String {
+    string_array(value).join(",")
+}
+
+fn string_array(value: &Value) -> Vec<&str> {
+    value
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
@@ -375,7 +515,7 @@ mod tests {
     use crate::cli::config::CapabilityToggle;
 
     use super::{
-        CapabilitiesConfig, ProjectKind, QualityCheck, capability_dry_run,
+        CapabilitiesConfig, ProjectKind, QualityCheck, capability_dry_run, dry_run_text_lines,
         meter_plan_for_capabilities, meters_for_capabilities, missing_config_entries,
         required_fix_entries, workspace_warnings,
     };
@@ -539,6 +679,54 @@ mod tests {
         assert_eq!(required_fixes.len(), 2);
         assert_eq!(missing_config.len(), 1);
         assert_eq!(missing_config[0]["check"], "tovuk.toml");
+    }
+
+    #[test]
+    fn dry_run_text_lines_summarize_preflight() {
+        let lines = dry_run_text_lines(&json!({
+            "ok": true,
+            "workspace": "/repo/shop",
+            "services": [{
+                "serviceName": "shop",
+                "kind": "fullstack",
+                "exists": true,
+                "check": { "ok": true },
+                "capabilities": {
+                    "enabled": ["static_frontend", "worker"],
+                    "disabled": ["sqlite"]
+                },
+                "meters": ["build_minutes", "worker_requests", "static_transfer_bytes"],
+                "requiredFixes": []
+            }],
+            "warnings": [],
+            "billingEstimate": {
+                "plan": "free",
+                "estimatedMonthlyTotalUsdMicros": 0,
+                "currentMonthOverageUsdMicros": 0
+            },
+            "usage": {
+                "meters": {
+                    "day": { "worker_requests": 42 },
+                    "month": { "build_minutes": 3, "log_events": 20 }
+                }
+            },
+            "nextActions": ["Run `tovuk deploy --wait --json`."]
+        }));
+
+        assert_eq!(
+            lines,
+            vec![
+                "dry_run ok".to_owned(),
+                "workspace /repo/shop".to_owned(),
+                "service shop kind=fullstack exists=true check=passed".to_owned(),
+                "capabilities enabled=static_frontend,worker disabled=sqlite".to_owned(),
+                "meters build_minutes,worker_requests,static_transfer_bytes".to_owned(),
+                "billing plan=free estimated_monthly_total=$0.00 current_overage=$0.00".to_owned(),
+                "usage requests_day=42 build_minutes_month=3 log_events_month=20".to_owned(),
+                "json: tovuk deploy --dry-run --json".to_owned(),
+                "next: Run `tovuk deploy --wait --json`.".to_owned(),
+            ]
+        );
     }
 
     fn fullstack_capabilities() -> CapabilitiesConfig {
