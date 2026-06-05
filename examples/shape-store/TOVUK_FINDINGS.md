@@ -2017,6 +2017,44 @@ Verification:
   product-code grid with no horizontal overflow, matching the example's visual
   direction.
 
+### 49. Mobile order-confirmed state was still visually busy
+
+Failure/friction:
+
+- The receipt-only checkout success state no longer mixed with the cart header,
+  but it still rendered as a full-viewport receipt surface with an extra status
+  sentence and bordered receipt rows.
+- On a small phone viewport, that made the final state feel heavier than the
+  rest of the sparse storefront even though there was no actual overflow.
+
+Fix included in this pass:
+
+- Removed the extra reserved-order sentence from the confirmation state.
+- Changed the receipt-only drawer into a compact centered success stack.
+- Simplified the mobile receipt rows to label/value stacks with no border box,
+  while keeping the order id, total, and continue action visible above the
+  fold.
+
+Verification:
+
+- Local Browser checkout at `320x568` reached `ORDER CONFIRMED` and showed:
+  - no horizontal overflow
+  - no extra reserved-order sentence
+  - a compact `222px` receipt surface instead of a full-height receipt surface
+- Local Browser breakpoint checks also passed at:
+  - mobile `375x667`
+  - tablet `768x1024`
+  - desktop `1440x900`
+- Production deploy `deploy_81` / `job_82` succeeded and is live at
+  `https://shape-store.tovuk.app`.
+- Production Browser manual checkout reached `ORDER CONFIRMED` and showed the
+  compact confirmation state at:
+  - mobile `320x568`
+  - mobile `375x667`
+  - tablet `768x1024`
+  - desktop `1440x900`
+- Production Browser console logs were clean for the checkout receipt flow.
+
 ## Remaining Tovuk friction
 
 ### High

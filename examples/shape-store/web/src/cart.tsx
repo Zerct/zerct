@@ -204,7 +204,6 @@ function OrderReceiptSummary({ onClose, orderReceipt }: { onClose: () => void; o
   return (
     <section className="receipt checkout-success" role="status" aria-label="Order receipt">
       <h2>ORDER CONFIRMED</h2>
-      <p>YOUR ORDER HAS BEEN RESERVED.</p>
       <dl className="receipt-grid">
         <div className="receipt-row">
           <dt>ORDER</dt>
