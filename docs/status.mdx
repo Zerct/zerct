@@ -7,7 +7,7 @@ description: "Use Tovuk health, structured status, and capability catalog endpoi
 Use status endpoints only to understand Tovuk availability. Use logs and deploy
 responses to debug your project.
 
-## Status check workflow
+## Status Check Workflow
 
 <Steps>
   <Step title="Check whether the API is reachable">
@@ -105,11 +105,23 @@ checks. If `ok` is true, call `/v1/capabilities` to confirm the public product,
 meter, docs, and OpenAPI catalog before retrying the CLI command you were
 running. If `ok` is false, retry later before changing project code.
 
-## Capability catalog
+## Capability Catalog
 
 `/v1/capabilities` is public and machine-readable. It returns the current
 `product`, `api_version`, `docs_url`, `openapi_url`, `auth`,
 `agent_workflow`, `endpoints`, `commands`, `plans`, and `products`.
+
+| Field | Use |
+| --- | --- |
+| `product` | Current default product summary. |
+| `api_version` | Public API version string for agent planning. |
+| `docs_url`, `openapi_url` | Canonical docs and OpenAPI links. |
+| `auth` | Login and token guidance for authenticated requests. |
+| `agent_workflow` | Ordered agent steps before CLI retries or project changes. |
+| `endpoints` | Public route catalog with methods, paths, auth requirements, and agent instructions. |
+| `commands` | CLI command catalog with descriptions. |
+| `plans` | Plan limits and pricing. |
+| `products` | Product features, meters, pricing fields, limit fields, and CLI commands. |
 
 Use `plans[].limits` and `plans[].pricing` for current plan limits and pricing.
 Use `products[].features`, `products[].meters`, `products[].meter_details`,
@@ -117,7 +129,7 @@ Use `products[].features`, `products[].meters`, `products[].meter_details`,
 capabilities, changing paid-resource code, or retrying a command after a
 platform reachability error.
 
-## CLI reachability errors
+## CLI Reachability Errors
 
 When any Tovuk CLI command cannot reach the API, the CLI emits a local
 agent-readable error with `code: "api_unreachable"`, the status docs URL, and
