@@ -1,12 +1,13 @@
 ---
-title: "Manage Key-Value Storage"
+title: "Manage Service KV Namespaces"
 sidebarTitle: "KV"
-description: "Confirm account and Service context, then create KV namespaces, read and write keys, use bulk routes, and set usage caps for Tovuk Services."
+description: "Confirm account and Service context, then create Service KV namespaces, read and write keys, use bulk routes, and set usage caps."
 ---
 
-KV stores small values for one Service. Use it for feature flags, sessions,
-configuration, rate-limit state, and cache metadata. Use SQLite for relational
-queries and Object Storage for large files.
+KV namespaces are Service-scoped key-value stores exposed to the Rust Worker
+runtime as bindings. Use them for feature flags, sessions, configuration,
+rate-limit state, and cache metadata. Use SQLite for relational queries and
+Object Storage for large files.
 
 ## Key-value setup flow
 
