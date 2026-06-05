@@ -24,10 +24,9 @@ Date: 2026-06-05
 - Added and released Tovuk CLI `0.1.96` during this pass to improve
   agent-readable service status output, add `checks[].status`, and make npm
   frontend checks install dev dependencies.
-- Added Tovuk CLI `0.1.97` changes during this pass to make `tovuk dev`
-  occupied-port handling explicit before release: JSON returns `ok: false` and
-  owner details, while text mode refuses to launch child processes until ports
-  are free.
+- Added and released Tovuk CLI `0.1.97` during this pass to make `tovuk dev`
+  occupied-port handling explicit: JSON returns `ok: false` and owner details,
+  while text mode refuses to launch child processes until ports are free.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
