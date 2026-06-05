@@ -1,12 +1,12 @@
 ---
-title: "Connect Rust Workers with Service Bindings"
+title: "Create Private Service Bindings"
 sidebarTitle: "Bindings"
-description: "Confirm account and Service context before creating Service Bindings for private worker-to-worker calls between Tovuk Rust Workers."
+description: "Confirm account and caller Service context, then create private Service Bindings between Tovuk Rust Workers."
 ---
 
-Service Bindings let one Rust Worker call another account-owned Rust Worker
-without exposing a public URL. Use them for internal auth, billing, webhooks,
-and shared APIs that should not be callable from browsers.
+Service Bindings are Service-scoped private links from one Rust Worker to
+another account-owned Rust Worker. Use them for internal auth, billing,
+webhooks, and shared APIs that should not be callable from browsers.
 
 ## Service Binding flow
 
