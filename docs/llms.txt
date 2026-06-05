@@ -21,7 +21,7 @@ Reference: [Tovuk docs](https://docs.tovuk.com).
 
 Resource references:
 
-- `docs/reference/project-contract.mdx`: tovuk.toml required files, kind and capabilities, build commands, and Rust/static runtime policy.
+- `docs/reference/project-contract.mdx`: tovuk.toml workflow, required files, kind and capabilities, local checks, dry-run planning, build commands, and Rust/static runtime policy.
 - `docs/reference/workers.mdx`: Rust Worker HTTP/API routing, runtime events, WebSocket upgrades, and frontend policy.
 - `docs/reference/resources.mdx`: Service Resources account setup, CLI/API/dashboard parity, resource routes, and runtime bindings.
 - `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
