@@ -8,10 +8,11 @@ on:
     paths:
       - "packages/tovuk/package.json"
       - "packages/tovuk/package-lock.json"
-      - "packages/tovuk/README.md"
       - "packages/tovuk/install.mjs"
       - "packages/tovuk/bin/tovuk"
-      - "crates/tovuk/**"
+      - "crates/tovuk/Cargo.toml"
+      - "crates/tovuk/Cargo.lock"
+      - "crates/tovuk/src/**"
 
 permissions:
   contents: read
