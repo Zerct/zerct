@@ -1737,6 +1737,89 @@ Verification:
   - express checkout reaches `ORDER CONFIRMED` with a `640px` receipt centered
     at `x=64` and no horizontal overflow.
 
+### 45. Imported Next.js apps needed earlier static-export guidance
+
+Failure/friction:
+
+- Tovuk already had a `next-static-frontend` starter, but imported Next apps
+  were still too easy to misconfigure.
+- The CLI treated the presence of a Next config file as enough to use the
+  static Next path, but it did not preflight whether the config actually set
+  `output: "export"`.
+- If a project had `next` in `package.json` but no Next config file, config
+  scaffolding could miss the framework signal and use the generic static
+  frontend output.
+- After the static-export failure, the generic frontend script guidance still
+  mentioned `vite.config.ts`, which is misleading for a Next app and slows down
+  AI agents that are following `agent_instruction` literally.
+
+Cloudflare product comparison:
+
+- Cloudflare Pages documents `Next.js (Static HTML Export)` as an explicit
+  framework preset with build command `npx next build` and build directory
+  `out`.
+- Cloudflare's current Next.js Pages docs also separate static export from
+  full-stack SSR Next, telling users to use the Workers Next.js guide for
+  server-rendered apps. Tovuk should keep making this distinction explicit:
+  static Next goes to the frontend output, server logic moves to the Rust
+  worker.
+
+Fix included in Tovuk CLI:
+
+- Replaced the old config-file-only Next detector with a framework detector
+  that checks both Next config files and `package.json` dependency sections.
+- `tovuk new <existing-next-project>` now scaffolds frontend output as `out`
+  when the existing app has a `next` dependency, even if `next.config.mjs` has
+  not been created yet.
+- `tovuk check --json` now adds a `Next static export` check for Next
+  frontends.
+- Missing or incomplete Next config now returns an agent-readable instruction:
+  create or update `next.config.mjs` with `output: "export"`, keep Tovuk output
+  set to `out`, and move API routes, middleware, SSR, and server logic to the
+  Rust worker.
+- Next projects now receive Next-specific frontend script guidance such as
+  `oxlint app next.config.mjs ...` instead of Vite-specific `vite.config.ts`
+  commands.
+
+Verification:
+
+- CLI Rust gates passed:
+  - `cargo test --manifest-path crates/tovuk/Cargo.toml --locked`
+  - `cargo clippy --manifest-path crates/tovuk/Cargo.toml --locked --release
+    --all-targets --all-features -- -D warnings`
+  - `./scripts/check-all.sh`
+- Temporary imported Next project test:
+  - package contained `dependencies.next` and no `next.config.mjs`.
+  - local CLI `tovuk new <tmp>` generated `output = "out"`.
+  - local CLI `tovuk check <tmp> --json` failed with `Next static export`,
+    message `next.config missing`, and an actionable `agent_instruction`.
+  - follow-up typecheck/lint guidance used `app next.config.mjs`, not
+    `vite.config.ts`.
+- Shape-store gates still passed:
+  - `npm run typecheck && npm run lint && npm run build`
+  - `cargo test --manifest-path examples/shape-store/api/Cargo.toml --locked`
+  - `npx -y tovuk@latest check --json`
+- Production deploy `deploy_69` / `job_70` succeeded from commit
+  `b98477471ae5c980ae4d389ecc3bf2270d56b131` and is live at
+  `https://shape-store.tovuk.app`.
+- Post-deploy production API checks passed:
+  - `GET /api/healthz` returned `{"ok":true}`.
+  - `GET /api/products` returned 50 products.
+  - demo-mode `POST /api/checkout` returned an order id.
+- Production Browser real-user transaction checks still passed on
+  `https://shape-store.tovuk.app`:
+  - desktop `1440x900`: 50 products, six product columns, no API fallback, no
+    overflow, gallery `ArrowRight` changed the product image while staying on
+    `YS-02`, cart had payment and billing sections, and `APPLE PAY` reached
+    `ORDER CONFIRMED`.
+  - tablet `768x1024`: 50 products, six product columns, no API fallback, no
+    overflow, cart/payment/success flow passed.
+  - mobile `390x844`: 50 products, three product columns, no API fallback, no
+    overflow, cart/payment/success flow passed.
+- Yeezy Browser reference check on desktop confirmed the current sparse
+  category/product-code grid, stable product `aria-label` values, no horizontal
+  overflow, and product detail text revealed after clicking `YS-02`.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1744,10 +1827,6 @@ Verification:
 - `--json` auth flows still need a more agent-readable shape. Agents need `login_url`, `user_code`, expiry, and current wait state as JSON before any long wait.
 - Generated fullstack templates still make ordinary API work harder than necessary because the Rust worker is a raw TCP HTTP server. It is lightweight, but agents must hand-build routing, body parsing, CORS, and JSON handling.
 - New static Next.js support is static-export only. That is correct for the current Tovuk runtime model, but users coming from Vercel will expect SSR and API routes unless docs and check errors keep saying "move server logic to Rust".
-- Static frontend framework detection is still behind the Cloudflare Wrangler
-  auto-config bar. A Next.js static export should be detectable from
-  `package.json`, and Tovuk should emit the exact config/build/output changes
-  needed before deploy.
 
 ### Medium
 

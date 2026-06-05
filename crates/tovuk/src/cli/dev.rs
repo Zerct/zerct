@@ -3,7 +3,7 @@ use super::{
     config::{TovukConfig, parse_tovuk_toml, validate_config},
     dev_ports::{DevPortOwner, port_owner},
     errors::{Result, agent_error, print_json},
-    frontend_checks::{frontend_package_manager, is_next_static_frontend},
+    frontend_checks::{frontend_package_manager, is_next_frontend},
     project_kind::ProjectKind,
 };
 use serde::Serialize;
@@ -132,7 +132,7 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
         let command = local_frontend_command(&frontend_root);
         let mut env = BTreeMap::new();
         if let Some(url) = worker_url.as_deref() {
-            let key = if is_next_static_frontend(&frontend_root) {
+            let key = if is_next_frontend(&frontend_root) {
                 "NEXT_PUBLIC_API_URL"
             } else {
                 "VITE_API_URL"
@@ -234,7 +234,7 @@ fn local_worker_command(worker_root: &Path, config: &TovukConfig) -> String {
 }
 
 fn local_frontend_command(frontend_root: &Path) -> String {
-    if is_next_static_frontend(frontend_root) {
+    if is_next_frontend(frontend_root) {
         return match frontend_package_manager(frontend_root) {
             "bun" => format!("bun run dev --hostname {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT}"),
             _ => format!("npm run dev -- --hostname {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT}"),
