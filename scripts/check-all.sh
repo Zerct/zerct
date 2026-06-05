@@ -116,6 +116,7 @@ assert_contains "$native_cli_flag_help_output" 'tovuk storage upload' 'native CL
 assert_contains "$native_cli_flag_help_output" 'tovuk storage download' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk deploy --dry-run' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk pricing' 'native CLI flag help'
+assert_contains "$native_cli_flag_help_output" 'tovuk service status' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk service show' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" 'tovuk limits set' 'native CLI flag help'
 assert_contains "$native_cli_flag_help_output" '--notify-at-percent' 'native CLI flag help'
@@ -141,7 +142,7 @@ for retired_command in \
   fi
   grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
 done
-for retired_service_command in status resources deploys builds inspect; do
+for retired_service_command in resources deploys builds inspect; do
   if "$native_cli" service "$retired_service_command" service_1 --json >/tmp/tovuk-retired-service-command.out 2>/tmp/tovuk-retired-service-command.err; then
     printf 'expected retired native CLI service command to fail: %s\n' "$retired_service_command" >&2
     exit 1
@@ -206,6 +207,7 @@ assert_contains "$python_cli_flag_help_output" 'tovuk storage upload' 'Python CL
 assert_contains "$python_cli_flag_help_output" 'tovuk storage download' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk deploy --dry-run' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk pricing' 'Python CLI flag help'
+assert_contains "$python_cli_flag_help_output" 'tovuk service status' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk service show' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" 'tovuk limits set' 'Python CLI flag help'
 assert_contains "$python_cli_flag_help_output" '--notify-at-percent' 'Python CLI flag help'
@@ -225,7 +227,7 @@ for retired_command in \
   fi
   grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
 done
-for retired_service_command in status resources deploys builds inspect; do
+for retired_service_command in resources deploys builds inspect; do
   if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk service "$retired_service_command" service_1 --json >/tmp/tovuk-retired-service-command.out 2>/tmp/tovuk-retired-service-command.err; then
     printf 'expected retired Python CLI service command to fail: %s\n' "$retired_service_command" >&2
     exit 1

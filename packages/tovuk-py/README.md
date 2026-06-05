@@ -74,6 +74,7 @@ tovuk deploy cancel deploy_1 --json
 tovuk usage
 tovuk usage --json
 tovuk service list
+tovuk service status service_1 --json
 tovuk service show service_1 --json
 tovuk service delete service_1 --json
 tovuk logs --deploy deploy_1 --limit 100 --json
@@ -145,13 +146,12 @@ work.
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, enabled and disabled capabilities, and resource
-counts. `tovuk service show` prints a compact Service snapshot with
-capabilities, resource counts, usage, latest deploy, latest build, and next
-actions.
-Dashboard Overview Service rows expose copyable commands for `service show`,
-logs, storage listing, worker request caps, support tickets, and service
-deletion.
+kind, runtime status, URL, enabled and disabled capabilities, and resource counts.
+`tovuk service status` prints only the live/deploy/build summary, while
+`tovuk service show` prints the broader Service snapshot.
+Dashboard Overview Service rows expose copyable commands for `service status`,
+`service show`, logs, storage listing, worker request caps, support tickets,
+and service deletion.
 `tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
 disabled capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service

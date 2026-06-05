@@ -66,6 +66,7 @@ Agent repair loop:
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service status service_1 --json
 tovuk deploy show deploy_1 --json
 tovuk deploy cancel deploy_1 --json
 tovuk logs --build job_1 --json
@@ -101,13 +102,12 @@ can choose the correct product and cap the right meters in one flow.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
 Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, enabled and disabled capabilities, and resource
-counts. `tovuk service show` prints a compact Service snapshot with
-capabilities, resource counts, usage, latest deploy, latest build, and next
-actions.
-Dashboard Overview Service rows expose copyable commands for `service show`,
-logs, storage listing, worker request caps, support tickets, and service
-deletion.
+kind, runtime status, URL, enabled and disabled capabilities, and resource counts.
+`tovuk service status` prints only the live/deploy/build summary, while
+`tovuk service show` prints the broader Service snapshot.
+Dashboard Overview Service rows expose copyable commands for `service status`,
+`service show`, logs, storage listing, worker request caps, support tickets,
+and service deletion.
 The deploy dry-run response combines `tovuk.toml`, explicit enabled and disabled
 capabilities, quality checks, capability meters, account limits, and
 `billingEstimate` before deploy, without creating a build. Each service

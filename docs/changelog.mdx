@@ -40,6 +40,10 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
 
 ### Updates
 
+- **Compact service status.** `tovuk service status <service> --json` returns
+  the runtime status, latest deploy, latest build, URL, and `live` boolean for
+  quick post-deploy checks. Use `service show` when agents need the full
+  resource, usage, billing, log, env, and domain snapshot.
 - **Explicit service capabilities.** `tovuk.toml` now uses a required
   `[capabilities]` table so agents can see enabled and disabled service
   surfaces before deploy. See [tovuk.toml](/reference/project-contract).

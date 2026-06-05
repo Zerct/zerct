@@ -49,13 +49,14 @@ tovuk deploy
 - Fix any JSON `agent_instruction`.
 - Confirm account setup with `tovuk account show --json`.
 - Review dry-run output before `tovuk deploy --wait --json`, then inspect the
-  Service snapshot with `tovuk service show <service> --json`.
+  live deploy with `tovuk service status <service> --json`.
 
 ```sh
 tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service status <service> --json
 tovuk service show <service> --json
 ```
 
@@ -70,6 +71,7 @@ Run `tovuk account show --json`.
 If setup is incomplete, run `tovuk account update --handle <handle> --display-name <name> --json`.
 Run `tovuk deploy --dry-run --json`.
 Run `tovuk deploy --wait --json`.
+Run `tovuk service status <service> --json`.
 Run `tovuk service show <service> --json`.
 </Prompt>
 
@@ -86,5 +88,6 @@ tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service status <service> --json
 tovuk service show <service> --json
 ```

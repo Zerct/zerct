@@ -65,15 +65,18 @@ description: "Create a Tovuk project contract, run checks, and deploy a Rust wor
   <Step title="Deploy">
     ```sh
     tovuk deploy --wait --json
+    tovuk service status <service> --json
     tovuk service show <service> --json
     ```
 
-    Use the returned service id with `tovuk service show <service> --json` to
-    confirm runtime status, URL, capabilities, deploys, builds, logs, usage,
-    billing estimate, and next actions. Inspect deploy state with
-    `tovuk deploy list --json` or `tovuk deploy show <deploy_id> --json` only
-    when the Service snapshot is not enough. Cancel stale queued work with
-    `tovuk deploy cancel <deploy_id> --json` when a newer deploy supersedes it.
+    Use the returned service id with `tovuk service status <service> --json` to
+    confirm runtime status, latest deploy, latest build, URL, and `live`.
+    Use `tovuk service show <service> --json` when agents need capabilities,
+    deploys, builds, logs, usage, billing estimate, resources, and next actions.
+    Inspect deploy history with `tovuk deploy list --json` or
+    `tovuk deploy show <deploy_id> --json` only when needed. Cancel stale queued
+    work with `tovuk deploy cancel <deploy_id> --json` when a newer deploy
+    supersedes it.
 
     On first deploy, the CLI opens browser login for GitHub or Google, stores
     the Tovuk session, then continues automatically. Tovuk builds the worker,
@@ -94,6 +97,7 @@ description: "Create a Tovuk project contract, run checks, and deploy a Rust wor
 
     ```sh
     tovuk deploy --wait --json
+    tovuk service status <service> --json
     tovuk service show <service> --json
     ```
 
