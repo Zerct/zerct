@@ -1668,6 +1668,75 @@ Verification:
   - selecting size `9` shows `ADDED TO BAG`, increments the cart count to `1`,
     and runs `cart-count-bump`.
 
+### 44. Checkout/payment/success states were too thin on desktop and tablet
+
+Failure/friction:
+
+- The cart drawer showed a correct order summary and express checkout buttons,
+  but the checkout form was a single full-width vertical stack on desktop.
+- The example also skipped lower checkout states that are visible in the
+  current Yeezy reference flow: richer shipping fields, payment details,
+  billing address, and a dedicated order-confirmed state.
+- On tablet, the first split-layout attempt made the checkout column too
+  narrow, which was worse than the reference. The fixed breakpoint keeps tablet
+  readable and reserves the split layout for desktop-width screens.
+
+Reference signals from `https://yeezy.com/`:
+
+- Cart/checkout stays in-page with the storefront visible behind the checkout
+  state.
+- Top right shows `YZY wallet` and the item count.
+- The checkout surface includes order summary, `YZY code`, express checkout,
+  contact information, shipping address, payment details, and billing address.
+- Desktop form fields are around 640px wide, with paired first/last name and
+  payment sub-fields.
+- Tablet keeps large readable fields instead of squeezing the form into a tiny
+  side column.
+
+Fix included in the shape-store example:
+
+- Added a dedicated `checkout.css` file instead of growing
+  `web/src/styles.css` past 1k lines.
+- Desktop cart now uses a Yeezy-like split checkout: a 640px checkout/payment
+  column on the left and a compact sticky order-summary column on the right.
+- Tablet cart now stacks the order summary above a readable 672px checkout
+  column.
+- Added shipping fields for first name, last name, address, apartment, city,
+  country, and phone.
+- Added payment details and billing address sections. Payment inputs are UI-only
+  in this public demo; the Rust worker does not collect card data.
+- Added a full order-confirmed state with order id, status, total, and a
+  continue-shopping action.
+
+Verification:
+
+- Local frontend gates passed:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+- Local API unit tests passed with `cargo test --manifest-path
+  examples/shape-store/api/Cargo.toml --locked`.
+- Public Tovuk check passed with `npx -y tovuk@latest check --json`.
+- Production deploy `deploy_67` / `job_68` succeeded from commit
+  `f5f98b9676edd28734edeb0b58366e0172db9562` and is live at
+  `https://shape-store.tovuk.app`.
+- Production API checks passed:
+  - `GET /api/healthz` returned `{"ok":true}`.
+  - `GET /api/products` returned 50 products.
+  - demo-mode `POST /api/checkout` returned an order id.
+- Production Browser desktop `1440x900`:
+  - checkout layout has `640px 420px` columns.
+  - left checkout column starts at `x=48`, width `640`.
+  - right summary starts at `x=803`, width `420`.
+  - payment details and billing address headings are present.
+  - express checkout reaches `ORDER CONFIRMED` with a `CONTINUE SHOPPING`
+    action and no horizontal overflow.
+- Production Browser tablet `768x1024`:
+  - checkout stacks to one `672px` column with no horizontal overflow.
+  - order summary stays readable above checkout/payment fields.
+  - express checkout reaches `ORDER CONFIRMED` with a `640px` receipt centered
+    at `x=64` and no horizontal overflow.
+
 ## Remaining Tovuk friction
 
 ### High
