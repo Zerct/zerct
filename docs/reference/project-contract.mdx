@@ -6,6 +6,70 @@ description: "Required files, capabilities, build commands, and runtime behavior
 
 Tovuk deploys projects that are explicit and reproducible.
 
+## Contract workflow
+
+<Steps>
+  <Step title="Choose the project kind">
+    Pick one `kind` for the repo or service root:
+
+    ```toml
+    kind = "rust_worker"
+    ```
+
+    Use `rust_worker` for Rust APIs and event handlers, `static_frontend` for
+    built static files, and `fullstack` when one root `tovuk.toml` builds both
+    the frontend and Rust worker.
+  </Step>
+
+  <Step title="Declare capabilities explicitly">
+    ```toml
+    [capabilities]
+    static_frontend = false
+    worker = true
+    sqlite = false
+    object_storage = false
+    kv = false
+    state = false
+    queue = false
+    cron = false
+    service_bindings = false
+    secrets = false
+    custom_domains = false
+    logs = true
+    builds = true
+    usage_caps = true
+    billing = true
+    support = true
+    abuse = true
+    ```
+
+    `static_frontend` and `worker` must match `kind`. `logs`, `builds`,
+    `usage_caps`, `billing`, `support`, and `abuse` stay true because Tovuk
+    exposes them for every service.
+  </Step>
+
+  <Step title="Check the contract locally">
+    ```sh
+    tovuk check --json
+    ```
+
+    Fix the first failed `agent_instruction`, then rerun `tovuk check --json`
+    until the project contract and quality gates pass.
+  </Step>
+
+  <Step title="Dry-run with the intended account">
+    ```sh
+    tovuk account show --json
+    tovuk account update --handle <handle> --display-name <name> --json
+    tovuk deploy --dry-run --json
+    ```
+
+    Run the account update command only when setup is incomplete. Use the
+    dry-run response to review enabled and disabled capabilities, missing
+    config, meters, `meterPlan`, limits, and `billingEstimate` before deploying.
+  </Step>
+</Steps>
+
 ## Required files
 
 Rust worker:
