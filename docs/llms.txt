@@ -25,8 +25,9 @@ Resource references:
 - `docs/reference/project-contract.mdx`: tovuk.toml workflow, required files, kind and capabilities, local checks, dry-run planning, build commands, and Rust/static runtime policy.
 - `docs/reference/workers.mdx`: Rust Worker deploy workflow, account setup, dry-run review, post-deploy Service snapshots, HTTP/API routing, runtime events, WebSocket upgrades, and frontend policy.
 - `docs/reference/resources.mdx`: Service Resources account setup,
-  post-deploy Service snapshots, CLI/API/dashboard parity, resource routes,
-  and runtime bindings.
+  post-deploy Service snapshots, top-level `next_actions`, nested
+  `resources.nextActions`, CLI/API/dashboard parity, resource routes, and
+  runtime bindings.
 - `docs/reference/sqlite.mdx`: SQLite account setup, Service context, explicit `sqlite` capability, dry-run planning, commands, limits, backups, and query metrics.
 - `docs/reference/state.mdx`: State account setup, Service context, explicit `state` capability, dry-run planning, keyed objects, storage, meters, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, explicit `kv` capability, dry-run planning, commands, API routes, meters, and limits.
@@ -94,7 +95,7 @@ Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service
 Binding resources through the same API routes as the CLI. It can also run
 single SQLite queries and shows returned rows, `rowsRead`, `rowsWritten`,
-`vmSteps`, `fullscanSteps`, storage, duration, and next actions. It can list
+`vmSteps`, `fullscanSteps`, storage, duration, and `nextActions`. It can list
 SQLite backups, create SQLite backups, and restore SQLite backups through the
 same API routes as the CLI. It can list KV keys, read one KV key, write one KV
 key, and delete one KV key with `kv_lists`,

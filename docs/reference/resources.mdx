@@ -18,7 +18,7 @@ agents do not need hidden manual actions.
 
     Confirm account setup first, then use the Service snapshot to review
     current resources, capabilities, `accountUsage`, `billingEstimate`, and
-    next actions before creating more resources.
+    top-level `next_actions` before creating more resources.
   </Step>
 
   <Step title="Create the required resource">
@@ -36,8 +36,8 @@ agents do not need hidden manual actions.
     tovuk service show service_1 --json
     ```
 
-    Confirm the new resource appears in the service resources payload and
-    follow the returned `nextActions`.
+    Confirm the new resource appears under `resources`, then review top-level
+    `next_actions` and nested `resources.nextActions` for follow-up commands.
   </Step>
 
   <Step title="Deploy and inspect resources">
