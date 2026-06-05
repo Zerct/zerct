@@ -8802,7 +8802,7 @@
                     }
                   ],
                   "next_actions": [
-                    "Use `tovuk service show <service>` for a compact service state snapshot."
+                    "Use `tovuk service status <service> --json` for a compact service state snapshot."
                   ],
                   "pricing": {
                     "subscriptionUsdCentsPerMonth": 0,
@@ -18489,7 +18489,7 @@
             "maxItems": 32,
             "examples": [
               [
-                "Use `tovuk service show <service>` for a compact service state snapshot."
+                "Use `tovuk service status <service> --json` for a compact service state snapshot."
               ]
             ]
           },
@@ -18900,7 +18900,7 @@
               }
             ],
             "next_actions": [
-              "Use `tovuk service show <service>` for a compact service state snapshot."
+              "Use `tovuk service status <service> --json` for a compact service state snapshot."
             ],
             "pricing": {
               "subscriptionUsdCentsPerMonth": 0,
