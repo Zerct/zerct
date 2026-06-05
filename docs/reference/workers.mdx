@@ -63,14 +63,17 @@ api/Cargo.toml
 web/package.json
 ```
 
-Deploy from the repo root:
+Deploy and inspect from the repo root:
 
 ```sh
 tovuk deploy --wait --json
+tovuk service show <service> --json
 ```
 
 Tovuk builds the worker and frontend together, then returns one `*.tovuk.app`
-URL.
+URL. Use the Service snapshot to confirm routing, runtime status, deploy state,
+resources, `accountUsage`, `billingEstimate`, and next actions before changing
+worker routes or resource bindings.
 
 ```toml
 name = "hello-service"
