@@ -84,6 +84,10 @@ Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
 the same cap set and remove actions as `tovuk limits`, plus the same hosted
 checkout flow as `tovuk billing checkout --json` and billing portal flow as
 `tovuk billing portal`. Usage rows show copyable `tovuk limits set` commands with `--notify-at-percent` and copyable `tovuk limits delete` commands for the selected meter.
+Usage Caps API routes are `GET /v1/usage`, `PUT /v1/usage/caps/{metric}`, and
+`DELETE /v1/usage/caps/{metric}/{period}`. The `PUT` body uses `period`,
+`capValue`, `hardStop`, and `notifyAtPercent`; the CLI sends `hardStop: true`
+and defaults `notifyAtPercent` to `80`.
 
 Dashboard Resources is available at `https://tovuk.com/account/resources` and
 supports creating and deleting SQLite, KV, Queue, Cron, State, and Service

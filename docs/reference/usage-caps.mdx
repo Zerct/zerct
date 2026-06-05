@@ -98,11 +98,11 @@ tovuk limits set object_storage_egress_bytes --period month --value 100000000000
 tovuk limits delete worker_requests --period day --json
 ```
 
-## API
+## Usage Caps API
 
 - `GET /v1/usage`
-- `PUT /v1/usage/caps/{metric}`
-- `DELETE /v1/usage/caps/{metric}/{period}`
+- `PUT /v1/usage/caps/{metric}` sets or replaces one cap. Send `period`, `capValue`, `hardStop`, and `notifyAtPercent`; the CLI sends `hardStop: true` and defaults `notifyAtPercent` to `80`.
+- `DELETE /v1/usage/caps/{metric}/{period}` removes one cap for the selected `day` or `month` period.
 
 ## Meters
 
