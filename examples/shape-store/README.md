@@ -46,8 +46,8 @@ npx -y tovuk@latest deploy . --wait --wait-timeout 600
 
 `POST /api/checkout` supports two modes:
 
-- Without `STRIPE_SECRET_KEY`, it returns a `STRIPE DEMO` receipt so the public
-  example can be tested and deployed without private credentials.
+- Without `STRIPE_SECRET_KEY`, it returns a demo receipt so the public example
+  can be tested and deployed without private credentials.
 - With Stripe configured, it creates a Stripe Checkout Session and redirects
   the browser to the returned Checkout URL.
 

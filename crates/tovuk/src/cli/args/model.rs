@@ -23,6 +23,7 @@ pub(crate) struct CliOptions {
     pub(crate) account: AccountOptions,
     pub(crate) abuse: AbuseOptions,
     pub(crate) deployment: DeploymentOptions,
+    pub(crate) dev: DevOptions,
     pub(crate) kv: KvOptions,
     pub(crate) queue: QueueOptions,
     pub(crate) storage: StorageOptions,
@@ -48,6 +49,12 @@ impl ArtifactBuild {
     pub(crate) fn requested(self) -> bool {
         matches!(self, Self::Build)
     }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct DevOptions {
+    pub(crate) frontend_port: String,
+    pub(crate) worker_port: String,
 }
 
 #[derive(Clone, Debug)]
@@ -138,6 +145,10 @@ impl Default for CliOptions {
                 dry_run: false,
                 wait: false,
                 wait_timeout_seconds: DEFAULT_DEPLOY_WAIT_TIMEOUT_SECONDS,
+            },
+            dev: DevOptions {
+                frontend_port: String::new(),
+                worker_port: String::new(),
             },
             kv: KvOptions {
                 metadata: String::new(),

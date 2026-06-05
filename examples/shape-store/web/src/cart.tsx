@@ -344,18 +344,17 @@ function ExpressCheckoutButtons({
   isSubmitting: boolean;
   onClick: () => void;
 }) {
-  const label = isSubmitting ? "STARTING..." : "APPLE PAY";
+  const label = isSubmitting ? "STARTING..." : "CHECKOUT";
   return (
     <section className="express-checkout" aria-label="Express checkout">
       <h2>EXPRESS CHECKOUT</h2>
-      <button className="express-checkout-button apple-pay" disabled={disabled || isSubmitting} onClick={onClick} type="button">
+      <button
+        className="express-checkout-button primary-pay"
+        disabled={disabled || isSubmitting}
+        onClick={onClick}
+        type="button"
+      >
         {label}
-      </button>
-      <button className="express-checkout-button secondary-pay" disabled type="button">
-        G PAY
-      </button>
-      <button className="express-checkout-button secondary-pay paypal" disabled type="button">
-        PayPal
       </button>
     </section>
   );

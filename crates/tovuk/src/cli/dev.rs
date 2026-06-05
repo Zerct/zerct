@@ -22,6 +22,12 @@ use std::{
 const DEFAULT_FRONTEND_PORT: u16 = 5173;
 const LOCAL_HOST: &str = "127.0.0.1";
 
+#[derive(Clone, Copy, Debug, Default)]
+struct DevPorts {
+    frontend: Option<u16>,
+    worker: Option<u16>,
+}
+
 #[derive(Clone, Debug, Serialize)]
 struct DevPlan {
     frontend_url: Option<String>,
@@ -54,7 +60,8 @@ struct DevPortStatus {
 
 pub(crate) fn dev(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     let config = read_dev_config(project_dir, cli)?;
-    let plan = create_dev_plan(project_dir, &config);
+    let ports = dev_ports(cli)?;
+    let plan = create_dev_plan(project_dir, &config, ports);
     if cli.output.json {
         return print_json(&json!({
             "ok": plan.ports_available(),
@@ -92,7 +99,7 @@ fn read_dev_config(project_dir: &Path, cli: &CliOptions) -> Result<TovukConfig> 
     })
 }
 
-fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
+fn create_dev_plan(project_dir: &Path, config: &TovukConfig, ports: DevPorts) -> DevPlan {
     let mut processes = Vec::new();
     let mut port_statuses = Vec::new();
     let mut worker_url = None;
@@ -107,7 +114,9 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
             .root
             .as_deref()
             .map_or_else(|| project_dir.to_path_buf(), |root| project_dir.join(root));
-        let worker_port = config.backend.port.unwrap_or(config.run.port);
+        let worker_port = ports
+            .worker
+            .unwrap_or_else(|| config.backend.port.unwrap_or(config.run.port));
         let command = local_worker_command(&worker_root, config);
         let url = format!("http://{LOCAL_HOST}:{worker_port}");
         worker_url = Some(url.clone());
@@ -129,7 +138,8 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
             .root
             .as_deref()
             .map_or_else(|| project_dir.to_path_buf(), |root| project_dir.join(root));
-        let command = local_frontend_command(&frontend_root);
+        let frontend_port = ports.frontend.unwrap_or(DEFAULT_FRONTEND_PORT);
+        let command = local_frontend_command(&frontend_root, frontend_port);
         let mut env = BTreeMap::new();
         if let Some(url) = worker_url.as_deref() {
             let key = if is_next_frontend(&frontend_root) {
@@ -139,9 +149,9 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
             };
             env.insert(key.to_owned(), format!("{url}/api"));
         }
-        let url = format!("http://{LOCAL_HOST}:{DEFAULT_FRONTEND_PORT}");
+        let url = format!("http://{LOCAL_HOST}:{frontend_port}");
         frontend_url = Some(url.clone());
-        port_statuses.push(dev_port_status("frontend", DEFAULT_FRONTEND_PORT, &url));
+        port_statuses.push(dev_port_status("frontend", frontend_port, &url));
         processes.push(DevProcess {
             command,
             cwd: display_path(&frontend_root),
@@ -165,6 +175,39 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
     }
 }
 
+fn dev_ports(cli: &CliOptions) -> Result<DevPorts> {
+    Ok(DevPorts {
+        frontend: optional_dev_port(&cli.dev.frontend_port, "--frontend-port", cli)?,
+        worker: optional_dev_port(&cli.dev.worker_port, "--worker-port", cli)?,
+    })
+}
+
+fn optional_dev_port(value: &str, flag: &str, cli: &CliOptions) -> Result<Option<u16>> {
+    let value = value.trim();
+    if value.is_empty() {
+        return Ok(None);
+    }
+
+    let parsed = value.parse::<u16>().map_err(|_error| {
+        agent_error(
+            "invalid_argument",
+            format!("{flag} must be a TCP port from 1 to 65535."),
+            format!("Pass a valid local port, for example `{flag} 5174`."),
+            cli.output.json,
+        )
+    })?;
+    if parsed == 0 {
+        return Err(agent_error(
+            "invalid_argument",
+            format!("{flag} must be a TCP port from 1 to 65535."),
+            format!("Pass a valid local port, for example `{flag} 5174`."),
+            cli.output.json,
+        ));
+    }
+
+    Ok(Some(parsed))
+}
+
 fn dev_port_status(name: &'static str, port: u16, url: &str) -> DevPortStatus {
     let has_listener = TcpStream::connect((LOCAL_HOST, port)).is_ok();
     let available = !has_listener && TcpListener::bind((LOCAL_HOST, port)).is_ok();
@@ -173,7 +216,7 @@ fn dev_port_status(name: &'static str, port: u16, url: &str) -> DevPortStatus {
         agent_instruction: if available {
             None
         } else {
-            Some(port_conflict_instruction(port, url, owner.as_ref()))
+            Some(port_conflict_instruction(name, port, url, owner.as_ref()))
         },
         available,
         host: LOCAL_HOST,
@@ -186,19 +229,29 @@ fn dev_port_status(name: &'static str, port: u16, url: &str) -> DevPortStatus {
 
 fn dev_agent_instruction(plan: &DevPlan) -> &'static str {
     if plan.port_statuses.iter().any(|status| !status.available) {
-        "One or more planned dev ports are already in use. Inspect dev.port_statuses before running `tovuk dev --output text`."
+        "One or more planned dev ports are already in use. Inspect dev.port_statuses, then rerun with --worker-port and/or --frontend-port set to available ports before using `tovuk dev --output text`."
     } else {
         "Run `tovuk dev --output text` to start these local processes. JSON mode returns the plan only so child process logs do not corrupt machine-readable output."
     }
 }
 
-fn port_conflict_instruction(port: u16, url: &str, owner: Option<&DevPortOwner>) -> String {
+fn port_conflict_instruction(
+    name: &'static str,
+    port: u16,
+    url: &str,
+    owner: Option<&DevPortOwner>,
+) -> String {
     let owner_text = owner.map_or_else(
         || "another local process".to_owned(),
         |owner| format!("pid {} ({})", owner.pid, owner.command),
     );
+    let override_flag = match name {
+        "worker" => "--worker-port",
+        "frontend" => "--frontend-port",
+        _ => "--worker-port or --frontend-port",
+    };
     format!(
-        "Port {port} is already in use by {owner_text}. Stop that process before running `tovuk dev --output text`, or run the printed commands manually on free ports with matching API URLs. Do not use {url} for verification until the planned Tovuk dev process owns it."
+        "Port {port} is already in use by {owner_text}. Stop that process or rerun `tovuk dev {override_flag} <free_port>` before using `tovuk dev --output text`. Do not use {url} for verification until the planned Tovuk dev process owns it."
     )
 }
 
@@ -210,7 +263,7 @@ fn fail_on_port_conflicts(plan: &DevPlan, cli: &CliOptions) -> Result<()> {
     Err(agent_error(
         "dev_port_in_use",
         "One or more planned Tovuk dev ports are already in use.",
-        "Inspect the printed port rows, stop the owning process, then rerun `tovuk dev`. Use `tovuk dev --json` for machine-readable owner details.",
+        "Inspect the printed port rows, then stop the owning process or rerun with --worker-port and/or --frontend-port set to free ports. Use `tovuk dev --json` for machine-readable owner details.",
         cli.output.json,
     ))
 }
@@ -233,20 +286,16 @@ fn local_worker_command(worker_root: &Path, config: &TovukConfig) -> String {
         .unwrap_or_else(|| "cargo run --release".to_owned())
 }
 
-fn local_frontend_command(frontend_root: &Path) -> String {
+fn local_frontend_command(frontend_root: &Path, frontend_port: u16) -> String {
     if is_next_frontend(frontend_root) {
         return match frontend_package_manager(frontend_root) {
-            "bun" => format!("bun run dev --hostname {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT}"),
-            _ => format!("npm run dev -- --hostname {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT}"),
+            "bun" => format!("bun run dev --hostname {LOCAL_HOST} --port {frontend_port}"),
+            _ => format!("npm run dev -- --hostname {LOCAL_HOST} --port {frontend_port}"),
         };
     }
     match frontend_package_manager(frontend_root) {
-        "bun" => {
-            format!("bun run dev --host {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT} --strictPort")
-        }
-        _ => format!(
-            "npm run dev -- --host {LOCAL_HOST} --port {DEFAULT_FRONTEND_PORT} --strictPort"
-        ),
+        "bun" => format!("bun run dev --host {LOCAL_HOST} --port {frontend_port} --strictPort"),
+        _ => format!("npm run dev -- --host {LOCAL_HOST} --port {frontend_port} --strictPort"),
     }
 }
 
@@ -389,8 +438,8 @@ fn display_path(path: &Path) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        DevPlan, LOCAL_HOST, create_dev_plan, dev_port_status, fail_on_port_conflicts,
-        port_conflict_instruction, read_dev_config,
+        DevPlan, DevPorts, LOCAL_HOST, create_dev_plan, dev_port_status, dev_ports,
+        fail_on_port_conflicts, port_conflict_instruction, read_dev_config,
     };
     use crate::cli::args::CliOptions;
     use std::{env, fs, net::TcpListener, path::PathBuf, time::SystemTime};
@@ -448,7 +497,7 @@ output = "dist"
 
         let cli = CliOptions::default();
         let config = read_dev_config(&project_dir, &cli)?;
-        let plan = create_dev_plan(&project_dir, &config);
+        let plan = create_dev_plan(&project_dir, &config, DevPorts::default());
 
         if plan.processes.len() != 2 {
             return Err(format!("unexpected process count: {}", plan.processes.len()).into());
@@ -536,7 +585,7 @@ output = "out"
 
         let cli = CliOptions::default();
         let config = read_dev_config(&project_dir, &cli)?;
-        let plan = create_dev_plan(&project_dir, &config);
+        let plan = create_dev_plan(&project_dir, &config, DevPorts::default());
 
         if plan.processes[1]
             .env
@@ -554,6 +603,102 @@ output = "out"
 
         let _ignore = fs::remove_dir_all(project_dir);
         Ok(())
+    }
+
+    #[test]
+    fn fullstack_plan_honors_dev_port_overrides() -> Result<(), Box<dyn std::error::Error>> {
+        let project_dir = temp_project_dir("fullstack-ports")?;
+        fs::create_dir_all(project_dir.join("api"))?;
+        fs::create_dir_all(project_dir.join("web"))?;
+        fs::write(
+            project_dir.join("api/Cargo.toml"),
+            "[package]\nname = \"api\"\n",
+        )?;
+        fs::write(
+            project_dir.join("web/package.json"),
+            "{\"scripts\":{\"dev\":\"vite\"}}",
+        )?;
+        fs::write(
+            project_dir.join("tovuk.toml"),
+            r#"
+name = "demo"
+kind = "fullstack"
+
+[capabilities]
+static_frontend = true
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
+
+[worker]
+root = "api"
+command = "./target/release/api"
+port = 3000
+health = "/api/healthz"
+
+[frontend]
+root = "web"
+output = "dist"
+"#,
+        )?;
+
+        let mut cli = CliOptions::default();
+        cli.dev.frontend_port = "5174".to_owned();
+        cli.dev.worker_port = "3001".to_owned();
+        let config = read_dev_config(&project_dir, &cli)?;
+        let ports = dev_ports(&cli)?;
+        let plan = create_dev_plan(&project_dir, &config, ports);
+
+        if plan.worker_url.as_deref() != Some("http://127.0.0.1:3001") {
+            return Err(format!("unexpected worker url: {:?}", plan.worker_url).into());
+        }
+        if plan.frontend_url.as_deref() != Some("http://127.0.0.1:5174") {
+            return Err(format!("unexpected frontend url: {:?}", plan.frontend_url).into());
+        }
+        if plan.processes[0].env.get("PORT").map(String::as_str) != Some("3001") {
+            return Err(format!("unexpected worker env: {:?}", plan.processes[0].env).into());
+        }
+        if plan.processes[1]
+            .env
+            .get("VITE_API_URL")
+            .map(String::as_str)
+            != Some("http://127.0.0.1:3001/api")
+        {
+            return Err(format!("unexpected frontend env: {:?}", plan.processes[1].env).into());
+        }
+        if !plan.processes[1].command.contains("--port 5174") {
+            return Err(
+                format!("unexpected frontend command: {}", plan.processes[1].command).into(),
+            );
+        }
+
+        let _ignore = fs::remove_dir_all(project_dir);
+        Ok(())
+    }
+
+    #[test]
+    fn dev_port_overrides_reject_invalid_ports() {
+        let mut cli = CliOptions::default();
+        cli.dev.frontend_port = "0".to_owned();
+
+        let error = dev_ports(&cli)
+            .err()
+            .map(|error| error.payload().code.clone());
+
+        assert_eq!(error.as_deref(), Some("invalid_argument"));
     }
 
     #[test]
@@ -619,9 +764,11 @@ output = "out"
             command: "api".to_owned(),
             pid: 123,
         };
-        let instruction = port_conflict_instruction(3000, "http://127.0.0.1:3000", Some(&owner));
+        let instruction =
+            port_conflict_instruction("worker", 3000, "http://127.0.0.1:3000", Some(&owner));
 
         assert!(instruction.contains("pid 123 (api)"));
+        assert!(instruction.contains("tovuk dev --worker-port <free_port>"));
         assert!(instruction.contains("Do not use http://127.0.0.1:3000"));
     }
 

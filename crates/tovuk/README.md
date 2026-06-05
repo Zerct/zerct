@@ -181,7 +181,8 @@ and `port_statuses` without starting processes. When a planned port is already
 occupied, JSON mode returns `ok: false` and `dev.port_statuses[].owner` when the
 PID/command can be detected. Text mode refuses to start child processes until
 ports are free, so agents do not inspect a stale worker or a different app
-already using the planned port.
+already using the planned port. Use `--worker-port <port>` or
+`--frontend-port <port>` to rerun the plan on free local ports.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.

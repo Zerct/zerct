@@ -422,7 +422,8 @@ occupied, JSON mode returns `ok: false` and `dev.port_statuses[].owner` when
 the PID/command can be detected. Text mode refuses to start child processes
 until ports are free. Inspect `dev.port_statuses` before opening
 `frontend_url` so a port conflict does not send the browser to a stale worker
-or a different app.
+or a different app. Use `--worker-port <port>` or `--frontend-port <port>` to
+rerun the plan on free local ports.
 The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
 KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
 Usage Caps.

@@ -35,6 +35,9 @@ Date: 2026-06-05
 - Prepared Tovuk CLI `0.1.100` during this pass so `tovuk deploy --wait` exits
   with an agent-readable error when the remote build ends as `failed` or
   `canceled`.
+- Prepared Tovuk CLI `0.1.101` during this pass so `tovuk dev` can reroute
+  local full-stack development with `--worker-port` and `--frontend-port` when
+  default ports are occupied.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
@@ -59,6 +62,8 @@ Date: 2026-06-05
 - Simplified the mobile order-confirmed state into a compact centered receipt
   with no bag header, no provider-specific status copy, and short order/total
   label-value rows.
+- Replaced misleading wallet-provider checkout labels with a neutral
+  `CHECKOUT` action that maps to the example's Stripe-or-demo checkout backend.
 - Hardened `POST /api/orders` so manual reservations use the same typed,
   catalog-backed parser as Stripe Checkout, reject missing email and unknown
   products, and return the server-computed order total.
@@ -1848,8 +1853,8 @@ Verification:
   `https://shape-store.tovuk.app`:
   - desktop `1440x900`: 50 products, six product columns, no API fallback, no
     overflow, gallery `ArrowRight` changed the product image while staying on
-    `YS-02`, cart had payment and billing sections, and `APPLE PAY` reached
-    `ORDER CONFIRMED`.
+    `YS-02`, cart had payment and billing sections, and the express checkout
+    action reached `ORDER CONFIRMED`.
   - tablet `768x1024`: 50 products, six product columns, no API fallback, no
     overflow, cart/payment/success flow passed.
   - mobile `390x844`: 50 products, three product columns, no API fallback, no
@@ -1966,8 +1971,8 @@ Verification:
   - desktop `1440x900`: three product columns, first product image `447x447`,
     no API fallback, no horizontal overflow, `ArrowRight` changed the active
     `YS-02` image, `Escape` returned to the grid, size `9` added to cart, and
-    `APPLE PAY` reached `ORDER CONFIRMED`. Cart copy showed `SHOPPING BAG` and
-    `DISCOUNT CODE`, with no `YZY` or wallet wording.
+    the express checkout action reached `ORDER CONFIRMED`. Cart copy showed
+    `SHOPPING BAG` and `DISCOUNT CODE`, with no `YZY` or wallet wording.
   - tablet `768x1024`: three product columns, first product image `223x223`,
     no horizontal overflow, keyboard gallery and checkout flow passed.
   - mobile `390x844`: three product columns, first product image `97x97`, no
@@ -2122,6 +2127,69 @@ Verification:
   `https://shape-store.tovuk.app` at mobile `320x568`; the same receipt state
   had no horizontal overflow at tablet `768x1024` or desktop `1440x900`.
 - Production Browser console logs were clean for that checkout receipt flow.
+
+### 52. Local dev still forced manual fallback commands when a default port was busy
+
+Failure/friction:
+
+- While testing the shape-store checkout copy, `tovuk dev --json` correctly
+  returned `ok: false` because another `node` process owned port `5173`.
+- The JSON output included the owner PID and the printed worker/frontend
+  commands, but the next step was still manual command copying with a free Vite
+  port and matching `VITE_API_URL`.
+- That is worse than the Cloudflare/Wrangler local-development pattern where
+  `wrangler dev` exposes a direct `--port` option for the local server:
+  https://developers.cloudflare.com/workers/wrangler/commands/workers/#dev
+
+Fix included in this pass:
+
+- Added `tovuk dev --worker-port <port>` and
+  `tovuk dev --frontend-port <port>`.
+- Updated JSON and text repair instructions so agents can rerun the Tovuk dev
+  plan on free local ports instead of copying manual process commands.
+- Updated CLI help, package docs, agent docs, and the changelog.
+- Bumped public package metadata to `0.1.101` so the CLI fix can publish
+  through npm, PyPI, crates.io, native binaries, and Homebrew metadata.
+
+Storefront fix included in this same pass:
+
+- Replaced misleading wallet-provider labels (`APPLE PAY`, `G PAY`, `PayPal`)
+  with a neutral `CHECKOUT` action that matches the example's actual
+  Stripe-or-demo backend.
+- Moved checkout-specific CSS from `styles.css` into `checkout.css`, reducing
+  the broad stylesheet from 913 lines to 675 lines so future UI edits stay
+  below the strict 1k-line review threshold.
+
+Verification:
+
+- Local shape-store checks passed:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run build`
+  - `cargo test --manifest-path examples/shape-store/api/Cargo.toml --locked`
+  - `npx -y tovuk@0.1.100 check --json`
+- Browser transaction checks passed on the local app:
+  - mobile `320x568`: size `9` added `YS-02`, `CHECKOUT` reached
+    `ORDER CONFIRMED`, no horizontal overflow, no `APPLE PAY`, `G PAY`,
+    `PayPal`, or `YZY` copy.
+  - tablet `768x1024`: cart showed one `CHECKOUT` action, no forbidden copy,
+    no horizontal overflow, and receipt centered at `360px`.
+  - desktop `1440x900`: cart showed one `CHECKOUT` action, no forbidden copy,
+    no horizontal overflow, and receipt centered at `360px`.
+- CLI checks passed:
+  - `cargo test --manifest-path crates/tovuk/Cargo.toml --locked` passed with
+    69 tests.
+  - `cargo run --manifest-path crates/tovuk/Cargo.toml -- dev
+    examples/shape-store --frontend-port 5174 --json` returned `ok: true`,
+    `frontend_url: http://127.0.0.1:5174`, and a matching
+    `VITE_API_URL=http://127.0.0.1:3000/api`.
+  - `cargo run --manifest-path crates/tovuk/Cargo.toml -- dev
+    examples/shape-store --frontend-port 0 --json` returned
+    `invalid_argument` with an agent-readable repair instruction.
+  - `cargo run --manifest-path crates/tovuk/Cargo.toml -- check
+    examples/shape-store --json` passed.
+  - `./scripts/check-all.sh` passed with 69 CLI tests and package version
+    `0.1.101`.
 
 ## Remaining Tovuk friction
 

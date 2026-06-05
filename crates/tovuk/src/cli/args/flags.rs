@@ -107,6 +107,7 @@ fn apply_value_flag(
         | "--token"
         | "--template"
         | "--output" => apply_common_value_flag(cli, name, inline, argv, index),
+        "--frontend-port" | "--worker-port" => apply_dev_value_flag(cli, name, inline, argv, index),
         "--content-type" => apply_storage_value_flag(cli, name, inline, argv, index),
         "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
         "--expiration" | "--expiration-ttl-seconds" | "--ttl" | "--metadata" => {
@@ -175,6 +176,34 @@ fn apply_common_value_flag(
             set_output_format(cli, &value, name, cli.output.json)?;
             Ok(super::values::flag_consumed(argv, index))
         }
+        _ => invalid_value_flag_dispatch(cli, name),
+    }
+}
+
+fn apply_dev_value_flag(
+    cli: &mut CliOptions,
+    name: &str,
+    inline: Option<String>,
+    argv: &[String],
+    index: usize,
+) -> Result<usize> {
+    match name {
+        "--frontend-port" => set_string_flag(
+            &mut cli.dev.frontend_port,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--worker-port" => set_string_flag(
+            &mut cli.dev.worker_port,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
         _ => invalid_value_flag_dispatch(cli, name),
     }
 }
