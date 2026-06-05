@@ -19,13 +19,14 @@ use std::{
 
 pub(super) fn frontend_script_checks(project_dir: &Path, run_scripts: bool) -> Vec<QualityCheck> {
     let manifest = read_package_json(project_dir);
+    let is_next = super::layout::is_next_frontend(project_dir);
     let typecheck = package_script_value(manifest.as_ref(), "typecheck");
     let lint = package_script_value(manifest.as_ref(), "lint");
     let mut checks = vec![
         package_script_exists_check("typecheck", &typecheck),
         package_script_exists_check("lint", &lint),
-        strict_typecheck_check(&typecheck),
-        native_lint_check(manifest.as_ref()),
+        strict_typecheck_check(&typecheck, is_next),
+        native_lint_check(manifest.as_ref(), is_next),
         native_quality_gate_check(manifest.as_ref()),
     ];
     if run_scripts && checks.iter().all(|check| check.ok) {
@@ -48,17 +49,20 @@ fn package_script_exists_check(script: &str, command: &str) -> QualityCheck {
     )
 }
 
-fn strict_typecheck_check(command: &str) -> QualityCheck {
+fn strict_typecheck_check(command: &str, is_next: bool) -> QualityCheck {
     quality_check(
         "strict frontend typecheck",
         uses_strict_frontend_typechecker(command),
         "accepted",
         "native typecheck missing",
-        "Set package.json `typecheck` to `oxlint src vite.config.ts --deny-warnings --type-aware --type-check --tsconfig tsconfig.json`, then retry.",
+        &format!(
+            "Set package.json `typecheck` to `oxlint {} --deny-warnings --type-aware --type-check --tsconfig tsconfig.json`, then retry.",
+            frontend_lint_targets(is_next)
+        ),
     )
 }
 
-fn native_lint_check(manifest: Option<&Value>) -> QualityCheck {
+fn native_lint_check(manifest: Option<&Value>, is_next: bool) -> QualityCheck {
     let ok = !package_script_tree_uses(
         manifest,
         "lint",
@@ -75,7 +79,10 @@ fn native_lint_check(manifest: Option<&Value>) -> QualityCheck {
         ok,
         "accepted",
         "native linter missing",
-        "Replace the lint script with native tooling such as `oxlint src vite.config.ts --deny-warnings` or `biome check .`, then retry.",
+        &format!(
+            "Replace the lint script with native tooling such as `oxlint {} --deny-warnings` or `biome check .`, then retry.",
+            frontend_lint_targets(is_next)
+        ),
     )
 }
 
@@ -113,6 +120,14 @@ fn package_script_value(manifest: Option<&Value>, script: &str) -> String {
         .unwrap_or_default()
         .trim()
         .to_owned()
+}
+
+fn frontend_lint_targets(is_next: bool) -> &'static str {
+    if is_next {
+        "app next.config.mjs"
+    } else {
+        "src vite.config.ts"
+    }
 }
 
 fn package_script_tree_uses(
