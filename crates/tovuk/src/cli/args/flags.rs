@@ -1,5 +1,5 @@
 use super::{
-    model::CliOptions,
+    model::{ArtifactBuild, CliOptions},
     values::{set_boolean_flag, set_string_flag, set_u64_flag},
 };
 use crate::cli::errors::{Result, agent_error};
@@ -58,6 +58,12 @@ fn apply_boolean_flag(
         "--dry-run" => {
             set_boolean_flag(inline, || cli.deployment.dry_run = true, name, json_output)
         }
+        "--build-artifact" => set_boolean_flag(
+            inline,
+            || cli.deployment.artifact_build = ArtifactBuild::Build,
+            name,
+            json_output,
+        ),
         "--public" => {
             set_boolean_flag(inline, || cli.storage.public_read = true, name, json_output)
         }

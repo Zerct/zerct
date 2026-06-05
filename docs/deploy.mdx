@@ -42,16 +42,17 @@ guessing.
   <Step title="Deploy and inspect the service">
     ```sh
     tovuk deploy --wait --json
-    tovuk service status <service> --json
     tovuk service show <service> --json
+    tovuk service status <service> --json
     ```
 
     Tovuk queues the build, runs checks, verifies the Rust worker health route,
     and exposes the service on a `tovuk.app` deployment hostname. Use the
-    returned service id with `tovuk service status <service> --json` to confirm
-    the service is live. Use `tovuk service show <service> --json` when agents
-    need capabilities, deploy history, builds, logs, `accountUsage`,
-    `billingEstimate`, resources, and next actions.
+    returned service id with `tovuk service show <service> --json` to capture
+    capabilities, deploy history, builds, logs, `accountUsage`,
+    `billingEstimate`, resources, and next actions. Use
+    `tovuk service status <service> --json` when agents need only the compact
+    live-state check.
   </Step>
 
   <Step title="Inspect or cancel deploys">

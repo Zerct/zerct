@@ -162,6 +162,15 @@ includes `missingConfig` for `tovuk.toml` repair, `requiredFixes` for every
 failed quality check, and `meterPlan` entries for enabled service meters with
 meter units, pricing fields, limit fields, and ready-to-fill `tovuk limits set`
 cap commands with `--notify-at-percent`.
+After adding or upgrading Rust dependencies, run
+`tovuk deploy --dry-run --build-artifact --json`; it performs the local release
+build without uploading or promoting, then reports
+`artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
+
+`tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
+and `port_statuses` without starting processes. Check `dev.port_statuses`
+before opening a local URL so agents do not inspect a different app already
+using the planned port.
 
 `tovuk storage upload` automatically switches to multipart transfer for files
 larger than 100 MiB.
@@ -172,7 +181,7 @@ Agent repair loop:
 
 ```sh
 tovuk check --json
-tovuk deploy --dry-run --json
+tovuk deploy --dry-run --build-artifact --json
 tovuk deploy --wait --json
 tovuk deploy show deploy_1 --json
 tovuk logs --build job_1 --json

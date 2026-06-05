@@ -15,13 +15,13 @@ const MIN_WORKER_THREADS: usize = 64;
 const MAX_WORKER_THREADS: usize = 128;
 const READ_CHUNK_BYTES: usize = 4096;
 const WORKER_THREAD_STACK_BYTES: usize = 256 * 1024;
-const SHIPPING_CENTS: u64 = 900;
+const SHIPPING_CENTS: u64 = 0;
 const FREE_SHIPPING_THRESHOLD_CENTS: u64 = 20_000;
 const STRIPE_API_VERSION: &str = "2026-02-25.clover";
 const STRIPE_CHECKOUT_SESSIONS_URL: &str = "https://api.stripe.com/v1/checkout/sessions";
 
 const PRODUCTS_JSON: &str = r#"{"products":[
-{"id":"shape-slide","name":"YS-02","categories":["NEW","FOOTWEAR","SLIDES","MENS","WOMENS"],"priceCents":2000,"inventory":24,"image":"/products/shape-capsule.svg"},
+{"id":"shape-slide","name":"YS-02","categories":["NEW","FOOTWEAR","SLIDES","MENS","WOMENS"],"priceCents":5000,"inventory":24,"image":"/products/shape-capsule.svg"},
 {"id":"shape-square","name":"SL-03","categories":["NEW","FOOTWEAR","MENS","WOMENS"],"priceCents":3500,"inventory":12,"image":"/products/shape-square.svg"},
 {"id":"shape-circle","name":"SG-03","categories":["NEW","MENS"],"priceCents":2000,"inventory":30,"image":"/products/shape-circle.svg"},
 {"id":"shape-triangle","name":"SL-01","categories":["NEW","FOOTWEAR","SLIDES"],"priceCents":2400,"inventory":19,"image":"/products/shape-triangle.svg"},

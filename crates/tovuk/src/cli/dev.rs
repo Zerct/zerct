@@ -10,6 +10,7 @@ use serde_json::json;
 use std::{
     collections::BTreeMap,
     fs,
+    net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
     thread,
@@ -24,6 +25,7 @@ struct DevPlan {
     frontend_url: Option<String>,
     kind: &'static str,
     next_actions: Vec<String>,
+    port_statuses: Vec<DevPortStatus>,
     processes: Vec<DevProcess>,
     project: String,
     worker_url: Option<String>,
@@ -37,6 +39,16 @@ struct DevProcess {
     name: &'static str,
 }
 
+#[derive(Clone, Debug, Serialize)]
+struct DevPortStatus {
+    agent_instruction: Option<String>,
+    available: bool,
+    host: &'static str,
+    name: &'static str,
+    port: u16,
+    url: String,
+}
+
 pub(crate) fn dev(project_dir: &Path, cli: &CliOptions) -> Result<()> {
     let config = read_dev_config(project_dir, cli)?;
     let plan = create_dev_plan(project_dir, &config);
@@ -45,7 +57,7 @@ pub(crate) fn dev(project_dir: &Path, cli: &CliOptions) -> Result<()> {
             "ok": true,
             "mode": "plan",
             "dev": plan,
-            "agent_instruction": "Run `tovuk dev --output text` to start these local processes. JSON mode returns the plan only so child process logs do not corrupt machine-readable output."
+            "agent_instruction": dev_agent_instruction(&plan)
         }));
     }
     print_dev_plan(&plan);
@@ -77,6 +89,7 @@ fn read_dev_config(project_dir: &Path, cli: &CliOptions) -> Result<TovukConfig> 
 
 fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
     let mut processes = Vec::new();
+    let mut port_statuses = Vec::new();
     let mut worker_url = None;
     let mut frontend_url = None;
 
@@ -91,7 +104,9 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
             .map_or_else(|| project_dir.to_path_buf(), |root| project_dir.join(root));
         let worker_port = config.backend.port.unwrap_or(config.run.port);
         let command = local_worker_command(&worker_root, config);
-        worker_url = Some(format!("http://{LOCAL_HOST}:{worker_port}"));
+        let url = format!("http://{LOCAL_HOST}:{worker_port}");
+        worker_url = Some(url.clone());
+        port_statuses.push(dev_port_status("worker", worker_port, &url));
         processes.push(DevProcess {
             command,
             cwd: display_path(&worker_root),
@@ -119,7 +134,9 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
             };
             env.insert(key.to_owned(), format!("{url}/api"));
         }
-        frontend_url = Some(format!("http://{LOCAL_HOST}:{DEFAULT_FRONTEND_PORT}"));
+        let url = format!("http://{LOCAL_HOST}:{DEFAULT_FRONTEND_PORT}");
+        frontend_url = Some(url.clone());
+        port_statuses.push(dev_port_status("frontend", DEFAULT_FRONTEND_PORT, &url));
         processes.push(DevProcess {
             command,
             cwd: display_path(&frontend_root),
@@ -136,9 +153,37 @@ fn create_dev_plan(project_dir: &Path, config: &TovukConfig) -> DevPlan {
             "Use Ctrl-C to stop all local dev processes.".to_owned(),
             "Run `tovuk check` before deploying.".to_owned(),
         ],
+        port_statuses,
         processes,
         project: display_path(project_dir),
         worker_url,
+    }
+}
+
+fn dev_port_status(name: &'static str, port: u16, url: &str) -> DevPortStatus {
+    let has_listener = TcpStream::connect((LOCAL_HOST, port)).is_ok();
+    let available = !has_listener && TcpListener::bind((LOCAL_HOST, port)).is_ok();
+    DevPortStatus {
+        agent_instruction: if available {
+            None
+        } else {
+            Some(format!(
+                "Port {port} is already in use. Stop the process using {url} before running `tovuk dev --output text`, or run the printed commands manually on free ports with matching API URLs."
+            ))
+        },
+        available,
+        host: LOCAL_HOST,
+        name,
+        port,
+        url: url.to_owned(),
+    }
+}
+
+fn dev_agent_instruction(plan: &DevPlan) -> &'static str {
+    if plan.port_statuses.iter().any(|status| !status.available) {
+        "One or more planned dev ports are already in use. Inspect dev.port_statuses before running `tovuk dev --output text`."
+    } else {
+        "Run `tovuk dev --output text` to start these local processes. JSON mode returns the plan only so child process logs do not corrupt machine-readable output."
     }
 }
 
@@ -178,6 +223,14 @@ fn print_dev_plan(plan: &DevPlan) {
     }
     if let Some(url) = plan.frontend_url.as_deref() {
         println!("frontend {url}");
+    }
+    for status in &plan.port_statuses {
+        let availability = if status.available {
+            "available"
+        } else {
+            "in-use"
+        };
+        println!("port {} {} {}", status.name, status.url, availability);
     }
     for process in &plan.processes {
         let env = process
@@ -291,9 +344,9 @@ fn display_path(path: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{create_dev_plan, read_dev_config};
+    use super::{LOCAL_HOST, create_dev_plan, dev_port_status, read_dev_config};
     use crate::cli::args::CliOptions;
-    use std::{env, fs, path::PathBuf, time::SystemTime};
+    use std::{env, fs, net::TcpListener, path::PathBuf, time::SystemTime};
 
     #[test]
     fn fullstack_plan_wires_worker_and_frontend() -> Result<(), Box<dyn std::error::Error>> {
@@ -453,6 +506,23 @@ output = "out"
         }
 
         let _ignore = fs::remove_dir_all(project_dir);
+        Ok(())
+    }
+
+    #[test]
+    fn port_status_reports_occupied_port() -> Result<(), Box<dyn std::error::Error>> {
+        let listener = TcpListener::bind((LOCAL_HOST, 0))?;
+        let port = listener.local_addr()?.port();
+        let status = dev_port_status("frontend", port, &format!("http://{LOCAL_HOST}:{port}"));
+
+        if status.available {
+            return Err(format!("expected occupied port {port} to be unavailable").into());
+        }
+        if status.agent_instruction.is_none() {
+            return Err("expected occupied port to include an agent instruction".into());
+        }
+
+        drop(listener);
         Ok(())
     }
 

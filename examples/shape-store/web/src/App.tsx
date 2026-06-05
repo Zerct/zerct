@@ -21,12 +21,10 @@ export function App() {
   const [selectedCategory, setSelectedCategory] = useState<Category>("NEW");
   const visibleProducts = useVisibleProducts(products, selectedCategory);
 
-  function addProduct(productId: string) {
+  function addProduct(productId: string, selectedSize?: string) {
     transitionStoreState(() => {
-      cart.addToCart(productId);
+      cart.addToCart(productId, selectedSize);
       checkout.clearReceipt();
-      setSelectedProduct(null);
-      setIsCartOpen(true);
     });
   }
 
@@ -92,7 +90,7 @@ function OverlayLayers({
   checkout: CheckoutState;
   isCartOpen: boolean;
   isMenuOpen: boolean;
-  onAdd: (productId: string) => void;
+  onAdd: (productId: string, selectedSize?: string) => void;
   onCartClose: () => void;
   onMenuClose: () => void;
 }) {
@@ -162,7 +160,7 @@ function HeaderStartButton({
 
   return (
     <button aria-label="Open menu" className="menu-trigger" onClick={onMenuOpen} type="button">
-      +
+      <span aria-hidden="true" className="menu-icon" />
     </button>
   );
 }

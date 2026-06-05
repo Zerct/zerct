@@ -8,6 +8,7 @@ use super::{
         project::{number_field, string_field},
         project_kind::ProjectKind,
     },
+    artifact::artifact_check,
     types::DeployProjectInfo,
 };
 use reqwest::Method;
@@ -24,29 +25,36 @@ pub(super) fn print_deploy_dry_run(
     let usage = api_request(cli, Method::GET, "/v1/usage", Some(token), None)?;
     let services = api_request(cli, Method::GET, "/v1/services", Some(token), None)?;
     let existing_service_names = service_name_set(&services);
+    let build_artifact = cli.deployment.artifact_build.requested();
+    let limits = usage.get("limits").cloned().unwrap_or(Value::Null);
     let service_dry_runs = projects
         .iter()
-        .map(|project| service_dry_run(project, &existing_service_names, &capabilities))
+        .map(|project| {
+            service_dry_run(
+                project,
+                &existing_service_names,
+                &capabilities,
+                &limits,
+                build_artifact,
+            )
+        })
         .collect::<Vec<_>>();
     let warnings = workspace_warnings(&service_dry_runs, &usage);
-    let ok = warnings.is_empty()
-        && service_dry_runs
-            .iter()
-            .all(|project| project["check"]["ok"].as_bool().unwrap_or(false));
+    let ok = warnings.is_empty() && service_dry_runs.iter().all(service_dry_run_ok);
     let report = json!({
         "ok": ok,
         "mode": "dry_run",
         "dryRun": true,
         "sourceOfTruth": "tovuk.toml",
-        "deployBehavior": "read_only_no_upload_no_build",
+        "deployBehavior": if build_artifact { "local_build_no_upload_no_remote_build" } else { "read_only_no_upload_no_build" },
         "workspace": project_dir.display().to_string(),
         "services": service_dry_runs,
         "warnings": warnings,
         "capabilityCatalog": capability_catalog(&capabilities),
-        "limits": usage.get("limits").cloned().unwrap_or(Value::Null),
+        "limits": limits,
         "usage": usage.get("usage").cloned().unwrap_or(Value::Null),
         "billingEstimate": usage.get("billingEstimate").cloned().unwrap_or(Value::Null),
-        "nextActions": next_actions(ok),
+        "nextActions": next_actions(ok, build_artifact),
     });
 
     if cli.output.json {
@@ -62,6 +70,8 @@ fn service_dry_run(
     project: &DeployProjectInfo,
     existing_service_names: &BTreeSet<String>,
     capabilities: &Value,
+    limits: &Value,
+    build_artifact: bool,
 ) -> Value {
     let report = run_check(&project.dir);
     let config = report.config.as_ref();
@@ -87,12 +97,23 @@ fn service_dry_run(
             "ok": report.ok,
             "checks": report.checks,
         },
+        "artifactCheck": artifact_check(&project.dir, config, limits, build_artifact, report.ok),
         "missingConfig": missing_config,
         "requiredFixes": required_fixes,
         "meters": meters_for_capabilities(config.map(|config| &config.capabilities), capabilities),
         "meterPlan": meter_plan_for_capabilities(config.map(|config| &config.capabilities), capabilities),
         "nextAgentActions": project_next_actions(report.ok, kind),
     })
+}
+
+fn service_dry_run_ok(service: &Value) -> bool {
+    let check_ok = service["check"]["ok"].as_bool().unwrap_or(false);
+    let artifact_ok = service["artifactCheck"]["ok"].as_bool().unwrap_or(
+        !service["artifactCheck"]["requested"]
+            .as_bool()
+            .unwrap_or(false),
+    );
+    check_ok && artifact_ok
 }
 
 fn required_fix_entries(checks: &[QualityCheck]) -> Vec<Value> {
@@ -360,12 +381,19 @@ fn project_next_actions(ok: bool, kind: Option<ProjectKind>) -> Vec<&'static str
     }
 }
 
-fn next_actions(ok: bool) -> Vec<&'static str> {
+fn next_actions(ok: bool, build_artifact: bool) -> Vec<&'static str> {
     if ok {
+        if build_artifact {
+            return vec![
+                "Review billingEstimate.lineItems and warnings.",
+                "Set hard usage caps for expected load.",
+                "Run `tovuk deploy --wait --json`.",
+            ];
+        }
         return vec![
             "Review billingEstimate.lineItems and warnings.",
             "Set hard usage caps for expected load.",
-            "Run `tovuk deploy --wait --json`.",
+            "After Rust dependency changes, run `tovuk deploy --dry-run --build-artifact --json`; otherwise run `tovuk deploy --wait --json`.",
         ];
     }
     vec![
@@ -459,6 +487,19 @@ fn service_dry_run_text_lines(service: &Value) -> Vec<String> {
             string_field(fix, "message")
         ));
         if let Some(instruction) = fix.get("agent_instruction").and_then(Value::as_str) {
+            lines.push(format!("agent_instruction: {instruction}"));
+        }
+    }
+
+    let artifact = service.get("artifactCheck").unwrap_or(&Value::Null);
+    if artifact["requested"].as_bool().unwrap_or(false) {
+        lines.push(format!(
+            "artifact status={} gzip_bytes={} limit_bytes={}",
+            string_field(artifact, "status"),
+            number_field(artifact, "compressedBytes"),
+            number_field(artifact, "compressedLimitBytes")
+        ));
+        if let Some(instruction) = artifact.get("agent_instruction").and_then(Value::as_str) {
             lines.push(format!("agent_instruction: {instruction}"));
         }
     }

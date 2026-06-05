@@ -51,10 +51,11 @@ cd ..
 tovuk check --json
 tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
-tovuk deploy --dry-run --json
+tovuk dev --json
+tovuk deploy --dry-run --build-artifact --json
 tovuk deploy --wait --json
-tovuk service status <service> --json
 tovuk service show <service> --json
+tovuk service status <service> --json
 tovuk deploy list --json
 tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json

@@ -2,22 +2,35 @@
 
 A no-admin fullstack ecommerce example for Tovuk.
 
-The storefront mirrors the sparse product-grid and in-place product-detail flow
-of the current Yeezy storefront, but all product visuals are local black SVG
-shape assets. No Yeezy branding or product imagery is copied.
+The storefront mirrors the sparse product-grid, full-screen product overlay,
+size-selection, and wallet-style checkout flow of the current Yeezy storefront,
+but all product visuals are local black SVG shape assets. No Yeezy branding or
+product imagery is copied.
 
 ## Run Locally
 
-Start the Rust API:
+Inspect the local plan first:
 
 ```sh
-cargo run --manifest-path api/Cargo.toml
+npx -y tovuk@latest dev --json
 ```
 
-Start the Vite frontend:
+If the planned ports are available, start both local processes:
 
 ```sh
-npm --prefix web run dev -- --host 127.0.0.1 --port 5174 --strictPort
+npx -y tovuk@latest dev --output text
+```
+
+If another local app already owns those ports, start the Rust API on a free port:
+
+```sh
+PORT=3001 cargo run --manifest-path api/Cargo.toml
+```
+
+Then start the Vite frontend against that API:
+
+```sh
+VITE_API_URL=http://127.0.0.1:3001/api npm --prefix web run dev -- --host 127.0.0.1 --port 5174 --strictPort
 ```
 
 Then open `http://127.0.0.1:5174/`.

@@ -32,11 +32,11 @@ Use this page when an AI coding agent is deploying with Tovuk.
   </Step>
 
   <Step title="Deploy and recover context">
-    Run `tovuk deploy --wait --json`, then inspect live deploy state with
-    `tovuk service status <service> --json`. Use
-    `tovuk service show <service> --json` when capabilities, resources, logs,
-    usage, billing estimate, env, domains, or next actions are needed. Inspect
-    deploy history with `tovuk deploy list --json` or
+    Run `tovuk deploy --wait --json`, then inspect the Service snapshot with
+    `tovuk service show <service> --json`. Use
+    `tovuk service status <service> --json` when only compact live, deploy,
+    build, and URL state is needed. Inspect deploy history with
+    `tovuk deploy list --json` or
     `tovuk deploy show <deploy_id> --json` when needed. If a newer deploy
     supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
   </Step>
@@ -92,8 +92,8 @@ cd ..
 tovuk check --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
-tovuk service status <service> --json
 tovuk service show <service> --json
+tovuk service status <service> --json
 ```
 
 The dashboard mirrors CLI and API state. The committed `tovuk.toml` remains
@@ -118,8 +118,8 @@ Run `tovuk check --json`. Fix the first failed check by following
 is incomplete. Run `tovuk deploy --dry-run --json` and review warnings,
 capabilities, `missingConfig`, `requiredFixes`, meters, `meterPlan`, limits,
 and `billingEstimate`. Deploy with `tovuk deploy --wait --json`, then inspect
-live deploy state with `tovuk service status <service> --json`. If the compact
-status does not explain the state, run `tovuk service show <service> --json`,
+the Service snapshot with `tovuk service show <service> --json`. If more
+deploy context is needed, run `tovuk service status <service> --json`,
 `tovuk deploy list --json`, or `tovuk deploy show <deploy_id> --json`.
 Cancel superseded queued work with
 `tovuk deploy cancel <deploy_id> --json`. If the build fails, read
@@ -226,9 +226,9 @@ Run `cd ..`.
 Keep dynamic server logic in the Rust worker. Keep the TanStack frontend static
 at runtime and call same-origin `/api`. Run `tovuk check --json`, then
 `tovuk account show --json`, then `tovuk deploy --dry-run --json`, then
-`tovuk deploy --wait --json`, then `tovuk service status <service> --json`
-from the repo root. Use `tovuk service show <service> --json` when resource,
-billing, env, domain, or log context is needed.
+`tovuk deploy --wait --json`, then `tovuk service show <service> --json`
+from the repo root. Use `tovuk service status <service> --json` when only
+compact live state is needed.
 </Prompt>
 
 ## Log and service commands

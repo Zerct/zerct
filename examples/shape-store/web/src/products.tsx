@@ -3,7 +3,7 @@ import { formatCurrency, productSizes, type Category, type Product } from "./sto
 import { getProductTransitionStyle } from "./transitions";
 
 type ProductGridProps = {
-  onAdd: (productId: string) => void;
+  onAdd: (productId: string, selectedSize?: string) => void;
   onViewProduct: (product: Product) => void;
   products: Product[];
   selectedCategory: Category;
@@ -11,7 +11,7 @@ type ProductGridProps = {
 };
 
 type ProductFocusViewProps = {
-  onAdd: (productId: string) => void;
+  onAdd: (productId: string, selectedSize?: string) => void;
   onViewProduct: (product: Product) => void;
   product: Product;
   products: Product[];
@@ -125,7 +125,14 @@ function ProductFocusView({
         </div>
         <ProductDots />
         {isSizePickerOpen ? (
-          <SizePicker onAdd={() => onAdd(product.id)} onClose={() => setIsSizePickerOpen(false)} product={product} />
+          <SizePicker
+            onAdd={(selectedSize) => {
+              onAdd(product.id, selectedSize);
+              setIsSizePickerOpen(false);
+            }}
+            onClose={() => setIsSizePickerOpen(false)}
+            product={product}
+          />
         ) : (
           <div className="product-detail-meta">
             <strong>{product.name}</strong>
@@ -155,7 +162,7 @@ function SizePicker({
   onClose,
   product,
 }: {
-  onAdd: () => void;
+  onAdd: (selectedSize: string) => void;
   onClose: () => void;
   product: Product;
 }) {
@@ -173,7 +180,7 @@ function SizePicker({
       <span>{formatCurrency(product.priceCents)}</span>
       <div className="size-grid">
         {productSizes.map((size) => (
-          <button key={size} onClick={onAdd} type="button">
+          <button key={size} onClick={() => onAdd(size)} type="button">
             {size}
           </button>
         ))}

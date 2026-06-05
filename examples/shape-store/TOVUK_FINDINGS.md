@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://hello-service.tovuk.app
-- Latest verified deploy: `deploy_45`, `job_46`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_53`, `job_54`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -26,6 +26,9 @@ Date: 2026-06-05
   interaction more closely: product clicks keep the URL at `/`, transition into
   a full-screen product rail with adjacent products offscreen, and the `+`
   opens the inline size selector in place.
+- Updated the ecommerce example cart flow to match the same reference more
+  closely: selecting size `9` adds `YS-02` at `$50`, keeps the product overlay
+  open, and the bag opens a full-screen `YZY WALLET`-style order summary.
 
 ## What I built
 
@@ -43,7 +46,7 @@ Date: 2026-06-05
   - name-only product grid
   - full-page Yeezy-like product detail state with back control, bag icon,
     carousel dots, price, plus button, and inline size selector
-  - cart drawer
+  - full-screen wallet/order-summary cart overlay
   - quantity controls
   - checkout form
   - order receipt
@@ -74,10 +77,15 @@ Production deploy and API checks:
 - `npx -y tovuk@latest deploy . --wait --wait-timeout 600`: passed
 - Latest `npx -y tovuk@latest deploy . --wait --wait-timeout 600`: passed
   for `deploy_45` / `job_46`, using public CLI `0.1.93`.
+- Latest local CLI deploy passed for `deploy_53` / `job_54`, using local
+  Tovuk CLI `0.1.95`.
 - `curl https://hello-service.tovuk.app/api/healthz`: returned `{"ok":true}`
 - `curl https://hello-service.tovuk.app/api/products`: returned 50 products
 - `curl -X POST https://hello-service.tovuk.app/api/orders ...`: returned an order receipt
 - Latest deploy logs show `Checks passed`, Vite build output, and `Deploy promoted.`
+  Production `https://shape-store.tovuk.app/api/healthz` returned `{"ok":true}`,
+  and `https://shape-store.tovuk.app/api/products` returned 50 products with
+  `YS-02` priced at `5000` cents.
 
 Browser and UX checks:
 
@@ -95,13 +103,19 @@ Browser and UX checks:
   Tovuk CLI status output.
 - Confirmed production grid, product detail, size picker, cart, and receipt
   states through Browser or Playwright fallback.
-- Latest local Browser check on `http://127.0.0.1:5174/` confirmed:
+- Latest local Browser check on `http://127.0.0.1:5175/` with
+  `VITE_API_URL=http://127.0.0.1:3001/api` confirmed:
   - home grid uses the Yeezy-like sparse category/product layout
   - product click keeps the URL at `/`
   - focused product view shows back, bag, large black shape, carousel dots,
     product code, price, and plus
   - plus opens the Yeezy-like `? / SELECT SIZE / X` size selector with sizes
     `4` through `16`
+  - selecting size `9` increments the bag count while staying in the product
+    detail state
+  - bag opens a full-screen order summary with `YZY WALLET`, product thumbnail,
+    size, quantity controls, `$50` subtotal/total, `YZY CODE`, and express
+    checkout buttons
   - no horizontal overflow at `429px` viewport width
 - Confirmed responsive Browser screenshots at:
   - mobile `390x844`
@@ -116,6 +130,12 @@ Browser and UX checks:
   - `3` columns at `390x844`
   - `6` columns at `768x1024` and `1280x800`
   - no `API FALLBACK`
+- Confirmed production Browser flow on `deploy_53`:
+  - product detail shows `YS-02` at `$50`
+  - selecting size `9` increments the bag count to `1`
+  - cart opens as a full-screen `YZY WALLET` order summary
+  - cart subtotal and total are `$50`
+  - no horizontal overflow at `429px`
 - Confirmed mobile viewport at `390x844`:
   - `50` product tiles
   - `3` columns
@@ -1223,6 +1243,63 @@ Product recommendation:
 - `tovuk check` should continue treating dependency installation as part of the
   preflight, not as hidden prerequisite knowledge.
 
+### 35. Artifact-size dry-runs need an explicit build mode
+
+Finding:
+
+- Ordinary dry-run is correctly read-only, but after adding Stripe dependencies
+  agents needed a way to validate worker compressed size before creating a
+  production build.
+
+Fix included in Tovuk CLI 0.1.95:
+
+- Added `tovuk deploy --dry-run --build-artifact`.
+- The command runs the configured local Rust worker release build without
+  upload or promotion.
+- It reports `artifactCheck.compressedBytes` and compares it with
+  `limits.workerCompressedSizeMib`.
+
+Verification:
+
+- Ran `cargo run --manifest-path ../../crates/tovuk/Cargo.toml -- deploy
+  --dry-run --build-artifact --json` from the public `examples/shape-store`.
+- `artifactCheck.compressedBytes` was `935395` and the free-plan limit was
+  `3145728`.
+- The command returned `deployBehavior: local_build_no_upload_no_remote_build`
+  and `ok: true`.
+
+Caveat:
+
+- This is a local-platform artifact check. The production Linux build remains
+  authoritative, but this catches size risk earlier and gives agents a concrete
+  remediation path.
+
+### 36. `tovuk dev --json` needed port ownership status
+
+Failure/friction:
+
+- I opened `http://127.0.0.1:5173/` expecting the shape-store frontend, but an
+  existing Tovuk app was already serving that port.
+- `tovuk dev --json` showed the planned URLs and commands, but did not say
+  whether those URLs were already occupied.
+
+Fix included in Tovuk CLI 0.1.95:
+
+- Added `dev.port_statuses` to the JSON dev plan.
+- Each planned worker/frontend URL now reports `available`, `host`, `port`,
+  `url`, and an `agent_instruction` when the port is already in use.
+- The top-level `agent_instruction` warns agents to inspect
+  `dev.port_statuses` before running `tovuk dev --output text`.
+
+Verification:
+
+- With local ports `3000` and `5173` occupied, `cargo run --manifest-path
+  ../../crates/tovuk/Cargo.toml -- dev --json` reported both planned ports as
+  unavailable.
+- Added `port_status_reports_occupied_port` unit coverage.
+- `cargo test --manifest-path crates/tovuk/Cargo.toml --locked --all-targets
+  --all-features` passed with 54 tests.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -1238,8 +1315,6 @@ Product recommendation:
   reserve `service show --json` for full inspection.
 - `tovuk check --json` still prints both `run.health: /healthz` and `worker.health: /api/healthz` in config output for this fullstack app. It is harmless here, but confusing for agents deciding which health path matters.
 - Browser login failures surface as browser console errors before they become Tovuk-branded user guidance.
-- Local dev workflows need stronger port ownership checks. A successful page
-  load is not enough when another Tovuk app is already serving the same port.
 - npm audit warnings from framework dependency trees are noisy for template users. Tovuk should decide whether template checks should surface audit guidance separately from source/lint/build checks.
 
 ## AI agent usability
@@ -1267,6 +1342,9 @@ Hard:
 - Product detail now mirrors the current Yeezy flow more closely: the route
   does not change, the selected product is shown in a full-screen rail, and the
   inline size selector replaces the plus controls without showing the footer.
+- Cart now mirrors the current Yeezy flow more closely: size selection adds to
+  the bag without leaving product detail, and the bag opens a full-screen
+  wallet/order-summary checkout overlay.
 - Cart, quantity, and checkout flows work from the deployed site.
 - I fixed the mobile cart trigger alignment after visual inspection.
 - No demo label/bar is present.

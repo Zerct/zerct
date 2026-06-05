@@ -2,7 +2,7 @@ import productCatalogJson from "./catalog.json";
 
 export const categoryTabs = ["NEW", "MENS", "WOMENS", "FOOTWEAR", "ACCESSORIES", "SLIDES"] as const;
 export const productSizes = ["4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"] as const;
-export const shippingCents = 900;
+export const shippingCents = 0;
 export const freeShippingThresholdCents = 20000;
 
 const apiBaseUrl = import.meta.env.VITE_API_URL ?? "/api";
@@ -33,6 +33,7 @@ export type Product = {
 export type CartLine = {
   product: Product;
   quantity: number;
+  selectedSize?: string;
 };
 
 export type CheckoutFields = {

@@ -44,15 +44,15 @@ description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
   <Step title="Deploy and inspect the Service">
     ```sh
     tovuk deploy --wait --json
-    tovuk service status <service> --json
     tovuk service show <service> --json
+    tovuk service status <service> --json
     tovuk logs --build job_1 --json
     ```
 
-    Inspect compact service status before reaching for logs. Preserve the
-    returned deploy and build ids. Use the full Service snapshot when resource,
-    billing, env, or domain context is needed. If the build fails, fix the
-    first actionable log line, rerun checks, and redeploy.
+    Inspect the full Service snapshot before reaching for logs. Preserve the
+    returned deploy and build ids. Use compact service status when only live,
+    deploy, build, and URL state is needed. If the build fails, fix the first
+    actionable log line, rerun checks, and redeploy.
   </Step>
 </Steps>
 
@@ -66,8 +66,8 @@ tovuk check --json
 tovuk account show --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
-tovuk service status <service> --json
 tovuk service show <service> --json
+tovuk service status <service> --json
 ```
 
 `tovuk` is the live unscoped npm package. It installs a native binary for the
@@ -93,6 +93,13 @@ disabled capabilities, quality checks, capability meters, limits, and
 quality check, and `meterPlan` entries for enabled service meters with meter
 units, pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
 commands with `--notify-at-percent`.
+After adding or upgrading Rust dependencies, run
+`tovuk deploy --dry-run --build-artifact --json`; it performs the local release
+build without uploading or promoting, then reports
+`artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
+`tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
+and `dev.port_statuses` without starting processes so agents can avoid opening
+a different app already serving the planned port.
 
 The agent repair loop is the same on every package surface:
 
@@ -100,7 +107,7 @@ The agent repair loop is the same on every package surface:
 tovuk check --json
 tovuk account show --json
 tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
-tovuk deploy --dry-run --json
+tovuk deploy --dry-run --build-artifact --json
 tovuk deploy --wait --json
 tovuk service show service_1 --json
 tovuk deploy list --json

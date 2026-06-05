@@ -208,7 +208,7 @@ code. Main meters: any supported meter from `tovuk pricing --json`.
 - Use service bindings for private worker-to-worker calls instead of exposing
   internal APIs publicly. Keep call chains under 32 worker invocations per
   top-level request.
-- Use `tovuk env set` for server-only secrets and never commit `.env` files.
+- Use `tovuk secrets set` for server-only secrets and never commit `.env` files.
 - Use `tovuk domains add` and the returned DNS record for custom domains.
 - Use `tovuk logs --json` for repair loops and support-ticket evidence.
 - Set hard usage caps before high-throughput work:
