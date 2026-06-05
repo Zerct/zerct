@@ -24,7 +24,7 @@ Resource references:
 - `docs/reference/project-contract.mdx`: tovuk.toml required files, kind and capabilities, build commands, and Rust/static runtime policy.
 - `docs/reference/workers.mdx`: Rust Worker HTTP/API routing, runtime events, WebSocket upgrades, and frontend policy.
 - `docs/reference/resources.mdx`: Service Resources workflow, CLI/API/dashboard parity, resource routes, and runtime bindings.
-- `docs/reference/sqlite.mdx`: managed SQLite commands, limits, and backups.
+- `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
 - `docs/reference/state.mdx`: State account setup, Service context, keyed objects, storage, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
 - `docs/reference/queues.mdx`: queue account setup, Service context, producers, consumers, retries, and dead letters.
@@ -220,6 +220,8 @@ tovuk logs --build <build_id> --json
 tovuk logs --service <service> --json
 tovuk env list --service <service> --json
 tovuk domains list --service <service> --json
+tovuk account show --json
+tovuk service show <service> --json
 tovuk sqlite create --service <service> DB --json
 tovuk sqlite query --service <service> DB "select 1" --json
 tovuk sqlite backup create --service <service> DB --json
