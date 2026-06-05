@@ -23,7 +23,7 @@ Resource references:
 
 - `docs/reference/project-contract.mdx`: tovuk.toml required files, kind and capabilities, build commands, and Rust/static runtime policy.
 - `docs/reference/workers.mdx`: Rust Worker HTTP/API routing, runtime events, WebSocket upgrades, and frontend policy.
-- `docs/reference/resources.mdx`: Service Resources workflow, CLI/API/dashboard parity, resource routes, and runtime bindings.
+- `docs/reference/resources.mdx`: Service Resources account setup, CLI/API/dashboard parity, resource routes, and runtime bindings.
 - `docs/reference/sqlite.mdx`: SQLite account setup, Service context, commands, limits, backups, and query metrics.
 - `docs/reference/state.mdx`: State account setup, Service context, keyed objects, storage, and alarms.
 - `docs/reference/kv.mdx`: KV account setup, Service context, commands, API routes, meters, and limits.
@@ -213,6 +213,7 @@ tovuk pricing --json
 tovuk deploy --dry-run --json
 curl https://api.tovuk.com/v1/status
 tovuk usage --json
+tovuk account show --json
 tovuk service list --json
 tovuk service show <service> --json
 tovuk service delete <service> --json
