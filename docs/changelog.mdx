@@ -113,9 +113,10 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
 ### Updates
 
 - **Compact service status.** `tovuk service status <service> --json` returns
-  the runtime status, latest deploy, latest build, URL, and `live` boolean for
-  quick post-deploy checks. Use `service show` when agents need the full
-  resource, usage, billing, log, env, and domain snapshot.
+  top-level `ok`, `url`, and `agent_instruction` fields, plus runtime status,
+  latest deploy, latest build, URL, and `live` boolean for quick post-deploy
+  checks. Use `service show` when agents need the full resource, usage,
+  billing, log, env, and domain snapshot.
 - **Explicit service capabilities.** `tovuk.toml` now uses a required
   `[capabilities]` table so agents can see enabled and disabled service
   surfaces before deploy. See [tovuk.toml](/reference/project-contract).
@@ -127,8 +128,12 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
   when an upgrade is needed. See
   [Deployment Limits and Guardrails](/reference/limits).
 - **Actionable check feedback.** `tovuk check` now returns a concrete
-  `agent_instruction` for every failed check so agents can repair issues in
-  one workflow. See the [AI agent deploy workflow](/agents#deploy-workflow).
+  `agent_instruction` for every failed check and `checks[].status` in JSON so
+  agents can filter failures directly. See the
+  [AI agent deploy workflow](/agents#deploy-workflow).
+- **Frontend checks install dev dependencies.** Generated npm frontend check
+  commands now use `npm ci --include=dev` so TypeScript checks keep dev-only
+  type packages even when the environment is production-biased.
 - **Improved workspace check UX.** Faster checks and clearer output for
   full-stack workspaces. See the [AI agent deploy workflow](/agents#deploy-workflow).
 - **Inline CLI flag values.** Flags now accept inline values

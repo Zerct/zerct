@@ -11,7 +11,8 @@ Use this page when an AI coding agent is deploying with Tovuk.
 <Steps>
   <Step title="Check and fix the first failure">
     Run `tovuk check --json`. If it fails, fix the first failed check by
-    following `agent_instruction`, then run `tovuk check --json` again.
+    filtering `checks[]` for `status == "failed"` and following
+    `agent_instruction`, then run `tovuk check --json` again.
   </Step>
 
   <Step title="Confirm account setup">
@@ -34,8 +35,9 @@ Use this page when an AI coding agent is deploying with Tovuk.
   <Step title="Deploy and recover context">
     Run `tovuk deploy --wait --json`, then inspect the Service snapshot with
     `tovuk service show <service> --json`. Use
-    `tovuk service status <service> --json` when only compact live, deploy,
-    build, and URL state is needed. Inspect deploy history with
+    `tovuk service status <service> --json` when only top-level `ok`, `url`,
+    `agent_instruction`, live, deploy, build, and URL state is needed. Inspect
+    deploy history with
     `tovuk deploy list --json` or
     `tovuk deploy show <deploy_id> --json` when needed. If a newer deploy
     supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
@@ -113,7 +115,8 @@ Object Storage, KV, Queues, Cron, State, Service Bindings, Secrets, and Custom D
 <Prompt description="Run the full Tovuk agent deploy workflow." actions={["copy"]}>
 Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
 Run `tovuk check --json`. Fix the first failed check by following
-`agent_instruction`, then rerun check. Run `tovuk account show --json` and use
+`checks[] | select(.status == "failed") | .agent_instruction`, then rerun
+check. Run `tovuk account show --json` and use
 `tovuk account update --handle <handle> --display-name <name> --json` if setup
 is incomplete. Run `tovuk deploy --dry-run --json` and review warnings,
 capabilities, `missingConfig`, `requiredFixes`, meters, `meterPlan`, limits,

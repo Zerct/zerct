@@ -100,6 +100,7 @@ Usage:
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
+  - Use tovuk check --json before deploy; filter failed checks with checks[].status == "failed" and follow agent_instruction.
   - Use tovuk dev --json to inspect local worker/frontend commands, ports, port_statuses, and env wiring without starting processes; use tovuk dev --output text to run them.
   - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
   - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
@@ -119,7 +120,7 @@ Agent contract:
   - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
   - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
   - Use tovuk account show/activity/update --json for account setup and account-wide recovery without dashboard-only steps.
-  - Use tovuk service status <service> --json for the compact "is my deploy live?" answer: runtime status, latest deploy, latest build, URL, and live boolean.
+  - Use tovuk service status <service> --json for the compact "is my deploy live?" answer: ok, url, agent_instruction, runtime status, latest deploy, latest build, and live boolean.
   - Use tovuk service show <service> --json as the full service inspection command for capabilities, deploys, builds, logs, env names, domains, resources, accountUsage, billingEstimate, limits, pricing, usage caps, and next actions.
   - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
   - Delete unused test services with tovuk service delete <service> --json after smoke tests.

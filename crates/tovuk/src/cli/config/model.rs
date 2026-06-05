@@ -222,7 +222,7 @@ mod tests {
             frontend: FrontendConfig {
                 root: Some("web".to_owned()),
                 check: Some(
-                    "npm ci --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
+                    "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm run typecheck && npm run lint"
                         .to_owned(),
                 ),
                 build: Some("npm run build".to_owned()),

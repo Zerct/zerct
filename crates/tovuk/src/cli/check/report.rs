@@ -1,13 +1,28 @@
 use crate::cli::config::TovukConfig;
-use serde::Serialize;
+use serde::{Serialize, ser::SerializeStruct};
 use std::path::Path;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug)]
 pub(crate) struct QualityCheck {
     pub(crate) name: String,
     pub(crate) ok: bool,
     pub(crate) message: String,
     pub(crate) agent_instruction: Option<String>,
+}
+
+impl Serialize for QualityCheck {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("QualityCheck", 5)?;
+        state.serialize_field("name", &self.name)?;
+        state.serialize_field("ok", &self.ok)?;
+        state.serialize_field("status", quality_check_status(self.ok))?;
+        state.serialize_field("message", &self.message)?;
+        state.serialize_field("agent_instruction", &self.agent_instruction)?;
+        state.end()
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -117,5 +132,35 @@ pub(crate) fn quality_check(
         } else {
             Some(instruction.to_owned())
         },
+    }
+}
+
+fn quality_check_status(ok: bool) -> &'static str {
+    if ok { "passed" } else { "failed" }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::QualityCheck;
+
+    #[test]
+    fn quality_check_json_includes_status() -> Result<(), Box<dyn std::error::Error>> {
+        let value = serde_json::to_value(QualityCheck {
+            name: "npm run typecheck".to_owned(),
+            ok: false,
+            message: "missing types".to_owned(),
+            agent_instruction: Some("Run npm install, then retry.".to_owned()),
+        })?;
+
+        if value["ok"] != false {
+            return Err(format!("unexpected ok value: {}", value["ok"]).into());
+        }
+        if value["status"] != "failed" {
+            return Err(format!("unexpected status: {}", value["status"]).into());
+        }
+        if value["name"] != "npm run typecheck" {
+            return Err(format!("unexpected name: {}", value["name"]).into());
+        }
+        Ok(())
     }
 }

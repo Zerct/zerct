@@ -50,9 +50,10 @@ description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
     ```
 
     Inspect the full Service snapshot before reaching for logs. Preserve the
-    returned deploy and build ids. Use compact service status when only live,
-    deploy, build, and URL state is needed. If the build fails, fix the first
-    actionable log line, rerun checks, and redeploy.
+    returned deploy and build ids. Use compact service status when only
+    top-level `ok`, `url`, `agent_instruction`, live, deploy, build, and URL
+    state is needed. If the build fails, fix the first actionable log line,
+    rerun checks, and redeploy.
   </Step>
 </Steps>
 
