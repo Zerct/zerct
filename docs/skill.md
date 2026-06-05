@@ -53,6 +53,7 @@ tovuk account show --json
 tovuk account update --handle <handle> --display-name <name> --json
 tovuk deploy --dry-run --json
 tovuk deploy --wait --json
+tovuk service show <service> --json
 tovuk deploy list --json
 tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json
