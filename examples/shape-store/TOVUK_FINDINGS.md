@@ -2055,6 +2055,33 @@ Verification:
   - desktop `1440x900`
 - Production Browser console logs were clean for the checkout receipt flow.
 
+### 50. Package README edits triggered public release workflows
+
+Failure/friction:
+
+- A README-only public-contract wording fix touched the Cargo, npm, and Python
+  package READMEs.
+- The publish workflows treated those README edits as CLI release changes and
+  failed because `0.1.99` already existed on npm, PyPI, and GitHub Releases.
+- That creates avoidable red checks for documentation-only edits and makes
+  agents think a version bump is required when no package artifact changed.
+
+Fix included in this pass:
+
+- Narrowed npm, PyPI, and native-binary publish workflow path filters from
+  broad `crates/tovuk/**` package docs paths to actual release inputs:
+  manifests, lockfiles, package entrypoints, installer files, and CLI source.
+- README-only package docs changes still go through CI, but no longer start a
+  release job that cannot publish an already-existing version.
+
+Verification:
+
+- `scripts/check-github-actions.sh` passed locally.
+- `go run github.com/rhysd/actionlint/cmd/actionlint@latest -color` passed
+  locally.
+- `go run scripts/check-public-contracts/*.go cli-contract` passed locally
+  after the README wording fix.
+
 ## Remaining Tovuk friction
 
 ### High
