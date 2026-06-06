@@ -20,6 +20,10 @@ type CartLineActions = {
 export type CartState = ReturnType<typeof useCart>;
 export type CheckoutState = ReturnType<typeof useCheckout>;
 
+export function formatCartItemCount(totalItems: number) {
+  return `${totalItems} ${totalItems === 1 ? "item" : "items"}`;
+}
+
 export function CartDrawer({
   cart,
   checkout,
@@ -101,7 +105,7 @@ function CartTop({ onClose, totalItems }: { onClose: () => void; totalItems: num
       <button aria-label="Back to products" className="back-trigger" onClick={onClose} type="button">
         <span aria-hidden="true" />
       </button>
-      <div className="checkout-bag" aria-label={`Cart has ${totalItems} items`}>
+      <div className="checkout-bag" aria-label={`Cart has ${formatCartItemCount(totalItems)}`}>
         <span>SHOPPING BAG</span>
         <span>{totalItems}</span>
         <span aria-hidden="true" className="cart-icon" />

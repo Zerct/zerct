@@ -35,6 +35,10 @@ check = "npm ci --include=dev --prefer-offline --no-audit --fund=false && npm ru
 build = "npm run build"
 output = "dist"
 
+[dev]
+worker_port = 3001
+frontend_port = 5174
+
 [resources]
 memory = "128mb"
 cpu = "1"

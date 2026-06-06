@@ -80,6 +80,11 @@ description: "Track dated Tovuk product changes, fixes, and release notes."
   `--worker-port <port>` and `--frontend-port <port>`, so agents can keep one
   Tovuk-managed local dev command instead of copying manual fallback commands
   when a default port is already occupied. See [Packages](/reference/packages).
+- **Local dev ports can live in config.** Projects can now set
+  `[dev].worker_port` and `[dev].frontend_port` in `tovuk.toml` for stable
+  local URLs. CLI port flags still override config for one run, and deploy
+  requests/source archives omit `[dev]` because it is local-only. See
+  [Packages](/reference/packages).
 - **Homebrew install guidance.** Install instructions now show the correct
   tap and formula path. See [Packages](/reference/packages).
 - **Object storage meters in deploy dry run.** Object storage usage meters

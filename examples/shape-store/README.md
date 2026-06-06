@@ -15,13 +15,26 @@ Inspect the local plan first:
 npx -y tovuk@latest dev --json
 ```
 
+This project pins stable local ports in `tovuk.toml`:
+
+```toml
+[dev]
+worker_port = 3001
+frontend_port = 5174
+```
+
 If the planned ports are available, start both local processes:
 
 ```sh
 npx -y tovuk@latest dev --output text
 ```
 
-If another local app already owns those ports, start the Rust API on a free port:
+Use `--worker-port <port>` or `--frontend-port <port>` for a one-run override
+when another local app already owns the configured ports.
+Tovuk strips `[dev]` from deploy payloads and source archives, so these local
+ports do not affect production.
+
+Manual fallback: start the Rust API on a free port:
 
 ```sh
 PORT=3001 cargo run --manifest-path api/Cargo.toml

@@ -9,6 +9,8 @@ pub(crate) struct TovukConfig {
     pub(crate) capabilities: CapabilitiesConfig,
     pub(crate) build: BuildConfig,
     pub(crate) run: RunConfig,
+    #[serde(skip_serializing_if = "DevConfig::is_empty")]
+    pub(crate) dev: DevConfig,
     pub(crate) frontend: FrontendConfig,
     #[serde(rename = "worker")]
     pub(crate) backend: BackendConfig,
@@ -167,6 +169,20 @@ pub(crate) struct RunConfig {
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
+pub(crate) struct DevConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) worker_port: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) frontend_port: Option<u16>,
+}
+
+impl DevConfig {
+    pub(crate) fn is_empty(&self) -> bool {
+        self.worker_port.is_none() && self.frontend_port.is_none()
+    }
+}
+
+#[derive(Clone, Debug, Default, Serialize)]
 pub(crate) struct FrontendConfig {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) root: Option<String>,
@@ -200,7 +216,8 @@ mod tests {
 
     use super::{
         super::super::{project_kind::ProjectKind, resource_config::ResourceConfig},
-        BackendConfig, BuildConfig, CapabilitiesConfig, FrontendConfig, RunConfig, TovukConfig,
+        BackendConfig, BuildConfig, CapabilitiesConfig, DevConfig, FrontendConfig, RunConfig,
+        TovukConfig,
     };
 
     #[test]
@@ -219,6 +236,7 @@ mod tests {
                 port: 3000,
                 health: "/healthz".to_owned(),
             },
+            dev: DevConfig::default(),
             frontend: FrontendConfig {
                 root: Some("web".to_owned()),
                 check: Some(
@@ -248,5 +266,6 @@ mod tests {
 
         assert_eq!(value["worker"]["root"], json!("api"));
         assert_eq!(value.get("backend"), None);
+        assert_eq!(value.get("dev"), None);
     }
 }

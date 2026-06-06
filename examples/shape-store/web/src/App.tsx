@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CartDrawer, useCart, useCheckout, type CartState, type CheckoutState } from "./cart";
+import { CartDrawer, formatCartItemCount, useCart, useCheckout, type CartState, type CheckoutState } from "./cart";
 import { ProductGrid } from "./products";
 import {
   categoryTabs,
@@ -135,7 +135,12 @@ function SiteHeader({
         onCategorySelect={onCategorySelect}
         selectedCategory={selectedCategory}
       />
-      <button aria-label={`Open cart with ${totalItems} items`} className="cart-trigger" onClick={onCartOpen} type="button">
+      <button
+        aria-label={`Open cart with ${formatCartItemCount(totalItems)}`}
+        className="cart-trigger"
+        onClick={onCartOpen}
+        type="button"
+      >
         <span aria-hidden="true" className="cart-icon" />
         <span className="cart-count" key={totalItems}>
           {totalItems}

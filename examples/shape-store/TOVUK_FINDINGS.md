@@ -38,6 +38,14 @@ Date: 2026-06-05
 - Prepared Tovuk CLI `0.1.101` during this pass so `tovuk dev` can reroute
   local full-stack development with `--worker-port` and `--frontend-port` when
   default ports are occupied.
+- Prepared Tovuk CLI `0.1.102` during this pass so projects can set stable
+  local dev ports in `[dev]` while keeping command-line port flags as one-run
+  overrides. Deploy requests and source archives strip `[dev]`, so local
+  preferences do not leak into production deploy contracts.
+- Pushed the engine compatibility commit for `[dev]`, but production engine
+  deployment was blocked because the workstation was on tailnet
+  `xquik-dev.org.github` instead of `tovuk.org.github`; the public CLI now
+  avoids depending on that rollout by treating `[dev]` as local-only.
 - Patched and deployed the Tovuk engine router wake path so sleeping fullstack services can wake instead of returning the platform `503` routing fallback.
 - Updated the ecommerce example product flow to match the current Yeezy
   interaction more closely: product clicks keep the URL at `/`, transition into
@@ -2245,6 +2253,39 @@ Verification:
     overflow and no forbidden provider/branded copy.
   - production Browser console logs were clean for the smoke flow.
 
+### 53. `[dev]` needed to be local-only for deploy compatibility
+
+Failure/friction:
+
+- Stable local ports belong in project config, not in repeated agent memory.
+  Cloudflare Wrangler documents local-development settings under `[dev]`,
+  including `port`, and notes that many `wrangler dev` options can be set in
+  the Wrangler config file.
+- Tovuk production also parses `tovuk.toml` from the uploaded source archive.
+  If `[dev]` leaked into deploy payloads or archives before every production
+  engine had the parser update, deploys would fail even though `[dev]` is only
+  a local preference.
+
+Fix included in Tovuk CLI `0.1.102` and this example:
+
+- Added `[dev].worker_port` and `[dev].frontend_port` to `tovuk.toml`.
+- `tovuk dev` reads those ports, and one-run `--worker-port` /
+  `--frontend-port` flags override config.
+- `tovuk deploy` strips `dev` from the JSON config sent to the API.
+- The source archive rewrites only `tovuk.toml` to remove `[dev]` before
+  upload, so current production remains compatible and local-only preferences
+  do not become part of the deploy contract.
+
+Verification:
+
+- Deploy tests prove both the JSON deploy config and uploaded source archive
+  omit `dev` when local config includes it.
+- `cargo run --manifest-path crates/tovuk/Cargo.toml -- dev
+  examples/shape-store --json` uses `worker_port = 3001` and
+  `frontend_port = 5174` from the example config.
+- `cargo run --manifest-path crates/tovuk/Cargo.toml -- check
+  examples/shape-store --json` still surfaces `[dev]` locally for agents.
+
 ## Remaining Tovuk friction
 
 ### High
@@ -2258,6 +2299,10 @@ Verification:
 - The new `tovuk service status <service> --json` covers compact live checks,
   but agent docs should consistently prefer it for post-deploy smoke tests and
   reserve `service show --json` for full inspection.
+- Repeating `--worker-port` and `--frontend-port` on every local dev command is
+  friction for users and a state-retention bug source for agents. The better
+  default is persistent project-local `[dev]` ports, with flags reserved for
+  one-off overrides when a port is temporarily busy.
 - `tovuk check --json` still prints both `run.health: /healthz` and `worker.health: /api/healthz` in config output for this fullstack app. It is harmless here, but confusing for agents deciding which health path matters.
 - Browser login failures surface as browser console errors before they become Tovuk-branded user guidance.
 - npm audit warnings from framework dependency trees are noisy for template users. Tovuk should decide whether template checks should surface audit guidance separately from source/lint/build checks.

@@ -67,6 +67,9 @@ Before opening a local dev URL, inspect `tovuk dev --json`. If it returns
 `ok: false`, read `dev.port_statuses[].owner`, stop the process using the
 planned port or rerun with `--worker-port <port>` / `--frontend-port <port>`;
 do not smoke-test a stale worker.
+For stable local ports, set `[dev].worker_port` and `[dev].frontend_port` in
+`tovuk.toml`; command-line port flags are one-run overrides. `[dev]` is
+local-only and is omitted from deploy requests and source archives.
 
 After adding or upgrading Rust dependencies, run
 `tovuk deploy --dry-run --build-artifact --json` before the wait deploy to

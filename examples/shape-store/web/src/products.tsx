@@ -425,7 +425,7 @@ function SizePicker({
       <ProductPriceStatus detailCopy={detailCopy} product={product} />
       <div className="size-grid">
         {productSizes.map((size) => (
-          <button key={size} onClick={() => onAdd(size)} type="button">
+          <button aria-label={`Add ${product.name} size ${size} to bag`} key={size} onClick={() => onAdd(size)} type="button">
             {size}
           </button>
         ))}
