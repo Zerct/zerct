@@ -8,8 +8,8 @@ use super::{
         toml_values::{get_bool, get_section, get_string, get_u16, reject_unknown_section_keys},
     },
     model::{
-        BackendConfig, BuildConfig, CapabilitiesConfig, CapabilityToggle, FrontendConfig,
-        RunConfig, TovukConfig,
+        BackendConfig, BuildConfig, CapabilitiesConfig, CapabilityToggle, DevConfig,
+        FrontendConfig, RunConfig, TovukConfig,
     },
 };
 use std::path::Path;
@@ -26,6 +26,7 @@ pub(crate) fn parse_tovuk_toml(
     let capabilities_table = get_required_section(&table, "capabilities")?;
     let build_table = get_section(&table, "build")?;
     let run_table = get_section(&table, "run")?;
+    let dev_table = get_section(&table, "dev")?;
     let frontend_table = get_section(&table, "frontend")?;
     let backend_table = get_section(&table, "worker")?;
     let resources_table = get_section(&table, "resources")?;
@@ -33,6 +34,7 @@ pub(crate) fn parse_tovuk_toml(
         &capabilities_table,
         &build_table,
         &run_table,
+        &dev_table,
         &frontend_table,
         &backend_table,
         &resources_table,
@@ -43,6 +45,7 @@ pub(crate) fn parse_tovuk_toml(
         capabilities: parse_capabilities_config(&capabilities_table)?,
         build: parse_build_config(&build_table, kind, project_dir)?,
         run: parse_run_config(&run_table)?,
+        dev: parse_dev_config(&dev_table)?,
         frontend: parse_frontend_config(&frontend_table, kind, project_dir)?,
         backend: parse_backend_config(&backend_table, kind)?,
         resources: parse_resource_config(&resources_table)?,
@@ -72,6 +75,7 @@ fn reject_unknown_config_sections(
     capabilities: &toml::Table,
     build: &toml::Table,
     run: &toml::Table,
+    dev: &toml::Table,
     frontend: &toml::Table,
     backend: &toml::Table,
     resources: &toml::Table,
@@ -79,6 +83,7 @@ fn reject_unknown_config_sections(
     reject_unknown_section_keys(capabilities, "capabilities", &CapabilitiesConfig::KEYS)?;
     reject_unknown_section_keys(build, "build", &["command", "check", "output"])?;
     reject_unknown_section_keys(run, "run", &["command", "port", "health"])?;
+    reject_unknown_section_keys(dev, "dev", &["worker_port", "frontend_port"])?;
     reject_unknown_section_keys(frontend, "frontend", &["root", "check", "build", "output"])?;
     reject_unknown_section_keys(
         backend,
@@ -150,6 +155,13 @@ fn parse_run_config(table: &toml::Table) -> std::result::Result<RunConfig, Strin
     })
 }
 
+fn parse_dev_config(table: &toml::Table) -> std::result::Result<DevConfig, String> {
+    Ok(DevConfig {
+        worker_port: get_u16(table, "worker_port")?,
+        frontend_port: get_u16(table, "frontend_port")?,
+    })
+}
+
 fn parse_frontend_config(
     table: &toml::Table,
     kind: ProjectKind,
@@ -204,6 +216,7 @@ fn reject_unknown_root_keys(
         "capabilities",
         "build",
         "run",
+        "dev",
         "frontend",
         "worker",
         "resources",

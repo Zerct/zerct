@@ -21,6 +21,7 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
         return Err("name must be lowercase DNS-safe text up to 48 characters".to_owned());
     }
     validate_capabilities_config(config)?;
+    validate_dev_config(config)?;
     if config.kind.is_fullstack() {
         validate_fullstack_config(config)?;
     } else {
@@ -30,6 +31,16 @@ pub(crate) fn validate_config(config: &TovukConfig) -> std::result::Result<(), S
         } else {
             validate_rust_worker_config(config)?;
         }
+    }
+    Ok(())
+}
+
+fn validate_dev_config(config: &TovukConfig) -> std::result::Result<(), String> {
+    if let Some(port) = config.dev.worker_port {
+        validate_port(port, "[dev].worker_port")?;
+    }
+    if let Some(port) = config.dev.frontend_port {
+        validate_port(port, "[dev].frontend_port")?;
     }
     Ok(())
 }

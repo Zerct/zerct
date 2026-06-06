@@ -12,6 +12,7 @@ use super::{
     args::CliOptions,
     auth::read_or_login_token,
     check::run_check,
+    config::TovukConfig,
     errors::{Result, agent_error, print_json},
     project::{encode_component, nested_string},
 };
@@ -197,12 +198,32 @@ fn deploy_project(project_dir: &Path, cli: &CliOptions, token: &str) -> Result<V
             cli.output.json,
         ));
     }
+    let config = report
+        .config
+        .as_ref()
+        .map(|config| deploy_config_value(config, cli.output.json))
+        .transpose()?;
     let body = json!({
-        "config": report.config,
+        "config": config,
         "commit_sha": git_commit_sha(project_dir),
         "source_archive_base64": create_archive_base64(project_dir, cli.output.json)?,
     });
     api_request(cli, Method::POST, "/v1/deploy", Some(token), Some(body))
+}
+
+fn deploy_config_value(config: &TovukConfig, json_output: bool) -> Result<Value> {
+    let mut value = serde_json::to_value(config).map_err(|error| {
+        agent_error(
+            "config_serialization_failed",
+            "Could not serialize tovuk.toml.",
+            format!("Fix tovuk.toml, then retry deploy: {error}"),
+            json_output,
+        )
+    })?;
+    if let Value::Object(fields) = &mut value {
+        fields.remove("dev");
+    }
+    Ok(value)
 }
 
 fn git_commit_sha(project_dir: &Path) -> Option<String> {
@@ -241,10 +262,14 @@ fn git_porcelain_is_clean(stdout: &[u8]) -> bool {
 #[cfg(test)]
 mod tests {
     use super::{
-        deploy_cancel_route, deploy_id_arg, deploy_list_route, deploy_show_route,
-        git_porcelain_is_clean,
+        deploy_cancel_route, deploy_config_value, deploy_id_arg, deploy_list_route,
+        deploy_show_route, git_porcelain_is_clean,
     };
-    use crate::cli::args::CliOptions;
+    use crate::cli::{
+        args::CliOptions,
+        config::{parse_tovuk_toml, validate_config},
+    };
+    use std::path::Path;
 
     #[test]
     fn deploy_show_and_cancel_use_target_routes() {
@@ -313,5 +338,49 @@ mod tests {
         assert!(!git_porcelain_is_clean(
             b"?? examples/shape-store/web/dist/\n"
         ));
+    }
+
+    #[test]
+    fn deploy_config_value_strips_local_dev_config() -> Result<(), Box<dyn std::error::Error>> {
+        let source = r#"
+name = "demo"
+
+[capabilities]
+static_frontend = false
+worker = true
+sqlite = false
+object_storage = false
+kv = false
+state = false
+queue = false
+cron = false
+service_bindings = false
+secrets = false
+custom_domains = false
+logs = true
+builds = true
+usage_caps = true
+billing = true
+support = true
+abuse = true
+
+[run]
+command = "./target/release/demo"
+
+[dev]
+worker_port = 3001
+"#;
+        let config = parse_tovuk_toml(source, Path::new("."))?;
+        validate_config(&config)?;
+
+        let value = deploy_config_value(&config, true)?;
+
+        if value.get("dev").is_some() {
+            return Err(format!("deploy config should not include dev: {value}").into());
+        }
+        if value["name"] != "demo" {
+            return Err(format!("unexpected deploy config: {value}").into());
+        }
+        Ok(())
     }
 }
