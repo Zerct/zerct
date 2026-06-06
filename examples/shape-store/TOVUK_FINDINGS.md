@@ -7,7 +7,7 @@ Date: 2026-06-06
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_89`, `job_90`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_91`, `job_92`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -110,6 +110,9 @@ Date: 2026-06-06
   sending `app` to the origin API, while the API expects `service`.
 - Updated the cart icon to a thin outline shopping-bag shape closer to the
   current Yeezy reference without copying site assets.
+- Deployed the object-storage product-media update from clean commit
+  `f7fb50c` as `deploy_91` / `job_92` and verified the live frontend now loads
+  product media from `https://media.tovuk.app/shape-store/products/...`.
 
 ## What I built
 
@@ -157,6 +160,8 @@ Production deploy and API checks:
 - `TOVUK_OUTPUT=json npx -y tovuk@latest deploy --dry-run .`: passed
 - Latest `npx -y tovuk@latest deploy --dry-run .` confirms SQLite is enabled
   and the service check passes.
+- Latest `npx -y tovuk@latest deploy --dry-run .` confirms
+  `object_storage` is enabled and reports object-storage meters.
 - `npx -y tovuk@latest deploy . --wait --wait-timeout 600`: passed
 - Latest `npx -y tovuk@latest deploy . --wait --wait-timeout 600`: passed
   for `deploy_45` / `job_46`, using public CLI `0.1.93`.
@@ -172,10 +177,17 @@ Production deploy and API checks:
   Tovuk CLI `0.1.99`.
 - Latest production deploy passed for `deploy_81` / `job_82`, using public
   Tovuk CLI `0.1.99`.
+- Latest production deploy passed for `deploy_91` / `job_92`, using public
+  Tovuk CLI latest, from commit `f7fb50c`.
 - Latest artifact dry-run passed with `services[0].artifactCheck.status:
   "passed"`, gzip size `935494`, and limit `3145728`.
 - `curl https://shape-store.tovuk.app/api/healthz`: returned `{"ok":true}`
 - `curl https://shape-store.tovuk.app/api/products`: returned 50 products
+- `npx -y tovuk@latest service status shape-store --json`: returned
+  `ok: true`, `live: true`, latest deploy `deploy_91`, latest build job
+  `job_92`, and runtime status `running`.
+- `curl https://media.tovuk.app/shape-store/products/shape-capsule.png`:
+  returned HTTP `200`, `content-type: image/png`, `8999` bytes.
 - `curl -X POST https://shape-store.tovuk.app/api/checkout ...`: returned a
   demo Stripe Checkout response when Stripe secrets are not configured
 - Latest deploy logs show `Checks passed`, Vite build output, and `Deploy promoted.`
@@ -263,6 +275,25 @@ Browser and UX checks:
     `YS-02$50+`
   - active tile center, image center, meta center, and viewport center are all
     `195`
+- Confirmed production Browser flow on `deploy_91`:
+  - desktop `1440x900`: 50 products, 3 product columns, no horizontal
+    overflow, and grid/product-detail image URLs load from
+    `https://media.tovuk.app/shape-store/products/...`.
+  - desktop product gallery: next click changes `YS-02` from
+    `shape-capsule.png` to `shape-capsule.png?view=angle`; ArrowRight changes
+    to `?view=detail`; ArrowLeft returns to `?view=angle`; `ESCAPE` returns to
+    the 50-product grid.
+  - desktop checkout: `YS-02 -> size 9 -> CHECKOUT` reached
+    `ORDER CONFIRMED`; receipt width `360px`; no horizontal overflow; no
+    forbidden `YZY`, `YEEZY`, wallet, Apple Pay, Google Pay, or PayPal copy;
+    no console errors.
+  - tablet `768x1024`: cart and receipt states had no horizontal overflow;
+    receipt width `360px`; no forbidden copy; no console errors.
+  - mobile `390x844`: cart and receipt states had no horizontal overflow;
+    receipt width `320px`; no forbidden copy; no console errors.
+  - Browser locator clicks on the animated lower product controls were flaky
+    on tablet/mobile, but the same visible controls worked through Browser
+    DOM-node clicks and the UI state was correct.
 - Confirmed local desktop patch at `1440x900`:
   - listing has 50 products, 6 columns, and no horizontal overflow
   - `YS-02` product detail has active tile center `720`, image center `720`,
@@ -2505,6 +2536,31 @@ Recommended Tovuk improvement:
   retry-safe per-object status.
 - This would remove shell scripting from the common "ship static product media"
   path for both human users and agents.
+
+### 60. Animated product controls can make agent clicks flaky
+
+Failure/friction:
+
+- During live Browser checks on `deploy_91`, Playwright-style locator clicks
+  sometimes missed visible animated controls in the product detail flow:
+  `Select size for YS-02` and `Open cart with 1 item`.
+- The controls were present in the accessibility tree, had stable labels, and
+  had usable 44px hit targets. The cart count and product state were correct.
+- Browser DOM-node clicks on the same visible controls worked immediately.
+- For humans, this is unlikely to be a hard blocker. For AI agents, it creates
+  avoidable retry complexity because a semantically correct locator click can
+  fail while the visible UI is actually usable.
+
+Recommended Tovuk/example improvement:
+
+- Add stable `data-testid` values to the primary product-detail actions and
+  cart trigger, then document those selectors in the example README for agent
+  smoke tests.
+- Consider reducing or isolating pointer-sensitive motion on the primary
+  purchase controls so the product image rail can animate without making lower
+  controls feel race-prone to automation.
+- In Tovuk agent docs, recommend Browser DOM-node click fallback when a visible
+  accessible control repeatedly misses through locator clicks.
 
 ## Remaining Tovuk friction
 
