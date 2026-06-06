@@ -91,10 +91,10 @@ Date: 2026-06-05
   Python 3.9. Apple pip 21's experimental `pip index versions` command still
   reports a false `No matching distribution found`, but real `pip install`
   works.
-- Prepared Tovuk CLI `0.1.104` during this pass so JSON-mode login exposes a
-  one-line `login_started` stderr event with `login_url`, `verification_uri`,
-  `user_code`, expiry, and poll interval while keeping stdout reserved for the
-  final command JSON.
+- Prepared and released Tovuk CLI `0.1.104` during this pass so JSON-mode
+  login exposes a one-line `login_started` stderr event with `login_url`,
+  `verification_uri`, `user_code`, expiry, and poll interval while keeping
+  stdout reserved for the final command JSON.
 - Browser-smoked the live storefront again after the CLI pass: mobile product
   detail and cart had no horizontal overflow, no forbidden `YZY`, `YEEZY`,
   wallet, Apple Pay, Google Pay, or PayPal copy, and desktop grid at
@@ -2368,7 +2368,7 @@ Failure/friction:
   `tovuk deploy --wait --json` need stdout to remain one parseable final JSON
   document.
 
-Fix prepared in Tovuk CLI `0.1.104`:
+Fix released in Tovuk CLI `0.1.104`:
 
 - JSON-mode login emits a compact one-line `login_started` event to stderr.
 - The event includes `login_url`, `verification_uri`, `user_code`,
@@ -2387,6 +2387,9 @@ Verification:
   fields.
 - `./scripts/check-all.sh` passes, including 76 CLI tests and public package
   version/package contract checks for `0.1.104`.
+- Public release verification passed: npm latest, `npx -y tovuk@latest
+  --version`, crates.io search, PyPI JSON, GitHub release assets, and Apple
+  Python 3.9 `pip install tovuk==0.1.104` all show `0.1.104`.
 
 ## Remaining Tovuk friction
 
