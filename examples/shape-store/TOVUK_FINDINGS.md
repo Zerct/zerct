@@ -1,6 +1,6 @@
 # Tovuk Ecommerce MVP Findings
 
-Date: 2026-06-05
+Date: 2026-06-06
 
 ## Current result
 
@@ -99,6 +99,17 @@ Date: 2026-06-05
   detail and cart had no horizontal overflow, no forbidden `YZY`, `YEEZY`,
   wallet, Apple Pay, Google Pay, or PayPal copy, and desktop grid at
   `1440x900` had no console errors.
+- Updated the product gallery model again after Browser testing found the
+  fallback still showed neighboring product assets when a product had no
+  explicit gallery. The fallback now creates three image views for the selected
+  product only.
+- Enabled Tovuk Object Storage for the example and uploaded 50 generated black
+  PNG product media objects, all public, totaling 476,910 bytes.
+- Patched and deployed the Tovuk production media CDN Worker after public media
+  URLs returned `502` even though signed object URLs worked. The Worker was
+  sending `app` to the origin API, while the API expects `service`.
+- Updated the cart icon to a thin outline shopping-bag shape closer to the
+  current Yeezy reference without copying site assets.
 
 ## What I built
 
@@ -2390,6 +2401,110 @@ Verification:
 - Public release verification passed: npm latest, `npx -y tovuk@latest
   --version`, crates.io search, PyPI JSON, GitHub release assets, and Apple
   Python 3.9 `pip install tovuk==0.1.104` all show `0.1.104`.
+
+### 56. Product gallery fallback still used neighboring products
+
+Failure/friction:
+
+- The product-detail carousel was supposed to move through images of the
+  selected product, matching the Yeezy-style product view.
+- Browser testing showed that local `YS-02` still moved from
+  `/products/shape-capsule.svg` to neighboring assets such as
+  `/products/shape-square.svg` when the catalog did not define explicit
+  gallery images.
+- For users, this makes the product view feel wrong. For agents, it is an easy
+  mistake to miss because the carousel technically changes images and keeps the
+  same product label.
+
+Fix included in the example:
+
+- Removed the neighboring-product fallback.
+- Fallback galleries now create three views of the selected product image:
+  front, angle, and detail.
+- The visual variation lives in gallery CSS classes, so the data model remains
+  product-local and does not invent fake related products.
+
+Verification:
+
+- Browser desktop testing on the local store confirmed the active `YS-02`
+  gallery source changes among `shape-capsule` front/angle/detail URLs while
+  the selected product remains `YS-02`.
+- Left/right buttons, ArrowLeft/ArrowRight, and Escape work in product detail.
+
+### 57. Cart icon weight did not match the reference
+
+Failure/friction:
+
+- The cart icon was visually heavier and more box-like than the thin shopping
+  bag icon in the current Yeezy header.
+- This is small, but it matters for this example because the whole UI is sparse;
+  a single overweight control stands out on desktop and mobile.
+
+Fix included in the example:
+
+- Reworked the CSS-only cart icon into a thinner outline bag with a separate
+  rounded handle.
+- Reused that icon in the checkout header instead of adding another asset or
+  dependency.
+
+Verification:
+
+- Browser checks at desktop `1440x900`, tablet `768x1024`, and mobile cart
+  state confirmed the icon is stable and does not create horizontal overflow.
+
+### 58. Public media CDN used the wrong origin query parameter
+
+Failure/friction:
+
+- `tovuk storage upload --public` successfully uploaded 50 generated product
+  PNG files, and signed object URLs returned real PNG bytes.
+- Public media URLs such as
+  `https://media.tovuk.app/shape-store/products/shape-capsule.png` returned
+  `502 {"code":"origin_unavailable"}`.
+- Direct origin probing showed
+  `https://api.tovuk.com/v1/media/origin?app=shape-store&path=...` failed with
+  `missing field service`, while the origin route expects `service`.
+- This is high-friction for users and AI agents because object storage appears
+  uploaded correctly, but the public URL path fails outside the app.
+
+Fix included in Tovuk engine:
+
+- Changed the Cloudflare media Worker origin request from `app=<name>` to
+  `service=<name>`.
+- Ran the full engine check suite, committed the fix, pushed `main`, and
+  applied the production Cloudflare Worker through `scripts/deploy-origin.sh
+  cloudflare-apply`.
+
+Verification:
+
+- `curl` against the public media URL now returns HTTP `200`,
+  `content-type: image/png`, `8999` bytes, and a `512 x 512` PNG.
+
+### 59. Object storage needs a directory-upload path for media workflows
+
+Failure/friction:
+
+- Uploading product media one object at a time works, but a realistic store
+  immediately becomes repetitive. This example needed 50 public uploads.
+- For an AI agent, serial one-file CLI loops are doable but fragile: the agent
+  has to invent a script, choose content types, preserve destination prefixes,
+  and then separately list or verify objects.
+
+Fix included in the example:
+
+- Added `scripts/upload-product-media.sh` to generate PNG media from the local
+  black SVG assets, upload every file with `tovuk storage upload --public`, and
+  print the final object list.
+- Enabled `object_storage = true` in `tovuk.toml` so preflight output matches
+  the example's real needs.
+
+Recommended Tovuk improvement:
+
+- Add a first-party `tovuk storage upload-dir` command with `--service`,
+  `--prefix`, `--public`, content-type inference, JSON summary output, and
+  retry-safe per-object status.
+- This would remove shell scripting from the common "ship static product media"
+  path for both human users and agents.
 
 ## Remaining Tovuk friction
 

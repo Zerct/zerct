@@ -35,13 +35,8 @@
 }
 
 .checkout-bag .cart-icon {
-  position: relative;
   width: 14px;
-  height: 15px;
-}
-
-.checkout-bag .cart-icon::before {
-  top: -8px;
+  height: 13px;
 }
 
 .checkout-layout {

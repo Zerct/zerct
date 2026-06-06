@@ -92,6 +92,12 @@ type CartApiResponse = {
 
 const productCatalog = productCatalogJson as ProductCatalog;
 
+const officialProductMediaBaseUrl = "https://media.tovuk.app/shape-store/products";
+const configuredProductMediaBaseUrl = normalizeProductMediaBaseUrl(import.meta.env.VITE_PRODUCT_MEDIA_BASE_URL ?? "");
+const productMediaBaseUrl =
+  configuredProductMediaBaseUrl || (globalThis.location?.hostname === "shape-store.tovuk.app" ? officialProductMediaBaseUrl : "");
+const productGalleryViews = ["front", "angle", "detail"] as const;
+
 export const fallbackProducts: Product[] = shapeProducts(productCatalog.products);
 
 export async function fetchProducts() {
@@ -192,42 +198,46 @@ export function formatCurrency(cents: number) {
 }
 
 function shapeProducts(products: readonly RawProduct[]): Product[] {
-  return products.map((product, index) => shapeProduct(product, index, products));
+  return products.map(shapeProduct);
 }
 
-function shapeProduct(product: RawProduct, index: number, products: readonly RawProduct[]): Product {
+function shapeProduct(product: RawProduct): Product {
+  const image = productImageUrl(product.image);
   return {
     ...product,
-    galleryImages: galleryImagesForProduct(product, index, products),
+    galleryImages: galleryImagesForProduct(image, product.galleryImages),
+    image,
   };
 }
 
-function galleryImagesForProduct(product: RawProduct, index: number, products: readonly RawProduct[]) {
-  const explicitImages = product.galleryImages?.filter(Boolean);
+function galleryImagesForProduct(image: string, galleryImages: readonly string[] | undefined) {
+  const explicitImages = galleryImages?.filter(Boolean).map(productImageUrl);
   if (explicitImages !== undefined && explicitImages.length > 0) {
     return explicitImages;
   }
 
-  return galleryImageSequence(product.image, productImages(products), index);
+  return productGalleryViews.map((view) => galleryViewUrl(image, view));
 }
 
-function productImages(products: readonly RawProduct[]) {
-  return products.map((product) => product.image);
+function galleryViewUrl(image: string, view: (typeof productGalleryViews)[number]) {
+  return view === "front" ? image : `${image}${image.includes("?") ? "&" : "?"}view=${view}`;
 }
 
-function galleryImageSequence(fallbackImage: string, images: readonly string[], index: number) {
-  const imagePool = images.length > 0 ? images : [fallbackImage];
-  return Array.from({ length: 3 }, (_value, offset) =>
-    galleryImageAt(fallbackImage, imagePool, index + offset),
-  );
+function productImageUrl(image: string) {
+  if (productMediaBaseUrl === "") {
+    return image;
+  }
+
+  return `${productMediaBaseUrl}/${productMediaFileName(image)}`;
 }
 
-function galleryImageAt(fallbackImage: string, images: readonly string[], index: number) {
-  return images[wrappedIndex(images, index)] ?? fallbackImage;
+function normalizeProductMediaBaseUrl(baseUrl: string) {
+  return baseUrl.trim().replace(/\/+$/, "");
 }
 
-function wrappedIndex(items: readonly unknown[], index: number) {
-  return (index + items.length) % items.length;
+function productMediaFileName(image: string) {
+  const fileName = image.split("/").pop() ?? image;
+  return fileName.replace(/\.svg$/i, ".png");
 }
 
 function hasProducts(data: ProductsResponse) {

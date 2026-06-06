@@ -35,6 +35,8 @@ type ProductDetailCopy = {
   status: string;
 };
 
+const galleryViewClasses = ["view-front", "view-angle", "view-detail"] as const;
+
 const productCategoryLabels = {
   ACCESSORIES: "SHAPE ACCESSORY",
   FOOTWEAR: "SHAPE FOOTWEAR",
@@ -271,7 +273,7 @@ function GalleryImageButton({
     <button
       aria-current={getFocusAriaCurrent(isActive)}
       aria-label={`View ${product.name} image ${item.imageIndex + 1}`}
-      className={getFocusTileClass(isActive)}
+      className={getFocusTileClass(isActive, item.imageIndex)}
       onClick={onSelect}
       type="button"
     >
@@ -527,8 +529,8 @@ function getFocusImageLoading(isActive: boolean): "eager" | "lazy" {
   return isActive ? "eager" : "lazy";
 }
 
-function getFocusTileClass(isActive: boolean) {
-  return isActive ? "product-focus-tile active" : "product-focus-tile";
+function getFocusTileClass(isActive: boolean, imageIndex: number) {
+  return `product-focus-tile ${galleryViewClasses[imageIndex % galleryViewClasses.length]}${isActive ? " active" : ""}`;
 }
 
 function productFocusStageClass(isSizePickerOpen: boolean) {

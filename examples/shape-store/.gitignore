@@ -1,4 +1,5 @@
 .DS_Store
+.tovuk/
 .playwright-cli/
 output/playwright/
 api/target/

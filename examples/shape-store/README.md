@@ -4,8 +4,8 @@ A no-admin fullstack ecommerce example for Tovuk.
 
 The storefront mirrors the sparse product-grid, full-screen product overlay,
 size-selection, and full-screen bag checkout flow of the current Yeezy storefront,
-but all product visuals are local black SVG shape assets. No Yeezy branding or
-product imagery is copied.
+but all product visuals are generated from black shape assets. No Yeezy branding
+or product imagery is copied.
 
 ## Run Locally
 
@@ -54,6 +54,32 @@ Then open `http://127.0.0.1:5174/`.
 npx -y tovuk@latest check
 npx -y tovuk@latest deploy . --wait --wait-timeout 600
 ```
+
+## Product Media
+
+Local development uses the SVG files in `web/public/products`.
+
+The published `shape-store.tovuk.app` example uses generated PNG versions of
+those same black shape assets from Tovuk Object Storage:
+
+```sh
+./scripts/upload-product-media.sh
+```
+
+The script renders the local SVG assets into `.tovuk/product-media`, uploads
+them to public object storage under `products/`, and lists the uploaded objects.
+
+Useful overrides:
+
+```sh
+TOVUK_GENERATE_ONLY=1 ./scripts/upload-product-media.sh
+TOVUK_SERVICE=my-store ./scripts/upload-product-media.sh
+TOVUK_PRODUCT_MEDIA_PREFIX=products ./scripts/upload-product-media.sh
+VITE_PRODUCT_MEDIA_BASE_URL=https://media.tovuk.app/my-store/products npm --prefix web run build
+```
+
+This keeps the public example license-safe while still exercising Tovuk's
+object-storage media path end to end.
 
 ## Checkout Modes
 
