@@ -201,3 +201,6 @@ logs, fix the first actionable log error, rerun check, then redeploy.
 On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
 the Tovuk session in the OS credential store when available, and continues the
 deploy. Later commands reuse that session.
+In JSON mode, login writes a one-line `login_started` event to stderr with
+`login_url`, `verification_uri`, `user_code`, expiry, and poll interval, while
+stdout stays reserved for the final command JSON.
