@@ -7,7 +7,7 @@ Date: 2026-06-05
 - Built a no-admin `fullstack-rust-tanstack` ecommerce MVP in this directory.
 - Deployed it to Tovuk production.
 - Live URL: https://shape-store.tovuk.app
-- Latest verified deploy: `deploy_85`, `job_86`, status `succeeded`, service runtime status `running`.
+- Latest verified deploy: `deploy_89`, `job_90`, status `succeeded`, service runtime status `running`.
 - Patched and released Tovuk CLI `0.1.87` during this pass to remove JSON-mode deploy progress noise.
 - Added and released Tovuk CLI `0.1.88` during this pass to make local fullstack UX testing easier with `tovuk dev`.
 - Added and released Tovuk CLI `0.1.89` during this pass to add a static Next.js frontend template, make generated frontend templates default to npm consistently, and exclude common frontend build outputs from deploy archives.
@@ -78,6 +78,14 @@ Date: 2026-06-05
 - Added neutral product-detail copy to the shape-store product view so the
   selected product feels more like a complete ecommerce detail page without
   introducing Yeezy-specific branding or wallet/provider language.
+- Added stable local dev ports to the example `tovuk.toml`, made Tovuk deploy
+  strip `[dev]` from deploy payloads/source archives, and deployed the example
+  from clean commit `8eb2817c7139cc9905cb4421892599c5f0046d8f` as
+  `deploy_89` / `job_90`.
+- Patched the production storefront after Browser testing found anonymous size
+  buttons and singular cart copy reading `1 items`; size buttons now expose
+  labels like `Add YS-02 size 9 to bag`, and the cart label says
+  `Open cart with 1 item`.
 
 ## What I built
 
@@ -2285,6 +2293,20 @@ Verification:
   `frontend_port = 5174` from the example config.
 - `cargo run --manifest-path crates/tovuk/Cargo.toml -- check
   examples/shape-store --json` still surfaces `[dev]` locally for agents.
+- `cargo run --manifest-path crates/tovuk/Cargo.toml -- deploy
+  examples/shape-store --wait --wait-timeout 600 --json` succeeded twice
+  against current production with `[dev]` present locally:
+  `deploy_87` / `job_88` proved deploy compatibility, and `deploy_89` /
+  `job_90` shipped the accessibility polish from clean commit
+  `8eb2817c7139cc9905cb4421892599c5f0046d8f`.
+- Browser production checkout on `deploy_89` at `320x568` reached
+  `ORDER CONFIRMED` for `$50`, had no horizontal overflow, had no forbidden
+  `YZY`, `YEEZY`, wallet, Apple Pay, Google Pay, or PayPal copy, and emitted no
+  console errors.
+- Browser breakpoint checks on `deploy_89` at `320x568`, `768x1024`, and
+  `1440x900` showed no horizontal overflow in grid or product-detail states.
+- Browser confirmed the new accessible labels are targetable:
+  `Add YS-02 size 9 to bag` and `Open cart with 1 item`.
 
 ## Remaining Tovuk friction
 
