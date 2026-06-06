@@ -86,6 +86,9 @@ Date: 2026-06-05
   buttons and singular cart copy reading `1 items`; size buttons now expose
   labels like `Add YS-02 size 9 to bag`, and the cart label says
   `Open cart with 1 item`.
+- Prepared Tovuk CLI `0.1.103` during this pass so the PyPI launcher can
+  install on Python 3.9+ instead of disappearing from `pip` on macOS systems
+  where `/usr/bin/python3` is still Python 3.9.
 
 ## What I built
 
@@ -2307,6 +2310,35 @@ Verification:
   `1440x900` showed no horizontal overflow in grid or product-detail states.
 - Browser confirmed the new accessible labels are targetable:
   `Add YS-02 size 9 to bag` and `Open cart with 1 item`.
+
+### 54. PyPI install was hidden on macOS system Python
+
+Failure/friction:
+
+- `python3 -m pip index versions tovuk` on this Mac returned
+  `No matching distribution found for tovuk` even though the PyPI publish job
+  succeeded.
+- The cause was not a missing package. This workstation's `/usr/bin/python3`
+  is Python 3.9, and the PyPI wrapper required Python 3.11+, so pip filtered
+  the package out before users or agents could see it.
+- That is avoidable friction because the Python package is a thin launcher for
+  the native Tovuk binary and does not need Python 3.11 language features.
+
+Fix prepared in Tovuk CLI `0.1.103`:
+
+- Lowered the PyPI package requirement from Python 3.11+ to Python 3.9+.
+- Replaced Python 3.10+ union type-hint syntax in the launcher with
+  Python 3.9-compatible `typing.Optional` / `typing.List`.
+- Added Python 3.9 and 3.10 package classifiers so the supported install
+  surface is explicit.
+
+Verification:
+
+- `/usr/bin/python3 --version` reports `Python 3.9.6`.
+- `/usr/bin/python3 -m compileall -q packages/tovuk-py/src` succeeds after the
+  compatibility patch.
+- Installing the built wheel under `/usr/bin/python3` in a temporary target and
+  running `python3 -m tovuk --version` reports `0.1.103`.
 
 ## Remaining Tovuk friction
 

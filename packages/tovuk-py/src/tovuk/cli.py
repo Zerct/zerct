@@ -8,6 +8,7 @@ import pathlib
 import platform
 import stat
 import sys
+from typing import List, Optional
 import urllib.error
 import urllib.request
 
@@ -16,7 +17,7 @@ from . import __version__
 REPOSITORY = "https://github.com/tovuk/tovuk"
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: Optional[List[str]] = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if _wants_version(args):
         print(__version__)
@@ -31,11 +32,11 @@ def main(argv: list[str] | None = None) -> None:
     os.execv(str(binary), [str(binary), *args])
 
 
-def _wants_version(args: list[str]) -> bool:
+def _wants_version(args: List[str]) -> bool:
     return len(args) == 1 and args[0] in {"--version", "-v", "-V"}
 
 
-def _wants_json(args: list[str]) -> bool:
+def _wants_json(args: List[str]) -> bool:
     output = os.environ.get("TOVUK_OUTPUT", "").strip().lower()
     json_output = output == "json"
     index = 0
