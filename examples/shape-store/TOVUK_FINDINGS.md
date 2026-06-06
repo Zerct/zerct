@@ -91,6 +91,14 @@ Date: 2026-06-05
   Python 3.9. Apple pip 21's experimental `pip index versions` command still
   reports a false `No matching distribution found`, but real `pip install`
   works.
+- Prepared Tovuk CLI `0.1.104` during this pass so JSON-mode login exposes a
+  one-line `login_started` stderr event with `login_url`, `verification_uri`,
+  `user_code`, expiry, and poll interval while keeping stdout reserved for the
+  final command JSON.
+- Browser-smoked the live storefront again after the CLI pass: mobile product
+  detail and cart had no horizontal overflow, no forbidden `YZY`, `YEEZY`,
+  wallet, Apple Pay, Google Pay, or PayPal copy, and desktop grid at
+  `1440x900` had no console errors.
 
 ## What I built
 
@@ -2349,11 +2357,41 @@ Verification:
   `No matching distribution found for tovuk`, so that command should not be
   treated as a reliable registry verification signal on this environment.
 
+### 55. JSON login needed machine-readable progress without breaking stdout
+
+Failure/friction:
+
+- Before `0.1.104`, JSON mode suppressed human progress during browser login.
+  For `tovuk deploy --json`, an agent with no saved session could sit in a
+  long wait without seeing `login_url`, `user_code`, expiry, or poll interval.
+- Emitting that state on stdout would create a different bug: commands such as
+  `tovuk deploy --wait --json` need stdout to remain one parseable final JSON
+  document.
+
+Fix prepared in Tovuk CLI `0.1.104`:
+
+- JSON-mode login emits a compact one-line `login_started` event to stderr.
+- The event includes `login_url`, `verification_uri`, `user_code`,
+  `expires_in_seconds`, `poll_interval_seconds`, and an `agent_instruction`.
+- The event deliberately omits standalone `device_code` and session token
+  fields.
+- Explicit `tovuk login --json` prints a final success object on stdout after
+  the session is saved.
+- Implicit login during another command keeps stdout reserved for that
+  command's final JSON result.
+
+Verification:
+
+- Added CLI auth tests proving the `login_started` event is agent-readable,
+  defaults missing optional fields, and omits standalone device/session secret
+  fields.
+- `./scripts/check-all.sh` passes, including 76 CLI tests and public package
+  version/package contract checks for `0.1.104`.
+
 ## Remaining Tovuk friction
 
 ### High
 
-- `--json` auth flows still need a more agent-readable shape. Agents need `login_url`, `user_code`, expiry, and current wait state as JSON before any long wait.
 - Generated fullstack templates still make ordinary API work harder than necessary because the Rust worker is a raw TCP HTTP server. It is lightweight, but agents must hand-build routing, body parsing, CORS, and JSON handling.
 - New static Next.js support is static-export only. That is correct for the current Tovuk runtime model, but users coming from Vercel will expect SSR and API routes unless docs and check errors keep saying "move server logic to Rust".
 

@@ -5,7 +5,7 @@ Usage:
   tovuk new [path] [--template rust-worker|tanstack-static-frontend|next-static-frontend|fullstack-rust-tanstack]
   tovuk check [path] [--json|--output json|text]
   tovuk dev [path] [--worker-port <port>] [--frontend-port <port>] [--json|--output json|text]
-  tovuk login [--token <token>] [--api <url>]
+  tovuk login [--token <token>] [--api <url>] [--json|--output json|text]
   tovuk deploy --dry-run [path] [--build-artifact] [--api <url>] [--json|--output json|text]
   tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json|--output json|text]
   tovuk deploy list [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]

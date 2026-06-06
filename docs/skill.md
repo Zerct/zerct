@@ -160,6 +160,9 @@ Object Storage, State, KV, Queues, Cron, Service Bindings, Secrets, Custom
 Domains, Logs, Builds, or Usage Caps.
 Use `tovuk usage --json` to inspect `billingEstimate.lineItems` before load
 tests or paid usage.
+When login is required in JSON mode, read the one-line `login_started` event
+from stderr for `login_url`, `verification_uri`, `user_code`, expiry, and poll
+interval. Keep stdout reserved for the final command JSON.
 
 When a plan limit blocks work:
 
