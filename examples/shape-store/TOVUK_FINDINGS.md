@@ -86,9 +86,11 @@ Date: 2026-06-05
   buttons and singular cart copy reading `1 items`; size buttons now expose
   labels like `Add YS-02 size 9 to bag`, and the cart label says
   `Open cart with 1 item`.
-- Prepared Tovuk CLI `0.1.103` during this pass so the PyPI launcher can
-  install on Python 3.9+ instead of disappearing from `pip` on macOS systems
-  where `/usr/bin/python3` is still Python 3.9.
+- Prepared and released Tovuk CLI `0.1.103` during this pass so the PyPI
+  launcher can install on Python 3.9+ systems where `/usr/bin/python3` is still
+  Python 3.9. Apple pip 21's experimental `pip index versions` command still
+  reports a false `No matching distribution found`, but real `pip install`
+  works.
 
 ## What I built
 
@@ -2337,8 +2339,15 @@ Verification:
 - `/usr/bin/python3 --version` reports `Python 3.9.6`.
 - `/usr/bin/python3 -m compileall -q packages/tovuk-py/src` succeeds after the
   compatibility patch.
-- Installing the built wheel under `/usr/bin/python3` in a temporary target and
-  running `python3 -m tovuk --version` reports `0.1.103`.
+- Installing the built wheel under `/usr/bin/python3` in a temporary target
+  reports `0.1.103`.
+- After the release, `/usr/bin/python3 -m pip install --no-cache-dir --target
+  "$tmpdir" tovuk==0.1.103` from PyPI reports `Successfully installed
+  tovuk-0.1.103`, and `PYTHONPATH="$tmpdir" /usr/bin/python3 -m tovuk
+  --version` reports `0.1.103`.
+- Apple pip 21's experimental `pip index versions tovuk` still reports
+  `No matching distribution found for tovuk`, so that command should not be
+  treated as a reliable registry verification signal on this environment.
 
 ## Remaining Tovuk friction
 
