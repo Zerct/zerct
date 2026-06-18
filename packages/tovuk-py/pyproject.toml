@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tovuk"
-version = "0.1.104"
-description = "Deploy Rust workers, static frontends, and full-stack services to Tovuk."
+version = "0.1.105"
+description = "Use Tovuk scraper APIs and manage Rust services from a native CLI."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 authors = [{ name = "Tovuk" }]
-keywords = ["tovuk", "rust", "deploy", "worker", "hosting"]
+keywords = ["tovuk", "rust", "scraper", "api", "cli"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

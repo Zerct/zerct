@@ -10,6 +10,7 @@ mod lists;
 mod logs;
 mod nodes;
 mod resources;
+mod scrapers;
 mod storage;
 mod support;
 
@@ -27,5 +28,6 @@ pub(crate) use resources::{
     binding_command, caps_command, cron_command, kv_command, queue_command, sqlite_command,
     state_command,
 };
+pub(crate) use scrapers::{request_command, scraper_command};
 pub(crate) use storage::storage_command;
 pub(crate) use support::support_command;

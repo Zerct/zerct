@@ -3,9 +3,9 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "Tovuk API",
-    "summary": "Control-plane API for Tovuk deploys.",
+    "summary": "API for Tovuk scraper requests and Rust control-plane operations.",
     "version": "0.1.0",
-    "description": "Use the Tovuk API to authenticate, create Rust worker deploys, manage account onboarding, and inspect deploy health. Context: info.",
+    "description": "Use the Tovuk API to list Scrapers, create paid public-data scraper Requests, fetch stored Results, authenticate, manage account billing, and inspect Rust service health. Context: info.",
     "termsOfService": "https://tovuk.com/legal/terms",
     "contact": {
       "name": "Tovuk",
@@ -48,6 +48,10 @@
     {
       "name": "Health",
       "description": "API availability endpoints. Context: tags.3."
+    },
+    {
+      "name": "Scrapers",
+      "description": "Public-data Scraper catalog, paid Requests, stored Results, and Records. Context: tags.Scrapers."
     },
     {
       "name": "Storage",
@@ -1502,6 +1506,401 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/scrapers": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "List Scrapers",
+        "description": "Returns public-data Scrapers with input schemas and price events. Context: paths./v1/scrapers.get.",
+        "operationId": "listScrapers",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScrapersLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/scrapers/{scraper}": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Show one Scraper",
+        "description": "Returns one public-data Scraper with input schema and price events. Context: paths./v1/scrapers/{scraper}.get.",
+        "operationId": "getScraper",
+        "parameters": [
+          {
+            "name": "scraper",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{1,64}$",
+              "examples": [
+                "google-maps"
+              ]
+            },
+            "description": "Stable Scraper id. Context: paths./v1/scrapers/{scraper}.get.parameters.scraper."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScraperDetailsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/requests": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "List scraper Requests",
+        "description": "Returns scraper Requests owned by the authenticated account. Context: paths./v1/requests.get.",
+        "operationId": "listScrapeRequests",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "format": "int64",
+              "examples": [
+                50
+              ]
+            },
+            "description": "Maximum Requests to return. Context: paths./v1/requests.get.parameters.limit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScrapeRequestsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Create scraper Request",
+        "description": "Creates a paid scraper Request for public data only. Context: paths./v1/requests.post.",
+        "operationId": "createScrapeRequest",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrapeRequestCreateRequest"
+              },
+              "examples": {
+                "googleMaps": {
+                  "summary": "Create Google Maps Request",
+                  "value": {
+                    "scraper": "google-maps",
+                    "input": {
+                      "query": "coffee shops in Istanbul",
+                      "limit": 100
+                    }
+                  }
+                },
+                "githubSearch": {
+                  "summary": "Create GitHub Search Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "query": "mcp server",
+                      "language": "Rust",
+                      "limit": 50
+                    }
+                  }
+                },
+                "githubOpportunities": {
+                  "summary": "Create GitHub Opportunities Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "opportunities",
+                      "query": "agent skills registry",
+                      "limit": 25
+                    }
+                  }
+                },
+                "githubMarketplace": {
+                  "summary": "Create GitHub Marketplace Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "marketplace",
+                      "searchQuery": "ci",
+                      "limit": 25
+                    }
+                  }
+                },
+                "redditSubreddit": {
+                  "summary": "Create Reddit Subreddit Request",
+                  "value": {
+                    "scraper": "reddit",
+                    "input": {
+                      "subreddit": "rust",
+                      "sort": "new",
+                      "limit": 50
+                    }
+                  }
+                },
+                "redditComments": {
+                  "summary": "Create Reddit Comments Request",
+                  "value": {
+                    "scraper": "reddit",
+                    "input": {
+                      "operation": "comments",
+                      "url": "https://www.reddit.com/r/rust/comments/POST_ID/example/",
+                      "limit": 100
+                    }
+                  }
+                },
+                "xSearch": {
+                  "summary": "Create X Search Request",
+                  "value": {
+                    "scraper": "x",
+                    "input": {
+                      "query": "rust lang",
+                      "product": "Latest",
+                      "limit": 100
+                    }
+                  }
+                },
+                "xPost": {
+                  "summary": "Create X Post Request",
+                  "value": {
+                    "scraper": "x",
+                    "input": {
+                      "url": "https://x.com/openai/status/1234567890",
+                      "limit": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "description": "Scraper id and public input object. Context: paths./v1/requests.post.requestBody."
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScrapeRequestCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/requests/{request_id}": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Show scraper Request",
+        "description": "Returns one scraper Request owned by the authenticated account. Context: paths./v1/requests/{request_id}.get.",
+        "operationId": "getScrapeRequest",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^request_[a-z0-9_]{1,56}$",
+              "examples": [
+                "request_123"
+              ]
+            },
+            "description": "Scraper Request id. Context: paths./v1/requests/{request_id}.get.parameters.request_id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScrapeRequestLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/requests/{request_id}/cancel": {
+      "post": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Cancel scraper Request",
+        "description": "Cancels a queued or running scraper Request. Context: paths./v1/requests/{request_id}/cancel.post.",
+        "operationId": "cancelScrapeRequest",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^request_[a-z0-9_]{1,56}$",
+              "examples": [
+                "request_123"
+              ]
+            },
+            "description": "Scraper Request id. Context: paths./v1/requests/{request_id}/cancel.post.parameters.request_id."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScrapeCancelApplied"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/requests/{request_id}/results": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Get scraper Results",
+        "description": "Returns stored result Records for one scraper Request. Context: paths./v1/requests/{request_id}/results.get.",
+        "operationId": "getScrapeResults",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^request_[a-z0-9_]{1,56}$",
+              "examples": [
+                "request_123"
+              ]
+            },
+            "description": "Scraper Request id. Context: paths./v1/requests/{request_id}/results.get.parameters.request_id."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "format": "int64",
+              "examples": [
+                100
+              ]
+            },
+            "description": "Maximum Records to return. Context: paths./v1/requests/{request_id}/results.get.parameters.limit."
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScrapeResultsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -8238,6 +8637,280 @@
           }
         }
       },
+      "ScrapersLoaded": {
+        "description": "Scraper catalog loaded. Context: components.responses.ScrapersLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScrapersResponse"
+            }
+          }
+        }
+      },
+      "ScraperDetailsLoaded": {
+        "description": "Scraper details loaded. Context: components.responses.ScraperDetailsLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScraperDetailsResponse"
+            },
+            "examples": {
+              "googleMaps": {
+                "summary": "Scraper details loaded",
+                "value": {
+                  "scraper": {
+                    "id": "google-maps",
+                    "name": "Google Maps Scraper",
+                    "category": "Local",
+                    "description": "Returns public places for a local search query.",
+                    "inputSchema": {},
+                    "priceEvents": [
+                      {
+                        "name": "google_maps_place",
+                        "unit": "place",
+                        "usdMicros": 3200
+                      }
+                    ]
+                  },
+                  "nextActions": [
+                    "Create a request with `tovuk request create google-maps '{\"query\":\"...\",\"limit\":100}' --json`."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ScrapeRequestsLoaded": {
+        "description": "Scraper Requests loaded. Context: components.responses.ScrapeRequestsLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScrapeRequestsResponse"
+            }
+          }
+        }
+      },
+      "ScrapeRequestCreated": {
+        "description": "Scraper Request created. Context: components.responses.ScrapeRequestCreated.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScrapeRequestResponse"
+            },
+            "examples": {
+              "queued": {
+                "summary": "Scraper Request queued",
+                "value": {
+                  "request": {
+                    "id": "request_123",
+                    "scraper": "google-maps",
+                    "status": "queued",
+                    "input": {
+                      "query": "coffee shops in Istanbul",
+                      "limit": 100
+                    },
+                    "resultCount": 0,
+                    "estimatedCostUsdMicros": 320000,
+                    "costUsdMicros": 0,
+                    "resultsUrl": "/v1/requests/request_123/results",
+                    "errorMessage": null,
+                    "agentInstruction": "Request queued. Poll `tovuk request show request_123 --json`, then fetch stored results with `tovuk request results request_123 --json` after the status is succeeded.",
+                    "createdAt": "2026-06-17T12:00:00Z",
+                    "updatedAt": "2026-06-17T12:00:00Z"
+                  },
+                  "nextActions": [
+                    "Poll `tovuk request show request_123 --json` until the request finishes."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ScrapeRequestLoaded": {
+        "description": "Scraper Request loaded. Context: components.responses.ScrapeRequestLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScrapeRequestResponse"
+            },
+            "examples": {
+              "queued": {
+                "summary": "Scraper Request loaded",
+                "value": {
+                  "request": {
+                    "id": "request_123",
+                    "scraper": "google-maps",
+                    "status": "queued",
+                    "input": {
+                      "query": "coffee shops",
+                      "limit": 100
+                    },
+                    "resultCount": 0,
+                    "estimatedCostUsdMicros": 320000,
+                    "costUsdMicros": 0,
+                    "resultsUrl": "/v1/requests/request_123/results",
+                    "errorMessage": null,
+                    "agentInstruction": "Request queued.",
+                    "createdAt": "2026-06-17T12:00:00Z",
+                    "updatedAt": "2026-06-17T12:00:00Z"
+                  },
+                  "nextActions": [
+                    "Poll `tovuk request show request_123 --json` until the request finishes."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "ScrapeCancelApplied": {
+        "description": "Scraper Request cancel response. Context: components.responses.ScrapeCancelApplied.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScrapeCancelResponse"
+            }
+          }
+        }
+      },
+      "ScrapeResultsLoaded": {
+        "description": "Scraper Results loaded. Context: components.responses.ScrapeResultsLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScrapeResultsResponse"
+            },
+            "examples": {
+              "empty": {
+                "summary": "Scraper Results loaded",
+                "value": {
+                  "request": {
+                    "id": "request_123",
+                    "scraper": "google-maps",
+                    "status": "queued",
+                    "input": {
+                      "query": "coffee shops",
+                      "limit": 100
+                    },
+                    "resultCount": 0,
+                    "estimatedCostUsdMicros": 320000,
+                    "costUsdMicros": 0,
+                    "resultsUrl": "/v1/requests/request_123/results",
+                    "errorMessage": null,
+                    "agentInstruction": "Request queued.",
+                    "createdAt": "2026-06-17T12:00:00Z",
+                    "updatedAt": "2026-06-17T12:00:00Z"
+                  },
+                  "records": [],
+                  "nextActions": [
+                    "Store the request id and fetch this endpoint again when you need the same results."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "AccountUsageLoaded": {
         "description": "Account usage loaded. Context: components.responses.AccountUsageLoaded.",
         "headers": {
@@ -11417,6 +12090,1022 @@
       }
     },
     "schemas": {
+      "ScraperPriceEvent": {
+        "type": "object",
+        "description": "One priced Scraper event. Context: components.schemas.ScraperPriceEvent.",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "unit",
+          "usdMicros"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{1,64}$",
+            "maxLength": 64,
+            "description": "Stable price event name. Context: components.schemas.ScraperPriceEvent.properties.name.",
+            "examples": [
+              "google_maps_place"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{1,64}$",
+            "maxLength": 64,
+            "description": "Billing unit. Context: components.schemas.ScraperPriceEvent.properties.unit.",
+            "examples": [
+              "place"
+            ]
+          },
+          "usdMicros": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000000,
+            "description": "Price per unit in USD micros. Context: components.schemas.ScraperPriceEvent.properties.usdMicros.",
+            "examples": [
+              3200
+            ]
+          }
+        }
+      },
+      "ScraperSummary": {
+        "type": "object",
+        "description": "Public-data Scraper catalog row. Context: components.schemas.ScraperSummary.",
+        "additionalProperties": false,
+        "examples": [
+          {
+            "id": "google-maps",
+            "name": "Google Maps Scraper",
+            "category": "Local",
+            "description": "Returns public places for a local search query.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string"
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                }
+              }
+            },
+            "priceEvents": [
+              {
+                "name": "google_maps_place",
+                "unit": "place",
+                "usdMicros": 3200
+              }
+            ]
+          }
+        ],
+        "required": [
+          "id",
+          "name",
+          "category",
+          "description",
+          "inputSchema",
+          "priceEvents"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "description": "Stable Scraper id. Context: components.schemas.ScraperSummary.properties.id.",
+            "examples": [
+              "google-maps"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,120}$",
+            "maxLength": 120,
+            "description": "Display name. Context: components.schemas.ScraperSummary.properties.name.",
+            "examples": [
+              "Google Maps Scraper"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z ]{0,63}$",
+            "maxLength": 64,
+            "description": "Scraper category. Context: components.schemas.ScraperSummary.properties.category.",
+            "examples": [
+              "Local"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,240}$",
+            "maxLength": 240,
+            "description": "What the Scraper returns. Context: components.schemas.ScraperSummary.properties.description.",
+            "examples": [
+              "Returns public places for a local search query."
+            ]
+          },
+          "inputSchema": {
+            "type": "object",
+            "description": "JSON Schema for public Scraper input. Context: components.schemas.ScraperSummary.properties.inputSchema.",
+            "maxProperties": 100,
+            "examples": [
+              {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100000
+                  }
+                }
+              }
+            ]
+          },
+          "priceEvents": {
+            "type": "array",
+            "description": "Priced events emitted by this Scraper. Context: components.schemas.ScraperSummary.properties.priceEvents.",
+            "items": {
+              "$ref": "#/components/schemas/ScraperPriceEvent"
+            },
+            "examples": [
+              [
+                {
+                  "name": "google_maps_place",
+                  "unit": "place",
+                  "usdMicros": 3200
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "ScrapersResponse": {
+        "type": "object",
+        "description": "Scraper catalog response. Context: components.schemas.ScrapersResponse.",
+        "additionalProperties": false,
+        "required": [
+          "scrapers",
+          "nextActions"
+        ],
+        "properties": {
+          "scrapers": {
+            "type": "array",
+            "description": "Available Scrapers. Context: components.schemas.ScrapersResponse.properties.scrapers.",
+            "items": {
+              "$ref": "#/components/schemas/ScraperSummary"
+            },
+            "examples": [
+              []
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.ScrapersResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+              "maxLength": 1000
+            },
+            "examples": [
+              [
+                "Create a paid scraper request with `POST /v1/requests`."
+              ]
+            ]
+          }
+        }
+      },
+      "ScraperDetailsResponse": {
+        "type": "object",
+        "description": "Single Scraper response. Context: components.schemas.ScraperDetailsResponse.",
+        "additionalProperties": false,
+        "required": [
+          "scraper",
+          "nextActions"
+        ],
+        "properties": {
+          "scraper": {
+            "type": "object",
+            "description": "Requested Scraper. Context: components.schemas.ScraperDetailsResponse.properties.scraper.",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "category",
+              "description",
+              "inputSchema",
+              "priceEvents"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]{1,64}$",
+                "description": "Stable Scraper id. Context: components.schemas.ScraperDetailsResponse.properties.scraper.properties.id.",
+                "examples": [
+                  "google-maps"
+                ]
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,120}$",
+                "maxLength": 120,
+                "description": "Display name. Context: components.schemas.ScraperDetailsResponse.properties.scraper.properties.name.",
+                "examples": [
+                  "Google Maps Scraper"
+                ]
+              },
+              "category": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z ]{0,63}$",
+                "maxLength": 64,
+                "description": "Scraper category. Context: components.schemas.ScraperDetailsResponse.properties.scraper.properties.category.",
+                "examples": [
+                  "Local"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,240}$",
+                "maxLength": 240,
+                "description": "What the Scraper returns. Context: components.schemas.ScraperDetailsResponse.properties.scraper.properties.description.",
+                "examples": [
+                  "Returns public places for a local search query."
+                ]
+              },
+              "inputSchema": {
+                "type": "object",
+                "description": "JSON Schema for public Scraper input. Context: components.schemas.ScraperDetailsResponse.properties.scraper.properties.inputSchema.",
+                "maxProperties": 100,
+                "examples": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "type": "string"
+                      },
+                      "limit": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 100000
+                      }
+                    }
+                  }
+                ]
+              },
+              "priceEvents": {
+                "type": "array",
+                "description": "Priced events emitted by this Scraper. Context: components.schemas.ScraperDetailsResponse.properties.scraper.properties.priceEvents.",
+                "items": {
+                  "$ref": "#/components/schemas/ScraperPriceEvent"
+                },
+                "examples": [
+                  [
+                    {
+                      "name": "google_maps_place",
+                      "unit": "place",
+                      "usdMicros": 3200
+                    }
+                  ]
+                ]
+              }
+            },
+            "examples": [
+              {
+                "id": "google-maps",
+                "name": "Google Maps Scraper",
+                "category": "Local",
+                "description": "Returns public places for a local search query.",
+                "inputSchema": {},
+                "priceEvents": [
+                  {
+                    "name": "google_maps_place",
+                    "unit": "place",
+                    "usdMicros": 3200
+                  }
+                ]
+              }
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.ScraperDetailsResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+              "maxLength": 1000
+            },
+            "examples": [
+              [
+                "Create a request with `tovuk request create google-maps '{\"query\":\"...\",\"limit\":100}' --json`."
+              ]
+            ]
+          }
+        }
+      },
+      "ScrapeRequestCreateRequest": {
+        "type": "object",
+        "description": "Create body for a paid scraper Request. Context: components.schemas.ScrapeRequestCreateRequest.",
+        "additionalProperties": false,
+        "required": [
+          "scraper",
+          "input"
+        ],
+        "properties": {
+          "scraper": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "description": "Stable Scraper id. Context: components.schemas.ScrapeRequestCreateRequest.properties.scraper.",
+            "examples": [
+              "google-maps"
+            ]
+          },
+          "input": {
+            "type": "object",
+            "description": "Public Scraper input. Do not send cookies, passwords, account tokens, GitHub tokens, private repository credentials, private session data, private account content, or proxy URLs. Context: components.schemas.ScrapeRequestCreateRequest.properties.input.",
+            "maxProperties": 100,
+            "examples": [
+              {
+                "query": "coffee shops in Istanbul",
+                "limit": 100
+              }
+            ]
+          }
+        }
+      },
+      "ScrapeRequest": {
+        "type": "object",
+        "description": "One scraper Request. Context: components.schemas.ScrapeRequest.",
+        "additionalProperties": false,
+        "examples": [
+          {
+            "id": "request_123",
+            "scraper": "google-maps",
+            "status": "queued",
+            "input": {
+              "query": "coffee shops",
+              "limit": 100
+            },
+            "resultCount": 0,
+            "estimatedCostUsdMicros": 320000,
+            "costUsdMicros": 0,
+            "resultsUrl": "/v1/requests/request_123/results",
+            "errorMessage": null,
+            "agentInstruction": "Request queued.",
+            "createdAt": "2026-06-17T12:00:00Z",
+            "updatedAt": "2026-06-17T12:00:00Z"
+          }
+        ],
+        "required": [
+          "id",
+          "scraper",
+          "status",
+          "input",
+          "resultCount",
+          "estimatedCostUsdMicros",
+          "costUsdMicros",
+          "resultsUrl",
+          "errorMessage",
+          "agentInstruction",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^request_[a-z0-9_]{1,56}$",
+            "description": "Request id. Context: components.schemas.ScrapeRequest.properties.id.",
+            "examples": [
+              "request_123"
+            ]
+          },
+          "scraper": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "maxLength": 64,
+            "description": "Stable Scraper id. Context: components.schemas.ScrapeRequest.properties.scraper.",
+            "examples": [
+              "google-maps"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "canceled"
+            ],
+            "description": "Request status. Context: components.schemas.ScrapeRequest.properties.status.",
+            "examples": [
+              "queued"
+            ]
+          },
+          "input": {
+            "type": "object",
+            "description": "Stored public input. Context: components.schemas.ScrapeRequest.properties.input.",
+            "maxProperties": 100,
+            "examples": [
+              {
+                "query": "coffee shops in Istanbul",
+                "limit": 100
+              }
+            ]
+          },
+          "resultCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000000,
+            "description": "Stored Record count. Context: components.schemas.ScrapeRequest.properties.resultCount.",
+            "examples": [
+              0
+            ]
+          },
+          "estimatedCostUsdMicros": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100000000000,
+            "description": "Estimated maximum cost in USD micros when a limit is known. Context: components.schemas.ScrapeRequest.properties.estimatedCostUsdMicros.",
+            "examples": [
+              320000
+            ]
+          },
+          "costUsdMicros": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100000000000,
+            "description": "Final charged cost in USD micros. Context: components.schemas.ScrapeRequest.properties.costUsdMicros.",
+            "examples": [
+              0
+            ]
+          },
+          "resultsUrl": {
+            "type": "string",
+            "pattern": "^/v1/requests/request_[a-z0-9_]{1,56}/results$",
+            "maxLength": 128,
+            "description": "Results endpoint path. Context: components.schemas.ScrapeRequest.properties.resultsUrl.",
+            "examples": [
+              "/v1/requests/request_123/results"
+            ]
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{0,1000}$",
+            "maxLength": 1000,
+            "description": "Recoverable error when status is failed. Context: components.schemas.ScrapeRequest.properties.errorMessage."
+          },
+          "agentInstruction": {
+            "type": "string",
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+            "maxLength": 1000,
+            "description": "Agent-readable next step. Context: components.schemas.ScrapeRequest.properties.agentInstruction.",
+            "examples": [
+              "Request queued. Poll `tovuk request show request_123 --json`."
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC creation timestamp. Context: components.schemas.ScrapeRequest.properties.createdAt."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC update timestamp. Context: components.schemas.ScrapeRequest.properties.updatedAt."
+          }
+        }
+      },
+      "ScrapeRequestResponse": {
+        "type": "object",
+        "description": "Scraper Request detail response. Context: components.schemas.ScrapeRequestResponse.",
+        "additionalProperties": false,
+        "required": [
+          "request",
+          "nextActions"
+        ],
+        "properties": {
+          "request": {
+            "type": "object",
+            "description": "Scraper Request. Context: components.schemas.ScrapeRequestResponse.properties.request.",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "scraper",
+              "status",
+              "input",
+              "resultCount",
+              "estimatedCostUsdMicros",
+              "costUsdMicros",
+              "resultsUrl",
+              "errorMessage",
+              "agentInstruction",
+              "createdAt",
+              "updatedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^request_[a-z0-9_]{1,56}$",
+                "description": "Request id. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.id.",
+                "examples": [
+                  "request_123"
+                ]
+              },
+              "scraper": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]{1,64}$",
+                "maxLength": 64,
+                "description": "Stable Scraper id. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.scraper.",
+                "examples": [
+                  "google-maps"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "queued",
+                  "running",
+                  "succeeded",
+                  "failed",
+                  "canceled"
+                ],
+                "description": "Request status. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.status.",
+                "examples": [
+                  "queued"
+                ]
+              },
+              "input": {
+                "type": "object",
+                "description": "Stored public input. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.input.",
+                "maxProperties": 100,
+                "examples": [
+                  {
+                    "query": "coffee shops in Istanbul",
+                    "limit": 100
+                  }
+                ]
+              },
+              "resultCount": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 1000000000,
+                "description": "Stored Record count. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.resultCount.",
+                "examples": [
+                  0
+                ]
+              },
+              "estimatedCostUsdMicros": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 100000000000,
+                "description": "Estimated maximum cost in USD micros when a limit is known. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.estimatedCostUsdMicros.",
+                "examples": [
+                  320000
+                ]
+              },
+              "costUsdMicros": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 100000000000,
+                "description": "Final charged cost in USD micros. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.costUsdMicros.",
+                "examples": [
+                  0
+                ]
+              },
+              "resultsUrl": {
+                "type": "string",
+                "pattern": "^/v1/requests/request_[a-z0-9_]{1,56}/results$",
+                "maxLength": 128,
+                "description": "Results endpoint path. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.resultsUrl.",
+                "examples": [
+                  "/v1/requests/request_123/results"
+                ]
+              },
+              "errorMessage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{0,1000}$",
+                "maxLength": 1000,
+                "description": "Recoverable error when status is failed. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.errorMessage.",
+                "examples": [
+                  null
+                ]
+              },
+              "agentInstruction": {
+                "type": "string",
+                "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+                "maxLength": 1000,
+                "description": "Agent-readable next step. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.agentInstruction.",
+                "examples": [
+                  "Request queued. Poll `tovuk request show request_123 --json`."
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "UTC creation timestamp. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.createdAt.",
+                "examples": [
+                  "2026-06-17T12:00:00Z"
+                ]
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "UTC update timestamp. Context: components.schemas.ScrapeRequestResponse.properties.request.properties.updatedAt.",
+                "examples": [
+                  "2026-06-17T12:00:00Z"
+                ]
+              }
+            },
+            "examples": [
+              {
+                "id": "request_123",
+                "scraper": "google-maps",
+                "status": "queued",
+                "input": {
+                  "query": "coffee shops",
+                  "limit": 100
+                },
+                "resultCount": 0,
+                "estimatedCostUsdMicros": 320000,
+                "costUsdMicros": 0,
+                "resultsUrl": "/v1/requests/request_123/results",
+                "errorMessage": null,
+                "agentInstruction": "Request queued.",
+                "createdAt": "2026-06-17T12:00:00Z",
+                "updatedAt": "2026-06-17T12:00:00Z"
+              }
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.ScrapeRequestResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+              "maxLength": 1000
+            },
+            "examples": [
+              [
+                "Poll `tovuk request show request_123 --json` until the request finishes."
+              ]
+            ]
+          }
+        }
+      },
+      "ScrapeRequestsResponse": {
+        "type": "object",
+        "description": "Scraper Request list response. Context: components.schemas.ScrapeRequestsResponse.",
+        "additionalProperties": false,
+        "required": [
+          "requests",
+          "nextActions"
+        ],
+        "properties": {
+          "requests": {
+            "type": "array",
+            "description": "Scraper Requests. Context: components.schemas.ScrapeRequestsResponse.properties.requests.",
+            "items": {
+              "$ref": "#/components/schemas/ScrapeRequest"
+            },
+            "examples": [
+              []
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.ScrapeRequestsResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+              "maxLength": 1000
+            },
+            "examples": [
+              [
+                "Use `tovuk request show <request_id> --json` for one request."
+              ]
+            ]
+          }
+        }
+      },
+      "ScrapeRecord": {
+        "type": "object",
+        "description": "One stored scraper Record. Context: components.schemas.ScrapeRecord.",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "data",
+          "sizeBytes",
+          "createdAt"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 1000000000,
+            "description": "Zero-based Record index. Context: components.schemas.ScrapeRecord.properties.index.",
+            "examples": [
+              0
+            ]
+          },
+          "data": {
+            "type": "object",
+            "description": "Record JSON object. Context: components.schemas.ScrapeRecord.properties.data.",
+            "maxProperties": 200,
+            "examples": [
+              {
+                "name": "Coffee shop",
+                "url": "https://example.com"
+              }
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 100000000,
+            "description": "Stored Record size in bytes. Context: components.schemas.ScrapeRecord.properties.sizeBytes.",
+            "examples": [
+              512
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "UTC storage timestamp. Context: components.schemas.ScrapeRecord.properties.createdAt."
+          }
+        }
+      },
+      "ScrapeResultsResponse": {
+        "type": "object",
+        "description": "Stored scraper Results response. Context: components.schemas.ScrapeResultsResponse.",
+        "additionalProperties": false,
+        "required": [
+          "request",
+          "records",
+          "nextActions"
+        ],
+        "properties": {
+          "request": {
+            "type": "object",
+            "description": "Scraper Request metadata. Context: components.schemas.ScrapeResultsResponse.properties.request.",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "scraper",
+              "status",
+              "input",
+              "resultCount",
+              "estimatedCostUsdMicros",
+              "costUsdMicros",
+              "resultsUrl",
+              "errorMessage",
+              "agentInstruction",
+              "createdAt",
+              "updatedAt"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^request_[a-z0-9_]{1,56}$",
+                "description": "Request id. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.id.",
+                "examples": [
+                  "request_123"
+                ]
+              },
+              "scraper": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]{1,64}$",
+                "maxLength": 64,
+                "description": "Stable Scraper id. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.scraper.",
+                "examples": [
+                  "google-maps"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "queued",
+                  "running",
+                  "succeeded",
+                  "failed",
+                  "canceled"
+                ],
+                "description": "Request status. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.status.",
+                "examples": [
+                  "succeeded"
+                ]
+              },
+              "input": {
+                "type": "object",
+                "description": "Stored public input. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.input.",
+                "maxProperties": 100,
+                "examples": [
+                  {
+                    "query": "coffee shops in Istanbul",
+                    "limit": 100
+                  }
+                ]
+              },
+              "resultCount": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 1000000000,
+                "description": "Stored Record count. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.resultCount.",
+                "examples": [
+                  1
+                ]
+              },
+              "estimatedCostUsdMicros": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 100000000000,
+                "description": "Estimated maximum cost in USD micros when a limit is known. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.estimatedCostUsdMicros.",
+                "examples": [
+                  320000
+                ]
+              },
+              "costUsdMicros": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 0,
+                "maximum": 100000000000,
+                "description": "Final charged cost in USD micros. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.costUsdMicros.",
+                "examples": [
+                  3200
+                ]
+              },
+              "resultsUrl": {
+                "type": "string",
+                "pattern": "^/v1/requests/request_[a-z0-9_]{1,56}/results$",
+                "maxLength": 128,
+                "description": "Results endpoint path. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.resultsUrl.",
+                "examples": [
+                  "/v1/requests/request_123/results"
+                ]
+              },
+              "errorMessage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{0,1000}$",
+                "maxLength": 1000,
+                "description": "Recoverable error when status is failed. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.errorMessage.",
+                "examples": [
+                  null
+                ]
+              },
+              "agentInstruction": {
+                "type": "string",
+                "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+                "maxLength": 1000,
+                "description": "Agent-readable next step. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.agentInstruction.",
+                "examples": [
+                  "Fetch stored records."
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "UTC creation timestamp. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.createdAt.",
+                "examples": [
+                  "2026-06-17T12:00:00Z"
+                ]
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "UTC update timestamp. Context: components.schemas.ScrapeResultsResponse.properties.request.properties.updatedAt.",
+                "examples": [
+                  "2026-06-17T12:00:30Z"
+                ]
+              }
+            },
+            "examples": [
+              {
+                "id": "request_123",
+                "scraper": "google-maps",
+                "status": "succeeded",
+                "input": {
+                  "query": "coffee shops",
+                  "limit": 100
+                },
+                "resultCount": 1,
+                "estimatedCostUsdMicros": 320000,
+                "costUsdMicros": 3200,
+                "resultsUrl": "/v1/requests/request_123/results",
+                "errorMessage": null,
+                "agentInstruction": "Fetch stored records.",
+                "createdAt": "2026-06-17T12:00:00Z",
+                "updatedAt": "2026-06-17T12:00:30Z"
+              }
+            ]
+          },
+          "records": {
+            "type": "array",
+            "description": "Stored Records. Context: components.schemas.ScrapeResultsResponse.properties.records.",
+            "items": {
+              "$ref": "#/components/schemas/ScrapeRecord"
+            },
+            "examples": [
+              []
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.ScrapeResultsResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+              "maxLength": 1000
+            },
+            "examples": [
+              [
+                "Store the request id and fetch this endpoint again when you need the same results."
+              ]
+            ]
+          }
+        }
+      },
+      "ScrapeCancelResponse": {
+        "type": "object",
+        "description": "Scraper Request cancel response. Context: components.schemas.ScrapeCancelResponse.",
+        "additionalProperties": false,
+        "required": [
+          "requestId",
+          "canceled",
+          "status",
+          "agentInstruction"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "pattern": "^request_[a-z0-9_]{1,56}$",
+            "description": "Request id. Context: components.schemas.ScrapeCancelResponse.properties.requestId.",
+            "examples": [
+              "request_123"
+            ]
+          },
+          "canceled": {
+            "type": "boolean",
+            "description": "Whether this call changed status to canceled. Context: components.schemas.ScrapeCancelResponse.properties.canceled.",
+            "examples": [
+              true
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "canceled"
+            ],
+            "description": "Status after cancellation. Context: components.schemas.ScrapeCancelResponse.properties.status.",
+            "examples": [
+              "canceled"
+            ]
+          },
+          "agentInstruction": {
+            "type": "string",
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+            "maxLength": 1000,
+            "description": "Agent-readable next action. Context: components.schemas.ScrapeCancelResponse.properties.agentInstruction.",
+            "examples": [
+              "Request canceled. Create a new request when you are ready to retry."
+            ]
+          }
+        }
+      },
       "HealthResponse": {
         "type": "object",
         "description": "Health response for the control-plane API. Context: components.schemas.HealthResponse.",

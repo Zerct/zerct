@@ -1,7 +1,7 @@
 {
   "name": "tovuk",
-  "version": "0.1.104",
-  "description": "Deploy Rust workers, static frontends, and full-stack services to Tovuk.",
+  "version": "0.1.105",
+  "description": "Use Tovuk scraper APIs and manage Rust services from a native CLI.",
   "type": "module",
   "bin": {
     "tovuk": "bin/tovuk"
@@ -20,9 +20,9 @@
   "keywords": [
     "tovuk",
     "rust",
-    "deploy",
-    "worker",
-    "hosting"
+    "scraper",
+    "api",
+    "cli"
   ],
   "homepage": "https://tovuk.com",
   "repository": {
