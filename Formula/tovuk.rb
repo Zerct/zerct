@@ -1,7 +1,7 @@
 class Tovuk < Formula
-  desc "Deploy Rust workers, static frontends, and full-stack services to Tovuk"
+  desc "Use Tovuk scraper APIs and manage Rust services from a native CLI"
   homepage "https://tovuk.com"
-  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.104"
+  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.105"
   license "MIT"
 
   depends_on "rust" => :build
@@ -21,6 +21,9 @@ class Tovuk < Formula
     assert_match "tovuk account show", help
     assert_match "tovuk account update", help
     assert_match "tovuk pricing", help
+    assert_match "tovuk scraper list", help
+    assert_match "tovuk request create", help
+    assert_match "tovuk request results", help
     assert_match "tovuk service show", help
     assert_match "tovuk billing [checkout|portal]", help
     assert_match "tovuk storage list", help

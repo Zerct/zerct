@@ -1,7 +1,7 @@
 # tovuk
 
-Rust CLI package for deploying Rust workers, static frontends, and full-stack
-services to Tovuk.
+Rust CLI package for Tovuk scraper APIs, Rust workers, static frontends, and
+full-stack services.
 This is the native source of truth for the Tovuk CLI. It does not require
 Node.js, npm, Python, or any JavaScript runtime.
 
@@ -56,6 +56,19 @@ The Cargo package exposes the same agent command surface as npm:
 ```sh
 tovuk pricing
 tovuk pricing --json
+tovuk scraper list --json
+tovuk scraper show google-maps --json
+tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json
+tovuk request show request_123 --json
+tovuk request results request_123 --json
+tovuk request cancel request_123 --json
 tovuk account show --json
 tovuk account activity --json
 tovuk deploy --dry-run --json
@@ -148,6 +161,13 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
+`tovuk scraper list --json` returns public-data Scrapers with price events.
+`tovuk request create <scraper> '<json>' --json` creates paid scraper work, and
+`tovuk request results <request_id> --json` fetches stored Records. Scraper
+Requests must not include cookies, passwords, account tokens, private session
+data, private account content, GitHub tokens, private repository credentials, or
+proxy URLs. GitHub Requests accept public search, repository, profile,
+trending, opportunity, and Marketplace inputs.
 `tovuk check --json` returns top-level `ok` plus `checks[]` entries with
 `ok`, `status`, `message`, and `agent_instruction`, so agents can filter
 `checks[] | select(.status == "failed")`.

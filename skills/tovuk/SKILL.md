@@ -1,12 +1,12 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and full-stack services to Tovuk with `tovuk`.
+description: Use Tovuk scraper APIs and manage Rust services with `tovuk`.
 ---
 
 # Tovuk
 
-Use when a user wants to deploy a Rust worker, static frontend, or
-full-stack service to Tovuk.
+Use when a user wants to create Tovuk scraper Requests, fetch stored Results,
+deploy a Rust worker, static frontend, or full-stack service to Tovuk.
 
 ## Workflow
 
@@ -42,12 +42,43 @@ command must force JSON without changing the session environment.
 12. If a build fails, run `tovuk logs --build <build_id>`, fix the
     first actionable log error, rerun check, and redeploy.
 
+For scraper API work:
+
+1. Run `tovuk scraper list --json`.
+2. Run
+   `tovuk request create <scraper> '{"query":"public search","limit":100}' --json`.
+3. For GitHub, use public input only, for example
+   `tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json`
+   or
+   `tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json`
+   or
+   `tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json`.
+4. For X, use public input only, for example
+   `tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json`
+   or
+   `tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json`.
+5. Poll with `tovuk request show <request_id> --json`.
+6. Fetch stored Records with `tovuk request results <request_id> --json`.
+7. Do not send cookies, passwords, account tokens, GitHub tokens, private
+   repository credentials, private session data, private account content, or
+   proxy URLs. For Instagram, send only public profile URLs, post URLs, reel
+   URLs, hashtag URLs, usernames, shortcodes, media ids, hashtags, or search
+   terms; Tovuk manages reader accounts internally. Tovuk manages X read
+   accounts and Webshare egress internally.
+
 ## Service resources
 
 Agents can manage runtime resources without dashboard access:
 
 ```sh
 tovuk service show <service> --json
+tovuk scraper list --json
+tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request show request_123 --json
+tovuk request results request_123 --json
 tovuk sqlite create --service <service> DB --json
 tovuk kv create --service <service> CACHE --json
 tovuk kv bulk put --service <service> CACHE '[{"key":"feature:search","value":"enabled"}]' --json

@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
   "name": "Tovuk",
-  "description": "Deploy Rust workers, static frontends, and full-stack services with agent-readable checks.",
+  "description": "Use Tovuk scraper APIs and manage Rust services with agent-readable checks.",
   "colors": {
     "primary": "#171717",
     "light": "#FAFAFA",
@@ -64,6 +64,7 @@
             "pages": [
               "index",
               "quickstart",
+              "scrapers",
               "agents",
               "templates",
               "deploy"

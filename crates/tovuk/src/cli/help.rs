@@ -15,6 +15,13 @@ Usage:
   tovuk account activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk account update --handle <handle> [--display-name <name>] [--api <url>] [--json]
   tovuk pricing [--api <url>] [--json]
+  tovuk scraper list [--api <url>] [--json]
+  tovuk scraper show <scraper> [--api <url>] [--json]
+  tovuk request list [--limit <n>] [--api <url>] [--json]
+  tovuk request create <scraper> '{"query":"coffee shops","limit":100}' [--limit <n>] [--api <url>] [--json]
+  tovuk request show <request_id> [--api <url>] [--json]
+  tovuk request results <request_id> [--limit <n>] [--api <url>] [--json]
+  tovuk request cancel <request_id> [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
   tovuk service list [--api <url>] [--json]
   tovuk service status <service> [--api <url>] [--json]
@@ -116,6 +123,8 @@ Agent contract:
   - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
   - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
   - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages. Pass --notify-at-percent to control the warning threshold.
+  - Use tovuk scraper list --json to choose a public-data scraper, tovuk request create <scraper> '<json>' --json to create paid scraper work, tovuk request show <request_id> --json to poll status, and tovuk request results <request_id> --json to fetch stored records.
+  - Scraper requests must use public URLs, public search terms, public profile handles, or public place ids only. Do not send cookies, passwords, account tokens, private session data, or private account content.
   - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions. Add --build-artifact after dependency changes to build the local release binary and compare its gzip size against the account worker limit before upload.
   - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
   - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
