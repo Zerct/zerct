@@ -1,7 +1,7 @@
 # tovuk
 
-Python CLI package for deploying Rust workers, static frontends, and full-stack
-services to Tovuk.
+Python CLI package for Tovuk scraper APIs, Rust workers, static frontends, and
+full-stack services.
 It installs or downloads the same native Tovuk binary used by npm, Homebrew,
 and Cargo. PyPI requires Python to install and launch the package, but it does
 not require Node.js, npm, or any JavaScript runtime.
@@ -65,6 +65,19 @@ The Python package exposes the same agent command surface as npm:
 ```sh
 tovuk pricing
 tovuk pricing --json
+tovuk scraper list --json
+tovuk scraper show google-maps --json
+tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json
+tovuk request show request_123 --json
+tovuk request results request_123 --json
+tovuk request cancel request_123 --json
 tovuk account show --json
 tovuk account activity --json
 tovuk deploy --dry-run --json
@@ -153,6 +166,15 @@ kind, runtime status, URL, enabled and disabled capabilities, and resource count
 `tovuk service status <service> --json` returns top-level `ok`, `url`, and
 `agent_instruction` fields for smoke tests; text mode prints only the
 live/deploy/build summary. `tovuk service show <service>` prints the broader Service snapshot.
+`tovuk scraper list --json` returns public-data Scrapers with price events.
+`tovuk request create <scraper> '<json>' --json` creates paid scraper work, and
+`tovuk request results <request_id> --json` fetches stored Records. Scraper
+Requests must not include cookies, passwords, account tokens, private session
+data, private account content, GitHub tokens, private repository credentials, or
+proxy URLs. GitHub Requests accept public search, repository, profile,
+trending, opportunity, and Marketplace inputs. Instagram Requests accept only
+public profile URLs, post URLs, reel URLs, hashtag URLs, usernames, shortcodes,
+media ids, hashtags, or search terms; Tovuk manages reader accounts internally.
 Dashboard Overview Service rows expose copyable commands for `service status`,
 `service show`, logs, storage listing, worker request caps, support tickets,
 and service deletion.

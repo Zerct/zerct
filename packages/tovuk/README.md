@@ -1,6 +1,6 @@
 # tovuk
 
-Deploy Rust workers, static frontends, and full-stack services to Tovuk.
+Use Tovuk scraper APIs and manage Rust services from a native CLI.
 
 ```sh
 npm install -g tovuk
@@ -91,6 +91,15 @@ Before high-throughput work, read pricing and set hard caps:
 tovuk pricing --json
 tovuk usage --json
 tovuk account activity --json
+tovuk scraper list --json
+tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request show request_123 --json
+tovuk request results request_123 --json
 tovuk deploy --dry-run --json
 tovuk deploy list --json
 tovuk deploy show deploy_1 --json
@@ -100,6 +109,14 @@ tovuk limits set worker_requests --period month --value 10000000 --notify-at-per
 
 The pricing response includes plan pricing and product meter metadata, so agents
 can choose the correct product and cap the right meters in one flow.
+The scraper catalog returns public-data Scrapers with price events. Scraper
+Requests require paid billing and must not include cookies, passwords, account
+tokens, GitHub tokens, private repository credentials, private session data,
+private account content, or proxy URLs. GitHub Requests accept public search,
+repository, profile, trending, opportunity, and Marketplace inputs. Instagram
+Requests accept only public
+profile URLs, post URLs, reel URLs, hashtag URLs, usernames, shortcodes, media
+ids, hashtags, or search terms; Tovuk manages reader accounts internally.
 The usage response includes `billingEstimate.lineItems` for current-month cost
 estimates.
 Without `--json`, `tovuk service list` prints a compact table with Service

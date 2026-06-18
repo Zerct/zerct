@@ -2,9 +2,10 @@
 
 Public Tovuk workspace for packages, agent skills, examples, and docs.
 
-Tovuk hosts Rust workers, static frontends, and full-stack services. A
-full-stack service uses one `tovuk.toml`, one deployment URL, static files at
-`/`, and a Rust worker under `/api/*`.
+Tovuk exposes public-data scraper APIs and still ships native CLI support for
+Rust workers, static frontends, and full-stack services. A full-stack service
+uses one `tovuk.toml`, one deployment URL, static files at `/`, and a Rust
+worker under `/api/*`.
 
 ## Install
 
@@ -30,6 +31,14 @@ tovuk new
 tovuk check
 tovuk account show
 tovuk account update --handle your-handle --display-name "Your Team"
+tovuk scraper list --json
+tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request show <request_id> --json
+tovuk request results <request_id> --json
 tovuk deploy --dry-run
 tovuk deploy --wait
 tovuk deploy list
@@ -41,6 +50,18 @@ tovuk deploy cancel <deploy_id>
 behavior is controlled only by the committed `tovuk.toml`. Agents must review
 `[capabilities]` before deploy instead of relying on automatic project
 detection.
+
+Scraper Requests are paid work for public data only. Do not send cookies,
+passwords, account tokens, GitHub tokens, private repository credentials,
+private session data, private account content, or proxy URLs. For GitHub
+Requests, send public repository queries, repository URLs, `owner/repo` names,
+languages, topics, trending scans, opportunities scans, or public GitHub
+Marketplace listing and app URLs only. For Instagram
+Requests, send public profile URLs, post URLs, reel URLs, hashtag URLs,
+usernames, shortcodes, media ids, hashtags, or search terms only. For X
+Requests, send public queries, post/profile URLs, handles, user ids, or post
+ids only. For Reddit Requests, send public subreddit names, search terms, post
+URLs, post ids, or usernames only; Tovuk manages managed proxy provider egress internally.
 
 Create a full-stack starter:
 

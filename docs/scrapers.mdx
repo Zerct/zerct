@@ -1,0 +1,187 @@
+---
+title: "Scraper API"
+description: "Use Tovuk Scrapers, Requests, Results, and Records from API or CLI."
+---
+
+Tovuk Scrapers read public data and store the output as Results. Use Requests
+to start work, poll status, and fetch Records later without building your own
+storage layer.
+
+Scraper Requests require paid billing. Catalog reads are public, but creating a
+Request returns `payment_required` until billing is active.
+
+## Names
+
+- Scraper: a public-data source such as `google-maps`, `website`, or `reddit`.
+- Request: one paid scraper run.
+- Results: stored output for one Request.
+- Record: one JSON item inside Results.
+
+## CLI
+
+```sh
+tovuk scraper list --json
+tovuk scraper show google-maps --json
+tovuk request create google-maps '{"query":"coffee shops in Istanbul","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"marketplace","appsUrls":[{"url":"https://github.com/marketplace/codecov"}],"limit":10}' --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
+tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
+tovuk request create instagram '{"url":"https://www.instagram.com/reel/SHORTCODE/","operation":"comments","limit":100}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json
+tovuk request show <request_id> --json
+tovuk request results <request_id> --json
+tovuk request cancel <request_id> --json
+```
+
+Use `--limit <n>` on `tovuk request create` to add or override `input.limit`.
+Use `--limit <n>` on `tovuk request results` to read fewer stored Records.
+
+## API
+
+```http
+GET /v1/scrapers
+GET /v1/scrapers/{scraper}
+POST /v1/requests
+GET /v1/requests
+GET /v1/requests/{request_id}
+POST /v1/requests/{request_id}/cancel
+GET /v1/requests/{request_id}/results
+```
+
+Create a Request:
+
+```json
+{
+  "scraper": "google-maps",
+  "input": {
+    "query": "coffee shops in Istanbul",
+    "limit": 100
+  }
+}
+```
+
+Create an X Request:
+
+```json
+{
+  "scraper": "x",
+  "input": {
+    "query": "rust lang",
+    "product": "Latest",
+    "limit": 100
+  }
+}
+```
+
+X also accepts a public `x.com` or `twitter.com` post/profile URL, `username`,
+`userId`, or `tweetId`. Tovuk stores canonical public input fields and runs X
+reads through managed infrastructure.
+
+Create a GitHub Request:
+
+```json
+{
+  "scraper": "github",
+  "input": {
+    "operation": "opportunities",
+    "query": "agent skills registry",
+    "limit": 25
+  }
+}
+```
+
+Create a GitHub Marketplace Request:
+
+```json
+{
+  "scraper": "github",
+  "input": {
+    "operation": "marketplace",
+    "appsUrls": [
+      {
+        "url": "https://github.com/marketplace/codecov"
+      }
+    ],
+    "limit": 10
+  }
+}
+```
+
+GitHub accepts public repository search queries, public `github.com` repository
+URLs, `owner/repo` names, `language`, `topic`, `operation: "trending"`, and
+`operation: "opportunities"`. It also accepts `operation: "marketplace"` with
+`query` or `searchQuery` for Marketplace search, `marketplaceUrls`, and
+Apify-compatible `appsUrls` for public Marketplace app pages. Tovuk stores
+canonical public input fields and returns repository-shaped or Marketplace app
+Records.
+
+Create a Reddit Request:
+
+```json
+{
+  "scraper": "reddit",
+  "input": {
+    "operation": "comments",
+    "url": "https://www.reddit.com/r/rust/comments/POST_ID/example/",
+    "limit": 100
+  }
+}
+```
+
+Reddit accepts public subreddit names, public search queries, public Reddit post
+URLs, `postId`, and public usernames. Operations are `subreddit`, `search`,
+`post`, `comments`, and `user`. Tovuk stores canonical public input fields and
+runs reads through managed managed proxy provider egress.
+
+Create an Instagram Request:
+
+```json
+{
+  "scraper": "instagram",
+  "input": {
+    "operation": "comments",
+    "url": "https://www.instagram.com/reel/SHORTCODE/",
+    "limit": 100
+  }
+}
+```
+
+Instagram accepts public profile URLs, post URLs, reel URLs, hashtag URLs,
+`username`, `shortcode`, `mediaId`, `hashtag`, `query`, and operations
+`profile`, `post`, `reel`, `comments`, `hashtag`, and `search`. Tovuk stores
+canonical public input fields and runs reads through Tovuk-managed reader
+accounts.
+
+Every Request stores its public input, status, estimated cost when `limit` is
+known, final cost, `resultsUrl`, and `agentInstruction`.
+
+## Public Data Only
+
+Do not send cookies, passwords, account tokens, private session data, or private
+account content. Send public URLs, public search terms, public profile handles,
+public repository names, public place ids, and public company or domain inputs
+only.
+
+For X Requests, never send login cookies, account credentials, session tokens,
+or proxy URLs. Tovuk manages X read accounts and managed proxy provider egress internally.
+
+For GitHub Requests, never send GitHub tokens, personal access tokens, private
+repository URLs, git credentials, cookies, session tokens, or proxy URLs.
+
+For Reddit Requests, never send Reddit cookies, account credentials, session
+tokens, private community content, or proxy URLs. Tovuk manages managed proxy provider egress
+internally and only accepts public Reddit targets.
+
+For Instagram Requests, never send Instagram cookies, account credentials,
+session tokens, private profile content, or proxy URLs. Tovuk manages reader
+accounts internally and only accepts public Instagram targets.
+
+## Prices
+
+`GET /v1/scrapers` returns `priceEvents` in USD micro-units. `1,000,000` means
+`$1.00`. Prices are per public Record unit, such as `place`, `post`, `review`,
+`page`, or `record`.

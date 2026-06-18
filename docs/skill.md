@@ -1,6 +1,6 @@
 ---
 name: tovuk
-description: Deploy Rust workers, static frontends, and full-stack services to Tovuk.
+description: Use Tovuk scraper APIs, Rust workers, static frontends, and full-stack services.
 license: MIT
 compatibility: Requires tovuk.toml. Full-stack services use one root tovuk.toml with worker and frontend roots. Rust workers require Cargo.toml and Cargo.lock. Package frontends require package.json, TypeScript source, typecheck/lint scripts, and a package lockfile. Plain static frontends require index.html.
 metadata:
@@ -10,9 +10,9 @@ metadata:
 
 # Tovuk
 
-Use this skill when a user wants to deploy a Rust worker, static frontend, or
-full-stack service to Tovuk, inspect a deployment, read logs, or prepare a
-project for deployment.
+Use this skill when a user wants to create Tovuk scraper Requests, fetch stored
+Results, deploy a Rust worker, static frontend, or full-stack service to Tovuk,
+inspect a deployment, read logs, or prepare a project for deployment.
 
 ## Project contract
 
@@ -60,8 +60,37 @@ tovuk deploy list --json
 tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json
 tovuk pricing --json
+tovuk scraper list --json
+tovuk scraper show google-maps --json
+tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
+tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
+tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
+tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json
+tovuk request show <request_id> --json
+tovuk request results <request_id> --json
+tovuk request cancel <request_id> --json
 tovuk logs --build <build_id> --json
 ```
+
+Scraper Requests are for public data only. Do not send cookies, passwords,
+account tokens, GitHub tokens, private repository credentials, private session
+data, private account content, or proxy URLs. For GitHub Requests, use public
+queries, public repository URLs, `owner/repo` names, languages, topics, trending
+scans, opportunities scans, or public Marketplace search and app URLs. For X
+Requests, use public queries, public post/profile URLs, handles, user ids, or
+post ids; Tovuk manages X read
+accounts and managed proxy provider egress internally. For Instagram Requests, use public
+profile URLs, post URLs, reel URLs, hashtag URLs, usernames, shortcodes, media
+ids, hashtags, or search terms; Tovuk manages reader accounts internally. For
+Reddit Requests, use public subreddit names, search terms, post URLs, post ids,
+or usernames; Tovuk manages managed proxy provider egress internally. If Request creation
+returns
+`payment_required`, run `tovuk billing checkout --json` and show the hosted
+checkout URL to the human.
 
 Before opening a local dev URL, inspect `tovuk dev --json`. If it returns
 `ok: false`, read `dev.port_statuses[].owner`, stop the process using the
