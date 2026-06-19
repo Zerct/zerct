@@ -65,6 +65,7 @@ tovuk request create github '{"operation":"opportunities","query":"agent skills 
 tovuk request create github '{"operation":"watchers","repo":"rust-lang/rust","limit":50}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
 tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json

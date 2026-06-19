@@ -74,6 +74,7 @@ tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json
 tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
@@ -101,10 +102,11 @@ post ids; Tovuk manages X read
 accounts and Webshare egress internally. For Instagram Requests, use public
 profile URLs, post URLs, reel URLs, hashtag URLs, usernames, shortcodes, media
 ids, hashtags, or search terms; Tovuk manages reader accounts internally. For
-Reddit Requests, use public subreddit names, search terms, post URLs, post ids,
-usernames, public search filters such as `contentType` and
-`autoDiscoverSubreddits`, direct comment ordering via `commentSort`, or
-top-level output `fields`; Tovuk manages Webshare egress internally.
+Reddit Requests, use public subreddit names, public subreddit URLs, search
+terms, post URLs, post ids, usernames, public search filters such as
+`contentType` and `autoDiscoverSubreddits`, direct comment ordering via
+`commentSort`, or top-level output `fields`; Tovuk manages Webshare egress
+internally.
 For LinkedIn Requests, use public job search URLs, job ids, company URLs or
 names, profile URLs or public identifiers, people-search filters, post URLs,
 post-search terms, content filters, public author/member/company/industry ids,
