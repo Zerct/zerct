@@ -25,13 +25,17 @@ tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops in Istanbul","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json
 tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","appsUrls":[{"url":"https://github.com/marketplace/codecov"}],"limit":10}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
-tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
+tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
+tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json
+tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
+tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
 tovuk request create instagram '{"url":"https://www.instagram.com/reel/SHORTCODE/","operation":"comments","limit":100}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
@@ -115,7 +119,21 @@ Create a GitHub Marketplace Request:
 }
 ```
 
-Create a GitHub Code Search Request:
+Create a broad GitHub Code Search Request:
+
+```json
+{
+  "scraper": "github",
+  "input": {
+    "operation": "codeSearch",
+    "query": "serde language:Rust",
+    "maxRepos": 3,
+    "limit": 25
+  }
+}
+```
+
+Create a repo-scoped GitHub Code Search Request:
 
 ```json
 {
@@ -149,7 +167,10 @@ GitHub accepts public repository search queries, public `github.com` repository
 URLs, `owner/repo` names, `language`, `topic`, `operation: "trending"`,
 `operation: "trendingDevelopers"`, `operation: "opportunities"`,
 `operation: "codeSearch"` with public code queries plus optional `language`,
-`repo`, `filename`, or `path` filters,
+`repo`, `filename`, `path`, or GitHub-style query qualifiers such as
+`repo:owner/name`, `language:Rust`, `filename:Cargo.toml`, or `path:src`.
+Omit `repo` to let Tovuk discover candidate public repositories first, and use
+`maxRepos` to cap repository archive scans.
 `operation: "issue"` for public issue detail URLs or `number`, and
 `operation: "pullRequest"` for public pull request detail URLs or `number`. It
 also accepts `operation: "file"` with public `repo` plus `path`, public
@@ -167,17 +188,71 @@ Create a Reddit Request:
 {
   "scraper": "reddit",
   "input": {
-    "operation": "comments",
-    "url": "https://www.reddit.com/r/rust/comments/POST_ID/example/",
-    "limit": 100
+    "query": "rust lang",
+    "contentType": "both",
+    "autoDiscoverSubreddits": true,
+    "maxSubreddits": 5,
+    "fields": ["type", "id", "url", "title", "bodyText", "score"],
+    "maxResults": 50
   }
 }
 ```
 
 Reddit accepts public subreddit names, public search queries, public Reddit post
-URLs, `postId`, and public usernames. Operations are `subreddit`, `search`,
-`post`, `comments`, and `user`. Tovuk stores canonical public input fields and
-runs reads through managed managed proxy provider egress.
+URLs, `postId`, and public usernames. Use `contentType: "posts"`,
+`contentType: "comments"`, or `contentType: "both"` to select post search,
+comment search, or both result types in one Request. Set
+`autoDiscoverSubreddits: true` with `maxSubreddits` on site-wide search to
+discover relevant public communities first, then search across them while
+keeping total Records capped by `limit` or `maxResults`. Add `fields` when you
+want compact Records with only selected top-level JSON fields. Operations include
+`subreddit`, `search`, `search-comments`, `search-communities`, `search-users`,
+`subreddit-users`, `post`, `comments`, `user`, `user-posts`, `user-comments`,
+`user-overview`, `popular`, and `all`. For direct post or comment requests,
+`commentSort` aliases `sort` and supports public Reddit comment ordering.
+Tovuk stores canonical public input fields and runs reads through managed
+managed proxy provider egress.
+
+Create a TikTok Request:
+
+```json
+{
+  "scraper": "tiktok",
+  "input": {
+    "operation": "search",
+    "query": "rust programming",
+    "outputFields": ["id", "desc", "author.uniqueId", "stats.playCount"],
+    "limit": 30
+  }
+}
+```
+
+Create a TikTok Sound Request:
+
+```json
+{
+  "scraper": "tiktok",
+  "input": {
+    "operation": "sound",
+    "soundUrls": ["https://www.tiktok.com/music/original-sound-1234567890"],
+    "limit": 30
+  }
+}
+```
+
+TikTok accepts public video URLs, profile URLs, usernames, video ids, hashtags,
+music ids, place ids, Ads Library URLs, Shop URLs, public Shop ids, public
+product ids, public search terms, and operations such as `video`, `profile`,
+`videos`, `search`, `hashtag`, `music`, `comments`, `followers`, `following`,
+`ads`, `shop`, and `location`. Use `fields`, `outputFields`, `includeFields`,
+or `fieldProjection` for safe dot-path projection. Tovuk returns projected
+values in `selectedFields`, `selectedItems`, `selectedComments`, or
+`selectedUsers` without executing customer JavaScript. Public-input aliases such
+as `profileUrls`, `handles`, `queries`, `userSearch`, `videoSearch`, `sound`,
+`soundUrls`, `musicUrls`, `soundIds`, `region`, `startDate`, `endDate`,
+`minLikes`, `maxLikes`, `downloadVideos`, `downloadSubtitles`, and
+`transcribeVideos` normalize onto the same public options; cookies, passwords,
+tokens, session data, and proxy URLs are not accepted.
 
 Create an Instagram Request:
 
@@ -216,7 +291,7 @@ repository URLs, git credentials, cookies, session tokens, or proxy URLs.
 
 For Reddit Requests, never send Reddit cookies, account credentials, session
 tokens, private community content, or proxy URLs. Tovuk manages managed proxy provider egress
-internally and only accepts public Reddit targets.
+internally and only accepts public Reddit targets and public search filters.
 
 For Instagram Requests, never send Instagram cookies, account credentials,
 session tokens, private profile content, or proxy URLs. Tovuk manages reader

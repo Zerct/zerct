@@ -52,6 +52,8 @@ For scraper API work:
    or
    `tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json`
    or
+   `tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json`
+   or
    `tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json`
    or
    `tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json`
@@ -74,7 +76,20 @@ For scraper API work:
    For Instagram, send only public profile URLs, post URLs, reel
    URLs, hashtag URLs, usernames, shortcodes, media ids, hashtags, or search
    terms; Tovuk manages reader accounts internally. Tovuk manages X read
-   accounts and managed proxy provider egress internally.
+   accounts and managed proxy provider egress internally. For Reddit, send only public
+   subreddit names, search terms, post URLs, post ids, usernames, and public
+   search filters such as `contentType` and `autoDiscoverSubreddits`, direct
+   comment ordering via `commentSort`, and top-level output `fields`; Tovuk
+   manages managed proxy provider egress internally.
+   For TikTok, send only public video URLs, profile URLs, usernames, video ids,
+   hashtags, music ids, place ids, Ads Library URLs, Shop URLs, public Shop ids,
+   public product ids, public search terms, and projection fields such as
+   `fields` or `outputFields`. Public-input aliases such as `profileUrls`,
+   `handles`, `queries`, `userSearch`, `videoSearch`, `sound`, `soundUrls`,
+   `musicUrls`, `soundIds`, `region`, `startDate`, `endDate`, `minLikes`,
+   `maxLikes`, `downloadVideos`, `downloadSubtitles`, and `transcribeVideos`
+   are accepted; cookies, passwords, tokens, session data, and proxy URLs are
+   not.
 
 ## Service resources
 
@@ -85,11 +100,15 @@ tovuk service show <service> --json
 tovuk scraper list --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json
 tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
+tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
+tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
+tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
 tovuk request show request_123 --json
 tovuk request results request_123 --json
