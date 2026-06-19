@@ -65,6 +65,7 @@ tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
@@ -82,10 +83,11 @@ tovuk logs --build <build_id> --json
 Scraper Requests are for public data only. Do not send cookies, passwords,
 account tokens, GitHub tokens, private repository credentials, private session
 data, private account content, or proxy URLs. For GitHub Requests, use public
-queries, public repository URLs, `owner/repo` names, languages, topics, trending
-repository or developer scans, opportunities scans, public issue or pull
-request URLs, public blob or raw file URLs, public repository file paths, or
-public Marketplace search and app URLs. For X
+queries, public code search queries and filters, public repository URLs,
+`owner/repo` names, languages, topics, trending repository or developer scans,
+opportunities scans, public issue or pull request URLs, public blob or raw file
+URLs, public repository file paths, or public Marketplace search and app URLs.
+For X
 Requests, use public queries, public post/profile URLs, handles, user ids, or
 post ids; Tovuk manages X read
 accounts and managed proxy provider egress internally. For Instagram Requests, use public

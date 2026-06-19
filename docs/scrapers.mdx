@@ -25,6 +25,7 @@ tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops in Istanbul","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
@@ -114,6 +115,22 @@ Create a GitHub Marketplace Request:
 }
 ```
 
+Create a GitHub Code Search Request:
+
+```json
+{
+  "scraper": "github",
+  "input": {
+    "operation": "codeSearch",
+    "query": "StreamableHTTPClientTransport",
+    "language": "TypeScript",
+    "repo": "modelcontextprotocol/typescript-sdk",
+    "path": "examples/client/src",
+    "limit": 25
+  }
+}
+```
+
 Create a GitHub File Request:
 
 ```json
@@ -131,6 +148,8 @@ Create a GitHub File Request:
 GitHub accepts public repository search queries, public `github.com` repository
 URLs, `owner/repo` names, `language`, `topic`, `operation: "trending"`,
 `operation: "trendingDevelopers"`, `operation: "opportunities"`,
+`operation: "codeSearch"` with public code queries plus optional `language`,
+`repo`, `filename`, or `path` filters,
 `operation: "issue"` for public issue detail URLs or `number`, and
 `operation: "pullRequest"` for public pull request detail URLs or `number`. It
 also accepts `operation: "file"` with public `repo` plus `path`, public
