@@ -1682,6 +1682,18 @@
                     }
                   }
                 },
+                "githubBroadCodeSearch": {
+                  "summary": "Create Broad GitHub Code Search Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "codeSearch",
+                      "query": "serde language:Rust",
+                      "maxRepos": 3,
+                      "limit": 25
+                    }
+                  }
+                },
                 "githubOpportunities": {
                   "summary": "Create GitHub Opportunities Request",
                   "value": {
@@ -1759,6 +1771,27 @@
                     }
                   }
                 },
+                "redditSearchBoth": {
+                  "summary": "Create Reddit Post And Comment Search Request",
+                  "value": {
+                    "scraper": "reddit",
+                    "input": {
+                      "query": "rust lang",
+                      "contentType": "both",
+                      "autoDiscoverSubreddits": true,
+                      "maxSubreddits": 5,
+                      "fields": [
+                        "type",
+                        "id",
+                        "url",
+                        "title",
+                        "bodyText",
+                        "score"
+                      ],
+                      "maxResults": 50
+                    }
+                  }
+                },
                 "redditComments": {
                   "summary": "Create Reddit Comments Request",
                   "value": {
@@ -1766,7 +1799,43 @@
                     "input": {
                       "operation": "comments",
                       "url": "https://www.reddit.com/r/rust/comments/POST_ID/example/",
+                      "commentSort": "top",
                       "limit": 100
+                    }
+                  }
+                },
+                "tiktokSearch": {
+                  "summary": "Create TikTok Search Request",
+                  "value": {
+                    "scraper": "tiktok",
+                    "input": {
+                      "operation": "search",
+                      "q": "rust programming",
+                      "searchType": "video",
+                      "region": "US",
+                      "startDate": "2026-01-01",
+                      "minLikes": 10,
+                      "includeSubtitles": true,
+                      "outputFields": [
+                        "id",
+                        "desc",
+                        "author.uniqueId",
+                        "stats.playCount"
+                      ],
+                      "limit": 30
+                    }
+                  }
+                },
+                "tiktokSound": {
+                  "summary": "Create TikTok Sound Request",
+                  "value": {
+                    "scraper": "tiktok",
+                    "input": {
+                      "operation": "sound",
+                      "soundUrls": [
+                        "https://www.tiktok.com/music/original-sound-1234567890"
+                      ],
+                      "limit": 30
                     }
                   }
                 },
