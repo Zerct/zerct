@@ -1804,6 +1804,34 @@
                     }
                   }
                 },
+                "linkedinPostSearch": {
+                  "summary": "Create LinkedIn Post Search Request",
+                  "value": {
+                    "scraper": "linkedin",
+                    "input": {
+                      "operation": "post-search",
+                      "query": "b2b sales",
+                      "sort_type": "date_posted",
+                      "date_filter": "past-week",
+                      "author_company_urns": "1035",
+                      "author_industry_urns": "4,43",
+                      "author_job_title": "founder",
+                      "limit": 25
+                    }
+                  }
+                },
+                "linkedinCompanyEmployees": {
+                  "summary": "Create LinkedIn Company Employees Request",
+                  "value": {
+                    "scraper": "linkedin",
+                    "input": {
+                      "operation": "company-employees",
+                      "identifier": "https://www.linkedin.com/company/google/",
+                      "job_title": "engineer OR developer",
+                      "max_employees": 50
+                    }
+                  }
+                },
                 "tiktokSearch": {
                   "summary": "Create TikTok Search Request",
                   "value": {

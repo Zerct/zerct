@@ -63,13 +63,17 @@ For scraper API work:
    `tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json`
    or
    `tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json`.
-4. For X, use public input only, for example
+4. For LinkedIn, use public input only, for example
+   `tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json`
+   or
+   `tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json`.
+5. For X, use public input only, for example
    `tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json`
    or
    `tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json`.
-5. Poll with `tovuk request show <request_id> --json`.
-6. Fetch stored Records with `tovuk request results <request_id> --json`.
-7. Do not send cookies, passwords, account tokens, GitHub tokens, private
+6. Poll with `tovuk request show <request_id> --json`.
+7. Fetch stored Records with `tovuk request results <request_id> --json`.
+8. Do not send cookies, passwords, account tokens, GitHub tokens, private
    repository credentials, private session data, private account content, or
    proxy URLs. For GitHub, send only public repository queries, code search
    queries and filters, URLs, usernames, repository names, and public filters.
@@ -81,6 +85,11 @@ For scraper API work:
    search filters such as `contentType` and `autoDiscoverSubreddits`, direct
    comment ordering via `commentSort`, and top-level output `fields`; Tovuk
    manages Webshare egress internally.
+   For LinkedIn, send only public job search URLs, job ids, company URLs or
+   names, profile URLs or public identifiers, people-search filters, post URLs,
+   post-search terms, content filters, public author/member/company/industry
+   ids, and company employee filters; Tovuk manages Webshare egress and reader
+   sessions internally.
    For TikTok, send only public video URLs, profile URLs, usernames, video ids,
    hashtags, music ids, place ids, Ads Library URLs, Shop URLs, public Shop ids,
    public product ids, public search terms, and projection fields such as
@@ -107,6 +116,8 @@ tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
+tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
+tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
 tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json

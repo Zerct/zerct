@@ -54,6 +54,9 @@ func checkDocs() {
 	logsBuilds := readText("docs/reference/logs-builds.mdx")
 	usageCaps := readText("docs/reference/usage-caps.mdx")
 	llms := readText("docs/llms.txt")
+	scrapers := readText("docs/scrapers.mdx")
+	skill := readText("docs/skill.md")
+	packagedSkill := readText("skills/tovuk/SKILL.md")
 	status := readText("docs/status.mdx")
 	abuse := readText("docs/abuse.mdx")
 	support := readText("docs/support.mdx")
@@ -62,15 +65,15 @@ func checkDocs() {
 		readme,
 		openapi,
 		readText("docs/docs.json"),
-		readText("docs/llms.txt"),
-		readText("docs/skill.md"),
+		llms,
+		skill,
 		strings.Join(readSortedTextsRecursive("docs", ".mdx"), "\n"),
 		readText("crates/tovuk/README.md"),
 		readText("packages/tovuk/README.md"),
 		readText("packages/tovuk/package.json"),
 		readText("packages/tovuk-py/README.md"),
 		readText("packages/tovuk-py/pyproject.toml"),
-		readText("skills/tovuk/SKILL.md"),
+		packagedSkill,
 	}, "\n")
 	rejectForbiddenPublicCopyTerms("public docs and package copy", publicCopy)
 	allUsageCapMeters := []string{
@@ -118,6 +121,34 @@ func checkDocs() {
 		requireContains(llms, "docs/"+page+".mdx", "llms resource reference "+page)
 	}
 	checkOpenAPIMeterContracts("docs/openapi.json", allUsageCapMeters)
+	for _, source := range []struct {
+		name string
+		text string
+	}{
+		{"README", readme},
+		{"scraper docs", scrapers},
+		{"llms", llms},
+		{"docs skill", skill},
+		{"packaged skill", packagedSkill},
+	} {
+		requireContains(
+			source.text,
+			`tovuk request create linkedin '{"operation":"post-search"`,
+			source.name+" LinkedIn post-search example",
+		)
+		requireContains(
+			source.text,
+			"company-employees",
+			source.name+" LinkedIn company employees example",
+		)
+	}
+	requireContains(openapi, `"linkedinPostSearch"`, "OpenAPI LinkedIn post search example")
+	requireContains(openapi, `"author_company_urns"`, "OpenAPI LinkedIn author company filter")
+	requireContains(
+		openapi,
+		`"linkedinCompanyEmployees"`,
+		"OpenAPI LinkedIn company employees example",
+	)
 	retiredFullstackKind := "worker" + "_static"
 	retiredFullstackTemplate := "worker" + "-static-rust-tanstack"
 	for _, retired := range []string{

@@ -34,6 +34,8 @@ tovuk request create github '{"operation":"marketplace","appsUrls":[{"url":"http
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
 tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json
+tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
+tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
 tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
@@ -213,6 +215,52 @@ want compact Records with only selected top-level JSON fields. Operations includ
 Tovuk stores canonical public input fields and runs reads through managed
 Webshare egress.
 
+Create a LinkedIn Post Search Request:
+
+```json
+{
+  "scraper": "linkedin",
+  "input": {
+    "operation": "post-search",
+    "query": "b2b sales",
+    "sort_type": "date_posted",
+    "date_filter": "past-week",
+    "author_company_urns": "1035",
+    "author_industry_urns": "4,43",
+    "author_job_title": "founder",
+    "limit": 25
+  }
+}
+```
+
+Create a LinkedIn Company Employees Request:
+
+```json
+{
+  "scraper": "linkedin",
+  "input": {
+    "operation": "company-employees",
+    "identifier": "https://www.linkedin.com/company/google/",
+    "job_title": "engineer OR developer",
+    "max_employees": 50
+  }
+}
+```
+
+LinkedIn accepts public job search URLs, job ids, company URLs or names,
+profile URLs or public identifiers, people-search filters, post URLs,
+post-search terms, content filters, public author/member/company/industry ids,
+and company employee filters. Operations include `jobs`, `job`, `company`,
+`company-search`, `company-employees`, `profile`, `profile-search`,
+`profile-posts`, `profile-comments`, `profile-reactions`, `post`,
+`post-comments`, `post-reactions`, `post-reshares`, `post-search`, and
+`company-posts`. Apify-compatible fields such as `keyword`, `searchQuery`,
+`profileUrls`, `publicIdentifiers`, `targetUrls`, `sort_type`, `date_filter`,
+`company_urns`, `member_urns`, `author_company_urns`,
+`author_industry_urns`, `author_job_title`, `maxPosts`, `total_posts`,
+`identifier`, `job_title`, and `max_employees` normalize onto the same public
+options.
+
 Create a TikTok Request:
 
 ```json
@@ -292,6 +340,11 @@ repository URLs, git credentials, cookies, session tokens, or proxy URLs.
 For Reddit Requests, never send Reddit cookies, account credentials, session
 tokens, private community content, or proxy URLs. Tovuk manages Webshare egress
 internally and only accepts public Reddit targets and public search filters.
+
+For LinkedIn Requests, never send LinkedIn cookies, account credentials,
+session tokens, private profile content, mailbox credentials, OTP codes, or
+proxy URLs. Tovuk manages reader sessions internally and only accepts public
+LinkedIn targets and public search filters.
 
 For Instagram Requests, never send Instagram cookies, account credentials,
 session tokens, private profile content, or proxy URLs. Tovuk manages reader
