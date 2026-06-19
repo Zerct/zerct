@@ -100,6 +100,7 @@ tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limi
 tovuk request create github '{"operation":"watchers","repo":"rust-lang/rust","limit":50}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json
 tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
 tovuk request show request_123 --json

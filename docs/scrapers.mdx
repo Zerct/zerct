@@ -34,6 +34,7 @@ tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","appsUrls":[{"url":"https://github.com/marketplace/codecov"}],"limit":10}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json
 tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
@@ -222,17 +223,22 @@ Create a Reddit Request:
 ```
 
 Reddit accepts public subreddit names, public search queries, public Reddit post
-URLs, `postId`, and public usernames. Use `contentType: "posts"`,
-`contentType: "comments"`, or `contentType: "both"` to select post search,
-comment search, or both result types in one Request. Set
+URLs, public subreddit URLs, `postId`, and public usernames. Use
+`operation: "subreddit-profile"` with `community`, `subreddit`, or a public
+subreddit URL when you need one community metadata Record with title,
+description, sidebar text, member counts when present, rules, icons, and public
+flags. Use `contentType: "posts"`, `contentType: "comments"`, or
+`contentType: "both"` to select post search, comment search, or both result
+types in one Request. Set
 `autoDiscoverSubreddits: true` with `maxSubreddits` on site-wide search to
 discover relevant public communities first, then search across them while
 keeping total Records capped by `limit` or `maxResults`. Add `fields` when you
 want compact Records with only selected top-level JSON fields. Operations include
-`subreddit`, `search`, `search-comments`, `search-communities`, `search-users`,
-`subreddit-users`, `post`, `comments`, `user`, `user-posts`, `user-comments`,
-`user-overview`, `popular`, and `all`. For direct post or comment requests,
-`commentSort` aliases `sort` and supports public Reddit comment ordering.
+`subreddit`, `subreddit-profile`, `search`, `search-comments`,
+`search-communities`, `search-users`, `subreddit-users`, `post`, `comments`,
+`user`, `user-posts`, `user-comments`, `user-overview`, `popular`, and `all`.
+For direct post or comment requests, `commentSort` aliases `sort` and supports
+public Reddit comment ordering.
 Tovuk stores canonical public input fields and runs reads through managed
 managed proxy provider egress.
 
@@ -360,7 +366,8 @@ repository URLs, git credentials, cookies, session tokens, or proxy URLs.
 
 For Reddit Requests, never send Reddit cookies, account credentials, session
 tokens, private community content, or proxy URLs. Tovuk manages managed proxy provider egress
-internally and only accepts public Reddit targets and public search filters.
+internally and only accepts public Reddit targets, public community profile
+targets, and public search filters.
 
 For LinkedIn Requests, never send LinkedIn cookies, account credentials,
 session tokens, private profile content, mailbox credentials, OTP codes, or
