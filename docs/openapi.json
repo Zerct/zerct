@@ -1679,6 +1679,18 @@
                     }
                   }
                 },
+                "githubTrendingDevelopers": {
+                  "summary": "Create GitHub Trending Developers Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "trendingDevelopers",
+                      "language": "rust",
+                      "since": "weekly",
+                      "limit": 25
+                    }
+                  }
+                },
                 "githubMarketplace": {
                   "summary": "Create GitHub Marketplace Request",
                   "value": {
