@@ -32,6 +32,7 @@ tovuk check
 tovuk account show
 tovuk account update --handle your-handle --display-name "Your Team"
 tovuk scraper list --json
+tovuk scraper health --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json

@@ -21,6 +21,7 @@ Request returns `payment_required` until billing is active.
 
 ```sh
 tovuk scraper list --json
+tovuk scraper health --json
 tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops in Istanbul","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
@@ -49,11 +50,15 @@ tovuk request cancel <request_id> --json
 
 Use `--limit <n>` on `tovuk request create` to add or override `input.limit`.
 Use `--limit <n>` on `tovuk request results` to read fewer stored Records.
+Use `tovuk scraper health --json` before heavy scraping to inspect managed
+reader, signing worker, and Webshare proxy readiness without sending private
+account material.
 
 ## API
 
 ```http
 GET /v1/scrapers
+GET /v1/scrapers/health
 GET /v1/scrapers/{scraper}
 POST /v1/requests
 GET /v1/requests

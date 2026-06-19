@@ -75,6 +75,7 @@ func checkCLIContract() {
 		requireContains(source, "tovuk abuse release", "agentic abuse release command")
 	}
 	for _, source := range []string{cargoCLI, rootReadme, cargoReadme, npmReadme, pythonReadme} {
+		requireContains(source, "tovuk scraper health", "agentic scraper health command")
 		requireContains(source, "tovuk service status", "agentic service status command")
 		requireContains(source, "tovuk nodes list", "operator node list command")
 		requireContains(source, "tovuk nodes drain", "operator node drain command")

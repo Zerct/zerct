@@ -1543,6 +1543,33 @@
         }
       }
     },
+    "/v1/scrapers/health": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "List Scraper runtime health",
+        "description": "Returns sanitized runtime-health diagnostics for every Scraper. Context: paths./v1/scrapers/health.get.",
+        "operationId": "listScraperRuntimeHealth",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/ScraperRuntimeHealthLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/scrapers/{scraper}": {
       "get": {
         "tags": [
@@ -8816,6 +8843,59 @@
           }
         }
       },
+      "ScraperRuntimeHealthLoaded": {
+        "description": "Scraper runtime health loaded. Context: components.responses.ScraperRuntimeHealthLoaded.",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "$ref": "#/components/headers/RateLimitLimit"
+          },
+          "X-RateLimit-Remaining": {
+            "$ref": "#/components/headers/RateLimitRemaining"
+          },
+          "X-RateLimit-Reset": {
+            "$ref": "#/components/headers/RateLimitReset"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ScraperRuntimeHealthResponse"
+            },
+            "examples": {
+              "runtimeHealth": {
+                "summary": "Scraper runtime health loaded",
+                "value": {
+                  "scrapers": [
+                    {
+                      "id": "github",
+                      "name": "GitHub Scraper",
+                      "category": "Developer",
+                      "status": "ready",
+                      "runtimeHealth": {
+                        "type": "githubManagedProxyHealth",
+                        "status": "ready",
+                        "checks": [
+                          {
+                            "name": "webshare_proxy",
+                            "ok": true,
+                            "message": "managed proxy is configured"
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "nextActions": [
+                    "Use `GET /v1/scrapers/{scraper}` for input schema, pricing, and scraper-specific runtime diagnostics."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
       "ScraperDetailsLoaded": {
         "description": "Scraper details loaded. Context: components.responses.ScraperDetailsLoaded.",
         "headers": {
@@ -12434,6 +12514,101 @@
           }
         }
       },
+      "ScraperRuntimeHealthEntry": {
+        "type": "object",
+        "description": "One public Scraper runtime-health row. Context: components.schemas.ScraperRuntimeHealthEntry.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "category",
+          "status",
+          "runtimeHealth"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "description": "Stable Scraper id. Context: components.schemas.ScraperRuntimeHealthEntry.properties.id.",
+            "examples": [
+              "github"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,120}$",
+            "maxLength": 120,
+            "description": "Display name. Context: components.schemas.ScraperRuntimeHealthEntry.properties.name.",
+            "examples": [
+              "GitHub Scraper"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z ]{0,63}$",
+            "maxLength": 64,
+            "description": "Scraper category. Context: components.schemas.ScraperRuntimeHealthEntry.properties.category.",
+            "examples": [
+              "Developer"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][a-zA-Z0-9]{0,63}$",
+            "maxLength": 64,
+            "description": "Agent-readable runtime status. Context: components.schemas.ScraperRuntimeHealthEntry.properties.status.",
+            "examples": [
+              "ready"
+            ]
+          },
+          "runtimeHealth": {
+            "type": "object",
+            "description": "Sanitized runtime diagnostics without accounts, cookies, tokens, passwords, proxy credentials, or raw session data. Context: components.schemas.ScraperRuntimeHealthEntry.properties.runtimeHealth.",
+            "maxProperties": 100,
+            "examples": [
+              {
+                "type": "githubManagedProxyHealth",
+                "status": "ready"
+              }
+            ]
+          }
+        }
+      },
+      "ScraperRuntimeHealthResponse": {
+        "type": "object",
+        "description": "Scraper runtime-health response. Context: components.schemas.ScraperRuntimeHealthResponse.",
+        "additionalProperties": false,
+        "required": [
+          "scrapers",
+          "nextActions"
+        ],
+        "properties": {
+          "scrapers": {
+            "type": "array",
+            "description": "Runtime-health rows for every catalog Scraper. Context: components.schemas.ScraperRuntimeHealthResponse.properties.scrapers.",
+            "items": {
+              "$ref": "#/components/schemas/ScraperRuntimeHealthEntry"
+            },
+            "examples": [
+              []
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "description": "Agent-readable next actions. Context: components.schemas.ScraperRuntimeHealthResponse.properties.nextActions.",
+            "items": {
+              "type": "string",
+              "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]{1,1000}$",
+              "maxLength": 1000
+            },
+            "examples": [
+              [
+                "Use `GET /v1/scrapers/{scraper}` for input schema, pricing, and scraper-specific runtime diagnostics."
+              ]
+            ]
+          }
+        }
+      },
       "ScraperDetailsResponse": {
         "type": "object",
         "description": "Single Scraper response. Context: components.schemas.ScraperDetailsResponse.",
@@ -12542,6 +12717,17 @@
                     "usdMicros": 3200
                   }
                 ]
+              }
+            ]
+          },
+          "runtimeHealth": {
+            "type": "object",
+            "description": "Optional sanitized runtime diagnostics for managed reader, signing worker, or proxy-backed Scrapers. Context: components.schemas.ScraperDetailsResponse.properties.runtimeHealth.",
+            "maxProperties": 100,
+            "examples": [
+              {
+                "type": "githubManagedProxyHealth",
+                "status": "ready"
               }
             ]
           },

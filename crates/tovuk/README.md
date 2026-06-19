@@ -57,6 +57,7 @@ The Cargo package exposes the same agent command surface as npm:
 tovuk pricing
 tovuk pricing --json
 tovuk scraper list --json
+tovuk scraper health --json
 tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
@@ -161,9 +162,11 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 
 `tovuk usage --json` includes `billingEstimate.lineItems` for current-month
 cost estimates.
-`tovuk scraper list --json` returns public-data Scrapers with price events.
-`tovuk request create <scraper> '<json>' --json` creates paid scraper work, and
-`tovuk request results <request_id> --json` fetches stored Records. Scraper
+`tovuk scraper list --json` returns public-data Scrapers with price events, and
+`tovuk scraper health --json` returns managed reader, signing worker, and proxy
+readiness. `tovuk request create <scraper> '<json>' --json` creates paid
+scraper work, and `tovuk request results <request_id> --json` fetches stored
+Records. Scraper
 Requests must not include cookies, passwords, account tokens, private session
 data, private account content, GitHub tokens, private repository credentials, or
 proxy URLs. GitHub Requests accept public search, repository, profile,
