@@ -69,6 +69,7 @@ tovuk request create github '{"operation":"opportunities","query":"agent skills 
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json
 tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
+tovuk request create github '{"operation":"watchers","repo":"rust-lang/rust","limit":50}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json

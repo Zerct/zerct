@@ -152,6 +152,8 @@ Scraper workflow:
    or
    `tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json`
    or
+   `tovuk request create github '{"operation":"watchers","repo":"rust-lang/rust","limit":50}' --json`
+   or
    `tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json`
    or
    `tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json`
