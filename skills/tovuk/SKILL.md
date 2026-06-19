@@ -45,9 +45,11 @@ command must force JSON without changing the session environment.
 For scraper API work:
 
 1. Run `tovuk scraper list --json`.
-2. Run
+2. Run `tovuk scraper health --json` and inspect `scrapers[].status` before
+   creating high-volume scraper Requests.
+3. Run
    `tovuk request create <scraper> '{"query":"public search","limit":100}' --json`.
-3. For GitHub, use public input only, for example
+4. For GitHub, use public input only, for example
    `tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json`
    or
    `tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json`
@@ -63,17 +65,17 @@ For scraper API work:
    `tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json`
    or
    `tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json`.
-4. For LinkedIn, use public input only, for example
+5. For LinkedIn, use public input only, for example
    `tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json`
    or
    `tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json`.
-5. For X, use public input only, for example
+6. For X, use public input only, for example
    `tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json`
    or
    `tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json`.
-6. Poll with `tovuk request show <request_id> --json`.
-7. Fetch stored Records with `tovuk request results <request_id> --json`.
-8. Do not send cookies, passwords, account tokens, GitHub tokens, private
+7. Poll with `tovuk request show <request_id> --json`.
+8. Fetch stored Records with `tovuk request results <request_id> --json`.
+9. Do not send cookies, passwords, account tokens, GitHub tokens, private
    repository credentials, private session data, private account content, or
    proxy URLs. For GitHub, send only public repository queries, code search
    queries and filters, URLs, usernames, repository names, and public filters.
@@ -107,6 +109,7 @@ Agents can manage runtime resources without dashboard access:
 ```sh
 tovuk service show <service> --json
 tovuk scraper list --json
+tovuk scraper health --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json

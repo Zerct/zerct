@@ -61,6 +61,7 @@ tovuk deploy show <deploy_id> --json
 tovuk deploy cancel <deploy_id> --json
 tovuk pricing --json
 tovuk scraper list --json
+tovuk scraper health --json
 tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json

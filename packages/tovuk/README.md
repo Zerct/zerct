@@ -92,6 +92,7 @@ tovuk pricing --json
 tovuk usage --json
 tovuk account activity --json
 tovuk scraper list --json
+tovuk scraper health --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
@@ -111,7 +112,8 @@ tovuk limits set worker_requests --period month --value 10000000 --notify-at-per
 
 The pricing response includes plan pricing and product meter metadata, so agents
 can choose the correct product and cap the right meters in one flow.
-The scraper catalog returns public-data Scrapers with price events. Scraper
+The scraper catalog returns public-data Scrapers with price events, and scraper
+health returns managed reader, signing worker, and proxy readiness. Scraper
 Requests require paid billing and must not include cookies, passwords, account
 tokens, GitHub tokens, private repository credentials, private session data,
 private account content, or proxy URLs. GitHub Requests accept public search,
