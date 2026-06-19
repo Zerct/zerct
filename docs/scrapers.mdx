@@ -25,6 +25,7 @@ tovuk scraper show google-maps --json
 tovuk request create google-maps '{"query":"coffee shops in Istanbul","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
+tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","appsUrls":[{"url":"https://github.com/marketplace/codecov"}],"limit":10}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
@@ -112,12 +113,13 @@ Create a GitHub Marketplace Request:
 ```
 
 GitHub accepts public repository search queries, public `github.com` repository
-URLs, `owner/repo` names, `language`, `topic`, `operation: "trending"`, and
-`operation: "opportunities"`. It also accepts `operation: "marketplace"` with
-`query` or `searchQuery` for Marketplace search, `marketplaceUrls`, and
-Apify-compatible `appsUrls` for public Marketplace app pages. Tovuk stores
-canonical public input fields and returns repository-shaped or Marketplace app
-Records.
+URLs, `owner/repo` names, `language`, `topic`, `operation: "trending"`,
+`operation: "trendingDevelopers"`, and `operation: "opportunities"`. It also
+accepts `mode: "developers"` as an actor-compatible alias for trending
+developers, plus `operation: "marketplace"` with `query` or `searchQuery` for
+Marketplace search, `marketplaceUrls`, and Apify-compatible `appsUrls` for
+public Marketplace app pages. Tovuk stores canonical public input fields and
+returns repository-shaped, developer-shaped, or Marketplace app Records.
 
 Create a Reddit Request:
 

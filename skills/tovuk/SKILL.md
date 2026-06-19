@@ -52,6 +52,8 @@ For scraper API work:
    or
    `tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json`
    or
+   `tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json`
+   or
    `tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json`.
 4. For X, use public input only, for example
    `tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json`
@@ -75,6 +77,7 @@ tovuk service show <service> --json
 tovuk scraper list --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
 tovuk request show request_123 --json

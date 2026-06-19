@@ -34,6 +34,7 @@ tovuk account update --handle your-handle --display-name "Your Team"
 tovuk scraper list --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
@@ -55,8 +56,8 @@ Scraper Requests are paid work for public data only. Do not send cookies,
 passwords, account tokens, GitHub tokens, private repository credentials,
 private session data, private account content, or proxy URLs. For GitHub
 Requests, send public repository queries, repository URLs, `owner/repo` names,
-languages, topics, trending scans, opportunities scans, or public GitHub
-Marketplace listing and app URLs only. For Instagram
+languages, topics, trending repository or developer scans, opportunities scans,
+or public GitHub Marketplace listing and app URLs only. For Instagram
 Requests, send public profile URLs, post URLs, reel URLs, hashtag URLs,
 usernames, shortcodes, media ids, hashtags, or search terms only. For X
 Requests, send public queries, post/profile URLs, handles, user ids, or post
