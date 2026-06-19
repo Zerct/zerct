@@ -1679,6 +1679,26 @@
                     }
                   }
                 },
+                "githubIssueDetail": {
+                  "summary": "Create GitHub Issue Detail Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "url": "https://github.com/rust-lang/rust/issues/1"
+                    }
+                  }
+                },
+                "githubPullRequestDetail": {
+                  "summary": "Create GitHub Pull Request Detail Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "pullRequest",
+                      "repo": "rust-lang/rust",
+                      "number": 1
+                    }
+                  }
+                },
                 "githubTrendingDevelopers": {
                   "summary": "Create GitHub Trending Developers Request",
                   "value": {
