@@ -66,6 +66,7 @@ tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
+tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
@@ -83,7 +84,8 @@ account tokens, GitHub tokens, private repository credentials, private session
 data, private account content, or proxy URLs. For GitHub Requests, use public
 queries, public repository URLs, `owner/repo` names, languages, topics, trending
 repository or developer scans, opportunities scans, public issue or pull
-request URLs, or public Marketplace search and app URLs. For X
+request URLs, public blob or raw file URLs, public repository file paths, or
+public Marketplace search and app URLs. For X
 Requests, use public queries, public post/profile URLs, handles, user ids, or
 post ids; Tovuk manages X read
 accounts and managed proxy provider egress internally. For Instagram Requests, use public
