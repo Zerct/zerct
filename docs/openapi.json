@@ -1668,6 +1668,20 @@
                     }
                   }
                 },
+                "githubCodeSearch": {
+                  "summary": "Create GitHub Code Search Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "codeSearch",
+                      "query": "StreamableHTTPClientTransport",
+                      "language": "TypeScript",
+                      "repo": "modelcontextprotocol/typescript-sdk",
+                      "path": "examples/client/src",
+                      "limit": 25
+                    }
+                  }
+                },
                 "githubOpportunities": {
                   "summary": "Create GitHub Opportunities Request",
                   "value": {

@@ -94,6 +94,7 @@ tovuk account activity --json
 tovuk scraper list --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
@@ -114,7 +115,7 @@ The scraper catalog returns public-data Scrapers with price events. Scraper
 Requests require paid billing and must not include cookies, passwords, account
 tokens, GitHub tokens, private repository credentials, private session data,
 private account content, or proxy URLs. GitHub Requests accept public search,
-repository, file, profile, trending, opportunity, and Marketplace inputs. Instagram
+code search, repository, file, profile, trending, opportunity, and Marketplace inputs. Instagram
 Requests accept only public
 profile URLs, post URLs, reel URLs, hashtag URLs, usernames, shortcodes, media
 ids, hashtags, or search terms; Tovuk manages reader accounts internally.

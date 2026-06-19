@@ -52,6 +52,8 @@ For scraper API work:
    or
    `tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json`
    or
+   `tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json`
+   or
    `tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json`
    or
    `tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json`
@@ -67,7 +69,9 @@ For scraper API work:
 6. Fetch stored Records with `tovuk request results <request_id> --json`.
 7. Do not send cookies, passwords, account tokens, GitHub tokens, private
    repository credentials, private session data, private account content, or
-   proxy URLs. For Instagram, send only public profile URLs, post URLs, reel
+   proxy URLs. For GitHub, send only public repository queries, code search
+   queries and filters, URLs, usernames, repository names, and public filters.
+   For Instagram, send only public profile URLs, post URLs, reel
    URLs, hashtag URLs, usernames, shortcodes, media ids, hashtags, or search
    terms; Tovuk manages reader accounts internally. Tovuk manages X read
    accounts and Webshare egress internally.
@@ -81,6 +85,7 @@ tovuk service show <service> --json
 tovuk scraper list --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
+tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
 tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
