@@ -74,6 +74,8 @@ tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limi
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
 tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json
+tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
+tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
 tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
@@ -101,6 +103,11 @@ Reddit Requests, use public subreddit names, search terms, post URLs, post ids,
 usernames, public search filters such as `contentType` and
 `autoDiscoverSubreddits`, direct comment ordering via `commentSort`, or
 top-level output `fields`; Tovuk manages managed proxy provider egress internally.
+For LinkedIn Requests, use public job search URLs, job ids, company URLs or
+names, profile URLs or public identifiers, people-search filters, post URLs,
+post-search terms, content filters, public author/member/company/industry ids,
+and company employee filters only; Tovuk manages managed proxy provider egress and
+Tovuk-owned reader sessions internally.
 For TikTok Requests, use public video URLs, profile URLs, usernames, video ids,
 hashtags, music ids, place ids, Ads Library URLs, Shop URLs, public Shop ids,
 public product ids, public search terms, and projection fields such as `fields`
