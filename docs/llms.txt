@@ -162,6 +162,8 @@ Scraper workflow:
 5. For Reddit, use public input only, for example
    `tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json`
    or
+   `tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json`
+   or
    `tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json`
    or
    `tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json`.
@@ -189,10 +191,11 @@ Scraper workflow:
    URLs, hashtag URLs, usernames, shortcodes, media ids, hashtags, or search
    terms; Tovuk manages reader accounts internally. Tovuk manages X read
    accounts and Webshare egress internally. For Reddit, send only public
-   subreddit names, search terms, post URLs, post ids, usernames, public search
-   filters such as `contentType` and `autoDiscoverSubreddits`, direct comment
-   ordering via `commentSort`, and top-level output `fields`; Tovuk manages
-   Webshare egress internally. For LinkedIn, send only public job search URLs,
+   subreddit names, public subreddit URLs, search terms, post URLs, post ids,
+   usernames, public search filters such as `contentType` and
+   `autoDiscoverSubreddits`, direct comment ordering via `commentSort`, and
+   top-level output `fields`; Tovuk manages Webshare egress internally. For
+   LinkedIn, send only public job search URLs,
    job ids, company URLs or names, profile URLs or public identifiers,
    people-search filters, post URLs, post-search terms, content filters,
    public author/member/company/industry ids, and company employee filters;

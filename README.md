@@ -43,6 +43,7 @@ tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
+tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json
 tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
 tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json
@@ -74,10 +75,11 @@ or public GitHub Marketplace listing and app URLs only. For Instagram
 Requests, send public profile URLs, post URLs, reel URLs, hashtag URLs,
 usernames, shortcodes, media ids, hashtags, or search terms only. For X
 Requests, send public queries, post/profile URLs, handles, user ids, or post
-ids only. For Reddit Requests, send public subreddit names, search terms, post
-URLs, post ids, usernames, search result type selectors such as `contentType`
-and `autoDiscoverSubreddits`, direct comment ordering via `commentSort`, and
-top-level output `fields` only; Tovuk manages Webshare egress internally.
+ids only. For Reddit Requests, send public subreddit names, public subreddit
+URLs, search terms, post URLs, post ids, usernames, search result type selectors
+such as `contentType` and `autoDiscoverSubreddits`, direct comment ordering via
+`commentSort`, and top-level output `fields` only; Tovuk manages Webshare
+egress internally.
 For LinkedIn Requests, send public job search URLs, job ids, company URLs or
 names, profile URLs or public identifiers, people-search filters, post URLs,
 post-search terms, content filters, public author/member/company/industry ids,
