@@ -12,11 +12,12 @@ use serde_json::{Value, json};
 pub(crate) fn scraper_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
         "list" => print_authenticated(cli, "/v1/scrapers"),
+        "health" => print_authenticated(cli, "/v1/scrapers/health"),
         "show" => scraper_show(cli),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown scraper command.",
-            "Use `tovuk scraper list --json` or `tovuk scraper show <scraper> --json`.",
+            "Use `tovuk scraper list --json`, `tovuk scraper health --json`, or `tovuk scraper show <scraper> --json`.",
             cli.output.json,
         )),
     }
