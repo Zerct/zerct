@@ -1699,6 +1699,18 @@
                     }
                   }
                 },
+                "githubFile": {
+                  "summary": "Create GitHub File Request",
+                  "value": {
+                    "scraper": "github",
+                    "input": {
+                      "operation": "file",
+                      "repo": "rust-lang/rust",
+                      "path": "README.md",
+                      "contentMaxChars": 2000
+                    }
+                  }
+                },
                 "githubTrendingDevelopers": {
                   "summary": "Create GitHub Trending Developers Request",
                   "value": {

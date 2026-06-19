@@ -54,6 +54,8 @@ For scraper API work:
    or
    `tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json`
    or
+   `tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json`
+   or
    `tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json`
    or
    `tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json`.
@@ -80,6 +82,7 @@ tovuk scraper list --json
 tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json
+tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
 tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json
 tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
 tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
