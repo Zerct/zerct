@@ -65,6 +65,6 @@ jobs:
       - name: Check GitHub Actions policy
         run: scripts/check-github-actions.sh
       - name: Lint GitHub Actions
-        run: go run github.com/rhysd/actionlint/cmd/actionlint@latest -color
+        run: actionlint -color
       - name: Run full repository check
         run: scripts/check-all.sh
