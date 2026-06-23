@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 
-vacuum_version="${VACUUM_VERSION:-v0.26.6}"
+vacuum_version="${VACUUM_VERSION:-0.26.6}"
 docs_openapi_path="$(
   node -e '
     const fs = require("node:fs");
@@ -41,12 +41,14 @@ if ! printf '%s\n' "${openapi_files[@]}" | grep -Fxq "$docs_openapi_path"; then
   exit 1
 fi
 
-vacuum_cmd=(go run "github.com/daveshanley/vacuum@${vacuum_version}")
-if command -v vacuum >/dev/null 2>&1 && [ "$(vacuum version)" = "${vacuum_version#v}" ]; then
-  vacuum_cmd=(vacuum)
+vacuum_bin="$(VACUUM_VERSION="${vacuum_version#v}" scripts/install-vacuum.sh)"
+installed_vacuum_version="$("$vacuum_bin" version)"
+if [ "$installed_vacuum_version" != "${vacuum_version#v}" ]; then
+  echo "vacuum ${vacuum_version#v} is required; found $installed_vacuum_version." >&2
+  exit 1
 fi
 
-"${vacuum_cmd[@]}" lint \
+"$vacuum_bin" lint \
   --ruleset .vacuum.yaml \
   --hard-mode \
   --fail-severity hint \

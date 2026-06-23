@@ -105,4 +105,11 @@ if ! rg -q 'public-trusted-ci' "$workflow_dir"; then
   status=1
 fi
 
+if command -v actionlint >/dev/null 2>&1; then
+  actionlint -color
+else
+  printf 'actionlint is required; install the native binary before checking workflows.\n' >&2
+  status=1
+fi
+
 exit "$status"

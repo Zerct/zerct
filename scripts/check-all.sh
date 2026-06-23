@@ -21,6 +21,18 @@ if rg -n 'npx[[:space:]]+tovuk' README.md docs packages crates skills Formula .g
   exit 1
 fi
 
+tracked_go_files="$(
+  while IFS= read -r path; do
+    if [[ -e "$path" ]]; then
+      printf '%s\n' "$path"
+    fi
+  done < <(git ls-files '*.go')
+)"
+if [[ -n "$tracked_go_files" ]]; then
+  printf 'Tracked Go source is not allowed in the public repo; use Rust-native checks:\n%s\n' "$tracked_go_files" >&2
+  exit 1
+fi
+
 strict_clippy_args=(
   --locked
   --release
@@ -91,15 +103,14 @@ cargo metadata --locked --manifest-path crates/tovuk/Cargo.toml --all-features -
 cargo deny --manifest-path crates/tovuk/Cargo.toml check --config deny.toml --metadata-path target/tovuk-cargo-deny-metadata.json all
 
 npm --prefix packages/tovuk run check
-go run scripts/check-public-contracts/*.go package-versions
-go run scripts/check-public-contracts/*.go cli-contract
-go run scripts/check-public-contracts/*.go docs
+scripts/check-public-contracts.sh package-versions
+scripts/check-public-contracts.sh cli-contract
+scripts/check-public-contracts.sh docs
 ./scripts/check-prose-style.sh --self-test
 ./scripts/check-prose-style.sh
 scripts/check-github-actions.sh
 scripts/check-shell-style.sh
 scripts/check-toml-style.sh
-scripts/check-go-style.sh
 scripts/check-typos.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb >/dev/null

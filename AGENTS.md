@@ -47,8 +47,7 @@ thread.
 - JavaScript and TypeScript are allowed only for static documentation/frontend
   assets. Do not add API routes, SSR handlers, middleware, Node/Bun/Deno
   servers, or TypeScript runtime commands.
-- Prefer Rust-native verification. Existing Go checks are tolerated only while
-  they are being retired or replaced; do not add new Go checks.
+- Prefer Rust-native verification. Do not add Go checks.
 - Keep Cargo, npm, PyPI, and Homebrew package versions synchronized whenever
   the native CLI changes.
 - `Formula/tovuk.rb` is the Homebrew formula for the main `tovuk/tovuk`
@@ -77,9 +76,9 @@ practical:
 cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
 cargo clippy --locked --release --manifest-path crates/tovuk/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
 npm --prefix packages/tovuk run check
-go run scripts/check-public-contracts/*.go package-versions
-go run scripts/check-public-contracts/*.go cli-contract
-go run scripts/check-public-contracts/*.go docs
+scripts/check-public-contracts.sh package-versions
+scripts/check-public-contracts.sh cli-contract
+scripts/check-public-contracts.sh docs
 ./scripts/check-prose-style.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb
