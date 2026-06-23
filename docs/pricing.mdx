@@ -1,210 +1,95 @@
 ---
-title: "Pricing and Usage Limits"
+title: "Pricing"
 sidebarTitle: "Pricing"
-description: "Free and Pro pricing, usage limits, overage meters, and usage caps for agent-ready deploys."
+description: "Paid scraper plans, included balance, per-result prices, and usage checks."
 ---
 
-Tovuk uses usage meters so agents can predict cost before they deploy. Free
-plans hard-stop at the free limits. Pro costs `$5/month`, includes
-the monthly allowances below, and lets agents set hard usage caps before paid
-overages.
+Tovuk uses balance-based scraper pricing. Pick a monthly plan, receive the
+included balance, and Tovuk deducts from that balance for each successful stored
+result record.
 
-## At a Glance
+There is no free scraper tier. Catalog reads are public, but creating a scraper
+request requires paid billing.
 
-<Columns cols={3}>
-  <Card title="Free Hard Stops">
-    Free projects stop at the free limits instead of creating paid usage by
-    accident.
-  </Card>
-  <Card title="$5/month Pro">
-    Pro includes monthly allowances and lets agents set hard usage caps before
-    paid overages.
-  </Card>
-  <Card title="Meter Before Load Tests">
-    Run `tovuk pricing --json`, confirm the account, then read usage before
-    heavy deploys, media uploads, or load tests.
-  </Card>
-</Columns>
+## Plans
 
-Use the CLI to read the live catalog:
+| Plan | Monthly price | Included balance | Best for |
+| --- | ---: | ---: | --- |
+| Pro | `$20/month` | `$20` | Small, steady API usage |
+| Business | `$100/month` | `$125` | Regular research and enrichment |
+| Scale | `$200/month` | `$300` | Daily scraping and higher volume |
+
+Manual top-ups and auto top-ups start at a `$20` minimum. Use Stripe-hosted
+checkout and portal flows:
 
 ```sh
-tovuk pricing --json
+tovuk billing checkout --json
+tovuk billing portal --json
 ```
 
-The response includes both `plans` and `products`. Use `products[].features`,
-`products[].meters`, `products[].meter_details`, `products[].pricing_fields`,
-and `products[].limit_fields` to choose the right product, verify supported
-behavior, understand what each meter counts, price the relevant meters, and set
-hard caps before large deploys, media uploads, or paid usage.
-Each `products[].meter_details[]` entry includes `cap_commands.day` and
-`cap_commands.month` so agents can set the matching daily or monthly usage cap
-without hard-coded command templates.
+## Per-Result Prices
 
-## Plan paid work
+Prices are charged only for successful stored records. API responses expose exact
+prices as USD micro-units in `priceEvents[].usdMicros`; `1,000,000` means
+`$1.00`.
 
-<Steps>
-  <Step title="Read the public catalog">
-    ```sh
-    tovuk pricing --json
-    ```
+| Scraper | Unit | Price per 1,000 results |
+| --- | --- | ---: |
+| Website Scraper | page | `$0.20` |
+| Google Search Scraper | search page | `$0.80` |
+| Google Maps Scraper | place | `$2.10` |
+| Google Maps Reviews Scraper | review | `$0.60` |
+| Jobs Scraper | job | `$0.80` |
+| YouTube Scraper | record | `$0.90` |
+| Reddit Scraper | record | `$0.70` |
+| GitHub Scraper | record | `$0.60` |
+| LinkedIn Scraper | record | `$0.90` |
+| TikTok Scraper | record | `$1.70` |
+| Instagram Scraper | record | `$0.80` |
+| X Scraper | post | `$0.30` |
+| Facebook Ads Scraper | ad | `$1.00` |
+| Contact Finder | record | `$1.50` |
 
-    `tovuk pricing --json` reads `/v1/capabilities` without account
-    authentication. Use the returned `plans`, `products`, meter details,
-    pricing fields, limit fields, and cap commands before choosing resources or
-    changing code.
-  </Step>
+Read the live catalog before estimating work:
 
-  <Step title="Confirm account setup">
-    ```sh
-    tovuk account show --json
-    tovuk account update --handle <handle> --display-name <name> --json
-    ```
+```sh
+tovuk scraper list --json
+tovuk scraper show tiktok --json
+```
 
-    Run the update command only when setup is incomplete. Authenticated usage,
-    hard caps, hosted checkout, and the billing portal apply to the current CLI
-    account.
-  </Step>
+## How Billing Works
 
-  <Step title="Estimate and cap load">
-    ```sh
-    tovuk usage --json
-    tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
-    tovuk billing checkout --json
-    ```
+When `limit` is known, request creation returns an estimated maximum cost. The
+final charge is based on the number of successful records saved:
 
-    Compare `usage`, configured caps, and `billingEstimate.lineItems` before
-    heavy work. Set hard caps for expected load, and open checkout only when a
-    human chooses higher paid capacity.
-  </Step>
-</Steps>
+```txt
+final charge = stored result count * scraper result price
+```
 
-Use the authenticated usage view before heavy work:
+Failed requests and empty results do not create per-result charges. The result
+records remain available through the results API so agents and scripts do not
+need to build a separate storage layer.
+
+Check balance, usage, invoices, and current-month estimates:
 
 ```sh
 tovuk usage --json
+tovuk account show --json
 ```
 
-`usage.billingEstimate` returns current-month line items for every priced meter
-and every explicitly free transfer meter, including the usage amount, included
-amount, billable amount, billing unit, rounding rule, and estimated USD
-micro-units. Storage estimates use the current stored bytes as a full-month
-estimate so agents can plan conservatively.
+`usage.billingEstimate.lineItems` shows the current-month scraper result meters,
+used result counts, unit prices, and estimated spend.
 
-## Free
+## API Paths
 
-- Projects: `100`.
-- Rust Workers: `100,000` requests per day, `10 ms` CPU per invocation,
-  `128 MiB` memory, `50` subrequests per request, `64 MiB` artifact size
-  before compression, `3 MiB` compressed artifact size, and `5,000` resource
-  bindings per service. Service binding call chains can use up to `32` worker
-  invocations per top-level request.
-- Static assets: free and unlimited requests, free asset storage, `20,000`
-  files per Worker version, `25 MiB` per file.
-- Transfer: metered for visibility with no default plan cap. Agents can set
-  `static_transfer_bytes` and `worker_transfer_bytes` hard caps before launch.
-  These meters appear in `usage.billingEstimate.lineItems` with `free_transfer`
-  billing units, null prices, and zero estimated cost.
-- SQLite: `10` databases, `5 GB` total, `500 MB` per database, `5 million`
-  rows read per day, `100,000` rows written per day, and `7 days` of backups.
-- KV: `1,000` namespaces, `1 GB` per account and namespace, `100,000`
-  reads per day, `1,000` writes, deletes, and list requests per day.
-- Queues: `10,000` queues, `10,000` operations per day, `128 KB` messages,
-  `24 hour` retention, configurable batches, and dead-letter queues.
-- State: `100` classes, `100,000` requests per day, `13,000 GB-s`
-  duration per day, `5 million` SQLite rows read per day, `100,000` SQLite
-  rows written per day, `5 GB` account SQLite storage, `1 GB` per object,
-  `2 MiB` key/value payloads, and `15 minute` State alarm handlers. The Free
-  account cap is enforced before a single object can use its full per-object
-  ceiling.
-- Object storage: `10 GB`, no object-count cap, `1 million` Class A
-  operations per month, `10 million` Class B operations per month, `1 TB`
-  object storage egress per month, free delete operations, `5 TB` maximum
-  object size, `5 GB` maximum single-part upload or multipart part size,
-  `50` custom domains per storage bucket, `50` bucket management operations
-  per second, and `1` write per second to the same object key.
-- Builds: `3,000` minutes per month, `1` concurrent build, `20 minute`
-  timeout, `2 vCPU`, `8 GB` memory, `20 GB` disk, `64` build environment
-  variables, `5 KB` per build environment variable, `10` deploy hooks per
-  service per minute, and `100` deploy hooks per account per minute.
-- Logs: `200,000` events per day, `3 day` retention, `256 KB` per event.
-- API tokens: `10`.
-- Support tickets: `3` per day.
-
-## Pro
-
-- Subscription: `$5/month`.
-- Projects: `500`.
-- Rust Workers: `10 million` included requests per month, then `$0.30` per
-  million requests. CPU includes `30 million ms` per month, then `$0.02` per
-  million CPU ms. Per-invocation CPU can be up to `300,000 ms`. Worker
-  artifacts are capped at `64 MiB` before compression and `10 MiB` after
-  compression, with `5,000` resource bindings per service. Service binding
-  call chains can use up to `32` worker invocations per top-level request.
-- Static assets: free and unlimited requests, free asset storage, `100,000`
-  files per Worker version, `25 MiB` per file.
-- Transfer: metered for visibility with no default plan cap. Agents can set
-  `static_transfer_bytes` and `worker_transfer_bytes` hard caps before
-  high-throughput launches. These meters appear in
-  `usage.billingEstimate.lineItems` with `free_transfer` billing units, null
-  prices, and zero estimated cost.
-- SQLite: `50,000` databases, `1 TB` account hard cap, `10 GB` per database,
-  `25 billion` rows read and `50 million` rows written per month included.
-  Backups keep a `30 day` restore window. Overage is `$0.001` per million rows
-  read, `$1.00` per million rows written, and `$0.75` per GB-month after the
-  included `5 GB`.
-- KV: `1,000` namespaces, no storage hard cap, `10 million` reads and
-  `1 million` writes, deletes, and lists per month included. Overage is `$0.50`
-  per million reads, `$5.00` per million writes, deletes, or lists, and `$0.50`
-  per GB-month after the included `1 GB`.
-- Queues: `10,000` queues, `1 million` operations per month included, then
-  `$0.40` per million operations. Default retention is `4 days`, configurable
-  up to `14 days`.
-- State: `500` classes, `1 million` requests and `400,000 GB-s`
-  duration per month included. SQLite includes `25 billion` rows read,
-  `50 million` rows written, `5 GB` included storage per month, a `10 GB`
-  per-object hard cap, and `15 minute` State alarm handlers. Overage is `$0.15`
-  per million requests, `$12.50` per million GB-s, `$0.001` per million rows
-  read, `$1.00` per million rows written, and `$0.20` per GB-month.
-- Object storage: no storage or object-count hard cap, `10 GB` included
-  storage, `1 million` Class A operations, and `10 million` Class B operations
-  per month. Overage is `$0.015` per GB-month, `$4.50` per million
-  Class A operations, `$0.36` per million Class B operations, and `$1.20` per
-  TB of object storage egress after the included `1 TB` per month. Deletes are
-  free. Objects can be up to `5 TB`, single uploads and multipart parts can be
-  up to `5 GB`, with `50` custom domains per storage bucket, `50` bucket
-  management operations per second, and `1` write per second to the same object
-  key.
-- Builds: `6,000` minutes per month, then `$0.005` per minute, `6` concurrent
-  builds, `20 minute` timeout, `4 vCPU`, `8 GB` memory, `20 GB` disk, `64`
-  build environment variables, `5 KB` per build environment variable, `10`
-  deploy hooks per service per minute, and `100` deploy hooks per account per
-  minute.
-- Logs: `20 million` events per month, then `$0.60` per million events, `7 day`
-  retention, `256 KB` per event.
-- API tokens: `100`.
-- Support tickets: `20` per day.
-
-## Usage Caps
-
-Paid overage should never surprise a human. Before a high-throughput test or a
-production launch, set usage caps with hard stops:
-
-```sh
-tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
-tovuk limits set worker_requests --period month --value 10000000 --notify-at-percent 80 --json
-tovuk limits set worker_cpu_ms --period month --value 30000000 --notify-at-percent 80 --json
-tovuk limits set static_transfer_bytes --period month --value 107374182400 --notify-at-percent 80 --json
-tovuk limits set worker_transfer_bytes --period month --value 107374182400 --notify-at-percent 80 --json
-tovuk limits set object_storage_egress_bytes --period month --value 1000000000000 --notify-at-percent 80 --json
-tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
-tovuk limits set object_storage_class_a_operations --period month --value 1000000 --notify-at-percent 80 --json
+```http
+GET /v1/scrapers
+GET /v1/scrapers/{scraper}
+POST /v1/requests
+GET /v1/requests/{request_id}
+GET /v1/requests/{request_id}/results
 ```
 
-Tovuk reports prices in API JSON as USD micro-units. `1,000,000` means `$1.00`.
-`tovuk usage --json` reports the same unit in `billingEstimate`. Explicitly
-free meters stay visible in the same estimate with null prices so agents can
-audit and cap them.
-
-The live API catalog is the source of truth for current limits and prices.
+Use public URLs, public handles, public search terms, or public identifiers only.
+Do not send cookies, passwords, account tokens, private session data, or proxy
+URLs through the public API or CLI.

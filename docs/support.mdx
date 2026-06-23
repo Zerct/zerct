@@ -1,107 +1,19 @@
 ---
-title: "Create and Resolve Support Tickets"
-sidebarTitle: "Support"
-description: "Collect evidence, list existing tickets, open Tovuk support cases, and resolve them from CLI, dashboard, or API workflows."
+title: "Support"
+description: "Open and resolve account-scoped support tickets from CLI or API."
 ---
 
-Tovuk support is API and CLI first. Ticket list, create, and resolve actions
-belong to the authenticated account. Agents should create tickets only after
-they have collected the exact command, service id, build id, deploy id, and first
-actionable log line.
+Collect the exact request id, command, and first actionable error before
+creating a ticket.
 
-## Support workflow
+```sh
+tovuk support list --limit 20 --json
+tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --severity normal --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
+```
 
-<Steps>
-  <Step title="Collect evidence">
-    Collect the exact command, service id, build id, deploy id, and first
-    actionable log line before opening a ticket.
-  </Step>
-
-  <Step title="Confirm account setup">
-    ```sh
-    tovuk account show --json
-    tovuk account update --handle <handle> --display-name <name> --json
-    ```
-
-    Run the update command only when setup is incomplete. Support tickets are
-    account-scoped and rate-limited per account.
-  </Step>
-
-  <Step title="Check existing tickets">
-    ```sh
-    tovuk support list --json
-    ```
-
-    Agents should list tickets before creating another one so repeated runs do
-    not duplicate the same issue.
-  </Step>
-
-  <Step title="Capture service context">
-    ```sh
-    tovuk service show service_1 --json
-    ```
-
-    Confirm the related Service, latest deploy, latest build, recent logs, and
-    `agent_instruction` before creating the ticket. Keep that snapshot with the
-    command, ids, and first actionable log line.
-  </Step>
-
-  <Step title="Create the ticket">
-    ```sh
-    tovuk support create \
-      "Deploy failed" \
-      "The deploy failed after the Rust check step. The agent already ran check and reproduced the same error." \
-      --service service_1 \
-      --build job_1 \
-      --deploy deploy_1 \
-      --failing-command "tovuk deploy --wait --json" \
-      --first-log-line "cargo check failed in src/main.rs" \
-      --severity normal \
-      --json
-    ```
-
-    The API stores the ticket on the authenticated account and returns
-    `agent_instruction`, rate-limit state, and a next command.
-  </Step>
-
-  <Step title="Resolve after the fix">
-    ```sh
-    tovuk support resolve ticket_0123456789abcdef0123 --json
-    ```
-
-    Resolve the ticket from the CLI when the agent fixes the issue or no longer
-    needs Tovuk support.
-  </Step>
-
-  <Step title="Use checkout for plan limits">
-    ```sh
-    tovuk billing checkout "Project limit reached" --json
-    ```
-
-    When a free-tier plan limit blocks work, show the returned `checkout.url` to
-    the human. Do not collect card details in the service, CLI, or agent.
-  </Step>
-</Steps>
-
-## Dashboard
-
-The dashboard Support view is available at `https://tovuk.com/account/support`
-or `https://tovuk.com/<handle>/support`.
-
-Use it to:
-
-- create a ticket from one screen;
-- select the related Service;
-- include the failing command, build id, deploy id, and first actionable log line;
-- see hourly and daily ticket limits;
-- view ticket status and agent instructions;
-- copy `tovuk support list --json`, `tovuk support resolve <ticket_id> --json`,
-  `tovuk service show <service> --json`, and `tovuk logs --build <build_id> --json`
-  from ticket rows when context exists;
-- resolve tickets after the issue is fixed.
-
-The dashboard uses the same API routes and rate limits as the CLI, so agents can
-switch between browser and CLI workflows without changing the support model.
+Support ticket creation is rate-limited per account. Resolve tickets after the
+issue is fixed so later automated runs do not duplicate work.
 
 ## API
 
@@ -111,20 +23,14 @@ POST /v1/support/tickets
 POST /v1/support/tickets/{ticket_id}/resolve
 ```
 
-The create body is:
+Create body:
 
 ```json
 {
-  "subject": "Deploy failed",
-  "details": "What the agent already tried and why the issue needs Tovuk support.",
-  "service_id": "service_1",
-  "build_id": "job_1",
-  "deploy_id": "deploy_1",
-  "failing_command": "tovuk deploy --wait --json",
-  "first_log_line": "cargo check failed in src/main.rs",
+  "subject": "Request failed",
+  "details": "Request id request_123 failed after retry.",
+  "failing_command": "tovuk request show request_123 --json",
+  "first_log_line": "upstream timeout",
   "severity": "normal"
 }
 ```
-
-Severity is `low`, `normal`, or `urgent`. Ticket creation is rate-limited per
-account.

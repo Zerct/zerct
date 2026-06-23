@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
   "name": "Tovuk",
-  "description": "Use Tovuk scraper APIs and manage Rust services with agent-readable checks.",
+  "description": "Use Tovuk public-data scraper APIs with a native Rust CLI.",
   "colors": {
     "primary": "#171717",
     "light": "#FAFAFA",
@@ -50,9 +50,6 @@
     "latex": false,
     "codeblocks": "dark"
   },
-  "thumbnails": {
-    "appearance": "dark"
-  },
   "navigation": {
     "tabs": [
       {
@@ -60,27 +57,19 @@
         "icon": "book-open",
         "groups": [
           {
-            "group": "Start and Deploy",
+            "group": "Scraper API",
             "pages": [
               "index",
               "quickstart",
               "scrapers",
-              "agents",
-              "templates",
-              "deploy"
+              "agents"
             ]
           },
           {
-            "group": "Production and Cost",
+            "group": "Account and Operations",
             "pages": [
-              "production-readiness",
               "pricing",
-              "status"
-            ]
-          },
-          {
-            "group": "Help and Updates",
-            "pages": [
+              "status",
               "support",
               "abuse",
               "changelog"
@@ -93,40 +82,9 @@
         "icon": "square-terminal",
         "groups": [
           {
-            "group": "Build and Deploy",
+            "group": "Packages",
             "pages": [
-              "reference/project-contract",
-              "reference/workers",
-              "reference/products",
-              "reference/packages",
-              "reference/limits"
-            ]
-          },
-          {
-            "group": "Resources and Data",
-            "pages": [
-              "reference/resources",
-              "reference/sqlite",
-              "reference/state",
-              "reference/kv",
-              "reference/secrets",
-              "reference/storage"
-            ]
-          },
-          {
-            "group": "Jobs and Connectivity",
-            "pages": [
-              "reference/queues",
-              "reference/cron",
-              "reference/bindings",
-              "reference/domains"
-            ]
-          },
-          {
-            "group": "Operations",
-            "pages": [
-              "reference/logs-builds",
-              "reference/usage-caps"
+              "reference/packages"
             ]
           }
         ]

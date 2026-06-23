@@ -1,534 +1,70 @@
 # Tovuk agent guide
 
-Tovuk deploys Rust workers, static frontends, and full-stack services.
-Full-stack services use one root tovuk.toml, serve the frontend at `/`, and route
-`/api/*` to the Rust worker.
+Tovuk is a paid public-data scraper API with a native Rust CLI. Use it to list
+available scrapers, create scraper Requests, poll status, and fetch stored
+Records.
 
-Use the native CLI after installing it with npm, Homebrew, PyPI, or Cargo:
+Install:
 
 ```sh
-tovuk check --json
-tovuk account show --json
-tovuk account update --handle <handle> --display-name <name> --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show <service> --json
-tovuk deploy list --json
-tovuk deploy show <deploy_id> --json
-tovuk deploy cancel <deploy_id> --json
+cargo install tovuk
+npm install -g tovuk
+pipx install tovuk
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
 ```
 
-Reference: [Tovuk docs](https://docs.tovuk.com).
-
-Resource references:
-
-- `docs/scrapers.mdx`: Scraper API names, public-data policy, paid Request
-  creation, stored Results, Record access, CLI commands, and API routes.
-- `docs/reference/project-contract.mdx`: tovuk.toml workflow, required files, kind and capabilities, local checks, dry-run planning, build commands, and Rust/static runtime policy.
-- `docs/reference/workers.mdx`: Rust Worker deploy workflow, account setup, dry-run review, post-deploy Service snapshots, HTTP/API routing, runtime events, WebSocket upgrades, and frontend policy.
-- `docs/reference/resources.mdx`: Service Resources account setup,
-  post-deploy Service snapshots, top-level `next_actions`, nested
-  `resources.nextActions`, CLI/API/dashboard parity, resource routes, and
-  runtime bindings.
-- `docs/reference/sqlite.mdx`: SQLite account setup, Service context, explicit `sqlite` capability, dry-run planning, commands, limits, backups, and query metrics.
-- `docs/reference/state.mdx`: State account setup, Service context, explicit `state` capability, dry-run planning, keyed objects, storage, meters, and alarms.
-- `docs/reference/kv.mdx`: KV account setup, Service context, explicit `kv` capability, dry-run planning, commands, API routes, meters, and limits.
-- `docs/reference/queues.mdx`: queue account setup, Service context, explicit `queue` capability, dry-run planning, producers, consumers, retries, and dead letters.
-- `docs/reference/cron.mdx`: Cron account setup, Service context, explicit `cron` capability, dry-run planning, scheduled Rust worker events, and trigger lifecycle commands.
-- `docs/reference/bindings.mdx`: Service Binding account setup, Service context, explicit `service_bindings` capability, dry-run planning, private calls, and runtime binding environment names.
-- `docs/reference/secrets.mdx`: account setup, Service context, and server-only environment values.
-- `docs/reference/storage.mdx`: Object Storage account setup, Service context, explicit `object_storage` capability, dry-run planning, uploads, downloads, multipart, and egress.
-- `docs/reference/domains.mdx`: Custom Domain account setup, Service context, explicit `custom_domains` capability, DNS records, verification, and cleanup.
-- `docs/reference/logs-builds.mdx`: `tovuk check --json`, account setup, dry-run, service snapshots before history and after repair redeploys, returned `build_job.id`/`final_build.status`, build/deploy/service logs, and queued deploy cancellation.
-- `docs/reference/limits.mdx`: deployment guardrails, account setup, plan-limit recovery, and paid usage caps.
-- `docs/reference/products.mdx`: product catalog fields, account setup, dry-run, usage, and usage-cap selection workflow.
-- `docs/reference/packages.mdx`: install channels, account setup checks,
-  post-deploy Service snapshots, package parity, and native binary recovery.
-- `docs/reference/usage-caps.mdx`: account setup, warning thresholds,
-  hard stops, cap removal, and public meter names.
-
-Workflow references:
-
-- `docs/index.mdx`: docs start page, path chooser, package install snippet
-  with account setup check, and visible Copy prompt with check, account setup,
-  dry-run, wait deploy, and post-deploy Service snapshot commands for AI coding
-  agents.
-- `docs/quickstart.mdx`: first Rust worker or full-stack deploy flow with a
-  post-deploy Service snapshot.
-- `docs/deploy.mdx`: check, account setup, dry-run, deploy, service snapshot, deploy history, cancellation, and recovery.
-- `docs/production-readiness.mdx`: production launch workflow, account setup,
-  usage caps, post-deploy Service snapshots, deploy evidence, status
-  distinction, secrets, domains, and cleanup.
-- `docs/agents.mdx`: agent deploy workflow, reusable deploy and starter
-  prompts with account checks, post-deploy Service snapshots, recovery,
-  support, and abuse workflow.
-- `docs/pricing.mdx`: pricing, account setup, usage limits, cost estimates, and hard caps.
-- `docs/templates.mdx`: project templates, `tovuk new`, starter account
-  checks, post-deploy Service snapshots, and starter workflows.
-- `docs/changelog.mdx`: dated Tovuk product changes, fixes, and release notes.
-
-Operational references:
-
-- `docs/status.mdx`: `/health`, `/healthz`, `/v1/status`, `/v1/capabilities`, CapabilitiesResponse catalog fields, the CLI `api_unreachable` payload, and project-failure handoff to logs.
-- `docs/support.mdx`: support ticket evidence, account setup, service snapshot, Dashboard Support, and support CLI/API routes.
-- `docs/abuse.mdx`: public abuse reports, account and Service context for owner-visible reports, owner appeals, operator quarantine, and abuse rate limits.
-
-Dashboard Overview is available at `https://tovuk.com/account` and shows
-Service kind, per-Service resource counts for SQLite, Object Storage, KV,
-Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, plus
-enabled and disabled capability summaries and
-copyable `tovuk service show <service> --json`,
-`tovuk logs --service <service> --limit 100 --json`,
-`tovuk storage list --service <service> --json`,
-`tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`,
-`tovuk support create "Service issue" ... --service <service> --json`, and
-`tovuk service delete <service> --json` commands.
-
-Dashboard Usage is available at `https://tovuk.com/account/usage` and supports
-the same cap set and remove actions as `tovuk limits`, plus the same hosted
-checkout flow as `tovuk billing checkout --json` and billing portal flow as
-`tovuk billing portal`. Usage rows show copyable `tovuk limits set` commands with `--notify-at-percent` and copyable `tovuk limits delete` commands for the selected meter.
-Usage Caps API routes are `GET /v1/usage`, `PUT /v1/usage/caps/{metric}`, and
-`DELETE /v1/usage/caps/{metric}/{period}`. The `PUT` body uses `period`,
-`capValue`, `hardStop`, and `notifyAtPercent`; the CLI sends `hardStop: true`
-and defaults `notifyAtPercent` to `80`.
-
-Dashboard Resources is available at `https://tovuk.com/account/resources` and
-supports creating and deleting SQLite, KV, Queue, Cron, State, and Service
-Binding resources through the same API routes as the CLI. It can also run
-single SQLite queries and shows returned rows, `rowsRead`, `rowsWritten`,
-`vmSteps`, `fullscanSteps`, storage, duration, and `nextActions`. It can list
-SQLite backups, create SQLite backups, and restore SQLite backups through the
-same API routes as the CLI. It can list KV keys, read one KV key, write one KV
-key, and delete one KV key with `kv_lists`,
-`kv_reads`, `kv_writes`, `kv_deletes`, and `kv_storage_bytes` metering. It can
-update Queue retries, retention, batch size, batch timeout, and dead-letter
-Queue settings, read Queue messages, read Queue metrics, send one Queue message,
-and send one Queue batch with `queue_operations` metering.
-It can update Cron schedules, pause Cron triggers, and resume Cron triggers
-through the same API routes as the CLI. State classes are Service-scoped keyed
-objects accessed from the Rust Worker runtime. The dashboard can list State objects,
-list State keys, read State values, write State values, delete State values,
-read State alarms, set State alarms, and delete State alarms with `state_requests`,
-`state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
-`state_sqlite_rows_written`, and
-`state_sqlite_storage_bytes` metering. Use CLI bulk commands for bulk KV reads,
-writes, and removals.
-
-Dashboard Secrets is available at `https://tovuk.com/account/secrets` and
-supports listing, setting, and deleting Service-scoped write-only environment
-variables through the same API routes as `tovuk secrets` and the
-backwards-compatible `tovuk env` surface.
-
-Dashboard Storage is available at `https://tovuk.com/account/storage` and
-`https://tovuk.com/<handle>/storage`. It lists objects, uploads ordinary files,
-automatically uses multipart transfer above 100 MiB, creates download URLs, and
-deletes objects through the same API routes and limits as the CLI. Use
-`tovuk storage upload --json` when an agent needs local-file automation outside
-the browser.
-
-Dashboard Activity is available at `https://tovuk.com/account/activity` and
-shows recent deploys, builds, runtime logs, next actions, and copyable repair
-commands through the same activity, deploy cancel, and log API routes as the
-CLI. Queued deploy rows can cancel queued build work and expose the same
-`tovuk deploy cancel <deploy_id> --json` command.
-
-Scraper workflow:
-
-1. Run `tovuk scraper list --json`.
-2. Choose a Scraper id such as `website`, `google-search`, `google-maps`,
-   `google-maps-reviews`, `jobs`, `youtube`, `reddit`, `github`, `linkedin`,
-   `tiktok`, `instagram`, `x`, `facebook-ads`, or `contacts`.
-3. Run
-   `tovuk request create <scraper> '{"query":"public search","limit":100}' --json`.
-4. For GitHub, use public input only, for example
-   `tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json`
-   or
-   `tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json`
-   or
-   `tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json`
-   or
-   `tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json`
-   or
-   `tovuk request create github '{"url":"https://github.com/rust-lang/rust/issues/1"}' --json`
-   or
-   `tovuk request create github '{"operation":"watchers","repo":"rust-lang/rust","limit":50}' --json`
-   or
-   `tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json`
-   or
-   `tovuk request create github '{"operation":"trendingDevelopers","language":"rust","since":"weekly","limit":25}' --json`
-   or
-   `tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json`.
-5. For Reddit, use public input only, for example
-   `tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json`
-   or
-   `tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json`
-   or
-   `tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDiscoverSubreddits":true,"maxSubreddits":5,"fields":["type","id","url","title","bodyText","score"],"maxResults":50}' --json`
-   or
-   `tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json`.
-6. For LinkedIn, use public input only, for example
-   `tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json`
-   or
-   `tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json`.
-7. For TikTok, use public input only, for example
-   `tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json`
-   or
-   `tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json`.
-8. For X, use public input only, for example
-   `tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json`
-   or
-   `tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json`.
-9. If billing blocks creation, run `tovuk billing checkout --json` and show the
-   returned URL to the human.
-10. Poll with `tovuk request show <request_id> --json`.
-11. Fetch stored Records with `tovuk request results <request_id> --json`.
-12. Do not send cookies, passwords, account tokens, GitHub tokens, private
-   repository credentials, private session data, private account content, or
-   proxy URLs. For GitHub, send only public repository queries, code search
-   queries and filters, URLs, usernames, repository names, and public filters.
-   For Instagram, send only public profile URLs, post URLs, reel
-   URLs, hashtag URLs, usernames, shortcodes, media ids, hashtags, or search
-   terms; Tovuk manages reader accounts internally. Tovuk manages X read
-   accounts and managed proxy provider egress internally. For Reddit, send only public
-   subreddit names, public subreddit URLs, search terms, post URLs, post ids,
-   usernames, public search filters such as `contentType` and
-   `autoDiscoverSubreddits`, direct comment ordering via `commentSort`, and
-   top-level output `fields`; Tovuk manages managed proxy provider egress internally. For
-   LinkedIn, send only public job search URLs,
-   job ids, company URLs or names, profile URLs or public identifiers,
-   people-search filters, post URLs, post-search terms, content filters,
-   public author/member/company/industry ids, and company employee filters;
-   Tovuk manages managed proxy provider egress and reader sessions internally. For TikTok,
-   send only public video URLs, profile
-   URLs, usernames, video ids, hashtags, music ids, place ids, Ads Library URLs,
-   Shop URLs, public Shop ids, public product ids, public search terms, and
-   projection fields such as `fields` or `outputFields`. Public-input aliases
-   such as `profileUrls`, `handles`, `queries`, `userSearch`, `videoSearch`, `sound`,
-   `soundUrls`, `musicUrls`, `soundIds`, `region`, `startDate`, `endDate`,
-   `minLikes`, `maxLikes`, `downloadVideos`, `downloadSubtitles`, and
-   `transcribeVideos` are accepted; cookies, passwords,
-   tokens, session data, and proxy URLs are not.
-
-Agent repair loop:
-
-1. Run `tovuk check --json`.
-2. If it fails, read the first failed check.
-3. Apply its `agent_instruction` exactly.
-4. Rerun check until it passes.
-5. Run `tovuk account show --json`.
-6. If account setup is incomplete, run
-   `tovuk account update --handle <handle> --display-name <name> --json`.
-7. Run `tovuk deploy --dry-run --json`; after Rust dependency changes, run
-   `tovuk deploy --dry-run --build-artifact --json`.
-8. Review warnings, enabled and disabled capabilities, `missingConfig`,
-   `requiredFixes`, meters, `meterPlan`, limits, and `billingEstimate`.
-9. Set hard usage caps for expected load.
-10. Run `tovuk deploy --wait --json`.
-11. Inspect the Service snapshot with `tovuk service show <service> --json`.
-12. Inspect deploy history with `tovuk deploy list --json` or
-   `tovuk deploy show <deploy_id> --json` when needed.
-13. If a newer deploy supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
-14. If deploy fails, read `build_job.id` or the failed build id.
-15. Run `tovuk logs --build <build_id> --json`.
-16. Fix the first actionable log error.
-17. Rerun `tovuk check --json` and `tovuk deploy --dry-run --json`; after
-    Rust dependency changes, rerun
-    `tovuk deploy --dry-run --build-artifact --json`.
-18. Run `tovuk deploy --wait --json` after the fix.
-19. Inspect the Service snapshot again with
-    `tovuk service show <service> --json` before reading more build or deploy
-    logs.
-
-Rust worker contract:
-
-- `Cargo.toml`, `Cargo.lock`, and `tovuk.toml` are committed.
-- `kind = "rust_worker"` is set in `tovuk.toml`.
-- `[capabilities]` explicitly sets `worker = true`,
-  `static_frontend = false`, service capabilities to true, and unused optional
-  resources to false.
-- `[build].check` includes `cargo fmt --all --check`.
-- `[build].check` includes release-mode
-  `cargo check --locked --release --all-targets --all-features`.
-- `[build].check` includes release-mode
-  `cargo test --locked --release --all-targets --all-features`.
-- `[build].check` includes
-  `cargo clippy --locked --release --all-targets --all-features` with
-  `-D warnings`, `-D clippy::all`, `-D clippy::pedantic`, panic/unwrap bans,
-  and resource lints such as `large_futures`, `large_stack_frames`,
-  `mem_forget`, and `redundant_clone`.
-- `[resources].memory` is `128mb`.
-- `[resources].cpu` is `1`; set `worker_cpu_ms` usage caps for CPU budget.
-- `[resources].idle_timeout_minutes` stays between `1` and `60`.
-- The server listens on `0.0.0.0:$PORT`.
-- The configured health path returns HTTP 200.
-- Direct `unsafe` is not allowed in workspace source.
-- Deploy archives contain source files only, not generated directories, secret
-  files, or compiled artifacts such as `.exe`, `.so`, `.dylib`, `.jar`,
-  `.node`, and `.rlib`.
-
-Static frontend contract:
-
-- `kind = "static_frontend"` is set in `tovuk.toml`.
-- `[capabilities]` explicitly sets `static_frontend = true`,
-  `worker = false`, service capabilities to true, and unused optional
-  resources to false.
-- Package static frontends commit `package.json` and a package lockfile.
-- Package browser source is `.ts` or `.tsx` under `src`, `app`, `pages`,
-  `routes`, or `components`.
-- Package `package.json` has `typecheck`, `lint`, and `build` scripts.
-- Package `typecheck` runs stable native type-aware TypeScript checks such as
-  `oxlint --type-aware --type-check`.
-- Package `lint` runs native tooling such as `oxlint` or `biome check`.
-- Package `lint` also runs Fallow `dead-code`, semantic `dupes`, and `health`
-  gates.
-- Package `[build].check` installs dependencies and runs package scripts for
-  typecheck and lint.
-- Plain static frontends without `package.json` include `index.html`, set
-  `[build].check = ":"`, `[build].command = ":"`, and `[build].output = "."`.
-- Weak typecheck, fake lint, missing Fallow quality gates, and JavaScript-based
-  lint/format scripts are rejected for package deploys.
-- JavaScript and TypeScript are frontend-only. API routes, SSR handlers,
-  middleware, and server logic must move to the Rust worker.
-
-Full-stack contract:
-
-- One root `tovuk.toml` sets `kind = "fullstack"`.
-- `[capabilities]` explicitly sets `static_frontend = true`, `worker = true`,
-  service capabilities to true, and unused optional resources to false.
-- `[worker].root` points to the Rust worker.
-- `[frontend].root` points to the static frontend.
-- The frontend calls same-origin `/api`.
-- The worker health path is `/api/healthz`.
-- Worker build and runtime commands must use `cargo build --release` and a
-  `./target/release/*` Rust binary, never Node, Bun, Deno, or TS runtimes.
-- Before SQLite mutations, confirm `[capabilities] sqlite = true` in
-  `tovuk.toml` when the Service does not already expose SQLite, then inspect
-  `tovuk deploy --dry-run --json`.
-- Before KV mutations, confirm `[capabilities] kv = true` in `tovuk.toml` when
-  the Service does not already expose KV, then inspect
-  `tovuk deploy --dry-run --json`.
-- Queue handlers are Rust worker routes at `POST /.tovuk/queues/<queue>`.
-- Queue batch size, batch timeout, retries, retention, and dead-letter routing
-  are configurable through the CLI/API.
-- Queue handler payloads contain base64 message bodies. Return `2xx` only after
-  the batch is safely handled.
-- Before Queue mutations, confirm `[capabilities] queue = true` in `tovuk.toml`
-  when the Service does not already expose Queues, then inspect
-  `tovuk deploy --dry-run --json`.
-- Cron triggers are Service-scoped deliveries to Rust worker handlers at
-  `POST /.tovuk/cron/<trigger>`.
-- Cron handlers must be idempotent because schedules can overlap with retries
-  or manual agent actions.
-- Before Cron trigger mutations, confirm `[capabilities] cron = true` in
-  `tovuk.toml` when the Service does not already expose Cron, then inspect
-  `tovuk deploy --dry-run --json`.
-- Before State mutations, confirm `[capabilities] state = true` in
-  `tovuk.toml` when the Service does not already expose State, then inspect
-  `tovuk deploy --dry-run --json`.
-- Before Service Binding mutations, confirm
-  `[capabilities] service_bindings = true` in `tovuk.toml` when the Service
-  does not already expose Service Bindings, then inspect
-  `tovuk deploy --dry-run --json`.
-- WebSocket upgrades on worker routes are proxied to Rust workers and meter
-  response-side tunnel bytes as `worker_transfer_bytes`.
-
-Useful commands:
+Agent command sequence:
 
 ```sh
-tovuk pricing --json
-tovuk account show --json
-tovuk deploy --dry-run --json
-curl https://api.tovuk.com/v1/status
-curl https://api.tovuk.com/v1/capabilities
-tovuk usage --json
-tovuk service list --json
-tovuk service show <service> --json
-tovuk service status <service> --json
-tovuk service delete <service> --json
-tovuk logs --build <build_id> --json
-tovuk logs --service <service> --json
-tovuk secrets list --service <service> --json
-tovuk domains list --service <service> --json
-tovuk account show --json
-tovuk service show <service> --json
-tovuk deploy --dry-run --json
-tovuk sqlite create --service <service> DB --json
-tovuk sqlite query --service <service> DB "select 1" --json
-tovuk sqlite batch --service <service> DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
-tovuk sqlite backup create --service <service> DB --json
-tovuk sqlite backup list --service <service> DB --json
-tovuk sqlite backup restore --service <service> DB sqlite_backup_1 --json
-tovuk sqlite delete --service <service> DB --json
-tovuk account show --json
-tovuk service show <service> --json
-tovuk deploy --dry-run --json
-tovuk kv create --service <service> CACHE --json
-tovuk kv namespace delete --service <service> CACHE --json
-tovuk account show --json
-tovuk service show <service> --json
-tovuk deploy --dry-run --json
-tovuk queue create --service <service> failed_jobs --json
-tovuk queue create --service <service> jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
-tovuk queue update --service <service> jobs --max-batch-size 25 --json
-tovuk queue update --service <service> jobs --clear-dead-letter-queue --json
-tovuk queue delete --service <service> jobs --json
-tovuk account show --json
-tovuk service show <service> --json
-tovuk deploy --dry-run --json
-tovuk cron create --service <service> nightly "0 0 * * *" --json
-tovuk cron update --service <service> nightly "*/15 * * * *" --json
-tovuk cron disable --service <service> nightly --json
-tovuk cron enable --service <service> nightly --json
-tovuk cron delete --service <service> nightly --json
-tovuk account show --json
-tovuk service show <service> --json
-tovuk deploy --dry-run --json
-tovuk state create --service <service> Room --json
-tovuk state objects --service <service> Room --json
-tovuk state keys --service <service> Room room-1 --json
-tovuk state put --service <service> Room room-1 counter 1 --json
-tovuk state get --service <service> Room room-1 counter --json
-tovuk state alarm set --service <service> Room room-1 --delay-seconds 60 --json
-tovuk state alarm get --service <service> Room room-1 --json
-tovuk state alarm delete --service <service> Room room-1 --json
-tovuk state delete --service <service> Room --json
-tovuk account show --json
-tovuk service show <service> --json
-tovuk deploy --dry-run --json
-tovuk binding create --service <service> AUTH_SERVICE --target auth-service --json
-tovuk binding delete --service <service> AUTH_SERVICE --json
-tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
-tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
-tovuk limits delete worker_requests --period day --json
-tovuk deploy --dry-run --json
-tovuk storage list --service <service> --json
-tovuk storage upload --service <service> ./file.png uploads/file.png --public --json
-tovuk storage download --service <service> uploads/file.png ./file.png --json
-tovuk storage url --service <service> uploads/file.png --json
-tovuk storage delete --service <service> uploads/file.png --json
-tovuk billing checkout --json
+export TOVUK_OUTPUT=json
+tovuk login
+tovuk account show
+tovuk account activity --limit 20
+tovuk pricing
+tovuk usage
+tovuk scraper list
+tovuk scraper health
+tovuk scraper show tiktok
+tovuk request list --limit 20
+tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}'
+tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}'
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":100}'
+tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}'
+tovuk request show request_123
+tovuk request results request_123 --limit 1000
+tovuk request cancel request_123
+tovuk billing checkout
 tovuk billing portal
-tovuk account show --json
-tovuk support list --json
-tovuk service show <service> --json
-tovuk support create "Deploy failed" "Agent retried deploy after check." --service <service> --build <build_id> --deploy <deploy_id> --failing-command "tovuk deploy --wait --json" --first-log-line "first actionable log line" --json
-tovuk support resolve <ticket_id> --json
-tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
-tovuk abuse list --json
-tovuk abuse list --operator --json
-tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
-tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
-tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
-tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
-tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
-tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
-tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
+tovuk support list --limit 20
+tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
+tovuk support resolve ticket_0123456789abcdef0123
+tovuk abuse report https://example.com "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id"
+tovuk abuse list
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported public target." --evidence "remediation note"
+tovuk abuse list --operator
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence."
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible notice recorded."
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed abuse and preserved evidence."
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated."
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target."
+tovuk abuse release abuse_0123456789abcdef0123 "Quarantine released after remediation."
 ```
 
-Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, enabled and disabled capabilities, and resource
-counts. `tovuk service status <service> --json` returns top-level `ok`, `url`,
-and `agent_instruction` fields for smoke tests; text mode prints only the
-live/deploy/build summary. `tovuk service show <service>` prints the broader
-Service snapshot.
+Scraper requests are public data only. Do not send cookies, passwords, account
+tokens, private session data, private account content, private repository
+credentials, or proxy URLs.
 
-Dashboard Overview is available at `https://tovuk.com/account` and
-`https://tovuk.com/<handle>`. When no Services exist, it shows first Service
-commands for `tovuk new hello-service --template fullstack-rust-tanstack`,
-`cd hello-service/web`, `npm install`, `cd ..`, `tovuk check --json`,
-`tovuk deploy --dry-run --json`, and `tovuk deploy --wait --json`. The
-committed `tovuk.toml` remains the source of
-truth; agents should still use CLI and API commands for automation. Service
-rows expose enabled and disabled capability summaries plus
-`tovuk service show <service> --json`,
-`tovuk logs --service <service> --limit 100 --json`,
-`tovuk storage list --service <service> --json`,
-`tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`,
-`tovuk support create "Service issue" ... --service <service> --json`,
-`tovuk service delete <service> --json`, and the same `DELETE /v1/services/{service_id}`
-cleanup action for smoke-test Services.
+The public CLI does not deploy websites, backends, databases, workers, storage
+buckets, queues, cron jobs, custom domains, secrets, or other customer
+infrastructure.
 
-Dashboard Support is available at `https://tovuk.com/account/support` and uses
-the same ticket API and rate limits as the CLI. Ticket rows expose copyable
-`tovuk support list --json`, `tovuk support resolve <ticket_id> --json`,
-`tovuk service show <service> --json`, and
-`tovuk logs --build <build_id> --json` commands when context exists.
+Relevant docs:
 
-Dashboard Abuse is available at `https://tovuk.com/account/abuse` and uses the
-same abuse report, list, and appeal API routes and rate limits as the CLI.
-Owner agents should confirm account setup with `tovuk account show --json` and
-inspect `tovuk service show <service> --json` before service-scoped reports,
-owner-visible list, or appeal work. Report rows expose copyable `tovuk abuse list --json`,
-`tovuk abuse appeal <report_id> "Remediation details" --json`, and
-`tovuk service show <service> --json` commands when report state supports them.
-
-Before storage mutations, confirm `[capabilities] object_storage = true` in
-`tovuk.toml` when the Service does not already expose object storage, then
-inspect `tovuk deploy --dry-run --json`. `tovuk storage upload` automatically
-switches to multipart transfer for files larger than 100 MiB. Object storage
-limits expose object size, part count, metadata size, custom domains per
-storage bucket, bucket management operations, and same-key write throughput.
-
-Before load tests, production launch, or paid usage, run
-`tovuk pricing --json`, confirm account setup with `tovuk account show --json`,
-inspect `tovuk deploy --dry-run --json` and `tovuk usage --json`, then set hard
-usage caps with `tovuk limits set`.
-Useful cap metrics include `build_minutes`, `worker_requests`, `worker_cpu_ms`,
-`sqlite_rows_read`, `sqlite_rows_written`, `kv_reads`, `queue_operations`,
-`state_requests`, `state_duration_gb_milliseconds`, `state_sqlite_rows_read`,
-`state_sqlite_rows_written`,
-`object_storage_bytes`, `object_storage_class_a_operations`, and
-`object_storage_class_b_operations`, and `object_storage_egress_bytes`.
-
-`tovuk pricing --json` exposes a `products` catalog. Use each product's
-`features`, `meters`, `meter_details`, `pricing_fields`, and `limit_fields`
-before load tests, media uploads, or paid usage.
-`tovuk deploy --dry-run --json` is read-only and combines `tovuk.toml`, quality checks,
-capability meters, account limits, usage, and `billingEstimate` before deploy.
-Each service includes `missingConfig` for `tovuk.toml` repair, `requiredFixes`
-for every failed quality check, and `meterPlan` entries for enabled service
-meters with meter units, pricing fields, limit fields, and ready-to-fill
-`tovuk limits set` cap commands.
-After adding or upgrading Rust dependencies, run
-`tovuk deploy --dry-run --build-artifact --json`; it performs the local release
-build without uploading or promoting, then reports
-`artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
-`tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
-and `dev.port_statuses` without starting child processes. If a planned port is
-occupied, JSON mode returns `ok: false` and `dev.port_statuses[].owner` when
-the PID/command can be detected. Text mode refuses to start child processes
-until ports are free. Inspect `dev.port_statuses` before opening
-`frontend_url` so a port conflict does not send the browser to a stale worker
-or a different app. Set `[dev].worker_port` and `[dev].frontend_port` in
-`tovuk.toml` for stable project-local dev ports. Use `--worker-port <port>` or
-`--frontend-port <port>` to override those config values for one run. `[dev]`
-is local-only; deploy requests and source archives omit it before uploading to
-Tovuk.
-The catalog includes Worker, Static Frontend, SQLite, Object Storage, State,
-KV, Queues, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, and
-Usage Caps.
-
-Use `GET /v1/status` only when Tovuk itself appears unavailable. If a Tovuk CLI
-command returns `api_unreachable`, retry it, then check `/v1/status` before
-changing project code. Healthy status currently reports control-plane SQLite
-and Redis dependency checks. When status is healthy, call
-`GET /v1/capabilities` to confirm the current public product, meter, docs, and
-OpenAPI catalog before retrying the command. If the API is available and a
-deploy fails, inspect build logs instead of changing status checks.
-
-Never print or commit secrets. Put secrets in Tovuk env vars with
-`tovuk secrets set --service <service> KEY="$KEY"` after loading the local
-shell variable from a password manager or secure prompt. `tovuk env set`
-remains supported for existing scripts.
-
-When a free-tier limit blocks work, confirm account setup with
-`tovuk account show --json`, inspect `tovuk usage --json`, then run
-`tovuk billing checkout --json` when payment is the blocker and show the
-returned URL to the human. For invoices, payment methods, or subscription
-changes, run `tovuk billing portal` and show the returned URL to the human.
-When Tovuk support is needed, create a ticket only after collecting the
-failing command, service id, build id, deploy id, first actionable log line,
-and what the agent already tried. Resolve the ticket when the issue is fixed
-so future agents do not duplicate the same support work.
+- `docs/quickstart.mdx`: first scraper Request.
+- `docs/scrapers.mdx`: scraper names, inputs, pricing, and API routes.
+- `docs/agents.mdx`: JSON-first automated workflow.
+- `docs/pricing.mdx`: plans and per-result prices.
+- `docs/reference/packages.mdx`: package channels and command surface.
+- `docs/support.mdx`: support tickets.
+- `docs/abuse.mdx`: abuse reports and operator moderation.
