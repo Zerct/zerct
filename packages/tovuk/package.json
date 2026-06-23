@@ -1,7 +1,7 @@
 {
   "name": "tovuk",
   "version": "0.1.106",
-  "description": "Use Tovuk scraper APIs and manage Rust services from a native CLI.",
+  "description": "Use Tovuk scraper APIs from a native CLI.",
   "type": "module",
   "bin": {
     "tovuk": "bin/tovuk"

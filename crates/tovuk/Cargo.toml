@@ -3,7 +3,7 @@ name = "tovuk"
 version = "0.1.106"
 edition = "2024"
 rust-version = "1.85"
-description = "Use Tovuk scraper APIs and manage Rust services from a native CLI."
+description = "Use Tovuk scraper APIs from a native CLI."
 license = "MIT"
 repository = "https://github.com/tovuk/tovuk"
 homepage = "https://tovuk.com"
@@ -39,8 +39,6 @@ unwrap_used = "deny"
 clone_on_ref_ptr = "deny"
 
 [dependencies]
-base64 = "0.22.1"
-flate2 = "1.1.9"
 reqwest = { version = "0.13.4", default-features = false, features = [
   "blocking",
   "json",
@@ -48,6 +46,3 @@ reqwest = { version = "0.13.4", default-features = false, features = [
 ] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
-tar = "0.4.46"
-toml = "1.1.2"
-walkdir = "2.5.0"

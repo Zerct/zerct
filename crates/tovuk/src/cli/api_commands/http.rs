@@ -113,27 +113,6 @@ fn enrich_agent_error_payload(
     }
 }
 
-pub(crate) fn payment_required_agent_error(
-    cli: &CliOptions,
-    token: &str,
-    message: impl Into<String>,
-    instruction: impl Into<String>,
-) -> CliError {
-    let mut payload = AgentErrorPayload {
-        code: "payment_required".to_owned(),
-        message: message.into(),
-        agent_instruction: Some(instruction.into()),
-        docs_url: None,
-        checkout_url: None,
-    };
-    enrich_agent_error_payload(cli, "local:preflight", Some(token), &mut payload);
-    CliError::new(CliFailure {
-        payload,
-        json: cli.output.json,
-        exit_code: 1,
-    })
-}
-
 fn create_checkout_url(cli: &CliOptions, token: Option<&str>, reason: &str) -> Option<String> {
     let token = token?;
     let response = api_request(

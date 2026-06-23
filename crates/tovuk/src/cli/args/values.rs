@@ -14,22 +14,6 @@ pub(super) fn set_string_flag(
     Ok(flag_consumed(argv, index))
 }
 
-pub(super) fn set_u64_flag(
-    target: &mut u64,
-    name: &str,
-    inline: Option<String>,
-    argv: &[String],
-    index: usize,
-    json_output: bool,
-) -> Result<usize> {
-    *target = parse_u64(
-        &flag_value(name, inline, argv, index, json_output)?,
-        name,
-        json_output,
-    )?;
-    Ok(flag_consumed(argv, index))
-}
-
 pub(super) fn set_boolean_flag(
     inline: Option<&String>,
     mut set: impl FnMut(),
@@ -91,24 +75,4 @@ pub(super) fn flag_consumed(argv: &[String], index: usize) -> usize {
 fn arg_has_inline_value(argv: &[String], index: usize) -> bool {
     argv.get(index)
         .is_some_and(|arg| arg.starts_with(LONG_FLAG_PREFIX) && arg.contains('='))
-}
-
-fn parse_u64(value: &str, name: &str, json_output: bool) -> Result<u64> {
-    let parsed = value.parse::<u64>().map_err(|_error| {
-        agent_error(
-            "invalid_argument",
-            format!("{name} must be a positive integer."),
-            format!("Pass {name} as seconds, for example {name} 900."),
-            json_output,
-        )
-    })?;
-    if parsed == 0 {
-        return Err(agent_error(
-            "invalid_argument",
-            format!("{name} must be a positive integer."),
-            format!("Pass {name} as seconds, for example {name} 900."),
-            json_output,
-        ));
-    }
-    Ok(parsed)
 }

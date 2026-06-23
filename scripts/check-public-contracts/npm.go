@@ -28,7 +28,7 @@ func checkNPMCLIPackage() {
 	packageJSON := readPackageJSON(packageJSONPath)
 	requireEqual(packageJSON.Name, "tovuk", "package name")
 	requireEqual(packageJSON.Type, "module", "package type")
-	requireEqual(packageJSON.Description, "Use Tovuk scraper APIs and manage Rust services from a native CLI.", "package description")
+	requireEqual(packageJSON.Description, "Use Tovuk scraper APIs from a native CLI.", "package description")
 	requireEqual(packageJSON.Homepage, "https://tovuk.com", "package homepage")
 	requireEqual(packageJSON.License, "MIT", "package license")
 	if packageJSON.Private != nil {

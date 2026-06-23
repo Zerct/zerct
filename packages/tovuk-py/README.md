@@ -1,235 +1,40 @@
 # tovuk
 
-Python CLI package for Tovuk scraper APIs, Rust workers, static frontends, and
-full-stack services.
-It installs or downloads the same native Tovuk binary used by npm, Homebrew,
-and Cargo. PyPI requires Python to install and launch the package, but it does
-not require Node.js, npm, or any JavaScript runtime.
+Python package for launching the native Tovuk Rust CLI. It installs or
+downloads the same binary used by npm, Homebrew, and Cargo.
 
 ```sh
 pipx install tovuk
-tovuk new hello-service --template fullstack-rust-tanstack
-cd hello-service/web && npm install && cd ..
-tovuk check --json
+tovuk login --json
 tovuk account show --json
-tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
-tovuk deploy --dry-run --json
-tovuk check
-tovuk deploy --wait --json
-tovuk deploy list --json
-tovuk deploy show deploy_1 --json
-tovuk deploy cancel deploy_1 --json
+tovuk pricing --json
+tovuk scraper list --json
+tovuk scraper health --json
+tovuk scraper show tiktok --json
+tovuk request list --limit 20 --json
+tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":100}' --json
+tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}' --json
+tovuk request show request_123 --json
+tovuk request results request_123 --limit 1000 --json
+tovuk usage --json
+tovuk billing checkout --json
+tovuk billing portal --json
+tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 ```
 
-For agent sessions, set `TOVUK_OUTPUT=json` once and run the same commands
-without repeating `--json`. Use `--output text` on a single command when you
-want human-readable output.
+Set `TOVUK_OUTPUT=json` for agent sessions. Set
+`TOVUK_NATIVE_BINARY=/path/to/tovuk` to test a local binary.
 
-From a full-stack repo root, `tovuk deploy` reads one root `tovuk.toml`,
-reads explicit `[capabilities]`, builds the worker and frontend roots, and
-returns one service URL with `/api/*` routed to the Rust worker.
+The CLI does not deploy websites, backends, databases, workers, storage buckets,
+queues, cron jobs, custom domains, secrets, or other customer infrastructure.
 
-`tovuk new` can scaffold a starter `tovuk.toml` from existing files, but deploy
-behavior is controlled only by the committed `tovuk.toml`. Review explicit
-`[capabilities]` before deploy.
-
-Rust worker deploys require `cargo fmt --all --check`, locked release-mode
-`cargo check`, locked release-mode tests, and strict all-target, all-feature
-Clippy with panic/unwrap bans plus resource-sensitive lints.
-Deploy archives must contain source files only. Tovuk rejects generated
-directories, secret files, and compiled artifacts such as `.exe`, `.so`,
-`.dylib`, `.jar`, `.node`, and `.rlib`.
-
-Package static frontend deploys require TypeScript browser source, stable native
-type-aware TypeScript checks, native linting such as `oxlint` or
-`biome check`, and Fallow dead-code, semantic duplicate-code, and health
-gates.
-
-The npm package is also available:
-
-```sh
-npm install -g tovuk
-tovuk deploy
-```
+Scraper requests are public data only. Do not send cookies, passwords, account
+tokens, private session data, private account content, private repository
+credentials, or proxy URLs.
 
 Homebrew uses the main public repository tap:
 
 ```sh
 brew tap tovuk/tovuk https://github.com/tovuk/tovuk
 brew install tovuk
-tovuk deploy
 ```
-
-The Python package exposes the same agent command surface as npm:
-
-```sh
-tovuk pricing
-tovuk pricing --json
-tovuk scraper list --json
-tovuk scraper health --json
-tovuk scraper show google-maps --json
-tovuk request create google-maps '{"query":"coffee shops","limit":100}' --json
-tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
-tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
-tovuk request create github '{"operation":"codeSearch","query":"StreamableHTTPClientTransport","language":"TypeScript","repo":"modelcontextprotocol/typescript-sdk","path":"examples/client/src","limit":25}' --json
-tovuk request create github '{"operation":"marketplace","searchQuery":"ci","limit":25}' --json
-tovuk request create github '{"operation":"watchers","repo":"rust-lang/rust","limit":50}' --json
-tovuk request create github '{"operation":"file","repo":"rust-lang/rust","path":"README.md","contentMaxChars":2000}' --json
-tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":50}' --json
-tovuk request create reddit '{"operation":"subreddit-profile","community":"rust"}' --json
-tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","limit":100}' --json
-tovuk request create x '{"query":"rust lang","product":"Latest","limit":100}' --json
-tovuk request create x '{"url":"https://x.com/openai/status/1234567890","limit":1}' --json
-tovuk request show request_123 --json
-tovuk request results request_123 --json
-tovuk request cancel request_123 --json
-tovuk account show --json
-tovuk account activity --json
-tovuk deploy --dry-run --json
-tovuk deploy list --json
-tovuk deploy show deploy_1 --json
-tovuk deploy cancel deploy_1 --json
-tovuk usage
-tovuk usage --json
-tovuk service list
-tovuk service status service_1 --json
-tovuk service show service_1 --json
-tovuk service delete service_1 --json
-tovuk logs --deploy deploy_1 --limit 100 --json
-tovuk env list --service service_1
-tovuk env set --service service_1 API_KEY=value
-tovuk env delete --service service_1 API_KEY
-tovuk secrets list --service service_1
-tovuk secrets set --service service_1 API_KEY=value
-tovuk secrets delete --service service_1 API_KEY
-tovuk domains add --service service_1 api.example.com
-tovuk domains verify --service service_1 api.example.com
-tovuk storage list --service service_1 --json
-tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
-tovuk storage url --service service_1 uploads/logo.png --json
-tovuk storage delete --service service_1 uploads/logo.png --json
-tovuk sqlite create --service service_1 DB --json
-tovuk sqlite query --service service_1 DB "select 1" --json
-tovuk sqlite backup create --service service_1 DB --json
-tovuk sqlite backup list --service service_1 DB --json
-tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
-tovuk sqlite delete --service service_1 DB --json
-tovuk kv create --service service_1 CACHE --json
-tovuk kv put --service service_1 CACHE user:1 '{"name":"Ada"}' --json
-tovuk kv get --service service_1 CACHE user:1 --json
-tovuk kv bulk put --service service_1 CACHE '[{"key":"feature:search","value":"enabled"}]' --json
-tovuk kv bulk get --service service_1 CACHE feature:search user:1 --json
-tovuk kv bulk delete --service service_1 CACHE feature:search old:key --json
-tovuk queue create --service service_1 jobs --json
-tovuk queue send --service service_1 jobs '{"task":"sync"}' --json
-tovuk queue send-batch --service service_1 jobs '[{"body":{"task":"sync"}},{"body":{"task":"index"}}]' --json
-tovuk queue metrics --service service_1 jobs --json
-tovuk cron create --service service_1 nightly "0 0 * * *" --json
-tovuk cron update --service service_1 nightly "*/15 * * * *" --json
-tovuk cron disable --service service_1 nightly --json
-tovuk cron enable --service service_1 nightly --json
-tovuk state list --service service_1 --json
-tovuk state create --service service_1 Room --json
-tovuk state objects --service service_1 Room --json
-tovuk state keys --service service_1 Room room-1 --json
-tovuk state put --service service_1 Room room-1 counter 1 --json
-tovuk state get --service service_1 Room room-1 counter --json
-tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json
-tovuk state alarm get --service service_1 Room room-1 --json
-tovuk state alarm delete --service service_1 Room room-1 --json
-tovuk state delete-value --service service_1 Room room-1 counter --json
-tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
-tovuk billing checkout --json
-tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
-tovuk support list --json
-tovuk support resolve ticket_0123456789abcdef0123 --json
-tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
-tovuk abuse list --json
-tovuk abuse list --operator --json
-tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
-tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
-tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
-tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
-tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
-tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
-tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
-tovuk nodes list --token "$TOVUK_OPERATOR_TOKEN" --json
-tovuk nodes drain tovuk-riesling --token "$TOVUK_OPERATOR_TOKEN" --json
-tovuk nodes enable tovuk-riesling --token "$TOVUK_OPERATOR_TOKEN" --json
-```
-
-`tovuk pricing --json` includes plan pricing and product meter metadata, so
-agents can choose the correct product and cap the right meters before heavy
-work.
-`tovuk usage --json` includes `billingEstimate.lineItems` for current-month
-cost estimates.
-Without `--json`, `tovuk service list` prints a compact table with Service
-kind, runtime status, URL, enabled and disabled capabilities, and resource counts.
-`tovuk service status <service> --json` returns top-level `ok`, `url`, and
-`agent_instruction` fields for smoke tests; text mode prints only the
-live/deploy/build summary. `tovuk service show <service>` prints the broader Service snapshot.
-`tovuk scraper list --json` returns public-data Scrapers with price events, and
-`tovuk scraper health --json` returns managed reader, signing worker, and proxy
-readiness. `tovuk request create <scraper> '<json>' --json` creates paid
-scraper work, and `tovuk request results <request_id> --json` fetches stored
-Records. Scraper
-Requests must not include cookies, passwords, account tokens, private session
-data, private account content, GitHub tokens, private repository credentials, or
-proxy URLs. GitHub Requests accept public search, repository, file, profile,
-code search, trending, opportunity, and Marketplace inputs. Instagram Requests accept only
-public profile URLs, post URLs, reel URLs, hashtag URLs, usernames, shortcodes,
-media ids, hashtags, or search terms; Tovuk manages reader accounts internally.
-Dashboard Overview Service rows expose copyable commands for `service status`,
-`service show`, logs, storage listing, worker request caps, support tickets,
-and service deletion.
-`tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
-disabled capabilities, quality checks, capability meters, account limits, and
-`billingEstimate` before deploy, without creating a build. Each service
-includes `missingConfig` for `tovuk.toml` repair, `requiredFixes` for every
-failed quality check, and `meterPlan` entries for enabled service meters with
-meter units, pricing fields, limit fields, and ready-to-fill `tovuk limits set`
-cap commands with `--notify-at-percent`.
-After adding or upgrading Rust dependencies, run
-`tovuk deploy --dry-run --build-artifact --json`; it performs the local release
-build without uploading or promoting, then reports
-`artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
-
-`tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
-and `port_statuses` without starting processes. When a planned port is already
-occupied, JSON mode returns `ok: false` and `dev.port_statuses[].owner` when the
-PID/command can be detected. Text mode refuses to start child processes until
-ports are free, so agents do not inspect a stale worker or a different app
-already using the planned port. Set `[dev].worker_port` and
-`[dev].frontend_port` in `tovuk.toml` for stable project-local dev ports, and
-use `--worker-port <port>` or `--frontend-port <port>` to override those config
-values for one run. `[dev]` is local-only; deploy requests and source archives
-omit it before uploading to Tovuk.
-
-`tovuk storage upload` automatically switches to multipart transfer for files
-larger than 100 MiB.
-Public media uploads reject executable and script payloads. Store artifacts
-privately, and use Static Frontend for browser-executed web assets.
-
-Agent repair loop:
-
-```sh
-tovuk check --json
-tovuk deploy --dry-run --build-artifact --json
-tovuk deploy --wait --json
-tovuk deploy show deploy_1 --json
-tovuk logs --build job_1 --json
-```
-
-Fix the first failed `agent_instruction`. In JSON mode, filter failed checks
-with `checks[] | select(.status == "failed")`. If a build fails, inspect build
-logs, fix the first actionable log error, rerun check, then redeploy.
-
-On first deploy, the CLI opens browser login, waits for GitHub or Google, stores
-the Tovuk session in the OS credential store when available, and continues the
-deploy. Later commands reuse that session.
-In JSON mode, login writes a one-line `login_started` event to stderr with
-`login_url`, `verification_uri`, `user_code`, expiry, and poll interval, while
-stdout stays reserved for the final command JSON.

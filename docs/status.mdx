@@ -1,158 +1,22 @@
 ---
-title: "Check Tovuk API Status and Capabilities"
-sidebarTitle: "Status"
-description: "Use Tovuk health, structured status, and capability catalog endpoints before changing project code."
+title: "Status"
+description: "Check public API health before retrying scraper work."
 ---
 
-Use status endpoints only to understand Tovuk availability. Use logs and deploy
-responses to debug your project.
-
-## Status Check Workflow
-
-<Steps>
-  <Step title="Check whether the API is reachable">
-    ```sh
-    curl https://api.tovuk.com/health
-    ```
-
-    Use `/health` when the question is whether the public API is reachable.
-    Keep `/healthz` for infrastructure probes and deploy scripts.
-  </Step>
-
-  <Step title="Read structured status">
-    ```sh
-    curl https://api.tovuk.com/v1/status
-    ```
-
-    Use `/v1/status` when an SDK, CLI, or agent needs structured dependency
-    checks, `agent_instruction`, and the status docs URL.
-  </Step>
-
-  <Step title="Handle CLI reachability errors">
-    ```json
-    {
-      "code": "api_unreachable",
-      "message": "Could not reach Tovuk API: ...",
-      "agent_instruction": "Retry the command. If it keeps failing, check Tovuk status before changing your project.",
-      "docs_url": "https://docs.tovuk.com/status",
-      "checkout_url": null
-    }
-    ```
-
-    Treat `api_unreachable` as a platform reachability signal. Retry the
-    command, check `/v1/status` if it keeps failing, and do not edit project
-    code until status is healthy.
-  </Step>
-
-  <Step title="Confirm the capability catalog">
-    ```sh
-    curl https://api.tovuk.com/v1/capabilities
-    ```
-
-    If `ok` is true, call `/v1/capabilities` to confirm the public product,
-    meter, docs, and OpenAPI catalog before retrying the Tovuk command you were
-    running. If `ok` is false, retry later before changing project code.
-  </Step>
-
-  <Step title="Switch to logs for project failures">
-    ```sh
-    tovuk logs --build <build_id> --json
-    ```
-
-    Use build logs, deploy responses, and service logs when the Tovuk API is
-    available but a project check, build, or deploy failed.
-  </Step>
-</Steps>
-
-## Endpoints
+Use status endpoints to distinguish Tovuk API availability from a scraper
+request failure.
 
 ```sh
 curl https://api.tovuk.com/health
 curl https://api.tovuk.com/healthz
 curl https://api.tovuk.com/v1/status
-curl https://api.tovuk.com/v1/capabilities
+tovuk scraper health --json
 ```
 
-`/health` is the simple human-friendly health alias. `/healthz` remains the
-infrastructure probe for load balancers and deploy scripts.
+`/health` is the simple public health alias. `/healthz` is the infrastructure
+probe. `/v1/status` returns structured dependency state, `agent_instruction`,
+and docs links. `tovuk scraper health --json` returns scraper runtime readiness
+for high-count public-data work.
 
-`/v1/status` is the structured endpoint for SDKs and agents:
-
-```json
-{
-  "ok": true,
-  "service": "tovuk-api",
-  "api_version": "v1",
-  "checks": [
-    {
-      "name": "control_plane_sqlite",
-      "ok": true,
-      "message": "reachable"
-    },
-    {
-      "name": "redis",
-      "ok": true,
-      "message": "reachable"
-    }
-  ],
-  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
-  "docs_url": "https://docs.tovuk.com/status"
-}
-```
-
-Healthy status currently reports control-plane SQLite and Redis dependency
-checks. If `ok` is true, call `/v1/capabilities` to confirm the public product,
-meter, docs, and OpenAPI catalog before retrying the CLI command you were
-running. If `ok` is false, retry later before changing project code.
-
-## Capability Catalog
-
-`/v1/capabilities` is public and machine-readable. It returns the current
-`product`, `api_version`, `docs_url`, `openapi_url`, `auth`,
-`agent_workflow`, `endpoints`, `commands`, `plans`, and `products`.
-
-| Field | Use |
-| --- | --- |
-| `product` | Current default product summary. |
-| `api_version` | Public API version string for agent planning. |
-| `docs_url`, `openapi_url` | Canonical docs and OpenAPI links. |
-| `auth` | Login and token guidance for authenticated requests. |
-| `agent_workflow` | Ordered agent steps before CLI retries or project changes. |
-| `endpoints` | Public route catalog with methods, paths, auth requirements, and agent instructions. |
-| `commands` | CLI command catalog with descriptions. |
-| `plans` | Plan limits and pricing. |
-| `products` | Product features, meters, pricing fields, limit fields, and CLI commands. |
-
-Use `plans[].limits` and `plans[].pricing` for current plan limits and pricing.
-Use `products[].features`, `products[].meters`, `products[].meter_details`,
-`products[].pricing_fields`, and `products[].limit_fields` before enabling
-capabilities, changing paid-resource code, or retrying a command after a
-platform reachability error.
-
-## CLI Reachability Errors
-
-When any Tovuk CLI command cannot reach the API, the CLI emits a local
-agent-readable error with `code: "api_unreachable"`, the status docs URL, and
-the instruction to retry before changing project code.
-
-```json
-{
-  "code": "api_unreachable",
-  "message": "Could not reach Tovuk API: ...",
-  "agent_instruction": "Retry the command. If it keeps failing, check Tovuk status before changing your project.",
-  "docs_url": "https://docs.tovuk.com/status",
-  "checkout_url": null
-}
-```
-
-After repeated `api_unreachable` errors, use `/v1/status` to separate Tovuk API
-availability from project build or runtime failures.
-
-## Agent Rule
-
-Do not use status as a project debugger. After deploy failures, inspect build
-logs instead:
-
-```sh
-tovuk logs --build <build_id> --json
-```
+When the CLI cannot reach the API, it returns `api_unreachable` with a status
+docs URL. Retry once, then check `/v1/status` before changing scraper inputs.

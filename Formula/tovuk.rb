@@ -1,5 +1,5 @@
 class Tovuk < Formula
-  desc "Use Tovuk scraper APIs and manage Rust services from a native CLI"
+  desc "Use Tovuk scraper APIs from a native CLI"
   homepage "https://tovuk.com"
   url "https://github.com/tovuk/tovuk.git", tag: "v0.1.106"
   license "MIT"
@@ -13,31 +13,17 @@ class Tovuk < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/tovuk --version")
     help = shell_output("#{bin}/tovuk --help")
-    assert_match "tovuk new", help
-    assert_match "tovuk deploy --dry-run", help
-    assert_match "tovuk deploy list", help
-    assert_match "tovuk deploy show", help
-    assert_match "tovuk deploy cancel", help
     assert_match "tovuk account show", help
     assert_match "tovuk account update", help
     assert_match "tovuk pricing", help
     assert_match "tovuk scraper list", help
     assert_match "tovuk scraper health", help
+    assert_match "tovuk scraper show", help
     assert_match "tovuk request create", help
+    assert_match "tovuk request show", help
     assert_match "tovuk request results", help
-    assert_match "tovuk service show", help
+    assert_match "tovuk usage", help
     assert_match "tovuk billing [checkout|portal]", help
-    assert_match "tovuk storage list", help
-    assert_match "tovuk storage upload", help
-    assert_match "tovuk storage download", help
-    assert_match "tovuk storage delete", help
-    assert_match "tovuk sqlite create", help
-    assert_match "tovuk sqlite query", help
-    assert_match "tovuk sqlite backup", help
-    assert_match "tovuk sqlite delete", help
-    assert_match "tovuk kv put", help
-    assert_match "tovuk kv get", help
-    assert_match "tovuk queue send", help
     assert_match "tovuk billing checkout --json", help
     assert_match "tovuk billing portal", help
     assert_match "tovuk support create", help
@@ -53,5 +39,13 @@ class Tovuk < Formula
     assert_match "tovuk abuse resolve", help
     assert_match "tovuk abuse reject", help
     assert_match "tovuk abuse release", help
+    refute_match "tovuk deploy", help
+    refute_match "tovuk service", help
+    refute_match "tovuk storage", help
+    refute_match "tovuk sqlite", help
+    refute_match "tovuk kv", help
+    refute_match "tovuk queue", help
+    refute_match "tovuk cron", help
+    refute_match "tovuk secrets", help
   end
 end

@@ -94,7 +94,7 @@ mod tests {
     }
 
     #[test]
-    fn dev_port_flags_are_parsed() {
+    fn retired_dev_port_flags_are_rejected() {
         let parsed = parse_args(&args(&[
             "dev",
             "--worker-port",
@@ -102,8 +102,10 @@ mod tests {
             "--frontend-port=5174",
         ]));
 
-        assert!(parsed.as_ref().is_ok_and(|cli| {
-            cli.command == "dev" && cli.dev.worker_port == "3001" && cli.dev.frontend_port == "5174"
-        }));
+        assert!(
+            parsed
+                .as_ref()
+                .is_err_and(|error| error.payload().code == "unknown_argument")
+        );
     }
 }

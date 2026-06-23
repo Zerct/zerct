@@ -5,7 +5,7 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::{command_arg, insert_optional},
+    common::command_arg,
     generic::{print_authenticated_mutation, print_paged_authenticated},
     http::api_request,
 };
@@ -20,7 +20,7 @@ pub(crate) fn support_command(cli: &CliOptions) -> Result<()> {
         _ => Err(agent_error(
             "unknown_command",
             "Unknown support command.",
-            "Use `tovuk support list --json` or `support create` with subject and details.",
+            "Use `tovuk support list --json`, `tovuk support create \"Subject\" \"Details\" --json`, or `tovuk support resolve <ticket_id> --json`.",
             cli.output.json,
         )),
     }
@@ -57,7 +57,7 @@ fn support_create(cli: &CliOptions) -> Result<()> {
         return Err(agent_error(
             "invalid_support_ticket",
             "Support ticket subject and details are required.",
-            "Use `tovuk support create \"Short subject\" \"Command, service id, build id, deploy id, and first actionable log line\" --json`.",
+            "Use `tovuk support create \"Short subject\" \"Command output, request id, and first actionable error line\" --json`.",
             cli.output.json,
         ));
     }
@@ -77,11 +77,18 @@ fn support_create(cli: &CliOptions) -> Result<()> {
             cli.severity.clone()
         }),
     );
-    insert_optional(&mut body, "service_id", &cli.service);
-    insert_optional(&mut body, "failing_command", &cli.failing_command);
-    insert_optional(&mut body, "build_id", &cli.build);
-    insert_optional(&mut body, "deploy_id", &cli.deploy);
-    insert_optional(&mut body, "first_log_line", &cli.first_log_line);
+    if !cli.failing_command.is_empty() {
+        body.insert(
+            "failing_command".to_owned(),
+            Value::String(cli.failing_command.clone()),
+        );
+    }
+    if !cli.first_log_line.is_empty() {
+        body.insert(
+            "first_log_line".to_owned(),
+            Value::String(cli.first_log_line.clone()),
+        );
+    }
     let response = api_request(
         cli,
         Method::POST,
