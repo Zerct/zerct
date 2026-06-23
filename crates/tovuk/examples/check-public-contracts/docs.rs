@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 
@@ -37,6 +37,12 @@ pub(crate) fn check() -> CheckResult {
     require_support_pricing_and_openapi(&sources)?;
     reject_retired_docs_contracts(&sources)?;
     println!("Checked scraper-only docs, package copy, and OpenAPI contract.");
+    Ok(())
+}
+
+pub(crate) fn print_openapi_path() -> CheckResult {
+    let path = openapi_config_path()?;
+    println!("{}", path.display());
     Ok(())
 }
 
@@ -107,6 +113,15 @@ fn read_navigation_pages() -> CheckResult<Vec<String>> {
         }
     }
     Ok(pages)
+}
+
+fn openapi_config_path() -> CheckResult<PathBuf> {
+    let docs: DocsJson = read_json("docs/docs.json")?;
+    let openapi = docs.api.openapi.trim();
+    if openapi.is_empty() {
+        return Err("docs/docs.json must set api.openapi".to_owned());
+    }
+    Ok(Path::new("docs").join(openapi))
 }
 
 fn require_navigation_pages_exist(pages: &[String]) -> CheckResult {

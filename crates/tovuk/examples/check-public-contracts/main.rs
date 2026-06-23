@@ -35,6 +35,7 @@ fn run() -> CheckResult {
         "package-versions" => package_versions::check(),
         "cli-contract" => cli_contract::check(),
         "docs" => docs::check(),
+        "openapi-path" => docs::print_openapi_path(),
         "npm-cli-package" => npm::check_cli_package(),
         "npm-native-runtime" => npm::check_native_runtime(),
         "mintlify-agent-readiness" => {

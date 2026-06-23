@@ -6,6 +6,11 @@ cd "$repo_root"
 python_bin="$(command -v python3.11 || command -v python3)"
 native_cli="$repo_root/crates/tovuk/target/release/tovuk"
 export TOVUK_NATIVE_BINARY="$native_cli"
+tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/tovuk-public-check.XXXXXX")"
+cleanup() {
+  rm -rf "$tmp_dir"
+}
+trap cleanup EXIT
 
 if git check-ignore -q AGENTS.md; then
   printf 'AGENTS.md must be tracked Codex project guidance, not ignored.\n' >&2
@@ -83,12 +88,14 @@ assert_not_contains() {
 assert_unknown_command() {
   local label="$1"
   shift
+  local out_file="$tmp_dir/retired-command.out"
+  local err_file="$tmp_dir/retired-command.err"
 
-  if "$@" >/tmp/tovuk-retired-command.out 2>/tmp/tovuk-retired-command.err; then
+  if "$@" >"$out_file" 2>"$err_file"; then
     printf 'expected retired command to fail: %s\n' "$label" >&2
     exit 1
   fi
-  grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
+  grep -q '"code": "unknown_command"' "$err_file"
 }
 
 required_help_commands=(
@@ -211,11 +218,11 @@ assert_help_contract \
   "$native_cli_flag_help_output"
 test "$("$native_cli" -V)" = "$native_cli_version"
 test "$("$native_cli" --api=https://api.example.test --version)" = "$native_cli_version"
-if "$native_cli" --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
+if "$native_cli" --json --definitely-unknown >"$tmp_dir/native-unknown-flag.out" 2>"$tmp_dir/native-unknown-flag.err"; then
   printf 'expected native CLI unknown flag to fail\n' >&2
   exit 1
 fi
-grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
+grep -q '"code": "unknown_argument"' "$tmp_dir/native-unknown-flag.err"
 
 assert_retired_commands 'native CLI retired command' "$native_cli"
 
@@ -230,9 +237,9 @@ assert_help_contract \
   "$python_cli_help_output" \
   "$python_cli_flag_help_output"
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --version)" = "$native_cli_version"
-if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
+if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >"$tmp_dir/python-unknown-flag.out" 2>"$tmp_dir/python-unknown-flag.err"; then
   printf 'expected Python CLI unknown flag to fail\n' >&2
   exit 1
 fi
-grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
+grep -q '"code": "unknown_argument"' "$tmp_dir/python-unknown-flag.err"
 assert_retired_commands 'Python CLI retired command' env PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk

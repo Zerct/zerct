@@ -40,7 +40,15 @@ pub(crate) struct PackageJson {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct DocsJson {
+    #[serde(default)]
+    pub(crate) api: DocsApi,
     pub(crate) navigation: DocsNavigation,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub(crate) struct DocsApi {
+    #[serde(default)]
+    pub(crate) openapi: String,
 }
 
 #[derive(Debug, Deserialize)]

@@ -5,17 +5,7 @@ repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$repo_root"
 
 vacuum_version="${VACUUM_VERSION:-0.26.6}"
-docs_openapi_path="$(
-  node -e '
-    const fs = require("node:fs");
-    const config = JSON.parse(fs.readFileSync("docs/docs.json", "utf8"));
-    const openapi = config.api?.openapi;
-    if (!openapi) {
-      process.exit(1);
-    }
-    console.log(`docs/${openapi}`);
-  '
-)"
+docs_openapi_path="$(scripts/check-public-contracts.sh openapi-path)"
 
 if [ ! -f "$docs_openapi_path" ]; then
   echo "Missing OpenAPI file referenced by docs/docs.json: $docs_openapi_path" >&2
