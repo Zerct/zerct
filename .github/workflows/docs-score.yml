@@ -21,10 +21,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: actions/setup-go@v6
-        with:
-          go-version: "1.26.x"
-          cache: false
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -41,7 +37,7 @@ jobs:
           ./scripts/check-prose-style.sh
       - name: Check public agent readiness
         run: |
-          if go run scripts/check-public-contracts/*.go mintlify-agent-readiness https://docs.tovuk.com; then
+          if ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com; then
             exit 0
           fi
 
@@ -62,7 +58,7 @@ jobs:
           mkdir -p "$HOME/.config/mintlify"
           printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
           npx --yes mint@4.2.578 score https://docs.tovuk.com --format json > mint-score.json
-          go run scripts/check-public-contracts/*.go mintlify-score mint-score.json
+          ./scripts/check-public-contracts.sh mintlify-score mint-score.json
         env:
           MINTLIFY_CLI_CONFIG_JSON: ${{ secrets.MINTLIFY_CLI_CONFIG_JSON }}
           MINTLIFY_SCORE_MIN: ${{ vars.MINTLIFY_SCORE_MIN }}
