@@ -30,19 +30,19 @@ reject_match 'actions/cache@(v[0-4]|main|master)' \
 reject_match 'pull_request_target:' \
   'pull_request_target is forbidden for this public repository'
 reject_match '(^|[^[:alnum:]_-])(eslint|prettier|tsc)([^[:alnum:]_-]|$)' \
-  'JavaScript linters and typecheckers are forbidden in CI; use Rust or Go based checks'
+  'JavaScript linters and typecheckers are forbidden in CI; use Rust based checks'
 
 if ! rg -q 'scripts/check-all\.sh' "$workflow_dir"; then
   printf 'workflows must run scripts/check-all.sh so local and CI checks stay aligned\n' >&2
   status=1
 fi
 
-if ! rg -q 'go run scripts/check-prose-style\.go --self-test' scripts/check-all.sh; then
+if ! rg -q '\./scripts/check-prose-style\.sh --self-test' scripts/check-all.sh; then
   printf 'scripts/check-all.sh must run the prose style checker self-test\n' >&2
   status=1
 fi
 
-if ! rg -q 'go run scripts/check-prose-style\.go$' scripts/check-all.sh; then
+if ! rg -q '\./scripts/check-prose-style\.sh$' scripts/check-all.sh; then
   printf 'scripts/check-all.sh must run the prose style checker repository scan\n' >&2
   status=1
 fi

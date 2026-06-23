@@ -80,7 +80,7 @@ npm --prefix packages/tovuk run check
 go run scripts/check-public-contracts/*.go package-versions
 go run scripts/check-public-contracts/*.go cli-contract
 go run scripts/check-public-contracts/*.go docs
-go run scripts/check-prose-style.go
+./scripts/check-prose-style.sh
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb
 ./scripts/check-all.sh
