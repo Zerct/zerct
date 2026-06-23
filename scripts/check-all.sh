@@ -91,6 +91,87 @@ assert_unknown_command() {
   grep -q '"code": "unknown_command"' /tmp/tovuk-retired-command.err
 }
 
+required_help_commands=(
+  'tovuk scraper list'
+  'tovuk scraper health'
+  'tovuk request create'
+  'tovuk request results'
+  'tovuk pricing'
+  'tovuk usage'
+  'tovuk billing checkout'
+  'tovuk support create'
+  'tovuk abuse list --operator'
+)
+retired_help_commands=(
+  'tovuk deploy'
+  'tovuk service'
+  'tovuk storage'
+  'tovuk sqlite'
+  'tovuk queue'
+)
+retired_commands=(
+  new
+  check
+  dev
+  deploy
+  service
+  logs
+  sqlite
+  kv
+  queue
+  cron
+  state
+  binding
+  limits
+  env
+  secrets
+  domains
+  storage
+  nodes
+  init
+  install
+  preview
+  capabilities
+  me
+  activity
+  services
+  overview
+  deploys
+  builds
+  status
+  inspect
+  platform
+  caps
+  limit
+  files
+  media
+)
+
+assert_help_contract() {
+  local label="$1"
+  shift
+  local help_output required_command retired_command
+
+  for help_output in "$@"; do
+    for required_command in "${required_help_commands[@]}"; do
+      assert_contains "$help_output" "$required_command" "$label"
+    done
+    for retired_command in "${retired_help_commands[@]}"; do
+      assert_not_contains "$help_output" "$retired_command" "$label"
+    done
+  done
+}
+
+assert_retired_commands() {
+  local label="$1"
+  shift
+  local retired_command
+
+  for retired_command in "${retired_commands[@]}"; do
+    assert_unknown_command "$label $retired_command" "$@" "$retired_command" --json
+  done
+}
+
 cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
 cargo check --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
 cargo test --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
@@ -123,22 +204,11 @@ printf '%s\n' "$native_cli_version"
 native_cli_default_output="$("$native_cli")"
 native_cli_help_output="$("$native_cli" help)"
 native_cli_flag_help_output="$("$native_cli" --help)"
-for help_output in "$native_cli_default_output" "$native_cli_help_output" "$native_cli_flag_help_output"; do
-  assert_contains "$help_output" 'tovuk scraper list' 'native CLI help'
-  assert_contains "$help_output" 'tovuk scraper health' 'native CLI help'
-  assert_contains "$help_output" 'tovuk request create' 'native CLI help'
-  assert_contains "$help_output" 'tovuk request results' 'native CLI help'
-  assert_contains "$help_output" 'tovuk pricing' 'native CLI help'
-  assert_contains "$help_output" 'tovuk usage' 'native CLI help'
-  assert_contains "$help_output" 'tovuk billing checkout' 'native CLI help'
-  assert_contains "$help_output" 'tovuk support create' 'native CLI help'
-  assert_contains "$help_output" 'tovuk abuse list --operator' 'native CLI help'
-  assert_not_contains "$help_output" 'tovuk deploy' 'native CLI help'
-  assert_not_contains "$help_output" 'tovuk service' 'native CLI help'
-  assert_not_contains "$help_output" 'tovuk storage' 'native CLI help'
-  assert_not_contains "$help_output" 'tovuk sqlite' 'native CLI help'
-  assert_not_contains "$help_output" 'tovuk queue' 'native CLI help'
-done
+assert_help_contract \
+  'native CLI help' \
+  "$native_cli_default_output" \
+  "$native_cli_help_output" \
+  "$native_cli_flag_help_output"
 test "$("$native_cli" -V)" = "$native_cli_version"
 test "$("$native_cli" --api=https://api.example.test --version)" = "$native_cli_version"
 if "$native_cli" --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
@@ -147,34 +217,22 @@ if "$native_cli" --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp
 fi
 grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
 
-for retired_command in \
-  new check dev deploy service logs sqlite kv queue cron state binding limits env secrets domains storage nodes \
-  init install preview capabilities me activity services overview deploys builds status inspect platform caps limit files media; do
-  assert_unknown_command "$retired_command" "$native_cli" "$retired_command" --json
-done
+assert_retired_commands 'native CLI retired command' "$native_cli"
 
 "$python_bin" -m compileall -q packages/tovuk-py/src
 PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --version
 python_cli_default_output="$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk)"
 python_cli_help_output="$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk help)"
 python_cli_flag_help_output="$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --help)"
-for help_output in "$python_cli_default_output" "$python_cli_help_output" "$python_cli_flag_help_output"; do
-  assert_contains "$help_output" 'tovuk scraper list' 'Python CLI help'
-  assert_contains "$help_output" 'tovuk request create' 'Python CLI help'
-  assert_contains "$help_output" 'tovuk request results' 'Python CLI help'
-  assert_contains "$help_output" 'tovuk pricing' 'Python CLI help'
-  assert_contains "$help_output" 'tovuk billing checkout' 'Python CLI help'
-  assert_contains "$help_output" 'tovuk support create' 'Python CLI help'
-  assert_not_contains "$help_output" 'tovuk deploy' 'Python CLI help'
-  assert_not_contains "$help_output" 'tovuk service' 'Python CLI help'
-  assert_not_contains "$help_output" 'tovuk storage' 'Python CLI help'
-done
+assert_help_contract \
+  'Python CLI help' \
+  "$python_cli_default_output" \
+  "$python_cli_help_output" \
+  "$python_cli_flag_help_output"
 test "$(PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --api=https://api.example.test --version)" = "$native_cli_version"
 if PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk --json --definitely-unknown >/tmp/tovuk-unknown-flag.out 2>/tmp/tovuk-unknown-flag.err; then
   printf 'expected Python CLI unknown flag to fail\n' >&2
   exit 1
 fi
 grep -q '"code": "unknown_argument"' /tmp/tovuk-unknown-flag.err
-for retired_command in new check dev deploy service logs sqlite kv queue cron state binding limits env secrets domains storage nodes; do
-  assert_unknown_command "$retired_command" env PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk "$retired_command" --json
-done
+assert_retired_commands 'Python CLI retired command' env PYTHONPATH=packages/tovuk-py/src "$python_bin" -m tovuk
