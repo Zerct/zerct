@@ -101,8 +101,8 @@ jobs:
           PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
       - if: steps.version.outputs.exists == 'false'
         run: |
-          go run scripts/check-prose-style.go --self-test
-          go run scripts/check-prose-style.go
+          ./scripts/check-prose-style.sh --self-test
+          ./scripts/check-prose-style.sh
       - if: steps.version.outputs.exists == 'false'
         run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - if: steps.version.outputs.exists == 'false'

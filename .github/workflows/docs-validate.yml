@@ -5,7 +5,8 @@ on:
     paths:
       - "docs/**"
       - "scripts/check-public-contracts/**"
-      - "scripts/check-prose-style.go"
+      - "scripts/check-prose-style.rs"
+      - "scripts/check-prose-style.sh"
       - ".github/workflows/docs-validate.yml"
   workflow_dispatch:
 
@@ -41,8 +42,8 @@ jobs:
             ${{ runner.os }}-npm-mintlify-
       - run: go run scripts/check-public-contracts/*.go docs
       - run: |
-          go run scripts/check-prose-style.go --self-test
-          go run scripts/check-prose-style.go
+          ./scripts/check-prose-style.sh --self-test
+          ./scripts/check-prose-style.sh
       - name: Validate Mintlify build
         run: npx --yes mint@4.2.578 validate
         working-directory: docs
