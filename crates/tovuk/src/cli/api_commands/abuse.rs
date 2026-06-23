@@ -91,9 +91,6 @@ fn abuse_report(cli: &CliOptions) -> Result<()> {
         }),
     );
     insert_optional(&mut body, "reporter_name", &cli.abuse.reporter_name);
-    insert_optional(&mut body, "service_id", &cli.service);
-    insert_optional(&mut body, "target_path", &cli.abuse.target_path);
-    insert_optional(&mut body, "object_path", &cli.abuse.object_path);
     let response = api_request(
         cli,
         Method::POST,

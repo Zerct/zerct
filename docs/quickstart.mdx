@@ -1,109 +1,68 @@
 ---
-title: "Deploy Rust Workers and Full-Stack Services"
-sidebarTitle: "Quickstart"
-description: "Create a Tovuk project contract, run checks, and deploy a Rust worker or full-stack service."
+title: "Quickstart"
+description: "Install the native CLI and run a paid public-data scraper Request."
 ---
 
-## Requirements
+## Install
 
-- A GitHub or Google login
-- A Rust worker with a committed `Cargo.lock`, or a full-stack service with a
-  Rust worker root and frontend root
-- A server process that reads the `PORT` environment variable
+```sh
+cargo install tovuk
+```
 
-## Deploy flow
+Other package channels use the same native Rust binary:
 
-<Steps>
-  <Step title="Create the project contract">
-    From your worker directory:
+```sh
+npm install -g tovuk
+pipx install tovuk
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
+```
 
-    ```sh
-    tovuk new
-    ```
+## Run a Request
 
-    This creates a starter `tovuk.toml` from the files already in the
-    directory. Review `kind`, `[capabilities]`, and build commands before
-    deploy. Tovuk deploys from `tovuk.toml`; the file scan used by `tovuk new`
-    is scaffolding only.
+```sh
+export TOVUK_OUTPUT=json
+tovuk login
+tovuk account show
+tovuk pricing
+tovuk usage
+tovuk scraper list
+tovuk scraper health
+tovuk scraper show tiktok
+tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}'
+```
 
-    For a new project, start from a template:
+Copy the returned `request.id`, then poll and fetch records:
 
-    ```sh
-    tovuk new hello-service --template fullstack-rust-tanstack
-    cd hello-service/web
-    npm install
-    cd ..
-    ```
-  </Step>
+```sh
+tovuk request show request_123
+tovuk request results request_123 --limit 1000
+```
 
-  <Step title="Check locally">
-    ```sh
-    tovuk check --json
-    ```
+Cancel queued or running work when needed:
 
-    Fix the first failed check before deploying. Tovuk errors include
-    `agent_instruction`, so agents can make the exact code change and rerun
-    check.
+```sh
+tovuk request cancel request_123
+```
 
-    Confirm account setup:
+## Public Input Only
 
-    ```sh
-    tovuk account show --json
-    tovuk account update --handle your-handle --display-name "Your Team" --json
-    ```
+Scraper requests are public data only. Use public URLs, public search terms, public profile handles, public place ids,
+or public identifiers only. Do not send cookies, passwords, account tokens,
+private session data, private account content, private repository credentials,
+or proxy URLs.
 
-    Dry-run the deploy before creating a build:
+## Billing
 
-    ```sh
-    tovuk deploy --dry-run --json
-    ```
+Requests require paid billing. If creation returns `payment_required`, create a
+hosted checkout session:
 
-    Review warnings, enabled capabilities, `missingConfig`, `requiredFixes`,
-    meters, limits, and `billingEstimate`.
-  </Step>
+```sh
+tovuk billing checkout --json
+```
 
-  <Step title="Deploy">
-    ```sh
-    tovuk deploy --wait --json
-    tovuk service show <service> --json
-    tovuk service status <service> --json
-    ```
+For invoices, payment methods, or subscription changes:
 
-    Use the returned service id with `tovuk service show <service> --json` to
-    capture capabilities, deploys, builds, logs, usage, billing estimate,
-    resources, and next actions. Use
-    `tovuk service status <service> --json` when agents need only compact
-    top-level `ok`, `url`, and `agent_instruction`, plus runtime status,
-    latest deploy, latest build, URL, and `live`.
-    Inspect deploy history with `tovuk deploy list --json` or
-    `tovuk deploy show <deploy_id> --json` only when needed. Cancel stale queued
-    work with `tovuk deploy cancel <deploy_id> --json` when a newer deploy
-    supersedes it.
-
-    On first deploy, the CLI opens browser login for GitHub or Google, stores
-    the Tovuk session, then continues automatically. Tovuk builds the worker,
-    verifies health, and returns the deployment URL.
-
-    If the build fails, inspect the build logs:
-
-    ```sh
-    tovuk logs --build <build_id> --json
-    ```
-
-    Fix the first actionable error, rerun check, then redeploy.
-  </Step>
-
-  <Step title="Use one root for full-stack repos">
-    Put one `tovuk.toml` in the repo root, with explicit `[capabilities]`,
-    `[worker]`, and `[frontend]` sections. Run one command from the repo root:
-
-    ```sh
-    tovuk deploy --wait --json
-    tovuk service show <service> --json
-    tovuk service status <service> --json
-    ```
-
-    Tovuk builds both roots, serves the frontend at `/`, and routes `/api/*` to
-    the Rust worker on the same service URL.
-  </Step>
-</Steps>
+```sh
+tovuk billing portal --json
+```

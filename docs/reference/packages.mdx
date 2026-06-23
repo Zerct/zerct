@@ -1,186 +1,64 @@
 ---
-title: "Install Tovuk CLI Packages"
-sidebarTitle: "Packages"
-description: "Install the Tovuk CLI from npm, Homebrew, PyPI, or crates.io."
+title: "Packages"
+description: "Install the native Tovuk CLI from Cargo, npm, PyPI, or Homebrew."
 ---
 
-## Install workflow
-
-<Steps>
-  <Step title="Choose one package channel">
-    Install `tovuk` from npm, Homebrew, PyPI, or crates.io. Use one channel per
-    machine so upgrades stay predictable.
-  </Step>
-
-  <Step title="Confirm the installed command">
-    ```sh
-    tovuk --version
-    tovuk --help
-    ```
-
-    The installed command should print the Tovuk version and the current command
-    surface before you run deploy work.
-  </Step>
-
-  <Step title="Check project and account context">
-    ```sh
-    tovuk check --json
-    tovuk account show --json
-    ```
-
-    Follow the first failed `agent_instruction` from project checks, then
-    confirm the account session before creating a build.
-  </Step>
-
-  <Step title="Dry-run before deploy">
-    ```sh
-    tovuk deploy --dry-run --json
-    ```
-
-    Review explicit capabilities, missing config, quality checks, meters,
-    limits, and `billingEstimate` before queuing build work.
-  </Step>
-
-  <Step title="Deploy and inspect the Service">
-    ```sh
-    tovuk deploy --wait --json
-    tovuk service show <service> --json
-    tovuk service status <service> --json
-    tovuk logs --build job_1 --json
-    ```
-
-    Inspect the full Service snapshot before reaching for logs. Preserve the
-    returned deploy and build ids. Use compact service status when only
-    top-level `ok`, `url`, `agent_instruction`, live, deploy, build, and URL
-    state is needed. If the build fails, fix the first actionable log line,
-    rerun checks, and redeploy.
-  </Step>
-</Steps>
-
-## npm
-
-```sh
-npm install -g tovuk
-tovuk --version
-tovuk --help
-tovuk check --json
-tovuk account show --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show <service> --json
-tovuk service status <service> --json
-```
-
-`tovuk` is the live unscoped npm package. It installs a native binary for the
-current platform.
-The npm package downloads that binary during `postinstall`. If npm scripts are
-disabled and `tovuk` reports that the native binary was not installed, reinstall
-with npm scripts enabled before retrying.
-
-All official package CLIs expose the same agent commands for login, account
-setup, check, deploy, deploy dry-runs, deploy history, deploy cancellation,
-pricing, usage, service inspection, logs, env, domains, storage, SQLite, KV,
-queues, cron, State, service bindings, usage caps, billing, support, and abuse.
-Value flags accept both `--flag value` and `--flag=value` forms. Boolean flags
-such as `--json`, `--wait`, and `--dry-run` do not take a value. Unknown
-`--flag` options fail with `Unknown Tovuk option` and an instruction to run
-`tovuk --help`.
-`tovuk usage --json` includes `billingEstimate.lineItems` so package users and
-agents can inspect current-month cost estimates without a dashboard.
-`tovuk deploy --dry-run --json` combines `tovuk.toml`, explicit enabled and
-disabled capabilities, quality checks, capability meters, limits, and
-`billingEstimate` before deploy without creating a build. Each service includes
-`missingConfig` for `tovuk.toml` repair, `requiredFixes` for every failed
-quality check, and `meterPlan` entries for enabled service meters with meter
-units, pricing fields, limit fields, and ready-to-fill `tovuk limits set` cap
-commands with `--notify-at-percent`.
-After adding or upgrading Rust dependencies, run
-`tovuk deploy --dry-run --build-artifact --json`; it performs the local release
-build without uploading or promoting, then reports
-`artifactCheck.compressedBytes` against `limits.workerCompressedSizeMib`.
-`tovuk dev --json` returns planned local worker/frontend commands, env, URLs,
-and `dev.port_statuses` without starting processes. When a planned port is
-already occupied, JSON mode returns `ok: false` and
-`dev.port_statuses[].owner` when the PID/command can be detected. Text mode
-refuses to start child processes until ports are free, so agents can avoid
-opening a stale worker or a different app already serving the planned port.
-Set `[dev].worker_port` and `[dev].frontend_port` in `tovuk.toml` for stable
-project-local dev ports. Use `--worker-port <port>` or
-`--frontend-port <port>` to override those config values for one run.
-`[dev]` is local-only; deploy requests and source archives omit it before
-uploading to Tovuk.
-
-The agent repair loop is the same on every package surface:
-
-```sh
-tovuk check --json
-tovuk account show --json
-tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show service_1 --json
-tovuk deploy list --json
-tovuk deploy show deploy_1 --json
-tovuk deploy cancel deploy_1 --json
-tovuk logs --build job_1 --json
-tovuk usage --json
-tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
-tovuk storage list --service service_1 --json
-tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --service service_1 uploads/logo.png --json
-tovuk billing checkout --json
-tovuk billing portal
-tovuk support create "Deploy failed" "Agent retried deploy after check." --service service_1 --build job_1 --deploy deploy_1 --failing-command "tovuk deploy --wait --json" --first-log-line "cargo check failed in src/main.rs" --json
-tovuk support resolve ticket_0123456789abcdef0123 --json
-```
-
-`tovuk storage upload` automatically switches to multipart transfer for files
-larger than 100 MiB.
-
-Fix `agent_instruction` first. If a build fails, fix the first actionable log
-line, rerun check, then redeploy.
-
-## Homebrew
-
-```sh
-brew tap tovuk/tovuk https://github.com/tovuk/tovuk
-brew install tovuk
-tovuk --version
-tovuk --help
-tovuk check --json
-tovuk account show --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show <service> --json
-```
-
-## PyPI
-
-```sh
-pipx install tovuk
-tovuk --version
-tovuk --help
-tovuk check --json
-tovuk account show --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show <service> --json
-```
-
-The PyPI package launches the same native Tovuk binary as npm, Homebrew, and
-Cargo. If it cannot install the binary, rerun the PyPI command with network
-access or install a supported native binary from GitHub Releases, Homebrew,
-Cargo, or npm.
-
-## crates.io
+All package channels run the same native Rust CLI.
 
 ```sh
 cargo install tovuk
-tovuk --version
-tovuk --help
-tovuk check --json
-tovuk account show --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show <service> --json
+npm install -g tovuk
+pipx install tovuk
+brew tap tovuk/tovuk https://github.com/tovuk/tovuk
+brew install tovuk
 ```
+
+The npm package exposes `bin/tovuk` and ships no runtime JavaScript
+dependencies. The PyPI package exposes `tovuk` through `tovuk.cli:main`.
+
+Use `TOVUK_NATIVE_BINARY=/path/to/tovuk` to test a local binary from npm or
+PyPI wrappers.
+
+Scraper requests are public data only. Do not send cookies, passwords, account
+tokens, private session data, private account content, private repository
+credentials, or proxy URLs.
+
+## Command Surface
+
+```sh
+tovuk login --json
+tovuk account show --json
+tovuk account activity --limit 20 --json
+tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
+tovuk pricing --json
+tovuk scraper list --json
+tovuk scraper health --json
+tovuk scraper show tiktok --json
+tovuk request list --limit 20 --json
+tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}' --json
+tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}' --json
+tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}' --json
+tovuk request show request_123 --json
+tovuk request results request_123 --limit 1000 --json
+tovuk request cancel request_123 --json
+tovuk usage --json
+tovuk billing checkout --json
+tovuk billing portal --json
+tovuk support list --limit 20 --json
+tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
+tovuk abuse report https://example.com "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
+tovuk abuse list --json
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported public target." --evidence "remediation note" --json
+tovuk abuse list --operator --json
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence." --json
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible notice recorded." --json
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed abuse and preserved evidence." --json
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated." --json
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
+tovuk abuse release abuse_0123456789abcdef0123 "Quarantine released after remediation." --json
+```
+
+The public CLI does not deploy websites, backends, databases, workers, storage
+buckets, queues, cron jobs, custom domains, secrets, or other customer
+infrastructure.

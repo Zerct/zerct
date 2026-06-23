@@ -2,15 +2,7 @@ use super::constants::VERSION;
 
 const HELP_BODY: &str = r#"
 Usage:
-  tovuk new [path] [--template rust-worker|tanstack-static-frontend|next-static-frontend|fullstack-rust-tanstack]
-  tovuk check [path] [--json|--output json|text]
-  tovuk dev [path] [--worker-port <port>] [--frontend-port <port>] [--json|--output json|text]
   tovuk login [--token <token>] [--api <url>] [--json|--output json|text]
-  tovuk deploy --dry-run [path] [--build-artifact] [--api <url>] [--json|--output json|text]
-  tovuk deploy [path] [--wait] [--wait-timeout <seconds>] [--api <url>] [--json|--output json|text]
-  tovuk deploy list [--service <service>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk deploy show <deploy_id> [--api <url>] [--json]
-  tovuk deploy cancel <deploy_id> [--api <url>] [--json]
   tovuk account show [--api <url>] [--json]
   tovuk account activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk account update --handle <handle> [--display-name <name>] [--api <url>] [--json]
@@ -24,76 +16,11 @@ Usage:
   tovuk request results <request_id> [--limit <n>] [--api <url>] [--json]
   tovuk request cancel <request_id> [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
-  tovuk service list [--api <url>] [--json]
-  tovuk service status <service> [--api <url>] [--json]
-  tovuk service show <service> [--api <url>] [--json]
-  tovuk service delete <service> [--api <url>] [--json]
-  tovuk logs --service <service> [--deploy <deploy_id>] [--build <build_id>] [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk sqlite create --service <service> DB [--api <url>] [--json]
-  tovuk sqlite query --service <service> DB "select 1" [--params <json_array>] [--api <url>] [--json]
-  tovuk sqlite batch --service <service> DB '[{"sql":"select 1"}]' [--api <url>] [--json]
-  tovuk sqlite backup [list|create|restore] --service <service> DB [backup_id] [--api <url>] [--json]
-  tovuk sqlite delete --service <service> DB [--api <url>] [--json]
-  tovuk kv create --service <service> CACHE [--api <url>] [--json]
-  tovuk kv namespace delete --service <service> CACHE [--api <url>] [--json]
-  tovuk kv keys --service <service> CACHE [--api <url>] [--json]
-  tovuk kv get --service <service> CACHE <key> [--api <url>] [--json]
-  tovuk kv put --service <service> CACHE <key> <value> [--metadata <json>] [--expiration <unix_seconds>] [--ttl <seconds>] [--api <url>] [--json]
-  tovuk kv delete --service <service> CACHE <key> [--api <url>] [--json]
-  tovuk kv bulk put --service <service> CACHE '[{"key":"a","value":"1"}]' [--api <url>] [--json]
-  tovuk kv bulk get --service <service> CACHE key-a key-b [--api <url>] [--json]
-  tovuk kv bulk delete --service <service> CACHE key-a key-b [--api <url>] [--json]
-  tovuk queue create --service <service> jobs [--max-retries <n>] [--retention-seconds <seconds>] [--max-batch-size <n>] [--max-batch-timeout-seconds <seconds>] [--dead-letter-queue <queue>] [--api <url>] [--json]
-  tovuk queue update --service <service> jobs [--max-retries <n>] [--retention-seconds <seconds>] [--max-batch-size <n>] [--max-batch-timeout-seconds <seconds>] [--dead-letter-queue <queue>|--clear-dead-letter-queue] [--api <url>] [--json]
-  tovuk queue messages --service <service> jobs [--api <url>] [--json]
-  tovuk queue metrics --service <service> jobs [--api <url>] [--json]
-  tovuk queue send --service <service> jobs <body> [--delay-seconds <seconds>] [--api <url>] [--json]
-  tovuk queue send-batch --service <service> jobs '[{"body":{"task":"sync"}}]' [--delay-seconds <seconds>] [--api <url>] [--json]
-  tovuk queue delete --service <service> jobs [--api <url>] [--json]
-  tovuk cron create --service <service> nightly "0 0 * * *" [--api <url>] [--json]
-  tovuk cron update --service <service> nightly "*/15 * * * *" [--api <url>] [--json]
-  tovuk cron enable --service <service> nightly [--api <url>] [--json]
-  tovuk cron disable --service <service> nightly [--api <url>] [--json]
-  tovuk cron delete --service <service> nightly [--api <url>] [--json]
-  tovuk state list --service <service> [--api <url>] [--json]
-  tovuk state create --service <service> Room [--api <url>] [--json]
-  tovuk state objects --service <service> Room [--api <url>] [--json]
-  tovuk state keys --service <service> Room room-1 [--api <url>] [--json]
-  tovuk state get --service <service> Room room-1 counter [--api <url>] [--json]
-  tovuk state put --service <service> Room room-1 counter 1 [--api <url>] [--json]
-  tovuk state alarm get --service <service> Room room-1 [--api <url>] [--json]
-  tovuk state alarm set --service <service> Room room-1 [--delay-seconds <seconds>|<unix_ms>] [--api <url>] [--json]
-  tovuk state alarm delete --service <service> Room room-1 [--api <url>] [--json]
-  tovuk state delete-value --service <service> Room room-1 counter [--api <url>] [--json]
-  tovuk state delete --service <service> Room [--api <url>] [--json]
-  tovuk binding create --service <service> AUTH_SERVICE --target <target_service> [--api <url>] [--json]
-  tovuk binding delete --service <service> AUTH_SERVICE [--api <url>] [--json]
-  tovuk limits set build_minutes --period month --value 6000 [--notify-at-percent <1-100>] [--api <url>] [--json]
-  tovuk limits set worker_requests --period day --value 100000 [--notify-at-percent <1-100>] [--api <url>] [--json]
-  tovuk limits set state_requests --period month --value 1000000 [--notify-at-percent <1-100>] [--api <url>] [--json]
-  tovuk limits set state_sqlite_rows_written --period month --value 50000000 [--notify-at-percent <1-100>] [--api <url>] [--json]
-  tovuk limits delete worker_requests --period day [--api <url>] [--json]
-  tovuk env list --service <service> [--api <url>] [--json]
-  tovuk env set --service <service> KEY=value [--api <url>] [--json]
-  tovuk env delete --service <service> KEY [--api <url>] [--json]
-  tovuk secrets list --service <service> [--api <url>] [--json]
-  tovuk secrets set --service <service> KEY=value [--api <url>] [--json]
-  tovuk secrets put --service <service> KEY=value [--api <url>] [--json]
-  tovuk secrets delete --service <service> KEY [--api <url>] [--json]
-  tovuk domains list --service <service> [--api <url>] [--json]
-  tovuk domains add --service <service> <domain> [--api <url>] [--json]
-  tovuk domains verify --service <service> <domain> [--api <url>] [--json]
-  tovuk domains delete --service <service> <domain> [--api <url>] [--json]
-  tovuk storage list --service <service> [--api <url>] [--json]
-  tovuk storage upload --service <service> <local_file> [storage_path] [--content-type <mime>] [--public] [--api <url>] [--json]
-  tovuk storage download --service <service> <storage_path> [local_file] [--api <url>] [--json]
-  tovuk storage delete --service <service> <storage_path> [--api <url>] [--json]
-  tovuk storage url --service <service> <storage_path> [--api <url>] [--json]
   tovuk billing [checkout|portal] [reason] [--api <url>] [--json]
   tovuk support list [--limit <n>] [--api <url>] [--json]
-  tovuk support create "Subject" "Details" [--service <service>] [--build <build_id>] [--deploy <deploy_id>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
+  tovuk support create "Subject" "Details" [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
   tovuk support resolve <ticket_id> [--api <url>] [--json]
-  tovuk abuse report <target_url> "Summary" "Details" --category phishing|malware|illegal_content|copyright|trademark|network_abuse|privacy|emergency_safety|other --reporter-email <email> [--service <service>] [--target-path <path>] [--object-path <path>] [--evidence <text>] [--api <url>] [--json]
+  tovuk abuse report <target_url> "Summary" "Details" --category phishing|malware|illegal_content|copyright|trademark|network_abuse|privacy|emergency_safety|other --reporter-email <email> [--evidence <text>] [--api <url>] [--json]
   tovuk abuse list [--operator] [--limit <n>] [--api <url>] [--json]
   tovuk abuse appeal <report_id> "Remediation details" [--evidence <text>] [--api <url>] [--json]
   tovuk abuse triage <report_id> "Triage evidence summary" [--api <url>] [--json]
@@ -102,47 +29,18 @@ Usage:
   tovuk abuse resolve <report_id> "Resolution evidence summary" [--api <url>] [--json]
   tovuk abuse reject <report_id> "Rejection evidence summary" [--api <url>] [--json]
   tovuk abuse release <report_id> "Release evidence summary" [--api <url>] [--json]
-  tovuk nodes list [--token <operator_token>] [--api <url>] [--json]
-  tovuk nodes drain <node_id> [--token <operator_token>] [--api <url>] [--json]
-  tovuk nodes enable <node_id> [--token <operator_token>] [--api <url>] [--json]
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
-  - Use tovuk check --json before deploy; filter failed checks with checks[].status == "failed" and follow agent_instruction.
-  - Use tovuk dev --json to inspect local worker/frontend commands, ports, port_statuses, owner PID/command, and env wiring without starting processes; ok=false means a planned port is occupied. Rerun with --worker-port and/or --frontend-port to use free ports, then use tovuk dev --output text only after planned ports are free.
-  - tovuk.toml must include explicit [capabilities] booleans; do not rely on kind alone to infer enabled service surfaces.
-  - Full-stack services set kind = "fullstack", keep worker and frontend roots in one tovuk.toml, serve the frontend at /, and serve the Rust worker API under /api.
-  - Rust workers keep Cargo.lock committed, pass rustfmt plus locked release-mode check/test/Clippy gates, listen on 0.0.0.0:$PORT, and return HTTP 200 from health.
-  - Static frontends set kind = "static_frontend", keep TypeScript source, a package lockfile, stable native typecheck, native lint, and Fallow quality gates.
-  - Static Next.js frontends must use `output: "export"` and `[build].output = "out"`; move API routes and server logic to a Rust worker.
-  - Plain static HTML/CSS/JS frontends may use kind = "static_frontend" with check = ":", command = ":", and output = ".".
-  - JavaScript and TypeScript are frontend-only on Tovuk; worker build and runtime commands must be Cargo release builds and Rust release binaries.
-  - Frontends call Rust workers for APIs, SQLite, KV, queues, objects, and server-side logic.
-  - Use tovuk sqlite batch for migrations and imports that need multiple statements in one transaction.
-  - Use tovuk secrets set --service <service> KEY=value for server-only secrets; tovuk env set remains supported as the same API surface.
-  - Create SQLite backups before migrations or destructive writes; restore from CLI/API without dashboard access, then verify with read queries.
-  - State alarms schedule one wake-up per State object. Alarm handlers run in Rust workers, receive retry metadata, and retry up to six times with exponential backoff.
-  - Use tovuk storage upload/list/download/delete for service files and media without dashboard access; upload automatically switches to multipart for large files; pass --public only when a public media URL is intended.
-  - Use tovuk pricing --json and tovuk usage --json before heavy work, inspect billingEstimate.lineItems, then set usage caps with tovuk limits for builds, worker, SQLite, KV, queue, State, and object storage meters before paid overages. Pass --notify-at-percent to control the warning threshold.
   - Use tovuk scraper list --json to choose a public-data scraper, tovuk scraper health --json to inspect managed reader and proxy readiness, tovuk request create <scraper> '<json>' --json to create paid scraper work, tovuk request show <request_id> --json to poll status, and tovuk request results <request_id> --json to fetch stored records.
-  - Scraper requests must use public URLs, public search terms, public profile handles, or public place ids only. Do not send cookies, passwords, account tokens, private session data, or private account content.
-  - Run tovuk deploy --dry-run --json before deploy so agents can inspect explicit capabilities, missing config, meters, limits, billing estimates, and next actions. Add --build-artifact after dependency changes to build the local release binary and compare its gzip size against the account worker limit before upload.
-  - Inspect deploy history with tovuk deploy list --json and one deploy with tovuk deploy show <deploy_id> --json.
-  - Cancel stale queued deploys with tovuk deploy cancel <deploy_id> --json when a newer deploy supersedes the work.
-  - Use tovuk account show/activity/update --json for account setup and account-wide recovery without dashboard-only steps.
-  - Use tovuk service status <service> --json for the compact "is my deploy live?" answer: ok, url, agent_instruction, runtime status, latest deploy, latest build, and live boolean.
-  - Use tovuk service show <service> --json as the full service inspection command for capabilities, deploys, builds, logs, env names, domains, resources, accountUsage, billingEstimate, limits, pricing, usage caps, and next actions.
-  - Run deploy from a full-stack repo root with one tovuk.toml to build worker and frontend together.
-  - Delete unused test services with tovuk service delete <service> --json after smoke tests.
-  - Prefer same-origin full-stack services over split services.
+  - Scraper requests must use public URLs, public search terms, public profile handles, or public place ids only. Do not send cookies, passwords, account tokens, private session data, proxy URLs, or private account content.
+  - Use tovuk pricing --json and tovuk usage --json before high-count scraper requests. Inspect priceEvents[].usdMicros, billingEstimate.lineItems, and account balance before creating large jobs.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - For invoices, payment methods, or subscription changes, run tovuk billing portal and show the returned URL to the human.
-  - Create support tickets only with command output, service id, build id, deploy id, and the first actionable log line.
+  - Create support tickets with command output, request id when available, and the first actionable error line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - Create abuse reports with target URL, category, reporter email, and evidence. Owners track and appeal service reports with tovuk abuse list --json and tovuk abuse appeal <report_id> --json; operators triage all reports with tovuk abuse list --operator --json, then use tovuk abuse triage, notify-owner, quarantine, resolve, reject, or release with an operator token.
-  - Operators use tovuk nodes list, tovuk nodes drain <node_id>, and tovuk nodes enable <node_id> with an operator token before and after origin-node maintenance.
-  - Keep direct unsafe out of Rust source.
-  - Keep Rust worker resources within Tovuk limits: 128mb memory, CPU allocation 1, metered worker_cpu_ms caps, and 1-60 minute idle timeout.
+  - This public CLI does not deploy websites, backends, databases, workers, storage buckets, queues, cron jobs, custom domains, secrets, or any other customer cloud resource.
 "#;
 
 pub(crate) fn help_text() -> String {

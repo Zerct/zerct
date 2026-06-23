@@ -2,10 +2,7 @@ use super::super::{
     args::CliOptions,
     errors::{Result, print_json},
 };
-use super::{
-    common::{page_query, service_route},
-    http::api_request,
-};
+use super::{common::page_query, http::api_request};
 use reqwest::Method;
 use serde_json::{Value, json};
 
@@ -17,10 +14,8 @@ pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
         "plans": plans,
         "products": products,
         "nextActions": [
-            "Use the `products` entries to choose Worker, Static Frontend, SQLite, Object Storage, State, KV, Queue, Cron, Service Bindings, Secrets, Custom Domains, Logs, Builds, or Usage Caps before changing code.",
-            "Use each product's `features`, `meters`, `meter_details`, `pricing_fields`, and `limit_fields` to verify supported behavior, price work, and choose hard caps.",
-            "Use `tovuk usage --json` after login to compare current usage against these limits.",
-            "Use `tovuk limits set <metric> --period month --value <n> --notify-at-percent 80 --json` to set a hard cap before paid overages.",
+            "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper.",
+            "Use `priceEvents[].usdMicros`, request limits, and `tovuk usage --json` to estimate account balance impact before high-count requests.",
             "Use `tovuk billing checkout --json` when an upgrade is required."
         ]
     }))
@@ -34,13 +29,6 @@ pub(crate) fn print_authenticated(cli: &CliOptions, route: &str) -> Result<()> {
 
 pub(crate) fn print_paged_authenticated(cli: &CliOptions, route: &str) -> Result<()> {
     print_authenticated(cli, &format!("{route}{}", page_query(cli)))
-}
-
-pub(crate) fn service_get_command(cli: &CliOptions, suffix: &str) -> Result<()> {
-    let route = service_route(cli, suffix)?;
-    let token = super::super::auth::read_or_login_token(cli)?;
-    let response = api_request(cli, Method::GET, &route, Some(&token), None)?;
-    print_json(&response)
 }
 
 pub(crate) fn print_authenticated_mutation(

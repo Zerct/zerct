@@ -1,280 +1,93 @@
 ---
-title: "Run Tovuk Deploys with AI Agents"
-sidebarTitle: "Agents"
-description: "Use Tovuk checks, dry-runs, deploy recovery, support evidence, and abuse workflows from one agent-ready page."
+title: "Agent Workflow"
+description: "Use Tovuk scraper APIs safely from an automated agent."
 ---
 
-Use this page when an AI coding agent is deploying with Tovuk.
+Set JSON output once for agent sessions:
 
-## Deploy workflow
+```sh
+export TOVUK_OUTPUT=json
+```
+
+## Scraper Sequence
 
 <Steps>
-  <Step title="Check and fix the first failure">
-    Run `tovuk check --json`. If it fails, fix the first failed check by
-    filtering `checks[]` for `status == "failed"` and following
-    `agent_instruction`, then run `tovuk check --json` again.
+  <Step title="Confirm account and price">
+    ```sh
+    tovuk account show
+    tovuk pricing
+    tovuk usage
+    tovuk billing checkout
+    tovuk billing portal
+    ```
+
+    Inspect balance, `priceEvents[].usdMicros`, and
+    `usage.billingEstimate.lineItems` before high-count Requests.
   </Step>
 
-  <Step title="Confirm account setup">
-    Run `tovuk account show --json`. If setup is incomplete, run
-    `tovuk account update --handle <handle> --display-name <name> --json`.
+  <Step title="Inspect scraper availability">
+    ```sh
+    tovuk scraper list
+    tovuk scraper health
+    tovuk scraper show tiktok
+    ```
   </Step>
 
-  <Step title="Dry-run the deploy">
-    Run `tovuk deploy --dry-run --json`. Review warnings, capabilities,
-    `missingConfig`, `requiredFixes`, meters, `meterPlan`, limits, and
-    `billingEstimate` before creating a build.
+  <Step title="Create paid public-data work">
+    ```sh
+    tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}'
+    tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}'
+    tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}'
+    ```
   </Step>
 
-  <Step title="Set usage caps">
-    Set usage caps for expected load. Before high-throughput work, run
-    `tovuk pricing --json`, then `tovuk usage --json` and inspect
-    `billingEstimate.lineItems`. Set caps for the relevant meters.
+  <Step title="Poll and read results">
+    ```sh
+    tovuk request show request_123
+    tovuk request results request_123 --limit 1000
+    ```
   </Step>
 
-  <Step title="Deploy and recover context">
-    Run `tovuk deploy --wait --json`, then inspect the Service snapshot with
-    `tovuk service show <service> --json`. Use
-    `tovuk service status <service> --json` when only top-level `ok`, `url`,
-    `agent_instruction`, live, deploy, build, and URL state is needed. Inspect
-    deploy history with
-    `tovuk deploy list --json` or
-    `tovuk deploy show <deploy_id> --json` when needed. If a newer deploy
-    supersedes queued work, run `tovuk deploy cancel <deploy_id> --json`.
-  </Step>
-
-  <Step title="Fix build failures">
-    If the build fails, run `tovuk logs --build <build_id> --json`, fix the
-    first actionable error from the logs, then redeploy with the same deploy
-    command.
-  </Step>
-
-  <Step title="Use service resources">
-    For service files or media, use `tovuk storage ... --json` instead of the
-    dashboard. For background work, create a queue and implement
-    `POST /.tovuk/queues/<queue>` in the Rust worker. For scheduled work,
-    create a cron trigger and implement `POST /.tovuk/cron/<trigger>` in the
-    Rust worker.
-  </Step>
-
-  <Step title="Escalate or clean up">
-    If a plan limit blocks the deploy or storage action, run
-    `tovuk billing checkout --json` and show the returned `checkout.url` to
-    the human. For invoices, payment methods, or subscription changes, run
-    `tovuk billing portal` and show the returned URL to the human. If Tovuk
-    itself needs help, create a support ticket with the exact command, service
-    id, build id, deploy id, and first actionable log line. Resolve the ticket
-    after the agent fixes the issue. Delete throwaway smoke-test services with
-    `tovuk service delete <service> --json`.
+  <Step title="Cancel when needed">
+    ```sh
+    tovuk request cancel request_123
+    ```
   </Step>
 </Steps>
 
-Do not weaken Rust lints, TypeScript strictness, stable native frontend
-typechecking, native frontend linting, or unsafe restrictions to pass Tovuk
-checks.
-Do not use Unicode em dashes in tracked text.
-Do not create JavaScript or TypeScript servers. Keep JS/TS in static frontend
-browser code only; move API routes, SSR handlers, middleware, and server logic
-to Rust.
-Deploy archives must contain source files only. Tovuk rejects generated
-directories, secret files, and compiled artifacts such as `.exe`, `.so`,
-`.dylib`, `.jar`, `.node`, and `.rlib`.
+## Public-Data Rule
 
-## Dashboard overview
+Scraper Requests are for public data only. Do not send cookies, passwords,
+account tokens, private session data, private account content, private
+repository credentials, or proxy URLs.
 
-Dashboard Overview is available at `https://tovuk.com/account` and
-`https://tovuk.com/<handle>`. When no Services exist, it shows the same first
-Service command sequence agents should use:
+## Support
+
+Open support tickets only after capturing the request id, exact command, and
+first actionable error:
 
 ```sh
-tovuk new hello-service --template fullstack-rust-tanstack
-cd hello-service/web
-npm install
-cd ..
-tovuk check --json
-tovuk deploy --dry-run --json
-tovuk deploy --wait --json
-tovuk service show <service> --json
-tovuk service status <service> --json
+tovuk support list --limit 20
+tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
+tovuk support resolve ticket_0123456789abcdef0123
 ```
 
-The dashboard mirrors CLI and API state. The committed `tovuk.toml` remains
-the source of truth for enabled and disabled capabilities. Service rows expose
-Service kind, enabled and disabled capability summaries, and per-Service resource counts for SQLite,
-Object Storage, KV, Queues, Cron, State, Service Bindings, Secrets, and Custom Domains, copyable
-  `tovuk service status <service> --json`,
-  `tovuk service show <service> --json`, `tovuk logs --service <service> --limit 100 --json`,
-`tovuk storage list --service <service> --json`,
-`tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json`,
-`tovuk support create "Service issue" ... --service <service> --json`, and
-`tovuk service delete <service> --json` commands. The delete action uses
-`DELETE /v1/services/{service_id}` for smoke-test cleanup.
-
-## Reusable deploy prompt
-
-<Prompt description="Run the full Tovuk agent deploy workflow." actions={["copy"]}>
-Use Tovuk to deploy this project. Read https://docs.tovuk.com/llms.txt first.
-Run `tovuk check --json`. Fix the first failed check by following
-`checks[] | select(.status == "failed") | .agent_instruction`, then rerun
-check. Run `tovuk account show --json` and use
-`tovuk account update --handle <handle> --display-name <name> --json` if setup
-is incomplete. Run `tovuk deploy --dry-run --json` and review warnings,
-capabilities, `missingConfig`, `requiredFixes`, meters, `meterPlan`, limits,
-and `billingEstimate`. Deploy with `tovuk deploy --wait --json`, then inspect
-the Service snapshot with `tovuk service show <service> --json`. If more
-deploy context is needed, run `tovuk service status <service> --json`,
-`tovuk deploy list --json`, or `tovuk deploy show <deploy_id> --json`.
-Cancel superseded queued work with
-`tovuk deploy cancel <deploy_id> --json`. If the build fails, read
-`tovuk logs --build <build_id> --json`, fix the first actionable error, and
-redeploy. Use service resource commands for SQLite, KV, queues, cron triggers,
-State, service bindings, and usage caps.
-Before load tests or production launch, run `tovuk pricing --json`, inspect
-`billingEstimate` from `tovuk usage --json`, and set hard usage caps with
-`tovuk limits set`.
-For queue handlers, implement `POST /.tovuk/queues/<queue>` and return `2xx`
-only after the batch is safely handled. For cron handlers, implement
-`POST /.tovuk/cron/<trigger>` and keep it idempotent.
-</Prompt>
-
-## Support ticket workflow
-
-Create support tickets only with enough evidence for a Tovuk support agent or
-operator agent to act:
+## Abuse
 
 ```sh
-tovuk support create \
-  "Deploy failed" \
-  "Agent already ran check and retried deploy." \
-  --service service_1 \
-  --build job_1 \
-  --deploy deploy_1 \
-  --failing-command "tovuk deploy --wait --json" \
-  --first-log-line "cargo check failed in src/main.rs" \
-  --severity normal \
-  --json
+tovuk abuse report https://example.com "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id"
+tovuk abuse list
+tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported public target." --evidence "remediation note"
 ```
 
-Before opening another ticket, list recent tickets:
+Operators use an operator token for moderation:
 
 ```sh
-tovuk support list --json
+tovuk abuse list --operator
+tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence."
+tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible notice recorded."
+tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed abuse and preserved evidence."
+tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated."
+tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target."
+tovuk abuse release abuse_0123456789abcdef0123 "Quarantine released after remediation."
 ```
-
-After the issue is fixed, resolve the ticket:
-
-```sh
-tovuk support resolve ticket_0123456789abcdef0123 --json
-```
-
-## Abuse report workflow
-
-Report abuse with a target URL, category, reporter email, and preserved
-evidence:
-
-```sh
-tovuk abuse report https://demo.tovuk.app "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
-```
-
-Owners can track reports associated with their services and appeal after
-remediation:
-
-```sh
-tovuk abuse list --json
-tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported file and rotated credentials." --evidence "deploy_1 remediation log" --json
-```
-
-Operator agents can triage all reports, notify owners where lawful, quarantine
-confirmed abuse, resolve remediated reports, reject unsupported reports, or
-release a quarantine with preserved evidence:
-
-```sh
-tovuk abuse list --operator --json
-tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence and target service metadata." --json
-tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible report recorded with evidence summary." --json
-tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed malware object and preserved scanner evidence." --json
-tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated and clean deploy verified." --json
-tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
-tovuk abuse release abuse_0123456789abcdef0123 "Owner removed object and redeployed clean build." --json
-```
-
-When a limit is the blocker, create a hosted Stripe subscription checkout link:
-
-```sh
-tovuk billing checkout "Project limit reached" --json
-```
-
-## Storage commands
-
-```sh
-tovuk storage list --service service_1 --json
-tovuk storage upload --service service_1 ./logo.png uploads/logo.png --public --json
-tovuk storage download --service service_1 uploads/logo.png ./logo.png --json
-tovuk storage delete --service service_1 uploads/logo.png --json
-```
-
-Use `--public` only when the service needs a public media URL. Use `--content-type <mime>`
-when the extension is missing or ambiguous.
-`tovuk storage upload` automatically switches to multipart transfer for files
-larger than 100 MiB.
-
-## Starter project prompt
-
-<Prompt description="Create a full-stack Tovuk starter project." actions={["copy"]}>
-Create a Tovuk full-stack project. Run
-`tovuk new hello-service --template fullstack-rust-tanstack`.
-Run `cd hello-service/web`.
-Run `npm install`.
-Run `cd ..`.
-Keep dynamic server logic in the Rust worker. Keep the TanStack frontend static
-at runtime and call same-origin `/api`. Run `tovuk check --json`, then
-`tovuk account show --json`, then `tovuk deploy --dry-run --json`, then
-`tovuk deploy --wait --json`, then `tovuk service show <service> --json`
-from the repo root. Use `tovuk service status <service> --json` when only
-compact live state is needed.
-</Prompt>
-
-## Log and service commands
-
-```sh
-tovuk service status service_1 --json
-tovuk service show service_1 --json
-tovuk service delete service_1 --json
-tovuk logs --build job_1 --json
-tovuk logs --deploy deploy_1 --json
-tovuk logs --service service_1 --json
-tovuk storage list --service service_1 --json
-tovuk sqlite create --service service_1 DB --json
-tovuk sqlite query --service service_1 DB "select 1" --json
-tovuk sqlite batch --service service_1 DB '[{"sql":"create table users (id integer primary key)"},{"sql":"insert into users (id) values (?)","params":[1]}]' --json
-tovuk sqlite backup create --service service_1 DB --json
-tovuk sqlite backup list --service service_1 DB --json
-tovuk sqlite backup restore --service service_1 DB sqlite_backup_1 --json
-tovuk sqlite delete --service service_1 DB --json
-tovuk kv create --service service_1 CACHE --json
-tovuk kv namespace delete --service service_1 CACHE --json
-tovuk queue create --service service_1 failed_jobs --json
-tovuk queue create --service service_1 jobs --max-batch-size 10 --max-batch-timeout-seconds 5 --dead-letter-queue failed_jobs --json
-tovuk queue update --service service_1 jobs --max-batch-size 25 --json
-tovuk queue delete --service service_1 jobs --json
-tovuk cron create --service service_1 nightly "0 0 * * *" --json
-tovuk state list --service service_1 --json
-tovuk state create --service service_1 Room --json
-tovuk state put --service service_1 Room room-1 counter 1 --json
-tovuk state get --service service_1 Room room-1 counter --json
-tovuk state alarm set --service service_1 Room room-1 --delay-seconds 60 --json
-tovuk state alarm get --service service_1 Room room-1 --json
-tovuk state alarm delete --service service_1 Room room-1 --json
-tovuk binding create --service service_1 AUTH_SERVICE --target auth-service --json
-tovuk limits set build_minutes --period month --value 6000 --notify-at-percent 80 --json
-tovuk limits set worker_requests --period day --value 100000 --notify-at-percent 80 --json
-tovuk limits set state_requests --period month --value 1000000 --notify-at-percent 80 --json
-tovuk limits set state_sqlite_rows_written --period month --value 50000000 --notify-at-percent 80 --json
-tovuk billing checkout --json
-tovuk billing portal
-tovuk support list --json
-tovuk support resolve ticket_0123456789abcdef0123 --json
-```
-
-`logs --build` is the best first command after a failed deploy. Use
-`logs --service` when you need the latest runtime and deploy context for one service.
