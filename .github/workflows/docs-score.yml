@@ -37,8 +37,8 @@ jobs:
             ${{ runner.os }}-npm-mintlify-
       - name: Check prose style
         run: |
-          go run scripts/check-prose-style.go --self-test
-          go run scripts/check-prose-style.go
+          ./scripts/check-prose-style.sh --self-test
+          ./scripts/check-prose-style.sh
       - name: Check public agent readiness
         run: |
           if go run scripts/check-public-contracts/*.go mintlify-agent-readiness https://docs.tovuk.com; then
