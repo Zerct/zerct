@@ -2,6 +2,7 @@
 
 mod cli_contract;
 mod docs;
+mod docs_sources;
 mod helpers;
 mod mintlify;
 mod npm;
