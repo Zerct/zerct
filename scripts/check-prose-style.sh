@@ -4,6 +4,4 @@ set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 cd "$repo_root"
 
-mkdir -p target/checks
-rustc --edition=2024 -D warnings scripts/check-prose-style.rs -o target/checks/check-prose-style
-target/checks/check-prose-style "$@"
+cargo run --locked --quiet --manifest-path crates/tovuk/Cargo.toml --example check-prose-style -- "$@"

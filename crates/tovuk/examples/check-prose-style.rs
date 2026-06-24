@@ -1,3 +1,5 @@
+//! Repository prose style checks for public Tovuk text files.
+
 use std::{
     ffi::OsStr,
     fs,
@@ -115,17 +117,19 @@ fn line_findings(file: &str, line_index: usize, line: &str) -> Vec<Finding> {
 fn has_ignored_binary_extension(file: &str) -> bool {
     matches!(
         Path::new(file).extension().and_then(OsStr::to_str),
-        Some("avif")
-            | Some("gif")
-            | Some("ico")
-            | Some("jpeg")
-            | Some("jpg")
-            | Some("otf")
-            | Some("pdf")
-            | Some("png")
-            | Some("ttf")
-            | Some("webp")
-            | Some("woff")
-            | Some("woff2")
+        Some(
+            "avif"
+                | "gif"
+                | "ico"
+                | "jpeg"
+                | "jpg"
+                | "otf"
+                | "pdf"
+                | "png"
+                | "ttf"
+                | "webp"
+                | "woff"
+                | "woff2",
+        )
     )
 }

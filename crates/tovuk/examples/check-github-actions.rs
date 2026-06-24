@@ -1,3 +1,5 @@
+//! GitHub Actions policy checks for the public Tovuk repository.
+
 use std::{
     fs,
     path::{Path, PathBuf},
