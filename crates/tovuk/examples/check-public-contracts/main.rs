@@ -7,6 +7,7 @@ mod helpers;
 mod mintlify;
 mod npm;
 mod package_versions;
+mod runtime_cli;
 mod types;
 
 use std::{env, process::ExitCode};
@@ -39,6 +40,15 @@ fn run() -> CheckResult {
         "openapi-path" => docs::print_openapi_path(),
         "npm-cli-package" => npm::check_cli_package(),
         "npm-native-runtime" => npm::check_native_runtime(),
+        "runtime-cli" => {
+            let Some(native_cli) = args.next() else {
+                return Err("runtime-cli requires the native CLI path".to_owned());
+            };
+            let Some(python_bin) = args.next() else {
+                return Err("runtime-cli requires the Python interpreter path".to_owned());
+            };
+            runtime_cli::check(native_cli.as_str(), python_bin.as_str())
+        }
         "mintlify-agent-readiness" => {
             let target = args
                 .next()
