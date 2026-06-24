@@ -59,7 +59,7 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
 ];
 
 pub(crate) fn check() -> CheckResult {
-    let tracked_files = git_lines(&["ls-files"])?;
+    let tracked_files = existing_tracked_files()?;
     let tracked_set = tracked_files.iter().cloned().collect::<BTreeSet<_>>();
 
     require_tracked_paths(&tracked_set)?;
@@ -74,6 +74,16 @@ pub(crate) fn check() -> CheckResult {
 
     println!("Checked public repository hygiene.");
     Ok(())
+}
+
+fn existing_tracked_files() -> CheckResult<Vec<String>> {
+    let deleted_files = git_lines(&["ls-files", "--deleted"])?
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    Ok(git_lines(&["ls-files"])?
+        .into_iter()
+        .filter(|path| !deleted_files.contains(path))
+        .collect())
 }
 
 fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {
