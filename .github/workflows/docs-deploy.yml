@@ -22,6 +22,68 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
+      - name: Prepare Mintlify API helper
+        run: |
+          set -euo pipefail
+
+          cat > "$RUNNER_TEMP/mintlify-api" <<'BASH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          method="${1:?method is required}"
+          url="${2:?url is required}"
+          label="${3:?label is required}"
+          response_file="$(mktemp "${RUNNER_TEMP:-/tmp}/mintlify-response.XXXXXX")"
+
+          print_mintlify_response_body() {
+            if [ ! -s "$response_file" ]; then
+              return
+            fi
+            echo "Mintlify response body:" >&2
+            if jq -c . "$response_file" >/dev/null 2>&1; then
+              jq -c . "$response_file" >&2
+            else
+              head -c 4096 "$response_file" >&2
+              echo >&2
+            fi
+          }
+
+          curl_exit=0
+          http_code="$(
+            curl -sS \
+              --request "$method" \
+              --url "$url" \
+              --header "Authorization: Bearer ${MINTLIFY_ADMIN_API_KEY}" \
+              --output "$response_file" \
+              --write-out '%{http_code}'
+          )" || curl_exit=$?
+
+          if [ "$curl_exit" -ne 0 ]; then
+            echo "::error title=Mintlify API request failed::curl exited ${curl_exit} while calling ${label}." >&2
+            print_mintlify_response_body
+            exit "$curl_exit"
+          fi
+
+          case "$http_code" in
+            2*)
+              cat "$response_file"
+              ;;
+            401|403)
+              echo "::error title=Mintlify authentication failed::Mintlify rejected MINTLIFY_ADMIN_API_KEY or MINTLIFY_PROJECT_ID while calling ${label}; rotate the GitHub secret, then rerun Deploy Mintlify docs." >&2
+              print_mintlify_response_body
+              exit 1
+              ;;
+            *)
+              echo "::error title=Mintlify API request failed::Mintlify returned HTTP ${http_code} while calling ${label}." >&2
+              print_mintlify_response_body
+              exit 1
+              ;;
+          esac
+          BASH
+
+          chmod +x "$RUNNER_TEMP/mintlify-api"
+          printf 'MINTLIFY_API_HELPER=%s\n' "$RUNNER_TEMP/mintlify-api" >> "$GITHUB_ENV"
+
       - name: Trigger docs deployment
         id: trigger
         env:
@@ -34,12 +96,13 @@ jobs:
             echo "MINTLIFY_ADMIN_API_KEY and MINTLIFY_PROJECT_ID are required." >&2
             exit 1
           fi
+          : "${MINTLIFY_API_HELPER:?MINTLIFY_API_HELPER is required}"
 
           response="$(
-            curl -fsS \
-              --request POST \
-              --url "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
-              --header "Authorization: Bearer ${MINTLIFY_ADMIN_API_KEY}"
+            "$MINTLIFY_API_HELPER" \
+              POST \
+              "https://api.mintlify.com/v1/project/update/${MINTLIFY_PROJECT_ID}" \
+              "project update"
           )"
           status_id="$(printf '%s\n' "$response" | jq -er '.statusId')"
           printf 'status_id=%s\n' "$status_id" >> "$GITHUB_OUTPUT"
@@ -50,6 +113,7 @@ jobs:
           STATUS_ID: ${{ steps.trigger.outputs.status_id }}
         run: |
           set -euo pipefail
+          : "${MINTLIFY_API_HELPER:?MINTLIFY_API_HELPER is required}"
 
           print_status() {
             local status="$1"
@@ -88,10 +152,10 @@ jobs:
 
           for attempt in $(seq 1 60); do
             response="$(
-              curl -fsS \
-                --request GET \
-                --url "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
-                --header "Authorization: Bearer ${MINTLIFY_ADMIN_API_KEY}"
+              "$MINTLIFY_API_HELPER" \
+                GET \
+                "https://api.mintlify.com/v1/project/update-status/${STATUS_ID}" \
+                "deployment status"
             )"
             status="$(printf '%s\n' "$response" | jq -r '.status // "unknown"')"
             summary="$(printf '%s\n' "$response" | jq -r '.summary // ""')"
