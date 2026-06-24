@@ -143,6 +143,7 @@ fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
     )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
+    require_openapi_status_checks(sources.openapi.as_str())?;
     require_contains(
         sources.openapi.as_str(),
         r#""linkedinPostSearch""#,
@@ -233,6 +234,20 @@ fn require_openapi_paths(openapi: &str) -> CheckResult {
         )?;
     }
     Ok(())
+}
+
+fn require_openapi_status_checks(openapi: &str) -> CheckResult {
+    require_contains(
+        openapi,
+        r#""name": "control_plane_sqlite""#,
+        "OpenAPI status control-plane SQLite check",
+    )?;
+    require_contains(openapi, r#""name": "redis""#, "OpenAPI status Redis check")?;
+    reject_contains(
+        openapi,
+        r#""name": "database""#,
+        "OpenAPI status must not expose generic database product wording",
+    )
 }
 
 fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResult {

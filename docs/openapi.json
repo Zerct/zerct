@@ -1568,7 +1568,12 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "database",
+                      "name": "control_plane_sqlite",
+                      "ok": true,
+                      "message": "reachable"
+                    },
+                    {
+                      "name": "redis",
                       "ok": true,
                       "message": "reachable"
                     }
@@ -1629,9 +1634,14 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "database",
+                      "name": "control_plane_sqlite",
                       "ok": false,
-                      "message": "unreachable"
+                      "message": "unavailable"
+                    },
+                    {
+                      "name": "redis",
+                      "ok": false,
+                      "message": "unavailable"
                     }
                   ],
                   "agent_instruction": "Retry later before changing scraper inputs.",
