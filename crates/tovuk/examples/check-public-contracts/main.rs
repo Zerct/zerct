@@ -7,6 +7,7 @@ mod helpers;
 mod mintlify;
 mod npm;
 mod package_versions;
+mod repo_hygiene;
 mod runtime_cli;
 mod types;
 
@@ -34,6 +35,7 @@ fn run() -> CheckResult {
     env::set_current_dir(repo_root.as_str()).map_err(|error| format!("cd {repo_root}: {error}"))?;
 
     match check.as_str() {
+        "repo-hygiene" => repo_hygiene::check(),
         "package-versions" => package_versions::check(),
         "cli-contract" => cli_contract::check(),
         "docs" => docs::check(),

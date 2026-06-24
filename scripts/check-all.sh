@@ -7,31 +7,7 @@ python_bin="$(command -v python3.11 || command -v python3)"
 native_cli="$repo_root/crates/tovuk/target/release/tovuk"
 export TOVUK_NATIVE_BINARY="$native_cli"
 
-if git check-ignore -q AGENTS.md; then
-  printf 'AGENTS.md must be tracked Codex project guidance, not ignored.\n' >&2
-  exit 1
-fi
-if ! git ls-files --error-unmatch AGENTS.md >/dev/null 2>&1; then
-  printf 'AGENTS.md must be tracked so Codex project guidance travels with the repo.\n' >&2
-  exit 1
-fi
-
-if rg -n 'npx[[:space:]]+tovuk' README.md docs packages crates skills Formula .github scripts --glob '!scripts/check-all.sh'; then
-  printf 'Use native `tovuk` guidance instead of `npx tovuk`.\n' >&2
-  exit 1
-fi
-
-tracked_go_files="$(
-  while IFS= read -r path; do
-    if [[ -e "$path" ]]; then
-      printf '%s\n' "$path"
-    fi
-  done < <(git ls-files '*.go')
-)"
-if [[ -n "$tracked_go_files" ]]; then
-  printf 'Tracked Go source is not allowed in the public repo; use Rust-native checks:\n%s\n' "$tracked_go_files" >&2
-  exit 1
-fi
+scripts/check-public-contracts.sh repo-hygiene
 
 strict_clippy_args=(
   --locked
