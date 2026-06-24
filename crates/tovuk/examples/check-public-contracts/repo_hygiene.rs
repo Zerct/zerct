@@ -65,6 +65,7 @@ pub(crate) fn check() -> CheckResult {
     require_tracked_paths(&tracked_set)?;
     require_agents_chain_size()?;
     require_shell_style_contract()?;
+    require_docs_deploy_observability_contract()?;
     reject_retired_npx_guidance(&tracked_files)?;
     reject_tracked_go_files(&tracked_files)?;
     reject_go_toolchain_bootstrap(&tracked_files)?;
@@ -135,6 +136,43 @@ fn require_shell_style_contract() -> CheckResult {
         if !source.contains(snippet) {
             return Err(label.to_owned());
         }
+    }
+    Ok(())
+}
+
+fn require_docs_deploy_observability_contract() -> CheckResult {
+    let source = read_text(".github/workflows/docs-deploy.yml")?;
+    for (snippet, label) in [
+        (
+            "MINTLIFY_API_HELPER",
+            "Mintlify docs deploy must reuse one API helper across trigger and polling",
+        ),
+        (
+            "--write-out '%{http_code}'",
+            "Mintlify docs deploy must capture HTTP status separately from response body",
+        ),
+        (
+            "Mintlify authentication failed",
+            "Mintlify docs deploy must emit an explicit authentication failure annotation",
+        ),
+        (
+            "rotate the GitHub secret",
+            "Mintlify docs deploy must tell operators how to resolve rejected credentials",
+        ),
+        (
+            "print_mintlify_response_body",
+            "Mintlify docs deploy must preserve sanitized response bodies for debugging",
+        ),
+    ] {
+        if !source.contains(snippet) {
+            return Err(label.to_owned());
+        }
+    }
+    if source.contains("curl -fsS") {
+        return Err(
+            "Mintlify docs deploy must not use curl -fsS because it hides auth/API response bodies"
+                .to_owned(),
+        );
     }
     Ok(())
 }
