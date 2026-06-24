@@ -52,6 +52,7 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
     ".tovuk/example",
     "crates/tovuk/target/example",
     "docs/.mintlify/example",
+    "packages/tovuk/.fallow/cache.bin",
     "node_modules/example",
     "packages/tovuk/dist/example",
     "packages/tovuk/node_modules/example",
