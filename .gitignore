@@ -26,6 +26,8 @@ pip-wheel-metadata/
 .direnv/
 .cache/
 **/.cache/
+.fallow/
+**/.fallow/
 .turbo/
 **/.turbo/
 .vite/
