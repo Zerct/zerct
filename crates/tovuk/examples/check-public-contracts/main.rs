@@ -9,6 +9,7 @@ mod npm;
 mod package_versions;
 mod repo_hygiene;
 mod runtime_cli;
+mod script_contracts;
 mod types;
 
 use std::{env, process::ExitCode};

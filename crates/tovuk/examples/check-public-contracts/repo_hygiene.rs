@@ -1,6 +1,7 @@
 use std::{collections::BTreeSet, fs, path::Path, process::Command};
 
 use crate::helpers::{CheckResult, read_text};
+use crate::script_contracts;
 
 const MAX_AGENTS_CHAIN_BYTES: u64 = 32_768;
 const MAX_SOURCE_FILE_LINES: usize = 500;
@@ -41,7 +42,10 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "scripts/check-shell-style.sh",
     "scripts/check-toml-style.sh",
     "scripts/check-typos.sh",
+    "scripts/lib/repo-root.sh",
+    "scripts/lib/tool-path.sh",
     "skills/tovuk/SKILL.md",
+    "crates/tovuk/examples/check-public-contracts/script_contracts.rs",
 ];
 
 const REQUIRED_IGNORED_PATHS: &[&str] = &[
@@ -64,7 +68,7 @@ pub(crate) fn check() -> CheckResult {
 
     require_tracked_paths(&tracked_set)?;
     require_agents_chain_size()?;
-    require_shell_style_contract()?;
+    script_contracts::check()?;
     require_docs_deploy_observability_contract()?;
     reject_retired_npx_guidance(&tracked_files)?;
     reject_tracked_go_files(&tracked_files)?;
@@ -115,29 +119,6 @@ fn require_agents_chain_size() -> CheckResult {
             "AGENTS.md is {size} bytes, above Codex default project_doc_max_bytes {MAX_AGENTS_CHAIN_BYTES}"
         ))
     }
-}
-
-fn require_shell_style_contract() -> CheckResult {
-    let source = read_text("scripts/check-shell-style.sh")?;
-    for (snippet, label) in [
-        (
-            "/opt/tovuk/native-tools/bin",
-            "public shell style check must find deployed native runner tools",
-        ),
-        (
-            "shellcheck -x",
-            "public shell style check must run ShellCheck with sourced-file analysis",
-        ),
-        (
-            "shfmt -i 2 -ci -d",
-            "public shell style check must run shfmt",
-        ),
-    ] {
-        if !source.contains(snippet) {
-            return Err(label.to_owned());
-        }
-    }
-    Ok(())
 }
 
 fn require_docs_deploy_observability_contract() -> CheckResult {

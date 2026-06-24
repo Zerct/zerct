@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/repo-root.sh
+. "$script_dir/lib/repo-root.sh"
+# shellcheck source=scripts/lib/tool-path.sh
+. "$script_dir/lib/tool-path.sh"
+repo_root="$(tovuk_repo_root "$script_dir")"
 cd "$repo_root"
+tovuk_prepend_tool_path
+
 python_bin="$(command -v python3.11 || command -v python3)"
 native_cli="$repo_root/crates/tovuk/target/release/tovuk"
 export TOVUK_NATIVE_BINARY="$native_cli"
