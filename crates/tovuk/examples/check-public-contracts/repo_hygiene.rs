@@ -1,9 +1,9 @@
-use std::{collections::BTreeSet, fs, path::Path, process::Command};
+use std::{collections::BTreeSet, path::Path, process::Command};
 
+use crate::agent_guidance;
 use crate::helpers::{CheckResult, read_text};
 use crate::script_contracts;
 
-const MAX_AGENTS_CHAIN_BYTES: u64 = 32_768;
 const MAX_SOURCE_FILE_LINES: usize = 500;
 
 const REQUIRED_TRACKED_PATHS: &[&str] = &[
@@ -26,6 +26,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "crates/tovuk/examples/check-github-actions.rs",
     "crates/tovuk/examples/check-prose-style.rs",
     "crates/tovuk/examples/check-public-contracts/main.rs",
+    "crates/tovuk/examples/check-public-contracts/agent_guidance.rs",
     "crates/tovuk/examples/check-public-contracts/repo_hygiene.rs",
     "crates/tovuk/src/main.rs",
     "docs/docs.json",
@@ -67,7 +68,7 @@ pub(crate) fn check() -> CheckResult {
     let tracked_set = tracked_files.iter().cloned().collect::<BTreeSet<_>>();
 
     require_tracked_paths(&tracked_set)?;
-    require_agents_chain_size()?;
+    agent_guidance::check_chain_sizes(&tracked_files)?;
     script_contracts::check()?;
     require_docs_deploy_observability_contract()?;
     reject_retired_npx_guidance(&tracked_files)?;
@@ -104,19 +105,6 @@ fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {
         Err(format!(
             "These required public repo files are not tracked:\n{}",
             missing.join("\n")
-        ))
-    }
-}
-
-fn require_agents_chain_size() -> CheckResult {
-    let size = fs::metadata("AGENTS.md")
-        .map_err(|error| format!("stat AGENTS.md: {error}"))?
-        .len();
-    if size <= MAX_AGENTS_CHAIN_BYTES {
-        Ok(())
-    } else {
-        Err(format!(
-            "AGENTS.md is {size} bytes, above Codex default project_doc_max_bytes {MAX_AGENTS_CHAIN_BYTES}"
         ))
     }
 }

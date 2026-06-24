@@ -1,5 +1,6 @@
 //! Public repository contract checks for Tovuk packages and docs.
 
+mod agent_guidance;
 mod cli_contract;
 mod docs;
 mod docs_sources;
