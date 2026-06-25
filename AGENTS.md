@@ -20,7 +20,7 @@ thread.
 ## Product Boundary
 
 - Public CLI commands are limited to login, account, pricing, scraper, request,
-  usage, billing, and support workflows.
+  usage, and billing workflows.
 - Public docs, package READMEs, examples, OpenAPI, generated artifacts, tests,
   and skills must describe scraper APIs only.
 - Scraper inputs must be public URLs, public handles, public search terms, or
@@ -33,10 +33,6 @@ thread.
 - Billing is per successful stored scraper result. Keep pricing exact and
   synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
   contract checks.
-- Support escalation must be possible through
-  `tovuk support create "Subject" "Details" --json` with command output,
-  request id when available, and the first actionable error line.
-
 ## Rust-Native Boundary
 
 - The native CLI source of truth is `crates/tovuk`.

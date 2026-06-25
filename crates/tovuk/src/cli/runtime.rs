@@ -1,7 +1,7 @@
 use super::{
     api_commands::{
         account_command, billing_command, pricing, print_authenticated, request_command,
-        scraper_command, support_command,
+        scraper_command,
     },
     args::parse_args,
     auth::login,
@@ -45,7 +45,6 @@ pub(crate) fn run() -> Result<ExitCode> {
         "account" => account_command(&cli),
         "usage" => print_authenticated(&cli, "/v1/usage"),
         "billing" => billing_command(&cli),
-        "support" => support_command(&cli),
         _ => Err(agent_error(
             "unknown_command",
             "Unknown Tovuk command.",

@@ -23,7 +23,6 @@ pub(crate) struct DocsSources {
     pub(crate) skill: String,
     pub(crate) packaged_skill: String,
     pub(crate) status: String,
-    pub(crate) support: String,
     pub(crate) public_copy: String,
 }
 
@@ -73,7 +72,6 @@ impl DocsSources {
             skill,
             packaged_skill,
             status: read_text("docs/status.mdx")?,
-            support: read_text("docs/support.mdx")?,
             public_copy,
         })
     }

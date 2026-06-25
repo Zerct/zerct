@@ -6,7 +6,7 @@ description: Use Tovuk public-data scraper APIs with `tovuk`.
 # Tovuk
 
 Use when a user wants to create Tovuk scraper Requests, fetch stored Results,
-inspect pricing or usage, manage billing, or open support workflows.
+inspect pricing or usage, or manage billing.
 
 Set `TOVUK_OUTPUT=json` for agent sessions.
 
@@ -26,9 +26,6 @@ tovuk request results request_123 --limit 1000
 tovuk request cancel request_123
 tovuk billing checkout
 tovuk billing portal
-tovuk support list --limit 20
-tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
-tovuk support resolve ticket_0123456789abcdef0123
 ```
 
 Scraper Requests are for public data only. Do not send cookies, passwords,

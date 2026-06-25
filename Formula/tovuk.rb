@@ -26,9 +26,7 @@ class Tovuk < Formula
     assert_match "tovuk billing [checkout|portal]", help
     assert_match "tovuk billing checkout --json", help
     assert_match "tovuk billing portal", help
-    assert_match "tovuk support create", help
-    assert_match "tovuk support list", help
-    assert_match "tovuk support resolve", help
+    refute_match "tovuk support", help
     refute_match "tovuk deploy", help
     refute_match "tovuk service", help
     refute_match "tovuk storage", help

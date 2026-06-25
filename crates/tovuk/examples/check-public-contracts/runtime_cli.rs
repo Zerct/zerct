@@ -10,7 +10,6 @@ const REQUIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk pricing",
     "tovuk usage",
     "tovuk billing checkout",
-    "tovuk support create",
 ];
 
 const RETIRED_HELP_COMMANDS: &[&str] = &[
@@ -19,6 +18,7 @@ const RETIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk storage",
     "tovuk sqlite",
     "tovuk queue",
+    "tovuk support",
 ];
 
 const RETIRED_COMMANDS: &[&str] = &[
@@ -57,6 +57,7 @@ const RETIRED_COMMANDS: &[&str] = &[
     "limit",
     "files",
     "media",
+    "support",
 ];
 
 #[derive(Clone, Copy)]
