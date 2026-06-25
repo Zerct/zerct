@@ -12,6 +12,7 @@ mod repo_hygiene;
 mod retired_contracts;
 mod runtime_cli;
 mod script_contracts;
+mod support_contract;
 mod types;
 
 use std::{env, process::ExitCode};

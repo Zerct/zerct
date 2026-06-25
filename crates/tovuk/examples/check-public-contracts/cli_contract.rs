@@ -4,11 +4,12 @@ use crate::{
         reject_contains, require_contains, require_equal,
     },
     retired_contracts::RETIRED_PUBLIC_COMMANDS,
+    support_contract,
     types::PackageJson,
 };
 
 #[derive(Debug)]
-struct ContractSources {
+pub(crate) struct ContractSources {
     cargo_cli: String,
     root_readme: String,
     cargo_readme: String,
@@ -32,8 +33,7 @@ pub(crate) fn check() -> CheckResult {
     let sources = ContractSources::load()?;
     require_native_command_dispatch(&sources)?;
     require_core_commands(&sources)?;
-    require_support_commands(&sources)?;
-    require_support_api_docs(&sources)?;
+    support_contract::check(&sources)?;
     require_install_guides(&sources)?;
     require_package_metadata(&sources)?;
     reject_retired_packaging(&sources)?;
@@ -87,6 +87,31 @@ impl ContractSources {
             self.packaged_skill.as_str(),
         ]
     }
+
+    pub(crate) fn support_command_sources(&self) -> [&str; 6] {
+        [
+            self.root_readme.as_str(),
+            self.docs_agents.as_str(),
+            self.docs_packages.as_str(),
+            self.docs_llms.as_str(),
+            self.packaged_skill.as_str(),
+            self.cargo_cli.as_str(),
+        ]
+    }
+
+    pub(crate) fn support_api_doc_sources(&self) -> [&str; 9] {
+        [
+            self.root_readme.as_str(),
+            self.cargo_readme.as_str(),
+            self.npm_readme.as_str(),
+            self.python_readme.as_str(),
+            self.docs_agents.as_str(),
+            self.docs_packages.as_str(),
+            self.docs_llms.as_str(),
+            self.docs_skill.as_str(),
+            self.packaged_skill.as_str(),
+        ]
+    }
 }
 
 fn require_native_command_dispatch(sources: &ContractSources) -> CheckResult {
@@ -130,52 +155,6 @@ fn require_core_commands(sources: &ContractSources) -> CheckResult {
                 format!("scraper-only public command {snippet}").as_str(),
             )?;
         }
-    }
-    Ok(())
-}
-
-fn require_support_commands(sources: &ContractSources) -> CheckResult {
-    for source in [
-        sources.root_readme.as_str(),
-        sources.docs_agents.as_str(),
-        sources.docs_packages.as_str(),
-        sources.docs_llms.as_str(),
-        sources.packaged_skill.as_str(),
-        sources.cargo_cli.as_str(),
-    ] {
-        for snippet in [
-            "tovuk support create",
-            "tovuk support list",
-            "tovuk support resolve",
-        ] {
-            require_contains(
-                source,
-                snippet,
-                format!("scraper-only public command {snippet}").as_str(),
-            )?;
-        }
-    }
-    Ok(())
-}
-
-fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
-    for source in [
-        sources.root_readme.as_str(),
-        sources.cargo_readme.as_str(),
-        sources.npm_readme.as_str(),
-        sources.python_readme.as_str(),
-        sources.docs_agents.as_str(),
-        sources.docs_packages.as_str(),
-        sources.docs_llms.as_str(),
-        sources.docs_skill.as_str(),
-        sources.packaged_skill.as_str(),
-    ] {
-        require_contains(
-            source,
-            "POST /v1/support/tickets",
-            "support ticket API route",
-        )?;
-        require_contains(source, "account API key", "support ticket API key guidance")?;
     }
     Ok(())
 }
