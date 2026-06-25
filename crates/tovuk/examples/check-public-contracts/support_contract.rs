@@ -13,7 +13,7 @@ pub(crate) fn check(sources: &ContractSources) -> CheckResult {
     require_support_commands(sources)?;
     require_support_api_docs(sources)?;
     require_support_openapi_contract(sources)?;
-    reject_support_retired_language(sources)
+    reject_non_service_ticket_language(sources)
 }
 
 fn require_support_commands(sources: &ContractSources) -> CheckResult {
@@ -72,31 +72,44 @@ fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
     Ok(())
 }
 
-fn reject_support_retired_language(sources: &ContractSources) -> CheckResult {
-    let retired_moderation_term = retired_moderation_term()?;
-    let retired_user_workflow_term = ["user-to-user", " ", "report"].concat();
-    let retired_direct_report_term = ["report", " ", "another", " ", "user"].concat();
+fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult {
+    let banned_compliance_term = banned_compliance_term()?;
+    let banned_user_workflow_term = ["user-to-user", " ", "report"].concat();
+    let banned_direct_report_term = ["report", " ", "another", " ", "user"].concat();
     for source in sources.support_public_sources() {
-        reject_contains(
-            source,
-            retired_moderation_term.as_str(),
-            "support surfaces must not mention retired moderation workflow wording",
-        )?;
-        reject_contains(
-            source,
-            retired_user_workflow_term.as_str(),
-            "support surfaces must not use retired customer-to-customer workflow wording",
-        )?;
-        reject_contains(
-            source,
-            retired_direct_report_term.as_str(),
-            "support surfaces must not describe reporting another user",
-        )?;
+        for (term, label) in [
+            (
+                banned_compliance_term.as_str(),
+                "support surfaces must describe service tickets, not compliance complaints",
+            ),
+            (
+                "moderation",
+                "support surfaces must describe service tickets, not moderation workflows",
+            ),
+            (
+                "dispute",
+                "support surfaces must describe service tickets, not customer disputes",
+            ),
+            (
+                "customer-to-customer",
+                "support surfaces must describe service tickets between the account and Tovuk",
+            ),
+            (
+                banned_user_workflow_term.as_str(),
+                "support surfaces must stay account-to-Tovuk service-ticket wording",
+            ),
+            (
+                banned_direct_report_term.as_str(),
+                "support surfaces must stay account-to-Tovuk service-ticket wording",
+            ),
+        ] {
+            reject_contains(source, term, label)?;
+        }
     }
     Ok(())
 }
 
-fn retired_moderation_term() -> CheckResult<String> {
+fn banned_compliance_term() -> CheckResult<String> {
     String::from_utf8(vec![97, 98, 117, 115, 101])
-        .map_err(|error| format!("invalid retired support term check: {error}"))
+        .map_err(|error| format!("invalid support service-ticket term check: {error}"))
 }
