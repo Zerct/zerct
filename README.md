@@ -2,7 +2,7 @@
 
 Tovuk is a paid public-data scraper API with a native Rust CLI. Use it to list
 available scrapers, create scraper requests, poll request status, fetch stored
-records, inspect usage, and manage billing.
+records, inspect usage, manage billing, and contact support.
 
 The public CLI is intentionally narrow. It does not deploy websites, backends,
 databases, workers, storage buckets, queues, cron jobs, custom domains,
@@ -50,6 +50,9 @@ tovuk request cancel request_123 --json
 tovuk usage --json
 tovuk billing checkout --json
 tovuk billing portal --json
+tovuk support list --limit 20 --json
+tovuk support create "Request failed" "The scraper request failed after retry. Request id: request_123. First error: upstream timeout." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --severity normal --json
+tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
 ## Public-Data Boundary
@@ -88,6 +91,9 @@ GET /v1/requests/{request_id}/results
 GET /v1/usage
 POST /v1/billing/checkout
 POST /v1/billing/portal
+GET /v1/support/tickets
+POST /v1/support/tickets
+POST /v1/support/tickets/{ticket_id}/resolve
 ```
 
 ## Development

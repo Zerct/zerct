@@ -1,4 +1,21 @@
-use super::super::{args::CliOptions, project::encode_component};
+use super::super::{
+    args::CliOptions,
+    errors::{Result, agent_error},
+    project::encode_component,
+};
+
+pub(crate) fn command_arg(
+    cli: &CliOptions,
+    code: &str,
+    message: &str,
+    instruction: &str,
+) -> Result<String> {
+    cli.args
+        .get(1)
+        .cloned()
+        .filter(|value| !value.is_empty())
+        .ok_or_else(|| agent_error(code, message, instruction, cli.output.json))
+}
 
 pub(crate) fn page_query(cli: &CliOptions) -> String {
     let mut params = Vec::new();
