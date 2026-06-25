@@ -1,6 +1,6 @@
 use crate::{
     cli_contract::ContractSources,
-    helpers::{CheckResult, reject_contains, require_contains},
+    helpers::{CheckResult, reject_contains, require_contains, require_contains_all},
     helpers_public_copy::ascii_term,
 };
 
@@ -32,18 +32,18 @@ fn require_support_commands(sources: &ContractSources) -> CheckResult {
 
 fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
     for source in sources.support_api_doc_sources() {
-        require_contains(
+        require_contains_all(
             source,
-            "POST /v1/support/tickets",
-            "support ticket API route",
-        )?;
-        require_contains(source, "account API key", "support ticket API key guidance")?;
-        require_contains(source, "request-id", "support ticket request id context")?;
-        require_contains(source, "created_by", "support ticket creator attribution")?;
-        require_contains(
-            source,
-            "account-scoped service",
-            "support ticket service-ticket positioning",
+            &[
+                ("POST /v1/support/tickets", "support ticket API route"),
+                ("account API key", "support ticket API key guidance"),
+                ("request-id", "support ticket request id context"),
+                ("created_by", "support ticket creator attribution"),
+                (
+                    "account-scoped service",
+                    "support ticket service-ticket positioning",
+                ),
+            ],
         )?;
         require_account_to_tovuk_service_ticket_wording(source)?;
     }
@@ -63,35 +63,35 @@ fn require_account_to_tovuk_service_ticket_wording(source: &str) -> CheckResult 
 
 fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
     let openapi = sources.support_openapi_source();
-    for (snippet, label) in [
-        (
-            "users and AI/API agents can open service tickets",
-            "OpenAPI support ticket API-agent guidance",
-        ),
-        (
-            "Request body for creating an account-scoped service ticket from a user, CLI, or AI/API agent.",
-            "OpenAPI support ticket create body guidance",
-        ),
-        (
-            "SupportTicketCreatedBy",
-            "OpenAPI support ticket creator attribution schema",
-        ),
-        (
-            "\"created_by\"",
-            "OpenAPI support ticket creator attribution field",
-        ),
-        (
-            "createSupportTicket",
-            "OpenAPI support ticket create operation",
-        ),
-        (
-            "SupportTicketCreateRequest",
-            "OpenAPI support ticket create schema",
-        ),
-    ] {
-        require_contains(openapi, snippet, label)?;
-    }
-    Ok(())
+    require_contains_all(
+        openapi,
+        &[
+            (
+                "users and AI/API agents can open service tickets",
+                "OpenAPI support ticket API-agent guidance",
+            ),
+            (
+                "Request body for creating an account-scoped service ticket from a user, CLI, or AI/API agent.",
+                "OpenAPI support ticket create body guidance",
+            ),
+            (
+                "SupportTicketCreatedBy",
+                "OpenAPI support ticket creator attribution schema",
+            ),
+            (
+                "\"created_by\"",
+                "OpenAPI support ticket creator attribution field",
+            ),
+            (
+                "createSupportTicket",
+                "OpenAPI support ticket create operation",
+            ),
+            (
+                "SupportTicketCreateRequest",
+                "OpenAPI support ticket create schema",
+            ),
+        ],
+    )
 }
 
 fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult {
