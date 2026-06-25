@@ -73,26 +73,12 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
 }
 
 fn reject_retired_npx_guidance(tracked_files: &[String]) -> CheckResult {
-    let mut matches = Vec::new();
-    for path in tracked_files {
-        if !is_public_text_scan_path(path) || !Path::new(path).is_file() {
-            continue;
-        }
-        let source = read_text(path)?;
-        for (index, line) in source.lines().enumerate() {
-            if line_contains_retired_npm_runner_guidance(line) {
-                matches.push(format!("{}:{}", path, index + 1));
-            }
-        }
-    }
-    if matches.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "Use native `tovuk` guidance instead of retired npm-runner guidance:\n{}",
-            matches.join("\n")
-        ))
-    }
+    reject_forbidden_line_matches(
+        tracked_files,
+        is_public_text_scan_path,
+        line_contains_retired_npm_runner_guidance,
+        "Use native `tovuk` guidance instead of retired npm-runner guidance:",
+    )
 }
 
 fn reject_tracked_go_files(tracked_files: &[String]) -> CheckResult {
@@ -112,14 +98,28 @@ fn reject_tracked_go_files(tracked_files: &[String]) -> CheckResult {
 }
 
 fn reject_go_toolchain_bootstrap(tracked_files: &[String]) -> CheckResult {
+    reject_forbidden_line_matches(
+        tracked_files,
+        is_go_toolchain_scan_path,
+        line_contains_forbidden_go_toolchain,
+        "Public repo tooling must not bootstrap Go toolchains; use Rust-native or prebuilt native release tools:",
+    )
+}
+
+fn reject_forbidden_line_matches(
+    tracked_files: &[String],
+    scan_path: fn(&str) -> bool,
+    line_matches: fn(&str) -> bool,
+    message: &str,
+) -> CheckResult {
     let mut matches = Vec::new();
     for path in tracked_files {
-        if !is_go_toolchain_scan_path(path) || !Path::new(path).is_file() {
+        if !scan_path(path) || !Path::new(path).is_file() {
             continue;
         }
         let source = read_text(path)?;
         for (index, line) in source.lines().enumerate() {
-            if line_contains_forbidden_go_toolchain(line) {
+            if line_matches(line) {
                 matches.push(format!("{}:{}", path, index + 1));
             }
         }
@@ -127,10 +127,7 @@ fn reject_go_toolchain_bootstrap(tracked_files: &[String]) -> CheckResult {
     if matches.is_empty() {
         Ok(())
     } else {
-        Err(format!(
-            "Public repo tooling must not bootstrap Go toolchains; use Rust-native or prebuilt native release tools:\n{}",
-            matches.join("\n")
-        ))
+        Err(format!("{message}\n{}", matches.join("\n")))
     }
 }
 
