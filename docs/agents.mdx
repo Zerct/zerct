@@ -60,14 +60,3 @@ export TOVUK_OUTPUT=json
 Scraper Requests are for public data only. Do not send cookies, passwords,
 account tokens, private session data, private account content, private
 repository credentials, or proxy URLs.
-
-## Support
-
-Open support tickets only after capturing the request id, exact command, and
-first actionable error:
-
-```sh
-tovuk support list --limit 20
-tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
-tovuk support resolve ticket_0123456789abcdef0123
-```
