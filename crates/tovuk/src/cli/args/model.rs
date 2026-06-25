@@ -12,7 +12,6 @@ pub(crate) struct CliOptions {
     pub(crate) token: String,
     pub(crate) severity: String,
     pub(crate) account: AccountOptions,
-    pub(crate) abuse: AbuseOptions,
     pub(crate) output: OutputOptions,
 }
 
@@ -20,15 +19,6 @@ pub(crate) struct CliOptions {
 pub(crate) struct AccountOptions {
     pub(crate) handle: String,
     pub(crate) display_name: String,
-}
-
-#[derive(Clone, Debug)]
-pub(crate) struct AbuseOptions {
-    pub(crate) operator: bool,
-    pub(crate) category: String,
-    pub(crate) reporter_email: String,
-    pub(crate) reporter_name: String,
-    pub(crate) evidence: String,
 }
 
 #[derive(Clone, Debug)]
@@ -53,13 +43,6 @@ impl Default for CliOptions {
             account: AccountOptions {
                 handle: String::new(),
                 display_name: String::new(),
-            },
-            abuse: AbuseOptions {
-                operator: false,
-                category: String::new(),
-                reporter_email: String::new(),
-                reporter_name: String::new(),
-                evidence: String::new(),
             },
             output: OutputOptions {
                 json: false,

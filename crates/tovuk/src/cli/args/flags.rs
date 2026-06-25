@@ -45,7 +45,6 @@ fn apply_boolean_flag(
             set_boolean_flag(inline, || cli.output.version = true, name, json_output)
         }
         "--json" => set_boolean_flag(inline, || cli.output.json = true, name, json_output),
-        "--operator" => set_boolean_flag(inline, || cli.abuse.operator = true, name, json_output),
         _ => return Ok(None),
     }
     .map(Some)
@@ -65,9 +64,6 @@ fn apply_value_flag(
         "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
         "--failing-command" | "--first-log-line" | "--severity" => {
             apply_support_value_flag(cli, name, inline, argv, index)
-        }
-        "--category" | "--reporter-email" | "--reporter-name" | "--evidence" => {
-            apply_abuse_value_flag(cli, name, inline, argv, index)
         }
         _ => invalid_value_flag_dispatch(cli, name),
     }
@@ -172,50 +168,6 @@ fn apply_support_value_flag(
         ),
         "--severity" => set_string_flag(
             &mut cli.severity,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        _ => invalid_value_flag_dispatch(cli, name),
-    }
-}
-
-fn apply_abuse_value_flag(
-    cli: &mut CliOptions,
-    name: &str,
-    inline: Option<String>,
-    argv: &[String],
-    index: usize,
-) -> Result<usize> {
-    match name {
-        "--category" => set_string_flag(
-            &mut cli.abuse.category,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--reporter-email" => set_string_flag(
-            &mut cli.abuse.reporter_email,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--reporter-name" => set_string_flag(
-            &mut cli.abuse.reporter_name,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--evidence" => set_string_flag(
-            &mut cli.abuse.evidence,
             name,
             inline,
             argv,

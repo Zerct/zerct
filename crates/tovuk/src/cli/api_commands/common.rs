@@ -3,13 +3,6 @@ use super::super::{
     errors::{Result, agent_error},
     project::encode_component,
 };
-use serde_json::{Map, Value};
-
-pub(crate) fn insert_optional(body: &mut Map<String, Value>, key: &str, value: &str) {
-    if !value.is_empty() {
-        body.insert(key.to_owned(), Value::String(value.to_owned()));
-    }
-}
 
 pub(crate) fn command_arg(
     cli: &CliOptions,

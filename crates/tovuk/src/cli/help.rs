@@ -20,15 +20,6 @@ Usage:
   tovuk support list [--limit <n>] [--api <url>] [--json]
   tovuk support create "Subject" "Details" [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
   tovuk support resolve <ticket_id> [--api <url>] [--json]
-  tovuk abuse report <target_url> "Summary" "Details" --category phishing|malware|illegal_content|copyright|trademark|network_abuse|privacy|emergency_safety|other --reporter-email <email> [--evidence <text>] [--api <url>] [--json]
-  tovuk abuse list [--operator] [--limit <n>] [--api <url>] [--json]
-  tovuk abuse appeal <report_id> "Remediation details" [--evidence <text>] [--api <url>] [--json]
-  tovuk abuse triage <report_id> "Triage evidence summary" [--api <url>] [--json]
-  tovuk abuse notify-owner <report_id> "Owner notification evidence summary" [--api <url>] [--json]
-  tovuk abuse quarantine <report_id> "Operator evidence summary" [--api <url>] [--json]
-  tovuk abuse resolve <report_id> "Resolution evidence summary" [--api <url>] [--json]
-  tovuk abuse reject <report_id> "Rejection evidence summary" [--api <url>] [--json]
-  tovuk abuse release <report_id> "Release evidence summary" [--api <url>] [--json]
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
@@ -39,7 +30,6 @@ Agent contract:
   - For invoices, payment methods, or subscription changes, run tovuk billing portal and show the returned URL to the human.
   - Create support tickets with command output, request id when available, and the first actionable error line.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
-  - Create abuse reports with target URL, category, reporter email, and evidence. Owners track and appeal service reports with tovuk abuse list --json and tovuk abuse appeal <report_id> --json; operators triage all reports with tovuk abuse list --operator --json, then use tovuk abuse triage, notify-owner, quarantine, resolve, reject, or release with an operator token.
   - This public CLI does not deploy websites, backends, databases, workers, storage buckets, queues, cron jobs, custom domains, secrets, or any other customer cloud resource.
 "#;
 

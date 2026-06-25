@@ -53,16 +53,6 @@ tovuk billing portal --json
 tovuk support list --limit 20 --json
 tovuk support create "Request failed" "The scraper request failed after retry. Request id: request_123. First error: upstream timeout." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --severity normal --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
-tovuk abuse report https://example.com "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
-tovuk abuse list --json
-tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported public target." --evidence "remediation note" --json
-tovuk abuse list --operator --json
-tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence." --json
-tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible notice recorded." --json
-tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed abuse and preserved evidence." --json
-tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated." --json
-tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
-tovuk abuse release abuse_0123456789abcdef0123 "Quarantine released after remediation." --json
 ```
 
 ## Public-Data Boundary
@@ -104,12 +94,7 @@ POST /v1/billing/portal
 GET /v1/support/tickets
 POST /v1/support/tickets
 POST /v1/support/tickets/{ticket_id}/resolve
-POST /v1/abuse/reports
-GET /v1/abuse/reports
-POST /v1/abuse/reports/{report_id}/appeal
 ```
-
-Operator abuse routes require an operator token.
 
 ## Development
 
