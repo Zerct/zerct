@@ -1,6 +1,7 @@
 use crate::{
     cli_contract::ContractSources,
     helpers::{CheckResult, reject_contains, require_contains},
+    helpers_public_copy::ascii_term,
 };
 
 const SUPPORT_COMMANDS: &[&str] = &[
@@ -73,60 +74,43 @@ fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
 }
 
 fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult {
-    let banned_compliance_term = banned_compliance_term()?;
-    let banned_user_workflow_term = ["user-to-user", " ", "report"].concat();
-    let banned_direct_report_term = ["report", " ", "another", " ", "user"].concat();
-    let banned_compliance_report_term = ["report", " ", banned_compliance_term.as_str()].concat();
+    let rejected_terms = non_service_ticket_terms();
     for source in sources.support_public_sources() {
-        for (term, label) in [
-            (
-                banned_compliance_term.as_str(),
-                "support surfaces must describe service tickets, not non-service requests",
-            ),
-            (
-                "compliance complaint",
-                "support surfaces must describe service tickets, not non-service requests",
-            ),
-            (
-                "complaint",
-                "support surfaces must describe service tickets, not non-service requests",
-            ),
-            (
-                "moderation",
-                "support surfaces must describe service tickets, not non-service workflows",
-            ),
-            (
-                "dispute",
-                "support surfaces must describe service tickets, not non-service workflows",
-            ),
-            (
-                "customer-to-customer",
-                "support surfaces must describe service tickets between the account and Tovuk",
-            ),
-            (
-                banned_user_workflow_term.as_str(),
-                "support surfaces must stay account-to-Tovuk service-ticket wording",
-            ),
-            (
-                banned_direct_report_term.as_str(),
-                "support surfaces must stay account-to-Tovuk service-ticket wording",
-            ),
-            (
-                "reporting",
-                "support surfaces must stay account-to-Tovuk service-ticket wording",
-            ),
-            (
-                banned_compliance_report_term.as_str(),
-                "support surfaces must stay account-to-Tovuk service-ticket wording",
-            ),
-        ] {
-            reject_contains(source, term, label)?;
+        for (value, label) in &rejected_terms {
+            reject_contains(source, value.as_str(), label)?;
         }
     }
     Ok(())
 }
 
-fn banned_compliance_term() -> CheckResult<String> {
-    String::from_utf8(vec![97, 98, 117, 115, 101])
-        .map_err(|error| format!("invalid support service-ticket term check: {error}"))
+type RejectedSupportTerm = (String, &'static str);
+
+fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
+    let compliance_report_term = ascii_term(&[97, 98, 117, 115, 101]);
+    let non_service_request =
+        "support surfaces must describe service tickets, not non-service requests";
+    let non_service_workflow =
+        "support surfaces must describe service tickets, not non-service workflows";
+    let account_to_tovuk = "support surfaces must stay account-to-Tovuk service-ticket wording";
+    vec![
+        (compliance_report_term.clone(), non_service_request),
+        ("compliance complaint".to_owned(), non_service_request),
+        ("complaint".to_owned(), non_service_request),
+        ("moderation".to_owned(), non_service_workflow),
+        ("dispute".to_owned(), non_service_workflow),
+        (
+            "customer-to-customer".to_owned(),
+            "support surfaces must describe service tickets between the account and Tovuk",
+        ),
+        (["user-to-user", " ", "report"].concat(), account_to_tovuk),
+        (
+            ["report", " ", "another", " ", "user"].concat(),
+            account_to_tovuk,
+        ),
+        ("reporting".to_owned(), account_to_tovuk),
+        (
+            ["report ", compliance_report_term.as_str()].concat(),
+            account_to_tovuk,
+        ),
+    ]
 }
