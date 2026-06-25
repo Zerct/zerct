@@ -99,7 +99,7 @@ pub(crate) fn internal_error(message: impl Into<String>) -> CliError {
     agent_error(
         "internal_error",
         message.into(),
-        "Retry the command. If it keeps failing, capture the command, request id, and first actionable error line for troubleshooting.",
+        "Retry the command. If it keeps failing, create a Tovuk support ticket with command output.",
         false,
     )
 }

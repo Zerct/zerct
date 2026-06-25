@@ -5,12 +5,12 @@
     "title": "Tovuk API",
     "summary": "API for Tovuk public-data scraper requests.",
     "version": "0.1.0",
-    "description": "Use the Tovuk API to list Scrapers, create paid public-data scraper Requests, fetch stored Results, authenticate, and manage account billing.",
+    "description": "Use the Tovuk API to list Scrapers, create paid public-data scraper Requests, fetch stored Results, authenticate, manage account billing, and open support workflows.",
     "termsOfService": "https://tovuk.com/legal/terms",
     "contact": {
       "name": "Tovuk",
       "url": "https://tovuk.com",
-      "email": "api@tovuk.com"
+      "email": "support@tovuk.com"
     },
     "license": {
       "name": "Proprietary",
@@ -35,7 +35,7 @@
   "tags": [
     {
       "name": "Accounts",
-      "description": "Account profile, usage, and billing endpoints."
+      "description": "Account profile, usage, billing, and support endpoints."
     },
     {
       "name": "Auth",
@@ -282,7 +282,7 @@
           "Accounts"
         ],
         "summary": "List account activity",
-        "description": "Lists recent scraper and billing activity for the authenticated account.",
+        "description": "Lists recent scraper, billing, and support activity for the authenticated account.",
         "operationId": "listAccountActivity",
         "parameters": [
           {
@@ -773,6 +773,139 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/BillingPortalCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/support/tickets": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "List support tickets",
+        "description": "Lists recent support tickets for the authenticated account.",
+        "operationId": "listSupportTickets",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of items to return. Context $.paths./v1/support/tickets.get.parameters.0.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100,
+              "format": "int64",
+              "example": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SupportTicketsLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create support ticket",
+        "description": "Creates a rate-limited support ticket with scraper request evidence.",
+        "operationId": "createSupportTicket",
+        "requestBody": {
+          "description": "Create support ticket body.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportTicketCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Create support ticket body.",
+                  "value": {
+                    "subject": "Request failed",
+                    "details": "Request id request_123 failed after retry.",
+                    "failing_command": "tovuk request show request_123 --json",
+                    "first_log_line": "upstream timeout",
+                    "severity": "normal"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SupportTicketCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/support/tickets/{ticket_id}/resolve": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Resolve support ticket",
+        "description": "Marks a support ticket resolved for the authenticated account.",
+        "operationId": "resolveSupportTicket",
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "description": "Support ticket id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^ticket_[A-Za-z0-9_:-]{1,80}$",
+              "example": "ticket_123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/SupportTicketResolved"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1902,6 +2035,174 @@
           },
           "X-RateLimit-Reset": {
             "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapeResultsLoaded.headers.X-RateLimit-Reset.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "SupportTicketsLoaded": {
+        "description": "Support tickets loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicketsResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Support tickets loaded.",
+                "value": {
+                  "ok": true,
+                  "tickets": [],
+                  "nextCursor": null
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed in the current window. Context $.components.responses.SupportTicketsLoaded.headers.X-RateLimit-Limit.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining in the current window. Context $.components.responses.SupportTicketsLoaded.headers.X-RateLimit-Remaining.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the current window resets. Context $.components.responses.SupportTicketsLoaded.headers.X-RateLimit-Reset.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "SupportTicketCreated": {
+        "description": "Support ticket created.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicketCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Support ticket created.",
+                "value": {
+                  "ok": true,
+                  "ticket": {
+                    "id": "ticket_123",
+                    "subject": "Request failed",
+                    "status": "open",
+                    "severity": "normal",
+                    "createdAt": "2026-06-23T12:00:00Z"
+                  },
+                  "agent_instruction": "Track this ticket with tovuk support list --json."
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed in the current window. Context $.components.responses.SupportTicketCreated.headers.X-RateLimit-Limit.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining in the current window. Context $.components.responses.SupportTicketCreated.headers.X-RateLimit-Remaining.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the current window resets. Context $.components.responses.SupportTicketCreated.headers.X-RateLimit-Reset.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "SupportTicketResolved": {
+        "description": "Support ticket resolved.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SupportTicketCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Support ticket resolved.",
+                "value": {
+                  "ok": true,
+                  "ticket": {
+                    "id": "ticket_123",
+                    "subject": "Request failed",
+                    "status": "resolved",
+                    "severity": "normal",
+                    "createdAt": "2026-06-23T12:00:00Z"
+                  },
+                  "agent_instruction": "Ticket resolved."
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed in the current window. Context $.components.responses.SupportTicketResolved.headers.X-RateLimit-Limit.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining in the current window. Context $.components.responses.SupportTicketResolved.headers.X-RateLimit-Remaining.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the current window resets. Context $.components.responses.SupportTicketResolved.headers.X-RateLimit-Reset.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -3279,6 +3580,192 @@
         "example": {
           "ok": true,
           "records": [],
+          "nextCursor": "example"
+        }
+      },
+      "SupportTicketSeverity": {
+        "type": "string",
+        "description": "Support ticket severity.",
+        "enum": [
+          "low",
+          "normal",
+          "urgent"
+        ],
+        "example": "low"
+      },
+      "SupportTicketStatus": {
+        "type": "string",
+        "description": "Support ticket status.",
+        "enum": [
+          "open",
+          "resolved"
+        ],
+        "example": "open"
+      },
+      "SupportTicket": {
+        "type": "object",
+        "description": "Support ticket.",
+        "required": [
+          "id",
+          "subject",
+          "status",
+          "severity",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "id_123"
+          },
+          "subject": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SupportTicketStatus"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/SupportTicketSeverity"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T12:00:00Z"
+          }
+        },
+        "example": {
+          "id": "id_123",
+          "subject": "example",
+          "status": "open",
+          "severity": "low",
+          "createdAt": "2026-06-23T12:00:00Z"
+        }
+      },
+      "SupportTicketCreateRequest": {
+        "type": "object",
+        "description": "Request body for creating a support ticket.",
+        "additionalProperties": false,
+        "required": [
+          "subject",
+          "details"
+        ],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          },
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          },
+          "failing_command": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          },
+          "first_log_line": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SupportTicketSeverity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "example": {
+          "subject": "example",
+          "details": "example"
+        }
+      },
+      "SupportTicketCreateResponse": {
+        "type": "object",
+        "description": "Support ticket mutation response.",
+        "required": [
+          "ok",
+          "ticket",
+          "agent_instruction"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "ticket": {
+            "$ref": "#/components/schemas/SupportTicket"
+          },
+          "agent_instruction": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          }
+        },
+        "example": {
+          "ok": true,
+          "ticket": {
+            "id": "id_123",
+            "subject": "example",
+            "status": "open",
+            "severity": "low",
+            "createdAt": "2026-06-23T12:00:00Z"
+          },
+          "agent_instruction": "example"
+        }
+      },
+      "SupportTicketsResponse": {
+        "type": "object",
+        "description": "Paginated support ticket list.",
+        "required": [
+          "ok",
+          "tickets",
+          "nextCursor"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "tickets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportTicket"
+            },
+            "example": []
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "example"
+          }
+        },
+        "example": {
+          "ok": true,
+          "tickets": [],
           "nextCursor": "example"
         }
       }

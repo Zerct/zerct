@@ -12,7 +12,7 @@ metadata:
 
 Use this skill when a user wants to create paid public-data scraper Requests,
 poll request status, fetch stored Records, inspect usage, manage billing, or
-manage billing.
+open support workflows.
 
 ```sh
 export TOVUK_OUTPUT=json
