@@ -31,7 +31,7 @@ Set `TOVUK_OUTPUT=json` for agent sessions. Set
 The CLI does not deploy websites, backends, databases, workers, storage buckets,
 queues, cron jobs, custom domains, secrets, or other customer infrastructure.
 
-Agents may also open account-scoped service tickets through
+API agents may also open account-scoped service tickets through
 `POST /v1/support/tickets` with an account API key or session bearer token.
 
 Scraper requests are public data only. Do not send cookies, passwords, account
