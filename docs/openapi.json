@@ -795,7 +795,7 @@
           "Accounts"
         ],
         "summary": "List support tickets",
-        "description": "Lists recent account-scoped support tickets for the authenticated account or account API key.",
+        "description": "Lists recent account-scoped service tickets for the authenticated account or account API key.",
         "operationId": "listSupportTickets",
         "parameters": [
           {
@@ -836,10 +836,10 @@
           "Accounts"
         ],
         "summary": "Create support ticket",
-        "description": "Creates a rate-limited account-scoped support ticket with scraper request evidence. Account API keys are accepted so automated agents can open service tickets.",
+        "description": "Creates a rate-limited account-scoped service ticket with scraper request evidence. Account API keys are accepted so users and API agents can open service tickets.",
         "operationId": "createSupportTicket",
         "requestBody": {
-          "description": "Create support ticket body.",
+          "description": "Create account-scoped service ticket body.",
           "required": true,
           "content": {
             "application/json": {
@@ -848,7 +848,7 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Create support ticket body.",
+                  "summary": "Create account-scoped service ticket body.",
                   "value": {
                     "subject": "Request failed",
                     "details": "Request failed after retry.",
@@ -888,7 +888,7 @@
           "Accounts"
         ],
         "summary": "Resolve support ticket",
-        "description": "Marks an account-scoped support ticket resolved for the authenticated account or account API key.",
+        "description": "Marks an account-scoped service ticket resolved for the authenticated account or account API key.",
         "operationId": "resolveSupportTicket",
         "parameters": [
           {
@@ -2048,7 +2048,7 @@
         }
       },
       "SupportTicketsLoaded": {
-        "description": "Support tickets loaded.",
+        "description": "Account-scoped service tickets loaded.",
         "content": {
           "application/json": {
             "schema": {
@@ -2056,7 +2056,7 @@
             },
             "examples": {
               "example": {
-                "summary": "Support tickets loaded.",
+                "summary": "Account-scoped service tickets loaded.",
                 "value": {
                   "tickets": [],
                   "rate_limit": {
@@ -2104,7 +2104,7 @@
         }
       },
       "SupportTicketCreated": {
-        "description": "Support ticket created.",
+        "description": "Account-scoped service ticket created.",
         "content": {
           "application/json": {
             "schema": {
@@ -2112,7 +2112,7 @@
             },
             "examples": {
               "example": {
-                "summary": "Support ticket created.",
+                "summary": "Account-scoped service ticket created.",
                 "value": {
                   "ticket": {
                     "id": "ticket_123",
@@ -2174,7 +2174,7 @@
         }
       },
       "SupportTicketResolved": {
-        "description": "Support ticket resolved.",
+        "description": "Account-scoped service ticket resolved.",
         "content": {
           "application/json": {
             "schema": {
@@ -2182,7 +2182,7 @@
             },
             "examples": {
               "example": {
-                "summary": "Support ticket resolved.",
+                "summary": "Account-scoped service ticket resolved.",
                 "value": {
                   "id": "ticket_123",
                   "subject": "Request failed",
@@ -3732,7 +3732,7 @@
       },
       "SupportTicketCreateRequest": {
         "type": "object",
-        "description": "Request body for creating an account-scoped support ticket from a user, CLI, or API agent.",
+        "description": "Request body for creating an account-scoped service ticket from a user, CLI, or API agent.",
         "additionalProperties": false,
         "required": [
           "subject",
@@ -3858,7 +3858,7 @@
       },
       "SupportTicketCreateResponse": {
         "type": "object",
-        "description": "Support ticket mutation response.",
+        "description": "Service ticket mutation response.",
         "required": [
           "ticket",
           "rate_limit",
@@ -3903,7 +3903,7 @@
       },
       "SupportTicketsResponse": {
         "type": "object",
-        "description": "Paginated support ticket list.",
+        "description": "Paginated account-scoped service ticket list.",
         "required": [
           "tickets",
           "rate_limit"
