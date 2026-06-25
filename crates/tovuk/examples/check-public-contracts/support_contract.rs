@@ -12,6 +12,7 @@ const SUPPORT_COMMANDS: &[&str] = &[
 pub(crate) fn check(sources: &ContractSources) -> CheckResult {
     require_support_commands(sources)?;
     require_support_api_docs(sources)?;
+    require_support_openapi_contract(sources)?;
     reject_support_retired_language(sources)
 }
 
@@ -37,6 +38,36 @@ fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
         )?;
         require_contains(source, "account API key", "support ticket API key guidance")?;
         require_contains(source, "request-id", "support ticket request id context")?;
+        require_contains(
+            source,
+            "account-scoped service",
+            "support ticket service-ticket positioning",
+        )?;
+    }
+    Ok(())
+}
+
+fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
+    let openapi = sources.support_openapi_source();
+    for (snippet, label) in [
+        (
+            "automated agents can open service tickets",
+            "OpenAPI support ticket API-agent guidance",
+        ),
+        (
+            "Request body for creating an account-scoped support ticket from a user, CLI, or API agent.",
+            "OpenAPI support ticket create body guidance",
+        ),
+        (
+            "createSupportTicket",
+            "OpenAPI support ticket create operation",
+        ),
+        (
+            "SupportTicketCreateRequest",
+            "OpenAPI support ticket create schema",
+        ),
+    ] {
+        require_contains(openapi, snippet, label)?;
     }
     Ok(())
 }

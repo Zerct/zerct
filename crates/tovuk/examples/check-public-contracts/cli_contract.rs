@@ -29,6 +29,7 @@ pub(crate) struct ContractSources {
     docs_agents: String,
     docs_packages: String,
     docs_support: String,
+    docs_openapi: String,
     docs_llms: String,
     docs_skill: String,
     packaged_skill: String,
@@ -71,6 +72,7 @@ impl ContractSources {
             docs_agents: read_text("docs/agents.mdx")?,
             docs_packages: read_text("docs/reference/packages.mdx")?,
             docs_support: read_text("docs/support.mdx")?,
+            docs_openapi: read_text("docs/openapi.json")?,
             docs_llms: read_text("docs/llms.txt")?,
             docs_skill: read_text("docs/skill.md")?,
             packaged_skill: read_text("skills/tovuk/SKILL.md")?,
@@ -135,6 +137,10 @@ impl ContractSources {
             self.packaged_skill.as_str(),
             self.cargo_cli.as_str(),
         ]
+    }
+
+    pub(crate) fn support_openapi_source(&self) -> &str {
+        self.docs_openapi.as_str()
     }
 }
 
