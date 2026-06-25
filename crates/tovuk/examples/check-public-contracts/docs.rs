@@ -138,9 +138,24 @@ fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
         "tovuk support create",
         "support create docs",
     )?;
+    require_contains(
+        sources.support.as_str(),
+        "POST /v1/support/tickets",
+        "support API create docs",
+    )?;
+    require_contains(
+        sources.support.as_str(),
+        "account API key",
+        "support API key docs",
+    )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
     require_openapi_status_checks(sources.openapi.as_str())?;
+    require_contains(
+        sources.openapi.as_str(),
+        "automated agents can open service tickets",
+        "OpenAPI support agent create description",
+    )?;
     require_contains(
         sources.openapi.as_str(),
         r#""linkedinPostSearch""#,

@@ -33,6 +33,7 @@ pub(crate) fn check() -> CheckResult {
     require_native_command_dispatch(&sources)?;
     require_core_commands(&sources)?;
     require_support_commands(&sources)?;
+    require_support_api_docs(&sources)?;
     require_install_guides(&sources)?;
     require_package_metadata(&sources)?;
     reject_retired_packaging(&sources)?;
@@ -153,6 +154,28 @@ fn require_support_commands(sources: &ContractSources) -> CheckResult {
                 format!("scraper-only public command {snippet}").as_str(),
             )?;
         }
+    }
+    Ok(())
+}
+
+fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
+    for source in [
+        sources.root_readme.as_str(),
+        sources.cargo_readme.as_str(),
+        sources.npm_readme.as_str(),
+        sources.python_readme.as_str(),
+        sources.docs_agents.as_str(),
+        sources.docs_packages.as_str(),
+        sources.docs_llms.as_str(),
+        sources.docs_skill.as_str(),
+        sources.packaged_skill.as_str(),
+    ] {
+        require_contains(
+            source,
+            "POST /v1/support/tickets",
+            "support ticket API route",
+        )?;
+        require_contains(source, "account API key", "support ticket API key guidance")?;
     }
     Ok(())
 }
