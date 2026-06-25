@@ -18,7 +18,6 @@ tovuk request results request_123 --limit 1000 --json
 tovuk usage --json
 tovuk billing checkout --json
 tovuk billing portal --json
-tovuk support list --limit 20 --json
 ```
 
 The npm package exposes `bin/tovuk` and has no runtime JavaScript
