@@ -255,7 +255,6 @@ fn reject_retired_packaging(sources: &ContractSources) -> CheckResult {
 
 fn reject_retired_commands(sources: &ContractSources) -> CheckResult {
     let retired_commands = [
-        "tovuk abuse",
         "tovuk new",
         "tovuk check",
         "tovuk dev",

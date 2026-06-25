@@ -19,7 +19,6 @@ const RETIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk storage",
     "tovuk sqlite",
     "tovuk queue",
-    "tovuk abuse",
 ];
 
 const RETIRED_COMMANDS: &[&str] = &[
@@ -32,7 +31,6 @@ const RETIRED_COMMANDS: &[&str] = &[
     "sqlite",
     "kv",
     "queue",
-    "abuse",
     "cron",
     "state",
     "binding",
