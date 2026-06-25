@@ -6,6 +6,9 @@ Usage:
   tovuk account show [--api <url>] [--json]
   tovuk account activity [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk account update --handle <handle> [--display-name <name>] [--api <url>] [--json]
+  tovuk api-key list [--api <url>] [--json]
+  tovuk api-key create "Production scraper" [--api <url>] [--json]
+  tovuk api-key revoke <api_key_id> [--api <url>] [--json]
   tovuk pricing [--api <url>] [--json]
   tovuk scraper list [--api <url>] [--json]
   tovuk scraper health [--api <url>] [--json]
@@ -26,6 +29,7 @@ Agent contract:
   - Use tovuk scraper list --json to choose a public-data scraper, tovuk scraper health --json to inspect managed reader and proxy readiness, tovuk request create <scraper> '<json>' --json to create paid scraper work, tovuk request show <request_id> --json to poll status, and tovuk request results <request_id> --json to fetch stored records.
   - Scraper requests must use public URLs, public search terms, public profile handles, or public place ids only. Do not send cookies, passwords, account tokens, private session data, proxy URLs, or private account content.
   - Use tovuk pricing --json and tovuk usage --json before high-count scraper requests. Inspect priceEvents[].usdMicros, billingEstimate.lineItems, and account balance before creating large jobs.
+  - Use tovuk api-key create "Production scraper" --json for scripts, save the returned token immediately, and revoke old keys with tovuk api-key revoke <api_key_id> --json.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - For invoices, payment methods, or subscription changes, run tovuk billing portal and show the returned URL to the human.
   - Create support tickets with command output, request id when available, and the first actionable error line.

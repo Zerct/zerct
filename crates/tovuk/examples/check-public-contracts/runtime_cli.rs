@@ -12,6 +12,7 @@ const REQUIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk request results",
     "tovuk pricing",
     "tovuk usage",
+    "tovuk api-key create",
     "tovuk billing checkout",
     "tovuk support create",
 ];

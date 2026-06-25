@@ -90,7 +90,8 @@ impl ContractSources {
 
 fn require_native_command_dispatch(sources: &ContractSources) -> CheckResult {
     for command in [
-        "login", "account", "pricing", "scraper", "request", "usage", "billing", "support",
+        "login", "account", "api-key", "pricing", "scraper", "request", "usage", "billing",
+        "support",
     ] {
         require_contains(
             sources.cargo_cli.as_str(),
@@ -104,6 +105,9 @@ fn require_native_command_dispatch(sources: &ContractSources) -> CheckResult {
 fn require_core_commands(sources: &ContractSources) -> CheckResult {
     let core_commands = [
         "tovuk account show",
+        "tovuk api-key create",
+        "tovuk api-key list",
+        "tovuk api-key revoke",
         "tovuk pricing",
         "tovuk scraper list",
         "tovuk scraper health",

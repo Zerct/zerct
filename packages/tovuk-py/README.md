@@ -7,6 +7,9 @@ downloads the same binary used by npm, Homebrew, and Cargo.
 pipx install tovuk
 tovuk login --json
 tovuk account show --json
+tovuk api-key list --json
+tovuk api-key create "Production scraper" --json
+tovuk api-key revoke api_key_0123456789abcdef01234567 --json
 tovuk pricing --json
 tovuk scraper list --json
 tovuk scraper health --json
