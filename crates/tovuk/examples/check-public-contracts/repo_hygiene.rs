@@ -1,74 +1,19 @@
-use std::{collections::BTreeSet, path::Path, process::Command};
+use std::{collections::BTreeSet, path::Path};
 
 use crate::agent_guidance;
 use crate::helpers::{CheckResult, read_text};
+use crate::repo_hygiene_git::existing_tracked_files;
 use crate::repo_hygiene_paths::{
     is_forbidden_tracked_path, is_go_toolchain_scan_path, is_guarded_source_path,
     is_public_text_scan_path, path_has_extension,
 };
+use crate::repo_hygiene_required::{require_ignored_paths, require_tracked_paths};
 use crate::repo_hygiene_text::{
     line_contains_forbidden_go_toolchain, line_contains_retired_npm_runner_guidance,
 };
 use crate::script_contracts;
 
 const MAX_SOURCE_FILE_LINES: usize = 500;
-
-const REQUIRED_TRACKED_PATHS: &[&str] = &[
-    ".github/workflows/ci.yml",
-    ".github/workflows/docs-deploy.yml",
-    ".github/workflows/docs-score.yml",
-    ".github/workflows/docs-validate.yml",
-    ".github/workflows/publish-crates.yml",
-    ".github/workflows/publish-native-binaries.yml",
-    ".github/workflows/publish-npm.yml",
-    ".github/workflows/publish-pypi.yml",
-    ".gitignore",
-    ".github/actionlint.yaml",
-    ".typos.toml",
-    ".vacuum.yaml",
-    "AGENTS.md",
-    "README.md",
-    "crates/tovuk/Cargo.lock",
-    "crates/tovuk/Cargo.toml",
-    "crates/tovuk/examples/check-github-actions.rs",
-    "crates/tovuk/examples/check-prose-style.rs",
-    "crates/tovuk/examples/check-public-contracts/main.rs",
-    "crates/tovuk/examples/check-public-contracts/agent_guidance.rs",
-    "crates/tovuk/examples/check-public-contracts/repo_hygiene.rs",
-    "crates/tovuk/src/main.rs",
-    "docs/docs.json",
-    "docs/openapi.json",
-    "deny.toml",
-    "Formula/tovuk.rb",
-    "packages/tovuk/package.json",
-    "packages/tovuk-py/pyproject.toml",
-    "scripts/check-all.sh",
-    "scripts/check-github-actions.sh",
-    "scripts/check-openapi.sh",
-    "scripts/check-prose-style.sh",
-    "scripts/check-public-contracts.sh",
-    "scripts/check-shell-style.sh",
-    "scripts/check-toml-style.sh",
-    "scripts/check-typos.sh",
-    "scripts/lib/repo-root.sh",
-    "scripts/lib/tool-path.sh",
-    "skills/tovuk/SKILL.md",
-    "crates/tovuk/examples/check-public-contracts/script_contracts.rs",
-];
-
-const REQUIRED_IGNORED_PATHS: &[&str] = &[
-    ".env",
-    ".env.local",
-    ".npmrc",
-    ".pypirc",
-    ".tovuk/example",
-    "crates/tovuk/target/example",
-    "docs/.mintlify/example",
-    "packages/tovuk/.fallow/cache.bin",
-    "node_modules/example",
-    "packages/tovuk/dist/example",
-    "packages/tovuk/node_modules/example",
-];
 
 pub(crate) fn check() -> CheckResult {
     let tracked_files = existing_tracked_files()?;
@@ -88,32 +33,6 @@ pub(crate) fn check() -> CheckResult {
 
     println!("Checked public repository hygiene.");
     Ok(())
-}
-
-fn existing_tracked_files() -> CheckResult<Vec<String>> {
-    let deleted_files = git_lines(&["ls-files", "--deleted"])?
-        .into_iter()
-        .collect::<BTreeSet<_>>();
-    Ok(git_lines(&["ls-files"])?
-        .into_iter()
-        .filter(|path| !deleted_files.contains(path))
-        .collect())
-}
-
-fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {
-    let missing = REQUIRED_TRACKED_PATHS
-        .iter()
-        .copied()
-        .filter(|path| !tracked_set.contains(*path))
-        .collect::<Vec<_>>();
-    if missing.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "These required public repo files are not tracked:\n{}",
-            missing.join("\n")
-        ))
-    }
 }
 
 fn require_docs_deploy_observability_contract() -> CheckResult {
@@ -254,7 +173,8 @@ fn reject_forbidden_tracked_files(tracked_files: &[String]) -> CheckResult {
 }
 
 fn reject_untracked_files() -> CheckResult {
-    let untracked = git_lines(&["ls-files", "--others", "--exclude-standard"])?;
+    let untracked =
+        crate::repo_hygiene_git::git_lines(&["ls-files", "--others", "--exclude-standard"])?;
     if untracked.is_empty() {
         Ok(())
     } else {
@@ -263,40 +183,4 @@ fn reject_untracked_files() -> CheckResult {
             untracked.join("\n")
         ))
     }
-}
-
-fn require_ignored_paths() -> CheckResult {
-    for path in REQUIRED_IGNORED_PATHS {
-        git_status_success(&["check-ignore", "-q", path])?
-            .then_some(())
-            .ok_or_else(|| format!("{path} must be ignored"))?;
-    }
-    Ok(())
-}
-
-fn git_lines(args: &[&str]) -> CheckResult<Vec<String>> {
-    let output = Command::new("git")
-        .args(args)
-        .output()
-        .map_err(|error| format!("run git {}: {error}", args.join(" ")))?;
-    if !output.status.success() {
-        return Err(format!(
-            "git {} failed with status {}",
-            args.join(" "),
-            output.status
-        ));
-    }
-    Ok(String::from_utf8_lossy(output.stdout.as_slice())
-        .lines()
-        .filter(|line| !line.is_empty())
-        .map(str::to_owned)
-        .collect())
-}
-
-fn git_status_success(args: &[&str]) -> CheckResult<bool> {
-    Command::new("git")
-        .args(args)
-        .status()
-        .map(|status| status.success())
-        .map_err(|error| format!("run git {}: {error}", args.join(" ")))
 }
