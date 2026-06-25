@@ -22,8 +22,7 @@ fn support_create_body_uses_typed_payload_and_omits_empty_context() {
         support_create_body(&cli).ok(),
         Some(json!({
             "subject": "Request failed",
-            "details": "request_123 timed out",
-            "severity": "normal"
+            "details": "request_123 timed out"
         }))
     );
 }
