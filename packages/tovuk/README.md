@@ -22,6 +22,7 @@ tovuk usage --json
 tovuk billing checkout --json
 tovuk billing portal --json
 tovuk support list --limit 20 --json
+tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 ```
 
 The npm package exposes `bin/tovuk` and has no runtime JavaScript

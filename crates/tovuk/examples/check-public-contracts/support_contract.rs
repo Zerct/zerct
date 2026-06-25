@@ -35,6 +35,7 @@ fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
             "support ticket API route",
         )?;
         require_contains(source, "account API key", "support ticket API key guidance")?;
+        require_contains(source, "request-id", "support ticket request id context")?;
     }
     Ok(())
 }

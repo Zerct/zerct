@@ -54,7 +54,7 @@ tovuk usage --json
 tovuk billing checkout --json
 tovuk billing portal --json
 tovuk support list --limit 20 --json
-tovuk support create "Request failed" "The scraper request failed after retry. Request id: request_123. First error: upstream timeout." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --severity normal --json
+tovuk support create "Request failed" "The scraper request failed after retry. First error: upstream timeout." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --severity normal --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 

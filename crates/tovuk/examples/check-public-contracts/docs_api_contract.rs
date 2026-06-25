@@ -24,6 +24,11 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
         "account API key",
         "support API key docs",
     )?;
+    require_contains(
+        sources.support.as_str(),
+        "request_id",
+        "support API request id docs",
+    )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
     require_openapi_status_checks(sources.openapi.as_str())?;
@@ -31,6 +36,11 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
         sources.openapi.as_str(),
         "automated agents can open service tickets",
         "OpenAPI support agent create description",
+    )?;
+    require_contains(
+        sources.openapi.as_str(),
+        r#""request_id""#,
+        "OpenAPI support request id context",
     )?;
     require_contains(
         sources.openapi.as_str(),
