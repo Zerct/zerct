@@ -12,6 +12,8 @@ mod helpers_public_copy;
 mod mintlify;
 mod mintlify_fetch;
 mod npm;
+mod npm_package;
+mod npm_runtime;
 mod package_versions;
 mod repo_hygiene;
 mod repo_hygiene_git;
