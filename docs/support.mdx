@@ -34,3 +34,18 @@ Create body:
   "severity": "normal"
 }
 ```
+
+Agent API clients can create the same ticket directly:
+
+```sh
+curl -sS https://api.tovuk.com/v1/support/tickets \
+  -H "Authorization: Bearer $TOVUK_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subject": "Request failed",
+    "details": "Request id request_123 failed after retry.",
+    "failing_command": "tovuk request show request_123 --json",
+    "first_log_line": "upstream timeout",
+    "severity": "normal"
+  }'
+```

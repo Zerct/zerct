@@ -17,6 +17,9 @@ open support workflows.
 ```sh
 export TOVUK_OUTPUT=json
 tovuk account show
+tovuk api-key list
+tovuk api-key create "Production scraper"
+tovuk api-key revoke api_key_0123456789abcdef01234567
 tovuk pricing
 tovuk usage
 tovuk scraper list
@@ -29,6 +32,9 @@ tovuk request show request_123
 tovuk request results request_123 --limit 1000
 tovuk billing checkout
 tovuk billing portal
+tovuk support list --limit 20
+tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
+tovuk support resolve ticket_0123456789abcdef0123
 ```
 
 Scraper requests are public data only. Do not send cookies, passwords, account
