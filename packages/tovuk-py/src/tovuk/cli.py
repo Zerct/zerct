@@ -15,6 +15,18 @@ import urllib.request
 from . import __version__
 
 REPOSITORY = "https://github.com/tovuk/tovuk"
+NATIVE_TARGETS = {
+    ("darwin", "aarch64"): "aarch64-apple-darwin",
+    ("darwin", "arm64"): "aarch64-apple-darwin",
+    ("darwin", "amd64"): "x86_64-apple-darwin",
+    ("darwin", "x86_64"): "x86_64-apple-darwin",
+    ("linux", "aarch64"): "aarch64-unknown-linux-gnu",
+    ("linux", "arm64"): "aarch64-unknown-linux-gnu",
+    ("linux", "amd64"): "x86_64-unknown-linux-gnu",
+    ("linux", "x86_64"): "x86_64-unknown-linux-gnu",
+    ("windows", "amd64"): "x86_64-pc-windows-msvc",
+    ("windows", "x86_64"): "x86_64-pc-windows-msvc",
+}
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -86,16 +98,9 @@ def _cache_dir() -> pathlib.Path:
 def _native_target() -> str:
     system = platform.system().lower()
     machine = platform.machine().lower()
-    if system == "darwin" and machine in {"arm64", "aarch64"}:
-        return "aarch64-apple-darwin"
-    if system == "darwin" and machine in {"x86_64", "amd64"}:
-        return "x86_64-apple-darwin"
-    if system == "linux" and machine in {"arm64", "aarch64"}:
-        return "aarch64-unknown-linux-gnu"
-    if system == "linux" and machine in {"x86_64", "amd64"}:
-        return "x86_64-unknown-linux-gnu"
-    if system == "windows" and machine in {"x86_64", "amd64"}:
-        return "x86_64-pc-windows-msvc"
+    target = NATIVE_TARGETS.get((system, machine))
+    if target is not None:
+        return target
     raise RuntimeError(f"Unsupported Tovuk native target: {system}/{machine}")
 
 
