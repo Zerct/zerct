@@ -39,6 +39,7 @@ fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
         )?;
         require_contains(source, "account API key", "support ticket API key guidance")?;
         require_contains(source, "request-id", "support ticket request id context")?;
+        require_contains(source, "created_by", "support ticket creator attribution")?;
         require_contains(
             source,
             "account-scoped service",
@@ -52,12 +53,20 @@ fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
     let openapi = sources.support_openapi_source();
     for (snippet, label) in [
         (
-            "users and API agents can open service tickets",
+            "users and AI/API agents can open service tickets",
             "OpenAPI support ticket API-agent guidance",
         ),
         (
-            "Request body for creating an account-scoped service ticket from a user, CLI, or API agent.",
+            "Request body for creating an account-scoped service ticket from a user, CLI, or AI/API agent.",
             "OpenAPI support ticket create body guidance",
+        ),
+        (
+            "SupportTicketCreatedBy",
+            "OpenAPI support ticket creator attribution schema",
+        ),
+        (
+            "\"created_by\"",
+            "OpenAPI support ticket creator attribution field",
         ),
         (
             "createSupportTicket",
@@ -86,14 +95,16 @@ fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult 
 type RejectedSupportTerm = (String, &'static str);
 
 fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
-    let compliance_report_term = ascii_term(&[97, 98, 117, 115, 101]);
+    let compliance_term = ascii_term(&[97, 98, 117, 115, 101]);
+    let third_party_action = ascii_term(&[114, 101, 112, 111, 114, 116]);
+    let continuous_action = ascii_term(&[114, 101, 112, 111, 114, 116, 105, 110, 103]);
     let non_service_request =
         "support surfaces must describe service tickets, not non-service requests";
     let non_service_workflow =
         "support surfaces must describe service tickets, not non-service workflows";
     let account_to_tovuk = "support surfaces must stay account-to-Tovuk service-ticket wording";
     vec![
-        (compliance_report_term.clone(), non_service_request),
+        (compliance_term.clone(), non_service_request),
         ("compliance complaint".to_owned(), non_service_request),
         ("complaint".to_owned(), non_service_request),
         ("moderation".to_owned(), non_service_workflow),
@@ -102,14 +113,17 @@ fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
             "customer-to-customer".to_owned(),
             "support surfaces must describe service tickets between the account and Tovuk",
         ),
-        (["user-to-user", " ", "report"].concat(), account_to_tovuk),
         (
-            ["report", " ", "another", " ", "user"].concat(),
+            ["user-to-user", " ", third_party_action.as_str()].concat(),
             account_to_tovuk,
         ),
-        ("reporting".to_owned(), account_to_tovuk),
         (
-            ["report ", compliance_report_term.as_str()].concat(),
+            [third_party_action.as_str(), " another user"].concat(),
+            account_to_tovuk,
+        ),
+        (continuous_action, account_to_tovuk),
+        (
+            [third_party_action.as_str(), " ", compliance_term.as_str()].concat(),
             account_to_tovuk,
         ),
     ]

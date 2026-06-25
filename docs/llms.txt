@@ -44,10 +44,11 @@ tovuk support create "Request failed" "Request failed after retry." --request-id
 tovuk support resolve ticket_0123456789abcdef0123
 ```
 
-API agents may also call `POST /v1/support/tickets` with an account API key or
-session bearer token. Support tickets are account-scoped service tickets between
-the authenticated account and Tovuk for scraper, billing, API key, and account
-help.
+AI/API agents may also call `POST /v1/support/tickets` with an account API key
+or session bearer token. Support tickets are account-scoped service tickets
+between the authenticated account and Tovuk for scraper, billing, API key, and
+account help. Ticket responses include `created_by` so later agents can see
+whether the ticket came from an account session or account API key.
 
 Scraper requests are public data only. Do not send cookies, passwords, account
 tokens, private session data, private account content, private repository
