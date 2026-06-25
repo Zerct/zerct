@@ -2,6 +2,7 @@ use super::super::{
     args::CliOptions,
     errors::{Result, agent_error},
 };
+use super::common::joined_args;
 use super::generic::{print_authenticated_mutation, print_paged_authenticated};
 use reqwest::Method;
 use serde_json::{Value, json};
@@ -62,17 +63,11 @@ fn account_update_display_name(cli: &CliOptions, handle: &str) -> String {
     if !cli.account.display_name.is_empty() {
         return cli.account.display_name.clone();
     }
-    let positional_name = cli
-        .args
-        .iter()
-        .skip(2)
-        .cloned()
-        .collect::<Vec<_>>()
-        .join(" ");
-    if positional_name.trim().is_empty() {
+    let positional_name = joined_args(cli, 2);
+    if positional_name.is_empty() {
         handle.to_owned()
     } else {
-        positional_name.trim().to_owned()
+        positional_name
     }
 }
 
