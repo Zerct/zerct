@@ -12,6 +12,9 @@ Set `TOVUK_OUTPUT=json` for agent sessions.
 
 ```sh
 tovuk account show
+tovuk api-key list
+tovuk api-key create "Production scraper"
+tovuk api-key revoke api_key_0123456789abcdef01234567
 tovuk pricing
 tovuk usage
 tovuk scraper list

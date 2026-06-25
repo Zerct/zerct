@@ -1,7 +1,7 @@
 use super::{
     api_commands::{
-        account_command, billing_command, pricing, print_authenticated, request_command,
-        scraper_command, support_command,
+        account_command, api_key_command, billing_command, pricing, print_authenticated,
+        request_command, scraper_command, support_command,
     },
     args::parse_args,
     auth::login,
@@ -43,6 +43,7 @@ pub(crate) fn run() -> Result<ExitCode> {
         "scraper" => scraper_command(&cli),
         "request" => request_command(&cli),
         "account" => account_command(&cli),
+        "api-key" => api_key_command(&cli),
         "usage" => print_authenticated(&cli, "/v1/usage"),
         "billing" => billing_command(&cli),
         "support" => support_command(&cli),
