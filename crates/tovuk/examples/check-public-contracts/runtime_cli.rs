@@ -1,6 +1,9 @@
 use std::process::{Command, Output};
 
-use crate::helpers::CheckResult;
+use crate::{
+    helpers::CheckResult,
+    retired_contracts::{RETIRED_CLI_COMMANDS, RETIRED_HELP_COMMANDS},
+};
 
 const REQUIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk scraper list",
@@ -10,54 +13,6 @@ const REQUIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk pricing",
     "tovuk usage",
     "tovuk billing checkout",
-];
-
-const RETIRED_HELP_COMMANDS: &[&str] = &[
-    "tovuk deploy",
-    "tovuk service",
-    "tovuk storage",
-    "tovuk sqlite",
-    "tovuk queue",
-    "tovuk support",
-];
-
-const RETIRED_COMMANDS: &[&str] = &[
-    "new",
-    "check",
-    "dev",
-    "deploy",
-    "service",
-    "logs",
-    "sqlite",
-    "kv",
-    "queue",
-    "cron",
-    "state",
-    "binding",
-    "limits",
-    "env",
-    "secrets",
-    "domains",
-    "storage",
-    "nodes",
-    "init",
-    "install",
-    "preview",
-    "capabilities",
-    "me",
-    "activity",
-    "services",
-    "overview",
-    "deploys",
-    "builds",
-    "status",
-    "inspect",
-    "platform",
-    "caps",
-    "limit",
-    "files",
-    "media",
-    "support",
 ];
 
 #[derive(Clone, Copy)]
@@ -177,7 +132,7 @@ impl Invocation<'_> {
     }
 
     fn require_retired_command_failures(&self) -> CheckResult {
-        for retired_command in RETIRED_COMMANDS {
+        for retired_command in RETIRED_CLI_COMMANDS {
             self.require_failure_code(&[retired_command, "--json"], "unknown_command")?;
         }
         Ok(())

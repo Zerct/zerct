@@ -3,6 +3,9 @@ use std::path::Path;
 use crate::{
     docs_sources::{DocsSources, openapi_config_path, read_navigation_pages},
     helpers::{CheckResult, file_exists, reject_contains, require_contains},
+    retired_contracts::{
+        RETIRED_OPENAPI_CONTRACTS, RETIRED_PUBLIC_COMMANDS, RETIRED_PUBLIC_DOCS_WORDING,
+    },
 };
 
 pub(crate) fn check() -> CheckResult {
@@ -234,30 +237,7 @@ fn require_openapi_status_checks(openapi: &str) -> CheckResult {
 }
 
 fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResult {
-    for retired in [
-        r#""/v1/apps""#,
-        r#""/v1/deploy""#,
-        r#""/v1/deploys""#,
-        r#""/v1/services""#,
-        r#""/v1/builds""#,
-        r#""/v1/capabilities""#,
-        r#""/v1/usage/caps"#,
-        r#""/v1/support/tickets""#,
-        r#""/v1/support/tickets/{ticket_id}/resolve""#,
-        "SupportTicket",
-        "support ticket",
-        "tovuk support",
-        "DeployRequest",
-        "DeployResponse",
-        "ServicesResponse",
-        "ServiceOverviewResponse",
-        "StorageObjectsResponse",
-        "SqliteQueryResponse",
-        "QueueMessageSendRequest",
-        "CronTrigger",
-        "UsageCap",
-        "TovukConfig",
-    ] {
+    for retired in RETIRED_OPENAPI_CONTRACTS {
         reject_contains(
             sources.openapi.as_str(),
             retired,
@@ -265,22 +245,11 @@ fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResult {
         )?;
     }
 
-    for retired in [
-        "tovuk deploy",
-        "tovuk service",
-        "tovuk storage",
-        "tovuk sqlite",
-        "tovuk kv",
-        "tovuk queue",
-        "tovuk cron",
-        "tovuk secrets",
-        "tovuk domains",
-        "tovuk limits",
-        "tovuk nodes",
-        "tovuk.toml",
-        "full-stack",
-        "static frontend",
-    ] {
+    for retired in RETIRED_PUBLIC_COMMANDS
+        .iter()
+        .copied()
+        .chain(RETIRED_PUBLIC_DOCS_WORDING.iter().copied())
+    {
         reject_contains(
             sources.public_copy.as_str(),
             retired,

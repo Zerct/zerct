@@ -3,6 +3,7 @@ use crate::{
         CheckResult, ascii_term, read_package_json, read_sorted_texts_recursive, read_text,
         reject_contains, require_contains, require_equal,
     },
+    retired_contracts::RETIRED_PUBLIC_COMMANDS,
     types::PackageJson,
 };
 
@@ -31,7 +32,6 @@ pub(crate) fn check() -> CheckResult {
     let sources = ContractSources::load()?;
     require_native_command_dispatch(&sources)?;
     require_core_commands(&sources)?;
-    reject_support_commands(&sources)?;
     require_install_guides(&sources)?;
     require_package_metadata(&sources)?;
     reject_retired_packaging(&sources)?;
@@ -122,25 +122,6 @@ fn require_core_commands(sources: &ContractSources) -> CheckResult {
                 source,
                 snippet,
                 format!("scraper-only public command {snippet}").as_str(),
-            )?;
-        }
-    }
-    Ok(())
-}
-
-fn reject_support_commands(sources: &ContractSources) -> CheckResult {
-    for source in
-        std::iter::once(sources.cargo_cli.as_str()).chain(sources.public_sources().iter().copied())
-    {
-        for snippet in [
-            "tovuk support create",
-            "tovuk support list",
-            "tovuk support resolve",
-        ] {
-            reject_contains(
-                source,
-                snippet,
-                format!("retired support command {snippet}").as_str(),
             )?;
         }
     }
@@ -249,26 +230,6 @@ fn reject_retired_packaging(sources: &ContractSources) -> CheckResult {
 }
 
 fn reject_retired_commands(sources: &ContractSources) -> CheckResult {
-    let retired_commands = [
-        "tovuk new",
-        "tovuk check",
-        "tovuk dev",
-        "tovuk deploy",
-        "tovuk service",
-        "tovuk logs",
-        "tovuk sqlite",
-        "tovuk kv",
-        "tovuk queue",
-        "tovuk cron",
-        "tovuk state",
-        "tovuk binding",
-        "tovuk limits",
-        "tovuk env",
-        "tovuk secrets",
-        "tovuk domains",
-        "tovuk storage",
-        "tovuk nodes",
-    ];
     for source in [
         sources.cargo_cli.as_str(),
         sources.root_readme.as_str(),
@@ -283,7 +244,7 @@ fn reject_retired_commands(sources: &ContractSources) -> CheckResult {
         sources.docs_skill.as_str(),
         sources.packaged_skill.as_str(),
     ] {
-        for command in retired_commands {
+        for command in RETIRED_PUBLIC_COMMANDS {
             reject_contains(
                 source,
                 command,

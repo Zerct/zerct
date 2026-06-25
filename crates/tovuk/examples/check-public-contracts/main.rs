@@ -9,6 +9,7 @@ mod mintlify;
 mod npm;
 mod package_versions;
 mod repo_hygiene;
+mod retired_contracts;
 mod runtime_cli;
 mod script_contracts;
 mod types;
