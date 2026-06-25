@@ -15,7 +15,8 @@ use serde_json::Value;
 struct SupportTicketInput {
     subject: String,
     details: String,
-    severity: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    severity: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     request_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -101,8 +102,8 @@ fn support_details(cli: &CliOptions) -> String {
     joined_args(cli, 2)
 }
 
-fn support_severity(cli: &CliOptions) -> String {
-    optional_trimmed_value(cli.severity.as_str()).unwrap_or_else(|| "normal".to_owned())
+fn support_severity(cli: &CliOptions) -> Option<String> {
+    optional_trimmed_value(cli.severity.as_str())
 }
 
 #[cfg(test)]
