@@ -57,36 +57,27 @@ fn apply_value_flag(
     argv: &[String],
     index: usize,
 ) -> Result<usize> {
-    match name {
-        "--api" | "--limit" | "--cursor" | "--token" | "--output" => {
-            apply_common_value_flag(cli, name, inline, argv, index)
-        }
-        "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
-        "--failing-command" | "--first-log-line" | "--request-id" | "--scraper-id"
-        | "--severity" => apply_support_value_flag(cli, name, inline, argv, index),
-        _ => invalid_value_flag_dispatch(cli, name),
+    if name == "--output" {
+        return apply_output_value_flag(cli, name, inline, argv, index);
     }
+    let json_output = cli.output.json;
+    let Some(target) = string_flag_target(cli, name) else {
+        return invalid_value_flag_dispatch(cli, name);
+    };
+    set_string_flag(target, name, inline, argv, index, json_output)
 }
 
-fn apply_common_value_flag(
+fn apply_output_value_flag(
     cli: &mut CliOptions,
     name: &str,
     inline: Option<String>,
     argv: &[String],
     index: usize,
 ) -> Result<usize> {
-    match name {
-        "--api" => set_string_flag(&mut cli.api_url, name, inline, argv, index, cli.output.json),
-        "--limit" => set_string_flag(&mut cli.limit, name, inline, argv, index, cli.output.json),
-        "--cursor" => set_string_flag(&mut cli.cursor, name, inline, argv, index, cli.output.json),
-        "--token" => set_string_flag(&mut cli.token, name, inline, argv, index, cli.output.json),
-        "--output" => {
-            let value = super::values::flag_value(name, inline, argv, index, cli.output.json)?;
-            set_output_format(cli, &value, name, cli.output.json)?;
-            Ok(super::values::flag_consumed(argv, index))
-        }
-        _ => invalid_value_flag_dispatch(cli, name),
-    }
+    let json_output = cli.output.json;
+    let value = super::values::flag_value(name, inline, argv, index, json_output)?;
+    set_output_format(cli, value.as_str(), name, json_output)?;
+    Ok(super::values::flag_consumed(argv, index))
 }
 
 pub(super) fn set_output_format(
@@ -113,86 +104,6 @@ pub(super) fn set_output_format(
     ))
 }
 
-fn apply_account_value_flag(
-    cli: &mut CliOptions,
-    name: &str,
-    inline: Option<String>,
-    argv: &[String],
-    index: usize,
-) -> Result<usize> {
-    match name {
-        "--handle" => set_string_flag(
-            &mut cli.account.handle,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--display-name" => set_string_flag(
-            &mut cli.account.display_name,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        _ => invalid_value_flag_dispatch(cli, name),
-    }
-}
-
-fn apply_support_value_flag(
-    cli: &mut CliOptions,
-    name: &str,
-    inline: Option<String>,
-    argv: &[String],
-    index: usize,
-) -> Result<usize> {
-    match name {
-        "--failing-command" => set_string_flag(
-            &mut cli.failing_command,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--first-log-line" => set_string_flag(
-            &mut cli.first_log_line,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--request-id" => set_string_flag(
-            &mut cli.request_id,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--scraper-id" => set_string_flag(
-            &mut cli.scraper_id,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        "--severity" => set_string_flag(
-            &mut cli.severity,
-            name,
-            inline,
-            argv,
-            index,
-            cli.output.json,
-        ),
-        _ => invalid_value_flag_dispatch(cli, name),
-    }
-}
-
 fn invalid_value_flag_dispatch(cli: &CliOptions, name: &str) -> Result<usize> {
     Err(agent_error(
         "unknown_argument",
@@ -200,4 +111,21 @@ fn invalid_value_flag_dispatch(cli: &CliOptions, name: &str) -> Result<usize> {
         "Run `tovuk --help`, remove or correct the unsupported option, then retry.",
         cli.output.json,
     ))
+}
+
+fn string_flag_target<'a>(cli: &'a mut CliOptions, name: &str) -> Option<&'a mut String> {
+    match name {
+        "--api" => Some(&mut cli.api_url),
+        "--limit" => Some(&mut cli.limit),
+        "--cursor" => Some(&mut cli.cursor),
+        "--token" => Some(&mut cli.token),
+        "--handle" => Some(&mut cli.account.handle),
+        "--display-name" => Some(&mut cli.account.display_name),
+        "--failing-command" => Some(&mut cli.failing_command),
+        "--first-log-line" => Some(&mut cli.first_log_line),
+        "--request-id" => Some(&mut cli.request_id),
+        "--scraper-id" => Some(&mut cli.scraper_id),
+        "--severity" => Some(&mut cli.severity),
+        _ => None,
+    }
 }
