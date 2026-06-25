@@ -49,34 +49,20 @@ pub(crate) fn reject_lines(
     message: &str,
     findings: &mut Vec<String>,
 ) {
-    for (line_index, line) in workflow.contents.lines().enumerate() {
-        if line.contains(needle) {
-            findings.push(format!(
-                "{}:{}: {message}",
-                workflow.path.display(),
-                line_index + 1
-            ));
-        }
-    }
+    reject_matching_lines(workflow, message, findings, |line| line.contains(needle));
 }
 
 pub(crate) fn reject_useblacksmith(workflow: &Workflow, findings: &mut Vec<String>) {
-    for (line_index, line) in workflow.contents.lines().enumerate() {
-        if line.contains("useblacksmith/cache")
-            || line.contains("useblacksmith/setup-go")
-            || line.contains("useblacksmith/setup-node")
-            || line.contains("useblacksmith/setup-python")
-            || line.contains("useblacksmith/setup-ruby")
-            || line.contains("useblacksmith/setup-java")
-            || line.contains("useblacksmith/rust-cache")
-        {
-            findings.push(format!(
-                "{}:{}: Blacksmith cache forks are forbidden; use official cache-aware actions on GitHub-hosted runners",
-                workflow.path.display(),
-                line_index + 1
-            ));
-        }
-    }
+    reject_matching_lines(
+        workflow,
+        "Blacksmith cache forks are forbidden; use official cache-aware actions on GitHub-hosted runners",
+        findings,
+        |line| {
+            BLACKSMITH_ACTIONS
+                .iter()
+                .any(|needle| line.contains(needle))
+        },
+    );
 }
 
 pub(crate) fn reject_retired_cache_action(workflow: &Workflow, findings: &mut Vec<String>) {
@@ -102,20 +88,18 @@ pub(crate) fn reject_retired_cache_action(workflow: &Workflow, findings: &mut Ve
 }
 
 pub(crate) fn reject_javascript_lint_tools(workflow: &Workflow, findings: &mut Vec<String>) {
-    for (line_index, line) in workflow.contents.lines().enumerate() {
-        if line
+    reject_matching_lines(
+        workflow,
+        "JavaScript linters and typecheckers are forbidden in CI; use Rust based checks",
+        findings,
+        |line| {
+            line
             .split(|character: char| {
                 !matches!(character, 'A'..='Z' | 'a'..='z' | '0'..='9' | '_' | '-')
             })
             .any(|token| matches!(token, "eslint" | "prettier" | "tsc"))
-        {
-            findings.push(format!(
-                "{}:{}: JavaScript linters and typecheckers are forbidden in CI; use Rust based checks",
-                workflow.path.display(),
-                line_index + 1
-            ));
-        }
-    }
+        },
+    );
 }
 
 pub(crate) fn require_contains(
@@ -146,4 +130,31 @@ fn is_workflow_file(path: &Path) -> bool {
         path.extension().and_then(|extension| extension.to_str()),
         Some("yml" | "yaml")
     )
+}
+
+const BLACKSMITH_ACTIONS: &[&str] = &[
+    "useblacksmith/cache",
+    "useblacksmith/setup-go",
+    "useblacksmith/setup-node",
+    "useblacksmith/setup-python",
+    "useblacksmith/setup-ruby",
+    "useblacksmith/setup-java",
+    "useblacksmith/rust-cache",
+];
+
+fn reject_matching_lines(
+    workflow: &Workflow,
+    message: &str,
+    findings: &mut Vec<String>,
+    line_matches: impl Fn(&str) -> bool,
+) {
+    for (line_index, line) in workflow.contents.lines().enumerate() {
+        if line_matches(line) {
+            findings.push(format!(
+                "{}:{}: {message}",
+                workflow.path.display(),
+                line_index + 1
+            ));
+        }
+    }
 }
