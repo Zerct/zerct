@@ -33,9 +33,10 @@ thread.
 - Billing is per successful stored scraper result. Keep pricing exact and
   synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
   contract checks.
-- Support escalation must be possible through
-  `tovuk support create "Subject" "Details" --json` with command output,
-  request id when available, and the first actionable error line.
+- Support escalation must be possible through both
+  `tovuk support create "Subject" "Details" --json` and
+  `POST /v1/support/tickets` with command output, request id when available,
+  and the first actionable error line.
 
 ## Rust-Native Boundary
 

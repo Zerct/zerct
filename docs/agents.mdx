@@ -74,3 +74,7 @@ tovuk support list --limit 20
 tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
 tovuk support resolve ticket_0123456789abcdef0123
 ```
+
+Agents can also call `POST /v1/support/tickets` directly with an account API key
+or session bearer token. Support tickets are account-scoped service requests
+with Tovuk, not user-to-user reports.

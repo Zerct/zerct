@@ -795,7 +795,7 @@
           "Accounts"
         ],
         "summary": "List support tickets",
-        "description": "Lists recent support tickets for the authenticated account.",
+        "description": "Lists recent account-scoped support tickets for the authenticated account or account API key.",
         "operationId": "listSupportTickets",
         "parameters": [
           {
@@ -836,7 +836,7 @@
           "Accounts"
         ],
         "summary": "Create support ticket",
-        "description": "Creates a rate-limited support ticket with scraper request evidence.",
+        "description": "Creates a rate-limited account-scoped support ticket with scraper request evidence. Account API keys are accepted so automated agents can open service tickets.",
         "operationId": "createSupportTicket",
         "requestBody": {
           "description": "Create support ticket body.",
@@ -886,7 +886,7 @@
           "Accounts"
         ],
         "summary": "Resolve support ticket",
-        "description": "Marks a support ticket resolved for the authenticated account.",
+        "description": "Marks an account-scoped support ticket resolved for the authenticated account or account API key.",
         "operationId": "resolveSupportTicket",
         "parameters": [
           {
@@ -3645,7 +3645,7 @@
       },
       "SupportTicketCreateRequest": {
         "type": "object",
-        "description": "Request body for creating a support ticket.",
+        "description": "Request body for creating an account-scoped support ticket from a user, CLI, or API agent.",
         "additionalProperties": false,
         "required": [
           "subject",

@@ -30,6 +30,9 @@ dependencies. Set `TOVUK_NATIVE_BINARY=/path/to/tovuk` to test a local binary.
 The CLI does not deploy websites, backends, databases, workers, storage buckets,
 queues, cron jobs, custom domains, secrets, or other customer infrastructure.
 
+Agents may also open account-scoped service tickets through
+`POST /v1/support/tickets` with an account API key or session bearer token.
+
 Scraper requests are public data only. Do not send cookies, passwords, account
 tokens, private session data, private account content, private repository
 credentials, or proxy URLs.
