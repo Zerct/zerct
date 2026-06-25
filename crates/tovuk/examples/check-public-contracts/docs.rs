@@ -1,8 +1,8 @@
-use std::path::Path;
-
 use crate::{
+    docs_api_contract::require_support_pricing_and_openapi,
+    docs_navigation::{require_navigation_contract, require_navigation_pages_exist},
     docs_sources::{DocsSources, openapi_config_path, read_navigation_pages},
-    helpers::{CheckResult, file_exists, reject_contains, require_contains},
+    helpers::{CheckResult, reject_contains, require_contains},
     retired_contracts::{
         RETIRED_OPENAPI_CONTRACTS, RETIRED_PUBLIC_COMMANDS, RETIRED_PUBLIC_DOCS_WORDING,
     },
@@ -23,73 +23,6 @@ pub(crate) fn check() -> CheckResult {
 pub(crate) fn print_openapi_path() -> CheckResult {
     let path = openapi_config_path()?;
     println!("{}", path.display());
-    Ok(())
-}
-
-fn require_navigation_pages_exist(pages: &[String]) -> CheckResult {
-    let mut missing_pages = Vec::new();
-    for page in pages {
-        if page.starts_with("http://") || page.starts_with("https://") {
-            continue;
-        }
-        let page_path = Path::new("docs").join(format!("{page}.mdx"));
-        if !file_exists(page_path.as_path()) {
-            missing_pages.push(page_path.display().to_string());
-        }
-    }
-    if missing_pages.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "Missing Mintlify pages:\n{}",
-            missing_pages.join("\n")
-        ))
-    }
-}
-
-fn require_navigation_contract(sources: &DocsSources) -> CheckResult {
-    for page in [
-        "index",
-        "quickstart",
-        "scrapers",
-        "agents",
-        "pricing",
-        "status",
-        "support",
-        "changelog",
-        "reference/packages",
-    ] {
-        require_contains(
-            sources.nav_pages.as_str(),
-            page,
-            format!("Mintlify scraper-only navigation {page}").as_str(),
-        )?;
-    }
-    for page in [
-        "deploy",
-        "templates",
-        "production-readiness",
-        "reference/project-contract",
-        "reference/workers",
-        "reference/resources",
-        "reference/sqlite",
-        "reference/state",
-        "reference/kv",
-        "reference/secrets",
-        "reference/storage",
-        "reference/queues",
-        "reference/cron",
-        "reference/bindings",
-        "reference/domains",
-        "reference/logs-builds",
-        "reference/usage-caps",
-    ] {
-        reject_contains(
-            sources.nav_pages.as_str(),
-            page,
-            format!("retired Mintlify navigation {page}").as_str(),
-        )?;
-    }
     Ok(())
 }
 
@@ -125,138 +58,6 @@ fn require_scraper_examples(sources: &DocsSources) -> CheckResult {
         )?;
     }
     Ok(())
-}
-
-fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
-    require_contains(
-        sources.status.as_str(),
-        "tovuk scraper health --json",
-        "status scraper health docs",
-    )?;
-    require_contains(
-        sources.support.as_str(),
-        "tovuk support create",
-        "support create docs",
-    )?;
-    require_contains(
-        sources.support.as_str(),
-        "POST /v1/support/tickets",
-        "support API create docs",
-    )?;
-    require_contains(
-        sources.support.as_str(),
-        "account API key",
-        "support API key docs",
-    )?;
-    require_pricing_contract(sources.pricing.as_str())?;
-    require_openapi_paths(sources.openapi.as_str())?;
-    require_openapi_status_checks(sources.openapi.as_str())?;
-    require_contains(
-        sources.openapi.as_str(),
-        "automated agents can open service tickets",
-        "OpenAPI support agent create description",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""linkedinPostSearch""#,
-        "OpenAPI LinkedIn post search example",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""author_company_urns""#,
-        "OpenAPI LinkedIn author company filter",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""linkedinCompanyEmployees""#,
-        "OpenAPI LinkedIn company employees example",
-    )
-}
-
-fn require_pricing_contract(pricing: &str) -> CheckResult {
-    for (snippet, label) in [
-        (
-            "There is no free scraper tier",
-            "pricing paid-only scraper docs",
-        ),
-        ("| Pro | `$20/month` | `$20`", "pricing Pro balance docs"),
-        (
-            "| Business | `$100/month` | `$125`",
-            "pricing Business balance docs",
-        ),
-        (
-            "| Scale | `$200/month` | `$300`",
-            "pricing Scale balance docs",
-        ),
-        (
-            "deducts from that balance for each successful stored",
-            "pricing balance debit docs",
-        ),
-        (
-            "`priceEvents[].usdMicros`",
-            "pricing scraper event price docs",
-        ),
-        (
-            "| Google Maps Scraper | place | `$2.10` |",
-            "pricing Google Maps per-result docs",
-        ),
-        (
-            "| TikTok Scraper | record | `$1.70` |",
-            "pricing TikTok per-result docs",
-        ),
-        (
-            "| Instagram Scraper | record | `$0.80` |",
-            "pricing Instagram per-result docs",
-        ),
-    ] {
-        require_contains(pricing, snippet, label)?;
-    }
-    Ok(())
-}
-
-fn require_openapi_paths(openapi: &str) -> CheckResult {
-    for path in [
-        r#""/health""#,
-        r#""/healthz""#,
-        r#""/v1/status""#,
-        r#""/v1/login/device""#,
-        r#""/v1/login/device/{device_code}""#,
-        r#""/v1/account""#,
-        r#""/v1/account/activity""#,
-        r#""/v1/scrapers""#,
-        r#""/v1/scrapers/health""#,
-        r#""/v1/scrapers/{scraper}""#,
-        r#""/v1/requests""#,
-        r#""/v1/requests/{request_id}""#,
-        r#""/v1/requests/{request_id}/cancel""#,
-        r#""/v1/requests/{request_id}/results""#,
-        r#""/v1/usage""#,
-        r#""/v1/billing/checkout""#,
-        r#""/v1/billing/portal""#,
-        r#""/v1/support/tickets""#,
-        r#""/v1/support/tickets/{ticket_id}/resolve""#,
-    ] {
-        require_contains(
-            openapi,
-            path,
-            format!("OpenAPI scraper-only path {path}").as_str(),
-        )?;
-    }
-    Ok(())
-}
-
-fn require_openapi_status_checks(openapi: &str) -> CheckResult {
-    require_contains(
-        openapi,
-        r#""name": "control_plane_sqlite""#,
-        "OpenAPI status control-plane SQLite check",
-    )?;
-    require_contains(openapi, r#""name": "redis""#, "OpenAPI status Redis check")?;
-    reject_contains(
-        openapi,
-        r#""name": "database""#,
-        "OpenAPI status must not expose generic database product wording",
-    )
 }
 
 fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResult {

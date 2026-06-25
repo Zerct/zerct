@@ -3,6 +3,8 @@
 mod agent_guidance;
 mod cli_contract;
 mod docs;
+mod docs_api_contract;
+mod docs_navigation;
 mod docs_sources;
 mod helpers;
 mod helpers_io;
