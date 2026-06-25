@@ -1,6 +1,6 @@
 use crate::helpers::{
     CheckResult, extract_cargo_lock_package_version, extract_line_quoted_value,
-    extract_rust_const_str, read_package_json, read_text, require_contains,
+    extract_rust_const_str, read_package_json, read_text, require_contains, require_contains_all,
 };
 
 pub(crate) fn check() -> CheckResult {
@@ -47,15 +47,18 @@ pub(crate) fn check() -> CheckResult {
         }
     }
 
-    require_contains(
+    require_contains_all(
         python_cli.as_str(),
-        "releases/download/v{__version__}",
-        "Python native binary downloader release path",
-    )?;
-    require_contains(
-        python_cli.as_str(),
-        "tovuk-{__version__}-",
-        "Python native binary downloader asset path",
+        &[
+            (
+                "releases/download/v{__version__}",
+                "Python native binary downloader release path",
+            ),
+            (
+                "tovuk-{__version__}-",
+                "Python native binary downloader asset path",
+            ),
+        ],
     )?;
     require_contains(
         formula.as_str(),

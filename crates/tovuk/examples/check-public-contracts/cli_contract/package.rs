@@ -1,4 +1,6 @@
-use crate::helpers::{CheckResult, ascii_term, reject_contains, require_contains, require_equal};
+use crate::helpers::{
+    CheckResult, ascii_term, reject_contains, require_contains, require_contains_all, require_equal,
+};
 
 use super::ContractSources;
 
@@ -13,22 +15,32 @@ pub(super) fn require_install_guides(sources: &ContractSources) -> CheckResult {
         sources.docs_packages.as_str(),
         sources.docs_llms.as_str(),
     ] {
-        require_contains(
+        require_contains_all(
             source,
-            "brew tap tovuk/tovuk https://github.com/tovuk/tovuk",
-            "main-repo Homebrew tap command",
+            &[
+                (
+                    "brew tap tovuk/tovuk https://github.com/tovuk/tovuk",
+                    "main-repo Homebrew tap command",
+                ),
+                ("brew install tovuk", "simple Homebrew install command"),
+                ("public data only", "public-data boundary"),
+            ],
         )?;
-        require_contains(
-            source,
-            "brew install tovuk",
-            "simple Homebrew install command",
-        )?;
-        require_contains(source, "public data only", "public-data boundary")?;
     }
     Ok(())
 }
 
 pub(super) fn require_package_metadata(sources: &ContractSources) -> CheckResult {
+    require_contains_all(
+        sources.homebrew_formula.as_str(),
+        &[
+            (
+                r#"depends_on "rust" => :build"#,
+                "Homebrew builds native Rust CLI",
+            ),
+            ("crates/tovuk", "Homebrew installs Rust crate path"),
+        ],
+    )?;
     require_contains(
         sources.npm_install.as_str(),
         "TOVUK_NATIVE_BINARY",
@@ -38,16 +50,6 @@ pub(super) fn require_package_metadata(sources: &ContractSources) -> CheckResult
         sources.python_cli.as_str(),
         "TOVUK_NATIVE_BINARY",
         "PyPI local native binary override",
-    )?;
-    require_contains(
-        sources.homebrew_formula.as_str(),
-        r#"depends_on "rust" => :build"#,
-        "Homebrew builds native Rust CLI",
-    )?;
-    require_contains(
-        sources.homebrew_formula.as_str(),
-        "crates/tovuk",
-        "Homebrew installs Rust crate path",
     )?;
     require_equal(
         sources.npm_package.description.as_str(),

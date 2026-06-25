@@ -5,7 +5,8 @@ use serde_json::Value;
 
 use crate::helpers::{
     CheckResult, env_int, has_markdown_link, number_field, read_json,
-    reject_forbidden_public_copy_terms, require_contains, retired_public_names,
+    reject_forbidden_public_copy_terms, require_contains, require_contains_all,
+    retired_public_names,
 };
 use crate::mintlify_fetch::{fetch_text, normalize_target_url, retry_delay};
 
@@ -169,9 +170,14 @@ fn check_mcp_discovery(
         retries,
         retry_delay,
     )?;
-    require_contains(mcp_discovery.as_str(), r#""url""#, "MCP discovery")?;
-    require_contains(mcp_discovery.as_str(), ":", "MCP discovery")?;
-    require_contains(mcp_discovery.as_str(), "/mcp", "MCP discovery")
+    require_contains_all(
+        mcp_discovery.as_str(),
+        &[
+            (r#""url""#, "MCP discovery"),
+            (":", "MCP discovery"),
+            ("/mcp", "MCP discovery"),
+        ],
+    )
 }
 
 fn reject_retired_public_names(label: &str, source: &str) -> CheckResult {

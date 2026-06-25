@@ -121,12 +121,16 @@ fn require_openapi_paths(openapi: &str) -> CheckResult {
 }
 
 fn require_openapi_status_checks(openapi: &str) -> CheckResult {
-    require_contains(
+    require_contains_all(
         openapi,
-        r#""name": "control_plane_sqlite""#,
-        "OpenAPI status control-plane SQLite check",
+        &[
+            (
+                r#""name": "control_plane_sqlite""#,
+                "OpenAPI status control-plane SQLite check",
+            ),
+            (r#""name": "redis""#, "OpenAPI status Redis check"),
+        ],
     )?;
-    require_contains(openapi, r#""name": "redis""#, "OpenAPI status Redis check")?;
     reject_contains(
         openapi,
         r#""name": "database""#,
