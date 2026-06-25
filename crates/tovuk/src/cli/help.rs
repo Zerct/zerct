@@ -21,7 +21,7 @@ Usage:
   tovuk usage [--api <url>] [--json]
   tovuk billing [checkout|portal] [reason] [--api <url>] [--json]
   tovuk support list [--limit <n>] [--api <url>] [--json]
-  tovuk support create "Subject" "Details" [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
+  tovuk support create "Subject" "Details" [--request-id <request_id>] [--scraper-id <scraper>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
   tovuk support resolve <ticket_id> [--api <url>] [--json]
 
 Agent contract:

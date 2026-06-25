@@ -20,7 +20,7 @@ tovuk request results request_123 --limit 1000 --json
 tovuk usage --json
 tovuk billing checkout --json
 tovuk billing portal --json
-tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
+tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 ```
 
 The CLI does not deploy websites, backends, databases, workers, storage buckets,

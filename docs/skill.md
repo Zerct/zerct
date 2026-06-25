@@ -33,7 +33,7 @@ tovuk request results request_123 --limit 1000
 tovuk billing checkout
 tovuk billing portal
 tovuk support list --limit 20
-tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
+tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
 tovuk support resolve ticket_0123456789abcdef0123
 ```
 

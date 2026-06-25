@@ -851,7 +851,9 @@
                   "summary": "Create support ticket body.",
                   "value": {
                     "subject": "Request failed",
-                    "details": "Request id request_123 failed after retry.",
+                    "details": "Request failed after retry.",
+                    "request_id": "request_123",
+                    "scraper_id": "tiktok",
                     "failing_command": "tovuk request show request_123 --json",
                     "first_log_line": "upstream timeout",
                     "severity": "normal"
@@ -2056,9 +2058,13 @@
               "example": {
                 "summary": "Support tickets loaded.",
                 "value": {
-                  "ok": true,
                   "tickets": [],
-                  "nextCursor": null
+                  "rate_limit": {
+                    "limit_per_hour": 10,
+                    "remaining_hour": 9,
+                    "limit_per_day": 10,
+                    "remaining_day": 9
+                  }
                 }
               }
             }
@@ -2108,15 +2114,27 @@
               "example": {
                 "summary": "Support ticket created.",
                 "value": {
-                  "ok": true,
                   "ticket": {
                     "id": "ticket_123",
                     "subject": "Request failed",
+                    "details": "Request failed after retry.",
+                    "request_id": "request_123",
+                    "scraper_id": "tiktok",
+                    "failing_command": "tovuk request show request_123 --json",
+                    "first_log_line": "upstream timeout",
                     "status": "open",
                     "severity": "normal",
-                    "createdAt": "2026-06-23T12:00:00Z"
+                    "agent_instruction": "Continue with tovuk request diagnostics.",
+                    "created_at": "2026-06-23T12:00:00Z",
+                    "updated_at": "2026-06-23T12:00:00Z"
                   },
-                  "agent_instruction": "Track this ticket with tovuk support list --json."
+                  "rate_limit": {
+                    "limit_per_hour": 10,
+                    "remaining_hour": 8,
+                    "limit_per_day": 10,
+                    "remaining_day": 8
+                  },
+                  "next_command": "tovuk support list --json"
                 }
               }
             }
@@ -2160,21 +2178,24 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/SupportTicketCreateResponse"
+              "$ref": "#/components/schemas/SupportTicket"
             },
             "examples": {
               "example": {
                 "summary": "Support ticket resolved.",
                 "value": {
-                  "ok": true,
-                  "ticket": {
-                    "id": "ticket_123",
-                    "subject": "Request failed",
-                    "status": "resolved",
-                    "severity": "normal",
-                    "createdAt": "2026-06-23T12:00:00Z"
-                  },
-                  "agent_instruction": "Ticket resolved."
+                  "id": "ticket_123",
+                  "subject": "Request failed",
+                  "details": "Request failed after retry.",
+                  "request_id": "request_123",
+                  "scraper_id": "tiktok",
+                  "failing_command": "tovuk request show request_123 --json",
+                  "first_log_line": "upstream timeout",
+                  "status": "resolved",
+                  "severity": "normal",
+                  "agent_instruction": "Ticket resolved.",
+                  "created_at": "2026-06-23T12:00:00Z",
+                  "updated_at": "2026-06-23T12:10:00Z"
                 }
               }
             }
@@ -3597,6 +3618,7 @@
         "type": "string",
         "description": "Support ticket status.",
         "enum": [
+          "in_progress",
           "open",
           "resolved"
         ],
@@ -3608,20 +3630,68 @@
         "required": [
           "id",
           "subject",
+          "details",
           "status",
           "severity",
-          "createdAt"
+          "agent_instruction",
+          "created_at",
+          "updated_at"
         ],
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "id_123"
+            "pattern": "^ticket_[a-f0-9]{20}$",
+            "example": "ticket_0123456789abcdef0123"
           },
           "subject": {
             "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "Request failed"
+          },
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "Request failed after retry."
+          },
+          "request_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "pattern": "^[a-z0-9_]{1,64}$",
+            "example": "request_123"
+          },
+          "scraper_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "example": "tiktok"
+          },
+          "failing_command": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "tovuk request show request_123 --json"
+          },
+          "first_log_line": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "upstream timeout"
           },
           "status": {
             "$ref": "#/components/schemas/SupportTicketStatus"
@@ -3629,18 +3699,35 @@
           "severity": {
             "$ref": "#/components/schemas/SupportTicketSeverity"
           },
-          "createdAt": {
+          "agent_instruction": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "Continue with tovuk request diagnostics."
+          },
+          "created_at": {
             "type": "string",
             "format": "date-time",
             "example": "2026-06-23T12:00:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T12:10:00Z"
           }
         },
         "example": {
-          "id": "id_123",
-          "subject": "example",
+          "id": "ticket_0123456789abcdef0123",
+          "subject": "Request failed",
+          "details": "Request failed after retry.",
+          "request_id": "request_123",
+          "scraper_id": "tiktok",
+          "failing_command": "tovuk request show request_123 --json",
+          "first_log_line": "upstream timeout",
           "status": "open",
-          "severity": "low",
-          "createdAt": "2026-06-23T12:00:00Z"
+          "severity": "normal",
+          "agent_instruction": "Continue with tovuk request diagnostics.",
+          "created_at": "2026-06-23T12:00:00Z",
+          "updated_at": "2026-06-23T12:10:00Z"
         }
       },
       "SupportTicketCreateRequest": {
@@ -3664,7 +3751,25 @@
             "minLength": 1,
             "maxLength": 8000,
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "Request failed after retry."
+          },
+          "request_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "pattern": "^[a-z0-9_]{1,64}$",
+            "example": "request_123"
+          },
+          "scraper_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64,
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "example": "tiktok"
           },
           "failing_command": {
             "type": [
@@ -3696,57 +3801,114 @@
           }
         },
         "example": {
-          "subject": "example",
-          "details": "example"
+          "subject": "Request failed",
+          "details": "Request failed after retry.",
+          "request_id": "request_123",
+          "scraper_id": "tiktok",
+          "failing_command": "tovuk request show request_123 --json",
+          "first_log_line": "upstream timeout",
+          "severity": "normal"
+        }
+      },
+      "SupportTicketRateLimit": {
+        "type": "object",
+        "description": "Account support ticket rate limit.",
+        "required": [
+          "limit_per_hour",
+          "remaining_hour",
+          "limit_per_day",
+          "remaining_day"
+        ],
+        "properties": {
+          "limit_per_hour": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 1000,
+            "example": 10
+          },
+          "remaining_hour": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 1000,
+            "example": 9
+          },
+          "limit_per_day": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 1000,
+            "example": 10
+          },
+          "remaining_day": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 1000,
+            "example": 9
+          }
+        },
+        "example": {
+          "limit_per_hour": 10,
+          "remaining_hour": 9,
+          "limit_per_day": 10,
+          "remaining_day": 9
         }
       },
       "SupportTicketCreateResponse": {
         "type": "object",
         "description": "Support ticket mutation response.",
         "required": [
-          "ok",
           "ticket",
-          "agent_instruction"
+          "rate_limit",
+          "next_command"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "ticket": {
             "$ref": "#/components/schemas/SupportTicket"
           },
-          "agent_instruction": {
+          "rate_limit": {
+            "$ref": "#/components/schemas/SupportTicketRateLimit"
+          },
+          "next_command": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "tovuk support list --json"
           }
         },
         "example": {
-          "ok": true,
           "ticket": {
-            "id": "id_123",
-            "subject": "example",
+            "id": "ticket_0123456789abcdef0123",
+            "subject": "Request failed",
+            "details": "Request failed after retry.",
+            "request_id": "request_123",
+            "scraper_id": "tiktok",
+            "failing_command": "tovuk request show request_123 --json",
+            "first_log_line": "upstream timeout",
             "status": "open",
-            "severity": "low",
-            "createdAt": "2026-06-23T12:00:00Z"
+            "severity": "normal",
+            "agent_instruction": "Continue with tovuk request diagnostics.",
+            "created_at": "2026-06-23T12:00:00Z",
+            "updated_at": "2026-06-23T12:10:00Z"
           },
-          "agent_instruction": "example"
+          "rate_limit": {
+            "limit_per_hour": 10,
+            "remaining_hour": 9,
+            "limit_per_day": 10,
+            "remaining_day": 9
+          },
+          "next_command": "tovuk support list --json"
         }
       },
       "SupportTicketsResponse": {
         "type": "object",
         "description": "Paginated support ticket list.",
         "required": [
-          "ok",
           "tickets",
-          "nextCursor"
+          "rate_limit"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "tickets": {
             "type": "array",
             "items": {
@@ -3754,19 +3916,18 @@
             },
             "example": []
           },
-          "nextCursor": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+          "rate_limit": {
+            "$ref": "#/components/schemas/SupportTicketRateLimit"
           }
         },
         "example": {
-          "ok": true,
           "tickets": [],
-          "nextCursor": "example"
+          "rate_limit": {
+            "limit_per_hour": 10,
+            "remaining_hour": 9,
+            "limit_per_day": 10,
+            "remaining_day": 9
+          }
         }
       }
     }
