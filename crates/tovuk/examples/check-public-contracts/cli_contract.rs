@@ -28,6 +28,7 @@ pub(crate) struct ContractSources {
     docs_quickstart: String,
     docs_agents: String,
     docs_packages: String,
+    docs_support: String,
     docs_llms: String,
     docs_skill: String,
     packaged_skill: String,
@@ -69,6 +70,7 @@ impl ContractSources {
             docs_quickstart: read_text("docs/quickstart.mdx")?,
             docs_agents: read_text("docs/agents.mdx")?,
             docs_packages: read_text("docs/reference/packages.mdx")?,
+            docs_support: read_text("docs/support.mdx")?,
             docs_llms: read_text("docs/llms.txt")?,
             docs_skill: read_text("docs/skill.md")?,
             packaged_skill: read_text("skills/tovuk/SKILL.md")?,
@@ -92,18 +94,19 @@ impl ContractSources {
         ]
     }
 
-    pub(crate) fn support_command_sources(&self) -> [&str; 6] {
+    pub(crate) fn support_command_sources(&self) -> [&str; 7] {
         [
             self.root_readme.as_str(),
             self.docs_agents.as_str(),
             self.docs_packages.as_str(),
+            self.docs_support.as_str(),
             self.docs_llms.as_str(),
             self.packaged_skill.as_str(),
             self.cargo_cli.as_str(),
         ]
     }
 
-    pub(crate) fn support_api_doc_sources(&self) -> [&str; 9] {
+    pub(crate) fn support_api_doc_sources(&self) -> [&str; 10] {
         [
             self.root_readme.as_str(),
             self.cargo_readme.as_str(),
@@ -111,9 +114,26 @@ impl ContractSources {
             self.python_readme.as_str(),
             self.docs_agents.as_str(),
             self.docs_packages.as_str(),
+            self.docs_support.as_str(),
             self.docs_llms.as_str(),
             self.docs_skill.as_str(),
             self.packaged_skill.as_str(),
+        ]
+    }
+
+    pub(crate) fn support_public_sources(&self) -> [&str; 11] {
+        [
+            self.root_readme.as_str(),
+            self.cargo_readme.as_str(),
+            self.npm_readme.as_str(),
+            self.python_readme.as_str(),
+            self.docs_agents.as_str(),
+            self.docs_packages.as_str(),
+            self.docs_support.as_str(),
+            self.docs_llms.as_str(),
+            self.docs_skill.as_str(),
+            self.packaged_skill.as_str(),
+            self.cargo_cli.as_str(),
         ]
     }
 }

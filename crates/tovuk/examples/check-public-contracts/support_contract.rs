@@ -42,24 +42,30 @@ fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
 }
 
 fn reject_support_retired_language(sources: &ContractSources) -> CheckResult {
-    let retired_complaint_term = retired_complaint_term()?;
+    let retired_moderation_term = retired_moderation_term()?;
     let retired_user_workflow_term = ["user-to-user", " ", "report"].concat();
-    for source in sources.support_api_doc_sources() {
+    let retired_direct_report_term = ["report", " ", "another", " ", "user"].concat();
+    for source in sources.support_public_sources() {
         reject_contains(
             source,
-            retired_complaint_term.as_str(),
-            "support docs must not mention retired complaint workflow wording",
+            retired_moderation_term.as_str(),
+            "support surfaces must not mention retired moderation workflow wording",
         )?;
         reject_contains(
             source,
             retired_user_workflow_term.as_str(),
-            "support docs must not use customer-to-customer complaint wording",
+            "support surfaces must not use retired customer-to-customer workflow wording",
+        )?;
+        reject_contains(
+            source,
+            retired_direct_report_term.as_str(),
+            "support surfaces must not describe reporting another user",
         )?;
     }
     Ok(())
 }
 
-fn retired_complaint_term() -> CheckResult<String> {
+fn retired_moderation_term() -> CheckResult<String> {
     String::from_utf8(vec![97, 98, 117, 115, 101])
         .map_err(|error| format!("invalid retired support term check: {error}"))
 }

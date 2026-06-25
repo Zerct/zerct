@@ -806,10 +806,10 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 1000,
-              "default": 100,
+              "maximum": 100,
+              "default": 25,
               "format": "int64",
-              "example": 100
+              "example": 25
             }
           }
         ],
@@ -898,10 +898,10 @@
             "required": true,
             "schema": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 128,
-              "pattern": "^ticket_[A-Za-z0-9_:-]{1,80}$",
-              "example": "ticket_123"
+              "minLength": 27,
+              "maxLength": 27,
+              "pattern": "^ticket_[a-f0-9]{20}$",
+              "example": "ticket_0123456789abcdef0123"
             }
           }
         ],
