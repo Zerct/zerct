@@ -1,16 +1,26 @@
 use super::super::{
     args::CliOptions,
-    auth::read_or_login_token,
-    errors::{Result, agent_error, print_json},
+    errors::{Result, agent_error},
     project::encode_component,
 };
 use super::{
     common::command_arg,
     generic::{print_authenticated_mutation, print_paged_authenticated},
-    http::api_request,
 };
 use reqwest::Method;
-use serde_json::{Map, Value};
+use serde::Serialize;
+use serde_json::Value;
+
+#[derive(Serialize)]
+struct SupportTicketInput {
+    subject: String,
+    details: String,
+    severity: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    failing_command: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    first_log_line: Option<String>,
+}
 
 pub(crate) fn support_command(cli: &CliOptions) -> Result<()> {
     match cli.args.first().map_or("list", String::as_str) {
@@ -45,15 +55,18 @@ fn support_resolve(cli: &CliOptions) -> Result<()> {
 }
 
 fn support_create(cli: &CliOptions) -> Result<()> {
-    let subject = cli.args.get(1).cloned().unwrap_or_default();
-    let details = cli
-        .args
-        .iter()
-        .skip(2)
-        .cloned()
-        .collect::<Vec<_>>()
-        .join(" ");
-    if subject.is_empty() || details.trim().is_empty() {
+    print_authenticated_mutation(
+        cli,
+        Method::POST,
+        "/v1/support/tickets",
+        Some(support_create_body(cli)?),
+    )
+}
+
+fn support_create_body(cli: &CliOptions) -> Result<Value> {
+    let subject = cli.args.get(1).map_or("", String::as_str).trim();
+    let details = support_details(cli);
+    if subject.is_empty() || details.is_empty() {
         return Err(agent_error(
             "invalid_support_ticket",
             "Support ticket subject and details are required.",
@@ -61,40 +74,118 @@ fn support_create(cli: &CliOptions) -> Result<()> {
             cli.output.json,
         ));
     }
+    serde_json::to_value(SupportTicketInput {
+        subject: subject.to_owned(),
+        details,
+        severity: support_severity(cli),
+        failing_command: optional_support_value(cli.failing_command.as_str()),
+        first_log_line: optional_support_value(cli.first_log_line.as_str()),
+    })
+    .map_err(|error| {
+        agent_error(
+            "invalid_support_ticket",
+            format!("Support ticket input could not be encoded: {error}"),
+            "Retry with visible support ticket subject and details.",
+            cli.output.json,
+        )
+    })
+}
 
-    let token = read_or_login_token(cli)?;
-    let mut body = Map::new();
-    body.insert("subject".to_owned(), Value::String(subject));
-    body.insert(
-        "details".to_owned(),
-        Value::String(details.trim().to_owned()),
-    );
-    body.insert(
-        "severity".to_owned(),
-        Value::String(if cli.severity.is_empty() {
-            "normal".to_owned()
-        } else {
-            cli.severity.clone()
-        }),
-    );
-    if !cli.failing_command.is_empty() {
-        body.insert(
-            "failing_command".to_owned(),
-            Value::String(cli.failing_command.clone()),
+fn support_details(cli: &CliOptions) -> String {
+    cli.args
+        .iter()
+        .skip(2)
+        .map(String::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn support_severity(cli: &CliOptions) -> String {
+    optional_support_value(cli.severity.as_str()).unwrap_or_else(|| "normal".to_owned())
+}
+
+fn optional_support_value(value: &str) -> Option<String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed.to_owned())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::support_create_body;
+    use crate::cli::args::CliOptions;
+    use serde_json::json;
+
+    #[test]
+    fn support_create_body_uses_typed_payload_and_omits_empty_context() {
+        let cli = CliOptions {
+            command: "support".to_owned(),
+            args: vec![
+                "create".to_owned(),
+                " Request failed ".to_owned(),
+                " request_123 ".to_owned(),
+                "timed".to_owned(),
+                "out ".to_owned(),
+            ],
+            ..CliOptions::default()
+        };
+
+        assert_eq!(
+            support_create_body(&cli).ok(),
+            Some(json!({
+                "subject": "Request failed",
+                "details": "request_123 timed out",
+                "severity": "normal"
+            }))
         );
     }
-    if !cli.first_log_line.is_empty() {
-        body.insert(
-            "first_log_line".to_owned(),
-            Value::String(cli.first_log_line.clone()),
+
+    #[test]
+    fn support_create_body_includes_trimmed_context_flags() {
+        let mut cli = CliOptions {
+            command: "support".to_owned(),
+            args: vec![
+                "create".to_owned(),
+                "Request failed".to_owned(),
+                "Request id request_123 failed.".to_owned(),
+            ],
+            ..CliOptions::default()
+        };
+        cli.failing_command = " tovuk request show request_123 --json ".to_owned();
+        cli.first_log_line = " upstream timeout ".to_owned();
+        cli.severity = " urgent ".to_owned();
+
+        assert_eq!(
+            support_create_body(&cli).ok(),
+            Some(json!({
+                "subject": "Request failed",
+                "details": "Request id request_123 failed.",
+                "severity": "urgent",
+                "failing_command": "tovuk request show request_123 --json",
+                "first_log_line": "upstream timeout"
+            }))
         );
     }
-    let response = api_request(
-        cli,
-        Method::POST,
-        "/v1/support/tickets",
-        Some(&token),
-        Some(Value::Object(body)),
-    )?;
-    print_json(&response)
+
+    #[test]
+    fn support_create_body_requires_subject_and_details() {
+        let cli = CliOptions {
+            command: "support".to_owned(),
+            args: vec!["create".to_owned(), " ".to_owned(), "details".to_owned()],
+            ..CliOptions::default()
+        };
+
+        let message = support_create_body(&cli)
+            .err()
+            .map(|error| error.to_string());
+        assert_eq!(
+            message.as_deref(),
+            Some("Support ticket subject and details are required.")
+        );
+    }
 }
