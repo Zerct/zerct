@@ -15,7 +15,9 @@ tovuk support resolve ticket_0123456789abcdef0123 --json
 Support ticket creation is rate-limited per account. Resolve tickets after the
 issue is fixed so later automated runs do not duplicate work.
 Tickets are account-scoped service tickets between your account and Tovuk for
-scraper, billing, API key, and account help.
+scraper, billing, API key, and account help. Ticket responses include
+`created_by` so users and AI/API agents can see whether the ticket came from an
+account session or account API key.
 
 ## API
 
@@ -39,7 +41,7 @@ Create body:
 }
 ```
 
-API agents can create the same ticket directly with an account API key or
+AI/API agents can create the same ticket directly with an account API key or
 session bearer token:
 
 ```sh

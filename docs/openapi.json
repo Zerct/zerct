@@ -836,7 +836,7 @@
           "Accounts"
         ],
         "summary": "Create support ticket",
-        "description": "Creates a rate-limited account-scoped service ticket with scraper request evidence. Account API keys are accepted so users and API agents can open service tickets.",
+        "description": "Creates a rate-limited account-scoped service ticket with scraper request evidence. Account API keys are accepted so users and AI/API agents can open service tickets.",
         "operationId": "createSupportTicket",
         "requestBody": {
           "description": "Create account-scoped service ticket body.",
@@ -2185,6 +2185,7 @@
                 "summary": "Account-scoped service ticket resolved.",
                 "value": {
                   "id": "ticket_123",
+                  "created_by": "account_api_key",
                   "subject": "Request failed",
                   "details": "Request failed after retry.",
                   "request_id": "request_123",
@@ -3624,11 +3625,21 @@
         ],
         "example": "open"
       },
+      "SupportTicketCreatedBy": {
+        "type": "string",
+        "description": "Auth surface that created the support ticket.",
+        "enum": [
+          "account_api_key",
+          "account_session"
+        ],
+        "example": "account_api_key"
+      },
       "SupportTicket": {
         "type": "object",
         "description": "Support ticket.",
         "required": [
           "id",
+          "created_by",
           "subject",
           "details",
           "status",
@@ -3642,6 +3653,9 @@
             "type": "string",
             "pattern": "^ticket_[a-f0-9]{20}$",
             "example": "ticket_0123456789abcdef0123"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/SupportTicketCreatedBy"
           },
           "subject": {
             "type": "string",
@@ -3717,6 +3731,7 @@
         },
         "example": {
           "id": "ticket_0123456789abcdef0123",
+          "created_by": "account_api_key",
           "subject": "Request failed",
           "details": "Request failed after retry.",
           "request_id": "request_123",
@@ -3732,7 +3747,7 @@
       },
       "SupportTicketCreateRequest": {
         "type": "object",
-        "description": "Request body for creating an account-scoped service ticket from a user, CLI, or API agent.",
+        "description": "Request body for creating an account-scoped service ticket from a user, CLI, or AI/API agent.",
         "additionalProperties": false,
         "required": [
           "subject",
@@ -3880,6 +3895,7 @@
         "example": {
           "ticket": {
             "id": "ticket_0123456789abcdef0123",
+            "created_by": "account_api_key",
             "subject": "Request failed",
             "details": "Request failed after retry.",
             "request_id": "request_123",
