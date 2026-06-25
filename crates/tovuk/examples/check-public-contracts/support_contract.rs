@@ -45,8 +45,20 @@ fn require_support_api_docs(sources: &ContractSources) -> CheckResult {
             "account-scoped service",
             "support ticket service-ticket positioning",
         )?;
+        require_account_to_tovuk_service_ticket_wording(source)?;
     }
     Ok(())
+}
+
+fn require_account_to_tovuk_service_ticket_wording(source: &str) -> CheckResult {
+    let normalized = source.split_whitespace().collect::<Vec<_>>().join(" ");
+    if normalized.contains("between your account and Tovuk")
+        || normalized.contains("between the authenticated account and Tovuk")
+    {
+        Ok(())
+    } else {
+        Err("support tickets must be described as account-to-Tovuk service tickets".to_owned())
+    }
 }
 
 fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {

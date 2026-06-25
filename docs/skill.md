@@ -41,8 +41,9 @@ Scraper requests are public data only. Do not send cookies, passwords, account
 tokens, private session data, private account content, private repository
 credentials, or proxy URLs.
 
-AI/API agents may open account-scoped service tickets through
-`POST /v1/support/tickets` with an account API key or session bearer token.
+AI/API agents may open account-scoped service tickets between the authenticated
+account and Tovuk through `POST /v1/support/tickets` with an account API key or
+session bearer token.
 Ticket responses include `created_by` for account-session versus account-API-key
 attribution.
 
