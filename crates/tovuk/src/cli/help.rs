@@ -32,7 +32,7 @@ Agent contract:
   - Use tovuk api-key create "Production scraper" --json for scripts, save the returned token immediately, and revoke old keys with tovuk api-key revoke <api_key_id> --json.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - For invoices, payment methods, or subscription changes, run tovuk billing portal and show the returned URL to the human.
-  - Create support tickets with command output, request id when available, and the first actionable error line.
+  - Create support tickets with command output, request id when available, and the first actionable error line; AI/API agents can also call POST /v1/support/tickets with an account API key.
   - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - This public CLI does not deploy websites, backends, databases, workers, storage buckets, queues, cron jobs, custom domains, secrets, or any other customer cloud resource.
 "#;
