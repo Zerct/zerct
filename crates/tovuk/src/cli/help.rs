@@ -17,6 +17,9 @@ Usage:
   tovuk request cancel <request_id> [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
   tovuk billing [checkout|portal] [reason] [--api <url>] [--json]
+  tovuk support list [--limit <n>] [--api <url>] [--json]
+  tovuk support create "Subject" "Details" [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
+  tovuk support resolve <ticket_id> [--api <url>] [--json]
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
@@ -25,6 +28,8 @@ Agent contract:
   - Use tovuk pricing --json and tovuk usage --json before high-count scraper requests. Inspect priceEvents[].usdMicros, billingEstimate.lineItems, and account balance before creating large jobs.
   - When a plan limit blocks work, run tovuk billing checkout --json and show the returned URL to the human.
   - For invoices, payment methods, or subscription changes, run tovuk billing portal and show the returned URL to the human.
+  - Create support tickets with command output, request id when available, and the first actionable error line.
+  - Resolve support tickets after the issue is fixed so later agents do not duplicate work.
   - This public CLI does not deploy websites, backends, databases, workers, storage buckets, queues, cron jobs, custom domains, secrets, or any other customer cloud resource.
 "#;
 

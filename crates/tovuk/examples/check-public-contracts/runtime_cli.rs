@@ -13,6 +13,7 @@ const REQUIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk pricing",
     "tovuk usage",
     "tovuk billing checkout",
+    "tovuk support create",
 ];
 
 #[derive(Clone, Copy)]

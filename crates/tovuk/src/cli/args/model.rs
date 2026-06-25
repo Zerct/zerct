@@ -7,7 +7,10 @@ pub(crate) struct CliOptions {
     pub(crate) api_url: String,
     pub(crate) limit: String,
     pub(crate) cursor: String,
+    pub(crate) failing_command: String,
+    pub(crate) first_log_line: String,
     pub(crate) token: String,
+    pub(crate) severity: String,
     pub(crate) account: AccountOptions,
     pub(crate) output: OutputOptions,
 }
@@ -33,7 +36,10 @@ impl Default for CliOptions {
             api_url: DEFAULT_API_URL.to_owned(),
             limit: String::new(),
             cursor: String::new(),
+            failing_command: String::new(),
+            first_log_line: String::new(),
             token: String::new(),
+            severity: String::new(),
             account: AccountOptions {
                 handle: String::new(),
                 display_name: String::new(),

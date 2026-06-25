@@ -55,6 +55,7 @@ fn require_navigation_contract(sources: &DocsSources) -> CheckResult {
         "agents",
         "pricing",
         "status",
+        "support",
         "changelog",
         "reference/packages",
     ] {
@@ -131,6 +132,11 @@ fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
         sources.status.as_str(),
         "tovuk scraper health --json",
         "status scraper health docs",
+    )?;
+    require_contains(
+        sources.support.as_str(),
+        "tovuk support create",
+        "support create docs",
     )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
@@ -212,6 +218,8 @@ fn require_openapi_paths(openapi: &str) -> CheckResult {
         r#""/v1/usage""#,
         r#""/v1/billing/checkout""#,
         r#""/v1/billing/portal""#,
+        r#""/v1/support/tickets""#,
+        r#""/v1/support/tickets/{ticket_id}/resolve""#,
     ] {
         require_contains(
             openapi,

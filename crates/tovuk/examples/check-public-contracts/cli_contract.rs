@@ -32,6 +32,7 @@ pub(crate) fn check() -> CheckResult {
     let sources = ContractSources::load()?;
     require_native_command_dispatch(&sources)?;
     require_core_commands(&sources)?;
+    require_support_commands(&sources)?;
     require_install_guides(&sources)?;
     require_package_metadata(&sources)?;
     reject_retired_packaging(&sources)?;
@@ -89,7 +90,7 @@ impl ContractSources {
 
 fn require_native_command_dispatch(sources: &ContractSources) -> CheckResult {
     for command in [
-        "login", "account", "pricing", "scraper", "request", "usage", "billing",
+        "login", "account", "pricing", "scraper", "request", "usage", "billing", "support",
     ] {
         require_contains(
             sources.cargo_cli.as_str(),
@@ -118,6 +119,30 @@ fn require_core_commands(sources: &ContractSources) -> CheckResult {
         std::iter::once(sources.cargo_cli.as_str()).chain(sources.public_sources().iter().copied())
     {
         for snippet in core_commands {
+            require_contains(
+                source,
+                snippet,
+                format!("scraper-only public command {snippet}").as_str(),
+            )?;
+        }
+    }
+    Ok(())
+}
+
+fn require_support_commands(sources: &ContractSources) -> CheckResult {
+    for source in [
+        sources.root_readme.as_str(),
+        sources.docs_agents.as_str(),
+        sources.docs_packages.as_str(),
+        sources.docs_llms.as_str(),
+        sources.packaged_skill.as_str(),
+        sources.cargo_cli.as_str(),
+    ] {
+        for snippet in [
+            "tovuk support create",
+            "tovuk support list",
+            "tovuk support resolve",
+        ] {
             require_contains(
                 source,
                 snippet,
