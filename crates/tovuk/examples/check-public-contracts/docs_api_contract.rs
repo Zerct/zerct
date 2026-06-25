@@ -34,7 +34,7 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
     require_openapi_status_checks(sources.openapi.as_str())?;
     require_contains(
         sources.openapi.as_str(),
-        "automated agents can open service tickets",
+        "users and API agents can open service tickets",
         "OpenAPI support agent create description",
     )?;
     require_contains(

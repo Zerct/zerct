@@ -51,11 +51,11 @@ fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
     let openapi = sources.support_openapi_source();
     for (snippet, label) in [
         (
-            "automated agents can open service tickets",
+            "users and API agents can open service tickets",
             "OpenAPI support ticket API-agent guidance",
         ),
         (
-            "Request body for creating an account-scoped support ticket from a user, CLI, or API agent.",
+            "Request body for creating an account-scoped service ticket from a user, CLI, or API agent.",
             "OpenAPI support ticket create body guidance",
         ),
         (
