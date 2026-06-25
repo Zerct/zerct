@@ -20,7 +20,7 @@ thread.
 ## Product Boundary
 
 - Public CLI commands are limited to login, account, pricing, scraper, request,
-  usage, billing, support, and abuse workflows.
+  usage, billing, and support workflows.
 - Public docs, package READMEs, examples, OpenAPI, generated artifacts, tests,
   and skills must describe scraper APIs only.
 - Scraper inputs must be public URLs, public handles, public search terms, or

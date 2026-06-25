@@ -11,7 +11,6 @@ const REQUIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk usage",
     "tovuk billing checkout",
     "tovuk support create",
-    "tovuk abuse list --operator",
 ];
 
 const RETIRED_HELP_COMMANDS: &[&str] = &[
@@ -20,6 +19,7 @@ const RETIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk storage",
     "tovuk sqlite",
     "tovuk queue",
+    "tovuk abuse",
 ];
 
 const RETIRED_COMMANDS: &[&str] = &[
@@ -32,6 +32,7 @@ const RETIRED_COMMANDS: &[&str] = &[
     "sqlite",
     "kv",
     "queue",
+    "abuse",
     "cron",
     "state",
     "binding",

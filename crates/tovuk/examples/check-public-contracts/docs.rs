@@ -53,7 +53,6 @@ fn require_navigation_contract(sources: &DocsSources) -> CheckResult {
         "pricing",
         "status",
         "support",
-        "abuse",
         "changelog",
         "reference/packages",
     ] {
@@ -135,11 +134,6 @@ fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
         sources.support.as_str(),
         "tovuk support create",
         "support create docs",
-    )?;
-    require_contains(
-        sources.abuse.as_str(),
-        "tovuk abuse quarantine",
-        "abuse operator docs",
     )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
@@ -223,9 +217,6 @@ fn require_openapi_paths(openapi: &str) -> CheckResult {
         r#""/v1/billing/portal""#,
         r#""/v1/support/tickets""#,
         r#""/v1/support/tickets/{ticket_id}/resolve""#,
-        r#""/v1/abuse/reports""#,
-        r#""/v1/abuse/reports/{report_id}/appeal""#,
-        r#""/v1/operator/abuse/reports""#,
     ] {
         require_contains(
             openapi,
@@ -259,6 +250,8 @@ fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResult {
         r#""/v1/builds""#,
         r#""/v1/capabilities""#,
         r#""/v1/usage/caps"#,
+        r#""/v1/abuse"#,
+        r#""/v1/operator/abuse"#,
         "DeployRequest",
         "DeployResponse",
         "ServicesResponse",
@@ -289,6 +282,7 @@ fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResult {
         "tovuk domains",
         "tovuk limits",
         "tovuk nodes",
+        "tovuk abuse",
         "tovuk.toml",
         "full-stack",
         "static frontend",

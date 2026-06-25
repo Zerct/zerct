@@ -47,16 +47,6 @@ tovuk billing portal --json
 tovuk support list --limit 20 --json
 tovuk support create "Request failed" "Request id request_123 failed after retry." --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 tovuk support resolve ticket_0123456789abcdef0123 --json
-tovuk abuse report https://example.com "Phishing page" "Credential collection form" --category phishing --reporter-email reporter@example.com --evidence "Screenshot URL and request id" --json
-tovuk abuse list --json
-tovuk abuse appeal abuse_0123456789abcdef0123 "Removed the reported public target." --evidence "remediation note" --json
-tovuk abuse list --operator --json
-tovuk abuse triage abuse_0123456789abcdef0123 "Reviewed reporter evidence." --json
-tovuk abuse notify-owner abuse_0123456789abcdef0123 "Owner-visible notice recorded." --json
-tovuk abuse quarantine abuse_0123456789abcdef0123 "Confirmed abuse and preserved evidence." --json
-tovuk abuse resolve abuse_0123456789abcdef0123 "Reporter issue remediated." --json
-tovuk abuse reject abuse_0123456789abcdef0123 "Evidence did not match the reported target." --json
-tovuk abuse release abuse_0123456789abcdef0123 "Quarantine released after remediation." --json
 ```
 
 The public CLI does not deploy websites, backends, databases, workers, storage

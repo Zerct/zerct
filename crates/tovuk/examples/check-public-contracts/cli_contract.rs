@@ -31,7 +31,7 @@ pub(crate) fn check() -> CheckResult {
     let sources = ContractSources::load()?;
     require_native_command_dispatch(&sources)?;
     require_core_commands(&sources)?;
-    require_support_and_abuse_commands(&sources)?;
+    require_support_commands(&sources)?;
     require_install_guides(&sources)?;
     require_package_metadata(&sources)?;
     reject_retired_packaging(&sources)?;
@@ -89,7 +89,7 @@ impl ContractSources {
 
 fn require_native_command_dispatch(sources: &ContractSources) -> CheckResult {
     for command in [
-        "login", "account", "pricing", "scraper", "request", "usage", "billing", "support", "abuse",
+        "login", "account", "pricing", "scraper", "request", "usage", "billing", "support",
     ] {
         require_contains(
             sources.cargo_cli.as_str(),
@@ -128,7 +128,7 @@ fn require_core_commands(sources: &ContractSources) -> CheckResult {
     Ok(())
 }
 
-fn require_support_and_abuse_commands(sources: &ContractSources) -> CheckResult {
+fn require_support_commands(sources: &ContractSources) -> CheckResult {
     for source in [
         sources.root_readme.as_str(),
         sources.docs_agents.as_str(),
@@ -141,16 +141,6 @@ fn require_support_and_abuse_commands(sources: &ContractSources) -> CheckResult 
             "tovuk support create",
             "tovuk support list",
             "tovuk support resolve",
-            "tovuk abuse report",
-            "tovuk abuse list",
-            "tovuk abuse list --operator",
-            "tovuk abuse appeal",
-            "tovuk abuse triage",
-            "tovuk abuse notify-owner",
-            "tovuk abuse quarantine",
-            "tovuk abuse resolve",
-            "tovuk abuse reject",
-            "tovuk abuse release",
         ] {
             require_contains(
                 source,
@@ -265,6 +255,7 @@ fn reject_retired_packaging(sources: &ContractSources) -> CheckResult {
 
 fn reject_retired_commands(sources: &ContractSources) -> CheckResult {
     let retired_commands = [
+        "tovuk abuse",
         "tovuk new",
         "tovuk check",
         "tovuk dev",
