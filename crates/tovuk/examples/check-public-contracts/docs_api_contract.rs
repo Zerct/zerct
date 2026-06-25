@@ -1,108 +1,92 @@
 use crate::{
     docs_sources::DocsSources,
-    helpers::{CheckResult, reject_contains, require_contains},
+    helpers::{CheckResult, reject_contains, require_contains, require_contains_all},
 };
 
 pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
-    require_contains(
+    require_contains_all(
         sources.status.as_str(),
-        "tovuk scraper health --json",
-        "status scraper health docs",
+        &[("tovuk scraper health --json", "status scraper health docs")],
     )?;
-    require_contains(
+    require_contains_all(
         sources.support.as_str(),
-        "tovuk support create",
-        "support create docs",
-    )?;
-    require_contains(
-        sources.support.as_str(),
-        "POST /v1/support/tickets",
-        "support API create docs",
-    )?;
-    require_contains(
-        sources.support.as_str(),
-        "account API key",
-        "support API key docs",
-    )?;
-    require_contains(
-        sources.support.as_str(),
-        "request_id",
-        "support API request id docs",
+        &[
+            ("tovuk support create", "support create docs"),
+            ("POST /v1/support/tickets", "support API create docs"),
+            ("account API key", "support API key docs"),
+            ("request_id", "support API request id docs"),
+        ],
     )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
     require_openapi_status_checks(sources.openapi.as_str())?;
-    require_contains(
+    require_contains_all(
         sources.openapi.as_str(),
-        "users and AI/API agents can open service tickets",
-        "OpenAPI support agent create description",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""created_by""#,
-        "OpenAPI support creator attribution field",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""request_id""#,
-        "OpenAPI support request id context",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""linkedinPostSearch""#,
-        "OpenAPI LinkedIn post search example",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""author_company_urns""#,
-        "OpenAPI LinkedIn author company filter",
-    )?;
-    require_contains(
-        sources.openapi.as_str(),
-        r#""linkedinCompanyEmployees""#,
-        "OpenAPI LinkedIn company employees example",
+        &[
+            (
+                "users and AI/API agents can open service tickets",
+                "OpenAPI support agent create description",
+            ),
+            (
+                r#""created_by""#,
+                "OpenAPI support creator attribution field",
+            ),
+            (r#""request_id""#, "OpenAPI support request id context"),
+            (
+                r#""linkedinPostSearch""#,
+                "OpenAPI LinkedIn post search example",
+            ),
+            (
+                r#""author_company_urns""#,
+                "OpenAPI LinkedIn author company filter",
+            ),
+            (
+                r#""linkedinCompanyEmployees""#,
+                "OpenAPI LinkedIn company employees example",
+            ),
+        ],
     )
 }
 
 fn require_pricing_contract(pricing: &str) -> CheckResult {
-    for (snippet, label) in [
-        (
-            "There is no free scraper tier",
-            "pricing paid-only scraper docs",
-        ),
-        ("| Pro | `$20/month` | `$20`", "pricing Pro balance docs"),
-        (
-            "| Business | `$100/month` | `$125`",
-            "pricing Business balance docs",
-        ),
-        (
-            "| Scale | `$200/month` | `$300`",
-            "pricing Scale balance docs",
-        ),
-        (
-            "deducts from that balance for each successful stored",
-            "pricing balance debit docs",
-        ),
-        (
-            "`priceEvents[].usdMicros`",
-            "pricing scraper event price docs",
-        ),
-        (
-            "| Google Maps Scraper | place | `$2.10` |",
-            "pricing Google Maps per-result docs",
-        ),
-        (
-            "| TikTok Scraper | record | `$1.70` |",
-            "pricing TikTok per-result docs",
-        ),
-        (
-            "| Instagram Scraper | record | `$0.80` |",
-            "pricing Instagram per-result docs",
-        ),
-    ] {
-        require_contains(pricing, snippet, label)?;
-    }
-    Ok(())
+    require_contains_all(
+        pricing,
+        &[
+            (
+                "There is no free scraper tier",
+                "pricing paid-only scraper docs",
+            ),
+            ("| Pro | `$20/month` | `$20`", "pricing Pro balance docs"),
+            (
+                "| Business | `$100/month` | `$125`",
+                "pricing Business balance docs",
+            ),
+            (
+                "| Scale | `$200/month` | `$300`",
+                "pricing Scale balance docs",
+            ),
+            (
+                "deducts from that balance for each successful stored",
+                "pricing balance debit docs",
+            ),
+            (
+                "`priceEvents[].usdMicros`",
+                "pricing scraper event price docs",
+            ),
+            (
+                "| Google Maps Scraper | place | `$2.10` |",
+                "pricing Google Maps per-result docs",
+            ),
+            (
+                "| TikTok Scraper | record | `$1.70` |",
+                "pricing TikTok per-result docs",
+            ),
+            (
+                "| Instagram Scraper | record | `$0.80` |",
+                "pricing Instagram per-result docs",
+            ),
+        ],
+    )
 }
 
 fn require_openapi_paths(openapi: &str) -> CheckResult {

@@ -20,6 +20,13 @@ pub(crate) fn require_contains(source: &str, snippet: &str, label: &str) -> Chec
     }
 }
 
+pub(crate) fn require_contains_all(source: &str, requirements: &[(&str, &str)]) -> CheckResult {
+    for &(snippet, label) in requirements {
+        require_contains(source, snippet, label)?;
+    }
+    Ok(())
+}
+
 pub(crate) fn reject_contains(source: &str, snippet: &str, label: &str) -> CheckResult {
     if source.contains(snippet) {
         Err(format!("{label} is present"))
