@@ -62,9 +62,8 @@ fn apply_value_flag(
             apply_common_value_flag(cli, name, inline, argv, index)
         }
         "--handle" | "--display-name" => apply_account_value_flag(cli, name, inline, argv, index),
-        "--failing-command" | "--first-log-line" | "--severity" => {
-            apply_support_value_flag(cli, name, inline, argv, index)
-        }
+        "--failing-command" | "--first-log-line" | "--request-id" | "--scraper-id"
+        | "--severity" => apply_support_value_flag(cli, name, inline, argv, index),
         _ => invalid_value_flag_dispatch(cli, name),
     }
 }
@@ -160,6 +159,22 @@ fn apply_support_value_flag(
         ),
         "--first-log-line" => set_string_flag(
             &mut cli.first_log_line,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--request-id" => set_string_flag(
+            &mut cli.request_id,
+            name,
+            inline,
+            argv,
+            index,
+            cli.output.json,
+        ),
+        "--scraper-id" => set_string_flag(
+            &mut cli.scraper_id,
             name,
             inline,
             argv,

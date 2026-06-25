@@ -9,6 +9,8 @@ pub(crate) struct CliOptions {
     pub(crate) cursor: String,
     pub(crate) failing_command: String,
     pub(crate) first_log_line: String,
+    pub(crate) request_id: String,
+    pub(crate) scraper_id: String,
     pub(crate) token: String,
     pub(crate) severity: String,
     pub(crate) account: AccountOptions,
@@ -38,6 +40,8 @@ impl Default for CliOptions {
             cursor: String::new(),
             failing_command: String::new(),
             first_log_line: String::new(),
+            request_id: String::new(),
+            scraper_id: String::new(),
             token: String::new(),
             severity: String::new(),
             account: AccountOptions {

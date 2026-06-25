@@ -17,6 +17,10 @@ struct SupportTicketInput {
     details: String,
     severity: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    request_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    scraper_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     failing_command: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     first_log_line: Option<String>,
@@ -78,6 +82,8 @@ fn support_create_body(cli: &CliOptions) -> Result<Value> {
         subject: subject.to_owned(),
         details,
         severity: support_severity(cli),
+        request_id: optional_trimmed_value(cli.request_id.as_str()),
+        scraper_id: optional_trimmed_value(cli.scraper_id.as_str()),
         failing_command: optional_trimmed_value(cli.failing_command.as_str()),
         first_log_line: optional_trimmed_value(cli.first_log_line.as_str()),
     })
@@ -142,6 +148,8 @@ mod tests {
         };
         cli.failing_command = " tovuk request show request_123 --json ".to_owned();
         cli.first_log_line = " upstream timeout ".to_owned();
+        cli.request_id = " request_123 ".to_owned();
+        cli.scraper_id = " tiktok ".to_owned();
         cli.severity = " urgent ".to_owned();
 
         assert_eq!(
@@ -150,6 +158,8 @@ mod tests {
                 "subject": "Request failed",
                 "details": "Request id request_123 failed.",
                 "severity": "urgent",
+                "request_id": "request_123",
+                "scraper_id": "tiktok",
                 "failing_command": "tovuk request show request_123 --json",
                 "first_log_line": "upstream timeout"
             }))
