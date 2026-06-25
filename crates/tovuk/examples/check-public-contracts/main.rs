@@ -5,6 +5,8 @@ mod cli_contract;
 mod docs;
 mod docs_sources;
 mod helpers;
+mod helpers_io;
+mod helpers_public_copy;
 mod mintlify;
 mod npm;
 mod package_versions;
