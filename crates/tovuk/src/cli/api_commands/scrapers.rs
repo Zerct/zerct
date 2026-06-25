@@ -3,6 +3,7 @@ use super::super::{
     errors::{Result, agent_error},
     project::encode_component,
 };
+use super::common::required_arg;
 use super::generic::{
     print_authenticated, print_authenticated_mutation, print_paged_authenticated,
 };
@@ -153,18 +154,4 @@ fn request_input(cli: &CliOptions, input_source: &str) -> Result<Value> {
         }
     }
     Ok(input)
-}
-
-fn required_arg(
-    cli: &CliOptions,
-    index: usize,
-    code: &str,
-    message: &str,
-    instruction: &str,
-) -> Result<String> {
-    cli.args
-        .get(index)
-        .cloned()
-        .filter(|value| !value.is_empty())
-        .ok_or_else(|| agent_error(code, message, instruction, cli.output.json))
 }

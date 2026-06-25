@@ -5,6 +5,7 @@ use super::super::{
     errors::{Result, agent_error, print_json},
     project::open_url,
 };
+use super::common::joined_args;
 use super::http::api_request;
 use reqwest::Method;
 use serde_json::{Value, json};
@@ -24,17 +25,11 @@ pub(crate) fn billing_command(cli: &CliOptions) -> Result<()> {
             ));
         }
     };
-    let reason = cli
-        .args
-        .iter()
-        .skip(1)
-        .cloned()
-        .collect::<Vec<_>>()
-        .join(" ");
+    let reason = joined_args(cli, 1);
     let body = if route == BILLING_CHECKOUT_ROUTE {
         Some(json!({
             "target_plan": "pro",
-            "reason": if reason.trim().is_empty() { "Upgrade to Tovuk Pro." } else { reason.trim() },
+            "reason": if reason.is_empty() { "Upgrade to Tovuk Pro." } else { reason.as_str() },
         }))
     } else {
         None

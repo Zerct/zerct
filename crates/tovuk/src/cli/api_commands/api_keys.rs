@@ -4,7 +4,7 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::command_arg,
+    common::{command_arg, joined_args},
     generic::{print_authenticated, print_authenticated_mutation},
 };
 use reqwest::Method;
@@ -34,15 +34,7 @@ fn api_key_create(cli: &CliOptions) -> Result<()> {
 }
 
 fn api_key_create_body(cli: &CliOptions) -> Result<Value> {
-    let name = cli
-        .args
-        .iter()
-        .skip(1)
-        .map(String::as_str)
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .collect::<Vec<_>>()
-        .join(" ");
+    let name = joined_args(cli, 1);
     if name.is_empty() {
         return Err(agent_error(
             "invalid_api_key_name",

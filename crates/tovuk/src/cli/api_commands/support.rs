@@ -4,7 +4,7 @@ use super::super::{
     project::encode_component,
 };
 use super::{
-    common::command_arg,
+    common::{command_arg, joined_args, optional_trimmed_value},
     generic::{print_authenticated_mutation, print_paged_authenticated},
 };
 use reqwest::Method;
@@ -78,8 +78,8 @@ fn support_create_body(cli: &CliOptions) -> Result<Value> {
         subject: subject.to_owned(),
         details,
         severity: support_severity(cli),
-        failing_command: optional_support_value(cli.failing_command.as_str()),
-        first_log_line: optional_support_value(cli.first_log_line.as_str()),
+        failing_command: optional_trimmed_value(cli.failing_command.as_str()),
+        first_log_line: optional_trimmed_value(cli.first_log_line.as_str()),
     })
     .map_err(|error| {
         agent_error(
@@ -92,27 +92,11 @@ fn support_create_body(cli: &CliOptions) -> Result<Value> {
 }
 
 fn support_details(cli: &CliOptions) -> String {
-    cli.args
-        .iter()
-        .skip(2)
-        .map(String::as_str)
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .collect::<Vec<_>>()
-        .join(" ")
+    joined_args(cli, 2)
 }
 
 fn support_severity(cli: &CliOptions) -> String {
-    optional_support_value(cli.severity.as_str()).unwrap_or_else(|| "normal".to_owned())
-}
-
-fn optional_support_value(value: &str) -> Option<String> {
-    let trimmed = value.trim();
-    if trimmed.is_empty() {
-        None
-    } else {
-        Some(trimmed.to_owned())
-    }
+    optional_trimmed_value(cli.severity.as_str()).unwrap_or_else(|| "normal".to_owned())
 }
 
 #[cfg(test)]
