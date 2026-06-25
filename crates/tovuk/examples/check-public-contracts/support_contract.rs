@@ -76,19 +76,28 @@ fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult 
     let banned_compliance_term = banned_compliance_term()?;
     let banned_user_workflow_term = ["user-to-user", " ", "report"].concat();
     let banned_direct_report_term = ["report", " ", "another", " ", "user"].concat();
+    let banned_compliance_report_term = ["report", " ", banned_compliance_term.as_str()].concat();
     for source in sources.support_public_sources() {
         for (term, label) in [
             (
                 banned_compliance_term.as_str(),
-                "support surfaces must describe service tickets, not compliance complaints",
+                "support surfaces must describe service tickets, not non-service requests",
+            ),
+            (
+                "compliance complaint",
+                "support surfaces must describe service tickets, not non-service requests",
+            ),
+            (
+                "complaint",
+                "support surfaces must describe service tickets, not non-service requests",
             ),
             (
                 "moderation",
-                "support surfaces must describe service tickets, not moderation workflows",
+                "support surfaces must describe service tickets, not non-service workflows",
             ),
             (
                 "dispute",
-                "support surfaces must describe service tickets, not customer disputes",
+                "support surfaces must describe service tickets, not non-service workflows",
             ),
             (
                 "customer-to-customer",
@@ -100,6 +109,14 @@ fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult 
             ),
             (
                 banned_direct_report_term.as_str(),
+                "support surfaces must stay account-to-Tovuk service-ticket wording",
+            ),
+            (
+                "reporting",
+                "support surfaces must stay account-to-Tovuk service-ticket wording",
+            ),
+            (
+                banned_compliance_report_term.as_str(),
                 "support surfaces must stay account-to-Tovuk service-ticket wording",
             ),
         ] {
