@@ -45,8 +45,9 @@ tovuk support resolve ticket_0123456789abcdef0123
 ```
 
 Agents may also call `POST /v1/support/tickets` with an account API key or
-session bearer token. Support tickets are account-scoped service requests with
-Tovuk, not moderation, dispute, or customer-to-customer workflows.
+session bearer token. Support tickets are account-scoped service requests
+between the authenticated account and Tovuk for scraper, billing, API key, and
+account help.
 
 Scraper requests are public data only. Do not send cookies, passwords, account
 tokens, private session data, private account content, private repository
