@@ -1,18 +1,13 @@
-use std::{thread::sleep, time::Duration};
+use std::time::Duration;
 
-use reqwest::{StatusCode, blocking::Client};
+use reqwest::blocking::Client;
 use serde_json::Value;
 
 use crate::helpers::{
     CheckResult, env_int, has_markdown_link, number_field, read_json,
     reject_forbidden_public_copy_terms, require_contains, retired_public_names,
 };
-
-#[derive(Debug)]
-struct FetchError {
-    message: String,
-    status: Option<StatusCode>,
-}
+use crate::mintlify_fetch::{fetch_text, normalize_target_url, retry_delay};
 
 pub(crate) fn check_agent_readiness(target: &str) -> CheckResult {
     let base_url = normalize_target_url(target);
@@ -50,14 +45,6 @@ pub(crate) fn check_score(path: &str) -> CheckResult {
     }
     println!("Mintlify score is {value:.0}/100");
     Ok(())
-}
-
-fn retry_delay() -> CheckResult<Duration> {
-    let retry_delay_ms = env_int("TOVUK_DOCS_CHECK_RETRY_DELAY_MS", 5_000)?;
-    Ok(Duration::from_millis(
-        u64::try_from(retry_delay_ms)
-            .map_err(|_| "TOVUK_DOCS_CHECK_RETRY_DELAY_MS must be non-negative".to_owned())?,
-    ))
 }
 
 fn check_required_agent_paths(
@@ -195,78 +182,6 @@ fn reject_retired_public_names(label: &str, source: &str) -> CheckResult {
         }
     }
     reject_forbidden_public_copy_terms(label, source)
-}
-
-fn fetch_text(
-    client: &Client,
-    base_url: &str,
-    path: &str,
-    headers: &[(&str, &str)],
-    retries: i64,
-    retry_delay: Duration,
-) -> CheckResult<String> {
-    let mut last_error = FetchError {
-        message: "request was not attempted".to_owned(),
-        status: None,
-    };
-    for attempt in 0..=retries {
-        match request_text(client, base_url, path, headers) {
-            Ok(text) => return Ok(text),
-            Err(error) => {
-                let retryable = is_retryable_fetch_error(&error);
-                last_error = error;
-                if attempt == retries || !retryable {
-                    break;
-                }
-                sleep(retry_delay);
-            }
-        }
-    }
-    Err(last_error.message)
-}
-
-fn request_text(
-    client: &Client,
-    base_url: &str,
-    path: &str,
-    headers: &[(&str, &str)],
-) -> Result<String, FetchError> {
-    let url = format!("{base_url}{path}");
-    let mut request = client.get(url);
-    for (name, value) in headers {
-        request = request.header(*name, *value);
-    }
-    let response = request.send().map_err(|error| FetchError {
-        message: error.to_string(),
-        status: None,
-    })?;
-    let status = response.status();
-    let body = response.text().map_err(|error| FetchError {
-        message: error.to_string(),
-        status: Some(status),
-    })?;
-    if !status.is_success() {
-        return Err(FetchError {
-            message: format!("{path} returned {}", status.as_u16()),
-            status: Some(status),
-        });
-    }
-    Ok(body)
-}
-
-fn is_retryable_fetch_error(error: &FetchError) -> bool {
-    error
-        .status
-        .is_none_or(|status| status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error())
-}
-
-fn normalize_target_url(target: &str) -> String {
-    let with_scheme = if target.starts_with("http://") || target.starts_with("https://") {
-        target.to_owned()
-    } else {
-        format!("https://{target}")
-    };
-    with_scheme.trim_end_matches('/').to_owned()
 }
 
 fn robots_blocks_crawlers(source: &str) -> bool {

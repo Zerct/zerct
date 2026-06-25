@@ -8,6 +8,7 @@ mod helpers;
 mod helpers_io;
 mod helpers_public_copy;
 mod mintlify;
+mod mintlify_fetch;
 mod npm;
 mod package_versions;
 mod repo_hygiene;
