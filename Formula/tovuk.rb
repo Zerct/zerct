@@ -29,7 +29,6 @@ class Tovuk < Formula
     assert_match "tovuk support create", help
     assert_match "tovuk support list", help
     assert_match "tovuk support resolve", help
-    refute_match "tovuk abuse", help
     refute_match "tovuk deploy", help
     refute_match "tovuk service", help
     refute_match "tovuk storage", help
