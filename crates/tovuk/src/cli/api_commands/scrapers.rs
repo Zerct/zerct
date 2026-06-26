@@ -3,7 +3,7 @@ use super::super::{
     errors::{Result, agent_error},
     project::encode_component,
 };
-use super::common::required_arg;
+use super::common::{page_query, required_arg};
 use super::generic::{
     print_authenticated, print_authenticated_mutation, print_paged_authenticated,
 };
@@ -95,15 +95,11 @@ fn request_results(cli: &CliOptions) -> Result<()> {
         "Request id is required.",
         "Use `tovuk request results request_123 --json` with an id from `tovuk request list --json`.",
     )?;
-    let route = if cli.limit.is_empty() {
-        format!("/v1/requests/{}/results", encode_component(&request_id))
-    } else {
-        format!(
-            "/v1/requests/{}/results?limit={}",
-            encode_component(&request_id),
-            encode_component(&cli.limit)
-        )
-    };
+    let route = format!(
+        "/v1/requests/{}/results{}",
+        encode_component(&request_id),
+        page_query(cli)
+    );
     print_authenticated(cli, &route)
 }
 

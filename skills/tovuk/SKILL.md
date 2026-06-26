@@ -26,6 +26,7 @@ tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":100}'
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}'
 tovuk request show request_123
 tovuk request results request_123 --limit 1000
+tovuk request results request_123 --limit 1000 --cursor <nextCursor>
 tovuk request cancel request_123
 tovuk billing checkout
 tovuk billing portal

@@ -30,6 +30,7 @@ tovuk request create github '{"operation":"codeSearch","query":"serde language:R
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}'
 tovuk request show request_123
 tovuk request results request_123 --limit 1000
+tovuk request results request_123 --limit 1000 --cursor <nextCursor>
 tovuk billing checkout
 tovuk billing portal
 tovuk support list --limit 20
