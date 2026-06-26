@@ -1,5 +1,5 @@
 use crate::helpers::{
-    CheckResult, ascii_term, reject_contains, require_contains, require_contains_all, require_equal,
+    CheckResult, reject_contains, require_contains, require_contains_all, require_equal,
 };
 
 use super::ContractSources;
@@ -79,7 +79,6 @@ pub(super) fn require_package_metadata(sources: &ContractSources) -> CheckResult
 }
 
 pub(super) fn reject_retired_packaging(sources: &ContractSources) -> CheckResult {
-    let retired_org_scope = ascii_term(&[64, 122, 101, 114, 99, 116]);
     for source in [
         sources.cargo_cli.as_str(),
         sources.npm_install.as_str(),
@@ -100,7 +99,7 @@ pub(super) fn reject_retired_packaging(sources: &ContractSources) -> CheckResult
         )?;
         reject_contains(source, "--app", "retired app flag")?;
         reject_contains(source, "/v1/apps", "retired apps API path")?;
-        reject_contains(source, retired_org_scope.as_str(), "retired org scope")?;
+        reject_contains(source, "@zerct", "retired org scope")?;
     }
     Ok(())
 }

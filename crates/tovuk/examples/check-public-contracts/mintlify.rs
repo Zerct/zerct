@@ -183,7 +183,7 @@ fn check_mcp_discovery(
 fn reject_retired_public_names(label: &str, source: &str) -> CheckResult {
     let lower = source.to_lowercase();
     for retired in retired_public_names() {
-        if lower.contains(retired.as_str()) {
+        if lower.contains(retired) {
             return Err(format!("{label} contains retired public branding"));
         }
     }

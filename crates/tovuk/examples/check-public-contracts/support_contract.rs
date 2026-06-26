@@ -1,7 +1,6 @@
 use crate::{
     cli_contract::ContractSources,
     helpers::{CheckResult, reject_contains, require_contains, require_contains_all},
-    helpers_public_copy::ascii_term,
 };
 
 const SUPPORT_COMMANDS: &[&str] = &[
@@ -107,16 +106,15 @@ fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult 
 type RejectedSupportTerm = (String, &'static str);
 
 fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
-    let compliance_term = ascii_term(&[97, 98, 117, 115, 101]);
-    let third_party_action = ascii_term(&[114, 101, 112, 111, 114, 116]);
-    let continuous_action = ascii_term(&[114, 101, 112, 111, 114, 116, 105, 110, 103]);
+    let compliance_term = "abuse";
+    let third_party_action = "report";
     let non_service_request =
         "support surfaces must describe service tickets, not non-service requests";
     let non_service_workflow =
         "support surfaces must describe service tickets, not non-service workflows";
     let account_to_tovuk = "support surfaces must stay account-to-Tovuk service-ticket wording";
     vec![
-        (compliance_term.clone(), non_service_request),
+        (compliance_term.to_owned(), non_service_request),
         ("compliance complaint".to_owned(), non_service_request),
         ("complaint".to_owned(), non_service_request),
         ("moderation".to_owned(), non_service_workflow),
@@ -126,36 +124,21 @@ fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
             "support surfaces must describe service tickets between the account and Tovuk",
         ),
         (
-            ["user-to-user", " ", third_party_action.as_str()].concat(),
+            ["user-to-user", " ", third_party_action].concat(),
             account_to_tovuk,
         ),
+        ([third_party_action, " a user"].concat(), account_to_tovuk),
+        ([third_party_action, " user"].concat(), account_to_tovuk),
         (
-            [third_party_action.as_str(), " a user"].concat(),
+            [third_party_action, " another user"].concat(),
             account_to_tovuk,
         ),
+        ([third_party_action, " customer"].concat(), account_to_tovuk),
+        (["user ", third_party_action].concat(), account_to_tovuk),
+        (["customer ", third_party_action].concat(), account_to_tovuk),
+        ("reporting".to_owned(), account_to_tovuk),
         (
-            [third_party_action.as_str(), " user"].concat(),
-            account_to_tovuk,
-        ),
-        (
-            [third_party_action.as_str(), " another user"].concat(),
-            account_to_tovuk,
-        ),
-        (
-            [third_party_action.as_str(), " customer"].concat(),
-            account_to_tovuk,
-        ),
-        (
-            ["user ", third_party_action.as_str()].concat(),
-            account_to_tovuk,
-        ),
-        (
-            ["customer ", third_party_action.as_str()].concat(),
-            account_to_tovuk,
-        ),
-        (continuous_action, account_to_tovuk),
-        (
-            [third_party_action.as_str(), " ", compliance_term.as_str()].concat(),
+            [third_party_action, " ", compliance_term].concat(),
             account_to_tovuk,
         ),
     ]

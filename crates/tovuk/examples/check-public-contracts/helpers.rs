@@ -7,7 +7,7 @@ pub(crate) use crate::{
         env_int, file_exists, find_repo_root, must_abs, read_json, read_package_json,
         read_sorted_texts_recursive, read_text,
     },
-    helpers_public_copy::{ascii_term, reject_forbidden_public_copy_terms, retired_public_names},
+    helpers_public_copy::{reject_forbidden_public_copy_terms, retired_public_names},
 };
 
 pub(crate) type CheckResult<T = ()> = Result<T, String>;
