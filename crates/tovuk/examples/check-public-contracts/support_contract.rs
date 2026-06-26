@@ -130,7 +130,27 @@ fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
             account_to_tovuk,
         ),
         (
+            [third_party_action.as_str(), " a user"].concat(),
+            account_to_tovuk,
+        ),
+        (
+            [third_party_action.as_str(), " user"].concat(),
+            account_to_tovuk,
+        ),
+        (
             [third_party_action.as_str(), " another user"].concat(),
+            account_to_tovuk,
+        ),
+        (
+            [third_party_action.as_str(), " customer"].concat(),
+            account_to_tovuk,
+        ),
+        (
+            ["user ", third_party_action.as_str()].concat(),
+            account_to_tovuk,
+        ),
+        (
+            ["customer ", third_party_action.as_str()].concat(),
             account_to_tovuk,
         ),
         (continuous_action, account_to_tovuk),

@@ -123,7 +123,7 @@ impl ContractSources {
         ]
     }
 
-    pub(crate) fn support_public_sources(&self) -> [&str; 11] {
+    pub(crate) fn support_public_sources(&self) -> [&str; 12] {
         [
             self.root_readme.as_str(),
             self.cargo_readme.as_str(),
@@ -134,6 +134,7 @@ impl ContractSources {
             self.docs_support.as_str(),
             self.docs_llms.as_str(),
             self.docs_skill.as_str(),
+            self.docs_openapi.as_str(),
             self.packaged_skill.as_str(),
             self.cargo_cli.as_str(),
         ]
