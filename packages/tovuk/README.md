@@ -25,6 +25,9 @@ tovuk support list --limit 20 --json
 tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 ```
 
+Use `tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
+to continue stored-result pagination.
+
 The npm package exposes `bin/tovuk` and has no runtime JavaScript
 dependencies. Set `TOVUK_NATIVE_BINARY=/path/to/tovuk` to test a local binary.
 

@@ -58,6 +58,9 @@ tovuk support create "Request failed" "The scraper request failed after retry. F
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
+Use `tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
+to continue stored-result pagination.
+
 Support tickets are account-scoped service tickets between your account and
 Tovuk. Users and AI/API agents can open them through the CLI or by calling
 `POST /v1/support/tickets` with an account API key or session bearer token.

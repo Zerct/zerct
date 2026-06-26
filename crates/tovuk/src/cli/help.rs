@@ -16,7 +16,7 @@ Usage:
   tovuk request list [--limit <n>] [--api <url>] [--json]
   tovuk request create <scraper> '{"query":"coffee shops","limit":100}' [--limit <n>] [--api <url>] [--json]
   tovuk request show <request_id> [--api <url>] [--json]
-  tovuk request results <request_id> [--limit <n>] [--api <url>] [--json]
+  tovuk request results <request_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
   tovuk request cancel <request_id> [--api <url>] [--json]
   tovuk usage [--api <url>] [--json]
   tovuk billing [checkout|portal] [reason] [--api <url>] [--json]
