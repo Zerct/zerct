@@ -97,4 +97,4 @@ pub(crate) const RETIRED_OPENAPI_CONTRACTS: &[&str] = &[
 ];
 
 pub(crate) const RETIRED_PUBLIC_DOCS_WORDING: &[&str] =
-    &["tovuk.toml", "full-stack", "static frontend"];
+    &["tovuk.toml", "full-stack", "static frontend", "tovukcloud"];
