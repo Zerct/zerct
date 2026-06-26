@@ -1,6 +1,6 @@
 use crate::cli::args::CliOptions;
 
-use super::{joined_args, optional_trimmed_value, required_arg};
+use super::{joined_args, optional_trimmed_value, page_query, required_arg};
 
 #[test]
 fn joined_args_trims_and_drops_empty_values() {
@@ -34,4 +34,15 @@ fn required_arg_reads_requested_position() {
         required_arg(&cli, 1, "missing", "missing", "retry").ok(),
         Some("request_123".to_owned())
     );
+}
+
+#[test]
+fn page_query_encodes_limit_and_cursor() {
+    let cli = CliOptions {
+        limit: "25".to_owned(),
+        cursor: "after value".to_owned(),
+        ..CliOptions::default()
+    };
+
+    assert_eq!(page_query(&cli), "?limit=25&cursor=after%20value");
 }

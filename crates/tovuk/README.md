@@ -23,6 +23,9 @@ tovuk billing portal --json
 tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 ```
 
+Use `tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
+to continue stored-result pagination.
+
 The CLI does not deploy websites, backends, databases, workers, storage buckets,
 queues, cron jobs, custom domains, secrets, or other customer infrastructure.
 

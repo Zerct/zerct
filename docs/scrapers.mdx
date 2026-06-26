@@ -84,7 +84,7 @@ tovuk request cancel <request_id> --json
 ```
 
 Use `--limit <n>` on `tovuk request create` to add or override `input.limit`.
-Use `--limit <n>` on `tovuk request results` to read fewer stored Records.
+Use `--limit <n>` and `--cursor <cursor>` on `tovuk request results` to page through stored Records.
 Use `tovuk scraper health --json` before heavy scraping to inspect managed
 reader, signing worker, and Webshare proxy readiness without sending private
 account material.
