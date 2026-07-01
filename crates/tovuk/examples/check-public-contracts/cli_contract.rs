@@ -10,7 +10,7 @@ use crate::{
 };
 
 use package::{reject_retired_packaging, require_install_guides, require_package_metadata};
-use retired::{reject_retired_commands, reject_retired_public_copy};
+use retired::{reject_retired_cli_internals, reject_retired_commands, reject_retired_public_copy};
 
 #[derive(Debug)]
 pub(crate) struct ContractSources {
@@ -43,6 +43,7 @@ pub(crate) fn check() -> CheckResult {
     require_install_guides(&sources)?;
     require_package_metadata(&sources)?;
     reject_retired_packaging(&sources)?;
+    reject_retired_cli_internals(&sources)?;
     reject_retired_commands(&sources)?;
     reject_retired_public_copy(&sources)?;
     println!("Checked scraper-only native CLI command and package contract.");

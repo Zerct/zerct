@@ -59,11 +59,11 @@ pub(crate) fn read_package_json(path: impl AsRef<Path>) -> CheckResult<PackageJs
     read_json(path)
 }
 
-pub(crate) fn env_int(name: &str, fallback: i64) -> CheckResult<i64> {
+pub(crate) fn env_int(name: &str, default_value: i64) -> CheckResult<i64> {
     let raw = std::env::var(name).unwrap_or_default();
     let trimmed = raw.trim();
     if trimmed.is_empty() {
-        return Ok(fallback);
+        return Ok(default_value);
     }
     trimmed
         .parse::<i64>()
@@ -81,14 +81,18 @@ pub(crate) fn must_abs(path: impl AsRef<Path>) -> CheckResult<String> {
         .map_err(|error| format!("resolve {}: {error}", path.display()))
 }
 
-pub(crate) fn find_repo_root() -> String {
+pub(crate) fn find_repo_root() -> CheckResult<String> {
     match Command::new("git")
         .args(["rev-parse", "--show-toplevel"])
         .output()
     {
         Ok(output) if output.status.success() => {
-            String::from_utf8_lossy(&output.stdout).trim().to_owned()
+            Ok(String::from_utf8_lossy(&output.stdout).trim().to_owned())
         }
-        _ => must_abs(".").unwrap_or_else(|_| ".".to_owned()),
+        Ok(output) => Err(format!(
+            "git rev-parse --show-toplevel failed with status {}",
+            output.status
+        )),
+        Err(error) => Err(format!("run git rev-parse --show-toplevel: {error}")),
     }
 }

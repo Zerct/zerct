@@ -46,7 +46,7 @@ fn run() -> CheckResult {
         return Err("usage: scripts/check-public-contracts.sh <check>".to_owned());
     };
 
-    let repo_root = find_repo_root();
+    let repo_root = find_repo_root()?;
     env::set_current_dir(repo_root.as_str()).map_err(|error| format!("cd {repo_root}: {error}"))?;
 
     match check.as_str() {

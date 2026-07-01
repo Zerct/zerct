@@ -34,6 +34,7 @@ pub(crate) const RETIRED_CLI_COMMANDS: &[&str] = &[
     "limit",
     "files",
     "media",
+    "account update",
 ];
 
 pub(crate) const RETIRED_HELP_COMMANDS: &[&str] = &[
@@ -42,6 +43,7 @@ pub(crate) const RETIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk storage",
     "tovuk sqlite",
     "tovuk queue",
+    "tovuk account update",
 ];
 
 pub(crate) const RETIRED_PUBLIC_COMMANDS: &[&str] = &[
@@ -63,6 +65,7 @@ pub(crate) const RETIRED_PUBLIC_COMMANDS: &[&str] = &[
     "tovuk domains",
     "tovuk storage",
     "tovuk nodes",
+    "tovuk account update",
 ];
 
 pub(crate) const RETIRED_OPENAPI_CONTRACTS: &[&str] = &[
@@ -84,6 +87,9 @@ pub(crate) const RETIRED_OPENAPI_CONTRACTS: &[&str] = &[
     r#""/v1/websites""#,
     r#""/v1/capabilities""#,
     r#""/v1/usage/caps"#,
+    "updateAccountProfile",
+    "AccountProfileUpdateRequest",
+    "AccountProfileUpdated",
     "DeployRequest",
     "DeployResponse",
     "ServicesResponse",

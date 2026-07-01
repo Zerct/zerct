@@ -54,3 +54,14 @@ pub(super) fn reject_retired_public_copy(sources: &ContractSources) -> CheckResu
     }
     Ok(())
 }
+
+pub(super) fn reject_retired_cli_internals(sources: &ContractSources) -> CheckResult {
+    for snippet in ["mod project;", "project::", "build job", "Tovuk user"] {
+        reject_contains(
+            sources.cargo_cli.as_str(),
+            snippet,
+            format!("retired CLI internal wording {snippet}").as_str(),
+        )?;
+    }
+    Ok(())
+}

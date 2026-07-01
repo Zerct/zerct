@@ -1,7 +1,7 @@
 use super::super::{
     args::CliOptions,
     errors::{Result, agent_error},
-    project::encode_component,
+    utils::encode_component,
 };
 use super::{
     common::{command_arg, joined_args},

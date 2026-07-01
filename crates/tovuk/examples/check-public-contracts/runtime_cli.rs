@@ -137,6 +137,7 @@ impl Invocation<'_> {
         for retired_command in RETIRED_CLI_COMMANDS {
             self.require_failure_code(&[retired_command, "--json"], "unknown_command")?;
         }
+        self.require_failure_code(&["account", "update", "--json"], "unknown_account_command")?;
         Ok(())
     }
 

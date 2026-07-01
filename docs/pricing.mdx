@@ -15,15 +15,15 @@ request requires paid billing.
 
 | Plan | Monthly price | Included balance | Best for |
 | --- | ---: | ---: | --- |
-| Pro | `$20/month` | `$20` | Small, steady API usage |
-| Business | `$100/month` | `$125` | Regular research and enrichment |
-| Scale | `$200/month` | `$300` | Daily scraping and higher volume |
+| Plus | `$20/month` | `$20` | Small, steady API usage |
+| Pro | `$100/month` | `$120` | Regular research and enrichment |
+| Max | `$200/month` | `$300` | Daily scraping and higher volume |
 
 Manual top-ups and auto top-ups start at a `$20` minimum. Use Stripe-hosted
 checkout and portal flows:
 
 ```sh
-tovuk billing checkout --json
+tovuk billing checkout plus --json
 tovuk billing portal --json
 ```
 

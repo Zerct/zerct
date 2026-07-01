@@ -19,6 +19,7 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
     )?;
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
+    require_openapi_account_profile_contract(sources.openapi.as_str())?;
     require_openapi_status_checks(sources.openapi.as_str())?;
     require_contains_all(
         sources.openapi.as_str(),
@@ -56,15 +57,9 @@ fn require_pricing_contract(pricing: &str) -> CheckResult {
                 "There is no free scraper tier",
                 "pricing paid-only scraper docs",
             ),
-            ("| Pro | `$20/month` | `$20`", "pricing Pro balance docs"),
-            (
-                "| Business | `$100/month` | `$125`",
-                "pricing Business balance docs",
-            ),
-            (
-                "| Scale | `$200/month` | `$300`",
-                "pricing Scale balance docs",
-            ),
+            ("| Plus | `$20/month` | `$20`", "pricing Plus balance docs"),
+            ("| Pro | `$100/month` | `$120`", "pricing Pro balance docs"),
+            ("| Max | `$200/month` | `$300`", "pricing Max balance docs"),
             (
                 "deducts from that balance for each successful stored",
                 "pricing balance debit docs",
@@ -87,6 +82,35 @@ fn require_pricing_contract(pricing: &str) -> CheckResult {
             ),
         ],
     )
+}
+
+fn require_openapi_account_profile_contract(openapi: &str) -> CheckResult {
+    require_contains_all(
+        openapi,
+        &[
+            (
+                r#""AccountProfileResponse""#,
+                "OpenAPI account profile schema",
+            ),
+            (r#""accountId""#, "OpenAPI account id profile field"),
+            (r#""email""#, "OpenAPI account email profile field"),
+            (r#""provider""#, "OpenAPI account provider profile field"),
+            (r#""plan""#, "OpenAPI account plan profile field"),
+            (r#""unpaid""#, "OpenAPI unpaid account plan enum"),
+            (r#""plus""#, "OpenAPI Plus account plan enum"),
+            (r#""pro""#, "OpenAPI Pro account plan enum"),
+            (r#""max""#, "OpenAPI Max account plan enum"),
+            (r#""displayName""#, "OpenAPI display name profile field"),
+        ],
+    )?;
+    for retired in [r#""free""#, r#""handle""#, r#""billingActive""#] {
+        reject_contains(
+            openapi,
+            retired,
+            format!("retired account profile field or plan value {retired}").as_str(),
+        )?;
+    }
+    Ok(())
 }
 
 fn require_openapi_paths(openapi: &str) -> CheckResult {

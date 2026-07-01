@@ -1,12 +1,12 @@
 use super::super::{
     args::CliOptions,
-    constants::{BILLING_CHECKOUT_ROUTE, VERSION},
+    constants::VERSION,
     errors::{
         AgentErrorPayload, CliError, CliFailure, Result, agent_error_with_docs, internal_error,
     },
 };
 use reqwest::{Method, blocking::Client};
-use serde_json::{Value, json};
+use serde_json::Value;
 
 pub(crate) fn api_request(
     cli: &CliOptions,
@@ -34,29 +34,33 @@ pub(crate) fn api_request(
         agent_error_with_docs(
             "api_unreachable",
             format!("Could not reach Tovuk API: {error}"),
-            "Retry the command. If it keeps failing, check Tovuk status before changing your project.",
+            "Retry the command. If it keeps failing, check Tovuk status before changing your request.",
             "https://docs.tovuk.com/status",
             cli.output.json,
         )
     })?;
     let status = response.status();
-    let text = response.text().unwrap_or_default();
-    let data = parse_json_text(&text);
     if status.is_success() {
-        return Ok(data);
+        let text = response
+            .text()
+            .map_err(|error| internal_error(error.to_string()))?;
+        return parse_success_json_text(&text);
     }
 
-    let mut payload = agent_payload_from_json(&data).unwrap_or_else(|| AgentErrorPayload {
+    let text = response
+        .text()
+        .map_err(|error| internal_error(error.to_string()))?;
+    let data = parse_error_json_text(&text);
+    let payload = agent_payload_from_json(&data).unwrap_or_else(|| AgentErrorPayload {
         code: "api_error".to_owned(),
         message: format!("Tovuk API returned HTTP {}.", status.as_u16()),
         agent_instruction: Some(
-            "Retry the command. If it keeps failing, check Tovuk status before changing your project."
+            "Retry the command. If it keeps failing, check Tovuk status before changing your request."
                 .to_owned(),
         ),
         docs_url: None,
         checkout_url: None,
     });
-    enrich_agent_error_payload(cli, route, token, &mut payload);
     Err(CliError::new(CliFailure {
         payload,
         json: cli.output.json,
@@ -64,11 +68,22 @@ pub(crate) fn api_request(
     }))
 }
 
-fn parse_json_text(text: &str) -> Value {
+fn parse_success_json_text(text: &str) -> Result<Value> {
     if text.trim().is_empty() {
-        Value::Null
+        Ok(Value::Null)
     } else {
-        serde_json::from_str(text).unwrap_or(Value::Null)
+        serde_json::from_str(text)
+            .map_err(|error| internal_error(format!("Tovuk API returned invalid JSON: {error}")))
+    }
+}
+
+fn parse_error_json_text(text: &str) -> Value {
+    if text.trim().is_empty() {
+        return Value::Null;
+    }
+    match serde_json::from_str(text) {
+        Ok(value) => value,
+        Err(_) => Value::Null,
     }
 }
 
@@ -90,47 +105,6 @@ fn agent_payload_from_json(value: &Value) -> Option<AgentErrorPayload> {
             .and_then(Value::as_str)
             .map(str::to_owned),
     })
-}
-
-fn enrich_agent_error_payload(
-    cli: &CliOptions,
-    route: &str,
-    token: Option<&str>,
-    payload: &mut AgentErrorPayload,
-) {
-    if payload.code != "payment_required"
-        || payload
-            .checkout_url
-            .as_deref()
-            .is_some_and(|value| !value.is_empty())
-        || token.is_none()
-        || route == BILLING_CHECKOUT_ROUTE
-    {
-        return;
-    }
-    if let Some(url) = create_checkout_url(cli, token, &payload.message) {
-        payload.checkout_url = Some(url);
-    }
-}
-
-fn create_checkout_url(cli: &CliOptions, token: Option<&str>, reason: &str) -> Option<String> {
-    let token = token?;
-    let response = api_request(
-        cli,
-        Method::POST,
-        BILLING_CHECKOUT_ROUTE,
-        Some(token),
-        Some(json!({
-            "reason": if reason.is_empty() { "Plan limit reached." } else { reason },
-            "target_plan": "pro",
-        })),
-    )
-    .ok()?;
-    response
-        .get("checkout")
-        .and_then(|checkout| checkout.get("url"))
-        .and_then(Value::as_str)
-        .map(str::to_owned)
 }
 
 #[cfg(test)]

@@ -1,7 +1,5 @@
 use serde_json::{Value, json};
 
-use crate::cli::constants::{DEFAULT_LOGIN_EXPIRES_SECONDS, DEFAULT_LOGIN_INTERVAL_SECONDS};
-
 use super::{login_started_payload, login_success_payload};
 
 #[test]
@@ -18,7 +16,9 @@ fn login_started_payload_is_agent_readable_without_standalone_device_code() {
     let payload = login_started_payload(
         &start,
         "https://tovuk.com/login?device_code=secret",
-        "TOVUK-123",
+        Some("TOVUK-123"),
+        900,
+        2,
     );
 
     assert_eq!(payload["event"], "login_started");
@@ -37,21 +37,18 @@ fn login_started_payload_is_agent_readable_without_standalone_device_code() {
 }
 
 #[test]
-fn login_started_payload_defaults_missing_optional_fields() {
-    let payload = login_started_payload(&json!({}), "https://tovuk.com/login", "");
+fn login_started_payload_uses_required_timing_values() {
+    let payload = login_started_payload(&json!({}), "https://tovuk.com/login", None, 900, 2);
 
     assert_eq!(payload["verification_uri"], Value::Null);
     assert_eq!(payload["user_code"], Value::Null);
-    assert_eq!(payload["expires_in_seconds"], DEFAULT_LOGIN_EXPIRES_SECONDS);
-    assert_eq!(
-        payload["poll_interval_seconds"],
-        DEFAULT_LOGIN_INTERVAL_SECONDS
-    );
+    assert_eq!(payload["expires_in_seconds"], 900);
+    assert_eq!(payload["poll_interval_seconds"], 2);
 }
 
 #[test]
 fn login_success_payload_excludes_session_token() {
-    let payload = login_success_payload("logged_in", "ada@example.com");
+    let payload = login_success_payload("logged_in", Some("ada@example.com"));
 
     assert_eq!(payload["ok"], true);
     assert_eq!(payload["status"], "logged_in");

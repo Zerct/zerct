@@ -14,7 +14,7 @@ class Tovuk < Formula
     assert_match version.to_s, shell_output("#{bin}/tovuk --version")
     help = shell_output("#{bin}/tovuk --help")
     assert_match "tovuk account show", help
-    assert_match "tovuk account update", help
+    refute_match "tovuk account " + "update", help
     assert_match "tovuk api-key list", help
     assert_match "tovuk api-key create", help
     assert_match "tovuk api-key revoke", help
@@ -26,8 +26,8 @@ class Tovuk < Formula
     assert_match "tovuk request show", help
     assert_match "tovuk request results", help
     assert_match "tovuk usage", help
-    assert_match "tovuk billing [checkout|portal]", help
-    assert_match "tovuk billing checkout --json", help
+    assert_match "tovuk billing [checkout plus|checkout pro|checkout max|portal]", help
+    assert_match "tovuk billing checkout plus", help
     assert_match "tovuk billing portal", help
     assert_match "tovuk support create", help
     assert_match "tovuk support list", help
