@@ -7,7 +7,7 @@ fn json_output_suppresses_human_progress() {
     let mut cli = CliOptions::default();
     cli.output.json = true;
 
-    assert_eq!(progress_message(&cli, "build job_1 running"), None);
+    assert_eq!(progress_message(&cli, "waiting for login"), None);
 }
 
 #[test]
@@ -15,7 +15,7 @@ fn text_output_keeps_human_progress() {
     let cli = CliOptions::default();
 
     assert_eq!(
-        progress_message(&cli, "build job_1 running"),
-        Some("build job_1 running")
+        progress_message(&cli, "waiting for login"),
+        Some("waiting for login")
     );
 }

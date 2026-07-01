@@ -17,8 +17,8 @@ Request returns `payment_required` until billing is active.
 ## Pricing
 
 Tovuk charges per successful stored Record and deducts the final cost from the
-account balance automatically. Monthly plans provide balance first: Pro includes
-`$20`, Business includes `$125`, and Scale includes `$300`.
+account balance automatically. Monthly plans provide balance first: Plus
+includes `$20`, Pro includes `$120`, and Max includes `$300`.
 
 Use the live catalog as the source of truth:
 
@@ -231,11 +231,11 @@ Omit `repo` to let Tovuk discover candidate public repositories first, and use
 also accepts `operation: "file"` with public `repo` plus `path`, public
 `github.com` blob URLs, or public `raw.githubusercontent.com` file URLs,
 `operation: "stargazers"`, `operation: "watchers"`/`"subscribers"`, and
-`operation: "forkers"` for public repository audience pages, and
-`mode: "developers"` as an actor-compatible alias for trending developers.
+`operation: "forkers"` for public repository audience pages. Use
+`operation: "trendingDevelopers"` for trending developer lists.
 Use `operation: "marketplace"` with `query` or `searchQuery` for Marketplace
-search, `marketplaceUrls`, and Apify-compatible `appsUrls` for public
-Marketplace app pages. Tovuk stores canonical public input fields and returns
+search, `marketplaceUrls`, and `appsUrls` for public Marketplace app pages.
+Tovuk stores canonical public input fields and returns
 repository-shaped, file-shaped, issue-shaped, pull-request-shaped,
 developer-shaped, or Marketplace app Records.
 
@@ -314,7 +314,7 @@ and company employee filters. Operations include `jobs`, `job`, `company`,
 `company-search`, `company-employees`, `profile`, `profile-search`,
 `profile-posts`, `profile-comments`, `profile-reactions`, `post`,
 `post-comments`, `post-reactions`, `post-reshares`, `post-search`, and
-`company-posts`. Apify-compatible fields such as `keyword`, `searchQuery`,
+`company-posts`. Public input fields such as `keyword`, `searchQuery`,
 `profileUrls`, `publicIdentifiers`, `targetUrls`, `sort_type`, `date_filter`,
 `company_urns`, `member_urns`, `author_company_urns`,
 `author_industry_urns`, `author_job_title`, `maxPosts`, `total_posts`,

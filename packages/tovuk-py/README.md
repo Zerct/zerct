@@ -20,7 +20,7 @@ tovuk request create tiktok '{"operation":"search","query":"rust programming","l
 tovuk request show request_123 --json
 tovuk request results request_123 --limit 1000 --json
 tovuk usage --json
-tovuk billing checkout --json
+tovuk billing checkout plus --json
 tovuk billing portal --json
 tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --json
 ```

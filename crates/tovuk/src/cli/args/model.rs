@@ -13,14 +13,7 @@ pub(crate) struct CliOptions {
     pub(crate) scraper_id: String,
     pub(crate) token: String,
     pub(crate) severity: String,
-    pub(crate) account: AccountOptions,
     pub(crate) output: OutputOptions,
-}
-
-#[derive(Clone, Debug)]
-pub(crate) struct AccountOptions {
-    pub(crate) handle: String,
-    pub(crate) display_name: String,
 }
 
 #[derive(Clone, Debug)]
@@ -44,10 +37,6 @@ impl Default for CliOptions {
             scraper_id: String::new(),
             token: String::new(),
             severity: String::new(),
-            account: AccountOptions {
-                handle: String::new(),
-                display_name: String::new(),
-            },
             output: OutputOptions {
                 json: false,
                 help: false,

@@ -5,7 +5,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub(super) fn read_keychain_token() -> String {
+pub(super) fn read_keychain_token() -> Option<String> {
     if cfg!(target_os = "macos") {
         let result = Command::new("security")
             .args([
@@ -21,8 +21,7 @@ pub(super) fn read_keychain_token() -> String {
         return result
             .ok()
             .filter(|output| output.status.success())
-            .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_owned())
-            .unwrap_or_default();
+            .and_then(|output| non_empty_stdout_token(&output.stdout));
     }
 
     if cfg!(target_os = "linux") && has_command("secret-tool") {
@@ -39,11 +38,10 @@ pub(super) fn read_keychain_token() -> String {
         return result
             .ok()
             .filter(|output| output.status.success())
-            .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_owned())
-            .unwrap_or_default();
+            .and_then(|output| non_empty_stdout_token(&output.stdout));
     }
 
-    String::new()
+    None
 }
 
 pub(super) fn write_keychain_token(token: &str) -> bool {
@@ -109,4 +107,9 @@ fn has_command(command: &str) -> bool {
             }
         })
     })
+}
+
+fn non_empty_stdout_token(stdout: &[u8]) -> Option<String> {
+    let token = String::from_utf8_lossy(stdout).trim().to_owned();
+    if token.is_empty() { None } else { Some(token) }
 }

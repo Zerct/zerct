@@ -1,7 +1,7 @@
 use super::super::{
     args::CliOptions,
     errors::{Result, agent_error},
-    project::encode_component,
+    utils::encode_component,
 };
 use super::common::{page_query, required_arg};
 use super::generic::{
@@ -59,8 +59,8 @@ fn request_create(cli: &CliOptions) -> Result<()> {
         "Scraper id is required.",
         "Use `tovuk request create google-maps '{\"query\":\"coffee shops\",\"limit\":100}' --json`.",
     )?;
-    let input_source = cli.args.get(2).cloned().unwrap_or_else(|| "{}".to_owned());
-    let input = request_input(cli, &input_source)?;
+    let input_source = request_input_source(cli)?;
+    let input = request_input(cli, input_source.as_str())?;
 
     print_authenticated_mutation(
         cli,
@@ -119,6 +119,16 @@ fn request_cancel(cli: &CliOptions) -> Result<()> {
     )
 }
 
+fn request_input_source(cli: &CliOptions) -> Result<String> {
+    required_arg(
+        cli,
+        2,
+        "request_input_required",
+        "Request input JSON is required.",
+        "Use `tovuk request create google-maps '{\"query\":\"coffee shops\",\"limit\":100}' --json`.",
+    )
+}
+
 fn request_input(cli: &CliOptions, input_source: &str) -> Result<Value> {
     let mut input = serde_json::from_str::<Value>(input_source).map_err(|error| {
         agent_error(
@@ -151,3 +161,7 @@ fn request_input(cli: &CliOptions, input_source: &str) -> Result<Value> {
     }
     Ok(input)
 }
+
+#[cfg(test)]
+#[path = "scrapers_tests.rs"]
+mod tests;

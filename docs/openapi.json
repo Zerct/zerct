@@ -229,51 +229,6 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         }
-      },
-      "put": {
-        "tags": [
-          "Accounts"
-        ],
-        "summary": "Update account profile",
-        "description": "Updates the authenticated account handle and display name.",
-        "operationId": "updateAccountProfile",
-        "requestBody": {
-          "description": "Account profile update body.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountProfileUpdateRequest"
-              },
-              "examples": {
-                "example": {
-                  "summary": "Account profile update body.",
-                  "value": {
-                    "handle": "tovuk-team",
-                    "displayName": "Tovuk Team"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "$ref": "#/components/responses/AccountProfileUpdated"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "429": {
-            "$ref": "#/components/responses/TooManyRequests"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
       }
     },
     "/v1/account/activity": {
@@ -725,7 +680,7 @@
         "description": "Creates a hosted checkout session for plan activation or balance top-up.",
         "operationId": "createBillingCheckout",
         "requestBody": {
-          "description": "Optional billing checkout reason.",
+          "description": "Billing checkout target and reason.",
           "required": true,
           "content": {
             "application/json": {
@@ -734,8 +689,9 @@
               },
               "examples": {
                 "example": {
-                  "summary": "Optional billing checkout reason.",
+                  "summary": "Plus subscription checkout.",
                   "value": {
+                    "target_plan": "plus",
                     "reason": "High-count scraper request"
                   }
                 }
@@ -1234,13 +1190,11 @@
               "example": {
                 "summary": "Account profile loaded.",
                 "value": {
-                  "ok": true,
-                  "account": {
-                    "id": "acct_123",
-                    "handle": "tovuk-team",
-                    "displayName": "Tovuk Team",
-                    "billingActive": true
-                  }
+                  "accountId": "acct_123",
+                  "email": "user@example.com",
+                  "provider": "google",
+                  "plan": "pro",
+                  "displayName": null
                 }
               }
             }
@@ -1269,62 +1223,6 @@
           },
           "X-RateLimit-Reset": {
             "description": "Unix timestamp when the current window resets. Context $.components.responses.AccountProfileLoaded.headers.X-RateLimit-Reset.",
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "minimum": 0,
-              "maximum": 4102444800,
-              "example": 1782216000
-            }
-          }
-        }
-      },
-      "AccountProfileUpdated": {
-        "description": "Account profile updated.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/AccountProfileResponse"
-            },
-            "examples": {
-              "example": {
-                "summary": "Account profile updated.",
-                "value": {
-                  "ok": true,
-                  "account": {
-                    "id": "acct_123",
-                    "handle": "tovuk-team",
-                    "displayName": "Tovuk Team",
-                    "billingActive": true
-                  }
-                }
-              }
-            }
-          }
-        },
-        "headers": {
-          "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.AccountProfileUpdated.headers.X-RateLimit-Limit.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 0,
-              "maximum": 100000,
-              "example": 1000
-            }
-          },
-          "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.AccountProfileUpdated.headers.X-RateLimit-Remaining.",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "minimum": 0,
-              "maximum": 100000,
-              "example": 999
-            }
-          },
-          "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.AccountProfileUpdated.headers.X-RateLimit-Reset.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2354,7 +2252,7 @@
                 "value": {
                   "code": "payment_required",
                   "message": "Billing is required.",
-                  "agent_instruction": "Run tovuk billing checkout --json.",
+                  "agent_instruction": "Run tovuk billing checkout plus --json, tovuk billing checkout pro --json, or tovuk billing checkout max --json.",
                   "docs_url": "https://docs.tovuk.com/pricing"
                 }
               }
@@ -2754,96 +2652,62 @@
           "expires_at": "2026-06-23T12:00:00Z"
         }
       },
-      "AccountProfile": {
+      "AccountProfileResponse": {
         "type": "object",
         "description": "Authenticated account profile.",
         "required": [
-          "id",
-          "handle",
-          "displayName",
-          "billingActive"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "id_123"
-          },
-          "handle": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
-          },
-          "displayName": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
-          },
-          "billingActive": {
-            "type": "boolean",
-            "example": true
-          }
-        },
-        "example": {
-          "id": "id_123",
-          "handle": "example",
-          "displayName": "example",
-          "billingActive": true
-        }
-      },
-      "AccountProfileResponse": {
-        "type": "object",
-        "description": "Account profile response.",
-        "required": [
-          "ok",
-          "account"
-        ],
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
-          "account": {
-            "$ref": "#/components/schemas/AccountProfile"
-          }
-        },
-        "example": {
-          "ok": true,
-          "account": {
-            "id": "id_123",
-            "handle": "example",
-            "displayName": "example",
-            "billingActive": true
-          }
-        }
-      },
-      "AccountProfileUpdateRequest": {
-        "type": "object",
-        "description": "Account profile update request.",
-        "additionalProperties": false,
-        "required": [
-          "handle",
+          "accountId",
+          "email",
+          "provider",
+          "plan",
           "displayName"
         ],
         "properties": {
-          "handle": {
+          "accountId": {
             "type": "string",
-            "minLength": 3,
-            "maxLength": 39,
-            "pattern": "^[a-z0-9][a-z0-9-]{1,37}[a-z0-9]$",
-            "example": "example"
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "acct_123"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@example.com"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "github",
+              "google",
+              "email"
+            ],
+            "example": "google"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "unpaid",
+              "plus",
+              "pro",
+              "max"
+            ],
+            "example": "pro"
           },
           "displayName": {
-            "type": "string",
-            "minLength": 1,
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 80,
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": null
           }
         },
         "example": {
-          "handle": "example",
-          "displayName": "example"
+          "accountId": "acct_123",
+          "email": "user@example.com",
+          "provider": "google",
+          "plan": "pro",
+          "displayName": null
         }
       },
       "AccountActivityItem": {

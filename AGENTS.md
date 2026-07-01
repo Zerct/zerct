@@ -17,6 +17,10 @@ Never delegate Tovuk public repo work to subagents. Do the audit,
 implementation, verification, and reporting yourself in the current Codex
 thread.
 
+Work locally and commit coherent increments. Push to main or master only after
+30 local commits unless the user explicitly asks earlier. Do not deploy from
+this public repo unless the user explicitly asks for a deploy.
+
 ## Product Boundary
 
 - Public CLI commands are limited to login, account, pricing, scraper, request,
@@ -28,8 +32,9 @@ thread.
   tokens, private session data, private repository credentials, proxy URLs, or
   private account content through the public API or CLI.
 - There is no free scraper tier. Creating scraper requests requires paid
-  billing. Plans are account-level and balance-first: `$20/month` includes
-  `$20`, `$100/month` includes `$125`, and `$200/month` includes `$300`.
+  billing. Plans are account-level and balance-first: Plus at `$20/month`
+  includes `$20`, Pro at `$100/month` includes `$120`, and Max at
+  `$200/month` includes `$300`.
 - Billing is per successful stored scraper result. Keep pricing exact and
   synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
   contract checks.
@@ -48,7 +53,9 @@ thread.
 - JavaScript and TypeScript are allowed only for static documentation/frontend
   assets. Do not add API routes, SSR handlers, middleware, Node/Bun/Deno
   servers, or TypeScript runtime commands.
-- Prefer Rust-native verification. Do not add Go checks.
+- Prefer Rust-native verification. Add a Go-native check only when it is
+  stable, stricter than the Rust-native alternatives for a real quality gap,
+  and does not add runtime surface or package dependencies.
 - Keep Cargo, npm, PyPI, and Homebrew package versions synchronized whenever
   the native CLI changes.
 - `Formula/tovuk.rb` is the Homebrew formula for the main `tovuk/tovuk`
