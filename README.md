@@ -35,7 +35,6 @@ Then use the scraper workflow:
 tovuk login --json
 tovuk account show --json
 tovuk account activity --limit 20 --json
-tovuk account update --handle tovuk-team --display-name "Tovuk Team" --json
 tovuk api-key list --json
 tovuk api-key create "Production scraper" --json
 tovuk api-key revoke api_key_0123456789abcdef01234567 --json
@@ -51,7 +50,7 @@ tovuk request show request_123 --json
 tovuk request results request_123 --limit 1000 --json
 tovuk request cancel request_123 --json
 tovuk usage --json
-tovuk billing checkout --json
+tovuk billing checkout plus --json
 tovuk billing portal --json
 tovuk support list --limit 20 --json
 tovuk support create "Request failed" "The scraper request failed after retry. First error: upstream timeout." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123 --json" --first-log-line "upstream timeout" --severity normal --json

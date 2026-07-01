@@ -5,6 +5,4 @@ pub(crate) const SESSION_FILE: &str = "session-token";
 pub(crate) const SESSION_SERVICE: &str = "com.tovuk.cli";
 pub(crate) const SESSION_ACCOUNT: &str = "session-token";
 pub(crate) const SESSION_LABEL: &str = "Tovuk session";
-pub(crate) const DEFAULT_LOGIN_EXPIRES_SECONDS: u64 = 600;
-pub(crate) const DEFAULT_LOGIN_INTERVAL_SECONDS: u64 = 5;
 pub(crate) const BILLING_CHECKOUT_ROUTE: &str = "/v1/billing/checkout";

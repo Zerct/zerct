@@ -38,7 +38,7 @@ tovuk request show request_123
 tovuk request results request_123 --limit 1000
 tovuk request results request_123 --limit 1000 --cursor <nextCursor>
 tovuk request cancel request_123
-tovuk billing checkout
+tovuk billing checkout plus
 tovuk billing portal
 tovuk support list --limit 20
 tovuk support create "Request failed" "Request failed after retry." --request-id request_123 --scraper-id tiktok --failing-command "tovuk request show request_123" --first-log-line "upstream timeout" --severity normal
