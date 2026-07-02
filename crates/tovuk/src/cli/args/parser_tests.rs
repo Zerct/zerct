@@ -19,20 +19,24 @@ fn output_json_enables_json_output() {
 }
 
 #[test]
-fn output_text_overrides_json_flag() {
-    let parsed = parse_args(&args(&["check", "--json", "--output=text"]));
-
-    assert!(parsed.as_ref().is_ok_and(|cli| !cli.output.json));
-}
-
-#[test]
 fn invalid_output_value_is_rejected() {
-    let parsed = parse_args(&args(&["check", "--output", "yaml"]));
+    let parsed = parse_args(&args(&["check", "--output", "text"]));
 
     assert!(
         parsed
             .as_ref()
             .is_err_and(|error| error.payload().code == "invalid_argument")
+    );
+}
+
+#[test]
+fn api_override_is_not_public_cli_surface() {
+    let parsed = parse_args(&args(&["account", "show", "--api=https://example.test"]));
+
+    assert!(
+        parsed
+            .as_ref()
+            .is_err_and(|error| error.payload().code == "unknown_argument")
     );
 }
 
