@@ -1,12 +1,12 @@
-use std::time::Duration;
+use std::{thread::sleep, time::Duration};
 
 use reqwest::{Url, blocking::Client};
+use serde::Deserialize;
 use serde_json::Value;
 
 use crate::helpers::{
     CheckResult, env_int, has_markdown_link, number_field, read_json,
-    reject_forbidden_public_copy_terms, require_contains, require_contains_all,
-    retired_public_names,
+    reject_forbidden_public_copy_terms, require_contains, retired_public_names,
 };
 use crate::mintlify_fetch::{fetch_text, normalize_target_url, retry_delay};
 
@@ -60,7 +60,6 @@ fn check_required_agent_paths(
         "/skill.md",
         "/.well-known/skills/index.json",
         "/.well-known/agent-skills/index.json",
-        "/.well-known/mcp",
         "/sitemap.xml",
         "/robots.txt",
         "/openapi.json",
@@ -162,23 +161,47 @@ fn check_mcp_discovery(
     retries: i64,
     retry_delay: Duration,
 ) -> CheckResult {
-    let mcp_discovery = fetch_text(
+    fetch_text_until_valid(
         client,
         base_url,
         "/.well-known/mcp",
         &[],
         retries,
         retry_delay,
+        |source| {
+            if source.trim().is_empty() {
+                return Err("/.well-known/mcp is empty".to_owned());
+            }
+            reject_retired_public_names("/.well-known/mcp", source)?;
+            require_mcp_urls_on_base_host(base_url, source)
+        },
     )?;
-    require_contains_all(
-        mcp_discovery.as_str(),
-        &[
-            (r#""url""#, "MCP discovery"),
-            (":", "MCP discovery"),
-            ("/mcp", "MCP discovery"),
-        ],
-    )?;
-    require_mcp_urls_on_base_host(base_url, mcp_discovery.as_str())
+    Ok(())
+}
+
+fn fetch_text_until_valid(
+    client: &Client,
+    base_url: &str,
+    path: &str,
+    headers: &[(&str, &str)],
+    retries: i64,
+    retry_delay: Duration,
+    validate: impl Fn(&str) -> CheckResult,
+) -> CheckResult<String> {
+    let mut last_error = "request was not attempted".to_owned();
+    for attempt in 0..=retries {
+        match fetch_text(client, base_url, path, headers, 0, retry_delay) {
+            Ok(text) => match validate(text.as_str()) {
+                Ok(()) => return Ok(text),
+                Err(error) => last_error = error,
+            },
+            Err(error) => last_error = error,
+        }
+        if attempt < retries {
+            sleep(retry_delay);
+        }
+    }
+    Err(last_error)
 }
 
 fn require_mcp_urls_on_base_host(base_url: &str, source: &str) -> CheckResult {
@@ -186,38 +209,13 @@ fn require_mcp_urls_on_base_host(base_url: &str, source: &str) -> CheckResult {
     let base_host = base
         .host_str()
         .ok_or_else(|| format!("docs base URL must include a host: {base_url}"))?;
-    let discovery = serde_json::from_str::<Value>(source)
+    let discovery = serde_json::from_str::<McpDiscovery>(source)
         .map_err(|error| format!("parse MCP discovery JSON: {error}"))?;
-    let mut urls = Vec::new();
-    collect_url_fields(&discovery, &mut urls);
-    if urls.is_empty() {
-        return Err("MCP discovery did not include URL fields".to_owned());
-    }
-    for url in urls {
-        require_mcp_url_on_base_host(base.scheme(), base_host, url)?;
+    require_mcp_url_on_base_host(base.scheme(), base_host, discovery.url.as_str())?;
+    for server in &discovery.servers {
+        require_mcp_url_on_base_host(base.scheme(), base_host, server.url.as_str())?;
     }
     Ok(())
-}
-
-fn collect_url_fields<'a>(value: &'a Value, urls: &mut Vec<&'a str>) {
-    match value {
-        Value::Array(items) => {
-            for item in items {
-                collect_url_fields(item, urls);
-            }
-        }
-        Value::Object(fields) => {
-            for (name, item) in fields {
-                if name == "url" {
-                    if let Value::String(url) = item {
-                        urls.push(url.as_str());
-                    }
-                }
-                collect_url_fields(item, urls);
-            }
-        }
-        _ => {}
-    }
 }
 
 fn require_mcp_url_on_base_host(base_scheme: &str, base_host: &str, url: &str) -> CheckResult {
@@ -234,6 +232,18 @@ fn require_mcp_url_on_base_host(base_scheme: &str, base_host: &str, url: &str) -
         ));
     }
     Ok(())
+}
+
+#[derive(Deserialize)]
+struct McpDiscovery {
+    url: String,
+    #[serde(default)]
+    servers: Vec<McpServer>,
+}
+
+#[derive(Deserialize)]
+struct McpServer {
+    url: String,
 }
 
 fn reject_retired_public_names(label: &str, source: &str) -> CheckResult {
@@ -308,6 +318,19 @@ mod tests {
         assert!(
             matches!(result, Err(message) if message.contains("public /mcp path")),
             "MCP discovery should use the public /mcp path"
+        );
+    }
+
+    #[test]
+    fn ignores_unrelated_discovery_url_metadata() {
+        let source = r#"{
+            "url": "https://docs.tovuk.com/mcp",
+            "metadata": {"url": "https://example.com/not-an-endpoint"}
+        }"#;
+
+        assert!(
+            require_mcp_urls_on_base_host("https://docs.tovuk.com", source).is_ok(),
+            "MCP discovery should validate endpoint fields, not unrelated metadata"
         );
     }
 }

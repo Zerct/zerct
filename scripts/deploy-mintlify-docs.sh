@@ -100,15 +100,13 @@ wait_for_deployment() {
 
     case "$status" in
       success)
-        verify_public_agent_readiness
-        exit 0
+        return 0
         ;;
       failure)
         if generated_subdomain_revalidation_failed "$summary" &&
           content_update_finished "$response"; then
           echo "::warning::Mintlify updated docs content but failed to revalidate an external generated subdomain. Custom-domain docs content is live."
-          verify_public_agent_readiness
-          exit 0
+          return 0
         fi
         printf '%s\n' "$response" | print_sanitized_logs
         exit 1
@@ -168,4 +166,17 @@ verify_public_agent_readiness() {
   ./scripts/check-public-contracts.sh mintlify-agent-readiness "$target"
 }
 
-wait_for_deployment "$(trigger_deployment)"
+main() {
+  local status_id
+
+  status_id="$(trigger_deployment)"
+  if [ -z "$status_id" ]; then
+    echo "::error title=Mintlify deployment trigger failed::Mintlify did not return a deployment status id." >&2
+    exit 1
+  fi
+
+  wait_for_deployment "$status_id"
+  verify_public_agent_readiness
+}
+
+main "$@"

@@ -14,6 +14,52 @@ use github_actions_policy::{
     workflows,
 };
 
+struct ReleaseWorkflowPolicy {
+    suffix: &'static str,
+    checks: &'static [ReleaseWorkflowCheck],
+}
+
+#[derive(Copy, Clone)]
+enum ReleaseWorkflowCheck {
+    NativeBinaryPublish,
+    PackageVersions,
+    PackagePublish,
+    NativeReleaseAssets,
+}
+
+const NATIVE_BINARY_RELEASE_CHECKS: &[ReleaseWorkflowCheck] = &[
+    ReleaseWorkflowCheck::NativeBinaryPublish,
+    ReleaseWorkflowCheck::PackageVersions,
+];
+const CRATE_RELEASE_CHECKS: &[ReleaseWorkflowCheck] = &[
+    ReleaseWorkflowCheck::PackageVersions,
+    ReleaseWorkflowCheck::PackagePublish,
+];
+const WRAPPER_RELEASE_CHECKS: &[ReleaseWorkflowCheck] = &[
+    ReleaseWorkflowCheck::PackageVersions,
+    ReleaseWorkflowCheck::PackagePublish,
+    ReleaseWorkflowCheck::NativeReleaseAssets,
+];
+
+const RELEASE_WORKFLOW_POLICIES: &[ReleaseWorkflowPolicy] = &[
+    ReleaseWorkflowPolicy {
+        suffix: "publish-native-binaries.yml",
+        checks: NATIVE_BINARY_RELEASE_CHECKS,
+    },
+    ReleaseWorkflowPolicy {
+        suffix: "publish-crates.yml",
+        checks: CRATE_RELEASE_CHECKS,
+    },
+    ReleaseWorkflowPolicy {
+        suffix: "publish-npm.yml",
+        checks: WRAPPER_RELEASE_CHECKS,
+    },
+    ReleaseWorkflowPolicy {
+        suffix: "publish-pypi.yml",
+        checks: WRAPPER_RELEASE_CHECKS,
+    },
+];
+
 fn main() -> ExitCode {
     match run() {
         Ok(()) => ExitCode::SUCCESS,
@@ -213,43 +259,46 @@ fn check_github_hosted_cargo_cache(workflow: &Workflow, findings: &mut Vec<Strin
 }
 
 fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<String>) {
-    let path = workflow.path.to_string_lossy();
-    if path.ends_with("publish-native-binaries.yml") {
-        check_native_binary_publish_workflow(workflow, findings);
-    }
-    if path.ends_with("publish-native-binaries.yml")
-        || path.ends_with("publish-crates.yml")
-        || path.ends_with("publish-npm.yml")
-        || path.ends_with("publish-pypi.yml")
-    {
-        require_contains(
-            workflow.contents.as_str(),
-            "scripts/check-public-contracts.sh package-versions",
-            format!(
-                "{}: publish workflows must verify all public package versions before publishing",
-                workflow.path.display()
-            )
-            .as_str(),
-            findings,
-        );
-    }
-    if path.ends_with("publish-crates.yml")
-        || path.ends_with("publish-npm.yml")
-        || path.ends_with("publish-pypi.yml")
-    {
-        check_package_publish_workflow(workflow, findings);
-    }
-    if path.ends_with("publish-npm.yml") || path.ends_with("publish-pypi.yml") {
-        require_contains(
-            workflow.contents.as_str(),
-            "./scripts/check-native-release-assets.sh",
-            format!(
-                "{}: package publish must verify native release assets before publishing wrappers",
-                workflow.path.display()
-            )
-            .as_str(),
-            findings,
-        );
+    let Some(policy) = RELEASE_WORKFLOW_POLICIES
+        .iter()
+        .find(|policy| workflow.path.ends_with(policy.suffix))
+    else {
+        return;
+    };
+
+    for check in policy.checks {
+        match check {
+            ReleaseWorkflowCheck::NativeBinaryPublish => {
+                check_native_binary_publish_workflow(workflow, findings);
+            }
+            ReleaseWorkflowCheck::PackageVersions => {
+                require_contains(
+                    workflow.contents.as_str(),
+                    "scripts/check-public-contracts.sh package-versions",
+                    format!(
+                        "{}: publish workflows must verify all public package versions before publishing",
+                        workflow.path.display()
+                    )
+                    .as_str(),
+                    findings,
+                );
+            }
+            ReleaseWorkflowCheck::PackagePublish => {
+                check_package_publish_workflow(workflow, findings);
+            }
+            ReleaseWorkflowCheck::NativeReleaseAssets => {
+                require_contains(
+                    workflow.contents.as_str(),
+                    "./scripts/check-native-release-assets.sh",
+                    format!(
+                        "{}: package publish must verify native release assets before publishing wrappers",
+                        workflow.path.display()
+                    )
+                    .as_str(),
+                    findings,
+                );
+            }
+        }
     }
 }
 

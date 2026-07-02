@@ -76,6 +76,14 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "TOVUK_DOCS_PUBLIC_URL:-https://docs.tovuk.com",
             "Mintlify docs deploy must default readiness checks to the public docs domain",
         ),
+        (
+            "status_id=\"$(trigger_deployment)\"",
+            "Mintlify docs deploy must capture the deployment status id before polling",
+        ),
+        (
+            "wait_for_deployment \"$status_id\"\n  verify_public_agent_readiness",
+            "Mintlify docs deploy must verify public agent readiness once after polling the captured deployment",
+        ),
     ] {
         if !script.contains(snippet) {
             return Err(label.to_owned());
