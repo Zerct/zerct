@@ -16,7 +16,7 @@ struct SupportTicketInput {
     subject: String,
     details: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    severity: Option<String>,
+    severity: Option<SupportSeverity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     request_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -25,6 +25,14 @@ struct SupportTicketInput {
     failing_command: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     first_log_line: Option<String>,
+}
+
+#[derive(Clone, Copy, Serialize)]
+#[serde(rename_all = "lowercase")]
+enum SupportSeverity {
+    Low,
+    Normal,
+    Urgent,
 }
 
 pub(crate) fn support_command(cli: &CliOptions) -> Result<()> {
@@ -82,7 +90,7 @@ fn support_create_body(cli: &CliOptions) -> Result<Value> {
     serde_json::to_value(SupportTicketInput {
         subject: subject.to_owned(),
         details,
-        severity: support_severity(cli),
+        severity: support_severity(cli)?,
         request_id: optional_trimmed_value(cli.request_id.as_str()),
         scraper_id: optional_trimmed_value(cli.scraper_id.as_str()),
         failing_command: optional_trimmed_value(cli.failing_command.as_str()),
@@ -102,8 +110,21 @@ fn support_details(cli: &CliOptions) -> String {
     joined_args(cli, 2)
 }
 
-fn support_severity(cli: &CliOptions) -> Option<String> {
-    optional_trimmed_value(cli.severity.as_str())
+fn support_severity(cli: &CliOptions) -> Result<Option<SupportSeverity>> {
+    let Some(value) = optional_trimmed_value(cli.severity.as_str()) else {
+        return Ok(None);
+    };
+    match value.as_str() {
+        "low" => Ok(Some(SupportSeverity::Low)),
+        "normal" => Ok(Some(SupportSeverity::Normal)),
+        "urgent" => Ok(Some(SupportSeverity::Urgent)),
+        _ => Err(agent_error(
+            "invalid_support_ticket",
+            "Support ticket severity must be low, normal, or urgent.",
+            "Use `--severity low`, `--severity normal`, or `--severity urgent`.",
+            cli.output.json,
+        )),
+    }
 }
 
 #[cfg(test)]
