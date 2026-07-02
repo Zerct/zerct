@@ -46,7 +46,7 @@ cargo check --locked --release --all-targets --all-features --manifest-path crat
 cargo test --locked --release --all-targets --all-features --manifest-path crates/tovuk/Cargo.toml
 cargo clippy --manifest-path crates/tovuk/Cargo.toml "${strict_clippy_args[@]}"
 cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
-cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty --no-verify >/dev/null
+cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty >/dev/null
 (cd crates/tovuk && cargo machete)
 mkdir -p target
 cargo metadata --locked --manifest-path crates/tovuk/Cargo.toml --all-features --format-version 1 >target/tovuk-cargo-deny-metadata.json
