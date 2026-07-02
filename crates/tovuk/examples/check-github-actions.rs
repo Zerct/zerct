@@ -191,6 +191,57 @@ fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<St
             findings,
         );
     }
+    if path.ends_with("publish-native-binaries.yml")
+        || path.ends_with("publish-crates.yml")
+        || path.ends_with("publish-npm.yml")
+        || path.ends_with("publish-pypi.yml")
+    {
+        require_contains(
+            workflow.contents.as_str(),
+            "scripts/check-public-contracts.sh package-versions",
+            format!(
+                "{}: publish workflows must verify all public package versions before publishing",
+                workflow.path.display()
+            )
+            .as_str(),
+            findings,
+        );
+    }
+    if path.ends_with("publish-crates.yml")
+        || path.ends_with("publish-npm.yml")
+        || path.ends_with("publish-pypi.yml")
+    {
+        require_contains(
+            workflow.contents.as_str(),
+            "workflow_run:",
+            format!(
+                "{}: package publish must wait for native binary workflow completion",
+                workflow.path.display()
+            )
+            .as_str(),
+            findings,
+        );
+        require_contains(
+            workflow.contents.as_str(),
+            "Publish native binaries",
+            format!(
+                "{}: package publish must depend on the native binary workflow",
+                workflow.path.display()
+            )
+            .as_str(),
+            findings,
+        );
+        require_contains(
+            workflow.contents.as_str(),
+            "github.event.workflow_run.conclusion == 'success'",
+            format!(
+                "{}: package publish must reject failed native binary workflow runs",
+                workflow.path.display()
+            )
+            .as_str(),
+            findings,
+        );
+    }
     if path.ends_with("publish-npm.yml") || path.ends_with("publish-pypi.yml") {
         require_contains(
             workflow.contents.as_str(),

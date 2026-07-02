@@ -2,17 +2,11 @@ name: Publish npm package
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "packages/tovuk/package.json"
-      - "packages/tovuk/package-lock.json"
-      - "packages/tovuk/install.mjs"
-      - "packages/tovuk/bin/tovuk"
-      - "crates/tovuk/Cargo.toml"
-      - "crates/tovuk/Cargo.lock"
-      - "crates/tovuk/src/**"
+  workflow_run:
+    workflows:
+      - Publish native binaries
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -25,13 +19,15 @@ concurrency:
 jobs:
   publish:
     name: publish tovuk to npm
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment: npm
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -39,6 +35,8 @@ jobs:
           cache: npm
           cache-dependency-path: packages/tovuk/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
+      - name: Check public release version contract
+        run: scripts/check-public-contracts.sh package-versions
       - uses: actions/cache@v5
         with:
           path: |
@@ -110,7 +108,7 @@ jobs:
           TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
       - name: Verify native release assets
         if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
-        run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}" 1200
+        run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Publish package with npm token
