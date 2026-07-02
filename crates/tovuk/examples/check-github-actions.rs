@@ -178,18 +178,7 @@ fn check_github_hosted_cargo_cache(workflow: &Workflow, findings: &mut Vec<Strin
 fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<String>) {
     let path = workflow.path.to_string_lossy();
     if path.ends_with("publish-native-binaries.yml") {
-        require_contains(
-            workflow.contents.as_str(),
-            "aarch64-unknown-linux-gnu",
-            "publish-native-binaries.yml must build every native target used by public package wrappers",
-            findings,
-        );
-        require_contains(
-            workflow.contents.as_str(),
-            ".sha256",
-            "publish-native-binaries.yml must publish SHA-256 checksum assets for native binaries",
-            findings,
-        );
+        check_native_binary_publish_workflow(workflow, findings);
     }
     if path.ends_with("publish-native-binaries.yml")
         || path.ends_with("publish-crates.yml")
@@ -211,36 +200,7 @@ fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<St
         || path.ends_with("publish-npm.yml")
         || path.ends_with("publish-pypi.yml")
     {
-        require_contains(
-            workflow.contents.as_str(),
-            "workflow_run:",
-            format!(
-                "{}: package publish must wait for native binary workflow completion",
-                workflow.path.display()
-            )
-            .as_str(),
-            findings,
-        );
-        require_contains(
-            workflow.contents.as_str(),
-            "Publish native binaries",
-            format!(
-                "{}: package publish must depend on the native binary workflow",
-                workflow.path.display()
-            )
-            .as_str(),
-            findings,
-        );
-        require_contains(
-            workflow.contents.as_str(),
-            "github.event.workflow_run.conclusion == 'success'",
-            format!(
-                "{}: package publish must reject failed native binary workflow runs",
-                workflow.path.display()
-            )
-            .as_str(),
-            findings,
-        );
+        check_package_publish_workflow(workflow, findings);
     }
     if path.ends_with("publish-npm.yml") || path.ends_with("publish-pypi.yml") {
         require_contains(
@@ -251,6 +211,63 @@ fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<St
                 workflow.path.display()
             )
             .as_str(),
+            findings,
+        );
+    }
+}
+
+fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
+    require_contains(
+        workflow.contents.as_str(),
+        "github.ref == 'refs/heads/main'",
+        "publish-native-binaries.yml must reject workflow_dispatch release uploads from non-main refs",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        "aarch64-unknown-linux-gnu",
+        "publish-native-binaries.yml must build every native target used by public package wrappers",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        ".sha256",
+        "publish-native-binaries.yml must publish SHA-256 checksum assets for native binaries",
+        findings,
+    );
+}
+
+fn check_package_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
+    for (needle, message) in [
+        (
+            "workflow_run:",
+            "package publish must wait for native binary workflow completion",
+        ),
+        (
+            "Publish native binaries",
+            "package publish must depend on the native binary workflow",
+        ),
+        (
+            "github.event.workflow_run.conclusion == 'success'",
+            "package publish must reject failed native binary workflow runs",
+        ),
+        (
+            "github.event.workflow_run.event == 'push'",
+            "package publish must only trust native binary workflow_run events created by main pushes",
+        ),
+        (
+            "github.event.workflow_run.head_branch == 'main'",
+            "package publish must only trust native binary workflow_run events from main",
+        ),
+        (
+            "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+            "manual package publishes must be restricted to the main ref",
+        ),
+    ] {
+        require_contains(
+            workflow.contents.as_str(),
+            needle,
+            format!("{}: {message}", workflow.path.display()).as_str(),
             findings,
         );
     }
