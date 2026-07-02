@@ -7,15 +7,19 @@ website deploys, backends, databases, workers, object storage buckets, queues,
 cron jobs, custom domains, secrets, runtime services, or other cloud-service
 products.
 
-Keep this file compact and durable. Put directory-specific rules in a closer
-`AGENTS.md` if a subtree needs different commands or ownership. More deeply
-nested files override this one. When editing agent instructions, first remove
-stale or duplicated guidance; add rules only for Tovuk-specific invariants,
-commands, or verification gates that remain true across coding-tool upgrades.
+Keep this file compact and durable. Codex loads project instructions from the
+repo root down to the current directory, and the default combined project
+guidance cap is 32 KiB. Put directory-specific rules in a closer `AGENTS.md`
+if a subtree needs different commands or ownership. More deeply nested files
+override this one. When editing agent instructions, follow the OpenAI Codex
+guidance: first remove stale or duplicated guidance, then add rules only for
+Tovuk-specific invariants, commands, or verification gates that remain true
+across coding-tool upgrades.
 
-Never delegate Tovuk public repo work to subagents. Do the audit,
-implementation, verification, and reporting yourself in the current Codex
-thread.
+Do not delegate implementation, final judgment, verification, or reporting to
+subagents. If the user explicitly requests a skill workflow that uses review
+subagents, use them only for discovery and independent critique; the current
+Codex thread still owns the edits, checks, and final report.
 
 Work locally and commit coherent increments. Push to main or master only after
 30 local commits unless the user explicitly asks earlier. Do not deploy from

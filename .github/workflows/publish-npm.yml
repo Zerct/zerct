@@ -108,6 +108,11 @@ jobs:
         working-directory: packages/tovuk
         env:
           TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
+      - name: Verify native release assets
+        if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
+        run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}" 1200
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Publish package with npm token
         if: steps.gate.outputs.enabled == 'true' && steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'token'
         run: npm publish --access public

@@ -114,6 +114,7 @@ fn check_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
     check_checkout_credentials(workflow, findings);
     check_self_hosted_policy(workflow, findings);
     check_github_hosted_cargo_cache(workflow, findings);
+    check_public_package_release_order(workflow, findings);
 }
 
 fn check_checkout_credentials(workflow: &Workflow, findings: &mut Vec<String>) {
@@ -171,6 +172,30 @@ fn check_github_hosted_cargo_cache(workflow: &Workflow, findings: &mut Vec<Strin
             "{}: GitHub-hosted Rust jobs must use actions/cache@v5",
             workflow.path.display()
         ));
+    }
+}
+
+fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<String>) {
+    let path = workflow.path.to_string_lossy();
+    if path.ends_with("publish-native-binaries.yml") {
+        require_contains(
+            workflow.contents.as_str(),
+            "aarch64-unknown-linux-gnu",
+            "publish-native-binaries.yml must build every native target used by public package wrappers",
+            findings,
+        );
+    }
+    if path.ends_with("publish-npm.yml") || path.ends_with("publish-pypi.yml") {
+        require_contains(
+            workflow.contents.as_str(),
+            "./scripts/check-native-release-assets.sh",
+            format!(
+                "{}: package publish must verify native release assets before publishing wrappers",
+                workflow.path.display()
+            )
+            .as_str(),
+            findings,
+        );
     }
 }
 

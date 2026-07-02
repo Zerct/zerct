@@ -20,6 +20,8 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
     require_pricing_contract(sources.pricing.as_str())?;
     require_openapi_paths(sources.openapi.as_str())?;
     require_openapi_account_profile_contract(sources.openapi.as_str())?;
+    require_openapi_api_key_contract(sources.openapi.as_str())?;
+    require_openapi_billing_contract(sources.openapi.as_str())?;
     require_openapi_status_checks(sources.openapi.as_str())?;
     require_contains_all(
         sources.openapi.as_str(),
@@ -122,6 +124,8 @@ fn require_openapi_paths(openapi: &str) -> CheckResult {
         r#""/v1/login/device/{device_code}""#,
         r#""/v1/account""#,
         r#""/v1/account/activity""#,
+        r#""/v1/account/api-keys""#,
+        r#""/v1/account/api-keys/{key_id}""#,
         r#""/v1/scrapers""#,
         r#""/v1/scrapers/health""#,
         r#""/v1/scrapers/{scraper}""#,
@@ -142,6 +146,92 @@ fn require_openapi_paths(openapi: &str) -> CheckResult {
         )?;
     }
     Ok(())
+}
+
+fn require_openapi_api_key_contract(openapi: &str) -> CheckResult {
+    require_contains_all(
+        openapi,
+        &[
+            (
+                r#""AccountApiKeySummary""#,
+                "OpenAPI API key summary schema",
+            ),
+            (
+                r#""AccountApiKeysResponse""#,
+                "OpenAPI API key list response schema",
+            ),
+            (
+                r#""AccountApiKeyCreateRequest""#,
+                "OpenAPI API key create request schema",
+            ),
+            (
+                r#""AccountApiKeyCreateResponse""#,
+                "OpenAPI API key create response schema",
+            ),
+            (
+                r#""AccountApiKeyRevokeResponse""#,
+                "OpenAPI API key revoke response schema",
+            ),
+            (r#""tokenPrefix""#, "OpenAPI API key token prefix field"),
+            (
+                r#""currentDayRequestCount""#,
+                "OpenAPI API key day usage field",
+            ),
+            (
+                r#""currentMonthRequestCount""#,
+                "OpenAPI API key month usage field",
+            ),
+            (
+                r#""operationId": "listAccountApiKeys""#,
+                "OpenAPI API key list operation",
+            ),
+            (
+                r#""operationId": "createAccountApiKey""#,
+                "OpenAPI API key create operation",
+            ),
+            (
+                r#""operationId": "revokeAccountApiKey""#,
+                "OpenAPI API key revoke operation",
+            ),
+        ],
+    )
+}
+
+fn require_openapi_billing_contract(openapi: &str) -> CheckResult {
+    require_contains_all(
+        openapi,
+        &[
+            (
+                r#""BillingCheckoutResponse""#,
+                "OpenAPI billing checkout response schema",
+            ),
+            (r#""target_plan""#, "OpenAPI billing checkout plan field"),
+            (
+                r#""top_up_usd_cents""#,
+                "OpenAPI billing checkout top-up field",
+            ),
+            (
+                r#""checkout""#,
+                "OpenAPI billing response checkout envelope",
+            ),
+            ("Manage Tovuk billing.", "OpenAPI portal response reason"),
+        ],
+    )?;
+    reject_contains(
+        openapi,
+        r#""BillingPortalResponse""#,
+        "OpenAPI must not document retired portal response envelope",
+    )?;
+    reject_contains(
+        openapi,
+        r#""portal":"#,
+        "OpenAPI billing portal must use the checkout envelope returned by the API",
+    )?;
+    reject_contains(
+        openapi,
+        r#""portal": "#,
+        "OpenAPI billing portal must use the checkout envelope returned by the API",
+    )
 }
 
 fn require_openapi_status_checks(openapi: &str) -> CheckResult {
