@@ -1,6 +1,17 @@
 use crate::{
     docs_sources::DocsSources,
-    helpers::{CheckResult, reject_contains, require_contains, require_contains_all},
+    helpers::{CheckResult, require_contains_all},
+};
+
+mod openapi;
+
+use openapi::{
+    OpenApi, openapi_document, openapi_path, openapi_schema,
+    reject_json_response_example_check_name, reject_operation_field, reject_schema,
+    reject_schema_property, reject_schema_property_enum, require_example_string,
+    require_json_response_example_check_name, require_json_response_example_string,
+    require_operation_id, require_parameter_bounds, require_schema_properties,
+    require_schema_property_enum,
 };
 
 pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
@@ -18,13 +29,14 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
         ],
     )?;
     require_pricing_contract(sources.pricing.as_str())?;
-    require_openapi_paths(sources.openapi.as_str())?;
-    require_openapi_account_profile_contract(sources.openapi.as_str())?;
-    require_openapi_account_usage_contract(sources.openapi.as_str())?;
-    require_openapi_api_key_contract(sources.openapi.as_str())?;
-    require_openapi_billing_contract(sources.openapi.as_str())?;
-    require_openapi_scraper_response_contract(sources.openapi.as_str())?;
-    require_openapi_status_checks(sources.openapi.as_str())?;
+    let openapi = openapi_document(sources.openapi.as_str())?;
+    require_openapi_paths(&openapi)?;
+    require_openapi_account_profile_contract(&openapi)?;
+    require_openapi_account_usage_contract(&openapi)?;
+    require_openapi_api_key_contract(&openapi)?;
+    require_openapi_billing_contract(&openapi)?;
+    require_openapi_scraper_response_contract(&openapi)?;
+    require_openapi_status_checks(&openapi)?;
     require_contains_all(
         sources.openapi.as_str(),
         &[
@@ -88,363 +100,301 @@ fn require_pricing_contract(pricing: &str) -> CheckResult {
     )
 }
 
-fn require_openapi_account_profile_contract(openapi: &str) -> CheckResult {
-    require_contains_all(
-        openapi,
-        &[
-            (
-                r#""AccountProfileResponse""#,
-                "OpenAPI account profile schema",
-            ),
-            (r#""accountId""#, "OpenAPI account id profile field"),
-            (r#""email""#, "OpenAPI account email profile field"),
-            (r#""provider""#, "OpenAPI account provider profile field"),
-            (r#""plan""#, "OpenAPI account plan profile field"),
-            (r#""unpaid""#, "OpenAPI unpaid account plan enum"),
-            (r#""plus""#, "OpenAPI Plus account plan enum"),
-            (r#""pro""#, "OpenAPI Pro account plan enum"),
-            (r#""max""#, "OpenAPI Max account plan enum"),
-            (r#""displayName""#, "OpenAPI display name profile field"),
-        ],
+fn require_openapi_account_profile_contract(openapi: &OpenApi) -> CheckResult {
+    let profile_schema = openapi_schema(openapi, "AccountProfileResponse")?;
+    require_schema_properties(
+        profile_schema,
+        &["accountId", "email", "provider", "plan", "displayName"],
+        "OpenAPI account profile",
     )?;
-    for retired in [r#""free""#, r#""handle""#, r#""billingActive""#] {
-        reject_contains(
-            openapi,
-            retired,
-            format!("retired account profile field or plan value {retired}").as_str(),
-        )?;
-    }
+    require_schema_property_enum(
+        profile_schema,
+        "plan",
+        &["unpaid", "plus", "pro", "max"],
+        "OpenAPI account plan enum",
+    )?;
+    reject_schema_property(
+        profile_schema,
+        "handle",
+        "retired account profile handle field",
+    )?;
+    reject_schema_property(
+        profile_schema,
+        "billingActive",
+        "retired account profile billingActive field",
+    )?;
+    reject_schema_property_enum(profile_schema, "plan", "free", "retired free account plan")?;
     Ok(())
 }
 
-fn require_openapi_account_usage_contract(openapi: &str) -> CheckResult {
-    require_contains_all(
+fn require_openapi_account_usage_contract(openapi: &OpenApi) -> CheckResult {
+    require_operation_id(
         openapi,
-        &[
-            (
-                r#""operationId": "getAccountActivity""#,
-                "OpenAPI account activity summary operation",
-            ),
-            (
-                r#""AccountOverviewUsage""#,
-                "OpenAPI account usage totals schema",
-            ),
-            (
-                r#""AccountUsageMeters""#,
-                "OpenAPI account usage meters schema",
-            ),
-            (r#""PlanPricing""#, "OpenAPI plan pricing schema"),
-            (
-                r#""AccountUsageResponse""#,
-                "OpenAPI account usage response schema",
-            ),
-            (
-                r#""AccountActivityResponse""#,
-                "OpenAPI account activity response schema",
-            ),
-            (r#""profile""#, "OpenAPI account response profile field"),
-            (r#""usage""#, "OpenAPI account response usage field"),
-            (r#""pricing""#, "OpenAPI account response pricing field"),
-            (
-                r#""billingEstimate""#,
-                "OpenAPI account response billing estimate field",
-            ),
-            (
-                r#""topUpBalanceUsdMicros""#,
-                "OpenAPI usage estimate top-up balance field",
-            ),
-            (
-                r#""currentMonthTopUpBalanceUsedUsdMicros""#,
-                "OpenAPI usage estimate top-up usage field",
-            ),
-            (
-                r#""estimatedMonthlyTotalUsdMicros""#,
-                "OpenAPI usage estimate monthly total field",
-            ),
-        ],
+        "/v1/account/activity",
+        "get",
+        "getAccountActivity",
+        "OpenAPI account activity summary operation",
     )?;
-    reject_contains(
-        openapi_path_section(openapi, r#""/v1/account/activity""#)?.as_str(),
-        r#""parameters""#,
+    for schema_name in [
+        "AccountOverviewUsage",
+        "AccountUsageMeters",
+        "PlanPricing",
+        "AccountUsageResponse",
+        "AccountActivityResponse",
+        "UsageCostEstimate",
+    ] {
+        openapi_schema(openapi, schema_name)?;
+    }
+    for schema_name in ["AccountUsageResponse", "AccountActivityResponse"] {
+        let schema = openapi_schema(openapi, schema_name)?;
+        require_schema_properties(
+            schema,
+            &["profile", "usage", "pricing", "billingEstimate"],
+            schema_name,
+        )?;
+        for retired_property in ["ok", "balanceUsdMicros", "activity", "nextCursor"] {
+            reject_schema_property(
+                schema,
+                retired_property,
+                format!("OpenAPI {schema_name} retired {retired_property} field").as_str(),
+            )?;
+        }
+    }
+    require_schema_properties(
+        openapi_schema(openapi, "UsageCostEstimate")?,
+        &[
+            "topUpBalanceUsdMicros",
+            "currentMonthTopUpBalanceUsedUsdMicros",
+            "estimatedMonthlyTotalUsdMicros",
+        ],
+        "OpenAPI usage estimate",
+    )?;
+    reject_operation_field(
+        openapi,
+        "/v1/account/activity",
+        "get",
+        "parameters",
         "OpenAPI account activity route must not document ignored pagination parameters",
     )?;
-    for schema_name in [r#""AccountUsageResponse""#, r#""AccountActivityResponse""#] {
-        let schema = openapi_schema_section(openapi, schema_name)?;
-        reject_contains(
-            schema.as_str(),
-            r#""ok""#,
-            "OpenAPI account responses must not document retired ok wrapper",
-        )?;
-        reject_contains(
-            schema.as_str(),
-            r#""balanceUsdMicros""#,
-            "OpenAPI account usage must not document retired balance-only shape",
-        )?;
-        reject_contains(
-            schema.as_str(),
-            r#""activity""#,
-            "OpenAPI account activity must not document retired activity list",
-        )?;
-        reject_contains(
-            schema.as_str(),
-            r#""nextCursor""#,
-            "OpenAPI account activity must not document retired pagination cursor",
-        )?;
-    }
     Ok(())
 }
 
-fn require_openapi_paths(openapi: &str) -> CheckResult {
+fn require_openapi_paths(openapi: &OpenApi) -> CheckResult {
     for path in [
-        r#""/health""#,
-        r#""/healthz""#,
-        r#""/v1/status""#,
-        r#""/v1/login/device""#,
-        r#""/v1/login/device/{device_code}""#,
-        r#""/v1/account""#,
-        r#""/v1/account/overview""#,
-        r#""/v1/account/activity""#,
-        r#""/v1/account/api-keys""#,
-        r#""/v1/account/api-keys/{key_id}""#,
-        r#""/v1/scrapers""#,
-        r#""/v1/scrapers/health""#,
-        r#""/v1/scrapers/{scraper}""#,
-        r#""/v1/requests""#,
-        r#""/v1/requests/{request_id}""#,
-        r#""/v1/requests/{request_id}/cancel""#,
-        r#""/v1/requests/{request_id}/results""#,
-        r#""/v1/usage""#,
-        r#""/v1/billing/checkout""#,
-        r#""/v1/billing/portal""#,
-        r#""/v1/support/tickets""#,
-        r#""/v1/support/tickets/{ticket_id}/resolve""#,
+        "/health",
+        "/healthz",
+        "/v1/status",
+        "/v1/login/device",
+        "/v1/login/device/{device_code}",
+        "/v1/account",
+        "/v1/account/overview",
+        "/v1/account/activity",
+        "/v1/account/api-keys",
+        "/v1/account/api-keys/{key_id}",
+        "/v1/scrapers",
+        "/v1/scrapers/health",
+        "/v1/scrapers/{scraper}",
+        "/v1/requests",
+        "/v1/requests/{request_id}",
+        "/v1/requests/{request_id}/cancel",
+        "/v1/requests/{request_id}/results",
+        "/v1/usage",
+        "/v1/billing/checkout",
+        "/v1/billing/portal",
+        "/v1/support/tickets",
+        "/v1/support/tickets/{ticket_id}/resolve",
     ] {
-        require_contains(
-            openapi,
-            path,
-            format!("OpenAPI scraper-only path {path}").as_str(),
+        openapi_path(openapi, path)?;
+    }
+    Ok(())
+}
+
+fn require_openapi_api_key_contract(openapi: &OpenApi) -> CheckResult {
+    require_schema_properties(
+        openapi_schema(openapi, "AccountApiKeySummary")?,
+        &[
+            "tokenPrefix",
+            "currentDayRequestCount",
+            "currentMonthRequestCount",
+        ],
+        "OpenAPI API key summary",
+    )?;
+    for schema_name in [
+        "AccountApiKeysResponse",
+        "AccountApiKeyCreateRequest",
+        "AccountApiKeyCreateResponse",
+        "AccountApiKeyRevokeResponse",
+    ] {
+        openapi_schema(openapi, schema_name)?;
+    }
+    require_operation_id(
+        openapi,
+        "/v1/account/api-keys",
+        "get",
+        "listAccountApiKeys",
+        "OpenAPI API key list operation",
+    )?;
+    require_operation_id(
+        openapi,
+        "/v1/account/api-keys",
+        "post",
+        "createAccountApiKey",
+        "OpenAPI API key create operation",
+    )?;
+    require_operation_id(
+        openapi,
+        "/v1/account/api-keys/{key_id}",
+        "delete",
+        "revokeAccountApiKey",
+        "OpenAPI API key revoke operation",
+    )
+}
+
+fn require_openapi_billing_contract(openapi: &OpenApi) -> CheckResult {
+    require_schema_properties(
+        openapi_schema(openapi, "BillingCheckoutResponse")?,
+        &["checkout"],
+        "OpenAPI billing checkout response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "BillingCheckoutRequest")?,
+        &["target_plan", "top_up_usd_cents"],
+        "OpenAPI billing checkout request",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "UsageCostEstimate")?,
+        &["topUpMaximumUsdCents"],
+        "OpenAPI usage estimate",
+    )?;
+    reject_schema(
+        openapi,
+        "BillingPortalResponse",
+        "retired portal response envelope",
+    )?;
+    reject_schema_property(
+        openapi_schema(openapi, "BillingCheckoutResponse")?,
+        "portal",
+        "OpenAPI billing portal must use the checkout envelope returned by the API",
+    )?;
+    require_example_string(
+        openapi_schema(openapi, "BillingCheckout")?,
+        &["reason"],
+        "Open Tovuk plus checkout.",
+        "OpenAPI checkout response reason",
+    )?;
+    require_json_response_example_string(
+        openapi,
+        "BillingPortalCreated",
+        &["checkout", "reason"],
+        "Manage Tovuk billing.",
+        "OpenAPI portal response reason",
+    )
+}
+
+fn require_openapi_scraper_response_contract(openapi: &OpenApi) -> CheckResult {
+    require_schema_properties(
+        openapi_schema(openapi, "ScrapersResponse")?,
+        &["scrapers", "nextActions"],
+        "OpenAPI scraper catalog response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScraperSummary")?,
+        &["inputSchema"],
+        "OpenAPI scraper summary",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScraperRuntimeHealthResponse")?,
+        &["scrapers", "nextActions"],
+        "OpenAPI scraper runtime health response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScraperDetailsResponse")?,
+        &["scraper", "runtimeHealth", "nextActions"],
+        "OpenAPI scraper details response",
+    )?;
+    require_operation_id(
+        openapi,
+        "/v1/requests",
+        "get",
+        "listScrapeRequests",
+        "OpenAPI request list operation",
+    )?;
+    require_parameter_bounds(
+        openapi,
+        "/v1/requests",
+        "get",
+        "limit",
+        50,
+        200,
+        "OpenAPI request list page limit",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScrapeRequest")?,
+        &[
+            "resultCount",
+            "estimatedCostUsdMicros",
+            "costUsdMicros",
+            "resultsUrl",
+            "agentInstruction",
+        ],
+        "OpenAPI scraper request",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScrapeRequestResponse")?,
+        &["request", "nextActions"],
+        "OpenAPI scraper request response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScrapeCancelResponse")?,
+        &["requestId", "canceled"],
+        "OpenAPI scraper cancel response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScrapeResultsResponse")?,
+        &["request", "records", "nextCursor", "nextActions"],
+        "OpenAPI scraper results response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "ScrapeRecord")?,
+        &["index", "sizeBytes"],
+        "OpenAPI scrape record",
+    )?;
+    for schema_name in [
+        "ScrapersResponse",
+        "ScraperRuntimeHealthResponse",
+        "ScraperDetailsResponse",
+        "ScrapeRequestResponse",
+        "ScrapeRequestsResponse",
+        "ScrapeCancelResponse",
+        "ScrapeResultsResponse",
+    ] {
+        reject_schema_property(
+            openapi_schema(openapi, schema_name)?,
+            "ok",
+            format!("OpenAPI {schema_name} retired ok wrapper").as_str(),
         )?;
     }
     Ok(())
 }
 
-fn require_openapi_api_key_contract(openapi: &str) -> CheckResult {
-    require_contains_all(
+fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
+    openapi_schema(openapi, "StatusResponse")?;
+    require_json_response_example_check_name(
         openapi,
-        &[
-            (
-                r#""AccountApiKeySummary""#,
-                "OpenAPI API key summary schema",
-            ),
-            (
-                r#""AccountApiKeysResponse""#,
-                "OpenAPI API key list response schema",
-            ),
-            (
-                r#""AccountApiKeyCreateRequest""#,
-                "OpenAPI API key create request schema",
-            ),
-            (
-                r#""AccountApiKeyCreateResponse""#,
-                "OpenAPI API key create response schema",
-            ),
-            (
-                r#""AccountApiKeyRevokeResponse""#,
-                "OpenAPI API key revoke response schema",
-            ),
-            (r#""tokenPrefix""#, "OpenAPI API key token prefix field"),
-            (
-                r#""currentDayRequestCount""#,
-                "OpenAPI API key day usage field",
-            ),
-            (
-                r#""currentMonthRequestCount""#,
-                "OpenAPI API key month usage field",
-            ),
-            (
-                r#""operationId": "listAccountApiKeys""#,
-                "OpenAPI API key list operation",
-            ),
-            (
-                r#""operationId": "createAccountApiKey""#,
-                "OpenAPI API key create operation",
-            ),
-            (
-                r#""operationId": "revokeAccountApiKey""#,
-                "OpenAPI API key revoke operation",
-            ),
-        ],
-    )
-}
-
-fn require_openapi_billing_contract(openapi: &str) -> CheckResult {
-    require_contains_all(
+        "StatusLoaded",
+        "control_plane_sqlite",
+        "OpenAPI status control-plane SQLite check",
+    )?;
+    require_json_response_example_check_name(
         openapi,
-        &[
-            (
-                r#""BillingCheckoutResponse""#,
-                "OpenAPI billing checkout response schema",
-            ),
-            (r#""target_plan""#, "OpenAPI billing checkout plan field"),
-            (
-                r#""top_up_usd_cents""#,
-                "OpenAPI billing checkout top-up field",
-            ),
-            (
-                r#""topUpMaximumUsdCents""#,
-                "OpenAPI usage estimate top-up maximum field",
-            ),
-            (
-                r#""checkout""#,
-                "OpenAPI billing response checkout envelope",
-            ),
-            ("Manage Tovuk billing.", "OpenAPI portal response reason"),
-        ],
+        "StatusLoaded",
+        "redis",
+        "OpenAPI status Redis check",
     )?;
-    reject_contains(
+    reject_json_response_example_check_name(
         openapi,
-        r#""BillingPortalResponse""#,
-        "OpenAPI must not document retired portal response envelope",
-    )?;
-    reject_contains(
-        openapi,
-        r#""portal":"#,
-        "OpenAPI billing portal must use the checkout envelope returned by the API",
-    )?;
-    reject_contains(
-        openapi,
-        r#""portal": "#,
-        "OpenAPI billing portal must use the checkout envelope returned by the API",
-    )
-}
-
-fn require_openapi_scraper_response_contract(openapi: &str) -> CheckResult {
-    require_contains_all(
-        openapi,
-        &[
-            (
-                r#""ScrapersResponse""#,
-                "OpenAPI scraper catalog response schema",
-            ),
-            (r#""inputSchema""#, "OpenAPI scraper input schema field"),
-            (
-                r#""ScraperRuntimeHealthResponse""#,
-                "OpenAPI scraper runtime health response schema",
-            ),
-            (r#""runtimeHealth""#, "OpenAPI scraper runtime health field"),
-            (
-                r#""operationId": "listScrapeRequests""#,
-                "OpenAPI request list operation",
-            ),
-            (
-                r#""maximum": 200"#,
-                "OpenAPI request list page limit maximum",
-            ),
-            (
-                r#""default": 50"#,
-                "OpenAPI request list page limit default",
-            ),
-            (
-                r#""ScrapeRequestResponse""#,
-                "OpenAPI scraper request response schema",
-            ),
-            (r#""resultCount""#, "OpenAPI scraper request result count"),
-            (
-                r#""estimatedCostUsdMicros""#,
-                "OpenAPI scraper request estimated cost",
-            ),
-            (r#""costUsdMicros""#, "OpenAPI scraper request cost"),
-            (r#""resultsUrl""#, "OpenAPI scraper request results URL"),
-            (
-                r#""agentInstruction""#,
-                "OpenAPI scraper request agent instruction",
-            ),
-            (r#""nextActions""#, "OpenAPI scraper response next actions"),
-            (
-                r#""ScrapeCancelResponse""#,
-                "OpenAPI scraper cancel response schema",
-            ),
-            (r#""requestId""#, "OpenAPI scraper cancel request id"),
-            (r#""canceled""#, "OpenAPI scraper cancel flag"),
-            (
-                r#""ScrapeResultsResponse""#,
-                "OpenAPI scraper results response schema",
-            ),
-            (r#""index""#, "OpenAPI scrape record ordinal index"),
-            (r#""sizeBytes""#, "OpenAPI scrape record size"),
-        ],
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScrapersResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper catalog response must not document retired ok wrapper",
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScraperRuntimeHealthResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper runtime health response must not document retired ok wrapper",
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScraperDetailsResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper details response must not document retired ok wrapper",
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScrapeRequestResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper request response must not document retired ok wrapper",
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScrapeRequestsResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper request list response must not document retired ok wrapper",
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScrapeCancelResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper cancel response must not document retired ok wrapper",
-    )?;
-    reject_contains(
-        openapi_schema_section(openapi, r#""ScrapeResultsResponse""#)?.as_str(),
-        r#""ok""#,
-        "OpenAPI scraper results response must not document retired ok wrapper",
-    )
-}
-
-fn openapi_schema_section(openapi: &str, schema_name: &str) -> Result<String, String> {
-    let start = openapi
-        .find(schema_name)
-        .ok_or_else(|| format!("OpenAPI schema {schema_name} was missing"))?;
-    let next = openapi[start + schema_name.len()..]
-        .find("\n      \"")
-        .map_or(openapi.len(), |offset| start + schema_name.len() + offset);
-    Ok(openapi[start..next].to_owned())
-}
-
-fn openapi_path_section(openapi: &str, path_name: &str) -> Result<String, String> {
-    let start = openapi
-        .find(path_name)
-        .ok_or_else(|| format!("OpenAPI path {path_name} was missing"))?;
-    let next = openapi[start + path_name.len()..]
-        .find("\n    \"/")
-        .map_or(openapi.len(), |offset| start + path_name.len() + offset);
-    Ok(openapi[start..next].to_owned())
-}
-
-fn require_openapi_status_checks(openapi: &str) -> CheckResult {
-    require_contains_all(
-        openapi,
-        &[
-            (
-                r#""name": "control_plane_sqlite""#,
-                "OpenAPI status control-plane SQLite check",
-            ),
-            (r#""name": "redis""#, "OpenAPI status Redis check"),
-        ],
-    )?;
-    reject_contains(
-        openapi,
-        r#""name": "database""#,
+        "StatusLoaded",
+        "database",
         "OpenAPI status must not expose generic database product wording",
     )
 }
