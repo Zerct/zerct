@@ -225,8 +225,20 @@ fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<
     );
     require_contains(
         workflow.contents.as_str(),
-        "aarch64-unknown-linux-gnu",
-        "publish-native-binaries.yml must build every native target used by public package wrappers",
+        "native-release-targets.json",
+        "publish-native-binaries.yml must read the native target matrix from native-release-targets.json",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        "fromJSON(needs.native-targets.outputs.matrix)",
+        "publish-native-binaries.yml must build the native matrix generated from native-release-targets.json",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        "matrix.asset_ext",
+        "publish-native-binaries.yml must name assets with explicit manifest asset extensions",
         findings,
     );
     require_contains(

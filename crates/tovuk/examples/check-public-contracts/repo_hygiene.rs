@@ -2,6 +2,7 @@ use std::{collections::BTreeSet, path::Path};
 
 use crate::agent_guidance;
 use crate::helpers::{CheckResult, read_text};
+use crate::native_release_targets;
 use crate::repo_hygiene_git::existing_tracked_files;
 use crate::repo_hygiene_paths::{
     is_forbidden_tracked_path, is_go_toolchain_scan_path, is_guarded_source_path,
@@ -21,6 +22,7 @@ pub(crate) fn check() -> CheckResult {
 
     require_tracked_paths(&tracked_set)?;
     agent_guidance::check_chain_sizes(&tracked_files)?;
+    native_release_targets::check()?;
     script_contracts::check()?;
     require_docs_deploy_observability_contract()?;
     reject_retired_npx_guidance(&tracked_files)?;

@@ -8,8 +8,36 @@ import { fileURLToPath } from 'node:url'
 
 const packageRoot = dirname(fileURLToPath(import.meta.url))
 const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'))
-const target = nativeTarget()
 const binaryPath = join(packageRoot, 'bin', 'tovuk')
+const nativeTargets = [
+  {
+    assetExt: '',
+    libc: 'glibc',
+    node: { arch: 'x64', platform: 'linux' },
+    triple: 'x86_64-unknown-linux-gnu',
+  },
+  {
+    assetExt: '',
+    libc: 'glibc',
+    node: { arch: 'arm64', platform: 'linux' },
+    triple: 'aarch64-unknown-linux-gnu',
+  },
+  {
+    assetExt: '',
+    node: { arch: 'arm64', platform: 'darwin' },
+    triple: 'aarch64-apple-darwin',
+  },
+  {
+    assetExt: '',
+    node: { arch: 'x64', platform: 'darwin' },
+    triple: 'x86_64-apple-darwin',
+  },
+  {
+    assetExt: '.exe',
+    node: { arch: 'x64', platform: 'win32' },
+    triple: 'x86_64-pc-windows-msvc',
+  },
+]
 
 mkdirSync(dirname(binaryPath), { recursive: true })
 
@@ -25,7 +53,8 @@ function installFromLocal(source) {
 }
 
 async function installFromRelease() {
-  const asset = `tovuk-${manifest.version}-${target}${target.endsWith('windows-msvc') ? '.exe' : ''}`
+  const target = nativeTarget()
+  const asset = `tovuk-${manifest.version}-${target.triple}${target.assetExt}`
   const url = `https://github.com/tovuk/tovuk/releases/download/v${manifest.version}/${asset}`
   const checksumUrl = `${url}.sha256`
   const tempPath = join(tmpdir(), `${basename(asset)}-${process.pid}`)
@@ -44,12 +73,23 @@ async function installFromRelease() {
 function nativeTarget() {
   const os = platform()
   const cpu = arch()
-  if (os === 'darwin' && cpu === 'arm64') return 'aarch64-apple-darwin'
-  if (os === 'darwin' && cpu === 'x64') return 'x86_64-apple-darwin'
-  if (os === 'linux' && cpu === 'arm64') return 'aarch64-unknown-linux-gnu'
-  if (os === 'linux' && cpu === 'x64') return 'x86_64-unknown-linux-gnu'
-  if (os === 'win32' && cpu === 'x64') return 'x86_64-pc-windows-msvc'
+  const target = nativeTargets.find((item) => item.node.platform === os && item.node.arch === cpu)
+  if (target?.libc === 'glibc' && linuxLibc() !== 'glibc') {
+    throw new Error(`Unsupported Tovuk native target: ${os}/${cpu} requires glibc Linux. Alpine/musl Linux is not supported by the published native binaries yet.`)
+  }
+  if (target) {
+    return target
+  }
   throw new Error(`Unsupported Tovuk native target: ${os}/${cpu}`)
+}
+
+function linuxLibc() {
+  if (platform() !== 'linux') {
+    return ''
+  }
+  const report = process.report?.getReport?.()
+  const glibcVersion = report?.header?.glibcVersionRuntime
+  return typeof glibcVersion === 'string' && glibcVersion.length > 0 ? 'glibc' : 'musl'
 }
 
 function download(url, destination) {

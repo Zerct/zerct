@@ -16,18 +16,35 @@ import urllib.request
 from . import __version__
 
 REPOSITORY = "https://github.com/tovuk/tovuk"
-NATIVE_TARGETS = {
-    ("darwin", "aarch64"): "aarch64-apple-darwin",
-    ("darwin", "arm64"): "aarch64-apple-darwin",
-    ("darwin", "amd64"): "x86_64-apple-darwin",
-    ("darwin", "x86_64"): "x86_64-apple-darwin",
-    ("linux", "aarch64"): "aarch64-unknown-linux-gnu",
-    ("linux", "arm64"): "aarch64-unknown-linux-gnu",
-    ("linux", "amd64"): "x86_64-unknown-linux-gnu",
-    ("linux", "x86_64"): "x86_64-unknown-linux-gnu",
-    ("windows", "amd64"): "x86_64-pc-windows-msvc",
-    ("windows", "x86_64"): "x86_64-pc-windows-msvc",
-}
+NATIVE_TARGETS = [
+    {
+        "asset_ext": "",
+        "libc": "glibc",
+        "python": (("linux", "amd64"), ("linux", "x86_64")),
+        "triple": "x86_64-unknown-linux-gnu",
+    },
+    {
+        "asset_ext": "",
+        "libc": "glibc",
+        "python": (("linux", "aarch64"), ("linux", "arm64")),
+        "triple": "aarch64-unknown-linux-gnu",
+    },
+    {
+        "asset_ext": "",
+        "python": (("darwin", "aarch64"), ("darwin", "arm64")),
+        "triple": "aarch64-apple-darwin",
+    },
+    {
+        "asset_ext": "",
+        "python": (("darwin", "amd64"), ("darwin", "x86_64")),
+        "triple": "x86_64-apple-darwin",
+    },
+    {
+        "asset_ext": ".exe",
+        "python": (("windows", "amd64"), ("windows", "x86_64")),
+        "triple": "x86_64-pc-windows-msvc",
+    },
+]
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -79,7 +96,8 @@ def _native_binary() -> pathlib.Path:
         return packaged
 
     target = _native_target()
-    binary = _cache_dir() / __version__ / target / "tovuk"
+    target_triple = str(target["triple"])
+    binary = _cache_dir() / __version__ / target_triple / "tovuk"
     if binary.is_file():
         return binary
 
@@ -96,18 +114,30 @@ def _cache_dir() -> pathlib.Path:
     return root / "tovuk" / "bin"
 
 
-def _native_target() -> str:
+def _native_target() -> dict[str, object]:
     system = platform.system().lower()
     machine = platform.machine().lower()
-    target = NATIVE_TARGETS.get((system, machine))
-    if target is not None:
+    for target in NATIVE_TARGETS:
+        if (system, machine) not in target["python"]:
+            continue
+        if target.get("libc") == "glibc" and _linux_libc() != "glibc":
+            raise RuntimeError(
+                f"Unsupported Tovuk native target: {system}/{machine} requires glibc Linux. "
+                "Alpine/musl Linux is not supported by the published native binaries yet."
+            )
         return target
     raise RuntimeError(f"Unsupported Tovuk native target: {system}/{machine}")
 
 
-def _download_release_binary(target: str, destination: pathlib.Path) -> None:
-    suffix = ".exe" if target.endswith("windows-msvc") else ""
-    asset = f"tovuk-{__version__}-{target}{suffix}"
+def _linux_libc() -> str:
+    libc_name, _ = platform.libc_ver()
+    return libc_name.lower()
+
+
+def _download_release_binary(target: dict[str, object], destination: pathlib.Path) -> None:
+    target_triple = str(target["triple"])
+    asset_ext = str(target["asset_ext"])
+    asset = f"tovuk-{__version__}-{target_triple}{asset_ext}"
     url = f"{REPOSITORY}/releases/download/v{__version__}/{asset}"
     checksum_url = f"{url}.sha256"
     try:

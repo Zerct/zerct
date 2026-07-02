@@ -1,0 +1,327 @@
+use std::{collections::BTreeSet, fmt::Write as _, path::Path};
+
+use serde::Deserialize;
+
+use crate::helpers::{CheckResult, read_json, read_text};
+
+#[derive(Debug, Deserialize)]
+struct NativeReleaseTargets {
+    targets: Vec<NativeTarget>,
+}
+
+#[derive(Debug, Deserialize)]
+struct NativeTarget {
+    asset_ext: String,
+    binary: String,
+    #[serde(default)]
+    libc: Option<String>,
+    node: NodeTarget,
+    python: Vec<PythonTarget>,
+    runner: String,
+    triple: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct NodeTarget {
+    arch: String,
+    platform: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct PythonTarget {
+    machine: String,
+    system: String,
+}
+
+pub(crate) fn check() -> CheckResult {
+    let manifest = read_manifest()?;
+    require_manifest_shape(&manifest)?;
+    require_workflow_contract(&manifest)?;
+    require_release_gate_contract()?;
+    require_npm_installer_contract(&manifest)?;
+    require_python_installer_contract(&manifest)?;
+    reject_package_local_target_manifests()?;
+    println!("Checked native release target contracts.");
+    Ok(())
+}
+
+fn read_manifest() -> CheckResult<NativeReleaseTargets> {
+    read_json("native-release-targets.json")
+}
+
+fn require_manifest_shape(manifest: &NativeReleaseTargets) -> CheckResult {
+    let mut triples = BTreeSet::new();
+    let mut node_aliases = BTreeSet::new();
+    let mut python_aliases = BTreeSet::new();
+    for target in &manifest.targets {
+        if !triples.insert(target.triple.clone()) {
+            return Err(format!("duplicate native release target {}", target.triple));
+        }
+        let node_alias = format!("{}/{}", target.node.platform, target.node.arch);
+        if !node_aliases.insert(node_alias.clone()) {
+            return Err(format!("duplicate npm native target alias {node_alias}"));
+        }
+        for alias in &target.python {
+            let python_alias = format!("{}/{}", alias.system, alias.machine);
+            if !python_aliases.insert(python_alias.clone()) {
+                return Err(format!("duplicate PyPI native target alias {python_alias}"));
+            }
+        }
+        require_target_shape(target)?;
+    }
+    require_exact_set(
+        &triples,
+        &[
+            "aarch64-apple-darwin",
+            "aarch64-unknown-linux-gnu",
+            "x86_64-apple-darwin",
+            "x86_64-pc-windows-msvc",
+            "x86_64-unknown-linux-gnu",
+        ],
+        "native release targets",
+    )?;
+    require_exact_set(
+        &node_aliases,
+        &[
+            "darwin/arm64",
+            "darwin/x64",
+            "linux/arm64",
+            "linux/x64",
+            "win32/x64",
+        ],
+        "npm native target aliases",
+    )?;
+    Ok(())
+}
+
+fn require_target_shape(target: &NativeTarget) -> CheckResult {
+    if target.triple.contains("windows") {
+        if target.asset_ext != ".exe" || target.binary != "tovuk.exe" {
+            return Err(format!(
+                "Windows native target {} must publish tovuk.exe with .exe asset extension",
+                target.triple
+            ));
+        }
+    } else if !target.asset_ext.is_empty() || target.binary != "tovuk" {
+        return Err(format!(
+            "non-Windows native target {} must publish tovuk without an asset extension",
+            target.triple
+        ));
+    }
+
+    if target.triple.contains("unknown-linux-gnu") {
+        if target.libc.as_deref() != Some("glibc") {
+            return Err(format!(
+                "GNU Linux native target {} must explicitly require glibc",
+                target.triple
+            ));
+        }
+    } else if target.libc.is_some() {
+        return Err(format!(
+            "non-Linux native target {} must not declare a libc",
+            target.triple
+        ));
+    }
+
+    let expected_runner = if target.triple.contains("unknown-linux") {
+        "ubuntu-24.04"
+    } else if target.triple.contains("apple-darwin") {
+        "macos-15"
+    } else if target.triple.contains("windows-msvc") {
+        "windows-2025"
+    } else {
+        return Err(format!("unknown native target family {}", target.triple));
+    };
+    if target.runner != expected_runner {
+        return Err(format!(
+            "native target {} must run on {expected_runner}, got {}",
+            target.triple, target.runner
+        ));
+    }
+    Ok(())
+}
+
+fn require_exact_set(actual: &BTreeSet<String>, expected: &[&str], label: &str) -> CheckResult {
+    let expected_set = expected
+        .iter()
+        .copied()
+        .map(str::to_owned)
+        .collect::<BTreeSet<_>>();
+    if *actual == expected_set {
+        return Ok(());
+    }
+    Err(format!(
+        "{label} must be {}; got {}",
+        expected_set.iter().cloned().collect::<Vec<_>>().join(", "),
+        actual.iter().cloned().collect::<Vec<_>>().join(", ")
+    ))
+}
+
+fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
+    let source = read_text(".github/workflows/publish-native-binaries.yml")?;
+    for snippet in [
+        "- \"native-release-targets.json\"",
+        "native-targets:",
+        "fromJSON(needs.native-targets.outputs.matrix)",
+        "\"asset_ext\": target[\"asset_ext\"]",
+        "\"binary\": target[\"binary\"]",
+        "\"runner\": target[\"runner\"]",
+        "\"target\": target[\"triple\"]",
+        "matrix.asset_ext",
+    ] {
+        if !source.contains(snippet) {
+            return Err(format!("publish-native-binaries.yml missing {snippet}"));
+        }
+    }
+    if manifest
+        .targets
+        .iter()
+        .any(|target| target.triple == "aarch64-unknown-linux-gnu")
+        && !source.contains("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER")
+    {
+        return Err("publish-native-binaries.yml must configure the Linux ARM64 linker".to_owned());
+    }
+    Ok(())
+}
+
+fn require_release_gate_contract() -> CheckResult {
+    let source = read_text("scripts/check-native-release-assets.sh")?;
+    for snippet in [
+        "native-release-targets.json",
+        "target['asset_ext']",
+        "verify_asset_checksums",
+        "gh release download",
+        "hashlib.sha256",
+        "checksum mismatch",
+    ] {
+        if !source.contains(snippet) {
+            return Err(format!("check-native-release-assets.sh missing {snippet}"));
+        }
+    }
+    if source.contains("endswith(\".exe\")") {
+        return Err("native release asset names must use explicit asset_ext metadata".to_owned());
+    }
+    Ok(())
+}
+
+fn require_npm_installer_contract(manifest: &NativeReleaseTargets) -> CheckResult {
+    let source = read_text("packages/tovuk/install.mjs")?;
+    let expected = expected_node_targets(manifest)?;
+    if !source.contains(expected.as_str()) {
+        return Err("packages/tovuk/install.mjs nativeTargets block is out of sync".to_owned());
+    }
+    for snippet in [
+        "target.assetExt",
+        "target.triple",
+        "requires glibc Linux",
+        "linuxLibc()",
+        "TOVUK_NATIVE_BINARY",
+    ] {
+        if !source.contains(snippet) {
+            return Err(format!("install.mjs missing {snippet}"));
+        }
+    }
+    let override_index = source
+        .find("if (process.env.TOVUK_NATIVE_BINARY)")
+        .ok_or_else(|| "install.mjs must honor TOVUK_NATIVE_BINARY".to_owned())?;
+    let target_index = source
+        .find("const target = nativeTarget()")
+        .ok_or_else(|| "install.mjs must resolve nativeTarget inside release install".to_owned())?;
+    if target_index < override_index {
+        return Err(
+            "install.mjs must not resolve the release target before local binary overrides"
+                .to_owned(),
+        );
+    }
+    Ok(())
+}
+
+fn expected_node_targets(manifest: &NativeReleaseTargets) -> CheckResult<String> {
+    let mut output = String::from("const nativeTargets = [\n");
+    for target in &manifest.targets {
+        writeln!(&mut output, "  {{").map_err(|error| error.to_string())?;
+        writeln!(&mut output, "    assetExt: '{}',", target.asset_ext)
+            .map_err(|error| error.to_string())?;
+        if let Some(libc) = target.libc.as_deref() {
+            writeln!(&mut output, "    libc: '{libc}',").map_err(|error| error.to_string())?;
+        }
+        writeln!(
+            &mut output,
+            "    node: {{ arch: '{}', platform: '{}' }},",
+            target.node.arch, target.node.platform
+        )
+        .map_err(|error| error.to_string())?;
+        writeln!(&mut output, "    triple: '{}',", target.triple)
+            .map_err(|error| error.to_string())?;
+        writeln!(&mut output, "  }},").map_err(|error| error.to_string())?;
+    }
+    output.push_str("]\n");
+    Ok(output)
+}
+
+fn require_python_installer_contract(manifest: &NativeReleaseTargets) -> CheckResult {
+    let source = read_text("packages/tovuk-py/src/tovuk/cli.py")?;
+    let expected = expected_python_targets(manifest)?;
+    if !source.contains(expected.as_str()) {
+        return Err(
+            "packages/tovuk-py/src/tovuk/cli.py NATIVE_TARGETS block is out of sync".to_owned(),
+        );
+    }
+    for snippet in [
+        "target[\"asset_ext\"]",
+        "target[\"triple\"]",
+        "requires glibc Linux",
+        "_linux_libc()",
+        "TOVUK_NATIVE_BINARY",
+    ] {
+        if !source.contains(snippet) {
+            return Err(format!("cli.py missing {snippet}"));
+        }
+    }
+    Ok(())
+}
+
+fn expected_python_targets(manifest: &NativeReleaseTargets) -> CheckResult<String> {
+    let mut output = String::from("NATIVE_TARGETS = [\n");
+    for target in &manifest.targets {
+        writeln!(&mut output, "    {{").map_err(|error| error.to_string())?;
+        writeln!(
+            &mut output,
+            "        \"asset_ext\": \"{}\",",
+            target.asset_ext
+        )
+        .map_err(|error| error.to_string())?;
+        if let Some(libc) = target.libc.as_deref() {
+            writeln!(&mut output, "        \"libc\": \"{libc}\",")
+                .map_err(|error| error.to_string())?;
+        }
+        output.push_str("        \"python\": (");
+        for (index, alias) in target.python.iter().enumerate() {
+            if index > 0 {
+                output.push_str(", ");
+            }
+            write!(&mut output, "(\"{}\", \"{}\")", alias.system, alias.machine)
+                .map_err(|error| error.to_string())?;
+        }
+        output.push_str("),\n");
+        writeln!(&mut output, "        \"triple\": \"{}\",", target.triple)
+            .map_err(|error| error.to_string())?;
+        writeln!(&mut output, "    }},").map_err(|error| error.to_string())?;
+    }
+    output.push_str("]\n");
+    Ok(output)
+}
+
+fn reject_package_local_target_manifests() -> CheckResult {
+    for path in [
+        "packages/tovuk/native-targets.json",
+        "packages/tovuk-py/src/tovuk/native_targets.json",
+    ] {
+        if Path::new(path).exists() {
+            return Err(format!(
+                "{path} must not exist; native target metadata belongs in native-release-targets.json"
+            ));
+        }
+    }
+    Ok(())
+}

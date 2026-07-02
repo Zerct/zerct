@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths:
+      - "native-release-targets.json"
       - "crates/tovuk/Cargo.toml"
       - "crates/tovuk/Cargo.lock"
       - "crates/tovuk/src/**"
@@ -18,29 +19,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  native-targets:
+    name: read native release targets
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Read native release target matrix
+        id: matrix
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+
+          with open("native-release-targets.json", encoding="utf-8") as handle:
+              targets = json.load(handle)["targets"]
+
+          matrix = {
+              "include": [
+                  {
+                      "asset_ext": target["asset_ext"],
+                      "binary": target["binary"],
+                      "runner": target["runner"],
+                      "target": target["triple"],
+                  }
+                  for target in targets
+              ]
+          }
+          print(f"matrix={json.dumps(matrix, separators=(',', ':'))}")
+          PY
+
   build:
     name: build ${{ matrix.target }}
+    needs: native-targets
     if: ${{ github.ref == 'refs/heads/main' }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - runner: ubuntu-24.04
-            target: x86_64-unknown-linux-gnu
-            binary: tovuk
-          - runner: ubuntu-24.04
-            target: aarch64-unknown-linux-gnu
-            binary: tovuk
-          - runner: macos-15
-            target: aarch64-apple-darwin
-            binary: tovuk
-          - runner: macos-15
-            target: x86_64-apple-darwin
-            binary: tovuk
-          - runner: windows-2025
-            target: x86_64-pc-windows-msvc
-            binary: tovuk.exe
+      matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v6
@@ -77,10 +97,7 @@ jobs:
         id: asset
         shell: bash
         run: |
-          asset="tovuk-${{ steps.version.outputs.version }}-${{ matrix.target }}"
-          case "${{ matrix.binary }}" in
-            *.exe) asset="${asset}.exe" ;;
-          esac
+          asset="tovuk-${{ steps.version.outputs.version }}-${{ matrix.target }}${{ matrix.asset_ext }}"
           echo "name=$asset" >> "$GITHUB_OUTPUT"
       - name: Check release asset
         id: release

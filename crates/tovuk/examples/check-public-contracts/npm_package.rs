@@ -171,11 +171,12 @@ fn require_install_source(install_path: &Path) -> CheckResult {
     for snippet in [
         "https://github.com/tovuk/tovuk/releases/download",
         ".sha256",
+        "nativeTargets",
+        "target.assetExt",
         "verifySha256",
+        "linuxLibc",
+        "requires glibc Linux",
         "TOVUK_NATIVE_BINARY",
-        "aarch64-apple-darwin",
-        "x86_64-unknown-linux-gnu",
-        "x86_64-pc-windows-msvc",
     ] {
         require_contains(
             install_source.as_str(),

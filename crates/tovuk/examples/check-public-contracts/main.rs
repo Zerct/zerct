@@ -11,6 +11,7 @@ mod helpers_io;
 mod helpers_public_copy;
 mod mintlify;
 mod mintlify_fetch;
+mod native_release_targets;
 mod npm;
 mod npm_package;
 mod npm_runtime;
@@ -51,6 +52,7 @@ fn run() -> CheckResult {
 
     match check.as_str() {
         "repo-hygiene" => repo_hygiene::check(),
+        "native-release-targets" => native_release_targets::check(),
         "package-versions" => package_versions::check(),
         "cli-contract" => cli_contract::check(),
         "docs" => docs::check(),
