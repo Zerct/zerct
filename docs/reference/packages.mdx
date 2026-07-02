@@ -28,7 +28,7 @@ credentials, or proxy URLs.
 ```sh
 tovuk login --json
 tovuk account show --json
-tovuk account activity --limit 20 --json
+tovuk account activity --json
 tovuk api-key list --json
 tovuk api-key create "Production scraper" --json
 tovuk api-key revoke api_key_0123456789abcdef01234567 --json
@@ -37,6 +37,7 @@ tovuk scraper list --json
 tovuk scraper health --json
 tovuk scraper show tiktok --json
 tovuk request list --limit 20 --json
+tovuk request list --limit 20 --cursor <nextCursor> --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}' --json
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}' --json
@@ -51,8 +52,9 @@ tovuk support create "Request failed" "Request failed after retry." --request-id
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
-Use `tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
-to continue stored-result pagination.
+Use `tovuk request list --limit <n> --cursor <nextCursor> --json` and
+`tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
+to continue request and stored-result pagination.
 
 The public CLI does not deploy websites, backends, databases, workers, storage
 buckets, queues, cron jobs, custom domains, secrets, or other customer

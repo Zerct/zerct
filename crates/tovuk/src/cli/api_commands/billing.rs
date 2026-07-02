@@ -41,12 +41,46 @@ pub(crate) fn billing_command(cli: &CliOptions) -> Result<()> {
 }
 
 fn billing_checkout_body(cli: &CliOptions) -> Result<Value> {
+    if !cli.top_up_usd_cents.is_empty() {
+        return billing_top_up_checkout_body(cli);
+    }
     let target_plan = billing_checkout_plan(cli)?;
     let reason = joined_args(cli, 2);
     Ok(json!({
         "target_plan": target_plan,
         "reason": if reason.is_empty() {
             format!("Open Tovuk {target_plan} checkout.")
+        } else {
+            reason
+        },
+    }))
+}
+
+fn billing_top_up_checkout_body(cli: &CliOptions) -> Result<Value> {
+    if matches!(
+        cli.args.get(1).map(String::as_str),
+        Some("plus" | "pro" | "max")
+    ) {
+        return Err(agent_error(
+            "billing_checkout_target_conflict",
+            "Billing checkout cannot include both a plan and top-up amount.",
+            "Use `tovuk billing checkout plus --json` for a plan or `tovuk billing checkout --top-up-usd-cents 2000 --json` for balance.",
+            cli.output.json,
+        ));
+    }
+    let top_up_usd_cents = cli.top_up_usd_cents.parse::<u32>().map_err(|_error| {
+        agent_error(
+            "billing_top_up_invalid",
+            "Billing top-up amount must be an integer number of USD cents.",
+            "Use `tovuk billing checkout --top-up-usd-cents 2000 --json` for the minimum $20 top-up.",
+            cli.output.json,
+        )
+    })?;
+    let reason = joined_args(cli, 1);
+    Ok(json!({
+        "top_up_usd_cents": top_up_usd_cents,
+        "reason": if reason.is_empty() {
+            format!("Open Tovuk ${:.2} balance top-up checkout.", f64::from(top_up_usd_cents) / 100.0)
         } else {
             reason
         },

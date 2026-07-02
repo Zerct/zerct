@@ -28,24 +28,16 @@ tovuk scraper list --json
 
 | Scraper | Unit | Price per 1,000 results |
 | --- | --- | ---: |
-| `website` | page | `$0.20` |
-| `google-search` | search page | `$0.80` |
-| `google-maps` | place | `$2.10` |
-| `google-maps-reviews` | review | `$0.60` |
-| `jobs` | job | `$0.80` |
-| `youtube` | record | `$0.90` |
 | `reddit` | record | `$0.70` |
 | `github` | record | `$0.60` |
 | `linkedin` | record | `$0.90` |
 | `tiktok` | record | `$1.70` |
 | `instagram` | record | `$0.80` |
 | `x` | post | `$0.30` |
-| `facebook-ads` | ad | `$1.00` |
-| `contacts` | record | `$1.50` |
 
 ## Names
 
-- Scraper: a public-data source such as `google-maps`, `website`, or `reddit`.
+- Scraper: a public-data source such as `github`, `instagram`, or `reddit`.
 - Request: one paid scraper run.
 - Results: stored output for one Request.
 - Record: one JSON item inside Results.
@@ -55,8 +47,7 @@ tovuk scraper list --json
 ```sh
 tovuk scraper list --json
 tovuk scraper health --json
-tovuk scraper show google-maps --json
-tovuk request create google-maps '{"query":"coffee shops in Istanbul","limit":100}' --json
+tovuk scraper show github --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":50}' --json
 tovuk request create github '{"operation":"opportunities","query":"agent skills registry","limit":25}' --json
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":25}' --json
@@ -84,7 +75,8 @@ tovuk request cancel <request_id> --json
 ```
 
 Use `--limit <n>` on `tovuk request create` to add or override `input.limit`.
-Use `--limit <n>` and `--cursor <cursor>` on `tovuk request results` to page through stored Records.
+Use `--limit <n>` and `--cursor <cursor>` on `tovuk request list` and
+`tovuk request results` to page through Requests and stored Records.
 Use `tovuk scraper health --json` before heavy scraping to inspect managed
 reader, signing worker, and Webshare proxy readiness without sending private
 account material.
@@ -106,10 +98,11 @@ Create a Request:
 
 ```json
 {
-  "scraper": "google-maps",
+  "scraper": "github",
   "input": {
-    "query": "coffee shops in Istanbul",
-    "limit": 100
+    "query": "mcp server",
+    "language": "Rust",
+    "limit": 50
   }
 }
 ```

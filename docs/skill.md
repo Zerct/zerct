@@ -25,6 +25,8 @@ tovuk usage
 tovuk scraper list
 tovuk scraper health
 tovuk scraper show tiktok
+tovuk request list --limit 20
+tovuk request list --limit 20 --cursor <nextCursor>
 tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}'
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}'
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}'
