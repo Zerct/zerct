@@ -100,12 +100,14 @@ wait_for_deployment() {
 
     case "$status" in
       success)
+        verify_public_agent_readiness
         exit 0
         ;;
       failure)
         if generated_subdomain_revalidation_failed "$summary" &&
           content_update_finished "$response"; then
           echo "::warning::Mintlify updated docs content but failed to revalidate an external generated subdomain. Custom-domain docs content is live."
+          verify_public_agent_readiness
           exit 0
         fi
         printf '%s\n' "$response" | print_sanitized_logs
@@ -154,6 +156,16 @@ content_update_finished() {
     any(. == "Successfully saved config") and
     any(test("^Successfully indexed [0-9]+ page\\(s\\)\\.$"))
   ' >/dev/null
+}
+
+verify_public_agent_readiness() {
+  local target
+
+  target="${TOVUK_DOCS_PUBLIC_URL:-https://docs.tovuk.com}"
+  export TOVUK_DOCS_CHECK_RETRIES="${TOVUK_DOCS_CHECK_RETRIES:-12}"
+  export TOVUK_DOCS_CHECK_RETRY_DELAY_MS="${TOVUK_DOCS_CHECK_RETRY_DELAY_MS:-10000}"
+  printf 'Checking Mintlify public agent readiness at %s\n' "$target"
+  ./scripts/check-public-contracts.sh mintlify-agent-readiness "$target"
 }
 
 wait_for_deployment "$(trigger_deployment)"

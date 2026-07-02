@@ -64,6 +64,18 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "print_mintlify_response_body",
             "Mintlify docs deploy must preserve sanitized response bodies for debugging",
         ),
+        (
+            "verify_public_agent_readiness()",
+            "Mintlify docs deploy must verify public agent readiness before exiting green",
+        ),
+        (
+            "mintlify-agent-readiness",
+            "Mintlify docs deploy must run the tracked public readiness checker",
+        ),
+        (
+            "TOVUK_DOCS_PUBLIC_URL:-https://docs.tovuk.com",
+            "Mintlify docs deploy must default readiness checks to the public docs domain",
+        ),
     ] {
         if !script.contains(snippet) {
             return Err(label.to_owned());
