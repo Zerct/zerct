@@ -37,17 +37,7 @@ jobs:
           ./scripts/check-prose-style.sh
       - name: Check public agent readiness
         run: |
-          if ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com; then
-            exit 0
-          fi
-
-          if [ "${TOVUK_DOCS_PUBLIC_REQUIRED:-}" = "true" ]; then
-            exit 1
-          fi
-
-          echo "::warning::docs.tovuk.com is not publicly reachable for agent-readiness checks yet. Set TOVUK_DOCS_PUBLIC_REQUIRED=true after the docs host is live."
-        env:
-          TOVUK_DOCS_PUBLIC_REQUIRED: ${{ vars.TOVUK_DOCS_PUBLIC_REQUIRED }}
+          ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
       - name: Run authenticated Mintlify score when configured
         run: |
           if [ -z "${MINTLIFY_CLI_CONFIG_JSON:-}" ]; then
