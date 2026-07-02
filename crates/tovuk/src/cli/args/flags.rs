@@ -118,6 +118,7 @@ fn string_flag_target<'a>(cli: &'a mut CliOptions, name: &str) -> Option<&'a mut
         "--api" => Some(&mut cli.api_url),
         "--limit" => Some(&mut cli.limit),
         "--cursor" => Some(&mut cli.cursor),
+        "--top-up-usd-cents" => Some(&mut cli.top_up_usd_cents),
         "--token" => Some(&mut cli.token),
         "--failing-command" => Some(&mut cli.failing_command),
         "--first-log-line" => Some(&mut cli.first_log_line),

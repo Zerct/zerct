@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto'
 import { createWriteStream, chmodSync, copyFileSync, mkdirSync, readFileSync, renameSync, rmSync } from 'node:fs'
 import { get } from 'node:https'
 import { arch, platform, tmpdir } from 'node:os'
@@ -26,9 +27,12 @@ function installFromLocal(source) {
 async function installFromRelease() {
   const asset = `tovuk-${manifest.version}-${target}${target.endsWith('windows-msvc') ? '.exe' : ''}`
   const url = `https://github.com/tovuk/tovuk/releases/download/v${manifest.version}/${asset}`
+  const checksumUrl = `${url}.sha256`
   const tempPath = join(tmpdir(), `${basename(asset)}-${process.pid}`)
   try {
     await download(url, tempPath)
+    const expectedSha256 = parseChecksum(await fetchText(checksumUrl), asset)
+    verifySha256(tempPath, expectedSha256)
     renameSync(tempPath, binaryPath)
     chmodSync(binaryPath, 0o755)
   } catch (error) {
@@ -53,7 +57,7 @@ function download(url, destination) {
     get(url, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         response.resume()
-        download(response.headers.location, destination).then(resolve, reject)
+        download(new URL(response.headers.location, url).toString(), destination).then(resolve, reject)
         return
       }
       if (response.statusCode !== 200) {
@@ -67,4 +71,58 @@ function download(url, destination) {
       file.on('error', reject)
     }).on('error', reject)
   })
+}
+
+function fetchText(url) {
+  return new Promise((resolve, reject) => {
+    get(url, (response) => {
+      if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        response.resume()
+        fetchText(new URL(response.headers.location, url).toString()).then(resolve, reject)
+        return
+      }
+      if (response.statusCode !== 200) {
+        response.resume()
+        reject(new Error(`HTTP ${response.statusCode ?? 'unknown'}`))
+        return
+      }
+      const chunks = []
+      let size = 0
+      response.on('data', (chunk) => {
+        size += chunk.length
+        if (size > 4096) {
+          response.destroy(new Error('checksum response is too large'))
+          return
+        }
+        chunks.push(chunk)
+      })
+      response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
+      response.on('error', reject)
+    }).on('error', reject)
+  })
+}
+
+function parseChecksum(text, asset) {
+  const line = text.split(/\r?\n/).map((item) => item.trim()).find(Boolean)
+  if (!line) {
+    throw new Error(`checksum file for ${asset} is empty`)
+  }
+  const [digest, ...nameParts] = line.split(/\s+/)
+  if (!/^[a-fA-F0-9]{64}$/.test(digest)) {
+    throw new Error(`checksum file for ${asset} does not contain a SHA-256 digest`)
+  }
+  if (nameParts.length > 0) {
+    const listedAsset = basename(nameParts.join(' ').replace(/^\*/, ''))
+    if (listedAsset !== asset) {
+      throw new Error(`checksum file names ${listedAsset}, expected ${asset}`)
+    }
+  }
+  return digest.toLowerCase()
+}
+
+function verifySha256(path, expectedSha256) {
+  const actualSha256 = createHash('sha256').update(readFileSync(path)).digest('hex')
+  if (actualSha256 !== expectedSha256) {
+    throw new Error(`native binary checksum mismatch: expected ${expectedSha256}, got ${actualSha256}`)
+  }
 }

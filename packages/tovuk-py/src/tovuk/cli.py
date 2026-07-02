@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -108,11 +109,36 @@ def _download_release_binary(target: str, destination: pathlib.Path) -> None:
     suffix = ".exe" if target.endswith("windows-msvc") else ""
     asset = f"tovuk-{__version__}-{target}{suffix}"
     url = f"{REPOSITORY}/releases/download/v{__version__}/{asset}"
+    checksum_url = f"{url}.sha256"
     try:
+        expected_sha256 = _release_checksum(checksum_url, asset)
         with urllib.request.urlopen(url, timeout=30) as response:
-            destination.write_bytes(response.read())
+            contents = response.read()
+        actual_sha256 = hashlib.sha256(contents).hexdigest()
+        if actual_sha256 != expected_sha256:
+            raise RuntimeError(
+                f"native binary checksum mismatch: expected {expected_sha256}, got {actual_sha256}"
+            )
+        destination.write_bytes(contents)
     except (OSError, urllib.error.URLError) as error:
         raise RuntimeError(f"Could not install native Tovuk binary from {url}: {error}") from error
+
+
+def _release_checksum(url: str, asset: str) -> str:
+    with urllib.request.urlopen(url, timeout=30) as response:
+        text = response.read(4096).decode("utf-8", errors="replace")
+    line = next((item.strip() for item in text.splitlines() if item.strip()), "")
+    if not line:
+        raise RuntimeError(f"checksum file for {asset} is empty")
+    parts = line.split()
+    digest = parts[0].lower()
+    if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
+        raise RuntimeError(f"checksum file for {asset} does not contain a SHA-256 digest")
+    if len(parts) > 1:
+        listed_asset = pathlib.Path(" ".join(parts[1:]).lstrip("*")).name
+        if listed_asset != asset:
+            raise RuntimeError(f"checksum file names {listed_asset}, expected {asset}")
+    return digest
 
 
 def _print_agent_error(message: str, json_output: bool) -> None:
