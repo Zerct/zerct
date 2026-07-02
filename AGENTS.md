@@ -18,12 +18,15 @@ across coding-tool upgrades.
 
 Do not delegate implementation, final judgment, verification, or reporting to
 subagents. If the user explicitly requests a skill workflow that uses review
-subagents, use them only for discovery and independent critique; the current
-Codex thread still owns the edits, checks, and final report.
+subagents, use them only for discovery and independent critique inside the
+current Codex thread; they must not create user-owned chats, standalone
+automation runs, or separate persistent workstreams. The current Codex thread
+still owns the edits, checks, and final report.
 
 Work locally and commit coherent increments. Push to main or master only after
-30 local commits unless the user explicitly asks earlier. Do not deploy from
-this public repo unless the user explicitly asks for a deploy.
+30 local commits and only when the current user or automation instruction
+includes that batched-push rule, unless the user explicitly asks earlier. Do
+not deploy from this public repo unless the user explicitly asks for a deploy.
 
 ## Product Boundary
 
