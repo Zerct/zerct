@@ -74,3 +74,29 @@ fn support_create_body_requires_subject_and_details() {
         Some("Support ticket subject and details are required.")
     );
 }
+
+#[test]
+fn support_create_body_rejects_invalid_severity() {
+    let cli = CliOptions {
+        command: "support".to_owned(),
+        args: vec![
+            "create".to_owned(),
+            "Request failed".to_owned(),
+            "Request id request_123 failed.".to_owned(),
+        ],
+        severity: "critical".to_owned(),
+        ..CliOptions::default()
+    };
+
+    let payload = support_create_body(&cli)
+        .err()
+        .map(|error| error.payload().clone());
+    assert_eq!(
+        payload.as_ref().map(|payload| payload.code.as_str()),
+        Some("invalid_support_ticket")
+    );
+    assert_eq!(
+        payload.as_ref().map(|payload| payload.message.as_str()),
+        Some("Support ticket severity must be low, normal, or urgent.")
+    );
+}

@@ -90,16 +90,10 @@ pub(super) fn set_output_format(
         cli.output.json = true;
         return Ok(());
     }
-    if value.eq_ignore_ascii_case("text") {
-        cli.output.json = false;
-        return Ok(());
-    }
     Err(agent_error(
         "invalid_argument",
-        format!("{source} must be `json` or `text`."),
-        format!(
-            "Set {source} to `json` for agent-readable output or `text` for human-readable output."
-        ),
+        format!("{source} must be `json`."),
+        format!("Set {source} to `json`, or omit it for default command output."),
         json_output,
     ))
 }
@@ -115,7 +109,6 @@ fn invalid_value_flag_dispatch(cli: &CliOptions, name: &str) -> Result<usize> {
 
 fn string_flag_target<'a>(cli: &'a mut CliOptions, name: &str) -> Option<&'a mut String> {
     match name {
-        "--api" => Some(&mut cli.api_url),
         "--limit" => Some(&mut cli.limit),
         "--cursor" => Some(&mut cli.cursor),
         "--top-up-usd-cents" => Some(&mut cli.top_up_usd_cents),

@@ -50,14 +50,8 @@ pub(crate) fn check(native_cli: &str, python_bin: &str) -> CheckResult {
         native.stdout(&["-V"])?.as_str(),
         native_version.as_str(),
     )?;
-    require_equal_output(
-        native.label,
-        native
-            .stdout(&["--api=https://api.example.test", "--version"])?
-            .as_str(),
-        native_version.as_str(),
-    )?;
     native.require_unknown_argument_failure()?;
+    native.require_api_override_failure()?;
     native.require_retired_command_failures()?;
 
     Invocation::require_module_compiles(python_bin)?;
@@ -67,14 +61,8 @@ pub(crate) fn check(native_cli: &str, python_bin: &str) -> CheckResult {
         native_version.as_str(),
     )?;
     assert_help_contract(python.label, &python.help_outputs()?)?;
-    require_equal_output(
-        python.label,
-        python
-            .stdout(&["--api=https://api.example.test", "--version"])?
-            .as_str(),
-        native_version.as_str(),
-    )?;
     python.require_unknown_argument_failure()?;
+    python.require_api_override_failure()?;
     python.require_retired_command_failures()?;
 
     println!("Checked runtime CLI help and retired command behavior.");
@@ -131,6 +119,18 @@ impl Invocation<'_> {
 
     fn require_unknown_argument_failure(&self) -> CheckResult {
         self.require_failure_code(&["--json", "--definitely-unknown"], "unknown_argument")
+    }
+
+    fn require_api_override_failure(&self) -> CheckResult {
+        self.require_failure_code(
+            &[
+                "--json",
+                "account",
+                "show",
+                "--api=https://api.example.test",
+            ],
+            "unknown_argument",
+        )
     }
 
     fn require_retired_command_failures(&self) -> CheckResult {

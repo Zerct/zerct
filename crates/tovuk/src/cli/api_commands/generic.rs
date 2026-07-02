@@ -1,48 +1,55 @@
 use super::super::{
     args::CliOptions,
-    errors::{Result, agent_error, print_json},
+    errors::{Result, print_json},
 };
 use super::{common::page_query, http::api_request};
 use reqwest::Method;
 use serde_json::{Value, json};
 
-pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
-    let response = api_request(cli, Method::GET, "/v1/capabilities", None, None)?;
-    let payload = pricing_payload(&response, cli.output.json)?;
-    print_json(&payload)
+pub(crate) fn pricing(_cli: &CliOptions) -> Result<()> {
+    print_json(&pricing_payload())
 }
 
-fn pricing_payload(response: &Value, json_output: bool) -> Result<Value> {
-    let plans = required_capability_array(response, "plans", json_output)?;
-    let products = required_capability_array(response, "products", json_output)?;
-    Ok(json!({
-        "plans": plans,
-        "products": products,
+fn pricing_payload() -> Value {
+    json!({
+        "plans": [
+            {
+                "plan": "plus",
+                "monthlyPriceUsdCents": 2000,
+                "includedBalanceUsdCents": 2000,
+                "bonusBalanceUsdCents": 0
+            },
+            {
+                "plan": "pro",
+                "monthlyPriceUsdCents": 10000,
+                "includedBalanceUsdCents": 12000,
+                "bonusBalanceUsdCents": 2000
+            },
+            {
+                "plan": "max",
+                "monthlyPriceUsdCents": 20000,
+                "includedBalanceUsdCents": 30000,
+                "bonusBalanceUsdCents": 10000
+            }
+        ],
+        "scraperPrices": [
+            {"scraper": "reddit", "unit": "record", "usdMicrosPerResult": 700},
+            {"scraper": "github", "unit": "record", "usdMicrosPerResult": 600},
+            {"scraper": "linkedin", "unit": "record", "usdMicrosPerResult": 900},
+            {"scraper": "tiktok", "unit": "record", "usdMicrosPerResult": 1700},
+            {"scraper": "instagram", "unit": "record", "usdMicrosPerResult": 800},
+            {"scraper": "x", "unit": "post", "usdMicrosPerResult": 300}
+        ],
+        "topUp": {
+            "minimumUsdCents": 2000,
+            "expiresAfterInactiveDays": 365
+        },
         "nextActions": [
             "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper.",
             "Use `priceEvents[].usdMicros`, request limits, and `tovuk usage --json` to estimate account balance impact before high-count requests.",
             "Choose a plan, then use `tovuk billing checkout plus --json`, `tovuk billing checkout pro --json`, or `tovuk billing checkout max --json` when an upgrade is required."
         ]
-    }))
-}
-
-fn required_capability_array(response: &Value, field: &str, json_output: bool) -> Result<Value> {
-    let Some(value) = response.get(field) else {
-        return Err(capabilities_contract_error(field, json_output));
-    };
-    if value.as_array().is_none() {
-        return Err(capabilities_contract_error(field, json_output));
-    }
-    Ok(value.clone())
-}
-
-fn capabilities_contract_error(field: &str, json_output: bool) -> super::super::errors::CliError {
-    agent_error(
-        "capabilities_invalid",
-        format!("Tovuk capabilities response is missing `{field}`."),
-        "Retry `tovuk pricing --json`. If it keeps failing, create a Tovuk support ticket with command output.",
-        json_output,
-    )
+    })
 }
 
 pub(crate) fn print_authenticated(cli: &CliOptions, route: &str) -> Result<()> {

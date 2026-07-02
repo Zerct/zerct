@@ -33,6 +33,7 @@ fn run() -> Result<(), String> {
     for workflow in &workflows {
         check_workflow(workflow, &mut findings);
     }
+    require_ci_path_filter_contract(&workflows, &mut findings);
     require_public_trusted_ci(&workflows, &mut findings);
     run_actionlint(&mut findings);
 
@@ -115,6 +116,31 @@ fn check_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
     check_self_hosted_policy(workflow, findings);
     check_github_hosted_cargo_cache(workflow, findings);
     check_public_package_release_order(workflow, findings);
+}
+
+fn require_ci_path_filter_contract(workflows: &[Workflow], findings: &mut Vec<String>) {
+    let Some(ci) = workflows
+        .iter()
+        .find(|workflow| workflow.path.ends_with("ci.yml"))
+    else {
+        findings.push("missing .github/workflows/ci.yml".to_owned());
+        return;
+    };
+    for path in [
+        ".gitignore",
+        ".typos.toml",
+        ".vacuum.yaml",
+        "AGENTS.md",
+        "deny.toml",
+        "native-release-targets.json",
+    ] {
+        require_contains(
+            ci.contents.as_str(),
+            format!("- \"{path}\"").as_str(),
+            format!("{}: CI path filters must include {path}", ci.path.display()).as_str(),
+            findings,
+        );
+    }
 }
 
 fn check_checkout_credentials(workflow: &Workflow, findings: &mut Vec<String>) {

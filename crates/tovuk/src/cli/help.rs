@@ -2,29 +2,29 @@ use super::constants::VERSION;
 
 const HELP_BODY: &str = r#"
 Usage:
-  tovuk login [--token <token>] [--api <url>] [--json|--output json|text]
-  tovuk account show [--api <url>] [--json]
-  tovuk account activity [--api <url>] [--json]
-  tovuk api-key list [--api <url>] [--json]
-  tovuk api-key create "Production scraper" [--api <url>] [--json]
-  tovuk api-key revoke <api_key_id> [--api <url>] [--json]
-  tovuk pricing [--api <url>] [--json]
-  tovuk scraper list [--api <url>] [--json]
-  tovuk scraper health [--api <url>] [--json]
-  tovuk scraper show <scraper> [--api <url>] [--json]
-  tovuk request list [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk request create <scraper> '{"query":"coffee shops","limit":100}' [--limit <n>] [--api <url>] [--json]
-  tovuk request show <request_id> [--api <url>] [--json]
-  tovuk request results <request_id> [--limit <n>] [--cursor <cursor>] [--api <url>] [--json]
-  tovuk request cancel <request_id> [--api <url>] [--json]
-  tovuk usage [--api <url>] [--json]
-  tovuk billing [checkout plus|checkout pro|checkout max|portal] [reason] [--top-up-usd-cents <cents>] [--api <url>] [--json]
-  tovuk support list [--limit <n>] [--api <url>] [--json]
-  tovuk support create "Subject" "Details" [--request-id <request_id>] [--scraper-id <scraper>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--api <url>] [--json]
-  tovuk support resolve <ticket_id> [--api <url>] [--json]
+  tovuk login [--token <token>] [--json|--output json]
+  tovuk account show [--json]
+  tovuk account activity [--json]
+  tovuk api-key list [--json]
+  tovuk api-key create "Production scraper" [--json]
+  tovuk api-key revoke <api_key_id> [--json]
+  tovuk pricing [--json]
+  tovuk scraper list [--json]
+  tovuk scraper health [--json]
+  tovuk scraper show <scraper> [--json]
+  tovuk request list [--limit <n>] [--cursor <cursor>] [--json]
+  tovuk request create <scraper> '{"query":"coffee shops","limit":100}' [--limit <n>] [--json]
+  tovuk request show <request_id> [--json]
+  tovuk request results <request_id> [--limit <n>] [--cursor <cursor>] [--json]
+  tovuk request cancel <request_id> [--json]
+  tovuk usage [--json]
+  tovuk billing [checkout plus|checkout pro|checkout max|portal] [reason] [--top-up-usd-cents <cents>] [--json]
+  tovuk support list [--limit <n>] [--json]
+  tovuk support create "Subject" "Details" [--request-id <request_id>] [--scraper-id <scraper>] [--failing-command <command>] [--first-log-line <line>] [--severity low|normal|urgent] [--json]
+  tovuk support resolve <ticket_id> [--json]
 
 Agent contract:
-  - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Use --output text to force human-readable output for one command.
+  - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Success output is JSON for API commands.
   - Use tovuk scraper list --json to choose a public-data scraper, tovuk scraper health --json to inspect managed reader and proxy readiness, tovuk request create <scraper> '<json>' --json to create paid scraper work, tovuk request show <request_id> --json to poll status, and tovuk request results <request_id> --json to fetch stored records.
   - Scraper requests must use public URLs, public search terms, public profile handles, or public place ids only. Do not send cookies, passwords, account tokens, private session data, proxy URLs, or private account content.
   - Use tovuk pricing --json and tovuk usage --json before high-count scraper requests. Inspect priceEvents[].usdMicros, billingEstimate.lineItems, and account balance before creating large jobs.

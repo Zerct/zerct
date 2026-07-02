@@ -54,6 +54,8 @@ pub(crate) fn is_forbidden_tracked_path(path: &str) -> bool {
         .and_then(std::ffi::OsStr::to_str)
         .unwrap_or_default();
     matches!(file_name, "terraform.tfvars" | ".terraform.tfvars" | ".env")
+        || is_local_guidance_file(file_name)
+        || is_local_generated_file(file_name)
         || file_name.ends_with(".auto.tfvars")
         || file_name.ends_with(".auto.tfvars.json")
         || path_has_extension(file_name, "tgz")
@@ -64,6 +66,21 @@ pub(crate) fn is_forbidden_tracked_path(path: &str) -> bool {
         || path
             .split('/')
             .any(|component| component == "terraform.tfstate" || component.contains(".tfstate."))
+}
+
+fn is_local_guidance_file(file_name: &str) -> bool {
+    matches!(
+        file_name.to_ascii_lowercase().as_str(),
+        "agents.override.md"
+            | "claude.md"
+            | "gemini.md"
+            | "publishing.md"
+            | "npm-support-request.md"
+    )
+}
+
+fn is_local_generated_file(file_name: &str) -> bool {
+    matches!(file_name, ".DS_Store") || path_has_extension(file_name, "log")
 }
 
 pub(crate) fn path_has_extension(path: &str, extension: &str) -> bool {
@@ -97,4 +114,30 @@ fn is_checked_text_path(path: &str) -> bool {
                 | "yml",
         )
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_forbidden_tracked_path;
+
+    #[test]
+    fn rejects_forced_local_agent_guidance() {
+        for path in [
+            "AGENTS.override.md",
+            "docs/AGENTS.override.md",
+            "CLAUDE.md",
+            "GEMINI.md",
+            "PUBLISHING.md",
+            "npm-support-request.md",
+        ] {
+            assert!(is_forbidden_tracked_path(path), "{path}");
+        }
+    }
+
+    #[test]
+    fn rejects_forced_generated_local_files() {
+        for path in [".DS_Store", "docs/.DS_Store", "debug.log"] {
+            assert!(is_forbidden_tracked_path(path), "{path}");
+        }
+    }
 }
