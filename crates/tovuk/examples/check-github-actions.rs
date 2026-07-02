@@ -168,14 +168,6 @@ fn check_self_hosted_policy(workflow: &Workflow, findings: &mut Vec<String>) {
             "public self-hosted jobs must require github.actor == kriptoburak",
         ),
         (
-            "github.event.pull_request.head.repo.full_name == github.repository",
-            "public self-hosted pull_request jobs must require same-repository heads",
-        ),
-        (
-            "github.event.pull_request.base.ref == 'main'",
-            "public self-hosted pull_request jobs must require base branch main",
-        ),
-        (
             "github.ref == 'refs/heads/main'",
             "public self-hosted push and workflow_dispatch jobs must require refs/heads/main",
         ),
@@ -186,6 +178,25 @@ fn check_self_hosted_policy(workflow: &Workflow, findings: &mut Vec<String>) {
             format!("{}: {message}", workflow.path.display()).as_str(),
             findings,
         );
+    }
+    if workflow.contents.contains("pull_request:") {
+        for (needle, message) in [
+            (
+                "github.event.pull_request.head.repo.full_name == github.repository",
+                "public self-hosted pull_request jobs must require same-repository heads",
+            ),
+            (
+                "github.event.pull_request.base.ref == 'main'",
+                "public self-hosted pull_request jobs must require base branch main",
+            ),
+        ] {
+            require_contains(
+                workflow.contents.as_str(),
+                needle,
+                format!("{}: {message}", workflow.path.display()).as_str(),
+                findings,
+            );
+        }
     }
 }
 
@@ -259,6 +270,24 @@ fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<
         workflow.contents.as_str(),
         "fromJSON(needs.native-targets.outputs.matrix)",
         "publish-native-binaries.yml must build the native matrix generated from native-release-targets.json",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        "needs: [native-targets, release-gate]",
+        "publish-native-binaries.yml must not upload native release assets before the release gate passes",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        "scripts/check-all.sh",
+        "publish-native-binaries.yml release gate must run the full public repository check before publishing assets",
+        findings,
+    );
+    require_contains(
+        workflow.contents.as_str(),
+        "mintlify-agent-readiness https://docs.tovuk.com",
+        "publish-native-binaries.yml release gate must verify live docs agent readiness before publishing assets",
         findings,
     );
     require_contains(

@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, path::Path};
 
 use crate::{helpers::CheckResult, repo_hygiene_git::git_status_success};
 
@@ -24,10 +24,36 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "crates/tovuk/Cargo.toml",
     "crates/tovuk/examples/check-github-actions.rs",
     "crates/tovuk/examples/check-prose-style.rs",
-    "crates/tovuk/examples/check-public-contracts/main.rs",
     "crates/tovuk/examples/check-public-contracts/agent_guidance.rs",
+    "crates/tovuk/examples/check-public-contracts/cli_contract.rs",
+    "crates/tovuk/examples/check-public-contracts/cli_contract/package.rs",
+    "crates/tovuk/examples/check-public-contracts/cli_contract/retired.rs",
+    "crates/tovuk/examples/check-public-contracts/docs.rs",
+    "crates/tovuk/examples/check-public-contracts/docs_api_contract.rs",
+    "crates/tovuk/examples/check-public-contracts/docs_api_contract/openapi.rs",
+    "crates/tovuk/examples/check-public-contracts/docs_navigation.rs",
+    "crates/tovuk/examples/check-public-contracts/docs_sources.rs",
+    "crates/tovuk/examples/check-public-contracts/helpers.rs",
+    "crates/tovuk/examples/check-public-contracts/helpers_io.rs",
+    "crates/tovuk/examples/check-public-contracts/helpers_public_copy.rs",
+    "crates/tovuk/examples/check-public-contracts/main.rs",
+    "crates/tovuk/examples/check-public-contracts/mintlify.rs",
+    "crates/tovuk/examples/check-public-contracts/mintlify_fetch.rs",
     "crates/tovuk/examples/check-public-contracts/native_release_targets.rs",
+    "crates/tovuk/examples/check-public-contracts/npm.rs",
+    "crates/tovuk/examples/check-public-contracts/npm_package.rs",
+    "crates/tovuk/examples/check-public-contracts/npm_runtime.rs",
+    "crates/tovuk/examples/check-public-contracts/package_versions.rs",
     "crates/tovuk/examples/check-public-contracts/repo_hygiene.rs",
+    "crates/tovuk/examples/check-public-contracts/repo_hygiene_git.rs",
+    "crates/tovuk/examples/check-public-contracts/repo_hygiene_paths.rs",
+    "crates/tovuk/examples/check-public-contracts/repo_hygiene_required.rs",
+    "crates/tovuk/examples/check-public-contracts/repo_hygiene_text.rs",
+    "crates/tovuk/examples/check-public-contracts/retired_contracts.rs",
+    "crates/tovuk/examples/check-public-contracts/runtime_cli.rs",
+    "crates/tovuk/examples/check-public-contracts/script_contracts.rs",
+    "crates/tovuk/examples/check-public-contracts/support_contract.rs",
+    "crates/tovuk/examples/check-public-contracts/types.rs",
     "crates/tovuk/src/main.rs",
     "docs/docs.json",
     "docs/openapi.json",
@@ -46,8 +72,8 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "scripts/lib/repo-root.sh",
     "scripts/lib/tool-path.sh",
     "skills/tovuk/SKILL.md",
-    "crates/tovuk/examples/check-public-contracts/script_contracts.rs",
 ];
+const PUBLIC_CONTRACT_CHECKER_DIR: &str = "crates/tovuk/examples/check-public-contracts/";
 
 const REQUIRED_IGNORED_PATHS: &[&str] = &[
     ".env",
@@ -64,19 +90,41 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
 ];
 
 pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {
+    let required_set = REQUIRED_TRACKED_PATHS
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
     let missing = REQUIRED_TRACKED_PATHS
         .iter()
         .copied()
         .filter(|path| !tracked_set.contains(*path))
         .collect::<Vec<_>>();
-    if missing.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
+    if !missing.is_empty() {
+        return Err(format!(
             "These required public repo files are not tracked:\n{}",
             missing.join("\n")
-        ))
+        ));
     }
+
+    let unpinned_checker_modules = tracked_set
+        .iter()
+        .filter(|path| {
+            path.starts_with(PUBLIC_CONTRACT_CHECKER_DIR)
+                && Path::new(path)
+                    .extension()
+                    .is_some_and(|extension| extension.eq_ignore_ascii_case("rs"))
+                && !required_set.contains(path.as_str())
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+    if !unpinned_checker_modules.is_empty() {
+        return Err(format!(
+            "These public contract checker modules must be added to REQUIRED_TRACKED_PATHS:\n{}",
+            unpinned_checker_modules.join("\n")
+        ));
+    }
+
+    Ok(())
 }
 
 pub(crate) fn require_ignored_paths() -> CheckResult {

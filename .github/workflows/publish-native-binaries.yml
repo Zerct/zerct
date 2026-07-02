@@ -19,6 +19,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  release-gate:
+    name: release gate
+    if: ${{ github.ref == 'refs/heads/main' && github.actor == 'kriptoburak' }}
+    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout trusted commit without third-party actions
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git init --initial-branch=main .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          auth="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+          git -c "http.${GITHUB_SERVER_URL}/.extraheader=AUTHORIZATION: basic ${auth}" \
+            fetch --depth=1 origin "${GITHUB_SHA}"
+          git checkout --detach FETCH_HEAD
+      - name: Check public agent readiness
+        run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+      - name: Run full repository check
+        run: scripts/check-all.sh
+
   native-targets:
     name: read native release targets
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -55,7 +79,7 @@ jobs:
 
   build:
     name: build ${{ matrix.target }}
-    needs: native-targets
+    needs: [native-targets, release-gate]
     if: ${{ github.ref == 'refs/heads/main' }}
     timeout-minutes: 30
     strategy:
