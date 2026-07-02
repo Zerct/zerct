@@ -20,6 +20,7 @@ concurrency:
 jobs:
   build:
     name: build ${{ matrix.target }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
