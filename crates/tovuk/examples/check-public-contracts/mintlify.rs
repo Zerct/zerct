@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use reqwest::blocking::Client;
+use reqwest::{Url, blocking::Client};
 use serde_json::Value;
 
 use crate::helpers::{
@@ -177,7 +177,63 @@ fn check_mcp_discovery(
             (":", "MCP discovery"),
             ("/mcp", "MCP discovery"),
         ],
-    )
+    )?;
+    require_mcp_urls_on_base_host(base_url, mcp_discovery.as_str())
+}
+
+fn require_mcp_urls_on_base_host(base_url: &str, source: &str) -> CheckResult {
+    let base = Url::parse(base_url).map_err(|error| format!("parse docs base URL: {error}"))?;
+    let base_host = base
+        .host_str()
+        .ok_or_else(|| format!("docs base URL must include a host: {base_url}"))?;
+    let discovery = serde_json::from_str::<Value>(source)
+        .map_err(|error| format!("parse MCP discovery JSON: {error}"))?;
+    let mut urls = Vec::new();
+    collect_url_fields(&discovery, &mut urls);
+    if urls.is_empty() {
+        return Err("MCP discovery did not include URL fields".to_owned());
+    }
+    for url in urls {
+        require_mcp_url_on_base_host(base.scheme(), base_host, url)?;
+    }
+    Ok(())
+}
+
+fn collect_url_fields<'a>(value: &'a Value, urls: &mut Vec<&'a str>) {
+    match value {
+        Value::Array(items) => {
+            for item in items {
+                collect_url_fields(item, urls);
+            }
+        }
+        Value::Object(fields) => {
+            for (name, item) in fields {
+                if name == "url" {
+                    if let Value::String(url) = item {
+                        urls.push(url.as_str());
+                    }
+                }
+                collect_url_fields(item, urls);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn require_mcp_url_on_base_host(base_scheme: &str, base_host: &str, url: &str) -> CheckResult {
+    let parsed =
+        Url::parse(url).map_err(|error| format!("parse MCP discovery URL {url}: {error}"))?;
+    if parsed.scheme() != base_scheme || parsed.host_str() != Some(base_host) {
+        return Err(format!(
+            "MCP discovery URL {url} must stay on {base_scheme}://{base_host}"
+        ));
+    }
+    if parsed.path() != "/mcp" {
+        return Err(format!(
+            "MCP discovery URL {url} must use the public /mcp path"
+        ));
+    }
+    Ok(())
 }
 
 fn reject_retired_public_names(label: &str, source: &str) -> CheckResult {
@@ -202,4 +258,56 @@ fn robots_blocks_crawlers(source: &str) -> bool {
         .lines()
         .any(|line| line.to_lowercase().trim() == "allow: /");
     disallows_all && !allows_all
+}
+
+#[cfg(test)]
+mod tests {
+    use super::require_mcp_urls_on_base_host;
+
+    #[test]
+    fn accepts_public_mcp_urls_on_docs_host() {
+        let source = r#"{
+            "url": "https://docs.tovuk.com/mcp",
+            "servers": [
+                {"name": "public", "url": "https://docs.tovuk.com/mcp"}
+            ]
+        }"#;
+
+        assert!(
+            require_mcp_urls_on_base_host("https://docs.tovuk.com", source).is_ok(),
+            "MCP discovery should accept public docs-domain URLs"
+        );
+    }
+
+    #[test]
+    fn rejects_generated_mintlify_hosts() {
+        let source = r#"{
+            "url": "https://project-123.mintlify.me/mcp",
+            "servers": [
+                {"name": "public", "url": "https://project-123.mintlify.me/mcp"}
+            ]
+        }"#;
+
+        let result = require_mcp_urls_on_base_host("https://docs.tovuk.com", source);
+        assert!(
+            matches!(result, Err(message) if message.contains("must stay on https://docs.tovuk.com")),
+            "MCP discovery should reject generated Mintlify hosts"
+        );
+    }
+
+    #[test]
+    fn rejects_non_public_mcp_paths() {
+        let source = r#"{
+            "url": "https://docs.tovuk.com/authed/mcp",
+            "servers": [
+                {"name": "public", "url": "https://docs.tovuk.com/authed/mcp"}
+            ]
+        }"#;
+
+        let result = require_mcp_urls_on_base_host("https://docs.tovuk.com", source);
+        assert!(
+            matches!(result, Err(message) if message.contains("public /mcp path")),
+            "MCP discovery should use the public /mcp path"
+        );
+    }
 }
