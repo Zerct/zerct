@@ -879,6 +879,120 @@
           }
         }
       }
+    },
+    "/v1/account/api-keys": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "List API keys",
+        "description": "Lists API keys for the authenticated account without returning secret token material.",
+        "operationId": "listAccountApiKeys",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountApiKeysLoaded"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create API key",
+        "description": "Creates an API key for apps, scripts, agents, and backend jobs. The full token is returned once.",
+        "operationId": "createAccountApiKey",
+        "requestBody": {
+          "description": "API key name.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountApiKeyCreateRequest"
+              },
+              "examples": {
+                "example": {
+                  "summary": "Create production key.",
+                  "value": {
+                    "name": "Production scraper"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountApiKeyCreated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/account/api-keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Revoke API key",
+        "description": "Revokes an API key for the authenticated account.",
+        "operationId": "revokeAccountApiKey",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "description": "API key id from the list response.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]{3,64}$",
+              "example": "api_key_a1b2c3d4e5f6"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountApiKeyRevoked"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1366,10 +1480,9 @@
               "example": {
                 "summary": "Billing checkout created.",
                 "value": {
-                  "ok": true,
                   "checkout": {
-                    "url": "https://billing.stripe.com/example",
-                    "expiresAt": "2026-06-23T12:30:00Z"
+                    "url": "https://billing.stripe.com/session/example",
+                    "reason": "Open Tovuk plus checkout."
                   }
                 }
               }
@@ -1414,15 +1527,15 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/BillingPortalResponse"
+              "$ref": "#/components/schemas/BillingCheckoutResponse"
             },
             "examples": {
               "example": {
                 "summary": "Billing portal created.",
                 "value": {
-                  "ok": true,
-                  "portal": {
-                    "url": "https://billing.stripe.com/session/example"
+                  "checkout": {
+                    "url": "https://billing.stripe.com/session/example",
+                    "reason": "Manage Tovuk billing."
                   }
                 }
               }
@@ -2407,6 +2520,250 @@
             }
           }
         }
+      },
+      "AccountApiKeysLoaded": {
+        "description": "API keys loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountApiKeysResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "API keys loaded.",
+                "value": {
+                  "apiKeys": [
+                    {
+                      "id": "api_key_a1b2c3d4e5f6",
+                      "name": "Production scraper",
+                      "tokenPrefix": "tvk_live_8Qm2",
+                      "createdAt": "2026-06-23T12:00:00Z",
+                      "lastUsedAt": null,
+                      "revokedAt": null,
+                      "currentDayRequestCount": 42,
+                      "currentMonthRequestCount": 5160
+                    }
+                  ],
+                  "nextActions": [
+                    "Create one API key for each app or script."
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed while serving API key list loading.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining after serving API key list loading.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the rate window for API key list loading resets.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "AccountApiKeyCreated": {
+        "description": "API key created.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountApiKeyCreateResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "API key created.",
+                "value": {
+                  "apiKey": {
+                    "id": "api_key_a1b2c3d4e5f6",
+                    "name": "Production scraper",
+                    "tokenPrefix": "tvk_live_8Qm2",
+                    "createdAt": "2026-06-23T12:00:00Z",
+                    "lastUsedAt": null,
+                    "revokedAt": null,
+                    "currentDayRequestCount": 42,
+                    "currentMonthRequestCount": 5160
+                  },
+                  "token": "tvk_live_example_token_shown_once",
+                  "nextActions": [
+                    "Save this key now. Tovuk will not show it again."
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed while serving API key creation.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining after serving API key creation.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the rate window for API key creation resets.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "AccountApiKeyRevoked": {
+        "description": "API key revoked.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountApiKeyRevokeResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "API key revoked.",
+                "value": {
+                  "apiKey": {
+                    "id": "api_key_a1b2c3d4e5f6",
+                    "name": "Production scraper",
+                    "tokenPrefix": "tvk_live_8Qm2",
+                    "createdAt": "2026-06-23T12:00:00Z",
+                    "lastUsedAt": null,
+                    "revokedAt": "2026-06-23T12:05:00Z",
+                    "currentDayRequestCount": 42,
+                    "currentMonthRequestCount": 5160
+                  },
+                  "revoked": true,
+                  "nextActions": [
+                    "Remove this key from scripts and saved settings."
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed while serving API key revocation.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining after serving API key revocation.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the rate window for API key revocation resets.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Resource was not found.",
+                "value": {
+                  "code": "policy_rejected",
+                  "message": "API key not found.",
+                  "agent_instruction": "Refresh API keys and choose an existing key before revoking.",
+                  "docs_url": null,
+                  "checkout_url": null
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed while serving missing resource errors.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining after serving missing resource errors.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the rate window for missing resource errors resets.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
       }
     },
     "schemas": {
@@ -2899,108 +3256,90 @@
       },
       "BillingCheckoutRequest": {
         "type": "object",
-        "description": "Optional checkout reason.",
+        "description": "Subscription or top-up checkout payload accepted by the billing API.",
         "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
         "properties": {
-          "reason": {
+          "target_plan": {
             "type": [
               "string",
               "null"
             ],
+            "enum": [
+              "unpaid",
+              "plus",
+              "pro",
+              "max",
+              null
+            ],
+            "example": "plus",
+            "description": "Target monthly plan for subscription checkout."
+          },
+          "top_up_usd_cents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "minimum": 2000,
+            "maximum": 100000,
+            "example": 2000,
+            "description": "One-time USD top-up amount in cents."
+          },
+          "reason": {
+            "type": "string",
             "maxLength": 200,
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "Open Tovuk plus checkout."
           }
         },
         "example": {
-          "reason": "example"
+          "target_plan": "plus",
+          "reason": "Open Tovuk plus checkout."
         }
       },
       "BillingCheckout": {
         "type": "object",
-        "description": "Hosted checkout session.",
+        "description": "Hosted Stripe checkout or billing portal session.",
         "required": [
           "url",
-          "expiresAt"
+          "reason"
         ],
         "properties": {
           "url": {
             "type": "string",
             "format": "uri",
-            "example": "https://example.com"
+            "example": "https://billing.stripe.com/session/example"
           },
-          "expiresAt": {
+          "reason": {
             "type": "string",
-            "format": "date-time",
-            "example": "2026-06-23T12:00:00Z"
+            "maxLength": 200,
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "Open Tovuk plus checkout."
           }
         },
         "example": {
-          "url": "https://example.com",
-          "expiresAt": "2026-06-23T12:00:00Z"
+          "url": "https://billing.stripe.com/session/example",
+          "reason": "Open Tovuk plus checkout."
         }
       },
       "BillingCheckoutResponse": {
         "type": "object",
-        "description": "Billing checkout response.",
+        "description": "Billing checkout or portal response.",
         "required": [
-          "ok",
           "checkout"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "checkout": {
             "$ref": "#/components/schemas/BillingCheckout"
           }
         },
         "example": {
-          "ok": true,
           "checkout": {
-            "url": "https://example.com",
-            "expiresAt": "2026-06-23T12:00:00Z"
-          }
-        }
-      },
-      "BillingPortal": {
-        "type": "object",
-        "description": "Hosted billing portal session.",
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "url": {
-            "type": "string",
-            "format": "uri",
-            "example": "https://example.com"
-          }
-        },
-        "example": {
-          "url": "https://example.com"
-        }
-      },
-      "BillingPortalResponse": {
-        "type": "object",
-        "description": "Billing portal response.",
-        "required": [
-          "ok",
-          "portal"
-        ],
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
-          "portal": {
-            "$ref": "#/components/schemas/BillingPortal"
-          }
-        },
-        "example": {
-          "ok": true,
-          "portal": {
-            "url": "https://example.com"
+            "url": "https://billing.stripe.com/session/example",
+            "reason": "Open Tovuk plus checkout."
           }
         }
       },
@@ -3808,6 +4147,246 @@
             "limit_per_day": 10,
             "remaining_day": 9
           }
+        }
+      },
+      "AccountApiKeySummary": {
+        "type": "object",
+        "description": "Customer API key summary without secret token material.",
+        "required": [
+          "id",
+          "name",
+          "tokenPrefix",
+          "createdAt",
+          "lastUsedAt",
+          "revokedAt",
+          "currentDayRequestCount",
+          "currentMonthRequestCount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]{3,64}$",
+            "example": "api_key_a1b2c3d4e5f6"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "Production scraper",
+            "pattern": "^[\\s\\S]{1,80}$"
+          },
+          "tokenPrefix": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "example": "tvk_live_8Qm2",
+            "pattern": "^[A-Za-z0-9_]{1,32}$"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T12:00:00Z"
+          },
+          "lastUsedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "example": null
+          },
+          "revokedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "example": null
+          },
+          "currentDayRequestCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "example": 42,
+            "maximum": 9007199254740991
+          },
+          "currentMonthRequestCount": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "example": 5160,
+            "maximum": 9007199254740991
+          }
+        },
+        "example": {
+          "id": "api_key_a1b2c3d4e5f6",
+          "name": "Production scraper",
+          "tokenPrefix": "tvk_live_8Qm2",
+          "createdAt": "2026-06-23T12:00:00Z",
+          "lastUsedAt": null,
+          "revokedAt": null,
+          "currentDayRequestCount": 42,
+          "currentMonthRequestCount": 5160
+        }
+      },
+      "AccountApiKeysResponse": {
+        "type": "object",
+        "description": "API key list response.",
+        "required": [
+          "apiKeys",
+          "nextActions"
+        ],
+        "properties": {
+          "apiKeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountApiKeySummary"
+            },
+            "example": []
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300,
+              "pattern": "^[\\s\\S]{1,300}$"
+            },
+            "example": [
+              "Create one API key for each app or script."
+            ]
+          }
+        },
+        "example": {
+          "apiKeys": [
+            {
+              "id": "api_key_a1b2c3d4e5f6",
+              "name": "Production scraper",
+              "tokenPrefix": "tvk_live_8Qm2",
+              "createdAt": "2026-06-23T12:00:00Z",
+              "lastUsedAt": null,
+              "revokedAt": null,
+              "currentDayRequestCount": 42,
+              "currentMonthRequestCount": 5160
+            }
+          ],
+          "nextActions": [
+            "Create one API key for each app or script."
+          ]
+        }
+      },
+      "AccountApiKeyCreateRequest": {
+        "type": "object",
+        "description": "API key creation request.",
+        "additionalProperties": false,
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "Production scraper",
+            "pattern": "^[\\s\\S]{1,80}$"
+          }
+        },
+        "example": {
+          "name": "Production scraper"
+        }
+      },
+      "AccountApiKeyCreateResponse": {
+        "type": "object",
+        "description": "API key creation response. The token is shown only once.",
+        "required": [
+          "apiKey",
+          "token",
+          "nextActions"
+        ],
+        "properties": {
+          "apiKey": {
+            "$ref": "#/components/schemas/AccountApiKeySummary"
+          },
+          "token": {
+            "type": "string",
+            "minLength": 20,
+            "example": "tvk_live_example_token_shown_once",
+            "pattern": "^[A-Za-z0-9_]{20,256}$"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300,
+              "pattern": "^[\\s\\S]{1,300}$"
+            },
+            "example": [
+              "Save this key now. Tovuk will not show it again."
+            ]
+          }
+        },
+        "example": {
+          "apiKey": {
+            "id": "api_key_a1b2c3d4e5f6",
+            "name": "Production scraper",
+            "tokenPrefix": "tvk_live_8Qm2",
+            "createdAt": "2026-06-23T12:00:00Z",
+            "lastUsedAt": null,
+            "revokedAt": null,
+            "currentDayRequestCount": 42,
+            "currentMonthRequestCount": 5160
+          },
+          "token": "tvk_live_example_token_shown_once",
+          "nextActions": [
+            "Save this key now. Tovuk will not show it again."
+          ]
+        }
+      },
+      "AccountApiKeyRevokeResponse": {
+        "type": "object",
+        "description": "API key revocation response.",
+        "required": [
+          "apiKey",
+          "revoked",
+          "nextActions"
+        ],
+        "properties": {
+          "apiKey": {
+            "$ref": "#/components/schemas/AccountApiKeySummary"
+          },
+          "revoked": {
+            "type": "boolean",
+            "example": true
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300,
+              "pattern": "^[\\s\\S]{1,300}$"
+            },
+            "example": [
+              "Remove this key from scripts and saved settings."
+            ]
+          }
+        },
+        "example": {
+          "apiKey": {
+            "id": "api_key_a1b2c3d4e5f6",
+            "name": "Production scraper",
+            "tokenPrefix": "tvk_live_8Qm2",
+            "createdAt": "2026-06-23T12:00:00Z",
+            "lastUsedAt": null,
+            "revokedAt": "2026-06-23T12:05:00Z",
+            "currentDayRequestCount": 42,
+            "currentMonthRequestCount": 5160
+          },
+          "revoked": true,
+          "nextActions": [
+            "Remove this key from scripts and saved settings."
+          ]
         }
       }
     }
