@@ -85,21 +85,19 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           tag="v${{ steps.version.outputs.version }}"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          exists=false
+          asset_exists=false
+          checksum_exists=false
           if gh release view "$tag" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
+            exists=true
             assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
             if grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets" >/dev/null; then
-              echo "asset_exists=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "asset_exists=false" >> "$GITHUB_OUTPUT"
+              asset_exists=true
             fi
             if grep -Fx "${{ steps.asset.outputs.name }}.sha256" <<<"$assets" >/dev/null; then
-              echo "checksum_exists=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "checksum_exists=false" >> "$GITHUB_OUTPUT"
+              checksum_exists=true
             fi
-            if grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets" >/dev/null; then
+            if [ "$asset_exists" = "true" ]; then
               if [ "$GITHUB_EVENT_NAME" = "push" ]; then
                 echo "::error::${{ steps.asset.outputs.name }} already exists on $tag. Bump every public package version before pushing CLI changes."
                 exit 1
@@ -108,11 +106,13 @@ jobs:
             else
               echo "::notice::$tag exists, building missing asset ${{ steps.asset.outputs.name }}."
             fi
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "asset_exists=false" >> "$GITHUB_OUTPUT"
-            echo "checksum_exists=false" >> "$GITHUB_OUTPUT"
           fi
+          {
+            printf 'tag=%s\n' "$tag"
+            printf 'exists=%s\n' "$exists"
+            printf 'asset_exists=%s\n' "$asset_exists"
+            printf 'checksum_exists=%s\n' "$checksum_exists"
+          } >> "$GITHUB_OUTPUT"
       - name: Build
         if: steps.release.outputs.asset_exists == 'false'
         shell: bash
