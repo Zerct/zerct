@@ -170,6 +170,8 @@ fn require_install_source(install_path: &Path) -> CheckResult {
     let install_source = read_text(install_path)?;
     for snippet in [
         "https://github.com/tovuk/tovuk/releases/download",
+        ".sha256",
+        "verifySha256",
         "TOVUK_NATIVE_BINARY",
         "aarch64-apple-darwin",
         "x86_64-unknown-linux-gnu",

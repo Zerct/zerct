@@ -17,10 +17,15 @@ deadline=$((SECONDS + wait_seconds))
 tag="v$version"
 required_assets=(
   "tovuk-$version-x86_64-unknown-linux-gnu"
+  "tovuk-$version-x86_64-unknown-linux-gnu.sha256"
   "tovuk-$version-aarch64-unknown-linux-gnu"
+  "tovuk-$version-aarch64-unknown-linux-gnu.sha256"
   "tovuk-$version-aarch64-apple-darwin"
+  "tovuk-$version-aarch64-apple-darwin.sha256"
   "tovuk-$version-x86_64-apple-darwin"
+  "tovuk-$version-x86_64-apple-darwin.sha256"
   "tovuk-$version-x86_64-pc-windows-msvc.exe"
+  "tovuk-$version-x86_64-pc-windows-msvc.exe.sha256"
 )
 
 while true; do

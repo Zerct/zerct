@@ -8,7 +8,7 @@ use super::{request_input, request_input_source};
 fn request_create_requires_input_json() {
     let cli = CliOptions {
         command: "request".to_owned(),
-        args: vec!["create".to_owned(), "google-maps".to_owned()],
+        args: vec!["create".to_owned(), "github".to_owned()],
         ..CliOptions::default()
     };
 

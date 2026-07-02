@@ -34,7 +34,7 @@ Then use the scraper workflow:
 ```sh
 tovuk login --json
 tovuk account show --json
-tovuk account activity --limit 20 --json
+tovuk account activity --json
 tovuk api-key list --json
 tovuk api-key create "Production scraper" --json
 tovuk api-key revoke api_key_0123456789abcdef01234567 --json
@@ -43,6 +43,7 @@ tovuk scraper list --json
 tovuk scraper health --json
 tovuk scraper show tiktok --json
 tovuk request list --limit 20 --json
+tovuk request list --limit 20 --cursor <nextCursor> --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}' --json
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}' --json
@@ -57,8 +58,9 @@ tovuk support create "Request failed" "The scraper request failed after retry. F
 tovuk support resolve ticket_0123456789abcdef0123 --json
 ```
 
-Use `tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
-to continue stored-result pagination.
+Use `tovuk request list --limit <n> --cursor <nextCursor> --json` and
+`tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
+to continue request and stored-result pagination.
 
 Support tickets are account-scoped service tickets between your account and
 Tovuk. Users and AI/API agents can open them through the CLI or by calling
@@ -89,7 +91,7 @@ GET /v1/status
 POST /v1/login/device
 GET /v1/login/device/{device_code}
 GET /v1/account
-PATCH /v1/account
+GET /v1/account/overview
 GET /v1/account/activity
 GET /v1/scrapers
 GET /v1/scrapers/health

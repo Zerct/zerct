@@ -88,21 +88,30 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            if gh release view "$tag" --json assets --jq '.assets[].name' \
-              | grep -Fx "${{ steps.asset.outputs.name }}" >/dev/null; then
+            assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
+            if grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets" >/dev/null; then
+              echo "asset_exists=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "asset_exists=false" >> "$GITHUB_OUTPUT"
+            fi
+            if grep -Fx "${{ steps.asset.outputs.name }}.sha256" <<<"$assets" >/dev/null; then
+              echo "checksum_exists=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "checksum_exists=false" >> "$GITHUB_OUTPUT"
+            fi
+            if grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets" >/dev/null; then
               if [ "$GITHUB_EVENT_NAME" = "push" ]; then
                 echo "::error::${{ steps.asset.outputs.name }} already exists on $tag. Bump every public package version before pushing CLI changes."
                 exit 1
               fi
-              echo "asset_exists=true" >> "$GITHUB_OUTPUT"
               echo "::notice::${{ steps.asset.outputs.name }} already exists on $tag."
             else
-              echo "asset_exists=false" >> "$GITHUB_OUTPUT"
               echo "::notice::$tag exists, building missing asset ${{ steps.asset.outputs.name }}."
             fi
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "asset_exists=false" >> "$GITHUB_OUTPUT"
+            echo "checksum_exists=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Build
         if: steps.release.outputs.asset_exists == 'false'
@@ -116,6 +125,25 @@ jobs:
         run: |
           cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "${{ steps.asset.outputs.name }}"
           chmod +x "${{ steps.asset.outputs.name }}" || true
+      - name: Download existing asset for checksum
+        if: steps.release.outputs.asset_exists == 'true' && steps.release.outputs.checksum_exists == 'false'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh release download "${{ steps.release.outputs.tag }}" --pattern "${{ steps.asset.outputs.name }}" --clobber
+      - name: Prepare checksum
+        if: steps.release.outputs.asset_exists == 'false' || steps.release.outputs.checksum_exists == 'false'
+        shell: bash
+        env:
+          ASSET: ${{ steps.asset.outputs.name }}
+        run: |
+          node - <<'NODE'
+          const { createHash } = require('node:crypto')
+          const { readFileSync, writeFileSync } = require('node:fs')
+          const asset = process.env.ASSET
+          const digest = createHash('sha256').update(readFileSync(asset)).digest('hex')
+          writeFileSync(`${asset}.sha256`, `${digest}  ${asset}\n`, 'utf8')
+          NODE
       - name: Upload release asset
         if: steps.release.outputs.asset_exists == 'false'
         shell: bash
@@ -127,13 +155,19 @@ jobs:
             gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag" \
               || gh release view "$tag" >/dev/null
           fi
-          gh release upload "$tag" "${{ steps.asset.outputs.name }}"
+          gh release upload "$tag" "${{ steps.asset.outputs.name }}" "${{ steps.asset.outputs.name }}.sha256"
+      - name: Upload checksum asset
+        if: steps.release.outputs.asset_exists == 'true' && steps.release.outputs.checksum_exists == 'false'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ steps.release.outputs.tag }}" "${{ steps.asset.outputs.name }}.sha256"
       - name: Verify release asset
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           tag="v${{ steps.version.outputs.version }}"
-          gh release view "$tag" --json assets \
-            --jq '.assets[].name' \
-            | grep -Fx "${{ steps.asset.outputs.name }}"
+          assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
+          grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets"
+          grep -Fx "${{ steps.asset.outputs.name }}.sha256" <<<"$assets"

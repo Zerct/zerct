@@ -58,6 +58,11 @@ pub(crate) fn check() -> CheckResult {
                 "tovuk-{__version__}-",
                 "Python native binary downloader asset path",
             ),
+            (".sha256", "Python native binary checksum asset path"),
+            (
+                "hashlib.sha256",
+                "Python native binary checksum verification",
+            ),
         ],
     )?;
     require_contains(

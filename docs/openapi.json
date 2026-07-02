@@ -231,43 +231,41 @@
         }
       }
     },
+    "/v1/account/overview": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account overview",
+        "description": "Returns the authenticated account profile, usage, pricing, billing estimate, and API keys.",
+        "operationId": "getAccountOverview",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/AccountOverviewLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/account/activity": {
       "get": {
         "tags": [
           "Accounts"
         ],
-        "summary": "List account activity",
-        "description": "Lists recent scraper, billing, and support activity for the authenticated account.",
-        "operationId": "listAccountActivity",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of items to return.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 1000,
-              "default": 100,
-              "format": "int64",
-              "example": 100
-            }
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "description": "Opaque pagination cursor from a previous response.",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 512,
-              "pattern": "^[\\s\\S]{0,8192}$",
-              "example": "example"
-            }
-          }
-        ],
+        "summary": "Get account activity",
+        "description": "Returns account usage, billing estimate, pricing, and recommended next actions for the authenticated account.",
+        "operationId": "getAccountActivity",
         "responses": {
           "200": {
             "$ref": "#/components/responses/AccountActivityLoaded"
@@ -395,15 +393,15 @@
           {
             "name": "limit",
             "in": "query",
-            "description": "Maximum number of items to return. Context $.paths./v1/requests.get.parameters.0.",
+            "description": "Maximum number of scraper Requests to return. Context $.paths./v1/requests.get.parameters.0.",
             "required": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 1000,
-              "default": 100,
+              "maximum": 200,
+              "default": 50,
               "format": "int64",
-              "example": 100
+              "example": 50
             }
           },
           {
@@ -415,7 +413,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 512,
-              "pattern": "^[\\s\\S]{0,8192}$",
+              "pattern": "^[\\s\\S]{1,512}$",
               "example": "example"
             }
           }
@@ -620,7 +618,7 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 512,
-              "pattern": "^[\\s\\S]{0,8192}$",
+              "pattern": "^[\\s\\S]{1,512}$",
               "example": "example"
             }
           }
@@ -650,7 +648,7 @@
           "Accounts"
         ],
         "summary": "Get usage",
-        "description": "Returns balance, current scraper usage, and current-month cost estimates.",
+        "description": "Returns account profile, usage totals, current scraper pricing, and current-month cost estimates.",
         "operationId": "getAccountUsage",
         "responses": {
           "200": {
@@ -892,6 +890,9 @@
           "200": {
             "$ref": "#/components/responses/AccountApiKeysLoaded"
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -900,9 +901,6 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
           }
         }
       },
@@ -976,6 +974,9 @@
           "200": {
             "$ref": "#/components/responses/AccountApiKeyRevoked"
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -987,9 +988,6 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
           }
         }
       }
@@ -1025,7 +1023,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window.",
+            "description": "Maximum requests allowed for the health ok response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1035,7 +1033,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window.",
+            "description": "Requests remaining for the health ok response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1045,7 +1043,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets.",
+            "description": "Unix timestamp when the health ok response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1091,7 +1089,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.StatusLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the status response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1101,7 +1099,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.StatusLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the status response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1111,7 +1109,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.StatusLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the status response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1157,7 +1155,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.StatusUnavailable.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the status unavailable response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1167,7 +1165,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.StatusUnavailable.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the status unavailable response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1177,7 +1175,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.StatusUnavailable.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the status unavailable response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1210,7 +1208,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.LoginStarted.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the login started response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1220,7 +1218,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.LoginStarted.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the login started response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1230,7 +1228,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.LoginStarted.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the login started response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1262,7 +1260,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.LoginPolled.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the login polled response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1272,7 +1270,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.LoginPolled.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the login polled response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1282,7 +1280,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.LoginPolled.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the login polled response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1316,7 +1314,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.AccountProfileLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the account profile response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1326,7 +1324,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.AccountProfileLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the account profile response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1336,7 +1334,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.AccountProfileLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the account profile response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1358,16 +1356,79 @@
               "example": {
                 "summary": "Account activity loaded.",
                 "value": {
-                  "ok": true,
-                  "activity": [
-                    {
-                      "id": "act_123",
-                      "type": "scraper_request",
-                      "message": "Request completed.",
-                      "createdAt": "2026-06-23T12:00:00Z"
+                  "profile": {
+                    "accountId": "acct_123",
+                    "email": "user@example.com",
+                    "provider": "google",
+                    "plan": "pro",
+                    "displayName": null
+                  },
+                  "usage": {
+                    "meters": {
+                      "hour": {},
+                      "day": {},
+                      "week": {},
+                      "twoWeeks": {},
+                      "month": {
+                        "scraper.tiktok.result_records": 1000,
+                        "scraper.tiktok.cost_usd_micros": 1700000
+                      },
+                      "quarter": {}
                     }
-                  ],
-                  "nextCursor": null
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 2000,
+                    "planBalanceUsdCentsPerMonth": 2000,
+                    "bonusBalanceUsdCentsPerMonth": 0,
+                    "includedBalanceUsdCentsPerMonth": 2000,
+                    "paidOveragesEnabled": false
+                  },
+                  "billingEstimate": {
+                    "currency": "USD",
+                    "plan": "plus",
+                    "paidOveragesEnabled": false,
+                    "subscriptionUsdMicrosPerMonth": 20000000,
+                    "planBalanceUsdCentsPerMonth": 2000,
+                    "bonusBalanceUsdCentsPerMonth": 0,
+                    "includedBalanceUsdCentsPerMonth": 2000,
+                    "topUpBalanceUsdMicros": 0,
+                    "topUpMinimumUsdCents": 2000,
+                    "topUpMaximumUsdCents": 100000,
+                    "topUpExpiresAfterInactiveDays": 365,
+                    "autoTopUpEnabled": false,
+                    "autoTopUpThresholdUsdCents": 2000,
+                    "autoTopUpAmountUsdCents": 2000,
+                    "autoTopUpMonthlyLimitUsdCents": 20000,
+                    "currentMonthBonusBalanceUsedUsdMicros": 0,
+                    "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+                    "currentMonthTopUpBalanceUsedUsdMicros": 0,
+                    "currentMonthOverageUsdMicros": 0,
+                    "estimatedMonthlyTotalUsdMicros": 20000000,
+                    "lineItems": [
+                      {
+                        "product": "tiktok",
+                        "meter": "scraper_result_records",
+                        "currentMonthUsed": 1000,
+                        "includedPerMonth": null,
+                        "billableAmount": 1000,
+                        "usageUnit": "result",
+                        "billingUnit": "result",
+                        "billingUnitSize": 1,
+                        "priceUsdMicrosPerBillingUnit": null,
+                        "estimatedUsdMicros": 1700000,
+                        "estimateBasis": "stored_scrape_requests",
+                        "rounding": "actual_scraper_cost"
+                      }
+                    ],
+                    "nextActions": [
+                      "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+                      "Fetch saved results or create another public-data scraper request when you need fresh data."
+                    ]
+                  },
+                  "nextActions": [
+                    "Run `tovuk request results <request-id> --json` to fetch stored results.",
+                    "Run `tovuk scraper list --json` before creating another paid scraper request."
+                  ]
                 }
               }
             }
@@ -1375,7 +1436,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.AccountActivityLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the account activity response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1385,7 +1446,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.AccountActivityLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the account activity response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1395,7 +1456,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.AccountActivityLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the account activity response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1417,18 +1478,73 @@
               "example": {
                 "summary": "Account usage loaded.",
                 "value": {
-                  "ok": true,
-                  "balanceUsdMicros": 20000000,
+                  "profile": {
+                    "accountId": "acct_123",
+                    "email": "user@example.com",
+                    "provider": "google",
+                    "plan": "pro",
+                    "displayName": null
+                  },
+                  "usage": {
+                    "meters": {
+                      "hour": {},
+                      "day": {},
+                      "week": {},
+                      "twoWeeks": {},
+                      "month": {
+                        "scraper.tiktok.result_records": 1000,
+                        "scraper.tiktok.cost_usd_micros": 1700000
+                      },
+                      "quarter": {}
+                    }
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 2000,
+                    "planBalanceUsdCentsPerMonth": 2000,
+                    "bonusBalanceUsdCentsPerMonth": 0,
+                    "includedBalanceUsdCentsPerMonth": 2000,
+                    "paidOveragesEnabled": false
+                  },
                   "billingEstimate": {
-                    "currency": "usd",
+                    "currency": "USD",
+                    "plan": "plus",
+                    "paidOveragesEnabled": false,
+                    "subscriptionUsdMicrosPerMonth": 20000000,
+                    "planBalanceUsdCentsPerMonth": 2000,
+                    "bonusBalanceUsdCentsPerMonth": 0,
+                    "includedBalanceUsdCentsPerMonth": 2000,
+                    "topUpBalanceUsdMicros": 0,
+                    "topUpMinimumUsdCents": 2000,
+                    "topUpMaximumUsdCents": 100000,
+                    "topUpExpiresAfterInactiveDays": 365,
+                    "autoTopUpEnabled": false,
+                    "autoTopUpThresholdUsdCents": 2000,
+                    "autoTopUpAmountUsdCents": 2000,
+                    "autoTopUpMonthlyLimitUsdCents": 20000,
+                    "currentMonthBonusBalanceUsedUsdMicros": 0,
+                    "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+                    "currentMonthTopUpBalanceUsedUsdMicros": 0,
+                    "currentMonthOverageUsdMicros": 0,
+                    "estimatedMonthlyTotalUsdMicros": 20000000,
                     "lineItems": [
                       {
-                        "label": "TikTok records",
-                        "meter": "tiktok_records",
-                        "quantity": 1000,
-                        "unitUsdMicros": 1700,
-                        "estimatedUsdMicros": 1700000
+                        "product": "tiktok",
+                        "meter": "scraper_result_records",
+                        "currentMonthUsed": 1000,
+                        "includedPerMonth": null,
+                        "billableAmount": 1000,
+                        "usageUnit": "result",
+                        "billingUnit": "result",
+                        "billingUnitSize": 1,
+                        "priceUsdMicrosPerBillingUnit": null,
+                        "estimatedUsdMicros": 1700000,
+                        "estimateBasis": "stored_scrape_requests",
+                        "rounding": "actual_scraper_cost"
                       }
+                    ],
+                    "nextActions": [
+                      "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+                      "Fetch saved results or create another public-data scraper request when you need fresh data."
                     ]
                   }
                 }
@@ -1438,7 +1554,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.AccountUsageLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the account usage response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1448,7 +1564,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.AccountUsageLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the account usage response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1458,7 +1574,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.AccountUsageLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the account usage response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1491,7 +1607,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.BillingCheckoutCreated.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the billing checkout created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1501,7 +1617,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.BillingCheckoutCreated.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the billing checkout created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1511,7 +1627,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.BillingCheckoutCreated.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the billing checkout created response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1544,7 +1660,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.BillingPortalCreated.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the billing portal created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1554,7 +1670,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.BillingPortalCreated.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the billing portal created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1564,7 +1680,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.BillingPortalCreated.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the billing portal created response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1586,19 +1702,9 @@
               "example": {
                 "summary": "Scrapers loaded.",
                 "value": {
-                  "ok": true,
-                  "scrapers": [
-                    {
-                      "id": "tiktok",
-                      "name": "TikTok Scraper",
-                      "unit": "record",
-                      "priceEvents": [
-                        {
-                          "unit": "record",
-                          "usdMicros": 1700
-                        }
-                      ]
-                    }
+                  "scrapers": [],
+                  "nextActions": [
+                    "Use `tovuk scraper list --json` to choose a scraper."
                   ]
                 }
               }
@@ -1607,7 +1713,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScrapersLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scrapers response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1617,7 +1723,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScrapersLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scrapers response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1627,7 +1733,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapersLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scrapers response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1649,13 +1755,9 @@
               "example": {
                 "summary": "Scraper runtime health loaded.",
                 "value": {
-                  "ok": true,
-                  "scrapers": [
-                    {
-                      "scraper": "tiktok",
-                      "status": "ready",
-                      "message": "ready"
-                    }
+                  "scrapers": [],
+                  "nextActions": [
+                    "Use `tovuk scraper health --json` before debugging scraper readiness."
                   ]
                 }
               }
@@ -1664,7 +1766,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScraperRuntimeHealthLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scraper runtime health response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1674,7 +1776,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScraperRuntimeHealthLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scraper runtime health response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1684,7 +1786,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScraperRuntimeHealthLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scraper runtime health response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1706,31 +1808,42 @@
               "example": {
                 "summary": "Scraper details loaded.",
                 "value": {
-                  "ok": true,
                   "scraper": {
                     "id": "linkedin",
                     "name": "LinkedIn Scraper",
-                    "unit": "record",
+                    "category": "social",
+                    "description": "Scrape public LinkedIn data.",
+                    "inputSchema": {
+                      "type": "object",
+                      "examples": {
+                        "linkedinPostSearch": {
+                          "operation": "post-search",
+                          "query": "b2b sales",
+                          "author_company_urns": "1035",
+                          "limit": 50
+                        },
+                        "linkedinCompanyEmployees": {
+                          "operation": "company-employees",
+                          "identifier": "https://www.linkedin.com/company/google/",
+                          "max_employees": 50
+                        }
+                      }
+                    },
                     "priceEvents": [
                       {
+                        "name": "linkedin_records",
                         "unit": "record",
                         "usdMicros": 900
                       }
-                    ],
-                    "examples": {
-                      "linkedinPostSearch": {
-                        "operation": "post-search",
-                        "query": "b2b sales",
-                        "author_company_urns": "1035",
-                        "limit": 50
-                      },
-                      "linkedinCompanyEmployees": {
-                        "operation": "company-employees",
-                        "identifier": "https://www.linkedin.com/company/google/",
-                        "max_employees": 50
-                      }
-                    }
-                  }
+                    ]
+                  },
+                  "runtimeHealth": {
+                    "type": "linkedinManagedReaderHealth",
+                    "status": "ready"
+                  },
+                  "nextActions": [
+                    "Use `tovuk request create linkedin <input-json> --json` to create scraper work."
+                  ]
                 }
               }
             }
@@ -1738,7 +1851,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScraperDetailsLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scraper details response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1748,7 +1861,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScraperDetailsLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scraper details response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1758,7 +1871,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScraperDetailsLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scraper details response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1780,9 +1893,30 @@
               "example": {
                 "summary": "Scraper requests loaded.",
                 "value": {
-                  "ok": true,
-                  "requests": [],
-                  "nextCursor": null
+                  "requests": [
+                    {
+                      "id": "request_123",
+                      "scraper": "tiktok",
+                      "status": "succeeded",
+                      "input": {
+                        "operation": "search",
+                        "query": "rust programming",
+                        "limit": 100
+                      },
+                      "resultCount": 1,
+                      "estimatedCostUsdMicros": 170000,
+                      "costUsdMicros": 1700,
+                      "resultsUrl": "/v1/requests/request_123/results",
+                      "errorMessage": null,
+                      "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+                      "createdAt": "2026-06-23T12:00:00Z",
+                      "updatedAt": "2026-06-23T12:00:30Z"
+                    }
+                  ],
+                  "nextCursor": null,
+                  "nextActions": [
+                    "Use `nextCursor` with `tovuk request list --cursor <nextCursor> --json` when another page exists."
+                  ]
                 }
               }
             }
@@ -1790,7 +1924,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScrapeRequestsLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scrape requests response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1800,7 +1934,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScrapeRequestsLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scrape requests response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1810,7 +1944,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapeRequestsLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scrape requests response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1832,18 +1966,27 @@
               "example": {
                 "summary": "Scraper request created.",
                 "value": {
-                  "ok": true,
                   "request": {
                     "id": "request_123",
                     "scraper": "tiktok",
-                    "status": "queued",
+                    "status": "succeeded",
                     "input": {
                       "operation": "search",
                       "query": "rust programming",
                       "limit": 100
                     },
-                    "createdAt": "2026-06-23T12:00:00Z"
-                  }
+                    "resultCount": 1,
+                    "estimatedCostUsdMicros": 170000,
+                    "costUsdMicros": 1700,
+                    "resultsUrl": "/v1/requests/request_123/results",
+                    "errorMessage": null,
+                    "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+                    "createdAt": "2026-06-23T12:00:00Z",
+                    "updatedAt": "2026-06-23T12:00:30Z"
+                  },
+                  "nextActions": [
+                    "Use `tovuk request results request_123 --json` after the request succeeds."
+                  ]
                 }
               }
             }
@@ -1851,7 +1994,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScrapeRequestCreated.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scrape request created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1861,7 +2004,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScrapeRequestCreated.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scrape request created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1871,7 +2014,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapeRequestCreated.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scrape request created response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1893,7 +2036,6 @@
               "example": {
                 "summary": "Scraper request loaded.",
                 "value": {
-                  "ok": true,
                   "request": {
                     "id": "request_123",
                     "scraper": "tiktok",
@@ -1903,8 +2045,18 @@
                       "query": "rust programming",
                       "limit": 100
                     },
-                    "createdAt": "2026-06-23T12:00:00Z"
-                  }
+                    "resultCount": 1,
+                    "estimatedCostUsdMicros": 170000,
+                    "costUsdMicros": 1700,
+                    "resultsUrl": "/v1/requests/request_123/results",
+                    "errorMessage": null,
+                    "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+                    "createdAt": "2026-06-23T12:00:00Z",
+                    "updatedAt": "2026-06-23T12:00:30Z"
+                  },
+                  "nextActions": [
+                    "Use `tovuk request results request_123 --json` after the request succeeds."
+                  ]
                 }
               }
             }
@@ -1912,7 +2064,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScrapeRequestLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scrape request response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1922,7 +2074,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScrapeRequestLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scrape request response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1932,7 +2084,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapeRequestLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scrape request response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -1954,11 +2106,10 @@
               "example": {
                 "summary": "Scraper request canceled.",
                 "value": {
-                  "ok": true,
-                  "request": {
-                    "id": "request_123",
-                    "status": "canceled"
-                  }
+                  "requestId": "request_123",
+                  "canceled": true,
+                  "status": "canceled",
+                  "agentInstruction": "Request canceled. Create a new scraper request when ready."
                 }
               }
             }
@@ -1966,7 +2117,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScrapeCancelApplied.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scrape cancel applied response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1976,7 +2127,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScrapeCancelApplied.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scrape cancel applied response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -1986,7 +2137,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapeCancelApplied.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scrape cancel applied response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2008,18 +2159,39 @@
               "example": {
                 "summary": "Scraper results loaded.",
                 "value": {
-                  "ok": true,
+                  "request": {
+                    "id": "request_123",
+                    "scraper": "tiktok",
+                    "status": "succeeded",
+                    "input": {
+                      "operation": "search",
+                      "query": "rust programming",
+                      "limit": 100
+                    },
+                    "resultCount": 1,
+                    "estimatedCostUsdMicros": 170000,
+                    "costUsdMicros": 1700,
+                    "resultsUrl": "/v1/requests/request_123/results",
+                    "errorMessage": null,
+                    "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+                    "createdAt": "2026-06-23T12:00:00Z",
+                    "updatedAt": "2026-06-23T12:00:30Z"
+                  },
                   "records": [
                     {
-                      "id": "record_123",
+                      "index": 0,
                       "data": {
                         "id": "video_123",
                         "desc": "rust programming"
                       },
-                      "createdAt": "2026-06-23T12:00:00Z"
+                      "sizeBytes": 64,
+                      "createdAt": "2026-06-23T12:00:30Z"
                     }
                   ],
-                  "nextCursor": null
+                  "nextCursor": null,
+                  "nextActions": [
+                    "Use `nextCursor` with `tovuk request results request_123 --cursor <nextCursor> --json` when another page exists."
+                  ]
                 }
               }
             }
@@ -2027,7 +2199,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.ScrapeResultsLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the scrape results response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2037,7 +2209,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.ScrapeResultsLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the scrape results response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2047,7 +2219,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.ScrapeResultsLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the scrape results response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2083,7 +2255,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.SupportTicketsLoaded.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the support tickets response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2093,7 +2265,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.SupportTicketsLoaded.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the support tickets response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2103,7 +2275,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.SupportTicketsLoaded.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the support tickets response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2153,7 +2325,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.SupportTicketCreated.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the support ticket created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2163,7 +2335,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.SupportTicketCreated.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the support ticket created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2173,7 +2345,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.SupportTicketCreated.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the support ticket created response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2215,7 +2387,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.SupportTicketResolved.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the support ticket resolved response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2225,7 +2397,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.SupportTicketResolved.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the support ticket resolved response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2235,7 +2407,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.SupportTicketResolved.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the support ticket resolved response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2268,7 +2440,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.BadRequest.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the bad request response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2278,7 +2450,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.BadRequest.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the bad request response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2288,7 +2460,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.BadRequest.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the bad request response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2321,7 +2493,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.Unauthorized.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the unauthorized response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2331,7 +2503,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.Unauthorized.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the unauthorized response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2341,7 +2513,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.Unauthorized.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the unauthorized response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2374,7 +2546,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.PaymentRequired.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the payment required response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2384,7 +2556,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.PaymentRequired.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the payment required response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2394,7 +2566,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.PaymentRequired.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the payment required response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2427,7 +2599,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.TooManyRequests.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the too many requests response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2437,7 +2609,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.TooManyRequests.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the too many requests response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2447,7 +2619,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.TooManyRequests.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the too many requests response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2490,7 +2662,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed in the current window. Context $.components.responses.InternalServerError.headers.X-RateLimit-Limit.",
+            "description": "Maximum requests allowed for the internal server error response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2500,7 +2672,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining in the current window. Context $.components.responses.InternalServerError.headers.X-RateLimit-Remaining.",
+            "description": "Requests remaining for the internal server error response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2510,7 +2682,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the current window resets. Context $.components.responses.InternalServerError.headers.X-RateLimit-Reset.",
+            "description": "Unix timestamp when the internal server error response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2554,7 +2726,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed while serving API key list loading.",
+            "description": "Maximum requests allowed for the account api keys response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2564,7 +2736,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining after serving API key list loading.",
+            "description": "Requests remaining for the account api keys response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2574,7 +2746,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the rate window for API key list loading resets.",
+            "description": "Unix timestamp when the account api keys response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2617,7 +2789,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed while serving API key creation.",
+            "description": "Maximum requests allowed for the account api key created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2627,7 +2799,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining after serving API key creation.",
+            "description": "Requests remaining for the account api key created response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2637,7 +2809,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the rate window for API key creation resets.",
+            "description": "Unix timestamp when the account api key created response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2680,7 +2852,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed while serving API key revocation.",
+            "description": "Maximum requests allowed for the account api key revoked response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2690,7 +2862,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining after serving API key revocation.",
+            "description": "Requests remaining for the account api key revoked response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2700,7 +2872,7 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the rate window for API key revocation resets.",
+            "description": "Unix timestamp when the account api key revoked response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -2734,7 +2906,7 @@
         },
         "headers": {
           "X-RateLimit-Limit": {
-            "description": "Maximum requests allowed while serving missing resource errors.",
+            "description": "Maximum requests allowed for the not found response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2744,7 +2916,7 @@
             }
           },
           "X-RateLimit-Remaining": {
-            "description": "Requests remaining after serving missing resource errors.",
+            "description": "Requests remaining for the not found response window.",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -2754,7 +2926,137 @@
             }
           },
           "X-RateLimit-Reset": {
-            "description": "Unix timestamp when the rate window for missing resource errors resets.",
+            "description": "Unix timestamp when the not found response rate-limit window resets.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "AccountOverviewLoaded": {
+        "description": "Account overview loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AccountOverviewResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Account overview loaded.",
+                "value": {
+                  "profile": {
+                    "accountId": "acct_123",
+                    "email": "user@example.com",
+                    "provider": "google",
+                    "plan": "pro",
+                    "displayName": null
+                  },
+                  "usage": {
+                    "meters": {
+                      "hour": {},
+                      "day": {},
+                      "week": {},
+                      "twoWeeks": {},
+                      "month": {
+                        "scraper.tiktok.result_records": 1000,
+                        "scraper.tiktok.cost_usd_micros": 1700000
+                      },
+                      "quarter": {}
+                    }
+                  },
+                  "pricing": {
+                    "subscriptionUsdCentsPerMonth": 2000,
+                    "planBalanceUsdCentsPerMonth": 2000,
+                    "bonusBalanceUsdCentsPerMonth": 0,
+                    "includedBalanceUsdCentsPerMonth": 2000,
+                    "paidOveragesEnabled": false
+                  },
+                  "billingEstimate": {
+                    "currency": "USD",
+                    "plan": "plus",
+                    "paidOveragesEnabled": false,
+                    "subscriptionUsdMicrosPerMonth": 20000000,
+                    "planBalanceUsdCentsPerMonth": 2000,
+                    "bonusBalanceUsdCentsPerMonth": 0,
+                    "includedBalanceUsdCentsPerMonth": 2000,
+                    "topUpBalanceUsdMicros": 0,
+                    "topUpMinimumUsdCents": 2000,
+                    "topUpMaximumUsdCents": 100000,
+                    "topUpExpiresAfterInactiveDays": 365,
+                    "autoTopUpEnabled": false,
+                    "autoTopUpThresholdUsdCents": 2000,
+                    "autoTopUpAmountUsdCents": 2000,
+                    "autoTopUpMonthlyLimitUsdCents": 20000,
+                    "currentMonthBonusBalanceUsedUsdMicros": 0,
+                    "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+                    "currentMonthTopUpBalanceUsedUsdMicros": 0,
+                    "currentMonthOverageUsdMicros": 0,
+                    "estimatedMonthlyTotalUsdMicros": 20000000,
+                    "lineItems": [
+                      {
+                        "product": "tiktok",
+                        "meter": "scraper_result_records",
+                        "currentMonthUsed": 1000,
+                        "includedPerMonth": null,
+                        "billableAmount": 1000,
+                        "usageUnit": "result",
+                        "billingUnit": "result",
+                        "billingUnitSize": 1,
+                        "priceUsdMicrosPerBillingUnit": null,
+                        "estimatedUsdMicros": 1700000,
+                        "estimateBasis": "stored_scrape_requests",
+                        "rounding": "actual_scraper_cost"
+                      }
+                    ],
+                    "nextActions": [
+                      "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+                      "Fetch saved results or create another public-data scraper request when you need fresh data."
+                    ]
+                  },
+                  "apiKeys": [
+                    {
+                      "id": "key_123",
+                      "name": "analytics agent",
+                      "tokenPrefix": "tovuk_live_1234",
+                      "createdAt": "2026-06-23T12:00:00Z",
+                      "lastUsedAt": null,
+                      "revokedAt": null,
+                      "currentDayRequestCount": 0,
+                      "currentMonthRequestCount": 0
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed for the account overview response window.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining for the account overview response window.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the account overview response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -3067,190 +3369,567 @@
           "displayName": null
         }
       },
-      "AccountActivityItem": {
-        "type": "object",
-        "description": "One account activity item.",
-        "required": [
-          "id",
-          "type",
-          "message",
-          "createdAt"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "id_123"
-          },
-          "type": {
-            "type": "string",
-            "examples": [
-              "scraper_request"
-            ],
-            "pattern": "^[\\s\\S]{0,8192}$"
-          },
-          "message": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2026-06-23T12:00:00Z"
-          }
-        },
-        "example": {
-          "id": "id_123",
-          "type": "example",
-          "message": "example",
-          "createdAt": "2026-06-23T12:00:00Z"
-        }
-      },
       "AccountActivityResponse": {
         "type": "object",
-        "description": "Account activity response.",
+        "description": "Account-wide activity response optimized for humans and agents.",
+        "additionalProperties": false,
         "required": [
-          "ok",
-          "activity",
-          "nextCursor"
+          "profile",
+          "usage",
+          "pricing",
+          "billingEstimate",
+          "nextActions"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
           },
-          "activity": {
+          "usage": {
+            "$ref": "#/components/schemas/AccountOverviewUsage"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing"
+          },
+          "billingEstimate": {
+            "$ref": "#/components/schemas/UsageCostEstimate"
+          },
+          "nextActions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AccountActivityItem"
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "Run `tovuk request results <request-id> --json` to fetch stored results."
             },
-            "example": []
-          },
-          "nextCursor": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": [
+              "Run `tovuk request results <request-id> --json` to fetch stored results.",
+              "Run `tovuk scraper list --json` before creating another paid scraper request."
+            ]
           }
         },
         "example": {
-          "ok": true,
-          "activity": [],
-          "nextCursor": "example"
+          "profile": {
+            "accountId": "acct_123",
+            "email": "user@example.com",
+            "provider": "google",
+            "plan": "pro",
+            "displayName": null
+          },
+          "usage": {
+            "meters": {
+              "hour": {},
+              "day": {},
+              "week": {},
+              "twoWeeks": {},
+              "month": {
+                "scraper.tiktok.result_records": 1000,
+                "scraper.tiktok.cost_usd_micros": 1700000
+              },
+              "quarter": {}
+            }
+          },
+          "pricing": {
+            "subscriptionUsdCentsPerMonth": 2000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "paidOveragesEnabled": false
+          },
+          "billingEstimate": {
+            "currency": "USD",
+            "plan": "plus",
+            "paidOveragesEnabled": false,
+            "subscriptionUsdMicrosPerMonth": 20000000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "topUpBalanceUsdMicros": 0,
+            "topUpMinimumUsdCents": 2000,
+            "topUpMaximumUsdCents": 100000,
+            "topUpExpiresAfterInactiveDays": 365,
+            "autoTopUpEnabled": false,
+            "autoTopUpThresholdUsdCents": 2000,
+            "autoTopUpAmountUsdCents": 2000,
+            "autoTopUpMonthlyLimitUsdCents": 20000,
+            "currentMonthBonusBalanceUsedUsdMicros": 0,
+            "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+            "currentMonthTopUpBalanceUsedUsdMicros": 0,
+            "currentMonthOverageUsdMicros": 0,
+            "estimatedMonthlyTotalUsdMicros": 20000000,
+            "lineItems": [
+              {
+                "product": "tiktok",
+                "meter": "scraper_result_records",
+                "currentMonthUsed": 1000,
+                "includedPerMonth": null,
+                "billableAmount": 1000,
+                "usageUnit": "result",
+                "billingUnit": "result",
+                "billingUnitSize": 1,
+                "priceUsdMicrosPerBillingUnit": null,
+                "estimatedUsdMicros": 1700000,
+                "estimateBasis": "stored_scrape_requests",
+                "rounding": "actual_scraper_cost"
+              }
+            ],
+            "nextActions": [
+              "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+              "Fetch saved results or create another public-data scraper request when you need fresh data."
+            ]
+          },
+          "nextActions": [
+            "Run `tovuk request results <request-id> --json` to fetch stored results.",
+            "Run `tovuk scraper list --json` before creating another paid scraper request."
+          ]
         }
       },
       "UsageCostLineItem": {
         "type": "object",
-        "description": "Estimated cost line item.",
+        "description": "Estimated current-month scraper usage cost line item.",
+        "additionalProperties": false,
         "required": [
-          "label",
+          "product",
           "meter",
-          "quantity",
-          "unitUsdMicros",
-          "estimatedUsdMicros"
+          "currentMonthUsed",
+          "includedPerMonth",
+          "billableAmount",
+          "usageUnit",
+          "billingUnit",
+          "billingUnitSize",
+          "priceUsdMicrosPerBillingUnit",
+          "estimatedUsdMicros",
+          "estimateBasis",
+          "rounding"
         ],
         "properties": {
-          "label": {
+          "product": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "tiktok"
           },
           "meter": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "scraper_result_records"
           },
-          "quantity": {
+          "currentMonthUsed": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 1000
+          },
+          "includedPerMonth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": null
+          },
+          "billableAmount": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 1000
+          },
+          "usageUnit": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "result"
+          },
+          "billingUnit": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "result"
+          },
+          "billingUnitSize": {
             "type": "integer",
             "minimum": 0,
             "format": "int64",
             "maximum": 9007199254740991,
             "example": 1
           },
-          "unitUsdMicros": {
-            "type": "integer",
+          "priceUsdMicrosPerBillingUnit": {
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 0,
             "format": "int64",
             "maximum": 9007199254740991,
-            "example": 1
+            "example": null
           },
           "estimatedUsdMicros": {
             "type": "integer",
             "minimum": 0,
             "format": "int64",
             "maximum": 9007199254740991,
-            "example": 1
+            "example": 1700000
+          },
+          "estimateBasis": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "stored_scrape_requests"
+          },
+          "rounding": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "actual_scraper_cost"
           }
         },
         "example": {
-          "label": "example",
-          "meter": "example",
-          "quantity": 1,
-          "unitUsdMicros": 1,
-          "estimatedUsdMicros": 1
+          "product": "tiktok",
+          "meter": "scraper_result_records",
+          "currentMonthUsed": 1000,
+          "includedPerMonth": null,
+          "billableAmount": 1000,
+          "usageUnit": "result",
+          "billingUnit": "result",
+          "billingUnitSize": 1,
+          "priceUsdMicrosPerBillingUnit": null,
+          "estimatedUsdMicros": 1700000,
+          "estimateBasis": "stored_scrape_requests",
+          "rounding": "actual_scraper_cost"
         }
       },
       "UsageCostEstimate": {
         "type": "object",
-        "description": "Current-month scraper cost estimate.",
+        "description": "Conservative current-month scraper cost estimate for agent planning.",
+        "additionalProperties": false,
         "required": [
           "currency",
-          "lineItems"
+          "plan",
+          "paidOveragesEnabled",
+          "subscriptionUsdMicrosPerMonth",
+          "planBalanceUsdCentsPerMonth",
+          "bonusBalanceUsdCentsPerMonth",
+          "includedBalanceUsdCentsPerMonth",
+          "topUpBalanceUsdMicros",
+          "topUpMinimumUsdCents",
+          "topUpMaximumUsdCents",
+          "topUpExpiresAfterInactiveDays",
+          "autoTopUpEnabled",
+          "autoTopUpThresholdUsdCents",
+          "autoTopUpAmountUsdCents",
+          "autoTopUpMonthlyLimitUsdCents",
+          "currentMonthBonusBalanceUsedUsdMicros",
+          "currentMonthPlanBalanceUsedUsdMicros",
+          "currentMonthTopUpBalanceUsedUsdMicros",
+          "currentMonthOverageUsdMicros",
+          "estimatedMonthlyTotalUsdMicros",
+          "lineItems",
+          "nextActions"
         ],
         "properties": {
           "currency": {
             "type": "string",
-            "examples": [
-              "usd"
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "USD"
+          },
+          "plan": {
+            "type": "string",
+            "enum": [
+              "unpaid",
+              "plus",
+              "pro",
+              "max"
             ],
-            "pattern": "^[\\s\\S]{0,8192}$"
+            "example": "plus"
+          },
+          "paidOveragesEnabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "subscriptionUsdMicrosPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 20000000
+          },
+          "planBalanceUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "bonusBalanceUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 0,
+            "maximum": 100000
+          },
+          "includedBalanceUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "topUpBalanceUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 0
+          },
+          "topUpMinimumUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "topUpMaximumUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 100000,
+            "maximum": 100000
+          },
+          "topUpExpiresAfterInactiveDays": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 365,
+            "maximum": 65535
+          },
+          "autoTopUpEnabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "autoTopUpThresholdUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "autoTopUpAmountUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "autoTopUpMonthlyLimitUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 20000,
+            "maximum": 100000
+          },
+          "currentMonthBonusBalanceUsedUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 0
+          },
+          "currentMonthPlanBalanceUsedUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 1700000
+          },
+          "currentMonthTopUpBalanceUsedUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 0
+          },
+          "currentMonthOverageUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 0
+          },
+          "estimatedMonthlyTotalUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 20000000
           },
           "lineItems": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UsageCostLineItem"
             },
-            "example": []
+            "example": [
+              {
+                "product": "tiktok",
+                "meter": "scraper_result_records",
+                "currentMonthUsed": 1000,
+                "includedPerMonth": null,
+                "billableAmount": 1000,
+                "usageUnit": "result",
+                "billingUnit": "result",
+                "billingUnitSize": 1,
+                "priceUsdMicrosPerBillingUnit": null,
+                "estimatedUsdMicros": 1700000,
+                "estimateBasis": "stored_scrape_requests",
+                "rounding": "actual_scraper_cost"
+              }
+            ]
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "Run `tovuk scraper list --json` before creating another paid scraper request."
+            },
+            "example": [
+              "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+              "Fetch saved results or create another public-data scraper request when you need fresh data."
+            ]
           }
         },
         "example": {
-          "currency": "example",
-          "lineItems": []
+          "currency": "USD",
+          "plan": "plus",
+          "paidOveragesEnabled": false,
+          "subscriptionUsdMicrosPerMonth": 20000000,
+          "planBalanceUsdCentsPerMonth": 2000,
+          "bonusBalanceUsdCentsPerMonth": 0,
+          "includedBalanceUsdCentsPerMonth": 2000,
+          "topUpBalanceUsdMicros": 0,
+          "topUpMinimumUsdCents": 2000,
+          "topUpMaximumUsdCents": 100000,
+          "topUpExpiresAfterInactiveDays": 365,
+          "autoTopUpEnabled": false,
+          "autoTopUpThresholdUsdCents": 2000,
+          "autoTopUpAmountUsdCents": 2000,
+          "autoTopUpMonthlyLimitUsdCents": 20000,
+          "currentMonthBonusBalanceUsedUsdMicros": 0,
+          "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+          "currentMonthTopUpBalanceUsedUsdMicros": 0,
+          "currentMonthOverageUsdMicros": 0,
+          "estimatedMonthlyTotalUsdMicros": 20000000,
+          "lineItems": [
+            {
+              "product": "tiktok",
+              "meter": "scraper_result_records",
+              "currentMonthUsed": 1000,
+              "includedPerMonth": null,
+              "billableAmount": 1000,
+              "usageUnit": "result",
+              "billingUnit": "result",
+              "billingUnitSize": 1,
+              "priceUsdMicrosPerBillingUnit": null,
+              "estimatedUsdMicros": 1700000,
+              "estimateBasis": "stored_scrape_requests",
+              "rounding": "actual_scraper_cost"
+            }
+          ],
+          "nextActions": [
+            "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+            "Fetch saved results or create another public-data scraper request when you need fresh data."
+          ]
         }
       },
       "AccountUsageResponse": {
         "type": "object",
-        "description": "Account usage and balance response.",
+        "description": "Account usage response optimized for agents and billing views.",
+        "additionalProperties": false,
         "required": [
-          "ok",
-          "balanceUsdMicros",
+          "profile",
+          "usage",
+          "pricing",
           "billingEstimate"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
           },
-          "balanceUsdMicros": {
-            "type": "integer",
-            "format": "int64",
-            "minimum": 0,
-            "maximum": 9007199254740991,
-            "example": 1
+          "usage": {
+            "$ref": "#/components/schemas/AccountOverviewUsage"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing"
           },
           "billingEstimate": {
             "$ref": "#/components/schemas/UsageCostEstimate"
           }
         },
         "example": {
-          "ok": true,
-          "balanceUsdMicros": 1,
+          "profile": {
+            "accountId": "acct_123",
+            "email": "user@example.com",
+            "provider": "google",
+            "plan": "pro",
+            "displayName": null
+          },
+          "usage": {
+            "meters": {
+              "hour": {},
+              "day": {},
+              "week": {},
+              "twoWeeks": {},
+              "month": {
+                "scraper.tiktok.result_records": 1000,
+                "scraper.tiktok.cost_usd_micros": 1700000
+              },
+              "quarter": {}
+            }
+          },
+          "pricing": {
+            "subscriptionUsdCentsPerMonth": 2000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "paidOveragesEnabled": false
+          },
           "billingEstimate": {
-            "currency": "example",
-            "lineItems": []
+            "currency": "USD",
+            "plan": "plus",
+            "paidOveragesEnabled": false,
+            "subscriptionUsdMicrosPerMonth": 20000000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "topUpBalanceUsdMicros": 0,
+            "topUpMinimumUsdCents": 2000,
+            "topUpMaximumUsdCents": 100000,
+            "topUpExpiresAfterInactiveDays": 365,
+            "autoTopUpEnabled": false,
+            "autoTopUpThresholdUsdCents": 2000,
+            "autoTopUpAmountUsdCents": 2000,
+            "autoTopUpMonthlyLimitUsdCents": 20000,
+            "currentMonthBonusBalanceUsedUsdMicros": 0,
+            "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+            "currentMonthTopUpBalanceUsedUsdMicros": 0,
+            "currentMonthOverageUsdMicros": 0,
+            "estimatedMonthlyTotalUsdMicros": 20000000,
+            "lineItems": [
+              {
+                "product": "tiktok",
+                "meter": "scraper_result_records",
+                "currentMonthUsed": 1000,
+                "includedPerMonth": null,
+                "billableAmount": 1000,
+                "usageUnit": "result",
+                "billingUnit": "result",
+                "billingUnitSize": 1,
+                "priceUsdMicrosPerBillingUnit": null,
+                "estimatedUsdMicros": 1700000,
+                "estimateBasis": "stored_scrape_requests",
+                "rounding": "actual_scraper_cost"
+              }
+            ],
+            "nextActions": [
+              "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+              "Fetch saved results or create another public-data scraper request when you need fresh data."
+            ]
           }
         }
       },
@@ -3347,26 +4026,33 @@
         "type": "object",
         "description": "Scraper price event in USD micro-units.",
         "required": [
+          "name",
           "unit",
           "usdMicros"
         ],
         "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "tiktok_records"
+          },
           "unit": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "record"
           },
           "usdMicros": {
             "type": "integer",
             "minimum": 0,
             "format": "int64",
             "maximum": 9007199254740991,
-            "example": 1
+            "example": 1700
           }
         },
         "example": {
-          "unit": "example",
-          "usdMicros": 1
+          "name": "tiktok_records",
+          "unit": "record",
+          "usdMicros": 1700
         }
       },
       "ScraperSummary": {
@@ -3375,24 +4061,43 @@
         "required": [
           "id",
           "name",
-          "unit",
+          "category",
+          "description",
+          "inputSchema",
           "priceEvents"
         ],
         "properties": {
           "id": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "id_123"
+            "example": "tiktok"
           },
           "name": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "TikTok Scraper"
           },
-          "unit": {
+          "category": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "social"
+          },
+          "description": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "Scrape public TikTok data."
+          },
+          "inputSchema": {
+            "type": "object",
+            "example": {
+              "type": "object",
+              "properties": {
+                "operation": {
+                  "type": "string"
+                }
+              }
+            },
+            "maxProperties": 100
           },
           "priceEvents": {
             "type": "array",
@@ -3403,161 +4108,214 @@
           }
         },
         "example": {
-          "id": "id_123",
-          "name": "example",
-          "unit": "example",
-          "priceEvents": []
+          "id": "tiktok",
+          "name": "TikTok Scraper",
+          "category": "social",
+          "description": "Scrape public TikTok data.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "operation": {
+                "type": "string"
+              }
+            }
+          },
+          "priceEvents": [
+            {
+              "name": "tiktok_records",
+              "unit": "record",
+              "usdMicros": 1700
+            }
+          ]
         }
       },
       "ScrapersResponse": {
         "type": "object",
         "description": "Scraper catalog response.",
         "required": [
-          "ok",
-          "scrapers"
+          "scrapers",
+          "nextActions"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "scrapers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ScraperSummary"
             },
             "example": []
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "next action"
+            },
+            "example": [
+              "Use `tovuk scraper list --json` to choose a scraper."
+            ]
           }
         },
         "example": {
-          "ok": true,
-          "scrapers": []
+          "scrapers": [],
+          "nextActions": [
+            "Use `tovuk scraper list --json` to choose a scraper."
+          ]
         }
       },
       "ScraperRuntimeHealthEntry": {
         "type": "object",
         "description": "Scraper runtime health entry.",
         "required": [
-          "scraper",
+          "id",
+          "name",
+          "category",
           "status",
-          "message"
+          "runtimeHealth"
         ],
         "properties": {
-          "scraper": {
+          "id": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "tiktok"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "TikTok Scraper"
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "social"
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ready",
-              "degraded",
-              "unavailable"
-            ],
+            "pattern": "^[\\s\\S]{0,8192}$",
             "example": "ready"
           },
-          "message": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+          "runtimeHealth": {
+            "type": "object",
+            "example": {
+              "type": "tiktokBrowserRuntimeHealth",
+              "status": "ready"
+            },
+            "maxProperties": 100
           }
         },
         "example": {
-          "scraper": "example",
+          "id": "tiktok",
+          "name": "TikTok Scraper",
+          "category": "social",
           "status": "ready",
-          "message": "example"
+          "runtimeHealth": {
+            "type": "tiktokBrowserRuntimeHealth",
+            "status": "ready"
+          }
         }
       },
       "ScraperRuntimeHealthResponse": {
         "type": "object",
         "description": "Scraper runtime health response.",
         "required": [
-          "ok",
-          "scrapers"
+          "scrapers",
+          "nextActions"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "scrapers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ScraperRuntimeHealthEntry"
             },
             "example": []
-          }
-        },
-        "example": {
-          "ok": true,
-          "scrapers": []
-        }
-      },
-      "ScraperDetailsResponse": {
-        "type": "object",
-        "description": "Detailed Scraper response.",
-        "required": [
-          "ok",
-          "scraper"
-        ],
-        "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
           },
-          "scraper": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/ScraperSummary"
-              },
-              {
-                "type": "object",
-                "required": [
-                  "examples"
-                ],
-                "properties": {
-                  "examples": {
-                    "type": "object",
-                    "example": {
-                      "linkedinPostSearch": {
-                        "operation": "post-search",
-                        "query": "b2b sales",
-                        "author_company_urns": "1035",
-                        "limit": 50
-                      },
-                      "linkedinCompanyEmployees": {
-                        "operation": "company-employees",
-                        "identifier": "https://www.linkedin.com/company/google/",
-                        "max_employees": 50
-                      }
-                    },
-                    "maxProperties": 100
-                  }
-                },
-                "example": {
-                  "examples": {
-                    "linkedinPostSearch": {
-                      "operation": "post-search",
-                      "query": "b2b sales",
-                      "author_company_urns": "1035",
-                      "limit": 50
-                    }
-                  }
-                }
-              }
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "next action"
+            },
+            "example": [
+              "Use `tovuk scraper health --json` before debugging scraper readiness."
             ]
           }
         },
         "example": {
-          "ok": true,
+          "scrapers": [],
+          "nextActions": [
+            "Use `tovuk scraper health --json` before debugging scraper readiness."
+          ]
+        }
+      },
+      "ScraperDetailsResponse": {
+        "type": "object",
+        "description": "Detailed scraper response.",
+        "required": [
+          "scraper",
+          "nextActions"
+        ],
+        "properties": {
           "scraper": {
-            "id": "id_123",
-            "name": "example",
-            "unit": "example",
-            "priceEvents": [],
-            "examples": {}
+            "$ref": "#/components/schemas/ScraperSummary"
+          },
+          "runtimeHealth": {
+            "type": "object",
+            "example": {
+              "type": "linkedinManagedReaderHealth",
+              "status": "ready"
+            },
+            "maxProperties": 100
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "next action"
+            },
+            "example": [
+              "Use `tovuk request create linkedin <input-json> --json` to create scraper work."
+            ]
           }
+        },
+        "example": {
+          "scraper": {
+            "id": "linkedin",
+            "name": "LinkedIn Scraper",
+            "category": "social",
+            "description": "Scrape public LinkedIn data.",
+            "inputSchema": {
+              "type": "object",
+              "examples": {
+                "linkedinPostSearch": {
+                  "operation": "post-search",
+                  "query": "b2b sales",
+                  "author_company_urns": "1035",
+                  "limit": 50
+                },
+                "linkedinCompanyEmployees": {
+                  "operation": "company-employees",
+                  "identifier": "https://www.linkedin.com/company/google/",
+                  "max_employees": 50
+                }
+              }
+            },
+            "priceEvents": [
+              {
+                "name": "linkedin_records",
+                "unit": "record",
+                "usdMicros": 900
+              }
+            ]
+          },
+          "runtimeHealth": {
+            "type": "linkedinManagedReaderHealth",
+            "status": "ready"
+          },
+          "nextActions": [
+            "Use `tovuk request create linkedin <input-json> --json` to create scraper work."
+          ]
         }
       },
       "ScrapeRequestCreateRequest": {
@@ -3572,40 +4330,51 @@
           "scraper": {
             "type": "string",
             "pattern": "^[a-z0-9-]{1,64}$",
-            "example": "example"
+            "example": "github"
           },
           "input": {
             "type": "object",
             "description": "Public Scraper input. Do not send cookies, passwords, account tokens, private session data, private account content, private repository credentials, or proxy URLs.",
             "maxProperties": 100,
-            "example": {}
+            "example": {
+              "query": "language:rust topic:scraper"
+            }
           }
         },
         "example": {
-          "scraper": "example",
-          "input": {}
+          "scraper": "github",
+          "input": {
+            "query": "language:rust topic:scraper"
+          }
         }
       },
       "ScrapeRequest": {
         "type": "object",
-        "description": "Scraper Request status.",
+        "description": "Scraper request status.",
         "required": [
           "id",
           "scraper",
           "status",
           "input",
-          "createdAt"
+          "resultCount",
+          "estimatedCostUsdMicros",
+          "costUsdMicros",
+          "resultsUrl",
+          "errorMessage",
+          "agentInstruction",
+          "createdAt",
+          "updatedAt"
         ],
         "properties": {
           "id": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "id_123"
+            "example": "request_123"
           },
           "scraper": {
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "tiktok"
           },
           "status": {
             "type": "string",
@@ -3616,67 +4385,145 @@
               "failed",
               "canceled"
             ],
-            "example": "queued"
+            "example": "succeeded"
           },
           "input": {
             "type": "object",
-            "example": {},
+            "example": {
+              "operation": "search",
+              "query": "rust programming",
+              "limit": 100
+            },
             "maxProperties": 100
+          },
+          "resultCount": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 1
+          },
+          "estimatedCostUsdMicros": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 170000
+          },
+          "costUsdMicros": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 1700
+          },
+          "resultsUrl": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "/v1/requests/request_123/results"
+          },
+          "errorMessage": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": null
+          },
+          "agentInstruction": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "Fetch results with `tovuk request results request_123 --json`."
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
             "example": "2026-06-23T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-23T12:00:30Z"
           }
         },
         "example": {
-          "id": "id_123",
-          "scraper": "example",
-          "status": "queued",
-          "input": {},
-          "createdAt": "2026-06-23T12:00:00Z"
+          "id": "request_123",
+          "scraper": "tiktok",
+          "status": "succeeded",
+          "input": {
+            "operation": "search",
+            "query": "rust programming",
+            "limit": 100
+          },
+          "resultCount": 1,
+          "estimatedCostUsdMicros": 170000,
+          "costUsdMicros": 1700,
+          "resultsUrl": "/v1/requests/request_123/results",
+          "errorMessage": null,
+          "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+          "createdAt": "2026-06-23T12:00:00Z",
+          "updatedAt": "2026-06-23T12:00:30Z"
         }
       },
       "ScrapeRequestResponse": {
         "type": "object",
-        "description": "Scraper Request response.",
+        "description": "Scraper request response.",
         "required": [
-          "ok",
-          "request"
+          "request",
+          "nextActions"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "request": {
             "$ref": "#/components/schemas/ScrapeRequest"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "next action"
+            },
+            "example": [
+              "Use `tovuk request results request_123 --json` after the request succeeds."
+            ]
           }
         },
         "example": {
-          "ok": true,
           "request": {
-            "id": "id_123",
-            "scraper": "example",
-            "status": "queued",
-            "input": {},
-            "createdAt": "2026-06-23T12:00:00Z"
-          }
+            "id": "request_123",
+            "scraper": "tiktok",
+            "status": "succeeded",
+            "input": {
+              "operation": "search",
+              "query": "rust programming",
+              "limit": 100
+            },
+            "resultCount": 1,
+            "estimatedCostUsdMicros": 170000,
+            "costUsdMicros": 1700,
+            "resultsUrl": "/v1/requests/request_123/results",
+            "errorMessage": null,
+            "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+            "createdAt": "2026-06-23T12:00:00Z",
+            "updatedAt": "2026-06-23T12:00:30Z"
+          },
+          "nextActions": [
+            "Use `tovuk request results request_123 --json` after the request succeeds."
+          ]
         }
       },
       "ScrapeRequestsResponse": {
         "type": "object",
-        "description": "Paginated scraper Request list.",
+        "description": "Paginated scraper request list.",
         "required": [
-          "ok",
           "requests",
-          "nextCursor"
+          "nextCursor",
+          "nextActions"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
-          },
           "requests": {
             "type": "array",
             "items": {
@@ -3690,101 +4537,150 @@
               "null"
             ],
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": null
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "next action"
+            },
+            "example": [
+              "Use `nextCursor` with `tovuk request list --cursor <nextCursor> --json` when another page exists."
+            ]
           }
         },
         "example": {
-          "ok": true,
-          "requests": [],
-          "nextCursor": "example"
+          "requests": [
+            {
+              "id": "request_123",
+              "scraper": "tiktok",
+              "status": "succeeded",
+              "input": {
+                "operation": "search",
+                "query": "rust programming",
+                "limit": 100
+              },
+              "resultCount": 1,
+              "estimatedCostUsdMicros": 170000,
+              "costUsdMicros": 1700,
+              "resultsUrl": "/v1/requests/request_123/results",
+              "errorMessage": null,
+              "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+              "createdAt": "2026-06-23T12:00:00Z",
+              "updatedAt": "2026-06-23T12:00:30Z"
+            }
+          ],
+          "nextCursor": null,
+          "nextActions": [
+            "Use `nextCursor` with `tovuk request list --cursor <nextCursor> --json` when another page exists."
+          ]
         }
       },
       "ScrapeCancelResponse": {
         "type": "object",
-        "description": "Scraper Request cancel response.",
+        "description": "Scraper request cancel response.",
         "required": [
-          "ok",
-          "request"
+          "requestId",
+          "canceled",
+          "status",
+          "agentInstruction"
         ],
         "properties": {
-          "ok": {
+          "requestId": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "request_123"
+          },
+          "canceled": {
             "type": "boolean",
             "example": true
           },
-          "request": {
-            "type": "object",
-            "required": [
-              "id",
-              "status"
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "canceled"
             ],
-            "properties": {
-              "id": {
-                "type": "string",
-                "pattern": "^[\\s\\S]{0,8192}$",
-                "example": "id_123"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "canceled"
-                ],
-                "example": "canceled"
-              }
-            },
-            "example": {}
+            "example": "canceled"
+          },
+          "agentInstruction": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "Request canceled. Create a new scraper request when ready."
           }
         },
         "example": {
-          "ok": true,
-          "request": {
-            "id": "id_123",
-            "status": "canceled"
-          }
+          "requestId": "request_123",
+          "canceled": true,
+          "status": "canceled",
+          "agentInstruction": "Request canceled. Create a new scraper request when ready."
         }
       },
       "ScrapeRecord": {
         "type": "object",
-        "description": "Stored scraper result Record.",
+        "description": "Stored scraper result record.",
         "required": [
-          "id",
+          "index",
           "data",
+          "sizeBytes",
           "createdAt"
         ],
         "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "id_123"
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 0
           },
           "data": {
             "type": "object",
-            "example": {},
+            "example": {
+              "id": "video_123",
+              "desc": "rust programming"
+            },
             "maxProperties": 100
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 64
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:00:00Z"
+            "example": "2026-06-23T12:00:30Z"
           }
         },
         "example": {
-          "id": "id_123",
-          "data": {},
-          "createdAt": "2026-06-23T12:00:00Z"
+          "index": 0,
+          "data": {
+            "id": "video_123",
+            "desc": "rust programming"
+          },
+          "sizeBytes": 64,
+          "createdAt": "2026-06-23T12:00:30Z"
         }
       },
       "ScrapeResultsResponse": {
         "type": "object",
-        "description": "Paginated scraper Records response.",
+        "description": "Paginated scraper records response.",
         "required": [
-          "ok",
+          "request",
           "records",
-          "nextCursor"
+          "nextCursor",
+          "nextActions"
         ],
         "properties": {
-          "ok": {
-            "type": "boolean",
-            "example": true
+          "request": {
+            "$ref": "#/components/schemas/ScrapeRequest"
           },
           "records": {
             "type": "array",
@@ -3799,13 +4695,54 @@
               "null"
             ],
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": null
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "next action"
+            },
+            "example": [
+              "Use `nextCursor` with `tovuk request results request_123 --cursor <nextCursor> --json` when another page exists."
+            ]
           }
         },
         "example": {
-          "ok": true,
-          "records": [],
-          "nextCursor": "example"
+          "request": {
+            "id": "request_123",
+            "scraper": "tiktok",
+            "status": "succeeded",
+            "input": {
+              "operation": "search",
+              "query": "rust programming",
+              "limit": 100
+            },
+            "resultCount": 1,
+            "estimatedCostUsdMicros": 170000,
+            "costUsdMicros": 1700,
+            "resultsUrl": "/v1/requests/request_123/results",
+            "errorMessage": null,
+            "agentInstruction": "Fetch results with `tovuk request results request_123 --json`.",
+            "createdAt": "2026-06-23T12:00:00Z",
+            "updatedAt": "2026-06-23T12:00:30Z"
+          },
+          "records": [
+            {
+              "index": 0,
+              "data": {
+                "id": "video_123",
+                "desc": "rust programming"
+              },
+              "sizeBytes": 64,
+              "createdAt": "2026-06-23T12:00:30Z"
+            }
+          ],
+          "nextCursor": null,
+          "nextActions": [
+            "Use `nextCursor` with `tovuk request results request_123 --cursor <nextCursor> --json` when another page exists."
+          ]
         }
       },
       "SupportTicketSeverity": {
@@ -4386,6 +5323,357 @@
           "revoked": true,
           "nextActions": [
             "Remove this key from scripts and saved settings."
+          ]
+        }
+      },
+      "PlanPricing": {
+        "type": "object",
+        "description": "Customer-visible scraper subscription pricing and monthly balance.",
+        "additionalProperties": false,
+        "required": [
+          "subscriptionUsdCentsPerMonth",
+          "planBalanceUsdCentsPerMonth",
+          "bonusBalanceUsdCentsPerMonth",
+          "includedBalanceUsdCentsPerMonth",
+          "paidOveragesEnabled"
+        ],
+        "properties": {
+          "subscriptionUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "description": "Monthly subscription price in USD cents.",
+            "maximum": 100000
+          },
+          "planBalanceUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "description": "Paid account balance granted by the monthly subscription, in USD cents.",
+            "maximum": 100000
+          },
+          "bonusBalanceUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 0,
+            "description": "Bonus account balance granted above the paid plan balance, in USD cents.",
+            "maximum": 100000
+          },
+          "includedBalanceUsdCentsPerMonth": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "description": "Total monthly account balance granted by the plan, in USD cents.",
+            "maximum": 100000
+          },
+          "paidOveragesEnabled": {
+            "type": "boolean",
+            "example": false,
+            "description": "Whether paid usage above available balance is enabled."
+          }
+        },
+        "example": {
+          "subscriptionUsdCentsPerMonth": 2000,
+          "planBalanceUsdCentsPerMonth": 2000,
+          "bonusBalanceUsdCentsPerMonth": 0,
+          "includedBalanceUsdCentsPerMonth": 2000,
+          "paidOveragesEnabled": false
+        }
+      },
+      "AccountUsageMeters": {
+        "type": "object",
+        "description": "Rolling account usage-meter windows keyed by stable meter name.",
+        "additionalProperties": false,
+        "required": [
+          "hour",
+          "day",
+          "week",
+          "twoWeeks",
+          "month",
+          "quarter"
+        ],
+        "properties": {
+          "hour": {
+            "type": "object",
+            "description": "Rolling one-hour account usage meters.",
+            "maxProperties": 500,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{1,128}$"
+            },
+            "patternProperties": {
+              "^[a-z0-9._-]{1,128}$": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "format": "int64"
+              }
+            },
+            "additionalProperties": false,
+            "example": {}
+          },
+          "day": {
+            "type": "object",
+            "description": "Rolling 24-hour account usage meters.",
+            "maxProperties": 500,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{1,128}$"
+            },
+            "patternProperties": {
+              "^[a-z0-9._-]{1,128}$": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "format": "int64"
+              }
+            },
+            "additionalProperties": false,
+            "example": {}
+          },
+          "week": {
+            "type": "object",
+            "description": "Rolling seven-day account usage meters.",
+            "maxProperties": 500,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{1,128}$"
+            },
+            "patternProperties": {
+              "^[a-z0-9._-]{1,128}$": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "format": "int64"
+              }
+            },
+            "additionalProperties": false,
+            "example": {}
+          },
+          "twoWeeks": {
+            "type": "object",
+            "description": "Rolling 14-day account usage meters.",
+            "maxProperties": 500,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{1,128}$"
+            },
+            "patternProperties": {
+              "^[a-z0-9._-]{1,128}$": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "format": "int64"
+              }
+            },
+            "additionalProperties": false,
+            "example": {}
+          },
+          "month": {
+            "type": "object",
+            "description": "Rolling 30-day account usage meters.",
+            "maxProperties": 500,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{1,128}$"
+            },
+            "patternProperties": {
+              "^[a-z0-9._-]{1,128}$": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "format": "int64"
+              }
+            },
+            "additionalProperties": false,
+            "example": {}
+          },
+          "quarter": {
+            "type": "object",
+            "description": "Rolling 90-day account usage meters.",
+            "maxProperties": 500,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z0-9._-]{1,128}$"
+            },
+            "patternProperties": {
+              "^[a-z0-9._-]{1,128}$": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "format": "int64"
+              }
+            },
+            "additionalProperties": false,
+            "example": {}
+          }
+        },
+        "example": {
+          "hour": {},
+          "day": {},
+          "week": {},
+          "twoWeeks": {},
+          "month": {
+            "scraper.tiktok.result_records": 1000,
+            "scraper.tiktok.cost_usd_micros": 1700000
+          },
+          "quarter": {}
+        }
+      },
+      "AccountOverviewUsage": {
+        "type": "object",
+        "description": "Current account usage totals.",
+        "additionalProperties": false,
+        "required": [
+          "meters"
+        ],
+        "properties": {
+          "meters": {
+            "$ref": "#/components/schemas/AccountUsageMeters"
+          }
+        },
+        "example": {
+          "meters": {
+            "hour": {},
+            "day": {},
+            "week": {},
+            "twoWeeks": {},
+            "month": {
+              "scraper.tiktok.result_records": 1000,
+              "scraper.tiktok.cost_usd_micros": 1700000
+            },
+            "quarter": {}
+          }
+        }
+      },
+      "AccountOverviewResponse": {
+        "type": "object",
+        "description": "Account overview visible only to the authenticated account owner.",
+        "additionalProperties": false,
+        "required": [
+          "profile",
+          "usage",
+          "pricing",
+          "billingEstimate",
+          "apiKeys"
+        ],
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/AccountProfileResponse"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/AccountOverviewUsage"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing"
+          },
+          "billingEstimate": {
+            "$ref": "#/components/schemas/UsageCostEstimate"
+          },
+          "apiKeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountApiKeySummary"
+            },
+            "example": [
+              {
+                "id": "key_123",
+                "name": "analytics agent",
+                "tokenPrefix": "tovuk_live_1234",
+                "createdAt": "2026-06-23T12:00:00Z",
+                "lastUsedAt": null,
+                "revokedAt": null,
+                "currentDayRequestCount": 0,
+                "currentMonthRequestCount": 0
+              }
+            ]
+          }
+        },
+        "example": {
+          "profile": {
+            "accountId": "acct_123",
+            "email": "user@example.com",
+            "provider": "google",
+            "plan": "pro",
+            "displayName": null
+          },
+          "usage": {
+            "meters": {
+              "hour": {},
+              "day": {},
+              "week": {},
+              "twoWeeks": {},
+              "month": {
+                "scraper.tiktok.result_records": 1000,
+                "scraper.tiktok.cost_usd_micros": 1700000
+              },
+              "quarter": {}
+            }
+          },
+          "pricing": {
+            "subscriptionUsdCentsPerMonth": 2000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "paidOveragesEnabled": false
+          },
+          "billingEstimate": {
+            "currency": "USD",
+            "plan": "plus",
+            "paidOveragesEnabled": false,
+            "subscriptionUsdMicrosPerMonth": 20000000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "topUpBalanceUsdMicros": 0,
+            "topUpMinimumUsdCents": 2000,
+            "topUpMaximumUsdCents": 100000,
+            "topUpExpiresAfterInactiveDays": 365,
+            "autoTopUpEnabled": false,
+            "autoTopUpThresholdUsdCents": 2000,
+            "autoTopUpAmountUsdCents": 2000,
+            "autoTopUpMonthlyLimitUsdCents": 20000,
+            "currentMonthBonusBalanceUsedUsdMicros": 0,
+            "currentMonthPlanBalanceUsedUsdMicros": 1700000,
+            "currentMonthTopUpBalanceUsedUsdMicros": 0,
+            "currentMonthOverageUsdMicros": 0,
+            "estimatedMonthlyTotalUsdMicros": 20000000,
+            "lineItems": [
+              {
+                "product": "tiktok",
+                "meter": "scraper_result_records",
+                "currentMonthUsed": 1000,
+                "includedPerMonth": null,
+                "billableAmount": 1000,
+                "usageUnit": "result",
+                "billingUnit": "result",
+                "billingUnitSize": 1,
+                "priceUsdMicrosPerBillingUnit": null,
+                "estimatedUsdMicros": 1700000,
+                "estimateBasis": "stored_scrape_requests",
+                "rounding": "actual_scraper_cost"
+              }
+            ],
+            "nextActions": [
+              "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
+              "Fetch saved results or create another public-data scraper request when you need fresh data."
+            ]
+          },
+          "apiKeys": [
+            {
+              "id": "key_123",
+              "name": "analytics agent",
+              "tokenPrefix": "tovuk_live_1234",
+              "createdAt": "2026-06-23T12:00:00Z",
+              "lastUsedAt": null,
+              "revokedAt": null,
+              "currentDayRequestCount": 0,
+              "currentMonthRequestCount": 0
+            }
           ]
         }
       }

@@ -184,6 +184,12 @@ fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<St
             "publish-native-binaries.yml must build every native target used by public package wrappers",
             findings,
         );
+        require_contains(
+            workflow.contents.as_str(),
+            ".sha256",
+            "publish-native-binaries.yml must publish SHA-256 checksum assets for native binaries",
+            findings,
+        );
     }
     if path.ends_with("publish-npm.yml") || path.ends_with("publish-pypi.yml") {
         require_contains(

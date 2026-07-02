@@ -24,6 +24,7 @@ checkout and portal flows:
 
 ```sh
 tovuk billing checkout plus --json
+tovuk billing checkout --top-up-usd-cents 2000 --json
 tovuk billing portal --json
 ```
 
@@ -35,20 +36,12 @@ prices as USD micro-units in `priceEvents[].usdMicros`; `1,000,000` means
 
 | Scraper | Unit | Price per 1,000 results |
 | --- | --- | ---: |
-| Website Scraper | page | `$0.20` |
-| Google Search Scraper | search page | `$0.80` |
-| Google Maps Scraper | place | `$2.10` |
-| Google Maps Reviews Scraper | review | `$0.60` |
-| Jobs Scraper | job | `$0.80` |
-| YouTube Scraper | record | `$0.90` |
 | Reddit Scraper | record | `$0.70` |
 | GitHub Scraper | record | `$0.60` |
 | LinkedIn Scraper | record | `$0.90` |
 | TikTok Scraper | record | `$1.70` |
 | Instagram Scraper | record | `$0.80` |
 | X Scraper | post | `$0.30` |
-| Facebook Ads Scraper | ad | `$1.00` |
-| Contact Finder | record | `$1.50` |
 
 Read the live catalog before estimating work:
 

@@ -46,7 +46,7 @@ fn scraper_show(cli: &CliOptions) -> Result<()> {
         1,
         "scraper_required",
         "Scraper id is required.",
-        "Use `tovuk scraper show google-maps --json` with an id from `tovuk scraper list --json`.",
+        "Use `tovuk scraper show github --json` with an id from `tovuk scraper list --json`.",
     )?;
     print_authenticated(cli, &format!("/v1/scrapers/{}", encode_component(&scraper)))
 }
@@ -57,7 +57,7 @@ fn request_create(cli: &CliOptions) -> Result<()> {
         1,
         "scraper_required",
         "Scraper id is required.",
-        "Use `tovuk request create google-maps '{\"query\":\"coffee shops\",\"limit\":100}' --json`.",
+        "Use `tovuk request create github '{\"query\":\"mcp server\",\"language\":\"Rust\",\"limit\":100}' --json`.",
     )?;
     let input_source = request_input_source(cli)?;
     let input = request_input(cli, input_source.as_str())?;
@@ -125,7 +125,7 @@ fn request_input_source(cli: &CliOptions) -> Result<String> {
         2,
         "request_input_required",
         "Request input JSON is required.",
-        "Use `tovuk request create google-maps '{\"query\":\"coffee shops\",\"limit\":100}' --json`.",
+        "Use `tovuk request create github '{\"query\":\"mcp server\",\"language\":\"Rust\",\"limit\":100}' --json`.",
     )
 }
 
@@ -134,7 +134,7 @@ fn request_input(cli: &CliOptions, input_source: &str) -> Result<Value> {
         agent_error(
             "invalid_request_input",
             format!("Request input is not valid JSON: {error}"),
-            "Pass scraper input as a JSON object, for example `'{\"query\":\"coffee shops\",\"limit\":100}'`.",
+            "Pass scraper input as a JSON object, for example `'{\"query\":\"mcp server\",\"language\":\"Rust\",\"limit\":100}'`.",
             cli.output.json,
         )
     })?;
@@ -142,7 +142,7 @@ fn request_input(cli: &CliOptions, input_source: &str) -> Result<Value> {
         return Err(agent_error(
             "invalid_request_input",
             "Request input must be a JSON object.",
-            "Pass scraper input as a JSON object, for example `'{\"query\":\"coffee shops\",\"limit\":100}'`.",
+            "Pass scraper input as a JSON object, for example `'{\"query\":\"mcp server\",\"language\":\"Rust\",\"limit\":100}'`.",
             cli.output.json,
         ));
     }
