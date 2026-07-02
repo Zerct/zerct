@@ -11,6 +11,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     ".github/workflows/publish-native-binaries.yml",
     ".github/workflows/publish-npm.yml",
     ".github/workflows/publish-pypi.yml",
+    "scripts/deploy-mintlify-docs.sh",
     "scripts/check-native-release-assets.sh",
     ".gitignore",
     ".github/actionlint.yaml",

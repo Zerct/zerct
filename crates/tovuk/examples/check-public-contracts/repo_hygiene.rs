@@ -36,11 +36,15 @@ pub(crate) fn check() -> CheckResult {
 }
 
 fn require_docs_deploy_observability_contract() -> CheckResult {
-    let source = read_text(".github/workflows/docs-deploy.yml")?;
+    let workflow = read_text(".github/workflows/docs-deploy.yml")?;
+    let script = read_text("scripts/deploy-mintlify-docs.sh")?;
+    if !workflow.contains("scripts/deploy-mintlify-docs.sh") {
+        return Err("Mintlify docs deploy workflow must call the tracked deploy script".to_owned());
+    }
     for (snippet, label) in [
         (
-            "MINTLIFY_API_HELPER",
-            "Mintlify docs deploy must reuse one API helper across trigger and polling",
+            "mintlify_api()",
+            "Mintlify docs deploy must reuse one script API helper across trigger and polling",
         ),
         (
             "--write-out '%{http_code}'",
@@ -59,11 +63,11 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "Mintlify docs deploy must preserve sanitized response bodies for debugging",
         ),
     ] {
-        if !source.contains(snippet) {
+        if !script.contains(snippet) {
             return Err(label.to_owned());
         }
     }
-    if source.contains("curl -fsS") {
+    if script.contains("curl -fsS") {
         return Err(
             "Mintlify docs deploy must not use curl -fsS because it hides auth/API response bodies"
                 .to_owned(),
