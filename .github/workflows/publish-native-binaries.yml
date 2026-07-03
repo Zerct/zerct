@@ -39,7 +39,6 @@ jobs:
             fetch --depth=1 origin "${GITHUB_SHA}"
           git checkout --detach FETCH_HEAD
       - name: Check public agent readiness
-        continue-on-error: true
         run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
         run: scripts/check-all.sh

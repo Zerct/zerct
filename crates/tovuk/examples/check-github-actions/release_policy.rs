@@ -127,12 +127,7 @@ fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<
         "publish-native-binaries.yml release gate must run the full public repository check before publishing assets",
         findings,
     );
-    require_contains(
-        workflow.contents.as_str(),
-        "mintlify-agent-readiness https://docs.tovuk.com",
-        "publish-native-binaries.yml release gate must verify live docs agent readiness before publishing assets",
-        findings,
-    );
+    check_blocking_docs_readiness_gate(workflow, findings);
     require_contains(
         workflow.contents.as_str(),
         "matrix.asset_ext",
@@ -145,6 +140,60 @@ fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<
         "publish-native-binaries.yml must publish SHA-256 checksum assets for native binaries",
         findings,
     );
+}
+
+fn check_blocking_docs_readiness_gate(workflow: &Workflow, findings: &mut Vec<String>) {
+    const READINESS_COMMAND: &str =
+        "scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com";
+    match docs_readiness_step(workflow.contents.as_str(), READINESS_COMMAND) {
+        Some(DocsReadinessStep {
+            start_line,
+            continues_on_error: true,
+        }) => findings.push(format!(
+            "{}:{start_line}: live docs agent readiness must be a blocking release gate",
+            workflow.path.display()
+        )),
+        Some(_) => {}
+        None => findings.push(
+            "publish-native-binaries.yml release gate must verify live docs agent readiness before publishing assets"
+                .to_owned(),
+        ),
+    }
+}
+
+struct DocsReadinessStep {
+    start_line: usize,
+    continues_on_error: bool,
+}
+
+fn docs_readiness_step(contents: &str, command: &str) -> Option<DocsReadinessStep> {
+    let mut step_start_line = None;
+    let mut step_has_command = false;
+    let mut step_continues_on_error = false;
+
+    for (line_index, line) in contents.lines().enumerate() {
+        if line.trim_start().starts_with("- name:") {
+            if step_has_command {
+                return Some(DocsReadinessStep {
+                    start_line: step_start_line.unwrap_or(line_index + 1),
+                    continues_on_error: step_continues_on_error,
+                });
+            }
+            step_start_line = Some(line_index + 1);
+            step_has_command = false;
+            step_continues_on_error = false;
+        }
+
+        if step_start_line.is_some() {
+            step_has_command |= line.contains(command);
+            step_continues_on_error |= line.trim_start().starts_with("continue-on-error:");
+        }
+    }
+
+    step_has_command.then(|| DocsReadinessStep {
+        start_line: step_start_line.unwrap_or(1),
+        continues_on_error: step_continues_on_error,
+    })
 }
 
 fn check_package_publish_workflow_base(workflow: &Workflow, findings: &mut Vec<String>) {
@@ -245,5 +294,54 @@ fn check_artifact_publish_workflow(workflow: &Workflow, findings: &mut Vec<Strin
             format!("{}: {message}", workflow.path.display()).as_str(),
             findings,
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::docs_readiness_step;
+
+    const COMMAND: &str =
+        "scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com";
+
+    #[test]
+    fn docs_readiness_step_detects_non_blocking_gate() {
+        let step = docs_readiness_step(
+            r#"
+jobs:
+  release-gate:
+    steps:
+      - name: Check public agent readiness
+        continue-on-error: true
+        run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+      - name: Run full repository check
+        run: scripts/check-all.sh
+"#,
+            COMMAND,
+        )
+        .expect("readiness step");
+
+        assert!(step.continues_on_error);
+        assert_eq!(step.start_line, 5);
+    }
+
+    #[test]
+    fn docs_readiness_step_accepts_blocking_gate() {
+        let step = docs_readiness_step(
+            r#"
+jobs:
+  release-gate:
+    steps:
+      - name: Check public agent readiness
+        run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+      - name: Run full repository check
+        run: scripts/check-all.sh
+"#,
+            COMMAND,
+        )
+        .expect("readiness step");
+
+        assert!(!step.continues_on_error);
+        assert_eq!(step.start_line, 5);
     }
 }
