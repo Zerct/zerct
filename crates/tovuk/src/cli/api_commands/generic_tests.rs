@@ -1,4 +1,4 @@
-use super::pricing_payload;
+use super::super::pricing_catalog::pricing_payload;
 
 #[test]
 fn pricing_payload_keeps_public_plan_contract() -> Result<(), Box<dyn std::error::Error>> {
