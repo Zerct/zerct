@@ -2,7 +2,7 @@ use super::super::pricing_catalog::pricing_payload;
 
 #[test]
 fn pricing_payload_keeps_public_plan_contract() -> Result<(), Box<dyn std::error::Error>> {
-    let payload = pricing_payload();
+    let payload = pricing_payload()?;
 
     if payload["plans"][0]["plan"] != "plus" {
         return Err(format!("unexpected plans: {}", payload["plans"]).into());
@@ -18,7 +18,7 @@ fn pricing_payload_keeps_public_plan_contract() -> Result<(), Box<dyn std::error
 
 #[test]
 fn pricing_payload_keeps_public_scraper_prices() -> Result<(), Box<dyn std::error::Error>> {
-    let payload = pricing_payload();
+    let payload = pricing_payload()?;
 
     let prices = payload["scraperPrices"]
         .as_array()
