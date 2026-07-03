@@ -7,8 +7,11 @@ use super::{
     keychain::{read_keychain_token, write_keychain_token},
 };
 use std::{
-    env, fs, io,
+    env,
+    fs::{self, OpenOptions},
+    io::{self, Write},
     path::{Path, PathBuf},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 pub(super) fn read_stored_token(cli: &CliOptions) -> Result<Option<String>> {
@@ -81,9 +84,39 @@ fn write_token_file(path: &Path, token: &str) -> Result<()> {
         fs::create_dir_all(parent).map_err(|error| internal_error(error.to_string()))?;
         set_private_dir(parent);
     }
-    fs::write(path, format!("{token}\n")).map_err(|error| internal_error(error.to_string()))?;
+    let temp_path = private_temp_path(path);
+    write_private_temp_file(temp_path.as_path(), format!("{token}\n").as_bytes())
+        .map_err(|error| internal_error(error.to_string()))?;
+    fs::rename(temp_path.as_path(), path).map_err(|error| {
+        let _ignore = fs::remove_file(temp_path.as_path());
+        internal_error(error.to_string())
+    })?;
     set_private_file(path);
     Ok(())
+}
+
+fn write_private_temp_file(path: &Path, contents: &[u8]) -> io::Result<()> {
+    let mut options = OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut file = options.open(path)?;
+    file.write_all(contents)?;
+    file.sync_all()
+}
+
+fn private_temp_path(path: &Path) -> PathBuf {
+    let file_name = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or(SESSION_FILE);
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |duration| duration.as_nanos());
+    path.with_file_name(format!(".{file_name}.{}.{nanos}.tmp", std::process::id()))
 }
 
 fn user_session_path() -> PathBuf {
@@ -129,7 +162,7 @@ mod tests {
         time::{SystemTime, UNIX_EPOCH},
     };
 
-    use super::read_token_file;
+    use super::{read_token_file, write_token_file};
 
     #[test]
     fn missing_session_file_is_not_a_token() -> std::result::Result<(), Box<dyn std::error::Error>>
@@ -154,6 +187,43 @@ mod tests {
         }
 
         fs::remove_file(path)?;
+        Ok(())
+    }
+
+    #[test]
+    fn session_file_write_is_private_and_atomic()
+    -> std::result::Result<(), Box<dyn std::error::Error>> {
+        let path = unique_test_path("session-token-write")?;
+
+        write_token_file(path.as_path(), "tovuk_session_test")?;
+
+        let actual = fs::read_to_string(path.as_path())?;
+        if actual.as_str() != "tovuk_session_test\n" {
+            return Err(format!("unexpected session file contents: {actual:?}").into());
+        }
+        assert_private_file(path.as_path())?;
+
+        fs::remove_file(path)?;
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    fn assert_private_file(
+        path: &std::path::Path,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
+        use std::os::unix::fs::PermissionsExt;
+
+        let mode = fs::metadata(path)?.permissions().mode() & 0o777;
+        if mode != 0o600 {
+            return Err(format!("session file mode was {mode:o}, expected 600").into());
+        }
+        Ok(())
+    }
+
+    #[cfg(not(unix))]
+    fn assert_private_file(
+        _path: &std::path::Path,
+    ) -> std::result::Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 

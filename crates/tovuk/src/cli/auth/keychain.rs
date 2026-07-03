@@ -46,24 +46,8 @@ pub(super) fn read_keychain_token() -> Option<String> {
 
 pub(super) fn write_keychain_token(token: &str) -> bool {
     if cfg!(target_os = "macos") {
-        return Command::new("security")
-            .args([
-                "add-generic-password",
-                "-U",
-                "-s",
-                SESSION_SERVICE,
-                "-a",
-                SESSION_ACCOUNT,
-                "-l",
-                SESSION_LABEL,
-                "-w",
-                token,
-            ])
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .is_ok_and(|status| status.success());
+        // `security add-generic-password -w` exposes the token through argv.
+        return false;
     }
 
     if cfg!(target_os = "linux") && has_command("secret-tool") {
