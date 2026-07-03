@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto'
-import { createWriteStream, chmodSync, copyFileSync, mkdirSync, readFileSync, renameSync, rmSync } from 'node:fs'
+import { createWriteStream, chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, statSync } from 'node:fs'
 import { get } from 'node:https'
 import { arch, platform, tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
@@ -31,16 +31,19 @@ async function installFromRelease() {
   const asset = `tovuk-${manifest.version}-${target.triple}${target.asset_ext}`
   const url = `https://github.com/tovuk/tovuk/releases/download/v${manifest.version}/${asset}`
   const checksumUrl = `${url}.sha256`
-  const tempPath = join(tmpdir(), `${basename(asset)}-${process.pid}`)
+  const tempDir = mkdtempSync(join(tmpdir(), 'tovuk-install-'))
+  const tempPath = join(tempDir, basename(asset))
   try {
     await download(url, tempPath)
+    assertRegularFile(tempPath)
     const expectedSha256 = parseChecksum(await fetchText(checksumUrl), asset)
     verifySha256(tempPath, expectedSha256)
     renameSync(tempPath, binaryPath)
     chmodSync(binaryPath, 0o755)
   } catch (error) {
-    rmSync(tempPath, { force: true })
     throw new Error(`Could not install native Tovuk binary from ${url}: ${error instanceof Error ? error.message : String(error)}`)
+  } finally {
+    rmSync(tempDir, { recursive: true, force: true })
   }
 }
 
@@ -88,9 +91,17 @@ function download(url, destination, redirects = 0) {
         reject(new Error(`HTTP ${response.statusCode ?? 'unknown'}`))
         return
       }
-      const file = createWriteStream(destination, { mode: 0o755 })
+      const file = createWriteStream(destination, { flags: 'wx', mode: 0o755 })
       response.pipe(file)
-      file.on('finish', () => file.close(resolve))
+      file.on('finish', () => {
+        file.close((error) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve()
+        })
+      })
       file.on('error', reject)
     })
     request.setTimeout(REQUEST_TIMEOUT_MS, () => {
@@ -160,5 +171,11 @@ function verifySha256(path, expectedSha256) {
   const actualSha256 = createHash('sha256').update(readFileSync(path)).digest('hex')
   if (actualSha256 !== expectedSha256) {
     throw new Error(`native binary checksum mismatch: expected ${expectedSha256}, got ${actualSha256}`)
+  }
+}
+
+function assertRegularFile(path) {
+  if (!statSync(path).isFile()) {
+    throw new Error('downloaded native binary is not a regular file')
   }
 }
