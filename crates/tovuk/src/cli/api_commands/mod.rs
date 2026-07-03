@@ -4,7 +4,6 @@ mod billing;
 mod common;
 mod generic;
 mod http;
-mod pricing_catalog;
 mod scrapers;
 mod support;
 

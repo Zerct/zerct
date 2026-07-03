@@ -9,6 +9,7 @@ mod docs_sources;
 mod helpers;
 mod helpers_io;
 mod helpers_public_copy;
+mod html_visible_copy;
 mod mintlify;
 mod mintlify_fetch;
 mod native_release_targets;
