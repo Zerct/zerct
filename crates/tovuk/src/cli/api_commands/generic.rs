@@ -7,7 +7,8 @@ use reqwest::Method;
 use serde_json::Value;
 
 pub(crate) fn pricing(_cli: &CliOptions) -> Result<()> {
-    print_json(&super::pricing_catalog::pricing_payload())
+    let payload = super::pricing_catalog::pricing_payload()?;
+    print_json(&payload)
 }
 
 pub(crate) fn print_authenticated(cli: &CliOptions, route: &str) -> Result<()> {
