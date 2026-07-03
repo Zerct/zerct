@@ -224,6 +224,46 @@ jobs:
         run: |
           asset="tovuk-${{ steps.version.outputs.version }}-${{ matrix.target }}${{ matrix.asset_ext }}"
           echo "name=$asset" >> "$GITHUB_OUTPUT"
+      - name: Add GitHub CLI to PATH
+        shell: bash
+        run: |
+          if command -v gh >/dev/null 2>&1; then
+            gh --version
+            exit 0
+          fi
+
+          gh_version="2.96.0"
+          gh_root="$RUNNER_TEMP/gh-$gh_version"
+          mkdir -p "$gh_root"
+
+          case "$(uname -s)-$(uname -m)" in
+            Linux-x86_64)
+              curl -fsSL \
+                "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_linux_amd64.tar.gz" \
+                -o "$RUNNER_TEMP/gh.tar.gz"
+              tar -xzf "$RUNNER_TEMP/gh.tar.gz" --strip-components=1 -C "$gh_root"
+              ;;
+            Darwin-arm64)
+              curl -fsSL \
+                "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_macOS_arm64.zip" \
+                -o "$RUNNER_TEMP/gh.zip"
+              python3 - "$RUNNER_TEMP/gh.zip" "$gh_root" <<'PY'
+          import sys
+          import zipfile
+
+          archive, destination = sys.argv[1:]
+          with zipfile.ZipFile(archive) as handle:
+              handle.extractall(destination)
+          PY
+              ;;
+            *)
+              echo "::error::No rootless GitHub CLI installer configured for $(uname -s)-$(uname -m)."
+              exit 1
+              ;;
+          esac
+
+          echo "$gh_root/bin" >> "$GITHUB_PATH"
+          "$gh_root/bin/gh" --version
       - name: Check release asset
         id: release
         shell: bash
@@ -335,6 +375,23 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
     steps:
+      - name: Add GitHub CLI to PATH
+        shell: bash
+        run: |
+          if command -v gh >/dev/null 2>&1; then
+            gh --version
+            exit 0
+          fi
+
+          gh_version="2.96.0"
+          gh_root="$RUNNER_TEMP/gh-$gh_version"
+          mkdir -p "$gh_root"
+          curl -fsSL \
+            "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_linux_amd64.tar.gz" \
+            -o "$RUNNER_TEMP/gh.tar.gz"
+          tar -xzf "$RUNNER_TEMP/gh.tar.gz" --strip-components=1 -C "$gh_root"
+          echo "$gh_root/bin" >> "$GITHUB_PATH"
+          "$gh_root/bin/gh" --version
       - name: Download build artifact
         env:
           GITHUB_TOKEN: ${{ github.token }}

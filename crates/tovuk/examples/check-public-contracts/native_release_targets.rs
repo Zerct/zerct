@@ -133,6 +133,8 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
         "\"target\": target[\"triple\"]",
         "matrix.asset_ext",
         "runs-on: [self-hosted, tovuk, \"${{ matrix.runner_os }}\", \"${{ matrix.runner_arch }}\", public-trusted-ci]",
+        "gh_version=\"2.96.0\"",
+        "gh_${gh_version}_linux_amd64.tar.gz",
         "cmake_version=\"4.3.3\"",
         "ninja_version=\"1.13.2\"",
         "zig_version=\"0.16.0\"",
