@@ -1,7 +1,7 @@
 class Tovuk < Formula
   desc "Use Tovuk scraper APIs from a native CLI"
   homepage "https://tovuk.com"
-  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.111"
+  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.112"
   license "MIT"
 
   depends_on "rust" => :build
