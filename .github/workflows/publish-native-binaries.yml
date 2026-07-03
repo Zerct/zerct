@@ -126,14 +126,59 @@ jobs:
       - name: Check public release version contract
         shell: bash
         run: scripts/check-public-contracts.sh package-versions
+      - name: Install CMake and Ninja for cross builds
+        if: matrix.build_strategy == 'cargo-zigbuild' || matrix.build_strategy == 'cargo-xwin'
+        shell: bash
+        run: |
+          cmake_version="4.3.3"
+          cmake_root="$RUNNER_TEMP/cmake-$cmake_version"
+          if ! command -v cmake >/dev/null 2>&1; then
+            mkdir -p "$cmake_root"
+            curl -fsSL \
+              "https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-linux-x86_64.tar.gz" \
+              -o "$RUNNER_TEMP/cmake.tar.gz"
+            tar -xzf "$RUNNER_TEMP/cmake.tar.gz" --strip-components=1 -C "$cmake_root"
+            echo "$cmake_root/bin" >> "$GITHUB_PATH"
+            export PATH="$cmake_root/bin:$PATH"
+          fi
+
+          ninja_version="1.13.2"
+          ninja_root="$RUNNER_TEMP/ninja-$ninja_version"
+          if ! command -v ninja >/dev/null 2>&1; then
+            mkdir -p "$ninja_root"
+            curl -fsSL \
+              "https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux.zip" \
+              -o "$RUNNER_TEMP/ninja.zip"
+            python3 - "$RUNNER_TEMP/ninja.zip" "$ninja_root" <<'PY'
+          import sys
+          import zipfile
+
+          archive, destination = sys.argv[1:]
+          with zipfile.ZipFile(archive) as handle:
+              handle.extractall(destination)
+          PY
+            chmod +x "$ninja_root/ninja"
+            echo "$ninja_root" >> "$GITHUB_PATH"
+            export PATH="$ninja_root:$PATH"
+          fi
+
+          cmake --version
+          ninja --version
       - name: Install Linux ARM64 Zig cross toolchain
         if: matrix.build_strategy == 'cargo-zigbuild'
         shell: bash
         run: |
-          python3 -m pip --version >/dev/null 2>&1 || python3 -m ensurepip --user
-          python3 -m pip install --user --break-system-packages ziglang
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.local/bin:$PATH"
+          zig_version="0.16.0"
+          zig_root="$RUNNER_TEMP/zig-$zig_version"
+          if [ ! -x "$zig_root/zig" ]; then
+            mkdir -p "$zig_root"
+            curl -fsSL \
+              "https://ziglang.org/download/$zig_version/zig-x86_64-linux-$zig_version.tar.xz" \
+              -o "$RUNNER_TEMP/zig.tar.xz"
+            tar -xJf "$RUNNER_TEMP/zig.tar.xz" --strip-components=1 -C "$zig_root"
+          fi
+          echo "$zig_root" >> "$GITHUB_PATH"
+          export PATH="$zig_root:$PATH"
           cargo install --locked cargo-zigbuild
           zig version
           cargo zigbuild --version
@@ -152,17 +197,6 @@ jobs:
           fi
           echo "$llvm_root/bin" >> "$GITHUB_PATH"
           export PATH="$llvm_root/bin:$PATH"
-          python3 -m pip --version >/dev/null 2>&1 || python3 -m ensurepip --user
-          if ! command -v cmake >/dev/null 2>&1; then
-            python3 -m pip install --user --break-system-packages cmake
-            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-            export PATH="$HOME/.local/bin:$PATH"
-          fi
-          if ! command -v ninja >/dev/null 2>&1; then
-            python3 -m pip install --user --break-system-packages ninja
-            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-            export PATH="$HOME/.local/bin:$PATH"
-          fi
           rustup component add llvm-tools
           cargo install --locked cargo-xwin
           clang --version
