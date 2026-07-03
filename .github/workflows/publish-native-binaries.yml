@@ -85,6 +85,9 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
@@ -109,8 +112,8 @@ jobs:
         continue-on-error: true
         with:
           path: |
-            ~/.cargo/git
-            ~/.cargo/registry
+            ${{ env.CARGO_HOME }}/git
+            ${{ env.CARGO_HOME }}/registry
           key: ${{ runner.os }}-${{ matrix.target }}-cargo-registry-${{ hashFiles('crates/tovuk/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.target }}-cargo-registry-
