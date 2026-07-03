@@ -182,6 +182,7 @@ fn check_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
     check_self_hosted_policy(workflow, findings);
     check_github_hosted_cargo_cache(workflow, findings);
     check_public_package_release_order(workflow, findings);
+    check_docs_deploy_workflow(workflow, findings);
 }
 
 fn check_workflow_path_filters(
@@ -335,6 +336,19 @@ fn check_public_package_release_order(workflow: &Workflow, findings: &mut Vec<St
             }
         }
     }
+}
+
+fn check_docs_deploy_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
+    if !workflow.path.ends_with("docs-deploy.yml") {
+        return;
+    }
+
+    require_contains(
+        workflow.contents.as_str(),
+        "if: github.ref == 'refs/heads/main'",
+        "docs-deploy.yml must reject workflow_dispatch deploys from non-main refs before exposing Mintlify secrets",
+        findings,
+    );
 }
 
 fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
