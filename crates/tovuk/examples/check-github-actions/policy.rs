@@ -119,6 +119,7 @@ pub(crate) fn require_crates_trusted_publishing(workflow: &Workflow, findings: &
         workflow.path.display()
     );
     for needle in [
+        "runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]",
         "id-token: write",
         "rust-lang/crates-io-auth-action@v1",
         "CARGO_REGISTRY_TOKEN: ${{ steps.crates_io_auth.outputs.token }}",
