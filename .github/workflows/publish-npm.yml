@@ -116,11 +116,18 @@ jobs:
           name: tovuk-npm-package
           path: npm-package
       - name: Publish package with npm trusted publishing
-        run: npm publish npm-package/tovuk-*.tgz --access public
+        run: |
+          mapfile -t tarballs < <(find npm-package -type f -name 'tovuk-*.tgz' | sort)
+          if [ "${#tarballs[@]}" -ne 1 ]; then
+            printf 'Expected exactly one npm tarball, found %s:\n' "${#tarballs[@]}" >&2
+            find npm-package -maxdepth 3 -type f -print >&2
+            exit 1
+          fi
+          npm publish "${tarballs[0]}" --access public
       - name: Verify npm package
         run: |
           version="${{ needs.prepare.outputs.version }}"
-          for delay in 0 10 10 10 10 10; do
+          for delay in 0 10 10 15 15 20 20 30 30 30; do
             if [ "$delay" != 0 ]; then
               sleep "$delay"
             fi

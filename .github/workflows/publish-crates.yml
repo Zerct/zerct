@@ -93,7 +93,7 @@ jobs:
         if: steps.version.outputs.exists == 'false'
         run: |
           version="${{ steps.version.outputs.version }}"
-          for delay in 0 10 10 10 10 10; do
+          for delay in 0 10 10 15 15 20 20 30 30 30; do
             if [ "$delay" != 0 ]; then
               sleep "$delay"
             fi
