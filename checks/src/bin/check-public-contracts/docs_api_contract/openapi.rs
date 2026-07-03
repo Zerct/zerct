@@ -2,7 +2,7 @@ use serde_json::{Map, Value};
 
 use crate::helpers::CheckResult;
 
-pub(super) type OpenApi = Value;
+pub(in crate::docs_api_contract) type OpenApi = Value;
 
 pub(super) fn openapi_document(openapi: &str) -> CheckResult<OpenApi> {
     serde_json::from_str(openapi)
@@ -15,7 +15,7 @@ pub(super) fn openapi_path<'a>(openapi: &'a OpenApi, path_name: &str) -> CheckRe
         .ok_or_else(|| format!("OpenAPI path {path_name} was missing"))
 }
 
-pub(super) fn openapi_schema<'a>(
+pub(in crate::docs_api_contract) fn openapi_schema<'a>(
     openapi: &'a OpenApi,
     schema_name: &str,
 ) -> CheckResult<&'a Value> {
@@ -98,7 +98,7 @@ pub(super) fn reject_numeric_property_anywhere(
     }
 }
 
-pub(super) fn require_schema_property_example_u64(
+pub(in crate::docs_api_contract) fn require_schema_property_example_u64(
     schema: &Value,
     field: &str,
     expected: u64,
@@ -198,7 +198,7 @@ pub(super) fn require_json_response_example_string(
     }
 }
 
-pub(super) fn require_operation_id(
+pub(in crate::docs_api_contract) fn require_operation_id(
     openapi: &OpenApi,
     path_name: &str,
     method: &str,
@@ -259,7 +259,7 @@ pub(super) fn require_parameter_bounds(
     Ok(())
 }
 
-pub(super) fn require_schema_properties(
+pub(in crate::docs_api_contract) fn require_schema_properties(
     schema: &Value,
     fields: &[&str],
     label: &str,
@@ -273,7 +273,7 @@ pub(super) fn require_schema_properties(
     Ok(())
 }
 
-pub(super) fn require_schema_property_enum(
+pub(in crate::docs_api_contract) fn require_schema_property_enum(
     schema: &Value,
     field: &str,
     expected_values: &[&str],

@@ -40,11 +40,10 @@ not deploy from this public repo unless the user explicitly asks for a deploy.
   private account content through the public API or CLI.
 - There is no free scraper tier. Creating scraper requests requires paid
   billing. Plans are account-level and balance-first. Read the current plan
-  catalog from the engine `Plan::pricing()` source and the mirrored public
-  `crates/tovuk/src/cli/api_commands/pricing_catalog.rs` module before editing
-  plan copy. Public docs and contract checks are consumers, not pricing
-  authorities; do not add another public pricing table when the CLI catalog can
-  be consumed or checked directly.
+  catalog from the engine `Plan::pricing()` source before editing plan copy.
+  The public CLI must consume `GET /v1/pricing`; public docs and contract checks
+  are consumers, not pricing authorities. Do not add another public pricing
+  table or static JSON catalog.
 - Billing is per successful stored scraper result. Keep pricing exact and
   synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
   contract checks.

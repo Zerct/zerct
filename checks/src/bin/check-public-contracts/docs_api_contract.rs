@@ -32,7 +32,7 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
             ("request_id", "support API request id docs"),
         ],
     )?;
-    require_pricing_contract(sources.pricing.as_str())?;
+    require_pricing_contract(sources.pricing.as_str(), sources.openapi.as_str())?;
     let openapi = openapi_document(sources.openapi.as_str())?;
     require_openapi_paths(&openapi)?;
     require_openapi_login_contract(&openapi)?;
@@ -41,6 +41,7 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
     require_openapi_api_key_contract(&openapi)?;
     require_openapi_api_key_prefix_contract(sources.openapi.as_str())?;
     require_openapi_billing_contract(&openapi)?;
+    pricing_contract::require_openapi_pricing_contract(&openapi)?;
     require_openapi_scraper_response_contract(&openapi)?;
     require_openapi_status_checks(&openapi)?;
     require_contains_all(
@@ -188,6 +189,7 @@ fn require_openapi_paths(openapi: &OpenApi) -> CheckResult {
         "/v1/account/api-keys",
         "/v1/account/api-keys/{key_id}",
         "/v1/scrapers",
+        "/v1/pricing",
         "/v1/scrapers/health",
         "/v1/scrapers/{scraper}",
         "/v1/requests",

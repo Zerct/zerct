@@ -8,6 +8,7 @@ use crate::helpers::{
     CheckResult, env_int, number_field, read_json, reject_forbidden_public_copy_terms,
     require_contains, retired_public_names,
 };
+use crate::html_visible_copy::html_visible_copy;
 use crate::mintlify_fetch::{fetch_text, normalize_target_url, retry_delay};
 
 pub(crate) fn check_agent_readiness(target: &str) -> CheckResult {
@@ -291,76 +292,6 @@ fn reject_retired_public_names(label: &str, source: &str) -> CheckResult {
 fn reject_retired_public_names_in_html(label: &str, source: &str) -> CheckResult {
     let visible_copy = html_visible_copy(source);
     reject_retired_public_names(label, visible_copy.as_str())
-}
-
-fn html_visible_copy(source: &str) -> String {
-    let source = html_body(source).unwrap_or(source);
-    let without_scripts = remove_html_element_blocks(source, "script");
-    let without_styles = remove_html_element_blocks(without_scripts.as_str(), "style");
-    html_text_nodes(without_styles.as_str())
-}
-
-fn html_body(source: &str) -> Option<&str> {
-    let lower = source.to_lowercase();
-    let body_start_tag = lower.find("<body")?;
-    let body_start = lower[body_start_tag..]
-        .find('>')
-        .map(|offset| body_start_tag + offset + 1)?;
-    let body_end = lower[body_start..]
-        .find("</body>")
-        .map_or(source.len(), |offset| body_start + offset);
-    source.get(body_start..body_end)
-}
-
-fn remove_html_element_blocks(source: &str, tag: &str) -> String {
-    let mut output = String::with_capacity(source.len());
-    let mut remaining = source;
-    let open = format!("<{tag}");
-    let close = format!("</{tag}>");
-
-    loop {
-        let lower = remaining.to_lowercase();
-        let Some(start) = lower.find(open.as_str()) else {
-            output.push_str(remaining);
-            return output;
-        };
-        output.push_str(&remaining[..start]);
-        let after_start = &remaining[start..];
-        let after_start_lower = after_start.to_lowercase();
-        let Some(end) = after_start_lower.find(close.as_str()) else {
-            return output;
-        };
-        remaining = &after_start[end + close.len()..];
-    }
-}
-
-fn html_text_nodes(source: &str) -> String {
-    let mut output = String::with_capacity(source.len());
-    let mut in_tag = false;
-    for character in source.chars() {
-        match character {
-            '<' => {
-                in_tag = true;
-                output.push(' ');
-            }
-            '>' => {
-                in_tag = false;
-                output.push(' ');
-            }
-            _ if !in_tag => output.push(character),
-            _ => {}
-        }
-    }
-    decode_html_text(output.as_str())
-}
-
-fn decode_html_text(source: &str) -> String {
-    source
-        .replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
 }
 
 fn robots_blocks_crawlers(source: &str) -> bool {

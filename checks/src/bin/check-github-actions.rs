@@ -245,10 +245,10 @@ fn check_self_hosted_policy(workflow: &Workflow, findings: &mut Vec<String>) {
 fn check_github_hosted_cargo_cache(workflow: &Workflow, findings: &mut Vec<String>) {
     if contains_cargo_publish_command(workflow.contents.as_str())
         && !workflow.contents.contains("public-trusted-ci")
-        && !workflow.contents.contains("actions/cache@v5")
+        && !workflow.contents.contains("actions/cache@v6")
     {
         findings.push(format!(
-            "{}: GitHub-hosted Rust jobs must use actions/cache@v5",
+            "{}: GitHub-hosted Rust jobs must use actions/cache@v6",
             workflow.path.display()
         ));
     }

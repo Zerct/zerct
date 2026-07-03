@@ -76,7 +76,7 @@ pub(crate) fn reject_retired_cache_action(workflow: &Workflow, findings: &mut Ve
             .unwrap_or_default();
         if matches!(
             version,
-            "main" | "master" | "v0" | "v1" | "v2" | "v3" | "v4"
+            "main" | "master" | "v0" | "v1" | "v2" | "v3" | "v4" | "v5"
         ) {
             findings.push(format!(
                 "{}:{}: actions/cache must stay on the latest stable major",

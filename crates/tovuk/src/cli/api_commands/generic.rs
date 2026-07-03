@@ -6,8 +6,8 @@ use super::{common::page_query, http::api_request};
 use reqwest::Method;
 use serde_json::Value;
 
-pub(crate) fn pricing(_cli: &CliOptions) -> Result<()> {
-    let payload = super::pricing_catalog::pricing_payload()?;
+pub(crate) fn pricing(cli: &CliOptions) -> Result<()> {
+    let payload = api_request(cli, Method::GET, "/v1/pricing", None, None)?;
     print_json(&payload)
 }
 
@@ -31,7 +31,3 @@ pub(crate) fn print_authenticated_mutation(
     let response = api_request(cli, method, route, Some(&token), body)?;
     print_json(&response)
 }
-
-#[cfg(test)]
-#[path = "generic_tests.rs"]
-mod tests;
