@@ -239,7 +239,7 @@ fn check_package_publish_workflow_base(workflow: &Workflow, findings: &mut Vec<S
 }
 
 fn check_crate_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
-    check_package_publish_workflow_base(workflow, findings);
+    check_crate_publish_workflow_base(workflow, findings);
     require_crates_trusted_publishing(workflow, findings);
     for (needle, message) in [
         (
@@ -270,6 +270,54 @@ fn check_crate_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>)
     ] {
         reject_lines(workflow, needle, message, findings);
     }
+}
+
+fn check_crate_publish_workflow_base(workflow: &Workflow, findings: &mut Vec<String>) {
+    reject_lines(
+        workflow,
+        "method=skip",
+        "package publish workflows must fail closed instead of silently skipping publish auth",
+        findings,
+    );
+    for (needle, message) in [
+        (
+            "release:",
+            "crates.io trusted publishing must use a crates.io-supported release trigger",
+        ),
+        (
+            "- published",
+            "crates.io trusted publishing must run only for published releases",
+        ),
+        (
+            "github.event_name == 'release'",
+            "crates.io trusted publishing must explicitly handle release events",
+        ),
+        (
+            "github.event.release.target_commitish == 'main'",
+            "crates.io trusted publishing must reject releases not targeting main",
+        ),
+        (
+            "startsWith(github.event.release.tag_name, 'v')",
+            "crates.io trusted publishing must publish only version-tagged releases",
+        ),
+        (
+            "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
+            "manual package publishes must be restricted to the main ref",
+        ),
+    ] {
+        require_contains(
+            workflow.contents.as_str(),
+            needle,
+            format!("{}: {message}", workflow.path.display()).as_str(),
+            findings,
+        );
+    }
+    reject_lines(
+        workflow,
+        "workflow_run:",
+        "crates.io trusted publishing cannot use the workflow_run event",
+        findings,
+    );
 }
 
 fn check_artifact_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
