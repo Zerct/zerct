@@ -43,7 +43,8 @@ not deploy from this public repo unless the user explicitly asks for a deploy.
   catalog from the engine `Plan::pricing()` source and the mirrored public
   `crates/tovuk/src/cli/api_commands/pricing_catalog.rs` module before editing
   plan copy. Public docs and contract checks are consumers, not pricing
-  authorities.
+  authorities; do not add another public pricing table when the CLI catalog can
+  be consumed or checked directly.
 - Billing is per successful stored scraper result. Keep pricing exact and
   synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
   contract checks.
