@@ -447,6 +447,18 @@ fn check_package_publish_workflow(workflow: &Workflow, findings: &mut Vec<String
             "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
             "manual package publishes must be restricted to the main ref",
         ),
+        (
+            "needs: prepare",
+            "package publish credentials must be isolated to a post-prepare job",
+        ),
+        (
+            "actions/upload-artifact@v6",
+            "package publish prepare jobs must upload verified artifacts",
+        ),
+        (
+            "actions/download-artifact@v6",
+            "package publish jobs must publish downloaded verified artifacts",
+        ),
     ] {
         require_contains(
             workflow.contents.as_str(),

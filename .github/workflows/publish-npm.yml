@@ -10,19 +10,22 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  publish:
-    name: publish tovuk to npm
+  prepare:
+    name: prepare npm package
     if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
-    environment: npm
+    permissions:
+      contents: read
+    outputs:
+      exists: ${{ steps.version.outputs.exists }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -81,14 +84,42 @@ jobs:
         run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: Publish package with npm trusted publishing
+      - name: Pack npm package artifact
         if: steps.version.outputs.exists == 'false'
-        run: npm publish --access public
+        run: npm pack --pack-destination "$RUNNER_TEMP"
         working-directory: packages/tovuk
-      - name: Verify npm package
+      - uses: actions/upload-artifact@v6
         if: steps.version.outputs.exists == 'false'
+        with:
+          name: tovuk-npm-package
+          path: ${{ runner.temp }}/tovuk-*.tgz
+          if-no-files-found: error
+
+  publish:
+    name: publish tovuk to npm
+    needs: prepare
+    if: needs.prepare.outputs.exists == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+      - uses: actions/download-artifact@v6
+        with:
+          name: tovuk-npm-package
+          path: npm-package
+      - name: Publish package with npm trusted publishing
+        run: npm publish npm-package/tovuk-*.tgz --access public
+      - name: Verify npm package
         run: |
-          version="${{ steps.version.outputs.version }}"
+          version="${{ needs.prepare.outputs.version }}"
           for delay in 0 10 10 10 10 10; do
             if [ "$delay" != 0 ]; then
               sleep "$delay"
