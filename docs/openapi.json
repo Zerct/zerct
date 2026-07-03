@@ -5392,6 +5392,79 @@
           ]
         }
       },
+      "PlanPublicLimits": {
+        "type": "object",
+        "description": "Customer-visible non-billing account limits for scraper accounts.",
+        "additionalProperties": false,
+        "required": [
+          "apiTokens",
+          "supportTicketsPerDay"
+        ],
+        "properties": {
+          "apiTokens": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 100,
+            "description": "API keys allowed for the account.",
+            "maximum": 1000
+          },
+          "supportTicketsPerDay": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 20,
+            "description": "Support tickets allowed per rolling day.",
+            "maximum": 1000
+          }
+        },
+        "example": {
+          "apiTokens": 100,
+          "supportTicketsPerDay": 20
+        }
+      },
+      "PlanCatalogEntry": {
+        "type": "object",
+        "description": "Paid scraper plan catalog entry.",
+        "additionalProperties": false,
+        "required": [
+          "plan",
+          "limits",
+          "pricing"
+        ],
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "plus",
+              "pro",
+              "max"
+            ],
+            "example": "plus",
+            "description": "Billing plan."
+          },
+          "limits": {
+            "$ref": "#/components/schemas/PlanPublicLimits"
+          },
+          "pricing": {
+            "$ref": "#/components/schemas/PlanPricing"
+          }
+        },
+        "example": {
+          "plan": "plus",
+          "limits": {
+            "apiTokens": 100,
+            "supportTicketsPerDay": 20
+          },
+          "pricing": {
+            "subscriptionUsdCentsPerMonth": 2000,
+            "planBalanceUsdCentsPerMonth": 2000,
+            "bonusBalanceUsdCentsPerMonth": 0,
+            "includedBalanceUsdCentsPerMonth": 2000,
+            "paidOveragesEnabled": false
+          }
+        }
+      },
       "PlanPricing": {
         "type": "object",
         "description": "Customer-visible scraper subscription pricing and monthly balance.",
@@ -5624,6 +5697,7 @@
           "profile",
           "usage",
           "pricing",
+          "planCatalog",
           "billingEstimate",
           "apiKeys"
         ],
@@ -5636,6 +5710,29 @@
           },
           "pricing": {
             "$ref": "#/components/schemas/PlanPricing"
+          },
+          "planCatalog": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanCatalogEntry"
+            },
+            "description": "Paid scraper plan catalog from the same pricing source as billing.",
+            "example": [
+              {
+                "plan": "plus",
+                "limits": {
+                  "apiTokens": 100,
+                  "supportTicketsPerDay": 20
+                },
+                "pricing": {
+                  "subscriptionUsdCentsPerMonth": 2000,
+                  "planBalanceUsdCentsPerMonth": 2000,
+                  "bonusBalanceUsdCentsPerMonth": 0,
+                  "includedBalanceUsdCentsPerMonth": 2000,
+                  "paidOveragesEnabled": false
+                }
+              }
+            ]
           },
           "billingEstimate": {
             "$ref": "#/components/schemas/UsageCostEstimate"
@@ -5687,6 +5784,22 @@
             "includedBalanceUsdCentsPerMonth": 2000,
             "paidOveragesEnabled": false
           },
+          "planCatalog": [
+            {
+              "plan": "plus",
+              "limits": {
+                "apiTokens": 100,
+                "supportTicketsPerDay": 20
+              },
+              "pricing": {
+                "subscriptionUsdCentsPerMonth": 2000,
+                "planBalanceUsdCentsPerMonth": 2000,
+                "bonusBalanceUsdCentsPerMonth": 0,
+                "includedBalanceUsdCentsPerMonth": 2000,
+                "paidOveragesEnabled": false
+              }
+            }
+          ],
           "billingEstimate": {
             "currency": "USD",
             "plan": "plus",
