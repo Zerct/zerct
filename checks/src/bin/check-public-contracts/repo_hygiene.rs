@@ -41,59 +41,54 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
     let workflow = read_text(".github/workflows/docs-deploy.yml")?;
     let script = read_text("scripts/deploy-mintlify-docs.sh")?;
     if !workflow.contains("scripts/deploy-mintlify-docs.sh") {
-        return Err("Mintlify docs deploy workflow must call the tracked deploy script".to_owned());
+        return Err(
+            "Mintlify docs sync workflow must call the tracked verification script".to_owned(),
+        );
+    }
+    if !workflow.contains("Check Mintlify GitHub App sync") {
+        return Err("Mintlify docs workflow must describe the GitHub App sync boundary".to_owned());
     }
     for (snippet, label) in [
         (
-            "mintlify_api()",
-            "Mintlify docs deploy must reuse one script API helper across trigger and polling",
+            "Mintlify GitHub App owns production docs sync",
+            "Mintlify docs script must document that production sync is owned by the GitHub App",
         ),
         (
-            "--write-out '%{http_code}'",
-            "Mintlify docs deploy must capture HTTP status separately from response body",
+            "check-public-contracts.sh docs",
+            "Mintlify docs script must validate local docs contracts before public readiness",
         ),
         (
-            "Mintlify authentication failed",
-            "Mintlify docs deploy must emit an explicit authentication failure annotation",
+            "check-prose-style.sh --self-test",
+            "Mintlify docs script must run prose style self-test before public readiness",
         ),
         (
-            "rotate the GitHub secret",
-            "Mintlify docs deploy must tell operators how to resolve rejected credentials",
-        ),
-        (
-            "print_mintlify_response_body",
-            "Mintlify docs deploy must preserve sanitized response bodies for debugging",
-        ),
-        (
-            "verify_public_agent_readiness()",
-            "Mintlify docs deploy must verify public agent readiness before exiting green",
-        ),
-        (
-            "mintlify-agent-readiness",
-            "Mintlify docs deploy must run the tracked public readiness checker",
+            "TOVUK_DOCS_GITHUB_APP_SYNC_WAIT_SECONDS",
+            "Mintlify docs script must expose a bounded GitHub App sync wait",
         ),
         (
             "TOVUK_DOCS_PUBLIC_URL:-https://docs.tovuk.com",
-            "Mintlify docs deploy must default readiness checks to the public docs domain",
+            "Mintlify docs script must default readiness checks to the public docs domain",
         ),
         (
-            "status_id=\"$(trigger_deployment)\"",
-            "Mintlify docs deploy must capture the deployment status id before polling",
-        ),
-        (
-            "wait_for_deployment \"$status_id\"\n  verify_public_agent_readiness",
-            "Mintlify docs deploy must verify public agent readiness once after polling the captured deployment",
+            "mintlify-agent-readiness",
+            "Mintlify docs script must run the tracked public readiness checker",
         ),
     ] {
         if !script.contains(snippet) {
             return Err(label.to_owned());
         }
     }
-    if script.contains("curl -fsS") {
-        return Err(
-            "Mintlify docs deploy must not use curl -fsS because it hides auth/API response bodies"
-                .to_owned(),
-        );
+    for forbidden in [
+        "api.mintlify.com/v1/project/update",
+        "MINTLIFY_ADMIN_API_KEY",
+        "MINTLIFY_PROJECT_ID",
+    ] {
+        if script.contains(forbidden) || workflow.contains(forbidden) {
+            return Err(
+                "Mintlify docs workflow must not depend on the plan-gated deployment API"
+                    .to_owned(),
+            );
+        }
     }
     Ok(())
 }
