@@ -25,12 +25,18 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo-home
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: dtolnay/rust-toolchain@stable
+      - name: Add Cargo tools to PATH
+        shell: bash
+        run: echo "${CARGO_HOME}/bin" >> "$GITHUB_PATH"
       - name: Check public release version contract
         run: scripts/check-public-contracts.sh package-versions
       - name: Check registry version
