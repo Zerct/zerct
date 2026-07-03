@@ -2,11 +2,9 @@ name: Publish crates.io package
 
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Publish native binaries
+  release:
     types:
-      - completed
+      - published
 
 permissions:
   contents: read
@@ -18,7 +16,7 @@ concurrency:
 jobs:
   publish:
     name: publish tovuk to crates.io
-    if: ${{ github.actor == 'kriptoburak' && ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main')) }}
+    if: ${{ github.actor == 'kriptoburak' && ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'release' && github.event.release.target_commitish == 'main' && github.event.release.draft == false && github.event.release.prerelease == false && startsWith(github.event.release.tag_name, 'v'))) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: crates
@@ -32,7 +30,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.release.tag_name || github.sha }}
       - uses: dtolnay/rust-toolchain@stable
       - name: Add Cargo tools to PATH
         shell: bash
