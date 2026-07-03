@@ -14,6 +14,8 @@ python_bin="$(command -v python3.11 || command -v python3)"
 native_cli="$repo_root/crates/tovuk/target/release/tovuk"
 export TOVUK_NATIVE_BINARY="$native_cli"
 
+scripts/sync-native-release-targets.sh
+scripts/sync-native-release-targets.sh --check
 scripts/check-public-contracts.sh repo-hygiene
 
 strict_clippy_args=(

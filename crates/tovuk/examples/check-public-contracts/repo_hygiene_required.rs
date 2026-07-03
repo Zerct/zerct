@@ -69,6 +69,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "scripts/check-shell-style.sh",
     "scripts/check-toml-style.sh",
     "scripts/check-typos.sh",
+    "scripts/sync-native-release-targets.sh",
     "scripts/lib/repo-root.sh",
     "scripts/lib/tool-path.sh",
     "skills/tovuk/SKILL.md",
@@ -87,6 +88,8 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
     "node_modules/example",
     "packages/tovuk/dist/example",
     "packages/tovuk/node_modules/example",
+    "packages/tovuk/native-release-targets.json",
+    "packages/tovuk-py/src/tovuk/native_release_targets.json",
 ];
 
 pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {

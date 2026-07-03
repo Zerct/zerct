@@ -37,9 +37,11 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "node install.mjs",
+    "precheck": "../../scripts/sync-native-release-targets.sh",
     "check": "npm run check:policy && npm run runtime && npm run pack:dry",
     "check:policy": "../../scripts/check-public-contracts.sh npm-cli-package",
     "runtime": "../../scripts/check-public-contracts.sh npm-native-runtime",
+    "prepack": "../../scripts/sync-native-release-targets.sh",
     "pack:dry": "npm pack --dry-run"
   }
 }

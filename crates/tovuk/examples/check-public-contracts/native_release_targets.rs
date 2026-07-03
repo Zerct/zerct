@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use serde::Deserialize;
 
 use crate::helpers::{CheckResult, read_json, read_text};
@@ -36,6 +34,7 @@ struct PythonTarget {
 pub(crate) fn check() -> CheckResult {
     let manifest = read_manifest()?;
     require_manifest_shape(&manifest)?;
+    require_sync_script_contract()?;
     require_workflow_contract(&manifest)?;
     require_release_gate_contract()?;
     require_npm_installer_contract()?;
@@ -49,9 +48,9 @@ fn read_manifest() -> CheckResult<NativeReleaseTargets> {
 }
 
 fn require_manifest_shape(manifest: &NativeReleaseTargets) -> CheckResult {
-    let mut triples = BTreeSet::new();
-    let mut node_aliases = BTreeSet::new();
-    let mut python_aliases = BTreeSet::new();
+    let mut triples = std::collections::BTreeSet::new();
+    let mut node_aliases = std::collections::BTreeSet::new();
+    let mut python_aliases = std::collections::BTreeSet::new();
     for target in &manifest.targets {
         if !triples.insert(target.triple.clone()) {
             return Err(format!("duplicate native release target {}", target.triple));
@@ -68,28 +67,6 @@ fn require_manifest_shape(manifest: &NativeReleaseTargets) -> CheckResult {
         }
         require_target_shape(target)?;
     }
-    require_exact_set(
-        &triples,
-        &[
-            "aarch64-apple-darwin",
-            "aarch64-unknown-linux-gnu",
-            "x86_64-apple-darwin",
-            "x86_64-pc-windows-msvc",
-            "x86_64-unknown-linux-gnu",
-        ],
-        "native release targets",
-    )?;
-    require_exact_set(
-        &node_aliases,
-        &[
-            "darwin/arm64",
-            "darwin/x64",
-            "linux/arm64",
-            "linux/x64",
-            "win32/x64",
-        ],
-        "npm native target aliases",
-    )?;
     Ok(())
 }
 
@@ -138,22 +115,6 @@ fn require_target_shape(target: &NativeTarget) -> CheckResult {
         ));
     }
     Ok(())
-}
-
-fn require_exact_set(actual: &BTreeSet<String>, expected: &[&str], label: &str) -> CheckResult {
-    let expected_set = expected
-        .iter()
-        .copied()
-        .map(str::to_owned)
-        .collect::<BTreeSet<_>>();
-    if *actual == expected_set {
-        return Ok(());
-    }
-    Err(format!(
-        "{label} must be {}; got {}",
-        expected_set.iter().cloned().collect::<Vec<_>>().join(", "),
-        actual.iter().cloned().collect::<Vec<_>>().join(", ")
-    ))
 }
 
 fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
@@ -205,7 +166,7 @@ fn require_release_gate_contract() -> CheckResult {
 
 fn require_npm_installer_contract() -> CheckResult {
     let source = read_text("packages/tovuk/install.mjs")?;
-    require_packaged_manifest_matches_root("packages/tovuk/native-release-targets.json")?;
+    require_generated_manifest_matches_root("packages/tovuk/native-release-targets.json")?;
     require_contains_json_file("packages/tovuk/package.json", "native-release-targets.json")?;
     for snippet in [
         "native-release-targets.json",
@@ -237,7 +198,7 @@ fn require_npm_installer_contract() -> CheckResult {
 
 fn require_python_installer_contract() -> CheckResult {
     let source = read_text("packages/tovuk-py/src/tovuk/cli.py")?;
-    require_packaged_manifest_matches_root(
+    require_generated_manifest_matches_root(
         "packages/tovuk-py/src/tovuk/native_release_targets.json",
     )?;
     for snippet in [
@@ -268,7 +229,24 @@ fn require_python_installer_contract() -> CheckResult {
     Ok(())
 }
 
-fn require_packaged_manifest_matches_root(path: &str) -> CheckResult {
+fn require_sync_script_contract() -> CheckResult {
+    let source = read_text("scripts/sync-native-release-targets.sh")?;
+    for snippet in [
+        "source_manifest=\"native-release-targets.json\"",
+        "generated_manifests=(",
+        "\"packages/tovuk/native-release-targets.json\"",
+        "\"packages/tovuk-py/src/tovuk/native_release_targets.json\"",
+        "cmp -s \"$source_manifest\" \"$generated_manifest\"",
+        "cp \"$source_manifest\" \"$generated_manifest\"",
+    ] {
+        if !source.contains(snippet) {
+            return Err(format!("sync-native-release-targets.sh missing {snippet}"));
+        }
+    }
+    Ok(())
+}
+
+fn require_generated_manifest_matches_root(path: &str) -> CheckResult {
     let root = read_text("native-release-targets.json")?;
     let packaged = read_text(path)?;
     if packaged != root {

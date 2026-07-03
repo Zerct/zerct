@@ -73,6 +73,14 @@ fn required_package_scripts() -> BTreeMap<String, String> {
         ("pack:dry".to_owned(), "npm pack --dry-run".to_owned()),
         ("postinstall".to_owned(), "node install.mjs".to_owned()),
         (
+            "precheck".to_owned(),
+            "../../scripts/sync-native-release-targets.sh".to_owned(),
+        ),
+        (
+            "prepack".to_owned(),
+            "../../scripts/sync-native-release-targets.sh".to_owned(),
+        ),
+        (
             "runtime".to_owned(),
             format!("{PUBLIC_CONTRACTS_COMMAND} npm-native-runtime"),
         ),

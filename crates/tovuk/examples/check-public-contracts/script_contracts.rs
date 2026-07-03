@@ -10,6 +10,7 @@ const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
     "scripts/check-toml-style.sh",
     "scripts/check-typos.sh",
     "scripts/install-vacuum.sh",
+    "scripts/sync-native-release-targets.sh",
 ];
 
 pub(crate) fn check() -> CheckResult {
