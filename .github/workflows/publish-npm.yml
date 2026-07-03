@@ -123,7 +123,7 @@ jobs:
             find npm-package -maxdepth 3 -type f -print >&2
             exit 1
           fi
-          npm publish "${tarballs[0]}" --access public
+          npm publish "$(realpath "${tarballs[0]}")" --access public
       - name: Verify npm package
         run: |
           version="${{ needs.prepare.outputs.version }}"
