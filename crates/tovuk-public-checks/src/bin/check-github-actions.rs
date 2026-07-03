@@ -214,6 +214,8 @@ fn require_ci_path_filter_contract(workflows: &[Workflow], findings: &mut Vec<St
         ".typos.toml",
         ".vacuum.yaml",
         "AGENTS.md",
+        "crates/tovuk-public-checks/**",
+        "crates/tovuk/**",
         "deny.toml",
         "native-release-targets.json",
     ] {
@@ -422,6 +424,12 @@ fn check_native_binary_publish_workflow(workflow: &Workflow, findings: &mut Vec<
 }
 
 fn check_package_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
+    reject_lines(
+        workflow,
+        "method=skip",
+        "package publish workflows must fail closed instead of silently skipping publish auth",
+        findings,
+    );
     for (needle, message) in [
         (
             "workflow_run:",

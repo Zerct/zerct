@@ -143,13 +143,12 @@ jobs:
             exit 0
           fi
 
-          echo "method=skip" >> "$GITHUB_OUTPUT"
-          echo "::notice::Skipping PyPI publish for unscoped project tovuk. Configure PYPI_API_TOKEN or enable trusted publishing for project tovuk with owner tovuk, repository tovuk, workflow publish-pypi.yml, environment pypi."
+          echo "::error::PyPI publish auth is not configured. Set PYPI_API_TOKEN or enable trusted publishing for project tovuk with owner tovuk, repository tovuk, workflow publish-pypi.yml, environment pypi."
+          exit 1
         env:
           PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
           PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
       - uses: actions/download-artifact@v6
-        if: steps.publish_auth.outputs.method != 'skip'
         with:
           name: tovuk-pypi-dist
           path: pypi-dist
@@ -163,7 +162,6 @@ jobs:
           packages-dir: pypi-dist
           password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Verify PyPI package
-        if: steps.publish_auth.outputs.method != 'skip'
         run: |
           python3 - <<'PY'
           import time

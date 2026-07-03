@@ -1,6 +1,6 @@
 use crate::{
     docs_sources::DocsSources,
-    helpers::{CheckResult, require_contains_all},
+    helpers::{CheckResult, reject_contains, require_contains_all},
 };
 
 mod login_contract;
@@ -37,6 +37,7 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
     require_openapi_account_profile_contract(&openapi)?;
     require_openapi_account_usage_contract(&openapi)?;
     require_openapi_api_key_contract(&openapi)?;
+    require_openapi_api_key_prefix_contract(sources.openapi.as_str())?;
     require_openapi_billing_contract(&openapi)?;
     require_openapi_scraper_response_contract(&openapi)?;
     require_openapi_status_checks(&openapi)?;
@@ -251,6 +252,21 @@ fn require_openapi_api_key_contract(openapi: &OpenApi) -> CheckResult {
         "revokeAccountApiKey",
         "OpenAPI API key revoke operation",
     )
+}
+
+fn require_openapi_api_key_prefix_contract(openapi: &str) -> CheckResult {
+    require_contains_all(
+        openapi,
+        &[
+            ("tovuk_key_8Qm2", "OpenAPI API key prefix example"),
+            (
+                "tovuk_key_example_token_shown_once",
+                "OpenAPI one-time API key token example",
+            ),
+        ],
+    )?;
+    reject_contains(openapi, "tvk_live", "retired tvk_live API key prefix")?;
+    reject_contains(openapi, "tovuk_live", "retired tovuk_live API key prefix")
 }
 
 fn require_openapi_billing_contract(openapi: &OpenApi) -> CheckResult {

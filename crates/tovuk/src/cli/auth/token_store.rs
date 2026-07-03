@@ -146,10 +146,10 @@ mod tests {
     #[test]
     fn session_file_token_is_trimmed() -> std::result::Result<(), Box<dyn std::error::Error>> {
         let path = unique_test_path("session-token")?;
-        fs::write(path.as_path(), "  tvk_live_test\n")?;
+        fs::write(path.as_path(), "  tovuk_session_test\n")?;
 
         let actual = read_token_file(path.as_path(), false)?;
-        if actual.as_deref() != Some("tvk_live_test") {
+        if actual.as_deref() != Some("tovuk_session_test") {
             return Err(format!("session token was not trimmed: {actual:?}").into());
         }
 
