@@ -140,8 +140,11 @@ fn require_openapi_account_usage_contract(openapi: &OpenApi) -> CheckResult {
         "OpenAPI account activity summary operation",
     )?;
     for schema_name in [
+        "AccountOverviewResponse",
         "AccountOverviewUsage",
         "AccountUsageMeters",
+        "PlanCatalogEntry",
+        "PlanPublicLimits",
         "PlanPricing",
         "AccountUsageResponse",
         "AccountActivityResponse",
@@ -149,6 +152,28 @@ fn require_openapi_account_usage_contract(openapi: &OpenApi) -> CheckResult {
     ] {
         openapi_schema(openapi, schema_name)?;
     }
+    require_schema_properties(
+        openapi_schema(openapi, "AccountOverviewResponse")?,
+        &[
+            "profile",
+            "usage",
+            "pricing",
+            "planCatalog",
+            "billingEstimate",
+            "apiKeys",
+        ],
+        "AccountOverviewResponse",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "PlanCatalogEntry")?,
+        &["plan", "limits", "pricing"],
+        "PlanCatalogEntry",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "PlanPublicLimits")?,
+        &["apiTokens", "supportTicketsPerDay"],
+        "PlanPublicLimits",
+    )?;
     for schema_name in ["AccountUsageResponse", "AccountActivityResponse"] {
         let schema = openapi_schema(openapi, schema_name)?;
         require_schema_properties(
