@@ -22,7 +22,7 @@ jobs:
   release-gate:
     name: release gate
     if: ${{ github.ref == 'refs/heads/main' && github.actor == 'kriptoburak' }}
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
     timeout-minutes: 45
     permissions:
       contents: read
