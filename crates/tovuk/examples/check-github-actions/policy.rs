@@ -120,6 +120,8 @@ pub(crate) fn require_crates_trusted_publishing(workflow: &Workflow, findings: &
     );
     for needle in [
         "runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]",
+        "CARGO_HOME: ${{ github.workspace }}/.cargo-home",
+        "RUSTUP_HOME: ${{ github.workspace }}/.rustup-home",
         "id-token: write",
         "rust-lang/crates-io-auth-action@v1",
         "CARGO_REGISTRY_TOKEN: ${{ steps.crates_io_auth.outputs.token }}",
