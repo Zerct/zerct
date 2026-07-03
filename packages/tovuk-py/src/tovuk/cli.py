@@ -16,35 +16,9 @@ import urllib.request
 from . import __version__
 
 REPOSITORY = "https://github.com/tovuk/tovuk"
-NATIVE_TARGETS = [
-    {
-        "asset_ext": "",
-        "libc": "glibc",
-        "python": (("linux", "amd64"), ("linux", "x86_64")),
-        "triple": "x86_64-unknown-linux-gnu",
-    },
-    {
-        "asset_ext": "",
-        "libc": "glibc",
-        "python": (("linux", "aarch64"), ("linux", "arm64")),
-        "triple": "aarch64-unknown-linux-gnu",
-    },
-    {
-        "asset_ext": "",
-        "python": (("darwin", "aarch64"), ("darwin", "arm64")),
-        "triple": "aarch64-apple-darwin",
-    },
-    {
-        "asset_ext": "",
-        "python": (("darwin", "amd64"), ("darwin", "x86_64")),
-        "triple": "x86_64-apple-darwin",
-    },
-    {
-        "asset_ext": ".exe",
-        "python": (("windows", "amd64"), ("windows", "x86_64")),
-        "triple": "x86_64-pc-windows-msvc",
-    },
-]
+NATIVE_TARGETS = json.loads(
+    pathlib.Path(__file__).with_name("native_release_targets.json").read_text(encoding="utf-8")
+)["targets"]
 
 
 def main(argv: Optional[List[str]] = None) -> None:
@@ -91,20 +65,27 @@ def _native_binary() -> pathlib.Path:
             return path
         raise RuntimeError(f"TOVUK_NATIVE_BINARY does not point to a file: {path}")
 
-    packaged = pathlib.Path(__file__).with_name("bin") / "tovuk"
+    target = _native_target()
+    target_triple = str(target["triple"])
+    binary_name = str(target["binary"])
+
+    packaged = pathlib.Path(__file__).with_name("bin") / binary_name
     if packaged.is_file():
         return packaged
 
-    target = _native_target()
-    target_triple = str(target["triple"])
-    binary = _cache_dir() / __version__ / target_triple / "tovuk"
+    binary = _cache_dir() / __version__ / target_triple / binary_name
     if binary.is_file():
         return binary
 
     binary.parent.mkdir(parents=True, exist_ok=True)
     _download_release_binary(target, binary)
-    binary.chmod(binary.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    _mark_executable(binary)
     return binary
+
+
+def _mark_executable(binary: pathlib.Path) -> None:
+    if os.name != "nt":
+        binary.chmod(binary.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
 def _cache_dir() -> pathlib.Path:
@@ -118,7 +99,10 @@ def _native_target() -> dict[str, object]:
     system = platform.system().lower()
     machine = platform.machine().lower()
     for target in NATIVE_TARGETS:
-        if (system, machine) not in target["python"]:
+        if not any(
+            system == alias["system"] and machine == alias["machine"]
+            for alias in target["python"]
+        ):
             continue
         if target.get("libc") == "glibc" and _linux_libc() != "glibc":
             raise RuntimeError(

@@ -20,7 +20,7 @@ Agent command sequence:
 export TOVUK_OUTPUT=json
 tovuk login
 tovuk account show
-tovuk account activity --limit 20
+tovuk account activity
 tovuk api-key list
 tovuk api-key create "Production scraper"
 tovuk api-key revoke api_key_0123456789abcdef01234567
