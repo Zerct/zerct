@@ -10,19 +10,22 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  publish:
-    name: publish tovuk to PyPI
+  prepare:
+    name: prepare PyPI package
     if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
-    environment: pypi
+    permissions:
+      contents: read
+    outputs:
+      exists: ${{ steps.version.outputs.exists }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -78,9 +81,57 @@ jobs:
                   raise SystemExit(f"tovuk {version} already exists on PyPI. Bump every public package version before pushing CLI changes.")
               print("exists=true")
           PY
+      - if: steps.version.outputs.exists == 'false'
+        run: |
+          ./scripts/check-prose-style.sh --self-test
+          ./scripts/check-prose-style.sh
+      - if: steps.version.outputs.exists == 'false'
+        run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
+      - if: steps.version.outputs.exists == 'false'
+        run: |
+          python3 -m compileall -q packages/tovuk-py/src
+          PYTHONPATH=packages/tovuk-py/src python3 -m tovuk --help >/tmp/tovuk-help.txt
+          grep -q 'tovuk support create' /tmp/tovuk-help.txt
+        env:
+          TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
+      - name: Verify native release assets
+        if: steps.version.outputs.exists == 'false'
+        run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/setup-python@v6
+        if: steps.version.outputs.exists == 'false'
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: packages/tovuk-py/pyproject.toml
+      - if: steps.version.outputs.exists == 'false'
+        run: python -m pip install --upgrade build==1.4.4
+      - if: steps.version.outputs.exists == 'false'
+        run: |
+          rm -rf dist
+          python -m build
+        working-directory: packages/tovuk-py
+      - uses: actions/upload-artifact@v6
+        if: steps.version.outputs.exists == 'false'
+        with:
+          name: tovuk-pypi-dist
+          path: packages/tovuk-py/dist
+          if-no-files-found: error
+
+  publish:
+    name: publish tovuk to PyPI
+    needs: prepare
+    if: needs.prepare.outputs.exists == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
       - name: Select PyPI publish auth
         id: publish_auth
-        if: steps.version.outputs.exists == 'false'
         run: |
           if [ -n "${PYPI_API_TOKEN:-}" ]; then
             echo "method=token" >> "$GITHUB_OUTPUT"
@@ -97,53 +148,28 @@ jobs:
         env:
           PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
           PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
-      - if: steps.version.outputs.exists == 'false'
-        run: |
-          ./scripts/check-prose-style.sh --self-test
-          ./scripts/check-prose-style.sh
-      - if: steps.version.outputs.exists == 'false'
-        run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
-      - if: steps.version.outputs.exists == 'false'
-        run: |
-          python3 -m compileall -q packages/tovuk-py/src
-          PYTHONPATH=packages/tovuk-py/src python3 -m tovuk --help >/tmp/tovuk-help.txt
-          grep -q 'tovuk support create' /tmp/tovuk-help.txt
-        env:
-          TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
-      - name: Verify native release assets
-        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
-        run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/setup-python@v6
-        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
+      - uses: actions/download-artifact@v6
+        if: steps.publish_auth.outputs.method != 'skip'
         with:
-          python-version: "3.13"
-          cache: pip
-          cache-dependency-path: packages/tovuk-py/pyproject.toml
-      - if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
-        run: python -m pip install --upgrade build==1.4.4
-      - if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
-        run: python -m build
-        working-directory: packages/tovuk-py
+          name: tovuk-pypi-dist
+          path: pypi-dist
       - uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'trusted'
+        if: steps.publish_auth.outputs.method == 'trusted'
         with:
-          packages-dir: packages/tovuk-py/dist
+          packages-dir: pypi-dist
       - uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method == 'token'
+        if: steps.publish_auth.outputs.method == 'token'
         with:
-          packages-dir: packages/tovuk-py/dist
+          packages-dir: pypi-dist
           password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Verify PyPI package
-        if: steps.version.outputs.exists == 'false' && steps.publish_auth.outputs.method != 'skip'
+        if: steps.publish_auth.outputs.method != 'skip'
         run: |
           python3 - <<'PY'
-          import tomllib
           import time
           import urllib.request
 
-          version = tomllib.load(open("packages/tovuk-py/pyproject.toml", "rb"))["project"]["version"]
+          version = "${{ needs.prepare.outputs.version }}"
           for _ in range(6):
               try:
                   urllib.request.urlopen(f"https://pypi.org/pypi/tovuk/{version}/json", timeout=10).close()
