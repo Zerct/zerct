@@ -50,11 +50,6 @@ cargo clippy --manifest-path crates/tovuk/Cargo.toml "${strict_clippy_args[@]}"
 cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
 cargo package --locked --manifest-path crates/tovuk/Cargo.toml --allow-dirty >/dev/null
 (cd crates/tovuk && cargo machete)
-checks_manifest="crates/tovuk-public-checks/Cargo.toml"
-cargo fmt --check --manifest-path "$checks_manifest"
-cargo check --locked --release --all-targets --all-features --manifest-path "$checks_manifest"
-cargo test --locked --release --all-targets --all-features --manifest-path "$checks_manifest"
-cargo clippy --manifest-path "$checks_manifest" "${strict_clippy_args[@]}"
 mkdir -p target
 cargo metadata --locked --manifest-path crates/tovuk/Cargo.toml --all-features --format-version 1 >target/tovuk-cargo-deny-metadata.json
 cargo deny --manifest-path crates/tovuk/Cargo.toml check --config deny.toml --metadata-path target/tovuk-cargo-deny-metadata.json all

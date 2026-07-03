@@ -214,7 +214,6 @@ fn require_ci_path_filter_contract(workflows: &[Workflow], findings: &mut Vec<St
         ".typos.toml",
         ".vacuum.yaml",
         "AGENTS.md",
-        "crates/tovuk-public-checks/**",
         "crates/tovuk/**",
         "deny.toml",
         "native-release-targets.json",
