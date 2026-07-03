@@ -1,4 +1,4 @@
-name: Deploy Mintlify docs
+name: Check Mintlify docs sync
 
 on:
   push:
@@ -17,8 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: deploy docs
+  sync-check:
+    name: check docs sync
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -26,8 +26,5 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Deploy docs
-        env:
-          MINTLIFY_ADMIN_API_KEY: ${{ secrets.MINTLIFY_ADMIN_API_KEY }}
-          MINTLIFY_PROJECT_ID: ${{ secrets.MINTLIFY_PROJECT_ID }}
+      - name: Check Mintlify GitHub App sync
         run: scripts/deploy-mintlify-docs.sh
