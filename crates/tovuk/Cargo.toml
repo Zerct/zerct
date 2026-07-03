@@ -1,6 +1,6 @@
 [package]
 name = "tovuk"
-version = "0.1.108"
+version = "0.1.109"
 edition = "2024"
 rust-version = "1.85"
 description = "Use Tovuk scraper APIs from a native CLI."
