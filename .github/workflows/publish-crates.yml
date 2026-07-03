@@ -22,6 +22,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: crates
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -71,11 +74,15 @@ jobs:
       - if: steps.version.outputs.exists == 'false'
         run: cargo package --locked
         working-directory: crates/tovuk
+      - name: Authenticate with crates.io trusted publishing
+        id: crates_io_auth
+        if: steps.version.outputs.exists == 'false'
+        uses: rust-lang/crates-io-auth-action@v1
       - if: steps.version.outputs.exists == 'false'
         run: cargo publish --locked
         working-directory: crates/tovuk
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates_io_auth.outputs.token }}
       - name: Verify crates.io package
         if: steps.version.outputs.exists == 'false'
         run: |

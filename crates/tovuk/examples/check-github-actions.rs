@@ -13,8 +13,8 @@ use std::{
 
 use github_actions_policy::{
     Workflow, contains_cargo_publish_command, reject_javascript_lint_tools, reject_lines,
-    reject_retired_cache_action, reject_useblacksmith, require_contains, workflow_corpus,
-    workflows,
+    reject_retired_cache_action, reject_useblacksmith, require_contains,
+    require_crates_trusted_publishing, workflow_corpus, workflows,
 };
 use path_filters::{path_filter_matches_tracked, workflow_path_filters};
 
@@ -454,6 +454,9 @@ fn check_package_publish_workflow(workflow: &Workflow, findings: &mut Vec<String
             format!("{}: {message}", workflow.path.display()).as_str(),
             findings,
         );
+    }
+    if workflow.path.ends_with("publish-crates.yml") {
+        require_crates_trusted_publishing(workflow, findings);
     }
 }
 

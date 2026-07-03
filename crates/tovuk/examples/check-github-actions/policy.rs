@@ -113,6 +113,31 @@ pub(crate) fn require_contains(
     }
 }
 
+pub(crate) fn require_crates_trusted_publishing(workflow: &Workflow, findings: &mut Vec<String>) {
+    let message = format!(
+        "{}: crates.io publishes must use Trusted Publishing OIDC",
+        workflow.path.display()
+    );
+    for needle in [
+        "id-token: write",
+        "rust-lang/crates-io-auth-action@v1",
+        "CARGO_REGISTRY_TOKEN: ${{ steps.crates_io_auth.outputs.token }}",
+    ] {
+        require_contains(
+            workflow.contents.as_str(),
+            needle,
+            message.as_str(),
+            findings,
+        );
+    }
+    reject_lines(
+        workflow,
+        "secrets.CARGO_REGISTRY_TOKEN",
+        "crates.io publishes must not use a long-lived Cargo registry token secret",
+        findings,
+    );
+}
+
 pub(crate) fn contains_cargo_publish_command(contents: &str) -> bool {
     contents.lines().any(|line| {
         let trimmed = line.trim();
