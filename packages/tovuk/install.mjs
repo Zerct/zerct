@@ -10,6 +10,8 @@ const packageRoot = dirname(fileURLToPath(import.meta.url))
 const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'))
 const nativeTargets = JSON.parse(readFileSync(join(packageRoot, 'native-release-targets.json'), 'utf8')).targets
 const binaryPath = join(packageRoot, 'bin', nativeBinaryName())
+const REQUEST_TIMEOUT_MS = 30_000
+const MAX_REDIRECTS = 5
 
 mkdirSync(dirname(binaryPath), { recursive: true })
 
@@ -68,12 +70,17 @@ function linuxLibc() {
   return typeof glibcVersion === 'string' && glibcVersion.length > 0 ? 'glibc' : 'musl'
 }
 
-function download(url, destination) {
+function download(url, destination, redirects = 0) {
   return new Promise((resolve, reject) => {
-    get(url, (response) => {
+    const request = get(url, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        if (redirects >= MAX_REDIRECTS) {
+          response.resume()
+          reject(new Error(`too many redirects while downloading ${url}`))
+          return
+        }
         response.resume()
-        download(new URL(response.headers.location, url).toString(), destination).then(resolve, reject)
+        download(new URL(response.headers.location, url).toString(), destination, redirects + 1).then(resolve, reject)
         return
       }
       if (response.statusCode !== 200) {
@@ -85,16 +92,25 @@ function download(url, destination) {
       response.pipe(file)
       file.on('finish', () => file.close(resolve))
       file.on('error', reject)
-    }).on('error', reject)
+    })
+    request.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      request.destroy(new Error(`request timed out after ${REQUEST_TIMEOUT_MS / 1000} seconds`))
+    })
+    request.on('error', reject)
   })
 }
 
-function fetchText(url) {
+function fetchText(url, redirects = 0) {
   return new Promise((resolve, reject) => {
-    get(url, (response) => {
+    const request = get(url, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        if (redirects >= MAX_REDIRECTS) {
+          response.resume()
+          reject(new Error(`too many redirects while downloading ${url}`))
+          return
+        }
         response.resume()
-        fetchText(new URL(response.headers.location, url).toString()).then(resolve, reject)
+        fetchText(new URL(response.headers.location, url).toString(), redirects + 1).then(resolve, reject)
         return
       }
       if (response.statusCode !== 200) {
@@ -114,7 +130,11 @@ function fetchText(url) {
       })
       response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
       response.on('error', reject)
-    }).on('error', reject)
+    })
+    request.setTimeout(REQUEST_TIMEOUT_MS, () => {
+      request.destroy(new Error(`request timed out after ${REQUEST_TIMEOUT_MS / 1000} seconds`))
+    })
+    request.on('error', reject)
   })
 }
 
