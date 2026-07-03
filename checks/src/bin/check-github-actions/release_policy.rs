@@ -281,24 +281,16 @@ fn check_crate_publish_workflow_base(workflow: &Workflow, findings: &mut Vec<Str
     );
     for (needle, message) in [
         (
-            "release:",
-            "crates.io trusted publishing must use a crates.io-supported release trigger",
+            "push:",
+            "crates.io trusted publishing must use a crates.io-supported push trigger",
         ),
         (
-            "- published",
-            "crates.io trusted publishing must run only for published releases",
+            "branches: [main]",
+            "crates.io trusted publishing must run only for main pushes",
         ),
         (
-            "github.event_name == 'release'",
-            "crates.io trusted publishing must explicitly handle release events",
-        ),
-        (
-            "github.event.release.target_commitish == 'main'",
-            "crates.io trusted publishing must reject releases not targeting main",
-        ),
-        (
-            "startsWith(github.event.release.tag_name, 'v')",
-            "crates.io trusted publishing must publish only version-tagged releases",
+            "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+            "crates.io trusted publishing must explicitly guard main push events",
         ),
         (
             "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
