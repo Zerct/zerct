@@ -88,7 +88,7 @@ fn scan_repository() -> Result<(), String> {
 
 fn git_files() -> Result<Vec<String>, String> {
     let output = Command::new("git")
-        .args(["ls-files", "--cached", "--others", "--exclude-standard"])
+        .args(["ls-files", "--cached"])
         .output()
         .map_err(|error| format!("run git ls-files: {error}"))?;
     if !output.status.success() {
