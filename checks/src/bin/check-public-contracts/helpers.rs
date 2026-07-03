@@ -157,10 +157,3 @@ fn quoted_value(source: &str, label: &str) -> CheckResult<String> {
     };
     Ok(rest.chars().take(end).collect())
 }
-
-pub(crate) fn has_markdown_link(source: &str) -> bool {
-    let Some((_, after_bracket)) = source.split_once('[') else {
-        return false;
-    };
-    after_bracket.contains("](") && after_bracket.contains(')')
-}
