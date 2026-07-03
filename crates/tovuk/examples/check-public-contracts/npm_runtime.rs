@@ -39,7 +39,7 @@ fn native_binary_candidate(repo_root: &str) -> Option<String> {
             .join("packages")
             .join("tovuk")
             .join("bin")
-            .join("tovuk"),
+            .join("tovuk-native"),
     ]
     .into_iter()
     .find(|candidate| file_exists(candidate))

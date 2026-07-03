@@ -2,8 +2,11 @@
 
 #[path = "check-github-actions/policy.rs"]
 mod github_actions_policy;
+#[path = "check-github-actions/path_filters.rs"]
+mod path_filters;
 
 use std::{
+    collections::BTreeSet,
     fs,
     process::{Command, ExitCode},
 };
@@ -13,6 +16,7 @@ use github_actions_policy::{
     reject_retired_cache_action, reject_useblacksmith, require_contains, workflow_corpus,
     workflows,
 };
+use path_filters::{path_filter_matches_tracked, workflow_path_filters};
 
 struct ReleaseWorkflowPolicy {
     suffix: &'static str,
@@ -72,12 +76,14 @@ fn main() -> ExitCode {
 
 fn run() -> Result<(), String> {
     let workflows = workflows()?;
+    let tracked_files = tracked_files()?;
     let mut findings = Vec::new();
 
     reject_global_matches(&workflows, &mut findings);
     require_check_all_hooks(&mut findings)?;
     for workflow in &workflows {
         check_workflow(workflow, &mut findings);
+        check_workflow_path_filters(workflow, &tracked_files, &mut findings);
     }
     require_ci_path_filter_contract(&workflows, &mut findings);
     require_public_trusted_ci(&workflows, &mut findings);
@@ -90,6 +96,20 @@ fn run() -> Result<(), String> {
         eprintln!("{finding}");
     }
     Err("GitHub Actions policy check failed".to_owned())
+}
+
+fn tracked_files() -> Result<BTreeSet<String>, String> {
+    let output = Command::new("git")
+        .args(["ls-files"])
+        .output()
+        .map_err(|error| format!("git ls-files failed: {error}"))?;
+    if !output.status.success() {
+        return Err("git ls-files failed".to_owned());
+    }
+    Ok(String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .map(ToOwned::to_owned)
+        .collect())
 }
 
 fn reject_global_matches(workflows: &[Workflow], findings: &mut Vec<String>) {
@@ -162,6 +182,21 @@ fn check_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
     check_self_hosted_policy(workflow, findings);
     check_github_hosted_cargo_cache(workflow, findings);
     check_public_package_release_order(workflow, findings);
+}
+
+fn check_workflow_path_filters(
+    workflow: &Workflow,
+    tracked_files: &BTreeSet<String>,
+    findings: &mut Vec<String>,
+) {
+    for path_filter in workflow_path_filters(workflow.contents.as_str()) {
+        if !path_filter_matches_tracked(path_filter.as_str(), tracked_files) {
+            findings.push(format!(
+                "{}: workflow path filter {path_filter:?} does not match tracked files",
+                workflow.path.display()
+            ));
+        }
+    }
 }
 
 fn require_ci_path_filter_contract(workflows: &[Workflow], findings: &mut Vec<String>) {

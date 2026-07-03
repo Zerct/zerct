@@ -66,9 +66,9 @@ pub(super) fn require_package_metadata(sources: &ContractSources) -> CheckResult
         .bin
         .get("tovuk")
         .map_or("", String::as_str)
-        != "bin/tovuk"
+        != "bin/tovuk.mjs"
     {
-        return Err("npm package must expose bin/tovuk".to_owned());
+        return Err("npm package must expose bin/tovuk.mjs".to_owned());
     }
     if !sources.npm_package.dependencies.is_empty()
         || !sources.npm_package.dev_dependencies.is_empty()

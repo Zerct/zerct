@@ -8,36 +8,8 @@ import { fileURLToPath } from 'node:url'
 
 const packageRoot = dirname(fileURLToPath(import.meta.url))
 const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'))
-const binaryPath = join(packageRoot, 'bin', 'tovuk')
-const nativeTargets = [
-  {
-    assetExt: '',
-    libc: 'glibc',
-    node: { arch: 'x64', platform: 'linux' },
-    triple: 'x86_64-unknown-linux-gnu',
-  },
-  {
-    assetExt: '',
-    libc: 'glibc',
-    node: { arch: 'arm64', platform: 'linux' },
-    triple: 'aarch64-unknown-linux-gnu',
-  },
-  {
-    assetExt: '',
-    node: { arch: 'arm64', platform: 'darwin' },
-    triple: 'aarch64-apple-darwin',
-  },
-  {
-    assetExt: '',
-    node: { arch: 'x64', platform: 'darwin' },
-    triple: 'x86_64-apple-darwin',
-  },
-  {
-    assetExt: '.exe',
-    node: { arch: 'x64', platform: 'win32' },
-    triple: 'x86_64-pc-windows-msvc',
-  },
-]
+const nativeTargets = JSON.parse(readFileSync(join(packageRoot, 'native-release-targets.json'), 'utf8')).targets
+const binaryPath = join(packageRoot, 'bin', nativeBinaryName())
 
 mkdirSync(dirname(binaryPath), { recursive: true })
 
@@ -54,7 +26,7 @@ function installFromLocal(source) {
 
 async function installFromRelease() {
   const target = nativeTarget()
-  const asset = `tovuk-${manifest.version}-${target.triple}${target.assetExt}`
+  const asset = `tovuk-${manifest.version}-${target.triple}${target.asset_ext}`
   const url = `https://github.com/tovuk/tovuk/releases/download/v${manifest.version}/${asset}`
   const checksumUrl = `${url}.sha256`
   const tempPath = join(tmpdir(), `${basename(asset)}-${process.pid}`)
@@ -81,6 +53,10 @@ function nativeTarget() {
     return target
   }
   throw new Error(`Unsupported Tovuk native target: ${os}/${cpu}`)
+}
+
+function nativeBinaryName() {
+  return platform() === 'win32' ? 'tovuk-native.exe' : 'tovuk-native'
 }
 
 function linuxLibc() {

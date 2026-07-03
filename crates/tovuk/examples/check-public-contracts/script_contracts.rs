@@ -14,6 +14,7 @@ const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
 
 pub(crate) fn check() -> CheckResult {
     require_check_script_bootstrap()?;
+    require_vacuum_installer_contract()?;
     require_shell_style_contract()
 }
 
@@ -37,6 +38,29 @@ fn require_check_script_bootstrap() -> CheckResult {
             if !source.contains(snippet) {
                 return Err(format!("{path} {label}"));
             }
+        }
+    }
+    Ok(())
+}
+
+fn require_vacuum_installer_contract() -> CheckResult {
+    let source = read_text("scripts/install-vacuum.sh")?;
+    for (snippet, label) in [
+        (
+            "vacuum_asset_sha256",
+            "Vacuum installer must pin asset checksums",
+        ),
+        (
+            "shasum -a 256",
+            "Vacuum installer must verify SHA-256 before extraction",
+        ),
+        (
+            "checksum mismatch",
+            "Vacuum installer must fail on checksum mismatch",
+        ),
+    ] {
+        if !source.contains(snippet) {
+            return Err(label.to_owned());
         }
     }
     Ok(())

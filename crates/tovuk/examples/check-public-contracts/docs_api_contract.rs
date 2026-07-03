@@ -7,11 +7,11 @@ mod openapi;
 
 use openapi::{
     OpenApi, openapi_document, openapi_path, openapi_schema,
-    reject_json_response_example_check_name, reject_operation_field, reject_schema,
-    reject_schema_property, reject_schema_property_enum, require_example_string,
-    require_json_response_example_check_name, require_json_response_example_string,
-    require_operation_id, require_parameter_bounds, require_schema_properties,
-    require_schema_property_enum,
+    reject_json_response_example_check_name, reject_numeric_property_anywhere,
+    reject_operation_field, reject_schema, reject_schema_property, reject_schema_property_enum,
+    require_example_string, require_json_response_example_check_name,
+    require_json_response_example_string, require_operation_id, require_parameter_bounds,
+    require_schema_properties, require_schema_property_enum, require_schema_property_example_u64,
 };
 
 pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
@@ -261,10 +261,46 @@ fn require_openapi_billing_contract(openapi: &OpenApi) -> CheckResult {
         &["target_plan", "top_up_usd_cents"],
         "OpenAPI billing checkout request",
     )?;
+    let usage_estimate_schema = openapi_schema(openapi, "UsageCostEstimate")?;
     require_schema_properties(
-        openapi_schema(openapi, "UsageCostEstimate")?,
-        &["topUpMaximumUsdCents"],
+        usage_estimate_schema,
+        &[
+            "topUpMaximumUsdCents",
+            "autoTopUpThresholdUsdCents",
+            "autoTopUpAmountUsdCents",
+            "autoTopUpMonthlyLimitUsdCents",
+        ],
         "OpenAPI usage estimate",
+    )?;
+    require_schema_property_example_u64(
+        usage_estimate_schema,
+        "autoTopUpThresholdUsdCents",
+        500,
+        "OpenAPI usage estimate",
+    )?;
+    require_schema_property_example_u64(
+        usage_estimate_schema,
+        "autoTopUpAmountUsdCents",
+        2_000,
+        "OpenAPI usage estimate",
+    )?;
+    require_schema_property_example_u64(
+        usage_estimate_schema,
+        "autoTopUpMonthlyLimitUsdCents",
+        100_000,
+        "OpenAPI usage estimate",
+    )?;
+    reject_numeric_property_anywhere(
+        openapi,
+        "autoTopUpThresholdUsdCents",
+        2_000,
+        "OpenAPI stale auto top-up threshold",
+    )?;
+    reject_numeric_property_anywhere(
+        openapi,
+        "autoTopUpMonthlyLimitUsdCents",
+        20_000,
+        "OpenAPI stale auto top-up monthly limit",
     )?;
     reject_schema(
         openapi,

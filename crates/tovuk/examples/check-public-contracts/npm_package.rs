@@ -21,7 +21,7 @@ struct NpmPackagePaths {
     package_dir: PathBuf,
     package_json: PathBuf,
     install: PathBuf,
-    bin: PathBuf,
+    launcher: PathBuf,
 }
 
 pub(crate) fn check_cli_package_contract() -> CheckResult {
@@ -33,7 +33,7 @@ pub(crate) fn check_cli_package_contract() -> CheckResult {
     require_published_files(&paths, &package_json, &required_files)?;
     require_package_scripts(&package_json, &required_scripts)?;
     require_install_source(paths.install.as_path())?;
-    require_executable_bin(paths.bin.as_path())?;
+    require_executable_bin(paths.launcher.as_path())?;
     println!("Checked npm native CLI package policy.");
     Ok(())
 }
@@ -45,7 +45,7 @@ impl NpmPackagePaths {
         Ok(Self {
             package_json: package_dir.join("package.json"),
             install: package_dir.join("install.mjs"),
-            bin: package_dir.join("bin").join("tovuk"),
+            launcher: package_dir.join("bin").join("tovuk.mjs"),
             package_dir,
         })
     }
@@ -55,6 +55,7 @@ fn required_files() -> Vec<String> {
     vec![
         "bin".to_owned(),
         "install.mjs".to_owned(),
+        "native-release-targets.json".to_owned(),
         "README.md".to_owned(),
     ]
 }
@@ -118,7 +119,7 @@ fn require_manifest_policy(package_json: &PackageJson) -> CheckResult {
     )?;
     require_equal(
         package_json.bin.get("tovuk").map_or("", String::as_str),
-        "bin/tovuk",
+        "bin/tovuk.mjs",
         "tovuk bin path",
     )?;
     if !package_json.dependencies.is_empty() {
@@ -172,11 +173,12 @@ fn require_install_source(install_path: &Path) -> CheckResult {
         "https://github.com/tovuk/tovuk/releases/download",
         ".sha256",
         "nativeTargets",
-        "target.assetExt",
+        "target.asset_ext",
         "verifySha256",
         "linuxLibc",
         "requires glibc Linux",
         "TOVUK_NATIVE_BINARY",
+        "nativeBinaryName",
     ] {
         require_contains(
             install_source.as_str(),
@@ -188,9 +190,10 @@ fn require_install_source(install_path: &Path) -> CheckResult {
 }
 
 fn require_executable_bin(bin_path: &Path) -> CheckResult {
-    let metadata = fs::metadata(bin_path).map_err(|error| format!("stat bin/tovuk: {error}"))?;
+    let metadata =
+        fs::metadata(bin_path).map_err(|error| format!("stat bin/tovuk.mjs: {error}"))?;
     if metadata.permissions().mode() & 0o111 == 0 {
-        Err("bin/tovuk must stay executable".to_owned())
+        Err("bin/tovuk.mjs must stay executable".to_owned())
     } else {
         Ok(())
     }

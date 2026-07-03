@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, fmt::Write as _, path::Path};
+use std::collections::BTreeSet;
 
 use serde::Deserialize;
 
@@ -38,9 +38,8 @@ pub(crate) fn check() -> CheckResult {
     require_manifest_shape(&manifest)?;
     require_workflow_contract(&manifest)?;
     require_release_gate_contract()?;
-    require_npm_installer_contract(&manifest)?;
-    require_python_installer_contract(&manifest)?;
-    reject_package_local_target_manifests()?;
+    require_npm_installer_contract()?;
+    require_python_installer_contract()?;
     println!("Checked native release target contracts.");
     Ok(())
 }
@@ -204,17 +203,17 @@ fn require_release_gate_contract() -> CheckResult {
     Ok(())
 }
 
-fn require_npm_installer_contract(manifest: &NativeReleaseTargets) -> CheckResult {
+fn require_npm_installer_contract() -> CheckResult {
     let source = read_text("packages/tovuk/install.mjs")?;
-    let expected = expected_node_targets(manifest)?;
-    if !source.contains(expected.as_str()) {
-        return Err("packages/tovuk/install.mjs nativeTargets block is out of sync".to_owned());
-    }
+    require_packaged_manifest_matches_root("packages/tovuk/native-release-targets.json")?;
+    require_contains_json_file("packages/tovuk/package.json", "native-release-targets.json")?;
     for snippet in [
-        "target.assetExt",
+        "native-release-targets.json",
+        "target.asset_ext",
         "target.triple",
         "requires glibc Linux",
         "linuxLibc()",
+        "nativeBinaryName()",
         "TOVUK_NATIVE_BINARY",
     ] {
         if !source.contains(snippet) {
@@ -236,92 +235,56 @@ fn require_npm_installer_contract(manifest: &NativeReleaseTargets) -> CheckResul
     Ok(())
 }
 
-fn expected_node_targets(manifest: &NativeReleaseTargets) -> CheckResult<String> {
-    let mut output = String::from("const nativeTargets = [\n");
-    for target in &manifest.targets {
-        writeln!(&mut output, "  {{").map_err(|error| error.to_string())?;
-        writeln!(&mut output, "    assetExt: '{}',", target.asset_ext)
-            .map_err(|error| error.to_string())?;
-        if let Some(libc) = target.libc.as_deref() {
-            writeln!(&mut output, "    libc: '{libc}',").map_err(|error| error.to_string())?;
-        }
-        writeln!(
-            &mut output,
-            "    node: {{ arch: '{}', platform: '{}' }},",
-            target.node.arch, target.node.platform
-        )
-        .map_err(|error| error.to_string())?;
-        writeln!(&mut output, "    triple: '{}',", target.triple)
-            .map_err(|error| error.to_string())?;
-        writeln!(&mut output, "  }},").map_err(|error| error.to_string())?;
-    }
-    output.push_str("]\n");
-    Ok(output)
-}
-
-fn require_python_installer_contract(manifest: &NativeReleaseTargets) -> CheckResult {
+fn require_python_installer_contract() -> CheckResult {
     let source = read_text("packages/tovuk-py/src/tovuk/cli.py")?;
-    let expected = expected_python_targets(manifest)?;
-    if !source.contains(expected.as_str()) {
-        return Err(
-            "packages/tovuk-py/src/tovuk/cli.py NATIVE_TARGETS block is out of sync".to_owned(),
-        );
-    }
+    require_packaged_manifest_matches_root(
+        "packages/tovuk-py/src/tovuk/native_release_targets.json",
+    )?;
     for snippet in [
+        "native_release_targets.json",
         "target[\"asset_ext\"]",
+        "target[\"binary\"]",
         "target[\"triple\"]",
         "requires glibc Linux",
         "_linux_libc()",
         "TOVUK_NATIVE_BINARY",
+        "binary_name = str(target[\"binary\"])",
+        "pathlib.Path(__file__).with_name(\"bin\") / binary_name",
+        "/ target_triple / binary_name",
     ] {
         if !source.contains(snippet) {
             return Err(format!("cli.py missing {snippet}"));
         }
     }
+    if source.contains("/ target_triple / \"tovuk\"")
+        || source.contains("/ target_triple / 'tovuk'")
+        || source.contains("with_name(\"bin\") / \"tovuk\"")
+        || source.contains("with_name(\"bin\") / 'tovuk'")
+    {
+        return Err(
+            "cli.py must use manifest binary names instead of hard-coded tovuk paths".to_owned(),
+        );
+    }
     Ok(())
 }
 
-fn expected_python_targets(manifest: &NativeReleaseTargets) -> CheckResult<String> {
-    let mut output = String::from("NATIVE_TARGETS = [\n");
-    for target in &manifest.targets {
-        writeln!(&mut output, "    {{").map_err(|error| error.to_string())?;
-        writeln!(
-            &mut output,
-            "        \"asset_ext\": \"{}\",",
-            target.asset_ext
-        )
-        .map_err(|error| error.to_string())?;
-        if let Some(libc) = target.libc.as_deref() {
-            writeln!(&mut output, "        \"libc\": \"{libc}\",")
-                .map_err(|error| error.to_string())?;
-        }
-        output.push_str("        \"python\": (");
-        for (index, alias) in target.python.iter().enumerate() {
-            if index > 0 {
-                output.push_str(", ");
-            }
-            write!(&mut output, "(\"{}\", \"{}\")", alias.system, alias.machine)
-                .map_err(|error| error.to_string())?;
-        }
-        output.push_str("),\n");
-        writeln!(&mut output, "        \"triple\": \"{}\",", target.triple)
-            .map_err(|error| error.to_string())?;
-        writeln!(&mut output, "    }},").map_err(|error| error.to_string())?;
-    }
-    output.push_str("]\n");
-    Ok(output)
-}
-
-fn reject_package_local_target_manifests() -> CheckResult {
-    for path in [
-        "packages/tovuk/native-targets.json",
-        "packages/tovuk-py/src/tovuk/native_targets.json",
-    ] {
-        if Path::new(path).exists() {
-            return Err(format!(
-                "{path} must not exist; native target metadata belongs in native-release-targets.json"
-            ));
-        }
+fn require_packaged_manifest_matches_root(path: &str) -> CheckResult {
+    let root = read_text("native-release-targets.json")?;
+    let packaged = read_text(path)?;
+    if packaged != root {
+        return Err(format!(
+            "{path} must match native-release-targets.json exactly"
+        ));
     }
     Ok(())
+}
+
+fn require_contains_json_file(path: &str, file_name: &str) -> CheckResult {
+    let source = read_text(path)?;
+    if source.contains(file_name) {
+        return Ok(());
+    }
+    Err(format!(
+        "{path} must include {file_name} in published files"
+    ))
 }

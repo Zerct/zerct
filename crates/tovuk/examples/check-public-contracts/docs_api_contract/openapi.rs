@@ -80,6 +80,44 @@ pub(super) fn reject_schema_property_enum(
     }
 }
 
+pub(super) fn reject_numeric_property_anywhere(
+    openapi: &OpenApi,
+    field: &str,
+    rejected_value: u64,
+    label: &str,
+) -> CheckResult {
+    let mut matches = Vec::new();
+    collect_numeric_property_matches(openapi, field, rejected_value, "$", &mut matches);
+    if matches.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label} found {field}={rejected_value} at {}",
+            matches.join(", ")
+        ))
+    }
+}
+
+pub(super) fn require_schema_property_example_u64(
+    schema: &Value,
+    field: &str,
+    expected: u64,
+    label: &str,
+) -> CheckResult {
+    let actual = schema_properties(schema, label)?
+        .get(field)
+        .and_then(|property| property.get("example"))
+        .and_then(Value::as_u64)
+        .ok_or_else(|| format!("{label} field {field:?} numeric example is missing"))?;
+    if actual == expected {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label} field {field:?} example must be {expected}, got {actual}"
+        ))
+    }
+}
+
 pub(super) fn require_example_string(
     schema: &Value,
     path: &[&str],
@@ -275,6 +313,44 @@ fn json_response_example_has_check_name(
     Ok(checks
         .iter()
         .any(|check| check.get("name").and_then(Value::as_str) == Some(name)))
+}
+
+fn collect_numeric_property_matches(
+    value: &Value,
+    field: &str,
+    rejected_value: u64,
+    path: &str,
+    matches: &mut Vec<String>,
+) {
+    match value {
+        Value::Object(object) => {
+            for (key, child) in object {
+                let child_path = format!("{path}.{key}");
+                if key == field && child.as_u64() == Some(rejected_value) {
+                    matches.push(child_path.clone());
+                }
+                collect_numeric_property_matches(
+                    child,
+                    field,
+                    rejected_value,
+                    &child_path,
+                    matches,
+                );
+            }
+        }
+        Value::Array(items) => {
+            for (index, child) in items.iter().enumerate() {
+                collect_numeric_property_matches(
+                    child,
+                    field,
+                    rejected_value,
+                    format!("{path}[{index}]").as_str(),
+                    matches,
+                );
+            }
+        }
+        _other => {}
+    }
 }
 
 fn openapi_operation<'a>(
