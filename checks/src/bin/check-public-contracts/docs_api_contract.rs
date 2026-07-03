@@ -5,6 +5,7 @@ use crate::{
 
 mod login_contract;
 mod openapi;
+mod pricing_contract;
 
 use login_contract::require_openapi_login_contract;
 use openapi::{
@@ -15,6 +16,7 @@ use openapi::{
     require_json_response_example_string, require_operation_id, require_parameter_bounds,
     require_schema_properties, require_schema_property_enum, require_schema_property_example_u64,
 };
+use pricing_contract::require_pricing_contract;
 
 pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> CheckResult {
     require_contains_all(
@@ -64,41 +66,6 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
             (
                 r#""linkedinCompanyEmployees""#,
                 "OpenAPI LinkedIn company employees example",
-            ),
-        ],
-    )
-}
-
-fn require_pricing_contract(pricing: &str) -> CheckResult {
-    require_contains_all(
-        pricing,
-        &[
-            (
-                "There is no free scraper tier",
-                "pricing paid-only scraper docs",
-            ),
-            ("| Plus | `$20/month` | `$20`", "pricing Plus balance docs"),
-            ("| Pro | `$100/month` | `$120`", "pricing Pro balance docs"),
-            ("| Max | `$200/month` | `$300`", "pricing Max balance docs"),
-            (
-                "deducts from that balance for each successful stored",
-                "pricing balance debit docs",
-            ),
-            (
-                "`priceEvents[].usdMicros`",
-                "pricing scraper event price docs",
-            ),
-            (
-                "| GitHub Scraper | record | `$0.60` |",
-                "pricing GitHub per-result docs",
-            ),
-            (
-                "| TikTok Scraper | record | `$1.70` |",
-                "pricing TikTok per-result docs",
-            ),
-            (
-                "| Instagram Scraper | record | `$0.80` |",
-                "pricing Instagram per-result docs",
             ),
         ],
     )
