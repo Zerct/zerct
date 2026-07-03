@@ -61,6 +61,16 @@ jobs:
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
 
+          def runner_for(triple):
+              if triple.endswith("apple-darwin"):
+                  return {"arch": "ARM64", "os": "macOS"}
+              return {"arch": "x64", "os": "linux"}
+
+          def build_strategy(triple):
+              if triple.endswith("windows-msvc"):
+                  return "cargo-xwin"
+              return "cargo"
+
           with open("native-release-targets.json", encoding="utf-8") as handle:
               targets = json.load(handle)["targets"]
 
@@ -69,7 +79,10 @@ jobs:
                   {
                       "asset_ext": target["asset_ext"],
                       "binary": target["binary"],
+                      "build_strategy": build_strategy(target["triple"]),
                       "runner": target["runner"],
+                      "runner_arch": runner_for(target["triple"])["arch"],
+                      "runner_os": runner_for(target["triple"])["os"],
                       "target": target["triple"],
                   }
                   for target in targets
@@ -91,7 +104,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
-    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
+    runs-on: [self-hosted, tovuk, "${{ matrix.runner_os }}", "${{ matrix.runner_arch }}", public-trusted-ci]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -99,15 +112,39 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+      - name: Add Cargo tools to PATH
+        shell: bash
+        run: echo "${CARGO_HOME}/bin" >> "$GITHUB_PATH"
       - name: Check public release version contract
         shell: bash
         run: scripts/check-public-contracts.sh package-versions
-      - name: Install Linux ARM64 linker
+      - name: Check Linux ARM64 linker
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
+          if ! command -v aarch64-linux-gnu-gcc >/dev/null 2>&1; then
+            echo "::error::aarch64-linux-gnu-gcc must be preinstalled on the trusted Linux self-hosted runner."
+            exit 1
+          fi
+      - name: Install Windows MSVC cross toolchain
+        if: matrix.build_strategy == 'cargo-xwin'
+        shell: bash
+        run: |
+          if ! command -v clang >/dev/null 2>&1; then
+            echo "::error::clang must be preinstalled on the trusted Linux self-hosted runner for cargo-xwin."
+            exit 1
+          fi
+          if ! command -v cmake >/dev/null 2>&1; then
+            echo "::error::cmake must be preinstalled on the trusted Linux self-hosted runner for cargo-xwin."
+            exit 1
+          fi
+          if ! command -v ninja >/dev/null 2>&1; then
+            python3 -m pip install --user --break-system-packages ninja
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          fi
+          rustup component add llvm-tools
+          cargo install --locked cargo-xwin
+          cargo xwin --version
       - uses: actions/cache@v5
         continue-on-error: true
         with:
@@ -165,11 +202,15 @@ jobs:
             printf 'checksum_exists=%s\n' "$checksum_exists"
           } >> "$GITHUB_OUTPUT"
       - name: Build
-        if: steps.release.outputs.asset_exists == 'false'
+        if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo'
         shell: bash
         run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
         env:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+      - name: Build Windows MSVC
+        if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo-xwin'
+        shell: bash
+        run: cargo xwin build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
       - name: Prepare asset
         if: steps.release.outputs.asset_exists == 'false'
         shell: bash
