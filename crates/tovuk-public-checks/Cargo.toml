@@ -1,0 +1,40 @@
+[package]
+name = "tovuk-public-checks"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lints.rust]
+missing_docs = "deny"
+unsafe_code = "forbid"
+warnings = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+dbg_macro = "deny"
+expect_used = "deny"
+large_futures = "deny"
+large_include_file = "deny"
+large_stack_frames = "deny"
+mem_forget = "deny"
+panic = "deny"
+panic_in_result_fn = "deny"
+path_buf_push_overwrite = "deny"
+rc_buffer = "deny"
+rc_mutex = "deny"
+redundant_clone = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_in_result = "deny"
+unwrap_used = "deny"
+clone_on_ref_ptr = "deny"
+
+[dependencies]
+reqwest = { version = "0.13.4", default-features = false, features = [
+  "blocking",
+  "json",
+  "rustls",
+] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"

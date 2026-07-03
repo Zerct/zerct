@@ -4,8 +4,10 @@ on:
   pull_request:
     paths:
       - "docs/**"
-      - "crates/tovuk/examples/check-public-contracts/**"
-      - "crates/tovuk/examples/check-prose-style.rs"
+      - "crates/tovuk-public-checks/src/bin/check-public-contracts/**"
+      - "crates/tovuk-public-checks/src/bin/check-prose-style.rs"
+      - "crates/tovuk-public-checks/Cargo.toml"
+      - "crates/tovuk-public-checks/Cargo.lock"
       - "scripts/check-public-contracts.sh"
       - "scripts/check-prose-style.sh"
       - ".github/workflows/docs-validate.yml"

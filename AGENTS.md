@@ -89,7 +89,9 @@ practical:
 
 ```sh
 cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
+cargo fmt --check --manifest-path crates/tovuk-public-checks/Cargo.toml
 cargo clippy --locked --release --manifest-path crates/tovuk/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
+cargo clippy --locked --release --manifest-path crates/tovuk-public-checks/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
 npm --prefix packages/tovuk run check
 scripts/check-public-contracts.sh package-versions
 scripts/check-public-contracts.sh cli-contract
