@@ -39,9 +39,8 @@ not deploy from this public repo unless the user explicitly asks for a deploy.
   tokens, private session data, private repository credentials, proxy URLs, or
   private account content through the public API or CLI.
 - There is no free scraper tier. Creating scraper requests requires paid
-  billing. Plans are account-level and balance-first: Plus at `$20/month`
-  includes `$20`, Pro at `$100/month` includes `$120`, and Max at
-  `$200/month` includes `$300`.
+  billing. Plans are account-level and balance-first. Read the current plan
+  catalog from the public contract checks and docs before editing plan copy.
 - Billing is per successful stored scraper result. Keep pricing exact and
   synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
   contract checks.
