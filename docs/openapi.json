@@ -312,6 +312,33 @@
         }
       }
     },
+    "/v1/pricing": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Read pricing",
+        "description": "Returns paid scraper plans, per-result scraper prices, top-up balance rules, and next actions.",
+        "operationId": "getPricing",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/PricingLoaded"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/v1/scrapers/health": {
       "get": {
         "tags": [
@@ -1687,6 +1714,98 @@
           },
           "X-RateLimit-Reset": {
             "description": "Unix timestamp when the billing portal created response rate-limit window resets.",
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4102444800,
+              "example": 1782216000
+            }
+          }
+        }
+      },
+      "PricingLoaded": {
+        "description": "Pricing loaded.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PricingResponse"
+            },
+            "examples": {
+              "example": {
+                "summary": "Pricing loaded.",
+                "value": {
+                  "plans": [
+                    {
+                      "plan": "plus",
+                      "monthlyPriceUsdCents": 2000,
+                      "planBalanceUsdCents": 2000,
+                      "includedBalanceUsdCents": 2000,
+                      "bonusBalanceUsdCents": 0,
+                      "paidOveragesEnabled": false
+                    },
+                    {
+                      "plan": "pro",
+                      "monthlyPriceUsdCents": 10000,
+                      "planBalanceUsdCents": 10000,
+                      "includedBalanceUsdCents": 12000,
+                      "bonusBalanceUsdCents": 2000,
+                      "paidOveragesEnabled": false
+                    },
+                    {
+                      "plan": "max",
+                      "monthlyPriceUsdCents": 20000,
+                      "planBalanceUsdCents": 20000,
+                      "includedBalanceUsdCents": 30000,
+                      "bonusBalanceUsdCents": 10000,
+                      "paidOveragesEnabled": false
+                    }
+                  ],
+                  "scraperPrices": [
+                    {
+                      "scraper": "tiktok",
+                      "priceEvent": "tiktok_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 1700
+                    }
+                  ],
+                  "topUp": {
+                    "minimumUsdCents": 2000,
+                    "maximumUsdCents": 100000,
+                    "expiresAfterInactiveDays": 365
+                  },
+                  "nextActions": [
+                    "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper.",
+                    "Use `scraperPrices[].usdMicrosPerResult`, request limits, and `tovuk usage --json` to estimate balance impact before high-count requests."
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum requests allowed for the pricing response window.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 1000
+            }
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Requests remaining for the pricing response window.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100000,
+              "example": 999
+            }
+          },
+          "X-RateLimit-Reset": {
+            "description": "Unix timestamp when the pricing response rate-limit window resets.",
             "schema": {
               "type": "integer",
               "format": "int64",
@@ -4119,6 +4238,213 @@
           "name": "tiktok_records",
           "unit": "record",
           "usdMicros": 1700
+        }
+      },
+      "PricingPlan": {
+        "type": "object",
+        "description": "Customer-visible monthly scraper plan pricing.",
+        "additionalProperties": false,
+        "required": [
+          "plan",
+          "monthlyPriceUsdCents",
+          "planBalanceUsdCents",
+          "includedBalanceUsdCents",
+          "bonusBalanceUsdCents",
+          "paidOveragesEnabled"
+        ],
+        "properties": {
+          "plan": {
+            "type": "string",
+            "enum": [
+              "plus",
+              "pro",
+              "max"
+            ],
+            "example": "plus"
+          },
+          "monthlyPriceUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "planBalanceUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "includedBalanceUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "bonusBalanceUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 0,
+            "maximum": 100000
+          },
+          "paidOveragesEnabled": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "example": {
+          "plan": "plus",
+          "monthlyPriceUsdCents": 2000,
+          "planBalanceUsdCents": 2000,
+          "includedBalanceUsdCents": 2000,
+          "bonusBalanceUsdCents": 0,
+          "paidOveragesEnabled": false
+        }
+      },
+      "PricingScraperPrice": {
+        "type": "object",
+        "description": "One public per-result scraper price.",
+        "additionalProperties": false,
+        "required": [
+          "scraper",
+          "priceEvent",
+          "unit",
+          "usdMicrosPerResult"
+        ],
+        "properties": {
+          "scraper": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,64}$",
+            "example": "tiktok"
+          },
+          "priceEvent": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "tiktok_record"
+          },
+          "unit": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "record"
+          },
+          "usdMicrosPerResult": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 1700
+          }
+        },
+        "example": {
+          "scraper": "tiktok",
+          "priceEvent": "tiktok_record",
+          "unit": "record",
+          "usdMicrosPerResult": 1700
+        }
+      },
+      "PricingTopUpPolicy": {
+        "type": "object",
+        "description": "Paid top-up balance policy.",
+        "additionalProperties": false,
+        "required": [
+          "minimumUsdCents",
+          "maximumUsdCents",
+          "expiresAfterInactiveDays"
+        ],
+        "properties": {
+          "minimumUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 2000,
+            "maximum": 100000
+          },
+          "maximumUsdCents": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 100000,
+            "maximum": 100000
+          },
+          "expiresAfterInactiveDays": {
+            "type": "integer",
+            "minimum": 0,
+            "format": "int32",
+            "example": 365,
+            "maximum": 65535
+          }
+        },
+        "example": {
+          "minimumUsdCents": 2000,
+          "maximumUsdCents": 100000,
+          "expiresAfterInactiveDays": 365
+        }
+      },
+      "PricingResponse": {
+        "type": "object",
+        "description": "Public pricing catalog for CLI users, dashboards, and agents.",
+        "additionalProperties": false,
+        "required": [
+          "plans",
+          "scraperPrices",
+          "topUp",
+          "nextActions"
+        ],
+        "properties": {
+          "plans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingPlan"
+            }
+          },
+          "scraperPrices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricingScraperPrice"
+            }
+          },
+          "topUp": {
+            "$ref": "#/components/schemas/PricingTopUpPolicy"
+          },
+          "nextActions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[\\s\\S]{0,8192}$",
+              "example": "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper."
+            }
+          }
+        },
+        "example": {
+          "plans": [
+            {
+              "plan": "plus",
+              "monthlyPriceUsdCents": 2000,
+              "planBalanceUsdCents": 2000,
+              "includedBalanceUsdCents": 2000,
+              "bonusBalanceUsdCents": 0,
+              "paidOveragesEnabled": false
+            }
+          ],
+          "scraperPrices": [
+            {
+              "scraper": "tiktok",
+              "priceEvent": "tiktok_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1700
+            }
+          ],
+          "topUp": {
+            "minimumUsdCents": 2000,
+            "maximumUsdCents": 100000,
+            "expiresAfterInactiveDays": 365
+          },
+          "nextActions": [
+            "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper."
+          ]
         }
       },
       "ScraperSummary": {

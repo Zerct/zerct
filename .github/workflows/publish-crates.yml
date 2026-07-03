@@ -67,7 +67,7 @@ jobs:
         run: |
           ./scripts/check-prose-style.sh --self-test
           ./scripts/check-prose-style.sh
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         if: steps.version.outputs.exists == 'false'
         with:
           path: |

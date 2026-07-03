@@ -1,10 +1,13 @@
 use serde_json::Value;
 
-use crate::helpers::{CheckResult, read_json, require_contains, require_contains_all};
+use crate::helpers::{CheckResult, require_contains, require_contains_all};
 
-const PUBLIC_PRICING_CATALOG_PATH: &str = "crates/tovuk/src/cli/api_commands/pricing_catalog.json";
+use super::openapi::{
+    OpenApi, openapi_schema, require_operation_id, require_schema_properties,
+    require_schema_property_enum, require_schema_property_example_u64,
+};
 
-pub(crate) fn require_pricing_contract(pricing: &str) -> CheckResult {
+pub(crate) fn require_pricing_contract(pricing: &str, openapi: &str) -> CheckResult {
     require_contains_all(
         pricing,
         &[
@@ -22,9 +25,87 @@ pub(crate) fn require_pricing_contract(pricing: &str) -> CheckResult {
             ),
         ],
     )?;
-    let catalog = read_json(PUBLIC_PRICING_CATALOG_PATH)?;
+    let catalog = pricing_catalog_example(openapi)?;
     require_plan_price_rows(pricing, &catalog)?;
     require_scraper_price_rows(pricing, &catalog)
+}
+
+pub(crate) fn require_openapi_pricing_contract(openapi: &OpenApi) -> CheckResult {
+    require_operation_id(
+        openapi,
+        "/v1/pricing",
+        "get",
+        "getPricing",
+        "OpenAPI pricing operation",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "PricingResponse")?,
+        &["plans", "scraperPrices", "topUp", "nextActions"],
+        "OpenAPI pricing response",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "PricingPlan")?,
+        &[
+            "plan",
+            "monthlyPriceUsdCents",
+            "planBalanceUsdCents",
+            "includedBalanceUsdCents",
+            "bonusBalanceUsdCents",
+            "paidOveragesEnabled",
+        ],
+        "OpenAPI pricing plan",
+    )?;
+    require_schema_property_enum(
+        openapi_schema(openapi, "PricingPlan")?,
+        "plan",
+        &["plus", "pro", "max"],
+        "OpenAPI pricing plan enum",
+    )?;
+    require_schema_properties(
+        openapi_schema(openapi, "PricingScraperPrice")?,
+        &["scraper", "priceEvent", "unit", "usdMicrosPerResult"],
+        "OpenAPI pricing scraper price",
+    )?;
+    let top_up_schema = openapi_schema(openapi, "PricingTopUpPolicy")?;
+    require_schema_properties(
+        top_up_schema,
+        &[
+            "minimumUsdCents",
+            "maximumUsdCents",
+            "expiresAfterInactiveDays",
+        ],
+        "OpenAPI pricing top-up policy",
+    )?;
+    require_schema_property_example_u64(
+        top_up_schema,
+        "minimumUsdCents",
+        2_000,
+        "OpenAPI pricing top-up policy",
+    )?;
+    require_schema_property_example_u64(
+        top_up_schema,
+        "maximumUsdCents",
+        100_000,
+        "OpenAPI pricing top-up policy",
+    )?;
+    require_schema_property_example_u64(
+        top_up_schema,
+        "expiresAfterInactiveDays",
+        365,
+        "OpenAPI pricing top-up policy",
+    )
+}
+
+fn pricing_catalog_example(openapi: &str) -> CheckResult<Value> {
+    let document: Value = serde_json::from_str(openapi)
+        .map_err(|error| format!("docs/openapi.json must be valid JSON: {error}"))?;
+    let catalog = document
+        .get("components")
+        .and_then(|components| components.get("schemas"))
+        .and_then(|schemas| schemas.get("PricingResponse"))
+        .and_then(|pricing_response| pricing_response.get("example"))
+        .ok_or_else(|| "OpenAPI PricingResponse schema must contain an example".to_owned())?;
+    Ok(catalog.clone())
 }
 
 fn require_plan_price_rows(pricing: &str, catalog: &Value) -> CheckResult {
