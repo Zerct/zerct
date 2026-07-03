@@ -12,7 +12,7 @@ on:
       - "crates/tovuk/src/**"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -47,7 +47,7 @@ jobs:
   native-targets:
     name: read native release targets
     if: ${{ github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
@@ -83,10 +83,12 @@ jobs:
     needs: [native-targets, release-gate]
     if: ${{ github.ref == 'refs/heads/main' }}
     timeout-minutes: 30
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
-    runs-on: ${{ matrix.runner }}
+    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -190,30 +192,75 @@ jobs:
           const digest = createHash('sha256').update(readFileSync(asset)).digest('hex')
           writeFileSync(`${asset}.sha256`, `${digest}  ${asset}\n`, 'utf8')
           NODE
-      - name: Upload release asset
-        if: steps.release.outputs.asset_exists == 'false'
+      - name: Prepare release artifact bundle
         shell: bash
+        run: |
+          mkdir -p native-artifact
+          {
+            printf 'tag=%s\n' "${{ steps.release.outputs.tag }}"
+            printf 'asset_name=%s\n' "${{ steps.asset.outputs.name }}"
+            printf 'asset_exists=%s\n' "${{ steps.release.outputs.asset_exists }}"
+            printf 'checksum_exists=%s\n' "${{ steps.release.outputs.checksum_exists }}"
+          } > native-artifact/status.env
+          if [ -f "${{ steps.asset.outputs.name }}" ]; then
+            cp "${{ steps.asset.outputs.name }}" native-artifact/
+          fi
+          if [ -f "${{ steps.asset.outputs.name }}.sha256" ]; then
+            cp "${{ steps.asset.outputs.name }}.sha256" native-artifact/
+          fi
+      - uses: actions/upload-artifact@v6
+        with:
+          name: native-${{ matrix.target }}
+          path: native-artifact
+          if-no-files-found: error
+
+  upload:
+    name: upload ${{ matrix.target }}
+    needs: [native-targets, release-gate, build]
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
+    steps:
+      - name: Download build artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --name "native-${{ matrix.target }}" --dir native-artifact
+      - name: Upload release assets
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          tag="${{ steps.release.outputs.tag }}"
+          set -euo pipefail
+          # shellcheck disable=SC1091
+          . native-artifact/status.env
+
+          if [ "$asset_exists" = "true" ] && [ "$checksum_exists" = "true" ]; then
+            echo "$asset_name and checksum already exist on $tag."
+            exit 0
+          fi
+
           if ! gh release view "$tag" >/dev/null 2>&1; then
             gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag" \
               || gh release view "$tag" >/dev/null
           fi
-          gh release upload "$tag" "${{ steps.asset.outputs.name }}" "${{ steps.asset.outputs.name }}.sha256"
-      - name: Upload checksum asset
-        if: steps.release.outputs.asset_exists == 'true' && steps.release.outputs.checksum_exists == 'false'
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ steps.release.outputs.tag }}" "${{ steps.asset.outputs.name }}.sha256"
+
+          if [ "$asset_exists" = "false" ]; then
+            gh release upload "$tag" "native-artifact/$asset_name" "native-artifact/$asset_name.sha256"
+          elif [ "$checksum_exists" = "false" ]; then
+            gh release upload "$tag" "native-artifact/$asset_name.sha256"
+          fi
       - name: Verify release asset
-        shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          tag="v${{ steps.version.outputs.version }}"
+          set -euo pipefail
+          # shellcheck disable=SC1091
+          . native-artifact/status.env
           assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
-          grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets"
-          grep -Fx "${{ steps.asset.outputs.name }}.sha256" <<<"$assets"
+          grep -Fx "$asset_name" <<<"$assets"
+          grep -Fx "$asset_name.sha256" <<<"$assets"
