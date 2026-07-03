@@ -1197,10 +1197,12 @@
               "example": {
                 "summary": "Device login started.",
                 "value": {
-                  "device_code": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-                  "verification_uri": "https://tovuk.com/login/device",
-                  "expires_in": 600,
-                  "interval": 5
+                  "loginUrl": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "verificationUri": "https://tovuk.com/login",
+                  "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                  "userCode": "TOVUK-123",
+                  "intervalSeconds": 5,
+                  "expiresInSeconds": 600
                 }
               }
             }
@@ -1251,8 +1253,12 @@
                 "summary": "Device login poll result.",
                 "value": {
                   "status": "pending",
+                  "intervalSeconds": 5,
+                  "accountId": null,
+                  "email": null,
+                  "provider": null,
                   "token": null,
-                  "expires_at": "2026-06-23T12:00:00Z"
+                  "expiresAt": null
                 }
               }
             }
@@ -3235,42 +3241,56 @@
         "type": "object",
         "description": "Device login start response.",
         "required": [
-          "device_code",
-          "verification_uri",
-          "expires_in",
-          "interval"
+          "loginUrl",
+          "verificationUri",
+          "deviceCode",
+          "userCode",
+          "intervalSeconds",
+          "expiresInSeconds"
         ],
         "properties": {
-          "device_code": {
-            "type": "string",
-            "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
-          },
-          "verification_uri": {
+          "loginUrl": {
             "type": "string",
             "format": "uri",
-            "example": "https://example.com"
+            "example": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
-          "expires_in": {
+          "verificationUri": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://tovuk.com/login"
+          },
+          "deviceCode": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{1,8192}$",
+            "example": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+          },
+          "userCode": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{1,128}$",
+            "example": "TOVUK-123"
+          },
+          "intervalSeconds": {
             "type": "integer",
             "minimum": 1,
             "format": "int64",
             "maximum": 9007199254740991,
-            "example": 1
+            "example": 5
           },
-          "interval": {
+          "expiresInSeconds": {
             "type": "integer",
             "minimum": 1,
             "format": "int64",
             "maximum": 9007199254740991,
-            "example": 1
+            "example": 600
           }
         },
         "example": {
-          "device_code": "example",
-          "verification_uri": "https://example.com",
-          "expires_in": 1,
-          "interval": 1
+          "loginUrl": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "verificationUri": "https://tovuk.com/login",
+          "deviceCode": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "userCode": "TOVUK-123",
+          "intervalSeconds": 5,
+          "expiresInSeconds": 600
         }
       },
       "LoginPollResponse": {
@@ -3278,18 +3298,57 @@
         "description": "Device login poll response.",
         "required": [
           "status",
+          "intervalSeconds",
+          "accountId",
+          "email",
+          "provider",
           "token",
-          "expires_at"
+          "expiresAt"
         ],
         "properties": {
           "status": {
             "type": "string",
             "enum": [
               "pending",
-              "authorized",
+              "complete",
               "expired"
             ],
             "example": "pending"
+          },
+          "intervalSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "format": "int64",
+            "maximum": 9007199254740991,
+            "example": 5
+          },
+          "accountId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "acct_0123456789abcdef"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "email",
+            "example": "builder@example.com"
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "google",
+              "github",
+              null
+            ],
+            "example": "google"
           },
           "token": {
             "type": [
@@ -3299,16 +3358,23 @@
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
           },
-          "expires_at": {
-            "type": "string",
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
             "example": "2026-06-23T12:00:00Z"
           }
         },
         "example": {
           "status": "pending",
+          "intervalSeconds": 5,
+          "accountId": null,
+          "email": null,
+          "provider": null,
           "token": "example",
-          "expires_at": "2026-06-23T12:00:00Z"
+          "expiresAt": "2026-06-23T12:00:00Z"
         }
       },
       "AccountProfileResponse": {

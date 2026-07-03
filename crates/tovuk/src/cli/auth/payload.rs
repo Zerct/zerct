@@ -1,6 +1,6 @@
 use serde_json::{Value, json};
 
-use crate::cli::utils::optional_string_alias;
+use crate::cli::utils::optional_string_field;
 
 pub(super) fn login_started_payload(
     start: &Value,
@@ -9,7 +9,7 @@ pub(super) fn login_started_payload(
     expires_seconds: u64,
     interval_seconds: u64,
 ) -> Value {
-    let verification_uri = optional_string_alias(start, &["verificationUri", "verification_uri"]);
+    let verification_uri = optional_string_field(start, "verificationUri");
     json!({
         "event": "login_started",
         "ok": true,

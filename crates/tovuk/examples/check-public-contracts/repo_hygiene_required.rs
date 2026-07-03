@@ -30,6 +30,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "crates/tovuk/examples/check-public-contracts/cli_contract/retired.rs",
     "crates/tovuk/examples/check-public-contracts/docs.rs",
     "crates/tovuk/examples/check-public-contracts/docs_api_contract.rs",
+    "crates/tovuk/examples/check-public-contracts/docs_api_contract/login_contract.rs",
     "crates/tovuk/examples/check-public-contracts/docs_api_contract/openapi.rs",
     "crates/tovuk/examples/check-public-contracts/docs_navigation.rs",
     "crates/tovuk/examples/check-public-contracts/docs_sources.rs",

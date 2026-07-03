@@ -2,10 +2,7 @@ use super::{
     api_commands::api_request,
     args::CliOptions,
     errors::{Result, agent_error},
-    utils::{
-        encode_component, number_alias, open_url, optional_string_alias, optional_string_field,
-        progress,
-    },
+    utils::{encode_component, open_url, optional_string_field, progress},
 };
 use reqwest::Method;
 use serde_json::Value;
@@ -53,11 +50,11 @@ struct LoginTiming {
 
 fn login_and_store(cli: &CliOptions) -> Result<StoredSession> {
     let start = api_request(cli, Method::POST, "/v1/login/device", None, None)?;
-    let Some(login_url) = optional_string_alias(&start, &["loginUrl", "login_url"]) else {
+    let Some(login_url) = optional_string_field(&start, "loginUrl") else {
         return missing_login_field(cli, "browser URL");
     };
-    let user_code = optional_string_alias(&start, &["userCode", "user_code"]);
-    let Some(device_code) = optional_string_alias(&start, &["deviceCode", "device_code"]) else {
+    let user_code = optional_string_field(&start, "userCode");
+    let Some(device_code) = optional_string_field(&start, "deviceCode") else {
         return missing_login_field(cli, "device code");
     };
     let timing = login_timing(cli, &start)?;
@@ -88,28 +85,32 @@ fn login_and_store(cli: &CliOptions) -> Result<StoredSession> {
 
 fn login_timing(cli: &CliOptions, start: &Value) -> Result<LoginTiming> {
     Ok(LoginTiming {
-        expires_seconds: required_positive_number_alias(
+        expires_seconds: required_positive_number_field(
             cli,
             start,
-            &["expiresInSeconds", "expires_in_seconds"],
+            "expiresInSeconds",
             "login expiry seconds",
         )?,
-        interval_seconds: required_positive_number_alias(
+        interval_seconds: required_positive_number_field(
             cli,
             start,
-            &["intervalSeconds", "interval_seconds"],
+            "intervalSeconds",
             "login poll interval seconds",
         )?,
     })
 }
 
-fn required_positive_number_alias(
+fn required_positive_number_field(
     cli: &CliOptions,
     value: &Value,
-    aliases: &[&str],
+    key: &str,
     field: &str,
 ) -> Result<u64> {
-    match number_alias(value, aliases).filter(|value| *value > 0) {
+    match value
+        .get(key)
+        .and_then(Value::as_u64)
+        .filter(|value| *value > 0)
+    {
         Some(value) => Ok(value),
         None => Err(agent_error(
             "login_failed",
@@ -137,9 +138,10 @@ fn poll_login(cli: &CliOptions, device_code: &str, timing: LoginTiming) -> Resul
             Some("expired") => return login_expired(cli),
             _ => {}
         }
-        if let Some(next_interval) =
-            number_alias(&response, &["intervalSeconds", "interval_seconds"])
-                .filter(|value| *value > 0)
+        if let Some(next_interval) = response
+            .get("intervalSeconds")
+            .and_then(Value::as_u64)
+            .filter(|value| *value > 0)
         {
             interval_seconds = next_interval;
         }
@@ -169,15 +171,15 @@ fn login_expired(cli: &CliOptions) -> Result<Value> {
 mod tests {
     use serde_json::json;
 
-    use super::{CliOptions, required_positive_number_alias};
+    use super::{CliOptions, required_positive_number_field};
 
     #[test]
     fn login_timing_requires_positive_number() {
         let cli = CliOptions::default();
-        let message = required_positive_number_alias(
+        let message = required_positive_number_field(
             &cli,
             &json!({"intervalSeconds": 0}),
-            &["intervalSeconds", "interval_seconds"],
+            "intervalSeconds",
             "login poll interval seconds",
         )
         .err()
@@ -190,11 +192,11 @@ mod tests {
     }
 
     #[test]
-    fn login_timing_accepts_aliases() {
-        let value = required_positive_number_alias(
+    fn login_timing_accepts_camel_case_protocol_field() {
+        let value = required_positive_number_field(
             &CliOptions::default(),
-            &json!({"expires_in_seconds": 900}),
-            &["expiresInSeconds", "expires_in_seconds"],
+            &json!({"expiresInSeconds": 900}),
+            "expiresInSeconds",
             "login expiry seconds",
         );
 

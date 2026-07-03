@@ -3,8 +3,10 @@ use crate::{
     helpers::{CheckResult, require_contains_all},
 };
 
+mod login_contract;
 mod openapi;
 
+use login_contract::require_openapi_login_contract;
 use openapi::{
     OpenApi, openapi_document, openapi_path, openapi_schema,
     reject_json_response_example_check_name, reject_numeric_property_anywhere,
@@ -31,6 +33,7 @@ pub(crate) fn require_support_pricing_and_openapi(sources: &DocsSources) -> Chec
     require_pricing_contract(sources.pricing.as_str())?;
     let openapi = openapi_document(sources.openapi.as_str())?;
     require_openapi_paths(&openapi)?;
+    require_openapi_login_contract(&openapi)?;
     require_openapi_account_profile_contract(&openapi)?;
     require_openapi_account_usage_contract(&openapi)?;
     require_openapi_api_key_contract(&openapi)?;
