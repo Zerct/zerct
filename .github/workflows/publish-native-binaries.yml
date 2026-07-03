@@ -395,7 +395,7 @@ jobs:
       - name: Download build artifact
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: gh run download "$GITHUB_RUN_ID" --name "native-${{ matrix.target }}" --dir native-artifact
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "native-${{ matrix.target }}" --dir native-artifact
       - name: Upload release assets
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -409,15 +409,15 @@ jobs:
             exit 0
           fi
 
-          if ! gh release view "$tag" >/dev/null 2>&1; then
-            gh release create "$tag" --title "$tag" --notes "Native Tovuk CLI release $tag" \
-              || gh release view "$tag" >/dev/null
+          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" --notes "Native Tovuk CLI release $tag" \
+              || gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
           fi
 
           if [ "$asset_exists" = "false" ]; then
-            gh release upload "$tag" "native-artifact/$asset_name" "native-artifact/$asset_name.sha256"
+            gh release upload "$tag" --repo "$GITHUB_REPOSITORY" "native-artifact/$asset_name" "native-artifact/$asset_name.sha256"
           elif [ "$checksum_exists" = "false" ]; then
-            gh release upload "$tag" "native-artifact/$asset_name.sha256"
+            gh release upload "$tag" --repo "$GITHUB_REPOSITORY" "native-artifact/$asset_name.sha256"
           fi
       - name: Verify release asset
         env:
@@ -426,6 +426,6 @@ jobs:
           set -euo pipefail
           # shellcheck disable=SC1091
           . native-artifact/status.env
-          assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
+          assets="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
           grep -Fx "$asset_name" <<<"$assets"
           grep -Fx "$asset_name.sha256" <<<"$assets"
