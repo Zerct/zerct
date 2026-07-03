@@ -4,11 +4,12 @@
   "description": "Use Tovuk scraper APIs from a native CLI.",
   "type": "module",
   "bin": {
-    "tovuk": "bin/tovuk"
+    "tovuk": "bin/tovuk.mjs"
   },
   "files": [
     "bin",
     "install.mjs",
+    "native-release-targets.json",
     "README.md"
   ],
   "publishConfig": {

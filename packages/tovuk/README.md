@@ -31,7 +31,7 @@ Use `tovuk request list --limit <n> --cursor <nextCursor> --json` and
 `tovuk request results <request_id> --limit <n> --cursor <nextCursor> --json`
 to continue request and stored-result pagination.
 
-The npm package exposes `bin/tovuk` and has no runtime JavaScript
+The npm package exposes `bin/tovuk.mjs` and has no runtime JavaScript
 dependencies. Set `TOVUK_NATIVE_BINARY=/path/to/tovuk` to test a local binary.
 
 The CLI does not deploy websites, backends, databases, workers, storage buckets,
