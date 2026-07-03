@@ -125,6 +125,7 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
         "fromJSON(needs.native-targets.outputs.matrix)",
         "\"asset_ext\": target[\"asset_ext\"]",
         "\"binary\": target[\"binary\"]",
+        "\"build_target\": build_target(target[\"triple\"])",
         "\"build_strategy\": build_strategy(target[\"triple\"])",
         "\"runner\": target[\"runner\"]",
         "\"runner_arch\": runner_for(target[\"triple\"])[\"arch\"]",
@@ -132,6 +133,10 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
         "\"target\": target[\"triple\"]",
         "matrix.asset_ext",
         "runs-on: [self-hosted, tovuk, \"${{ matrix.runner_os }}\", \"${{ matrix.runner_arch }}\", public-trusted-ci]",
+        "cargo install --locked cargo-zigbuild",
+        "cargo zigbuild --locked --release",
+        "llvm_version=\"22.1.8\"",
+        "LLVM-$llvm_version-Linux-X64.tar.xz",
         "cargo install --locked cargo-xwin",
         "cargo xwin build --locked --release",
     ] {
@@ -143,9 +148,13 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
         .targets
         .iter()
         .any(|target| target.triple == "aarch64-unknown-linux-gnu")
-        && !source.contains("CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER")
+        && !(source.contains("triple == \"aarch64-unknown-linux-gnu\"")
+            && source.contains("return f\"{triple}.2.17\""))
     {
-        return Err("publish-native-binaries.yml must configure the Linux ARM64 linker".to_owned());
+        return Err(
+            "publish-native-binaries.yml must configure the Linux ARM64 Zig glibc target"
+                .to_owned(),
+        );
     }
     Ok(())
 }

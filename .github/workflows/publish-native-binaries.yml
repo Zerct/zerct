@@ -67,9 +67,16 @@ jobs:
               return {"arch": "x64", "os": "linux"}
 
           def build_strategy(triple):
+              if triple == "aarch64-unknown-linux-gnu":
+                  return "cargo-zigbuild"
               if triple.endswith("windows-msvc"):
                   return "cargo-xwin"
               return "cargo"
+
+          def build_target(triple):
+              if triple == "aarch64-unknown-linux-gnu":
+                  return f"{triple}.2.17"
+              return triple
 
           with open("native-release-targets.json", encoding="utf-8") as handle:
               targets = json.load(handle)["targets"]
@@ -80,6 +87,7 @@ jobs:
                       "asset_ext": target["asset_ext"],
                       "binary": target["binary"],
                       "build_strategy": build_strategy(target["triple"]),
+                      "build_target": build_target(target["triple"]),
                       "runner": target["runner"],
                       "runner_arch": runner_for(target["triple"])["arch"],
                       "runner_os": runner_for(target["triple"])["os"],
@@ -118,32 +126,48 @@ jobs:
       - name: Check public release version contract
         shell: bash
         run: scripts/check-public-contracts.sh package-versions
-      - name: Check Linux ARM64 linker
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+      - name: Install Linux ARM64 Zig cross toolchain
+        if: matrix.build_strategy == 'cargo-zigbuild'
         shell: bash
         run: |
-          if ! command -v aarch64-linux-gnu-gcc >/dev/null 2>&1; then
-            echo "::error::aarch64-linux-gnu-gcc must be preinstalled on the trusted Linux self-hosted runner."
-            exit 1
-          fi
+          python3 -m pip --version >/dev/null 2>&1 || python3 -m ensurepip --user
+          python3 -m pip install --user --break-system-packages ziglang
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+          cargo install --locked cargo-zigbuild
+          zig version
+          cargo zigbuild --version
       - name: Install Windows MSVC cross toolchain
         if: matrix.build_strategy == 'cargo-xwin'
         shell: bash
         run: |
-          if ! command -v clang >/dev/null 2>&1; then
-            echo "::error::clang must be preinstalled on the trusted Linux self-hosted runner for cargo-xwin."
-            exit 1
+          llvm_version="22.1.8"
+          llvm_root="$RUNNER_TEMP/llvm-$llvm_version"
+          if [ ! -x "$llvm_root/bin/clang" ]; then
+            mkdir -p "$llvm_root"
+            curl -fsSL \
+              "https://github.com/llvm/llvm-project/releases/download/llvmorg-$llvm_version/LLVM-$llvm_version-Linux-X64.tar.xz" \
+              -o "$RUNNER_TEMP/llvm.tar.xz"
+            tar -xJf "$RUNNER_TEMP/llvm.tar.xz" --strip-components=1 -C "$llvm_root"
           fi
+          echo "$llvm_root/bin" >> "$GITHUB_PATH"
+          export PATH="$llvm_root/bin:$PATH"
+          python3 -m pip --version >/dev/null 2>&1 || python3 -m ensurepip --user
           if ! command -v cmake >/dev/null 2>&1; then
-            echo "::error::cmake must be preinstalled on the trusted Linux self-hosted runner for cargo-xwin."
-            exit 1
+            python3 -m pip install --user --break-system-packages cmake
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.local/bin:$PATH"
           fi
           if ! command -v ninja >/dev/null 2>&1; then
             python3 -m pip install --user --break-system-packages ninja
             echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.local/bin:$PATH"
           fi
           rustup component add llvm-tools
           cargo install --locked cargo-xwin
+          clang --version
+          cmake --version
+          ninja --version
           cargo xwin --version
       - uses: actions/cache@v5
         continue-on-error: true
@@ -205,17 +229,23 @@ jobs:
         if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo'
         shell: bash
         run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
-        env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
       - name: Build Windows MSVC
         if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo-xwin'
         shell: bash
         run: cargo xwin build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
+      - name: Build Linux ARM64
+        if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo-zigbuild'
+        shell: bash
+        run: cargo zigbuild --locked --release --target "${{ matrix.build_target }}" --manifest-path crates/tovuk/Cargo.toml
       - name: Prepare asset
         if: steps.release.outputs.asset_exists == 'false'
         shell: bash
         run: |
-          cp "crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}" "${{ steps.asset.outputs.name }}"
+          binary_path="crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}"
+          if [ ! -f "$binary_path" ] && [ "${{ matrix.build_target }}" != "${{ matrix.target }}" ]; then
+            binary_path="crates/tovuk/target/${{ matrix.build_target }}/release/${{ matrix.binary }}"
+          fi
+          cp "$binary_path" "${{ steps.asset.outputs.name }}"
           chmod +x "${{ steps.asset.outputs.name }}" || true
       - name: Download existing asset for checksum
         if: steps.release.outputs.asset_exists == 'true' && steps.release.outputs.checksum_exists == 'false'
