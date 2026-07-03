@@ -5,6 +5,7 @@ pub(crate) fn is_public_text_scan_path(path: &str) -> bool {
         && (path == "AGENTS.md"
             || path == "README.md"
             || path.starts_with(".github/")
+            || path.starts_with("checks/")
             || path.starts_with("crates/")
             || path.starts_with("docs/")
             || path.starts_with("Formula/")

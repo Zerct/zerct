@@ -53,6 +53,8 @@ not deploy from this public repo unless the user explicitly asks for a deploy.
 ## Rust-Native Boundary
 
 - The native CLI source of truth is `crates/tovuk`.
+- Local repository policy and docs checks live in `checks`; this crate is
+  local-only and must not be published as a user package.
 - `packages/tovuk` ships the native Tovuk binary through npm and must not add
   runtime JavaScript dependencies.
 - `packages/tovuk-py` launches or downloads the same native Tovuk binary and
@@ -89,7 +91,9 @@ practical:
 
 ```sh
 cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
+cargo fmt --check --manifest-path checks/Cargo.toml
 cargo clippy --locked --release --manifest-path crates/tovuk/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
+cargo clippy --locked --release --manifest-path checks/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
 npm --prefix packages/tovuk run check
 scripts/check-public-contracts.sh package-versions
 scripts/check-public-contracts.sh cli-contract

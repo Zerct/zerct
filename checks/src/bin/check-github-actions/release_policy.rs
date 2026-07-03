@@ -305,9 +305,9 @@ mod tests {
         "scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com";
 
     #[test]
-    fn docs_readiness_step_detects_non_blocking_gate() {
+    fn docs_readiness_step_detects_non_blocking_gate() -> Result<(), String> {
         let step = docs_readiness_step(
-            r#"
+            r"
 jobs:
   release-gate:
     steps:
@@ -316,19 +316,27 @@ jobs:
         run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
         run: scripts/check-all.sh
-"#,
+",
             COMMAND,
         )
-        .expect("readiness step");
+        .ok_or_else(|| "readiness step missing".to_owned())?;
 
-        assert!(step.continues_on_error);
-        assert_eq!(step.start_line, 5);
+        if !step.continues_on_error {
+            return Err("readiness step should continue on error".to_owned());
+        }
+        if step.start_line != 5 {
+            return Err(format!(
+                "unexpected readiness step line {}",
+                step.start_line
+            ));
+        }
+        Ok(())
     }
 
     #[test]
-    fn docs_readiness_step_accepts_blocking_gate() {
+    fn docs_readiness_step_accepts_blocking_gate() -> Result<(), String> {
         let step = docs_readiness_step(
-            r#"
+            r"
 jobs:
   release-gate:
     steps:
@@ -336,12 +344,20 @@ jobs:
         run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
         run: scripts/check-all.sh
-"#,
+",
             COMMAND,
         )
-        .expect("readiness step");
+        .ok_or_else(|| "readiness step missing".to_owned())?;
 
-        assert!(!step.continues_on_error);
-        assert_eq!(step.start_line, 5);
+        if step.continues_on_error {
+            return Err("readiness step should block release".to_owned());
+        }
+        if step.start_line != 5 {
+            return Err(format!(
+                "unexpected readiness step line {}",
+                step.start_line
+            ));
+        }
+        Ok(())
     }
 }

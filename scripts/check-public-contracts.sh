@@ -10,4 +10,4 @@ repo_root="$(tovuk_repo_root "$script_dir")"
 cd "$repo_root"
 tovuk_prepend_tool_path
 
-cargo run --locked --quiet --manifest-path crates/tovuk/Cargo.toml --example check-public-contracts -- "$@"
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- "$@"
