@@ -9,6 +9,7 @@ import pathlib
 import platform
 import stat
 import sys
+import tempfile
 from typing import List, Optional
 import urllib.error
 import urllib.request
@@ -75,11 +76,13 @@ def _native_binary() -> pathlib.Path:
 
     binary = _cache_dir() / __version__ / target_triple / binary_name
     if binary.is_file():
-        return binary
+        if _cached_binary_is_valid(binary):
+            return binary
+        binary.unlink(missing_ok=True)
+        _checksum_path(binary).unlink(missing_ok=True)
 
     binary.parent.mkdir(parents=True, exist_ok=True)
     _download_release_binary(target, binary)
-    _mark_executable(binary)
     return binary
 
 
@@ -133,9 +136,48 @@ def _download_release_binary(target: dict[str, object], destination: pathlib.Pat
             raise RuntimeError(
                 f"native binary checksum mismatch: expected {expected_sha256}, got {actual_sha256}"
             )
-        destination.write_bytes(contents)
+        _write_cached_binary(destination, contents, expected_sha256)
     except (OSError, urllib.error.URLError) as error:
         raise RuntimeError(f"Could not install native Tovuk binary from {url}: {error}") from error
+
+
+def _cached_binary_is_valid(binary: pathlib.Path) -> bool:
+    if not binary.is_file() or binary.stat().st_size == 0:
+        return False
+    checksum_path = _checksum_path(binary)
+    if not checksum_path.is_file():
+        return True
+    expected_sha256 = checksum_path.read_text(encoding="utf-8").strip().lower()
+    actual_sha256 = hashlib.sha256(binary.read_bytes()).hexdigest()
+    return actual_sha256 == expected_sha256
+
+
+def _write_cached_binary(
+    destination: pathlib.Path, contents: bytes, expected_sha256: str
+) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temp_path: Optional[pathlib.Path] = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "wb",
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            delete=False,
+        ) as temp_file:
+            temp_file.write(contents)
+            temp_file.flush()
+            os.fsync(temp_file.fileno())
+            temp_path = pathlib.Path(temp_file.name)
+        _mark_executable(temp_path)
+        temp_path.replace(destination)
+        _checksum_path(destination).write_text(f"{expected_sha256}\n", encoding="utf-8")
+    finally:
+        if temp_path is not None and temp_path.exists():
+            temp_path.unlink()
+
+
+def _checksum_path(binary: pathlib.Path) -> pathlib.Path:
+    return binary.with_name(f"{binary.name}.sha256")
 
 
 def _release_checksum(url: str, asset: str) -> str:
