@@ -1,4 +1,4 @@
-pub(crate) const VERSION: &str = "0.1.109";
+pub(crate) const VERSION: &str = "0.1.110";
 pub(crate) const DEFAULT_API_URL: &str = "https://api.tovuk.com";
 pub(crate) const SESSION_DIR: &str = ".tovuk";
 pub(crate) const SESSION_FILE: &str = "session-token";
