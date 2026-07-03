@@ -125,9 +125,15 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
         "fromJSON(needs.native-targets.outputs.matrix)",
         "\"asset_ext\": target[\"asset_ext\"]",
         "\"binary\": target[\"binary\"]",
+        "\"build_strategy\": build_strategy(target[\"triple\"])",
         "\"runner\": target[\"runner\"]",
+        "\"runner_arch\": runner_for(target[\"triple\"])[\"arch\"]",
+        "\"runner_os\": runner_for(target[\"triple\"])[\"os\"]",
         "\"target\": target[\"triple\"]",
         "matrix.asset_ext",
+        "runs-on: [self-hosted, tovuk, \"${{ matrix.runner_os }}\", \"${{ matrix.runner_arch }}\", public-trusted-ci]",
+        "cargo install --locked cargo-xwin",
+        "cargo xwin build --locked --release",
     ] {
         if !source.contains(snippet) {
             return Err(format!("publish-native-binaries.yml missing {snippet}"));
