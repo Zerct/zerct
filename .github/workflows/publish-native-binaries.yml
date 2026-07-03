@@ -181,7 +181,7 @@ jobs:
           export PATH="$zig_root:$PATH"
           cargo install --locked cargo-zigbuild
           zig version
-          cargo zigbuild --version
+          cargo zigbuild --help >/dev/null
       - name: Install Windows MSVC cross toolchain
         if: matrix.build_strategy == 'cargo-xwin'
         shell: bash
