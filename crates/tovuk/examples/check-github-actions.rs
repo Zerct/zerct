@@ -183,6 +183,7 @@ fn check_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
     check_github_hosted_cargo_cache(workflow, findings);
     check_public_package_release_order(workflow, findings);
     check_docs_deploy_workflow(workflow, findings);
+    check_secret_workflow_dispatch_policy(workflow, findings);
 }
 
 fn check_workflow_path_filters(
@@ -347,6 +348,24 @@ fn check_docs_deploy_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
         workflow.contents.as_str(),
         "if: github.ref == 'refs/heads/main'",
         "docs-deploy.yml must reject workflow_dispatch deploys from non-main refs before exposing Mintlify secrets",
+        findings,
+    );
+}
+
+fn check_secret_workflow_dispatch_policy(workflow: &Workflow, findings: &mut Vec<String>) {
+    if !workflow.contents.contains("workflow_dispatch:") || !workflow.contents.contains("secrets.")
+    {
+        return;
+    }
+
+    require_contains(
+        workflow.contents.as_str(),
+        "github.ref == 'refs/heads/main'",
+        format!(
+            "{}: manually dispatched workflows that read repository secrets must be restricted to main",
+            workflow.path.display()
+        )
+        .as_str(),
         findings,
     );
 }
