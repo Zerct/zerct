@@ -1098,7 +1098,7 @@ dependencies = [
 
 [[package]]
 name = "tovuk"
-version = "0.1.113"
+version = "0.1.114"
 dependencies = [
  "reqwest",
  "serde",
