@@ -119,7 +119,7 @@ pub(crate) fn require_crates_trusted_publishing(workflow: &Workflow, findings: &
         workflow.path.display()
     );
     for needle in [
-        "runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]",
+        "runs-on: ubuntu-24.04",
         "CARGO_HOME: ${{ github.workspace }}/.cargo-home",
         "RUSTUP_HOME: ${{ github.workspace }}/.rustup-home",
         "id-token: write",
