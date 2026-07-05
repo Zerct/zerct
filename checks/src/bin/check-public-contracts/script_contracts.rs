@@ -1,7 +1,6 @@
 use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
 const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
-    "scripts/check-all.sh",
     "scripts/check-openapi.sh",
     "scripts/check-shell-style.sh",
     "scripts/check-toml-style.sh",
@@ -40,23 +39,23 @@ fn require_check_script_bootstrap() -> CheckResult {
 }
 
 fn require_rust_native_check_commands() -> CheckResult {
-    let check_all = read_text("scripts/check-all.sh")?;
+    let check_all = read_text("checks/src/bin/check-all.rs")?;
     for (snippet, label) in [
         (
-            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs",
-            "check-all must run public contract docs through the Rust checker binary",
+            "self.run_public_contracts(&[\"docs\"])?;",
+            "Rust check-all must run public contract docs through the Rust checker binary",
         ),
         (
-            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test",
-            "check-all must run prose self-test through the Rust checker binary",
+            "self.run_check_bin(\"check-prose-style\", &[\"--self-test\"])?;",
+            "Rust check-all must run prose self-test through the Rust checker binary",
         ),
         (
-            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-github-actions --",
-            "check-all must run GitHub Actions policy through the Rust checker binary",
+            "self.run_check_bin(\"check-github-actions\", &[])?;",
+            "Rust check-all must run GitHub Actions policy through the Rust checker binary",
         ),
         (
-            "typos --config .typos.toml .",
-            "check-all must call the Rust-native typos checker directly",
+            "self.run(\"typos\", &[\"--config\", \".typos.toml\", \".\"])?;",
+            "Rust check-all must call the Rust-native typos checker directly",
         ),
     ] {
         require_contains(check_all.as_str(), snippet, label)?;
