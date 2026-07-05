@@ -23,12 +23,15 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/Cargo.lock",
     "checks/Cargo.toml",
     "checks/src/bin/check-github-actions.rs",
+    "checks/src/bin/check-github-actions/global_policy.rs",
+    "checks/src/bin/check-github-actions/path_filter_contract.rs",
     "checks/src/bin/check-github-actions/path_filters.rs",
     "checks/src/bin/check-github-actions/policy.rs",
     "checks/src/bin/check-github-actions/release_policy.rs",
     "checks/src/bin/check-github-actions/release_policy/crates.rs",
     "checks/src/bin/check-github-actions/release_policy/native.rs",
     "checks/src/bin/check-github-actions/release_policy/wrappers.rs",
+    "checks/src/bin/check-github-actions/workflow_policy.rs",
     "checks/src/bin/check-prose-style.rs",
     "checks/src/bin/check-public-contracts/agent_guidance.rs",
     "checks/src/bin/check-public-contracts/cli_contract.rs",
@@ -96,6 +99,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "scripts/lib/tool-path.sh",
     "skills/tovuk/SKILL.md",
 ];
+const CHECK_GITHUB_ACTIONS_CHECKER_DIR: &str = "checks/src/bin/check-github-actions/";
 const PUBLIC_CONTRACT_CHECKER_DIR: &str = "checks/src/bin/check-public-contracts/";
 
 const REQUIRED_IGNORED_PATHS: &[&str] = &[
@@ -131,10 +135,16 @@ pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
         ));
     }
 
+    let pinned_checker_dirs = [
+        CHECK_GITHUB_ACTIONS_CHECKER_DIR,
+        PUBLIC_CONTRACT_CHECKER_DIR,
+    ];
     let unpinned_checker_modules = tracked_set
         .iter()
         .filter(|path| {
-            path.starts_with(PUBLIC_CONTRACT_CHECKER_DIR)
+            pinned_checker_dirs
+                .iter()
+                .any(|checker_dir| path.starts_with(checker_dir))
                 && Path::new(path)
                     .extension()
                     .is_some_and(|extension| extension.eq_ignore_ascii_case("rs"))
