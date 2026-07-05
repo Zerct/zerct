@@ -2,17 +2,17 @@
 
 use std::{
     env,
-    ffi::OsString,
     path::{Path, PathBuf},
     process::{Command, ExitCode},
 };
 
 use serde::Deserialize;
 
-type CheckResult<T = ()> = Result<T, String>;
+use tovuk_public_checks::check_support::{
+    CheckResult, display_path, git_tracked_files, repo_root, tool_path,
+};
 
 const DEFAULT_VACUUM_VERSION: &str = "0.26.6";
-const TOOL_PATH_PREFIX: &str = "/opt/tovuk/native-tools/bin:/opt/tovuk/cargo-tools/bin:/opt/tovuk/cargo/bin:/opt/tovuk/rust/stable/bin:/opt/tovuk/node/bin:/usr/local/bin:/usr/bin:/bin";
 
 fn main() -> ExitCode {
     match run() {
@@ -35,7 +35,7 @@ fn run() -> CheckResult {
         ));
     }
 
-    let openapi_files = discover_openapi_files()?;
+    let openapi_files = discover_openapi_files(repo_root.as_path())?;
     if openapi_files.is_empty() {
         return Err("No OpenAPI files found.".to_owned());
     }
@@ -82,18 +82,10 @@ fn docs_openapi_path() -> CheckResult<PathBuf> {
     Ok(Path::new("docs").join(openapi))
 }
 
-fn discover_openapi_files() -> CheckResult<Vec<String>> {
-    let output = Command::new("git")
-        .args(["ls-files"])
-        .output()
-        .map_err(|error| format!("run git ls-files: {error}"))?;
-    if !output.status.success() {
-        return Err(format!("git ls-files failed with status {}", output.status));
-    }
-    let mut openapi_files = String::from_utf8_lossy(&output.stdout)
-        .lines()
+fn discover_openapi_files(repo_root: &Path) -> CheckResult<Vec<String>> {
+    let mut openapi_files = git_tracked_files(repo_root)?
+        .into_iter()
         .filter(|path| is_openapi_file(path))
-        .map(ToOwned::to_owned)
         .collect::<Vec<_>>();
     openapi_files.sort();
     openapi_files.dedup();
@@ -199,35 +191,4 @@ fn run_vacuum_lint(
         .success()
         .then_some(())
         .ok_or_else(|| format!("Vacuum lint failed with status {status}"))
-}
-
-fn repo_root() -> CheckResult<PathBuf> {
-    let output = Command::new("git")
-        .args(["rev-parse", "--show-toplevel"])
-        .output()
-        .map_err(|error| format!("run git rev-parse --show-toplevel: {error}"))?;
-    if !output.status.success() {
-        return Err(format!(
-            "git rev-parse --show-toplevel failed with status {}",
-            output.status
-        ));
-    }
-    Ok(PathBuf::from(
-        String::from_utf8_lossy(&output.stdout).trim().to_owned(),
-    ))
-}
-
-fn tool_path() -> OsString {
-    let existing = env::var_os("PATH").unwrap_or_default();
-    let mut path = OsString::from(TOOL_PATH_PREFIX);
-    path.push(":");
-    path.push(existing);
-    path
-}
-
-fn display_path(path: &Path) -> String {
-    path.components()
-        .map(|component| component.as_os_str().to_string_lossy())
-        .collect::<Vec<_>>()
-        .join("/")
 }
