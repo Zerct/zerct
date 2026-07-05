@@ -41,7 +41,7 @@ jobs:
       - name: Check public agent readiness
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
-        run: scripts/check-all.sh
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 
   native-targets:
     name: read native release targets

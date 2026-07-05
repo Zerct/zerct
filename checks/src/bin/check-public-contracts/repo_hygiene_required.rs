@@ -86,7 +86,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "Formula/tovuk.rb",
     "packages/tovuk/package.json",
     "packages/tovuk-py/pyproject.toml",
-    "scripts/check-all.sh",
+    "checks/src/bin/check-all.rs",
     "scripts/check-openapi.sh",
     "scripts/check-shell-style.sh",
     "scripts/check-toml-style.sh",

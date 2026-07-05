@@ -26,25 +26,25 @@ pub(super) fn reject_global_matches(workflows: &[Workflow], findings: &mut Vec<S
 }
 
 pub(super) fn require_check_all_hooks(findings: &mut Vec<String>) -> Result<(), String> {
-    let check_all = fs::read_to_string("scripts/check-all.sh")
-        .map_err(|error| format!("read scripts/check-all.sh: {error}"))?;
+    let check_all = fs::read_to_string("checks/src/bin/check-all.rs")
+        .map_err(|error| format!("read checks/src/bin/check-all.rs: {error}"))?;
     let all_workflows = workflow_corpus()?;
     require_contains(
         all_workflows.as_str(),
-        "scripts/check-all.sh",
-        "workflows must run scripts/check-all.sh so local and CI checks stay aligned",
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --",
+        "workflows must run the Rust check-all binary so local and CI checks stay aligned",
         findings,
     );
     require_contains(
         check_all.as_str(),
-        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test",
-        "scripts/check-all.sh must run the prose style checker self-test through Rust",
+        "self.run_check_bin(\"check-prose-style\", &[\"--self-test\"])?;",
+        "Rust check-all must run the prose style checker self-test",
         findings,
     );
     require_contains(
         check_all.as_str(),
-        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --",
-        "scripts/check-all.sh must run the prose style checker repository scan through Rust",
+        "self.run_check_bin(\"check-prose-style\", &[])?;",
+        "Rust check-all must run the prose style checker repository scan",
         findings,
     );
     Ok(())
