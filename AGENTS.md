@@ -8,13 +8,15 @@ cron jobs, custom domains, secrets, runtime services, or other cloud-service
 products.
 
 Keep this file compact and durable. Codex loads project instructions from the
-repo root down to the current directory, and the default combined project
-guidance cap is 32 KiB. Put directory-specific rules in a closer `AGENTS.md`
-if a subtree needs different commands or ownership. More deeply nested files
-override this one. When editing agent instructions, follow the OpenAI Codex
-guidance: first remove stale or duplicated guidance, then add rules only for
-Tovuk-specific invariants, commands, or verification gates that remain true
-across coding-tool upgrades.
+repo root down to the current directory. In each directory, Codex uses at most
+one instruction file: `AGENTS.override.md` before `AGENTS.md`. The default
+combined project guidance cap is `project_doc_max_bytes` 32 KiB. Put
+directory-specific rules in a closer `AGENTS.md` if a subtree needs different
+commands or ownership. More deeply nested files override this one. When
+editing agent instructions, follow the OpenAI Codex guidance: first remove
+stale or duplicated guidance, then add rules only for Tovuk-specific
+invariants, commands, or verification gates that remain true across coding-tool
+upgrades.
 
 Do not delegate implementation, final judgment, verification, or reporting to
 subagents. If the user explicitly requests a skill workflow that uses review
