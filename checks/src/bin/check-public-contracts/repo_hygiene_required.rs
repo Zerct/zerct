@@ -33,6 +33,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-github-actions/release_policy/wrappers.rs",
     "checks/src/bin/check-github-actions/workflow_policy.rs",
     "checks/src/bin/check-openapi.rs",
+    "checks/src/bin/check-openapi/vacuum.rs",
     "checks/src/bin/check-prose-style.rs",
     "checks/src/bin/check-shell-style.rs",
     "checks/src/bin/check-toml-style.rs",
