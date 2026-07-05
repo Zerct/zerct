@@ -1,9 +1,6 @@
 use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
-const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
-    "scripts/install-vacuum.sh",
-    "scripts/sync-native-release-targets.sh",
-];
+const BOOTSTRAPPED_SCRIPTS: &[&str] = &["scripts/install-vacuum.sh"];
 
 pub(crate) fn check() -> CheckResult {
     require_check_script_bootstrap()?;

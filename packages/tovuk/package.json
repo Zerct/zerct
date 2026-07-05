@@ -37,11 +37,11 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "node install.mjs",
-    "precheck": "../../scripts/sync-native-release-targets.sh",
+    "precheck": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets --",
     "check": "npm run check:policy && npm run runtime && npm run pack:dry",
     "check:policy": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin check-public-contracts -- npm-cli-package",
     "runtime": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin check-public-contracts -- npm-native-runtime",
-    "prepack": "../../scripts/sync-native-release-targets.sh",
+    "prepack": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets --",
     "pack:dry": "npm pack --dry-run"
   }
 }
