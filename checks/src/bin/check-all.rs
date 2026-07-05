@@ -1,17 +1,16 @@
 //! Full public repository verification runner.
 
 use std::{
-    env,
-    ffi::{OsStr, OsString},
+    ffi::OsString,
     fs,
     path::{Path, PathBuf},
     process::{Command, ExitCode},
 };
 
-type CheckResult<T = ()> = Result<T, String>;
+use tovuk_public_checks::check_support::{
+    CHECKS_MANIFEST, CheckResult, find_command, repo_root, tool_path,
+};
 
-const TOOL_PATH_PREFIX: &str = "/opt/tovuk/native-tools/bin:/opt/tovuk/cargo-tools/bin:/opt/tovuk/cargo/bin:/opt/tovuk/rust/stable/bin:/opt/tovuk/node/bin:/usr/local/bin:/usr/bin:/bin";
-const CHECKS_MANIFEST: &str = "checks/Cargo.toml";
 const CLI_MANIFEST: &str = "crates/tovuk/Cargo.toml";
 const STRICT_CLIPPY_ARGS: &[&str] = &[
     "--locked",
@@ -255,8 +254,8 @@ impl Runner {
         self.run_check_bin("check-prose-style", &["--self-test"])?;
         self.run_check_bin("check-prose-style", &[])?;
         self.run_check_bin("check-github-actions", &[])?;
-        self.run("scripts/check-shell-style.sh", &[])?;
-        self.run("scripts/check-toml-style.sh", &[])?;
+        self.run_check_bin("check-shell-style", &[])?;
+        self.run_check_bin("check-toml-style", &[])?;
         self.run("typos", &["--config", ".typos.toml", "."])?;
         self.run_check_bin("check-openapi", &[])?;
         self.run("ruby", &["-c", "Formula/tovuk.rb"])?;
@@ -327,48 +326,11 @@ impl Runner {
     }
 
     fn command(&self, cwd: &Path, program: &str, args: &[&str]) -> Command {
-        let mut command = Command::new(program);
+        let mut command =
+            tovuk_public_checks::check_support::command(cwd, self.path.as_os_str(), program);
         command
             .args(args)
-            .current_dir(cwd)
-            .env("PATH", self.path.as_os_str())
             .env("TOVUK_NATIVE_BINARY", self.native_cli.as_os_str());
         command
     }
-}
-
-fn repo_root() -> CheckResult<PathBuf> {
-    let output = Command::new("git")
-        .args(["rev-parse", "--show-toplevel"])
-        .output()
-        .map_err(|error| format!("run git rev-parse --show-toplevel: {error}"))?;
-    if !output.status.success() {
-        return Err(format!(
-            "git rev-parse --show-toplevel failed with status {}",
-            output.status
-        ));
-    }
-    Ok(PathBuf::from(
-        String::from_utf8_lossy(&output.stdout).trim().to_owned(),
-    ))
-}
-
-fn tool_path() -> OsString {
-    let existing = env::var_os("PATH").unwrap_or_default();
-    let mut path = OsString::from(TOOL_PATH_PREFIX);
-    path.push(":");
-    path.push(existing);
-    path
-}
-
-fn find_command(path: &OsStr, candidates: &[&str]) -> CheckResult<PathBuf> {
-    for directory in env::split_paths(path) {
-        for candidate in candidates {
-            let executable = directory.join(candidate);
-            if executable.is_file() {
-                return Ok(executable);
-            }
-        }
-    }
-    Err(format!("could not find any of {}", candidates.join(", ")))
 }
