@@ -1,6 +1,6 @@
 use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
-const BOOTSTRAPPED_SCRIPTS: &[&str] = &["scripts/install-vacuum.sh"];
+const BOOTSTRAPPED_SCRIPTS: &[&str] = &["scripts/deploy-mintlify-docs.sh"];
 
 pub(crate) fn check() -> CheckResult {
     require_check_script_bootstrap()?;
@@ -67,21 +67,25 @@ fn require_rust_native_check_commands() -> CheckResult {
 }
 
 fn require_vacuum_installer_contract() -> CheckResult {
-    let source = read_text("scripts/install-vacuum.sh")?;
+    let source = read_text("checks/src/bin/check-openapi/vacuum.rs")?;
     require_contains_all(
         source.as_str(),
         &[
             (
-                "vacuum_asset_sha256",
+                "fn vacuum_asset_sha256",
                 "Vacuum installer must pin asset checksums",
             ),
             (
-                "shasum -a 256",
+                "Sha256::digest(archive_bytes)",
                 "Vacuum installer must verify SHA-256 before extraction",
             ),
             (
                 "checksum mismatch",
                 "Vacuum installer must fail on checksum mismatch",
+            ),
+            (
+                "Archive::new(GzDecoder::new(archive_bytes))",
+                "Vacuum installer must extract the pinned tarball in Rust",
             ),
         ],
     )
