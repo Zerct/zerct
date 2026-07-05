@@ -21,7 +21,7 @@ pub(crate) fn check() -> CheckResult {
     let tracked_set = tracked_files.iter().cloned().collect::<BTreeSet<_>>();
 
     require_tracked_paths(&tracked_set)?;
-    agent_guidance::check_chain_sizes(&tracked_files)?;
+    agent_guidance::check_policy(&tracked_files)?;
     native_release_targets::check()?;
     script_contracts::check()?;
     require_docs_deploy_observability_contract()?;
