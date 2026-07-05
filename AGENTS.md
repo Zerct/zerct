@@ -75,7 +75,7 @@ not deploy from this public repo unless the user explicitly asks for a deploy.
 ## API And Docs
 
 - Update `docs/openapi.json` for every public API surface.
-- OpenAPI must satisfy `scripts/check-openapi.sh` with a 100 score.
+- OpenAPI must satisfy `cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-openapi --` with a 100 score.
 - Update README files when commands, packages, pricing, limits, API behavior, or
   supported scraper surfaces change.
 - Mintlify navigation lives in `docs/docs.json`; add every user-facing page
@@ -101,7 +101,7 @@ cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- cli-contract
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
-scripts/check-openapi.sh
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-openapi --
 ruby -c Formula/tovuk.rb
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ```

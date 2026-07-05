@@ -1,7 +1,6 @@
 use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
 const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
-    "scripts/check-openapi.sh",
     "scripts/check-shell-style.sh",
     "scripts/check-toml-style.sh",
     "scripts/install-vacuum.sh",
