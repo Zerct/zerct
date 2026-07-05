@@ -27,4 +27,4 @@ jobs:
         with:
           persist-credentials: false
       - name: Check Mintlify GitHub App sync
-        run: scripts/deploy-mintlify-docs.sh
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --

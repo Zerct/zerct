@@ -1,36 +1,10 @@
 use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
-const BOOTSTRAPPED_SCRIPTS: &[&str] = &["scripts/deploy-mintlify-docs.sh"];
-
 pub(crate) fn check() -> CheckResult {
-    require_check_script_bootstrap()?;
     require_rust_native_check_commands()?;
     require_vacuum_installer_contract()?;
     require_shell_style_contract()?;
     require_toml_style_contract()
-}
-
-fn require_check_script_bootstrap() -> CheckResult {
-    for path in BOOTSTRAPPED_SCRIPTS {
-        let source = read_text(path)?;
-        for (snippet, label) in [
-            (
-                "scripts/lib/repo-root.sh",
-                "must use the tracked repo root helper",
-            ),
-            (
-                "scripts/lib/tool-path.sh",
-                "must use the tracked tool path helper",
-            ),
-            (
-                "tovuk_prepend_tool_path",
-                "must prepend the trusted runner tool path",
-            ),
-        ] {
-            require_contains(source.as_str(), snippet, format!("{path} {label}").as_str())?;
-        }
-    }
-    Ok(())
 }
 
 fn require_rust_native_check_commands() -> CheckResult {
