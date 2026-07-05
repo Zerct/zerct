@@ -310,6 +310,8 @@ fn robots_blocks_crawlers(source: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use crate::helpers_public_copy::{RETIRED_PUBLIC_MINTLIFY_SLUG, RETIRED_PUBLIC_NAME_TITLE};
+
     use super::{reject_retired_public_names_in_html, require_mcp_urls_on_base_host};
 
     #[test]
@@ -366,12 +368,13 @@ mod tests {
 
     #[test]
     fn ignores_generated_mintlify_project_slug_in_html_assets() {
-        let source = r#"
+        let source = format!(
+            r#"
             <!doctype html>
             <html>
               <head>
-                <meta property="og:image" content="https://zerct-4cdab021.mintlify.app/og.png">
-                <link rel="preload" href="/mintlify-assets/zerct-4cdab021/logo.svg">
+                <meta property="og:image" content="https://{RETIRED_PUBLIC_MINTLIFY_SLUG}.mintlify.app/og.png">
+                <link rel="preload" href="/mintlify-assets/{RETIRED_PUBLIC_MINTLIFY_SLUG}/logo.svg">
               </head>
               <body>
                 <main>
@@ -380,28 +383,31 @@ mod tests {
                 </main>
               </body>
             </html>
-        "#;
+        "#
+        );
 
         assert!(
-            reject_retired_public_names_in_html("/", source).is_ok(),
+            reject_retired_public_names_in_html("/", source.as_str()).is_ok(),
             "Mintlify immutable internal slugs in asset URLs should not fail visible copy checks"
         );
     }
 
     #[test]
     fn rejects_visible_retired_branding_in_html() {
-        let source = r"
+        let source = format!(
+            r"
             <!doctype html>
             <html>
               <body>
                 <main>
-                  <h1>Zerct</h1>
+                  <h1>{RETIRED_PUBLIC_NAME_TITLE}</h1>
                 </main>
               </body>
             </html>
-        ";
+        "
+        );
 
-        let result = reject_retired_public_names_in_html("/", source);
+        let result = reject_retired_public_names_in_html("/", source.as_str());
         assert!(
             matches!(result, Err(message) if message.contains("retired public branding")),
             "Visible retired public branding must still fail the docs readiness check"

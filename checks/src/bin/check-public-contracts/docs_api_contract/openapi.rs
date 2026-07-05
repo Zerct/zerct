@@ -124,17 +124,7 @@ pub(super) fn require_example_string(
     expected: &str,
     label: &str,
 ) -> CheckResult {
-    let mut current = schema
-        .get("example")
-        .ok_or_else(|| format!("{label} example is missing"))?;
-    for field in path {
-        current = current
-            .get(*field)
-            .ok_or_else(|| format!("{label} example field {field:?} is missing"))?;
-    }
-    let actual = current
-        .as_str()
-        .ok_or_else(|| format!("{label} example value is not a string"))?;
+    let actual = example_string_at_path(schema_example_value(schema, label)?, path, label)?;
     if actual == expected {
         Ok(())
     } else {
@@ -175,22 +165,11 @@ pub(super) fn require_json_response_example_string(
     expected: &str,
     label: &str,
 ) -> CheckResult {
-    let response = openapi_response(openapi, response_name)?;
-    let mut current = response
-        .get("content")
-        .and_then(|content| content.get("application/json"))
-        .and_then(|json| json.get("examples"))
-        .and_then(|examples| examples.get("example"))
-        .and_then(|example| example.get("value"))
-        .ok_or_else(|| format!("{label} JSON example is missing"))?;
-    for field in path {
-        current = current
-            .get(*field)
-            .ok_or_else(|| format!("{label} example field {field:?} is missing"))?;
-    }
-    let actual = current
-        .as_str()
-        .ok_or_else(|| format!("{label} example value is not a string"))?;
+    let actual = example_string_at_path(
+        json_response_example_value(openapi, response_name, label)?,
+        path,
+        label,
+    )?;
     if actual == expected {
         Ok(())
     } else {
@@ -301,18 +280,57 @@ fn json_response_example_has_check_name(
     name: &str,
     label: &str,
 ) -> CheckResult<bool> {
-    let checks = openapi_response(openapi, response_name)?
-        .get("content")
-        .and_then(|content| content.get("application/json"))
-        .and_then(|json| json.get("examples"))
-        .and_then(|examples| examples.get("example"))
-        .and_then(|example| example.get("value"))
-        .and_then(|value| value.get("checks"))
+    let checks = json_response_example_value(openapi, response_name, label)?
+        .get("checks")
         .and_then(Value::as_array)
         .ok_or_else(|| format!("{label} JSON example checks are missing"))?;
     Ok(checks
         .iter()
         .any(|check| check.get("name").and_then(Value::as_str) == Some(name)))
+}
+
+fn schema_example_value<'a>(schema: &'a Value, label: &str) -> CheckResult<&'a Value> {
+    schema
+        .get("example")
+        .ok_or_else(|| format!("{label} example is missing"))
+}
+
+fn json_response_example_value<'a>(
+    openapi: &'a OpenApi,
+    response_name: &str,
+    label: &str,
+) -> CheckResult<&'a Value> {
+    openapi_response(openapi, response_name)?
+        .get("content")
+        .and_then(|content| content.get("application/json"))
+        .and_then(|json| json.get("examples"))
+        .and_then(|examples| examples.get("example"))
+        .and_then(|example| example.get("value"))
+        .ok_or_else(|| format!("{label} JSON example is missing"))
+}
+
+fn example_string_at_path<'a>(
+    value: &'a Value,
+    path: &[&str],
+    label: &str,
+) -> CheckResult<&'a str> {
+    example_value_at_path(value, path, label)?
+        .as_str()
+        .ok_or_else(|| format!("{label} example value is not a string"))
+}
+
+fn example_value_at_path<'a>(
+    value: &'a Value,
+    path: &[&str],
+    label: &str,
+) -> CheckResult<&'a Value> {
+    let mut current = value;
+    for field in path {
+        current = current
+            .get(*field)
+            .ok_or_else(|| format!("{label} example field {field:?} is missing"))?;
+    }
+    Ok(current)
 }
 
 fn collect_numeric_property_matches(

@@ -6,11 +6,18 @@ struct PublicCopyForbiddenTerm {
     whole_word: bool,
 }
 
+pub(crate) const RETIRED_PUBLIC_NAME: &str = concat!("ze", "rct");
+#[cfg(test)]
+pub(crate) const RETIRED_PUBLIC_NAME_TITLE: &str = concat!("Ze", "rct");
+pub(crate) const RETIRED_PUBLIC_ORG_SCOPE: &str = concat!("@", "ze", "rct");
+#[cfg(test)]
+pub(crate) const RETIRED_PUBLIC_MINTLIFY_SLUG: &str = concat!("ze", "rct", "-4cdab021");
+
 pub(crate) fn reject_forbidden_public_copy_terms(label: &str, source: &str) -> CheckResult {
     let lower = source.to_lowercase();
     for term in public_copy_forbidden_terms() {
         if term.whole_word {
-            if contains_ascii_word(lower.as_str(), &[term.value]) {
+            if contains_ascii_word(lower.as_str(), term.value) {
                 return Err(format!(
                     "{label} contains forbidden public positioning term: {}",
                     term.value
@@ -82,15 +89,11 @@ fn public_copy_forbidden_terms() -> &'static [PublicCopyForbiddenTerm] {
 }
 
 pub(crate) fn retired_public_names() -> &'static [&'static str] {
-    &["zerct", "xquik"]
+    &[RETIRED_PUBLIC_NAME, "xquik"]
 }
 
-fn contains_ascii_word(value: &str, forbidden_words: &[&str]) -> bool {
+fn contains_ascii_word(value: &str, forbidden_word: &str) -> bool {
     value
         .split(|character: char| !character.is_ascii_alphanumeric())
-        .any(|word| {
-            forbidden_words
-                .iter()
-                .any(|forbidden| word.eq_ignore_ascii_case(forbidden))
-        })
+        .any(|word| word.eq_ignore_ascii_case(forbidden_word))
 }
