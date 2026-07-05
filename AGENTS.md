@@ -24,9 +24,10 @@ automation runs, or separate persistent workstreams. The current Codex thread
 still owns the edits, checks, and final report.
 
 Work locally and commit coherent increments. Push to main or master only after
-30 local commits and only when the current user or automation instruction
-includes that batched-push rule, unless the user explicitly asks earlier. Do
-not deploy from this public repo unless the user explicitly asks for a deploy.
+50 local commits and only when the current user or automation instruction
+includes that batched-push rule, unless the user explicitly asks earlier.
+Deploy only when the active user or automation instruction explicitly includes
+deployment.
 
 ## Product Boundary
 
@@ -101,6 +102,8 @@ cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- cli-contract
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-shell-style --
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-toml-style --
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-openapi --
 ruby -c Formula/tovuk.rb
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --

@@ -1,8 +1,6 @@
 use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
 const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
-    "scripts/check-shell-style.sh",
-    "scripts/check-toml-style.sh",
     "scripts/install-vacuum.sh",
     "scripts/sync-native-release-targets.sh",
 ];
@@ -11,7 +9,8 @@ pub(crate) fn check() -> CheckResult {
     require_check_script_bootstrap()?;
     require_rust_native_check_commands()?;
     require_vacuum_installer_contract()?;
-    require_shell_style_contract()
+    require_shell_style_contract()?;
+    require_toml_style_contract()
 }
 
 fn require_check_script_bootstrap() -> CheckResult {
@@ -53,6 +52,14 @@ fn require_rust_native_check_commands() -> CheckResult {
             "Rust check-all must run GitHub Actions policy through the Rust checker binary",
         ),
         (
+            "self.run_check_bin(\"check-shell-style\", &[])?;",
+            "Rust check-all must run shell style through the Rust checker binary",
+        ),
+        (
+            "self.run_check_bin(\"check-toml-style\", &[])?;",
+            "Rust check-all must run TOML style through the Rust checker binary",
+        ),
+        (
             "self.run(\"typos\", &[\"--config\", \".typos.toml\", \".\"])?;",
             "Rust check-all must call the Rust-native typos checker directly",
         ),
@@ -84,21 +91,42 @@ fn require_vacuum_installer_contract() -> CheckResult {
 }
 
 fn require_shell_style_contract() -> CheckResult {
-    let source = read_text("scripts/check-shell-style.sh")?;
+    let source = read_text("checks/src/bin/check-shell-style.rs")?;
     require_contains_all(
         source.as_str(),
         &[
             (
-                "shell_sources=(scripts/*.sh scripts/lib/*.sh)",
+                "collect_shell_files(repo_root, Path::new(\"scripts/lib\"))?",
                 "public shell style check must include shared shell libraries",
             ),
             (
-                "shellcheck -x",
+                "\"shellcheck\",",
                 "public shell style check must run ShellCheck with sourced-file analysis",
             ),
             (
-                "shfmt -i 2 -ci -d",
+                "&[\"-i\", \"2\", \"-ci\", \"-d\"]",
                 "public shell style check must run shfmt",
+            ),
+        ],
+    )
+}
+
+fn require_toml_style_contract() -> CheckResult {
+    let source = read_text("checks/src/bin/check-toml-style.rs")?;
+    require_contains_all(
+        source.as_str(),
+        &[
+            (
+                "&[\"format\", \"--check\"]",
+                "public TOML style check must run taplo format in check mode",
+            ),
+            (
+                "&[\"lint\", \"--no-schema\"]",
+                "public TOML style check must run taplo lint without schema downloads",
+            ),
+            (
+                "matches!(name, \".git\" | \"target\" | \"node_modules\")",
+                "public TOML style check must prune generated dependency directories",
             ),
         ],
     )
