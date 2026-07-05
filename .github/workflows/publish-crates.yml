@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: echo "${CARGO_HOME}/bin" >> "$GITHUB_PATH"
       - name: Check public release version contract
-        run: scripts/check-public-contracts.sh package-versions
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
       - name: Check registry version
         id: version
         run: |
@@ -70,8 +70,8 @@ jobs:
           fi
       - if: steps.version.outputs.exists == 'false'
         run: |
-          ./scripts/check-prose-style.sh --self-test
-          ./scripts/check-prose-style.sh
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
       - uses: actions/cache@v6
         if: steps.version.outputs.exists == 'false'
         with:

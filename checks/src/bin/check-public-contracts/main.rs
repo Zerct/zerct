@@ -45,7 +45,10 @@ fn main() -> ExitCode {
 fn run() -> CheckResult {
     let mut args = env::args().skip(1);
     let Some(check) = args.next() else {
-        return Err("usage: scripts/check-public-contracts.sh <check>".to_owned());
+        return Err(
+            "usage: cargo run --manifest-path checks/Cargo.toml --bin check-public-contracts -- <check>"
+                .to_owned(),
+        );
     };
 
     let repo_root = find_repo_root()?;

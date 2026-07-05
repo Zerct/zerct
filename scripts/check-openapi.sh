@@ -11,7 +11,7 @@ cd "$repo_root"
 tovuk_prepend_tool_path
 
 vacuum_version="${VACUUM_VERSION:-0.26.6}"
-docs_openapi_path="$(scripts/check-public-contracts.sh openapi-path)"
+docs_openapi_path="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- openapi-path)"
 
 if [ ! -f "$docs_openapi_path" ]; then
   echo "Missing OpenAPI file referenced by docs/docs.json: $docs_openapi_path" >&2

@@ -1,7 +1,6 @@
 use crate::github_actions_policy::{Workflow, require_contains};
 
-const READINESS_COMMAND: &str =
-    "scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com";
+const READINESS_COMMAND: &str = "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com";
 
 pub(super) fn check_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
     for (needle, message) in [
@@ -104,7 +103,7 @@ jobs:
     steps:
       - name: Check public agent readiness
         continue-on-error: true
-        run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
         run: scripts/check-all.sh
 ",
@@ -131,7 +130,7 @@ jobs:
   release-gate:
     steps:
       - name: Check public agent readiness
-        run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
         run: scripts/check-all.sh
 ",

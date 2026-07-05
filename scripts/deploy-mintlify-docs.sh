@@ -20,9 +20,9 @@ fi
 
 echo "Mintlify GitHub App owns production docs sync for this repository."
 echo "Checking local docs contracts before verifying public readiness at ${target}."
-./scripts/check-public-contracts.sh docs
-./scripts/check-prose-style.sh --self-test
-./scripts/check-prose-style.sh
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
 
 if [ "$sync_wait_seconds" -gt 0 ]; then
   echo "Waiting ${sync_wait_seconds}s for Mintlify GitHub App sync before public readiness check."
@@ -31,4 +31,4 @@ fi
 
 export TOVUK_DOCS_CHECK_RETRIES="${TOVUK_DOCS_CHECK_RETRIES:-12}"
 export TOVUK_DOCS_CHECK_RETRY_DELAY_MS="${TOVUK_DOCS_CHECK_RETRY_DELAY_MS:-10000}"
-./scripts/check-public-contracts.sh mintlify-agent-readiness "$target"
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness "$target"

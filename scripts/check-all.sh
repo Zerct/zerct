@@ -16,7 +16,7 @@ export TOVUK_NATIVE_BINARY="$native_cli"
 
 scripts/sync-native-release-targets.sh
 scripts/sync-native-release-targets.sh --check
-scripts/check-public-contracts.sh repo-hygiene
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- repo-hygiene
 
 strict_clippy_args=(
   --locked
@@ -62,19 +62,19 @@ cargo metadata --locked --manifest-path checks/Cargo.toml --all-features --forma
 cargo deny --manifest-path checks/Cargo.toml check --config deny.toml --metadata-path target/tovuk-public-checks-cargo-deny-metadata.json all
 
 npm --prefix packages/tovuk run check
-scripts/check-public-contracts.sh package-versions
-scripts/check-public-contracts.sh cli-contract
-scripts/check-public-contracts.sh docs
-./scripts/check-prose-style.sh --self-test
-./scripts/check-prose-style.sh
-scripts/check-github-actions.sh
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- cli-contract
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-github-actions --
 scripts/check-shell-style.sh
 scripts/check-toml-style.sh
-scripts/check-typos.sh
+typos --config .typos.toml .
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb >/dev/null
 if command -v brew >/dev/null 2>&1; then
   brew style Formula/tovuk.rb
 fi
 
-scripts/check-public-contracts.sh runtime-cli "$native_cli" "$python_bin"
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- runtime-cli "$native_cli" "$python_bin"
