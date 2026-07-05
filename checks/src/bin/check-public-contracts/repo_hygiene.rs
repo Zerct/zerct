@@ -54,11 +54,11 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "Mintlify docs script must document that production sync is owned by the GitHub App",
         ),
         (
-            "check-public-contracts.sh docs",
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs",
             "Mintlify docs script must validate local docs contracts before public readiness",
         ),
         (
-            "check-prose-style.sh --self-test",
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test",
             "Mintlify docs script must run prose style self-test before public readiness",
         ),
         (

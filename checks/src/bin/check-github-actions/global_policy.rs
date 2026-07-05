@@ -37,14 +37,14 @@ pub(super) fn require_check_all_hooks(findings: &mut Vec<String>) -> Result<(), 
     );
     require_contains(
         check_all.as_str(),
-        "./scripts/check-prose-style.sh --self-test",
-        "scripts/check-all.sh must run the prose style checker self-test",
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test",
+        "scripts/check-all.sh must run the prose style checker self-test through Rust",
         findings,
     );
     require_contains(
         check_all.as_str(),
-        "./scripts/check-prose-style.sh",
-        "scripts/check-all.sh must run the prose style checker repository scan",
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --",
+        "scripts/check-all.sh must run the prose style checker repository scan through Rust",
         findings,
     );
     Ok(())

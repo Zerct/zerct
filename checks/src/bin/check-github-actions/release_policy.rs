@@ -59,7 +59,7 @@ pub(super) fn check_public_package_release_order(workflow: &Workflow, findings: 
 fn require_package_versions(workflow: &Workflow, findings: &mut Vec<String>) {
     require_contains(
         workflow.contents.as_str(),
-        "scripts/check-public-contracts.sh package-versions",
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions",
         format!(
             "{}: publish workflows must verify all public package versions before publishing",
             workflow.path.display()

@@ -34,11 +34,11 @@ jobs:
             ${{ runner.os }}-npm-mintlify-
       - name: Check prose style
         run: |
-          ./scripts/check-prose-style.sh --self-test
-          ./scripts/check-prose-style.sh
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
       - name: Check public agent readiness
         run: |
-          ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run authenticated Mintlify score when configured
         run: |
           if [ -z "${MINTLIFY_CLI_CONFIG_JSON:-}" ]; then
@@ -49,7 +49,7 @@ jobs:
           mkdir -p "$HOME/.config/mintlify"
           printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
           npx --yes mint@4.2.578 score https://docs.tovuk.com --format json > mint-score.json
-          ./scripts/check-public-contracts.sh mintlify-score mint-score.json
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-score mint-score.json
         env:
           MINTLIFY_CLI_CONFIG_JSON: ${{ secrets.MINTLIFY_CLI_CONFIG_JSON }}
           MINTLIFY_SCORE_MIN: ${{ vars.MINTLIFY_SCORE_MIN }}

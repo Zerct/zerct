@@ -13,7 +13,7 @@ use crate::{
     types::PackageJson,
 };
 
-const PUBLIC_CONTRACTS_COMMAND: &str = "../../scripts/check-public-contracts.sh";
+const PUBLIC_CONTRACTS_COMMAND: &str = "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin check-public-contracts --";
 
 #[derive(Debug)]
 struct NpmPackagePaths {

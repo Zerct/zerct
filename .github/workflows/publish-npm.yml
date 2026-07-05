@@ -40,7 +40,7 @@ jobs:
       - name: Sync generated native target manifests
         run: scripts/sync-native-release-targets.sh
       - name: Check public release version contract
-        run: scripts/check-public-contracts.sh package-versions
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
       - uses: actions/cache@v6
         with:
           path: |
@@ -53,7 +53,7 @@ jobs:
       - name: Check registry version
         id: version
         run: |
-          version="$(./scripts/check-public-contracts.sh npm-version)"
+          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- npm-version)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
           if npm view "tovuk@$version" version --registry=https://registry.npmjs.org >/dev/null 2>&1; then

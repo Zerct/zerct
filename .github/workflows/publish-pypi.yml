@@ -39,7 +39,7 @@ jobs:
       - name: Sync generated native target manifests
         run: scripts/sync-native-release-targets.sh
       - name: Check public release version contract
-        run: scripts/check-public-contracts.sh package-versions
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
       - uses: actions/cache@v6
         with:
           path: |
@@ -83,8 +83,8 @@ jobs:
           PY
       - if: steps.version.outputs.exists == 'false'
         run: |
-          ./scripts/check-prose-style.sh --self-test
-          ./scripts/check-prose-style.sh
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
       - if: steps.version.outputs.exists == 'false'
         run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - if: steps.version.outputs.exists == 'false'
