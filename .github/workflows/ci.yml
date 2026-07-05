@@ -17,7 +17,6 @@ on:
       - "docs/**"
       - "native-release-targets.json"
       - "packages/**"
-      - "scripts/**"
       - "skills/**"
   push:
     branches:
@@ -36,7 +35,6 @@ on:
       - "docs/**"
       - "native-release-targets.json"
       - "packages/**"
-      - "scripts/**"
       - "skills/**"
 
 permissions:

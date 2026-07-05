@@ -24,6 +24,9 @@ fn run() -> CheckResult {
     let path = tool_path();
     let shell_sources = collect_shell_sources(repo_root.as_path())?;
     let shell_entrypoints = collect_shell_entrypoints(repo_root.as_path())?;
+    if shell_sources.is_empty() {
+        return Ok(());
+    }
 
     run_shell_tool(
         repo_root.as_path(),
@@ -32,13 +35,15 @@ fn run() -> CheckResult {
         &["-n"],
         shell_sources.as_slice(),
     )?;
-    run_shell_tool(
-        repo_root.as_path(),
-        path.as_os_str(),
-        "shellcheck",
-        &["-x"],
-        shell_entrypoints.as_slice(),
-    )?;
+    if !shell_entrypoints.is_empty() {
+        run_shell_tool(
+            repo_root.as_path(),
+            path.as_os_str(),
+            "shellcheck",
+            &["-x"],
+            shell_entrypoints.as_slice(),
+        )?;
+    }
     run_shell_tool(
         repo_root.as_path(),
         path.as_os_str(),
@@ -63,6 +68,9 @@ fn collect_shell_entrypoints(repo_root: &Path) -> CheckResult<Vec<PathBuf>> {
 fn collect_shell_files(repo_root: &Path, relative_dir: &Path) -> CheckResult<Vec<PathBuf>> {
     let absolute_dir = repo_root.join(relative_dir);
     let mut files = Vec::new();
+    if !absolute_dir.is_dir() {
+        return Ok(files);
+    }
     let entries = fs::read_dir(absolute_dir.as_path())
         .map_err(|error| format!("read {}: {error}", relative_dir.display()))?;
     for entry in entries {

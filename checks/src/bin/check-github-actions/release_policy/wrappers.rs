@@ -28,7 +28,7 @@ pub(super) fn check_publish_workflow(workflow: &Workflow, findings: &mut Vec<Str
 pub(super) fn check_native_release_assets(workflow: &Workflow, findings: &mut Vec<String>) {
     require_contains(
         workflow.contents.as_str(),
-        "./scripts/check-native-release-assets.sh",
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-native-release-assets --",
         format!(
             "{}: package publish must verify native release assets before publishing wrappers",
             workflow.path.display()
