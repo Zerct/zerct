@@ -39,10 +39,13 @@ pub(crate) fn check() -> CheckResult {
 
 fn require_docs_deploy_observability_contract() -> CheckResult {
     let workflow = read_text(".github/workflows/docs-deploy.yml")?;
-    let script = read_text("scripts/deploy-mintlify-docs.sh")?;
-    if !workflow.contains("scripts/deploy-mintlify-docs.sh") {
+    let checker = read_text("checks/src/bin/deploy-mintlify-docs.rs")?;
+    if !workflow.contains(
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --",
+    ) {
         return Err(
-            "Mintlify docs sync workflow must call the tracked verification script".to_owned(),
+            "Mintlify docs sync workflow must call the tracked Rust verification binary"
+                .to_owned(),
         );
     }
     if !workflow.contains("Check Mintlify GitHub App sync") {
@@ -54,11 +57,11 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "Mintlify docs script must document that production sync is owned by the GitHub App",
         ),
         (
-            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs",
+            "\"check-public-contracts\",\n        &[\"docs\"]",
             "Mintlify docs script must validate local docs contracts before public readiness",
         ),
         (
-            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test",
+            "\"check-prose-style\",\n        &[\"--self-test\"]",
             "Mintlify docs script must run prose style self-test before public readiness",
         ),
         (
@@ -66,7 +69,7 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "Mintlify docs script must expose a bounded GitHub App sync wait",
         ),
         (
-            "TOVUK_DOCS_PUBLIC_URL:-https://docs.tovuk.com",
+            "const DEFAULT_DOCS_PUBLIC_URL: &str = \"https://docs.tovuk.com\";",
             "Mintlify docs script must default readiness checks to the public docs domain",
         ),
         (
@@ -74,7 +77,7 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             "Mintlify docs script must run the tracked public readiness checker",
         ),
     ] {
-        if !script.contains(snippet) {
+        if !checker.contains(snippet) {
             return Err(label.to_owned());
         }
     }
@@ -83,7 +86,7 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
         "MINTLIFY_ADMIN_API_KEY",
         "MINTLIFY_PROJECT_ID",
     ] {
-        if script.contains(forbidden) || workflow.contains(forbidden) {
+        if checker.contains(forbidden) || workflow.contains(forbidden) {
             return Err(
                 "Mintlify docs workflow must not depend on the plan-gated deployment API"
                     .to_owned(),
