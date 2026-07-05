@@ -71,8 +71,8 @@ fn require_shell_style_contract() -> CheckResult {
         source.as_str(),
         &[
             (
-                "collect_shell_files(repo_root, Path::new(\"scripts/lib\"))?",
-                "public shell style check must include shared shell libraries",
+                "if shell_sources.is_empty()",
+                "public shell style check must accept a shell-free repository",
             ),
             (
                 "\"shellcheck\",",
