@@ -1,6 +1,7 @@
 use crate::helpers::{
-    CheckResult, reject_contains, require_contains, require_contains_all, require_equal,
+    CheckResult, reject_contains_any, require_contains, require_contains_all, require_equal,
 };
+use crate::helpers_public_copy::RETIRED_PUBLIC_ORG_SCOPE;
 
 use super::ContractSources;
 
@@ -88,18 +89,22 @@ pub(super) fn reject_retired_packaging(sources: &ContractSources) -> CheckResult
         sources.python_readme.as_str(),
         sources.homebrew_formula.as_str(),
     ] {
-        reject_contains(source, "TOVUK_NPM_CLI", "retired npm delegation")?;
-        reject_contains(source, "NPM_PACKAGE_VERSION", "retired npm package pin")?;
-        reject_contains(source, "npx -y", "retired npx delegation")?;
-        reject_contains(source, "tovuk/tap", "retired archived Homebrew tap")?;
-        reject_contains(
+        reject_contains_any(
             source,
-            "brew install tovuk/tovuk/tovuk",
-            "retired qualified Homebrew install",
+            &[
+                ("TOVUK_NPM_CLI", "retired npm delegation"),
+                ("NPM_PACKAGE_VERSION", "retired npm package pin"),
+                ("npx -y", "retired npx delegation"),
+                ("tovuk/tap", "retired archived Homebrew tap"),
+                (
+                    "brew install tovuk/tovuk/tovuk",
+                    "retired qualified Homebrew install",
+                ),
+                ("--app", "retired app flag"),
+                ("/v1/apps", "retired apps API path"),
+                (RETIRED_PUBLIC_ORG_SCOPE, "retired org scope"),
+            ],
         )?;
-        reject_contains(source, "--app", "retired app flag")?;
-        reject_contains(source, "/v1/apps", "retired apps API path")?;
-        reject_contains(source, "@zerct", "retired org scope")?;
     }
     Ok(())
 }

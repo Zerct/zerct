@@ -7,9 +7,8 @@ use std::{
 
 use crate::{
     helpers::{
-        CheckResult, file_exists, map_keys, must_abs, read_package_json, read_text,
-        require_contains, require_equal, require_string_map_keys_exactly,
-        require_string_slice_exactly,
+        CheckResult, file_exists, map_keys, must_abs, read_package_json, read_text, require_equal,
+        require_snippets, require_string_map_keys_exactly, require_string_slice_exactly,
     },
     types::PackageJson,
 };
@@ -177,24 +176,21 @@ fn require_package_scripts(
 
 fn require_install_source(install_path: &Path) -> CheckResult {
     let install_source = read_text(install_path)?;
-    for snippet in [
-        "https://github.com/tovuk/tovuk/releases/download",
-        ".sha256",
-        "nativeTargets",
-        "target.asset_ext",
-        "verifySha256",
-        "linuxLibc",
-        "requires glibc Linux",
-        "TOVUK_NATIVE_BINARY",
-        "nativeBinaryName",
-    ] {
-        require_contains(
-            install_source.as_str(),
-            snippet,
-            format!("install.mjs {snippet}").as_str(),
-        )?;
-    }
-    Ok(())
+    require_snippets(
+        install_source.as_str(),
+        "install.mjs",
+        &[
+            "https://github.com/tovuk/tovuk/releases/download",
+            ".sha256",
+            "nativeTargets",
+            "target.asset_ext",
+            "verifySha256",
+            "linuxLibc",
+            "requires glibc Linux",
+            "TOVUK_NATIVE_BINARY",
+            "nativeBinaryName",
+        ],
+    )
 }
 
 fn require_executable_bin(bin_path: &Path) -> CheckResult {

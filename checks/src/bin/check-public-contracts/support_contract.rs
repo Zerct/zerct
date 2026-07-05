@@ -1,6 +1,6 @@
 use crate::{
     cli_contract::ContractSources,
-    helpers::{CheckResult, reject_contains, require_contains, require_contains_all},
+    helpers::{CheckResult, reject_contains_any, require_contains, require_contains_all},
 };
 
 const SUPPORT_COMMANDS: &[&str] = &[
@@ -8,6 +8,12 @@ const SUPPORT_COMMANDS: &[&str] = &[
     "tovuk support list",
     "tovuk support resolve",
 ];
+const NON_SERVICE_REQUEST: &str =
+    "support surfaces must describe service tickets, not non-service requests";
+const NON_SERVICE_WORKFLOW: &str =
+    "support surfaces must describe service tickets, not non-service workflows";
+const ACCOUNT_TO_TOVUK_TICKET: &str =
+    "support surfaces must stay account-to-Tovuk service-ticket wording";
 
 pub(crate) fn check(sources: &ContractSources) -> CheckResult {
     require_support_commands(sources)?;
@@ -94,52 +100,29 @@ fn require_support_openapi_contract(sources: &ContractSources) -> CheckResult {
 }
 
 fn reject_non_service_ticket_language(sources: &ContractSources) -> CheckResult {
-    let rejected_terms = non_service_ticket_terms();
     for source in sources.support_public_sources() {
-        for (value, label) in &rejected_terms {
-            reject_contains(source, value.as_str(), label)?;
-        }
+        reject_contains_any(source, NON_SERVICE_TICKET_TERMS)?;
     }
     Ok(())
 }
 
-type RejectedSupportTerm = (String, &'static str);
-
-fn non_service_ticket_terms() -> Vec<RejectedSupportTerm> {
-    let compliance_term = "abuse";
-    let third_party_action = "report";
-    let non_service_request =
-        "support surfaces must describe service tickets, not non-service requests";
-    let non_service_workflow =
-        "support surfaces must describe service tickets, not non-service workflows";
-    let account_to_tovuk = "support surfaces must stay account-to-Tovuk service-ticket wording";
-    vec![
-        (compliance_term.to_owned(), non_service_request),
-        ("compliance complaint".to_owned(), non_service_request),
-        ("complaint".to_owned(), non_service_request),
-        ("moderation".to_owned(), non_service_workflow),
-        ("dispute".to_owned(), non_service_workflow),
-        (
-            "customer-to-customer".to_owned(),
-            "support surfaces must describe service tickets between the account and Tovuk",
-        ),
-        (
-            ["user-to-user", " ", third_party_action].concat(),
-            account_to_tovuk,
-        ),
-        ([third_party_action, " a user"].concat(), account_to_tovuk),
-        ([third_party_action, " user"].concat(), account_to_tovuk),
-        (
-            [third_party_action, " another user"].concat(),
-            account_to_tovuk,
-        ),
-        ([third_party_action, " customer"].concat(), account_to_tovuk),
-        (["user ", third_party_action].concat(), account_to_tovuk),
-        (["customer ", third_party_action].concat(), account_to_tovuk),
-        ("reporting".to_owned(), account_to_tovuk),
-        (
-            [third_party_action, " ", compliance_term].concat(),
-            account_to_tovuk,
-        ),
-    ]
-}
+const NON_SERVICE_TICKET_TERMS: &[(&str, &str)] = &[
+    ("abuse", NON_SERVICE_REQUEST),
+    ("compliance complaint", NON_SERVICE_REQUEST),
+    ("complaint", NON_SERVICE_REQUEST),
+    ("moderation", NON_SERVICE_WORKFLOW),
+    ("dispute", NON_SERVICE_WORKFLOW),
+    (
+        "customer-to-customer",
+        "support surfaces must describe service tickets between the account and Tovuk",
+    ),
+    ("user-to-user report", ACCOUNT_TO_TOVUK_TICKET),
+    ("report a user", ACCOUNT_TO_TOVUK_TICKET),
+    ("report user", ACCOUNT_TO_TOVUK_TICKET),
+    ("report another user", ACCOUNT_TO_TOVUK_TICKET),
+    ("report customer", ACCOUNT_TO_TOVUK_TICKET),
+    ("user report", ACCOUNT_TO_TOVUK_TICKET),
+    ("customer report", ACCOUNT_TO_TOVUK_TICKET),
+    ("reporting", ACCOUNT_TO_TOVUK_TICKET),
+    ("report abuse", ACCOUNT_TO_TOVUK_TICKET),
+];
