@@ -258,7 +258,7 @@ impl Runner {
         self.run("scripts/check-shell-style.sh", &[])?;
         self.run("scripts/check-toml-style.sh", &[])?;
         self.run("typos", &["--config", ".typos.toml", "."])?;
-        self.run("scripts/check-openapi.sh", &[])?;
+        self.run_check_bin("check-openapi", &[])?;
         self.run("ruby", &["-c", "Formula/tovuk.rb"])?;
         if find_command(self.path.as_os_str(), &["brew"]).is_ok() {
             self.run("brew", &["style", "Formula/tovuk.rb"])?;
