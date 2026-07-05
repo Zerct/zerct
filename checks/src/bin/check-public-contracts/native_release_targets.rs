@@ -167,16 +167,16 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
 }
 
 fn require_release_gate_contract() -> CheckResult {
-    let source = read_text("scripts/check-native-release-assets.sh")?;
+    let source = read_text("checks/src/bin/check-native-release-assets.rs")?;
     require_snippets(
         source.as_str(),
-        "check-native-release-assets.sh",
+        "check-native-release-assets.rs",
         &[
             "native-release-targets.json",
-            "target['asset_ext']",
+            "target.asset_ext",
             "verify_asset_checksums",
             "gh release download",
-            "hashlib.sha256",
+            "Sha256::digest",
             "checksum mismatch",
         ],
     )?;

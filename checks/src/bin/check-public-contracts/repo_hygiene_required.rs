@@ -11,7 +11,6 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     ".github/workflows/publish-native-binaries.yml",
     ".github/workflows/publish-npm.yml",
     ".github/workflows/publish-pypi.yml",
-    "scripts/check-native-release-assets.sh",
     "native-release-targets.json",
     ".gitignore",
     ".github/actionlint.yaml",
@@ -21,6 +20,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "README.md",
     "checks/Cargo.lock",
     "checks/Cargo.toml",
+    "checks/src/bin/check-native-release-assets.rs",
     "checks/src/bin/deploy-mintlify-docs.rs",
     "checks/src/bin/check-github-actions.rs",
     "checks/src/bin/check-github-actions/global_policy.rs",
@@ -94,8 +94,6 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "packages/tovuk/package.json",
     "packages/tovuk-py/pyproject.toml",
     "checks/src/bin/check-all.rs",
-    "scripts/lib/repo-root.sh",
-    "scripts/lib/tool-path.sh",
     "skills/tovuk/SKILL.md",
 ];
 const CHECK_GITHUB_ACTIONS_CHECKER_DIR: &str = "checks/src/bin/check-github-actions/";

@@ -81,7 +81,7 @@ jobs:
           TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
       - name: Verify native release assets
         if: steps.version.outputs.exists == 'false'
-        run: ./scripts/check-native-release-assets.sh "${{ steps.version.outputs.version }}"
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-native-release-assets -- "${{ steps.version.outputs.version }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Pack npm package artifact
