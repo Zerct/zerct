@@ -98,8 +98,8 @@ impl Runner {
     }
 
     fn sync_generated_manifests(&self) -> CheckResult {
-        self.run("scripts/sync-native-release-targets.sh", &[])?;
-        self.run("scripts/sync-native-release-targets.sh", &["--check"])?;
+        self.run_check_bin("sync-native-release-targets", &[])?;
+        self.run_check_bin("sync-native-release-targets", &["--check"])?;
         self.run_public_contracts(&["repo-hygiene"])
     }
 

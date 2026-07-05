@@ -14,6 +14,7 @@ use crate::{
 };
 
 const PUBLIC_CONTRACTS_COMMAND: &str = "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin check-public-contracts --";
+const SYNC_NATIVE_TARGETS_COMMAND: &str = "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets --";
 
 #[derive(Debug)]
 struct NpmPackagePaths {
@@ -73,12 +74,9 @@ fn required_package_scripts() -> BTreeMap<String, String> {
         ("postinstall".to_owned(), "node install.mjs".to_owned()),
         (
             "precheck".to_owned(),
-            "../../scripts/sync-native-release-targets.sh".to_owned(),
+            SYNC_NATIVE_TARGETS_COMMAND.to_owned(),
         ),
-        (
-            "prepack".to_owned(),
-            "../../scripts/sync-native-release-targets.sh".to_owned(),
-        ),
+        ("prepack".to_owned(), SYNC_NATIVE_TARGETS_COMMAND.to_owned()),
         (
             "runtime".to_owned(),
             format!("{PUBLIC_CONTRACTS_COMMAND} npm-native-runtime"),

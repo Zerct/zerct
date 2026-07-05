@@ -34,7 +34,7 @@ struct PythonTarget {
 pub(crate) fn check() -> CheckResult {
     let manifest = read_manifest()?;
     require_manifest_shape(&manifest)?;
-    require_sync_script_contract()?;
+    require_sync_binary_contract()?;
     require_workflow_contract(&manifest)?;
     require_release_gate_contract()?;
     require_npm_installer_contract()?;
@@ -251,18 +251,17 @@ fn require_python_installer_contract() -> CheckResult {
     Ok(())
 }
 
-fn require_sync_script_contract() -> CheckResult {
-    let source = read_text("scripts/sync-native-release-targets.sh")?;
+fn require_sync_binary_contract() -> CheckResult {
+    let source = read_text("checks/src/bin/sync-native-release-targets.rs")?;
     require_snippets(
         source.as_str(),
-        "sync-native-release-targets.sh",
+        "sync-native-release-targets.rs",
         &[
-            "source_manifest=\"native-release-targets.json\"",
-            "generated_manifests=(",
+            "const SOURCE_MANIFEST: &str = \"native-release-targets.json\";",
             "\"packages/tovuk/native-release-targets.json\"",
             "\"packages/tovuk-py/src/tovuk/native_release_targets.json\"",
-            "cmp -s \"$source_manifest\" \"$generated_manifest\"",
-            "cp \"$source_manifest\" \"$generated_manifest\"",
+            "fs::write(generated_path.as_path(), source_bytes)",
+            "is stale; run {SYNC_COMMAND}",
         ],
     )
 }
