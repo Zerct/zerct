@@ -79,4 +79,4 @@ jobs:
       - name: Lint GitHub Actions
         run: actionlint -color
       - name: Run full repository check
-        run: scripts/check-all.sh
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --

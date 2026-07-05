@@ -21,7 +21,7 @@ pub(super) fn check_publish_workflow(workflow: &Workflow, findings: &mut Vec<Str
             "publish-native-binaries.yml must not upload native release assets before the release gate passes",
         ),
         (
-            "scripts/check-all.sh",
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --",
             "publish-native-binaries.yml release gate must run the full public repository check before publishing assets",
         ),
         (
@@ -105,7 +105,7 @@ jobs:
         continue-on-error: true
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
-        run: scripts/check-all.sh
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ",
         )
         .ok_or_else(|| "readiness step missing".to_owned())?;
@@ -132,7 +132,7 @@ jobs:
       - name: Check public agent readiness
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
-        run: scripts/check-all.sh
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ",
         )
         .ok_or_else(|| "readiness step missing".to_owned())?;

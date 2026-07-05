@@ -103,5 +103,5 @@ cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb
-./scripts/check-all.sh
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ```

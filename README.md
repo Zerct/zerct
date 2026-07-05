@@ -112,7 +112,7 @@ POST /v1/support/tickets/{ticket_id}/resolve
 ## Development
 
 ```sh
-./scripts/check-all.sh
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ```
 
 The full check builds the native CLI, runs Rust tests and strict Clippy, checks
