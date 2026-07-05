@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::helpers::{CheckResult, read_json, read_text};
+use crate::helpers::{CheckResult, read_json, read_text, require_contains, require_snippets};
 
 #[derive(Debug, Deserialize)]
 struct NativeReleaseTargets {
@@ -119,38 +119,38 @@ fn require_target_shape(target: &NativeTarget) -> CheckResult {
 
 fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
     let source = read_text(".github/workflows/publish-native-binaries.yml")?;
-    for snippet in [
-        "- \"native-release-targets.json\"",
-        "native-targets:",
-        "fromJSON(needs.native-targets.outputs.matrix)",
-        "\"asset_ext\": target[\"asset_ext\"]",
-        "\"binary\": target[\"binary\"]",
-        "\"build_target\": build_target(target[\"triple\"])",
-        "\"build_strategy\": build_strategy(target[\"triple\"])",
-        "\"runner\": target[\"runner\"]",
-        "\"runner_arch\": runner_for(target[\"triple\"])[\"arch\"]",
-        "\"runner_os\": runner_for(target[\"triple\"])[\"os\"]",
-        "\"target\": target[\"triple\"]",
-        "matrix.asset_ext",
-        "runs-on: [self-hosted, tovuk, \"${{ matrix.runner_os }}\", \"${{ matrix.runner_arch }}\", public-trusted-ci]",
-        "gh_version=\"2.96.0\"",
-        "gh_${gh_version}_linux_amd64.tar.gz",
-        "--repo \"$GITHUB_REPOSITORY\"",
-        "cmake_version=\"4.3.3\"",
-        "ninja_version=\"1.13.2\"",
-        "zig_version=\"0.16.0\"",
-        "zig-x86_64-linux-$zig_version.tar.xz",
-        "cargo install --locked cargo-zigbuild",
-        "cargo zigbuild --locked --release",
-        "llvm_version=\"22.1.8\"",
-        "LLVM-$llvm_version-Linux-X64.tar.xz",
-        "cargo install --locked cargo-xwin",
-        "cargo xwin build --locked --release",
-    ] {
-        if !source.contains(snippet) {
-            return Err(format!("publish-native-binaries.yml missing {snippet}"));
-        }
-    }
+    require_snippets(
+        source.as_str(),
+        "publish-native-binaries.yml",
+        &[
+            "- \"native-release-targets.json\"",
+            "native-targets:",
+            "fromJSON(needs.native-targets.outputs.matrix)",
+            "\"asset_ext\": target[\"asset_ext\"]",
+            "\"binary\": target[\"binary\"]",
+            "\"build_target\": build_target(target[\"triple\"])",
+            "\"build_strategy\": build_strategy(target[\"triple\"])",
+            "\"runner\": target[\"runner\"]",
+            "\"runner_arch\": runner_for(target[\"triple\"])[\"arch\"]",
+            "\"runner_os\": runner_for(target[\"triple\"])[\"os\"]",
+            "\"target\": target[\"triple\"]",
+            "matrix.asset_ext",
+            "runs-on: [self-hosted, tovuk, \"${{ matrix.runner_os }}\", \"${{ matrix.runner_arch }}\", public-trusted-ci]",
+            "gh_version=\"2.96.0\"",
+            "gh_${gh_version}_linux_amd64.tar.gz",
+            "--repo \"$GITHUB_REPOSITORY\"",
+            "cmake_version=\"4.3.3\"",
+            "ninja_version=\"1.13.2\"",
+            "zig_version=\"0.16.0\"",
+            "zig-x86_64-linux-$zig_version.tar.xz",
+            "cargo install --locked cargo-zigbuild",
+            "cargo zigbuild --locked --release",
+            "llvm_version=\"22.1.8\"",
+            "LLVM-$llvm_version-Linux-X64.tar.xz",
+            "cargo install --locked cargo-xwin",
+            "cargo xwin build --locked --release",
+        ],
+    )?;
     if manifest
         .targets
         .iter()
@@ -168,18 +168,18 @@ fn require_workflow_contract(manifest: &NativeReleaseTargets) -> CheckResult {
 
 fn require_release_gate_contract() -> CheckResult {
     let source = read_text("scripts/check-native-release-assets.sh")?;
-    for snippet in [
-        "native-release-targets.json",
-        "target['asset_ext']",
-        "verify_asset_checksums",
-        "gh release download",
-        "hashlib.sha256",
-        "checksum mismatch",
-    ] {
-        if !source.contains(snippet) {
-            return Err(format!("check-native-release-assets.sh missing {snippet}"));
-        }
-    }
+    require_snippets(
+        source.as_str(),
+        "check-native-release-assets.sh",
+        &[
+            "native-release-targets.json",
+            "target['asset_ext']",
+            "verify_asset_checksums",
+            "gh release download",
+            "hashlib.sha256",
+            "checksum mismatch",
+        ],
+    )?;
     if source.contains("endswith(\".exe\")") {
         return Err("native release asset names must use explicit asset_ext metadata".to_owned());
     }
@@ -190,19 +190,19 @@ fn require_npm_installer_contract() -> CheckResult {
     let source = read_text("packages/tovuk/install.mjs")?;
     require_generated_manifest_matches_root("packages/tovuk/native-release-targets.json")?;
     require_contains_json_file("packages/tovuk/package.json", "native-release-targets.json")?;
-    for snippet in [
-        "native-release-targets.json",
-        "target.asset_ext",
-        "target.triple",
-        "requires glibc Linux",
-        "linuxLibc()",
-        "nativeBinaryName()",
-        "TOVUK_NATIVE_BINARY",
-    ] {
-        if !source.contains(snippet) {
-            return Err(format!("install.mjs missing {snippet}"));
-        }
-    }
+    require_snippets(
+        source.as_str(),
+        "install.mjs",
+        &[
+            "native-release-targets.json",
+            "target.asset_ext",
+            "target.triple",
+            "requires glibc Linux",
+            "linuxLibc()",
+            "nativeBinaryName()",
+            "TOVUK_NATIVE_BINARY",
+        ],
+    )?;
     let override_index = source
         .find("if (process.env.TOVUK_NATIVE_BINARY)")
         .ok_or_else(|| "install.mjs must honor TOVUK_NATIVE_BINARY".to_owned())?;
@@ -223,22 +223,22 @@ fn require_python_installer_contract() -> CheckResult {
     require_generated_manifest_matches_root(
         "packages/tovuk-py/src/tovuk/native_release_targets.json",
     )?;
-    for snippet in [
-        "native_release_targets.json",
-        "target[\"asset_ext\"]",
-        "target[\"binary\"]",
-        "target[\"triple\"]",
-        "requires glibc Linux",
-        "_linux_libc()",
-        "TOVUK_NATIVE_BINARY",
-        "binary_name = str(target[\"binary\"])",
-        "pathlib.Path(__file__).with_name(\"bin\") / binary_name",
-        "/ target_triple / binary_name",
-    ] {
-        if !source.contains(snippet) {
-            return Err(format!("cli.py missing {snippet}"));
-        }
-    }
+    require_snippets(
+        source.as_str(),
+        "cli.py",
+        &[
+            "native_release_targets.json",
+            "target[\"asset_ext\"]",
+            "target[\"binary\"]",
+            "target[\"triple\"]",
+            "requires glibc Linux",
+            "_linux_libc()",
+            "TOVUK_NATIVE_BINARY",
+            "binary_name = str(target[\"binary\"])",
+            "pathlib.Path(__file__).with_name(\"bin\") / binary_name",
+            "/ target_triple / binary_name",
+        ],
+    )?;
     if source.contains("/ target_triple / \"tovuk\"")
         || source.contains("/ target_triple / 'tovuk'")
         || source.contains("with_name(\"bin\") / \"tovuk\"")
@@ -253,19 +253,18 @@ fn require_python_installer_contract() -> CheckResult {
 
 fn require_sync_script_contract() -> CheckResult {
     let source = read_text("scripts/sync-native-release-targets.sh")?;
-    for snippet in [
-        "source_manifest=\"native-release-targets.json\"",
-        "generated_manifests=(",
-        "\"packages/tovuk/native-release-targets.json\"",
-        "\"packages/tovuk-py/src/tovuk/native_release_targets.json\"",
-        "cmp -s \"$source_manifest\" \"$generated_manifest\"",
-        "cp \"$source_manifest\" \"$generated_manifest\"",
-    ] {
-        if !source.contains(snippet) {
-            return Err(format!("sync-native-release-targets.sh missing {snippet}"));
-        }
-    }
-    Ok(())
+    require_snippets(
+        source.as_str(),
+        "sync-native-release-targets.sh",
+        &[
+            "source_manifest=\"native-release-targets.json\"",
+            "generated_manifests=(",
+            "\"packages/tovuk/native-release-targets.json\"",
+            "\"packages/tovuk-py/src/tovuk/native_release_targets.json\"",
+            "cmp -s \"$source_manifest\" \"$generated_manifest\"",
+            "cp \"$source_manifest\" \"$generated_manifest\"",
+        ],
+    )
 }
 
 fn require_generated_manifest_matches_root(path: &str) -> CheckResult {
@@ -281,10 +280,9 @@ fn require_generated_manifest_matches_root(path: &str) -> CheckResult {
 
 fn require_contains_json_file(path: &str, file_name: &str) -> CheckResult {
     let source = read_text(path)?;
-    if source.contains(file_name) {
-        return Ok(());
-    }
-    Err(format!(
-        "{path} must include {file_name} in published files"
-    ))
+    require_contains(
+        source.as_str(),
+        file_name,
+        format!("{path} must include {file_name} in published files").as_str(),
+    )
 }

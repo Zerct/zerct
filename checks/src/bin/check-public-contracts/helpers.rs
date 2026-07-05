@@ -27,12 +27,30 @@ pub(crate) fn require_contains_all(source: &str, requirements: &[(&str, &str)]) 
     Ok(())
 }
 
+pub(crate) fn require_snippets(source: &str, label: &str, snippets: &[&str]) -> CheckResult {
+    for snippet in snippets {
+        require_contains(
+            source,
+            snippet,
+            format!("{label} missing {snippet}").as_str(),
+        )?;
+    }
+    Ok(())
+}
+
 pub(crate) fn reject_contains(source: &str, snippet: &str, label: &str) -> CheckResult {
     if source.contains(snippet) {
         Err(format!("{label} is present"))
     } else {
         Ok(())
     }
+}
+
+pub(crate) fn reject_contains_any(source: &str, rejections: &[(&str, &str)]) -> CheckResult {
+    for &(snippet, label) in rejections {
+        reject_contains(source, snippet, label)?;
+    }
+    Ok(())
 }
 
 pub(crate) fn require_equal(actual: &str, expected: &str, label: &str) -> CheckResult {

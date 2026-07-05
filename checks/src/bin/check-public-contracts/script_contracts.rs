@@ -1,4 +1,4 @@
-use crate::helpers::{CheckResult, read_text};
+use crate::helpers::{CheckResult, read_text, require_contains, require_contains_all};
 
 const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
     "scripts/check-all.sh",
@@ -36,9 +36,7 @@ fn require_check_script_bootstrap() -> CheckResult {
                 "must prepend the trusted runner tool path",
             ),
         ] {
-            if !source.contains(snippet) {
-                return Err(format!("{path} {label}"));
-            }
+            require_contains(source.as_str(), snippet, format!("{path} {label}").as_str())?;
         }
     }
     Ok(())
@@ -46,46 +44,42 @@ fn require_check_script_bootstrap() -> CheckResult {
 
 fn require_vacuum_installer_contract() -> CheckResult {
     let source = read_text("scripts/install-vacuum.sh")?;
-    for (snippet, label) in [
-        (
-            "vacuum_asset_sha256",
-            "Vacuum installer must pin asset checksums",
-        ),
-        (
-            "shasum -a 256",
-            "Vacuum installer must verify SHA-256 before extraction",
-        ),
-        (
-            "checksum mismatch",
-            "Vacuum installer must fail on checksum mismatch",
-        ),
-    ] {
-        if !source.contains(snippet) {
-            return Err(label.to_owned());
-        }
-    }
-    Ok(())
+    require_contains_all(
+        source.as_str(),
+        &[
+            (
+                "vacuum_asset_sha256",
+                "Vacuum installer must pin asset checksums",
+            ),
+            (
+                "shasum -a 256",
+                "Vacuum installer must verify SHA-256 before extraction",
+            ),
+            (
+                "checksum mismatch",
+                "Vacuum installer must fail on checksum mismatch",
+            ),
+        ],
+    )
 }
 
 fn require_shell_style_contract() -> CheckResult {
     let source = read_text("scripts/check-shell-style.sh")?;
-    for (snippet, label) in [
-        (
-            "shell_sources=(scripts/*.sh scripts/lib/*.sh)",
-            "public shell style check must include shared shell libraries",
-        ),
-        (
-            "shellcheck -x",
-            "public shell style check must run ShellCheck with sourced-file analysis",
-        ),
-        (
-            "shfmt -i 2 -ci -d",
-            "public shell style check must run shfmt",
-        ),
-    ] {
-        if !source.contains(snippet) {
-            return Err(label.to_owned());
-        }
-    }
-    Ok(())
+    require_contains_all(
+        source.as_str(),
+        &[
+            (
+                "shell_sources=(scripts/*.sh scripts/lib/*.sh)",
+                "public shell style check must include shared shell libraries",
+            ),
+            (
+                "shellcheck -x",
+                "public shell style check must run ShellCheck with sourced-file analysis",
+            ),
+            (
+                "shfmt -i 2 -ci -d",
+                "public shell style check must run shfmt",
+            ),
+        ],
+    )
 }

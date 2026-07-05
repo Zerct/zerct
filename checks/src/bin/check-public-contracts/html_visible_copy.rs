@@ -183,23 +183,27 @@ fn decode_numeric_entity(entity: &str) -> CheckResult<Option<char>> {
 
 #[cfg(test)]
 mod tests {
+    use crate::helpers_public_copy::RETIRED_PUBLIC_NAME_TITLE;
+
     use super::html_visible_copy;
 
     #[test]
     fn visible_copy_ignores_head_assets_and_hidden_tags() {
-        let source = r"
+        let source = format!(
+            r"
             <html>
-              <head><title>Zerct</title></head>
+              <head><title>{RETIRED_PUBLIC_NAME_TITLE}</title></head>
               <body>
                 <h1>Tovuk &amp; agents</h1>
-                <script>Zerct</script>
-                <svg><text>Zerct</text></svg>
+                <script>{RETIRED_PUBLIC_NAME_TITLE}</script>
+                <svg><text>{RETIRED_PUBLIC_NAME_TITLE}</text></svg>
               </body>
             </html>
-        ";
+        "
+        );
 
-        let visible = html_visible_copy(source);
+        let visible = html_visible_copy(source.as_str());
         assert!(visible.contains("Tovuk & agents"));
-        assert!(!visible.contains("Zerct"));
+        assert!(!visible.contains(RETIRED_PUBLIC_NAME_TITLE));
     }
 }
