@@ -39,7 +39,7 @@ jobs:
             fetch --depth=1 origin "${GITHUB_SHA}"
           git checkout --detach FETCH_HEAD
       - name: Check public agent readiness
-        run: ./scripts/check-public-contracts.sh mintlify-agent-readiness https://docs.tovuk.com
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
       - name: Run full repository check
         run: scripts/check-all.sh
 
@@ -124,7 +124,7 @@ jobs:
         run: echo "${CARGO_HOME}/bin" >> "$GITHUB_PATH"
       - name: Check public release version contract
         shell: bash
-        run: scripts/check-public-contracts.sh package-versions
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
       - name: Install CMake and Ninja for cross builds
         if: matrix.build_strategy == 'cargo-zigbuild' || matrix.build_strategy == 'cargo-xwin'
         shell: bash

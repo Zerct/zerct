@@ -2,19 +2,16 @@ use crate::helpers::{CheckResult, read_text, require_contains, require_contains_
 
 const BOOTSTRAPPED_SCRIPTS: &[&str] = &[
     "scripts/check-all.sh",
-    "scripts/check-github-actions.sh",
     "scripts/check-openapi.sh",
-    "scripts/check-prose-style.sh",
-    "scripts/check-public-contracts.sh",
     "scripts/check-shell-style.sh",
     "scripts/check-toml-style.sh",
-    "scripts/check-typos.sh",
     "scripts/install-vacuum.sh",
     "scripts/sync-native-release-targets.sh",
 ];
 
 pub(crate) fn check() -> CheckResult {
     require_check_script_bootstrap()?;
+    require_rust_native_check_commands()?;
     require_vacuum_installer_contract()?;
     require_shell_style_contract()
 }
@@ -38,6 +35,31 @@ fn require_check_script_bootstrap() -> CheckResult {
         ] {
             require_contains(source.as_str(), snippet, format!("{path} {label}").as_str())?;
         }
+    }
+    Ok(())
+}
+
+fn require_rust_native_check_commands() -> CheckResult {
+    let check_all = read_text("scripts/check-all.sh")?;
+    for (snippet, label) in [
+        (
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs",
+            "check-all must run public contract docs through the Rust checker binary",
+        ),
+        (
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test",
+            "check-all must run prose self-test through the Rust checker binary",
+        ),
+        (
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-github-actions --",
+            "check-all must run GitHub Actions policy through the Rust checker binary",
+        ),
+        (
+            "typos --config .typos.toml .",
+            "check-all must call the Rust-native typos checker directly",
+        ),
+    ] {
+        require_contains(check_all.as_str(), snippet, label)?;
     }
     Ok(())
 }

@@ -97,10 +97,10 @@ cargo fmt --check --manifest-path checks/Cargo.toml
 cargo clippy --locked --release --manifest-path crates/tovuk/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
 cargo clippy --locked --release --manifest-path checks/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
 npm --prefix packages/tovuk run check
-scripts/check-public-contracts.sh package-versions
-scripts/check-public-contracts.sh cli-contract
-scripts/check-public-contracts.sh docs
-./scripts/check-prose-style.sh
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- cli-contract
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
 scripts/check-openapi.sh
 ruby -c Formula/tovuk.rb
 ./scripts/check-all.sh
