@@ -1097,7 +1097,7 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "control_plane_sqlite",
+                      "name": "control_plane_postgres",
                       "ok": true,
                       "message": "reachable"
                     },
@@ -1163,7 +1163,7 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "control_plane_sqlite",
+                      "name": "control_plane_postgres",
                       "ok": false,
                       "message": "unavailable"
                     },
