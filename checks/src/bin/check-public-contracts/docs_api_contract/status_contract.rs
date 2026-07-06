@@ -2,11 +2,17 @@ use crate::helpers::CheckResult;
 
 use super::openapi::{
     OpenApi, openapi_schema, reject_json_response_example_check_name,
-    require_json_response_example_check_name,
+    require_json_response_example_check_name, require_json_response_example_check_u64,
+    require_json_response_example_string, require_schema_properties,
 };
 
 pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
     openapi_schema(openapi, "StatusResponse")?;
+    require_schema_properties(
+        openapi_schema(openapi, "StatusCheck")?,
+        &["name", "ok", "message", "latency_ms"],
+        "OpenAPI status check schema",
+    )?;
     require_json_response_example_check_name(
         openapi,
         "StatusLoaded",
@@ -18,6 +24,48 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         "StatusLoaded",
         "redis",
         "OpenAPI status Redis check",
+    )?;
+    require_json_response_example_check_u64(
+        openapi,
+        "StatusLoaded",
+        "control_plane_postgres",
+        "latency_ms",
+        "OpenAPI status control-plane PostgreSQL latency",
+    )?;
+    require_json_response_example_check_u64(
+        openapi,
+        "StatusLoaded",
+        "redis",
+        "latency_ms",
+        "OpenAPI status Redis latency",
+    )?;
+    require_json_response_example_check_u64(
+        openapi,
+        "StatusUnavailable",
+        "control_plane_postgres",
+        "latency_ms",
+        "OpenAPI unavailable status control-plane PostgreSQL latency",
+    )?;
+    require_json_response_example_check_u64(
+        openapi,
+        "StatusUnavailable",
+        "redis",
+        "latency_ms",
+        "OpenAPI unavailable status Redis latency",
+    )?;
+    require_json_response_example_string(
+        openapi,
+        "StatusLoaded",
+        &["agent_instruction"],
+        "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
+        "OpenAPI loaded status agent instruction",
+    )?;
+    require_json_response_example_string(
+        openapi,
+        "StatusUnavailable",
+        &["agent_instruction"],
+        "Retry the command. If it keeps failing, check Tovuk status before changing your request.",
+        "OpenAPI unavailable status agent instruction",
     )?;
     reject_json_response_example_check_name(
         openapi,
