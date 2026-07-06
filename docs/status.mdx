@@ -14,9 +14,10 @@ tovuk scraper health --json
 ```
 
 `/health` is the simple public health alias. `/healthz` is the infrastructure
-probe. `/v1/status` returns structured dependency state, `agent_instruction`,
-and docs links. `tovuk scraper health --json` returns scraper runtime readiness
-for high-count public-data work.
+probe. `/v1/status` returns structured dependency state, per-check
+`latency_ms`, `agent_instruction`, and docs links. A dependency check `message`
+is `reachable`, `unavailable`, or `timed_out`. `tovuk scraper health --json`
+returns scraper runtime readiness for high-count public-data work.
 
 When the CLI cannot reach the API, it returns `api_unreachable` with a status
 docs URL. Retry once, then check `/v1/status` before changing scraper inputs.
