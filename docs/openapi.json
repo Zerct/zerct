@@ -1099,15 +1099,17 @@
                     {
                       "name": "control_plane_postgres",
                       "ok": true,
-                      "message": "reachable"
+                      "message": "reachable",
+                      "latency_ms": 12
                     },
                     {
                       "name": "redis",
                       "ok": true,
-                      "message": "reachable"
+                      "message": "reachable",
+                      "latency_ms": 3
                     }
                   ],
-                  "agent_instruction": "Continue with the requested Tovuk command.",
+                  "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
                   "docs_url": "https://docs.tovuk.com/status"
                 }
               }
@@ -1165,15 +1167,17 @@
                     {
                       "name": "control_plane_postgres",
                       "ok": false,
-                      "message": "unavailable"
+                      "message": "unavailable",
+                      "latency_ms": 3000
                     },
                     {
                       "name": "redis",
                       "ok": false,
-                      "message": "unavailable"
+                      "message": "unavailable",
+                      "latency_ms": 3000
                     }
                   ],
-                  "agent_instruction": "Retry later before changing scraper inputs.",
+                  "agent_instruction": "Retry the command. If it keeps failing, check Tovuk status before changing your request.",
                   "docs_url": "https://docs.tovuk.com/status"
                 }
               }
@@ -3279,7 +3283,8 @@
         "required": [
           "name",
           "ok",
-          "message"
+          "message",
+          "latency_ms"
         ],
         "properties": {
           "name": {
@@ -3295,12 +3300,20 @@
             "type": "string",
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9223372036854775807,
+            "example": 12
           }
         },
         "example": {
           "name": "example",
           "ok": true,
-          "message": "example"
+          "message": "example",
+          "latency_ms": 12
         }
       },
       "StatusResponse": {
