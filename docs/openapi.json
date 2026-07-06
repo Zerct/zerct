@@ -1167,13 +1167,13 @@
                     {
                       "name": "control_plane_postgres",
                       "ok": false,
-                      "message": "unavailable",
+                      "message": "timed_out",
                       "latency_ms": 3000
                     },
                     {
                       "name": "redis",
                       "ok": false,
-                      "message": "unavailable",
+                      "message": "timed_out",
                       "latency_ms": 3000
                     }
                   ],
@@ -3298,8 +3298,9 @@
           },
           "message": {
             "type": "string",
+            "description": "Dependency probe result: reachable, unavailable, or timed_out.",
             "pattern": "^[\\s\\S]{0,8192}$",
-            "example": "example"
+            "example": "reachable"
           },
           "latency_ms": {
             "type": "integer",
@@ -3312,7 +3313,7 @@
         "example": {
           "name": "example",
           "ok": true,
-          "message": "example",
+          "message": "reachable",
           "latency_ms": 12
         }
       },
