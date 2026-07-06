@@ -44,6 +44,30 @@ pub(in crate::docs_api_contract) fn reject_json_response_example_check_name(
     }
 }
 
+pub(in crate::docs_api_contract) fn require_json_response_example_check_u64(
+    openapi: &OpenApi,
+    response_name: &str,
+    check_name: &str,
+    field: &str,
+    label: &str,
+) -> CheckResult {
+    let checks = json_response_example_value(openapi, response_name, label)?
+        .get("checks")
+        .and_then(Value::as_array)
+        .ok_or_else(|| format!("{label} JSON example checks are missing"))?;
+    let check = checks
+        .iter()
+        .find(|value| value.get("name").and_then(Value::as_str) == Some(check_name))
+        .ok_or_else(|| format!("{label} check {check_name:?} is missing"))?;
+    if check.get(field).and_then(Value::as_u64).is_some() {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label} check {check_name:?} field {field:?} is missing"
+        ))
+    }
+}
+
 pub(in crate::docs_api_contract) fn require_json_response_example_string(
     openapi: &OpenApi,
     response_name: &str,
