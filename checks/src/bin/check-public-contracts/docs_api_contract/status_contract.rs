@@ -10,8 +10,8 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
     require_json_response_example_check_name(
         openapi,
         "StatusLoaded",
-        "control_plane_sqlite",
-        "OpenAPI status control-plane SQLite check",
+        "control_plane_postgres",
+        "OpenAPI status control-plane PostgreSQL check",
     )?;
     require_json_response_example_check_name(
         openapi,
