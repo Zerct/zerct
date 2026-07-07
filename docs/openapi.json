@@ -4639,13 +4639,67 @@
           },
           "outputSchema": {
             "type": "object",
-            "description": "Optional JSON schema for scraper Records. Ecommerce scrapers expose featureCoverage so agents can see whether requested Apify-style fields were extracted or accepted for compatibility.",
+            "description": "Optional JSON schema for scraper Records. Ecommerce scrapers expose featureCoverage plus generic public metadata fields such as tags, keywords, questionSamples, customerPhotoUrls, minimumOrderQuantity, rfqText, resultPosition, and adPosition so agents can see which Apify-style fields were extracted or accepted for compatibility.",
             "example": {
               "type": "object",
               "properties": {
                 "marketplace": {
                   "type": "string",
                   "const": "amazon"
+                },
+                "resultPosition": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "adPosition": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "keywords": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "customerPhotoUrls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "questionCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "questionSamples": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "minimumOrderQuantity": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "rfqText": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "requestedFeatures": {
                   "type": "array",
@@ -4738,6 +4792,60 @@
               "marketplace": {
                 "type": "string",
                 "const": "amazon"
+              },
+              "resultPosition": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "adPosition": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "keywords": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "customerPhotoUrls": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "questionCount": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "questionSamples": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "minimumOrderQuantity": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "rfqText": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "requestedFeatures": {
                 "type": "array",
@@ -4987,6 +5095,60 @@
                 "marketplace": {
                   "type": "string",
                   "const": "amazon"
+                },
+                "resultPosition": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "adPosition": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "keywords": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "customerPhotoUrls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "questionCount": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "questionSamples": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "minimumOrderQuantity": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "rfqText": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "requestedFeatures": {
                   "type": "array",

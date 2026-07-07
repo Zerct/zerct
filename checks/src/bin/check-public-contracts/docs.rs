@@ -97,6 +97,51 @@ fn require_scraper_examples(sources: &DocsSources) -> CheckResult {
         "featureCoverage",
         "OpenAPI ecommerce feature coverage",
     )?;
+    require_ecommerce_output_fields(sources)?;
+    Ok(())
+}
+
+fn require_ecommerce_output_fields(sources: &DocsSources) -> CheckResult {
+    for field in [
+        "tags",
+        "keywords",
+        "questionSamples",
+        "customerPhotoUrls",
+        "minimumOrderQuantity",
+        "rfqText",
+        "resultPosition",
+        "adPosition",
+    ] {
+        for (name, text) in [
+            ("scraper docs", sources.scrapers.as_str()),
+            ("agents", sources.agents.as_str()),
+            ("docs skill", sources.skill.as_str()),
+            ("packaged skill", sources.packaged_skill.as_str()),
+            ("llms", sources.llms.as_str()),
+        ] {
+            require_contains(
+                text,
+                field,
+                format!("{name} ecommerce output field {field}").as_str(),
+            )?;
+        }
+    }
+    for field in [
+        "\"tags\": {",
+        "\"keywords\": {",
+        "\"questionSamples\": {",
+        "\"customerPhotoUrls\": {",
+        "\"minimumOrderQuantity\": {",
+        "\"rfqText\": {",
+        "\"resultPosition\": {",
+        "\"adPosition\": {",
+    ] {
+        require_contains(
+            sources.openapi.as_str(),
+            field,
+            format!("OpenAPI ecommerce output field {field}").as_str(),
+        )?;
+    }
     Ok(())
 }
 

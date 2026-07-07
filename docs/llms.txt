@@ -60,7 +60,9 @@ credentials, or proxy URLs.
 
 For ecommerce Records, inspect `featureCoverage` to see whether requested
 Apify-style fields were extracted, absent, partially extracted, or accepted for
-compatibility.
+compatibility. Public metadata fields can include `tags`, `keywords`,
+`questionSamples`, `customerPhotoUrls`, `minimumOrderQuantity`, `rfqText`,
+`resultPosition`, and `adPosition`.
 
 The public CLI does not deploy websites, backends, databases, workers, storage
 buckets, queues, cron jobs, custom domains, secrets, or other customer
