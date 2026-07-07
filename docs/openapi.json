@@ -4636,26 +4636,166 @@
               "$ref": "#/components/schemas/ScraperPriceEvent"
             },
             "example": []
+          },
+          "outputSchema": {
+            "type": "object",
+            "description": "Optional JSON schema for scraper Records. Ecommerce scrapers expose featureCoverage so agents can see whether requested Apify-style fields were extracted or accepted for compatibility.",
+            "example": {
+              "type": "object",
+              "properties": {
+                "marketplace": {
+                  "type": "string",
+                  "const": "amazon"
+                },
+                "requestedFeatures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "featureCoverage": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "feature": {
+                        "type": "string",
+                        "example": "includeReviews"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "extracted",
+                          "not_found",
+                          "partially_extracted",
+                          "accepted_not_extracted",
+                          "unknown"
+                        ],
+                        "example": "extracted"
+                      },
+                      "fields": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "example": [
+                          "reviewCount",
+                          "reviewSamples"
+                        ]
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Review count or review samples were extracted."
+                      }
+                    },
+                    "required": [
+                      "feature",
+                      "status",
+                      "fields",
+                      "message"
+                    ]
+                  }
+                }
+              }
+            },
+            "maxProperties": 100
           }
         },
         "example": {
-          "id": "tiktok",
-          "name": "TikTok Scraper",
-          "category": "social",
-          "description": "Scrape public TikTok data.",
+          "id": "amazon",
+          "name": "Amazon Scraper",
+          "category": "Ecommerce",
+          "description": "Scrape public Amazon records through managed managed proxy provider egress.",
           "inputSchema": {
             "type": "object",
             "properties": {
               "operation": {
+                "type": "string",
+                "enum": [
+                  "search",
+                  "product",
+                  "reviews",
+                  "offers",
+                  "seller",
+                  "bestsellers",
+                  "asins",
+                  "questions",
+                  "price-tracker"
+                ]
+              },
+              "query": {
                 "type": "string"
+              },
+              "includeReviews": {
+                "type": "boolean"
+              }
+            }
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "marketplace": {
+                "type": "string",
+                "const": "amazon"
+              },
+              "requestedFeatures": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "featureCoverage": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "feature": {
+                      "type": "string",
+                      "example": "includeReviews"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "extracted",
+                        "not_found",
+                        "partially_extracted",
+                        "accepted_not_extracted",
+                        "unknown"
+                      ],
+                      "example": "extracted"
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "reviewCount",
+                        "reviewSamples"
+                      ]
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Review count or review samples were extracted."
+                    }
+                  },
+                  "required": [
+                    "feature",
+                    "status",
+                    "fields",
+                    "message"
+                  ]
+                }
               }
             }
           },
           "priceEvents": [
             {
-              "name": "tiktok_records",
+              "name": "amazon_record",
               "unit": "record",
-              "usdMicros": 1700
+              "usdMicros": 1400
             }
           ]
         }
@@ -4812,40 +4952,110 @@
         },
         "example": {
           "scraper": {
-            "id": "linkedin",
-            "name": "LinkedIn Scraper",
-            "category": "social",
-            "description": "Scrape public LinkedIn data.",
+            "id": "amazon",
+            "name": "Amazon Scraper",
+            "category": "Ecommerce",
+            "description": "Scrape public Amazon records through managed managed proxy provider egress.",
             "inputSchema": {
               "type": "object",
-              "examples": {
-                "linkedinPostSearch": {
-                  "operation": "post-search",
-                  "query": "b2b sales",
-                  "author_company_urns": "1035",
-                  "limit": 50
+              "properties": {
+                "operation": {
+                  "type": "string",
+                  "enum": [
+                    "search",
+                    "product",
+                    "reviews",
+                    "offers",
+                    "seller",
+                    "bestsellers",
+                    "asins",
+                    "questions",
+                    "price-tracker"
+                  ]
                 },
-                "linkedinCompanyEmployees": {
-                  "operation": "company-employees",
-                  "identifier": "https://www.linkedin.com/company/google/",
-                  "max_employees": 50
+                "query": {
+                  "type": "string"
+                },
+                "includeReviews": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "outputSchema": {
+              "type": "object",
+              "properties": {
+                "marketplace": {
+                  "type": "string",
+                  "const": "amazon"
+                },
+                "requestedFeatures": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "featureCoverage": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "feature": {
+                        "type": "string",
+                        "example": "includeReviews"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "extracted",
+                          "not_found",
+                          "partially_extracted",
+                          "accepted_not_extracted",
+                          "unknown"
+                        ],
+                        "example": "extracted"
+                      },
+                      "fields": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "example": [
+                          "reviewCount",
+                          "reviewSamples"
+                        ]
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Review count or review samples were extracted."
+                      }
+                    },
+                    "required": [
+                      "feature",
+                      "status",
+                      "fields",
+                      "message"
+                    ]
+                  }
                 }
               }
             },
             "priceEvents": [
               {
-                "name": "linkedin_records",
+                "name": "amazon_record",
                 "unit": "record",
-                "usdMicros": 900
+                "usdMicros": 1400
               }
             ]
           },
           "runtimeHealth": {
-            "type": "linkedinManagedReaderHealth",
-            "status": "ready"
+            "type": "amazonManagedProxyHealth",
+            "status": "ready",
+            "proxyConfigured": true,
+            "localDirectEgressAllowed": false
           },
           "nextActions": [
-            "Use `tovuk request create linkedin <input-json> --json` to create scraper work."
+            "Use `tovuk request create amazon <input-json> --json` to create scraper work."
           ]
         }
       },
