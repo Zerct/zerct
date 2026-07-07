@@ -261,6 +261,12 @@ Ecommerce operation inputs may use common Apify-style aliases such as
 `zipCode`; saved requests return the canonical operation token shown in the
 table and normalize postal aliases to `deliveryLocation`.
 
+Use `tovuk scraper show <scraper> --json` to inspect exact `inputSchema` caps.
+Current ecommerce caps are 50 search terms, 200 broad URL or product URL
+values, 100 seller, shop, or category URL values, 200 product IDs or ASINs, 100
+category IDs, 512 characters for search text, 2,048 characters for URLs, and
+128 characters for generated product or category IDs.
+
 Ecommerce Records include `requestedFeatures` and `featureCoverage`. Use
 `featureCoverage` to see whether each Apify-style feature flag was extracted,
 not found in the fetched public HTML, partially extracted, or accepted for
