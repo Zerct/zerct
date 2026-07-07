@@ -48,7 +48,9 @@ credentials, or proxy URLs.
 
 For ecommerce Records, inspect `featureCoverage` to see whether requested
 Apify-style fields were extracted, absent, partially extracted, or accepted for
-compatibility.
+compatibility. Public metadata fields can include `tags`, `keywords`,
+`questionSamples`, `customerPhotoUrls`, `minimumOrderQuantity`, `rfqText`,
+`resultPosition`, and `adPosition`.
 
 AI/API agents may open account-scoped service tickets between the authenticated
 account and Tovuk through `POST /v1/support/tickets` with an account API key or
