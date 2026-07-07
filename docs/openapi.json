@@ -1105,6 +1105,7 @@
                       "ok": true,
                       "message": "reachable",
                       "latency_ms": 12,
+                      "latency_us": 12500,
                       "details": {
                         "pool_max_connections": 6,
                         "pool_open_connections": 4,
@@ -1116,7 +1117,8 @@
                       "name": "redis",
                       "ok": true,
                       "message": "reachable",
-                      "latency_ms": 3
+                      "latency_ms": 3,
+                      "latency_us": 3200
                     }
                   ],
                   "agent_instruction": "Continue with GET /v1/capabilities, then run the requested Tovuk command.",
@@ -1180,6 +1182,7 @@
                       "ok": false,
                       "message": "timed_out",
                       "latency_ms": 3000,
+                      "latency_us": 3000000,
                       "details": {
                         "pool_max_connections": 6,
                         "pool_open_connections": 6,
@@ -1191,7 +1194,8 @@
                       "name": "redis",
                       "ok": false,
                       "message": "timed_out",
-                      "latency_ms": 3000
+                      "latency_ms": 3000,
+                      "latency_us": 3000000
                     }
                   ],
                   "agent_instruction": "Retry the command. If it keeps failing, check Tovuk status before changing your request.",
@@ -3358,7 +3362,8 @@
           "name",
           "ok",
           "message",
-          "latency_ms"
+          "latency_ms",
+          "latency_us"
         ],
         "properties": {
           "name": {
@@ -3382,6 +3387,14 @@
             "minimum": 0,
             "maximum": 9223372036854775807,
             "example": 12
+          },
+          "latency_us": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 9223372036854775807,
+            "description": "Dependency probe latency in microseconds for fast checks that round down to latency_ms: 0.",
+            "example": 12500
           },
           "details": {
             "type": "object",
@@ -3424,6 +3437,7 @@
           "ok": true,
           "message": "reachable",
           "latency_ms": 12,
+          "latency_us": 12500,
           "details": {
             "pool_max_connections": 6,
             "pool_open_connections": 4,

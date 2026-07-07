@@ -8,6 +8,19 @@ use super::openapi::{
 };
 
 pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
+    require_status_response_schemas(openapi)?;
+    require_status_check_names(openapi)?;
+    require_status_latency_examples(openapi)?;
+    require_status_top_level_examples(openapi)?;
+    reject_json_response_example_check_name(
+        openapi,
+        "StatusLoaded",
+        "database",
+        "OpenAPI status must not expose generic database product wording",
+    )
+}
+
+fn require_status_response_schemas(openapi: &OpenApi) -> CheckResult {
     require_schema_properties(
         openapi_schema(openapi, "StatusResponse")?,
         &[
@@ -23,9 +36,19 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
     )?;
     require_schema_properties(
         openapi_schema(openapi, "StatusCheck")?,
-        &["name", "ok", "message", "latency_ms", "details"],
+        &[
+            "name",
+            "ok",
+            "message",
+            "latency_ms",
+            "latency_us",
+            "details",
+        ],
         "OpenAPI status check schema",
-    )?;
+    )
+}
+
+fn require_status_check_names(openapi: &OpenApi) -> CheckResult {
     require_json_response_example_check_name(
         openapi,
         "StatusLoaded",
@@ -37,37 +60,40 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         "StatusLoaded",
         "redis",
         "OpenAPI status Redis check",
+    )
+}
+
+fn require_status_latency_examples(openapi: &OpenApi) -> CheckResult {
+    for response_name in ["StatusLoaded", "StatusUnavailable"] {
+        require_dependency_latency_examples(openapi, response_name, "control_plane_postgres")?;
+        require_postgres_pool_details(openapi, response_name)?;
+        require_dependency_latency_examples(openapi, response_name, "redis")?;
+    }
+    Ok(())
+}
+
+fn require_dependency_latency_examples(
+    openapi: &OpenApi,
+    response_name: &str,
+    check_name: &str,
+) -> CheckResult {
+    require_json_response_example_check_u64(
+        openapi,
+        response_name,
+        check_name,
+        "latency_ms",
+        "OpenAPI status millisecond latency",
     )?;
     require_json_response_example_check_u64(
         openapi,
-        "StatusLoaded",
-        "control_plane_postgres",
-        "latency_ms",
-        "OpenAPI status control-plane PostgreSQL latency",
-    )?;
-    require_postgres_pool_details(openapi, "StatusLoaded")?;
-    require_json_response_example_check_u64(
-        openapi,
-        "StatusLoaded",
-        "redis",
-        "latency_ms",
-        "OpenAPI status Redis latency",
-    )?;
-    require_json_response_example_check_u64(
-        openapi,
-        "StatusUnavailable",
-        "control_plane_postgres",
-        "latency_ms",
-        "OpenAPI unavailable status control-plane PostgreSQL latency",
-    )?;
-    require_postgres_pool_details(openapi, "StatusUnavailable")?;
-    require_json_response_example_check_u64(
-        openapi,
-        "StatusUnavailable",
-        "redis",
-        "latency_ms",
-        "OpenAPI unavailable status Redis latency",
-    )?;
+        response_name,
+        check_name,
+        "latency_us",
+        "OpenAPI status microsecond latency",
+    )
+}
+
+fn require_status_top_level_examples(openapi: &OpenApi) -> CheckResult {
     require_json_response_example_string(
         openapi,
         "StatusLoaded",
@@ -95,12 +121,6 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         &["agent_instruction"],
         "Retry the command. If it keeps failing, check Tovuk status before changing your request.",
         "OpenAPI unavailable status agent instruction",
-    )?;
-    reject_json_response_example_check_name(
-        openapi,
-        "StatusLoaded",
-        "database",
-        "OpenAPI status must not expose generic database product wording",
     )
 }
 
