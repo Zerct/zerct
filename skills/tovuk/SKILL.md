@@ -49,6 +49,12 @@ compatibility. Public metadata fields can include `tags`, `keywords`,
 `questionSamples`, `customerPhotoUrls`, `minimumOrderQuantity`, `rfqText`,
 `resultPosition`, and `adPosition`.
 
+Use `tovuk scraper show <scraper> --json` before large ecommerce jobs to read
+the live `inputSchema`. Current ecommerce caps are 50 search terms, 200 broad
+URL or product URL values, 100 seller, shop, or category URL values, 200
+product IDs or ASINs, 100 category IDs, 512 characters for search text, 2,048
+characters for URLs, and 128 characters for generated product or category IDs.
+
 AI/API agents may open account-scoped service tickets between the authenticated
 account and Tovuk through `POST /v1/support/tickets` with an account API key or
 session bearer token.
