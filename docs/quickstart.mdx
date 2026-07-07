@@ -33,6 +33,8 @@ tovuk scraper list
 tovuk scraper health
 tovuk scraper show tiktok
 tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}'
+tovuk request create google-maps '{"searchTerms":["coffee shops"],"locationQuery":"Seattle, WA","limit":25}'
+tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","limit":25}'
 ```
 
 Copy the returned `request.id`, then poll and fetch records:

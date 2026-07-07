@@ -53,6 +53,16 @@ fn require_scraper_examples(sources: &DocsSources) -> CheckResult {
         )?;
         require_contains(
             text,
+            "tovuk request create amazon",
+            format!("{name} Amazon example").as_str(),
+        )?;
+        require_contains(
+            text,
+            "tovuk request create google-maps",
+            format!("{name} Google Maps example").as_str(),
+        )?;
+        require_contains(
+            text,
             "public data only",
             format!("{name} public-data policy").as_str(),
         )?;

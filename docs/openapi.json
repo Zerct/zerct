@@ -1767,10 +1767,64 @@
                   ],
                   "scraperPrices": [
                     {
+                      "scraper": "reddit",
+                      "priceEvent": "reddit_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 700
+                    },
+                    {
+                      "scraper": "github",
+                      "priceEvent": "github_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 600
+                    },
+                    {
+                      "scraper": "google-maps",
+                      "priceEvent": "google_maps_place",
+                      "unit": "place",
+                      "usdMicrosPerResult": 1200
+                    },
+                    {
+                      "scraper": "amazon",
+                      "priceEvent": "amazon_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 1400
+                    },
+                    {
+                      "scraper": "alibaba",
+                      "priceEvent": "alibaba_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 1500
+                    },
+                    {
+                      "scraper": "temu",
+                      "priceEvent": "temu_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 1600
+                    },
+                    {
+                      "scraper": "etsy",
+                      "priceEvent": "etsy_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 1200
+                    },
+                    {
                       "scraper": "tiktok",
                       "priceEvent": "tiktok_record",
                       "unit": "record",
                       "usdMicrosPerResult": 1700
+                    },
+                    {
+                      "scraper": "instagram",
+                      "priceEvent": "instagram_record",
+                      "unit": "record",
+                      "usdMicrosPerResult": 800
+                    },
+                    {
+                      "scraper": "x",
+                      "priceEvent": "x_post",
+                      "unit": "post",
+                      "usdMicrosPerResult": 300
                     }
                   ],
                   "topUp": {
@@ -4441,14 +4495,84 @@
               "includedBalanceUsdCents": 2000,
               "bonusBalanceUsdCents": 0,
               "paidOveragesEnabled": false
+            },
+            {
+              "plan": "pro",
+              "monthlyPriceUsdCents": 10000,
+              "planBalanceUsdCents": 10000,
+              "includedBalanceUsdCents": 12000,
+              "bonusBalanceUsdCents": 2000,
+              "paidOveragesEnabled": false
+            },
+            {
+              "plan": "max",
+              "monthlyPriceUsdCents": 20000,
+              "planBalanceUsdCents": 20000,
+              "includedBalanceUsdCents": 30000,
+              "bonusBalanceUsdCents": 10000,
+              "paidOveragesEnabled": false
             }
           ],
           "scraperPrices": [
+            {
+              "scraper": "reddit",
+              "priceEvent": "reddit_record",
+              "unit": "record",
+              "usdMicrosPerResult": 700
+            },
+            {
+              "scraper": "github",
+              "priceEvent": "github_record",
+              "unit": "record",
+              "usdMicrosPerResult": 600
+            },
+            {
+              "scraper": "google-maps",
+              "priceEvent": "google_maps_place",
+              "unit": "place",
+              "usdMicrosPerResult": 1200
+            },
+            {
+              "scraper": "amazon",
+              "priceEvent": "amazon_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1400
+            },
+            {
+              "scraper": "alibaba",
+              "priceEvent": "alibaba_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1500
+            },
+            {
+              "scraper": "temu",
+              "priceEvent": "temu_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1600
+            },
+            {
+              "scraper": "etsy",
+              "priceEvent": "etsy_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1200
+            },
             {
               "scraper": "tiktok",
               "priceEvent": "tiktok_record",
               "unit": "record",
               "usdMicrosPerResult": 1700
+            },
+            {
+              "scraper": "instagram",
+              "priceEvent": "instagram_record",
+              "unit": "record",
+              "usdMicrosPerResult": 800
+            },
+            {
+              "scraper": "x",
+              "priceEvent": "x_post",
+              "unit": "post",
+              "usdMicrosPerResult": 300
             }
           ],
           "topUp": {
@@ -4457,7 +4581,8 @@
             "expiresAfterInactiveDays": 365
           },
           "nextActions": [
-            "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper."
+            "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper.",
+            "Use `scraperPrices[].usdMicrosPerResult`, request limits, and `tovuk usage --json` to estimate balance impact before high-count requests."
           ]
         }
       },

@@ -172,6 +172,11 @@ fn scraper_label(scraper: &str) -> CheckResult<&'static str> {
     match scraper {
         "reddit" => Ok("Reddit"),
         "github" => Ok("GitHub"),
+        "google-maps" => Ok("Google Maps"),
+        "amazon" => Ok("Amazon"),
+        "alibaba" => Ok("Alibaba"),
+        "temu" => Ok("Temu"),
+        "etsy" => Ok("Etsy"),
         "linkedin" => Ok("LinkedIn"),
         "tiktok" => Ok("TikTok"),
         "instagram" => Ok("Instagram"),
