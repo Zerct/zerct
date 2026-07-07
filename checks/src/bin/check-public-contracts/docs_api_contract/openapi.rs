@@ -8,8 +8,8 @@ mod schemas;
 
 pub(in crate::docs_api_contract) use examples::{
     reject_json_response_example_check_name, require_example_string,
-    require_json_response_example_check_name, require_json_response_example_check_u64,
-    require_json_response_example_string,
+    require_json_response_example_check_name, require_json_response_example_check_nested_u64,
+    require_json_response_example_check_u64, require_json_response_example_string,
 };
 pub(in crate::docs_api_contract) use operations::{
     reject_operation_field, require_operation_id, require_parameter_bounds,
