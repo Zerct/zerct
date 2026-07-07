@@ -67,6 +67,36 @@ fn require_scraper_examples(sources: &DocsSources) -> CheckResult {
             format!("{name} public-data policy").as_str(),
         )?;
     }
+    require_contains(
+        sources.scrapers.as_str(),
+        "featureCoverage",
+        "scraper docs ecommerce feature coverage",
+    )?;
+    require_contains(
+        sources.agents.as_str(),
+        "featureCoverage",
+        "agent docs ecommerce feature coverage",
+    )?;
+    require_contains(
+        sources.skill.as_str(),
+        "featureCoverage",
+        "docs skill ecommerce feature coverage",
+    )?;
+    require_contains(
+        sources.packaged_skill.as_str(),
+        "featureCoverage",
+        "packaged skill ecommerce feature coverage",
+    )?;
+    require_contains(
+        sources.llms.as_str(),
+        "featureCoverage",
+        "llms ecommerce feature coverage",
+    )?;
+    require_contains(
+        sources.openapi.as_str(),
+        "featureCoverage",
+        "OpenAPI ecommerce feature coverage",
+    )?;
     Ok(())
 }
 

@@ -256,6 +256,11 @@ examples above:
 Tovuk runs Google Maps and ecommerce reads through managed Webshare egress and
 stores visible public records only.
 
+Ecommerce Records include `requestedFeatures` and `featureCoverage`. Use
+`featureCoverage` to see whether each Apify-style feature flag was extracted,
+not found in the fetched public HTML, partially extracted, or accepted for
+compatibility while a platform-specific parser is still needed.
+
 Create a Reddit Request:
 
 ```json
