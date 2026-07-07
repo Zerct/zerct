@@ -18,6 +18,8 @@ tovuk request list --limit 20 --json
 tovuk request list --limit 20 --cursor <nextCursor> --json
 tovuk request create github '{"query":"mcp server","language":"Rust","limit":100}' --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}' --json
+tovuk request create google-maps '{"searchTerms":["coffee shops"],"locationQuery":"Seattle, WA","limit":25}' --json
+tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","limit":25}' --json
 tovuk request show request_123 --json
 tovuk request results request_123 --limit 1000 --json
 tovuk usage --json

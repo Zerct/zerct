@@ -30,6 +30,11 @@ tovuk scraper list --json
 | --- | --- | ---: |
 | `reddit` | record | `$0.70` |
 | `github` | record | `$0.60` |
+| `google-maps` | place | `$1.20` |
+| `amazon` | record | `$1.40` |
+| `alibaba` | record | `$1.50` |
+| `temu` | record | `$1.60` |
+| `etsy` | record | `$1.20` |
 | `linkedin` | record | `$0.90` |
 | `tiktok` | record | `$1.70` |
 | `instagram` | record | `$0.80` |
@@ -37,7 +42,7 @@ tovuk scraper list --json
 
 ## Names
 
-- Scraper: a public-data source such as `github`, `instagram`, or `reddit`.
+- Scraper: a public-data source such as `github`, `google-maps`, `amazon`, or `reddit`.
 - Request: one paid scraper run.
 - Results: stored output for one Request.
 - Record: one JSON item inside Results.
@@ -63,6 +68,11 @@ tovuk request create reddit '{"query":"rust lang","contentType":"both","autoDisc
 tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.com/r/rust/comments/POST_ID/example/","commentSort":"top","limit":100}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
 tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json
+tovuk request create google-maps '{"searchTerms":["coffee shops"],"locationQuery":"Seattle, WA","limit":25,"scrapeContacts":true}' --json
+tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","limit":25,"includeReviews":true}' --json
+tovuk request create alibaba '{"operation":"search","query":"stainless bottle","limit":25,"includeSupplierVerification":true}' --json
+tovuk request create temu '{"operation":"search","query":"desk lamp","limit":25,"includeSalesData":true}' --json
+tovuk request create etsy '{"operation":"search","query":"linen wall art","limit":25,"includeShopDetails":true}' --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
 tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
@@ -232,6 +242,20 @@ Tovuk stores canonical public input fields and returns
 repository-shaped, file-shaped, issue-shaped, pull-request-shaped,
 developer-shaped, or Marketplace app Records.
 
+Business and ecommerce scrapers use the same Request shape shown in the CLI
+examples above:
+
+| Scraper | Public inputs | Operations |
+| --- | --- | --- |
+| `google-maps` | place URLs, search URLs, shared list URLs, place ids, search terms, location context, review filters, contact and image flags | `search`, `place`, `reviews`, `list` |
+| `amazon` | search terms, product URLs, ASINs, seller URLs, category URLs, bestseller targets, price filters, review and offer flags | `search`, `product`, `reviews`, `offers`, `seller`, `bestsellers`, `asins`, `questions`, `price-tracker` |
+| `alibaba` | search terms, product URLs, supplier URLs, category URLs, RFQ targets, reverse-image inputs, MOQ and price-tier options | `search`, `product`, `supplier`, `category`, `rfq`, `reverse-image`, `price-tiers` |
+| `temu` | search terms, product URLs, listing URLs, category URLs, review options, ad-library targets, sold-count and variant flags | `search`, `product`, `listings`, `category`, `reviews`, `ad-library`, `price-tracker` |
+| `etsy` | search terms, listing URLs, shop URLs, review targets, keyword-research options, seller-intelligence and customer-photo flags | `search`, `listing`, `shop`, `reviews`, `keywords`, `seller-intel`, `customer-photos` |
+
+Tovuk runs Google Maps and ecommerce reads through managed Webshare egress and
+stores visible public records only.
+
 Create a Reddit Request:
 
 ```json
@@ -389,6 +413,14 @@ or proxy URLs. Tovuk manages X read accounts and Webshare egress internally.
 
 For GitHub Requests, never send GitHub tokens, personal access tokens, private
 repository URLs, git credentials, cookies, session tokens, or proxy URLs.
+
+For Google Maps Requests, never send private account data, private saved-place
+lists, cookies, Google account credentials, session tokens, or proxy URLs.
+
+For ecommerce Requests, never send marketplace account cookies, buyer or seller
+account credentials, order history, private cart data, session tokens, or proxy
+URLs. Tovuk manages Webshare egress internally and only accepts public Amazon,
+Alibaba, Temu, and Etsy targets.
 
 For Reddit Requests, never send Reddit cookies, account credentials, session
 tokens, private community content, or proxy URLs. Tovuk manages Webshare egress
