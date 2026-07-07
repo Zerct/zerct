@@ -47,6 +47,8 @@ tovuk request list --limit 20 --cursor <nextCursor> --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","limit":100}' --json
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}' --json
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}' --json
+tovuk request create google-maps '{"searchTerms":["coffee shops"],"locationQuery":"Seattle, WA","limit":25}' --json
+tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","limit":25}' --json
 tovuk request show request_123 --json
 tovuk request results request_123 --limit 1000 --json
 tovuk request cancel request_123 --json

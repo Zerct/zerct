@@ -24,6 +24,8 @@ tovuk request create tiktok '{"operation":"search","query":"rust programming","l
 tovuk request create github '{"operation":"codeSearch","query":"serde language:Rust","maxRepos":3,"limit":100}'
 tovuk request create reddit '{"subreddit":"rust","sort":"new","limit":100}'
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":50}'
+tovuk request create google-maps '{"searchTerms":["coffee shops"],"locationQuery":"Seattle, WA","limit":25}'
+tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","limit":25}'
 tovuk request list --limit 20
 tovuk request list --limit 20 --cursor <nextCursor>
 tovuk request show request_123
