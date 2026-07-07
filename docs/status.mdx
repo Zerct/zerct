@@ -15,9 +15,10 @@ tovuk scraper health --json
 
 `/health` is the simple public health alias. `/healthz` is the infrastructure
 probe. `/v1/status` returns structured dependency state, stable `service` and
-`name` identifiers, per-check `latency_ms`, optional non-secret `details`,
-`agent_instruction`, and docs links. The `control_plane_postgres` check reports
-pool capacity fields such as
+`name` identifiers, per-check `latency_ms` and `latency_us`, optional
+non-secret `details`, `agent_instruction`, and docs links. Use `latency_us` for
+fast dependency probes that round down to `latency_ms: 0`. The
+`control_plane_postgres` check reports pool capacity fields such as
 `pool_max_connections`, `pool_open_connections`, `pool_idle_connections`, and
 `pool_busy_connections` so agents can distinguish database latency from pool
 saturation. A dependency check `message` is `reachable`, `unavailable`, or
