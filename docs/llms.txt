@@ -58,6 +58,10 @@ Scraper requests are public data only. Do not send cookies, passwords, account
 tokens, private session data, private account content, private repository
 credentials, or proxy URLs.
 
+For ecommerce Records, inspect `featureCoverage` to see whether requested
+Apify-style fields were extracted, absent, partially extracted, or accepted for
+compatibility.
+
 The public CLI does not deploy websites, backends, databases, workers, storage
 buckets, queues, cron jobs, custom domains, secrets, or other customer
 infrastructure.
