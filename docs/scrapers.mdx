@@ -256,6 +256,10 @@ examples above:
 Tovuk runs Google Maps and ecommerce reads through managed managed proxy provider egress and
 stores visible public records only.
 
+Ecommerce operation inputs may use common Apify-style aliases such as
+`best_sellers`, `adLibrary`, `Vendor`, or `seller-intelligence`; saved requests
+return the canonical operation token shown in the table.
+
 Ecommerce Records include `requestedFeatures` and `featureCoverage`. Use
 `featureCoverage` to see whether each Apify-style feature flag was extracted,
 not found in the fetched public HTML, partially extracted, or accepted for
