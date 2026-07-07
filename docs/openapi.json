@@ -911,7 +911,7 @@
           "Accounts"
         ],
         "summary": "List API keys",
-        "description": "Lists API keys for the authenticated account without returning secret token material.",
+        "description": "Lists all active API keys and the 20 most recently revoked API keys for the authenticated account without returning secret token material.",
         "operationId": "listAccountApiKeys",
         "responses": {
           "200": {
@@ -2894,7 +2894,7 @@
         }
       },
       "AccountApiKeysLoaded": {
-        "description": "API keys loaded.",
+        "description": "API keys loaded. Includes all active keys and the 20 most recently revoked keys.",
         "content": {
           "application/json": {
             "schema": {
@@ -2917,7 +2917,10 @@
                     }
                   ],
                   "nextActions": [
-                    "Create one API key for each app or script."
+                    "Create one API key for each app or script that runs scraper requests or opens support tickets.",
+                    "This list shows all active API keys and the 20 most recently revoked keys.",
+                    "Revoke keys you no longer use.",
+                    "Set `TOVUK_TOKEN` before running scraper requests or support commands from the CLI."
                   ]
                 }
               }
@@ -6136,7 +6139,7 @@
       },
       "AccountApiKeysResponse": {
         "type": "object",
-        "description": "API key list response.",
+        "description": "API key list response. Includes all active keys and the 20 most recently revoked keys.",
         "required": [
           "apiKeys",
           "nextActions"
@@ -6158,7 +6161,10 @@
               "pattern": "^[\\s\\S]{1,300}$"
             },
             "example": [
-              "Create one API key for each app or script."
+              "Create one API key for each app or script that runs scraper requests or opens support tickets.",
+              "This list shows all active API keys and the 20 most recently revoked keys.",
+              "Revoke keys you no longer use.",
+              "Set `TOVUK_TOKEN` before running scraper requests or support commands from the CLI."
             ]
           }
         },
@@ -6176,7 +6182,10 @@
             }
           ],
           "nextActions": [
-            "Create one API key for each app or script."
+            "Create one API key for each app or script that runs scraper requests or opens support tickets.",
+            "This list shows all active API keys and the 20 most recently revoked keys.",
+            "Revoke keys you no longer use.",
+            "Set `TOVUK_TOKEN` before running scraper requests or support commands from the CLI."
           ]
         }
       },
