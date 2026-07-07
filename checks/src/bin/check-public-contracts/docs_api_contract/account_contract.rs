@@ -168,6 +168,14 @@ pub(super) fn require_openapi_api_key_prefix_contract(openapi: &str) -> CheckRes
                 "tovuk_key_example_token_shown_once",
                 "OpenAPI one-time API key token example",
             ),
+            (
+                "20 most recently revoked API keys",
+                "OpenAPI API key list revoked-history bound",
+            ),
+            (
+                "all active API keys",
+                "OpenAPI API key list active-key visibility",
+            ),
         ],
     )?;
     reject_contains(openapi, "tvk_live", "retired tvk_live API key prefix")?;
