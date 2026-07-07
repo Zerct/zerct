@@ -12,7 +12,8 @@ pub(in crate::docs_api_contract) use examples::{
     require_json_response_example_check_u64, require_json_response_example_string,
 };
 pub(in crate::docs_api_contract) use operations::{
-    reject_operation_field, require_operation_id, require_parameter_bounds,
+    reject_operation_field, require_operation_id, require_operation_response_ref,
+    require_parameter_bounds,
 };
 pub(in crate::docs_api_contract) use schemas::{
     reject_numeric_property_anywhere, reject_schema, reject_schema_property,

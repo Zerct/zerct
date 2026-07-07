@@ -936,7 +936,7 @@
           "Accounts"
         ],
         "summary": "Create API key",
-        "description": "Creates an API key for apps, scripts, agents, and backend jobs. The full token is returned once.",
+        "description": "Creates an API key for apps, scripts, agents, and backend jobs. The full token is returned once. Plan apiTokens limits apply to active keys; revoked keys do not count.",
         "operationId": "createAccountApiKey",
         "requestBody": {
           "description": "API key name.",
@@ -966,6 +966,9 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "402": {
+            "$ref": "#/components/responses/PaymentRequired"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
