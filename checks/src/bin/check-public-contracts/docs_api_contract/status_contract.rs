@@ -8,7 +8,19 @@ use super::openapi::{
 };
 
 pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
-    openapi_schema(openapi, "StatusResponse")?;
+    require_schema_properties(
+        openapi_schema(openapi, "StatusResponse")?,
+        &[
+            "ok",
+            "service",
+            "name",
+            "api_version",
+            "checks",
+            "agent_instruction",
+            "docs_url",
+        ],
+        "OpenAPI status response schema",
+    )?;
     require_schema_properties(
         openapi_schema(openapi, "StatusCheck")?,
         &["name", "ok", "message", "latency_ms", "details"],
@@ -55,6 +67,20 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         "redis",
         "latency_ms",
         "OpenAPI unavailable status Redis latency",
+    )?;
+    require_json_response_example_string(
+        openapi,
+        "StatusLoaded",
+        &["service"],
+        "tovuk-api",
+        "OpenAPI loaded status service",
+    )?;
+    require_json_response_example_string(
+        openapi,
+        "StatusUnavailable",
+        &["service"],
+        "tovuk-api",
+        "OpenAPI unavailable status service",
     )?;
     require_json_response_example_string(
         openapi,

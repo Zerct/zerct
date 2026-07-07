@@ -1093,6 +1093,7 @@
                 "summary": "Structured API status.",
                 "value": {
                   "ok": true,
+                  "service": "tovuk-api",
                   "name": "tovuk-api",
                   "api_version": "v1",
                   "checks": [
@@ -1167,6 +1168,7 @@
                 "summary": "Structured API unavailable status.",
                 "value": {
                   "ok": false,
+                  "service": "tovuk-api",
                   "name": "tovuk-api",
                   "api_version": "v1",
                   "checks": [
@@ -3429,6 +3431,7 @@
         "description": "Structured API status for agents.",
         "required": [
           "ok",
+          "service",
           "name",
           "api_version",
           "checks",
@@ -3439,6 +3442,11 @@
           "ok": {
             "type": "boolean",
             "example": true
+          },
+          "service": {
+            "type": "string",
+            "pattern": "^[\\s\\S]{0,8192}$",
+            "example": "tovuk-api"
           },
           "name": {
             "type": "string",
@@ -3470,6 +3478,7 @@
         },
         "example": {
           "ok": true,
+          "service": "tovuk-api",
           "name": "example",
           "api_version": "example",
           "checks": [],
