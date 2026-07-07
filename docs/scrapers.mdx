@@ -69,7 +69,7 @@ tovuk request create reddit '{"operation":"comments","url":"https://www.reddit.c
 tovuk request create linkedin '{"operation":"post-search","query":"b2b sales","sort_type":"date_posted","author_company_urns":"1035","limit":25}' --json
 tovuk request create linkedin '{"operation":"company-employees","identifier":"https://www.linkedin.com/company/google/","job_title":"engineer OR developer","max_employees":50}' --json
 tovuk request create google-maps '{"searchTerms":["coffee shops"],"locationQuery":"Seattle, WA","limit":25,"scrapeContacts":true}' --json
-tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","limit":25,"includeReviews":true}' --json
+tovuk request create amazon '{"operation":"search","query":"mechanical keyboard","countryCode":"DE","deliveryLocation":"10115","limit":25,"includeReviews":true}' --json
 tovuk request create alibaba '{"operation":"search","query":"stainless bottle","limit":25,"includeSupplierVerification":true}' --json
 tovuk request create temu '{"operation":"search","query":"desk lamp","limit":25,"includeSalesData":true}' --json
 tovuk request create etsy '{"operation":"search","query":"linen wall art","limit":25,"includeShopDetails":true}' --json
@@ -248,7 +248,7 @@ examples above:
 | Scraper | Public inputs | Operations |
 | --- | --- | --- |
 | `google-maps` | place URLs, search URLs, shared list URLs, place ids, search terms, location context, review filters, contact and image flags | `search`, `place`, `reviews`, `list` |
-| `amazon` | search terms, product URLs, ASINs, seller URLs, category URLs, bestseller targets, country-specific Amazon marketplace targets, price filters, review and offer flags | `search`, `product`, `reviews`, `offers`, `seller`, `bestsellers`, `asins`, `questions`, `price-tracker` |
+| `amazon` | search terms, product URLs, ASINs, seller URLs, category URLs, bestseller targets, country-specific Amazon marketplace targets, delivery-location or postal-code hints, price filters, review and offer flags | `search`, `product`, `reviews`, `offers`, `seller`, `bestsellers`, `asins`, `questions`, `price-tracker` |
 | `alibaba` | search terms, product URLs, supplier URLs, category URLs, RFQ targets, reverse-image inputs, MOQ and price-tier options | `search`, `product`, `supplier`, `category`, `rfq`, `reverse-image`, `price-tiers` |
 | `temu` | search terms, product URLs, listing URLs, category URLs, review options, ad-library targets, sold-count and variant flags | `search`, `product`, `listings`, `category`, `reviews`, `ad-library`, `price-tracker` |
 | `etsy` | search terms, listing URLs, shop URLs, review targets, keyword-research options, seller-intelligence and customer-photo flags | `search`, `listing`, `shop`, `reviews`, `keywords`, `seller-intel`, `customer-photos` |
@@ -257,8 +257,9 @@ Tovuk runs Google Maps and ecommerce reads through managed Webshare egress and
 stores visible public records only.
 
 Ecommerce operation inputs may use common Apify-style aliases such as
-`best_sellers`, `adLibrary`, `Vendor`, or `seller-intelligence`; saved requests
-return the canonical operation token shown in the table.
+`best_sellers`, `adLibrary`, `Vendor`, `seller-intelligence`, `postalCode`, or
+`zipCode`; saved requests return the canonical operation token shown in the
+table and normalize postal aliases to `deliveryLocation`.
 
 Ecommerce Records include `requestedFeatures` and `featureCoverage`. Use
 `featureCoverage` to see whether each Apify-style feature flag was extracted,
@@ -266,8 +267,8 @@ not found in the fetched public HTML, partially extracted, or accepted for
 compatibility while a platform-specific parser is still needed.
 When public metadata or visible page text provides them, ecommerce Records also
 include fields such as `tags`, `keywords`, `questionSamples`,
-`customerPhotoUrls`, `minimumOrderQuantity`, `rfqText`, `resultPosition`, and
-`adPosition`.
+`customerPhotoUrls`, `minimumOrderQuantity`, `rfqText`, `deliveryLocation`,
+`resultPosition`, and `adPosition`.
 
 Create a Reddit Request:
 
