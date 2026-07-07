@@ -39,6 +39,29 @@ pub(in crate::docs_api_contract) fn require_operation_id(
     }
 }
 
+pub(in crate::docs_api_contract) fn require_operation_response_ref(
+    openapi: &OpenApi,
+    path_name: &str,
+    method: &str,
+    status: &str,
+    expected_ref: &str,
+    label: &str,
+) -> CheckResult {
+    let actual = openapi_operation(openapi, path_name, method)?
+        .get("responses")
+        .and_then(|responses| responses.get(status))
+        .and_then(|response| response.get("$ref"))
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("{label} response {status} ref is missing"))?;
+    if actual == expected_ref {
+        Ok(())
+    } else {
+        Err(format!(
+            "{label} response {status} ref must be {expected_ref:?}, got {actual:?}"
+        ))
+    }
+}
+
 pub(in crate::docs_api_contract) fn require_parameter_bounds(
     openapi: &OpenApi,
     path_name: &str,

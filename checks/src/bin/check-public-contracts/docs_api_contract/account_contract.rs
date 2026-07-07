@@ -2,8 +2,8 @@ use crate::helpers::{CheckResult, reject_contains, require_contains_all};
 
 use super::openapi::{
     OpenApi, openapi_schema, reject_operation_field, reject_schema_property,
-    reject_schema_property_enum, require_operation_id, require_schema_properties,
-    require_schema_property_enum,
+    reject_schema_property_enum, require_operation_id, require_operation_response_ref,
+    require_schema_properties, require_schema_property_enum,
 };
 
 pub(super) fn require_openapi_account_profile_contract(openapi: &OpenApi) -> CheckResult {
@@ -141,6 +141,14 @@ pub(super) fn require_openapi_api_key_contract(openapi: &OpenApi) -> CheckResult
         "post",
         "createAccountApiKey",
         "OpenAPI API key create operation",
+    )?;
+    require_operation_response_ref(
+        openapi,
+        "/v1/account/api-keys",
+        "post",
+        "402",
+        "#/components/responses/PaymentRequired",
+        "OpenAPI API key create plan-limit response",
     )?;
     require_operation_id(
         openapi,
