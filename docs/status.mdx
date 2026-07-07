@@ -15,9 +15,13 @@ tovuk scraper health --json
 
 `/health` is the simple public health alias. `/healthz` is the infrastructure
 probe. `/v1/status` returns structured dependency state, per-check
-`latency_ms`, `agent_instruction`, and docs links. A dependency check `message`
-is `reachable`, `unavailable`, or `timed_out`. `tovuk scraper health --json`
-returns scraper runtime readiness for high-count public-data work.
+`latency_ms`, optional non-secret `details`, `agent_instruction`, and docs
+links. The `control_plane_postgres` check reports pool capacity fields such as
+`pool_max_connections`, `pool_open_connections`, `pool_idle_connections`, and
+`pool_busy_connections` so agents can distinguish database latency from pool
+saturation. A dependency check `message` is `reachable`, `unavailable`, or
+`timed_out`. `tovuk scraper health --json` returns scraper runtime readiness
+for high-count public-data work.
 
 When the CLI cannot reach the API, it returns `api_unreachable` with a status
 docs URL. Retry once, then check `/v1/status` before changing scraper inputs.

@@ -1100,7 +1100,13 @@
                       "name": "control_plane_postgres",
                       "ok": true,
                       "message": "reachable",
-                      "latency_ms": 12
+                      "latency_ms": 12,
+                      "details": {
+                        "pool_max_connections": 6,
+                        "pool_open_connections": 4,
+                        "pool_idle_connections": 2,
+                        "pool_busy_connections": 2
+                      }
                     },
                     {
                       "name": "redis",
@@ -1168,7 +1174,13 @@
                       "name": "control_plane_postgres",
                       "ok": false,
                       "message": "timed_out",
-                      "latency_ms": 3000
+                      "latency_ms": 3000,
+                      "details": {
+                        "pool_max_connections": 6,
+                        "pool_open_connections": 6,
+                        "pool_idle_connections": 0,
+                        "pool_busy_connections": 6
+                      }
                     },
                     {
                       "name": "redis",
@@ -3362,13 +3374,54 @@
             "minimum": 0,
             "maximum": 9223372036854775807,
             "example": 12
+          },
+          "details": {
+            "type": "object",
+            "description": "Optional non-secret dependency diagnostics. The control_plane_postgres check reports SQLx pool capacity so agents can distinguish database latency from pool saturation.",
+            "additionalProperties": false,
+            "properties": {
+              "pool_max_connections": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 100000,
+                "example": 6
+              },
+              "pool_open_connections": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 100000,
+                "example": 4
+              },
+              "pool_idle_connections": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 100000,
+                "example": 2
+              },
+              "pool_busy_connections": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "maximum": 100000,
+                "example": 2
+              }
+            }
           }
         },
         "example": {
           "name": "example",
           "ok": true,
           "message": "reachable",
-          "latency_ms": 12
+          "latency_ms": 12,
+          "details": {
+            "pool_max_connections": 6,
+            "pool_open_connections": 4,
+            "pool_idle_connections": 2,
+            "pool_busy_connections": 2
+          }
         }
       },
       "StatusResponse": {

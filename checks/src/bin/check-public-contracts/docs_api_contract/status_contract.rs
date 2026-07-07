@@ -2,15 +2,16 @@ use crate::helpers::CheckResult;
 
 use super::openapi::{
     OpenApi, openapi_schema, reject_json_response_example_check_name,
-    require_json_response_example_check_name, require_json_response_example_check_u64,
-    require_json_response_example_string, require_schema_properties,
+    require_json_response_example_check_name, require_json_response_example_check_nested_u64,
+    require_json_response_example_check_u64, require_json_response_example_string,
+    require_schema_properties,
 };
 
 pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
     openapi_schema(openapi, "StatusResponse")?;
     require_schema_properties(
         openapi_schema(openapi, "StatusCheck")?,
-        &["name", "ok", "message", "latency_ms"],
+        &["name", "ok", "message", "latency_ms", "details"],
         "OpenAPI status check schema",
     )?;
     require_json_response_example_check_name(
@@ -32,6 +33,7 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         "latency_ms",
         "OpenAPI status control-plane PostgreSQL latency",
     )?;
+    require_postgres_pool_details(openapi, "StatusLoaded")?;
     require_json_response_example_check_u64(
         openapi,
         "StatusLoaded",
@@ -46,6 +48,7 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         "latency_ms",
         "OpenAPI unavailable status control-plane PostgreSQL latency",
     )?;
+    require_postgres_pool_details(openapi, "StatusUnavailable")?;
     require_json_response_example_check_u64(
         openapi,
         "StatusUnavailable",
@@ -73,4 +76,22 @@ pub(super) fn require_openapi_status_checks(openapi: &OpenApi) -> CheckResult {
         "database",
         "OpenAPI status must not expose generic database product wording",
     )
+}
+
+fn require_postgres_pool_details(openapi: &OpenApi, response_name: &str) -> CheckResult {
+    for field in [
+        "pool_max_connections",
+        "pool_open_connections",
+        "pool_idle_connections",
+        "pool_busy_connections",
+    ] {
+        require_json_response_example_check_nested_u64(
+            openapi,
+            response_name,
+            "control_plane_postgres",
+            &["details", field],
+            "OpenAPI status control-plane PostgreSQL pool details",
+        )?;
+    }
+    Ok(())
 }
