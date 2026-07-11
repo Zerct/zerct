@@ -1,8 +1,8 @@
 //! Per-workflow security and release policy checks.
 
 use super::{
-    HostedActionsCheck, PathFilters as _, ReleasePolicy as _, Workflow, WorkflowPolicy,
-    require_contains,
+    HostedActionsCheck, PathFilters as _, PolicyRequirement, ReleasePolicy as _, Workflow,
+    WorkflowPolicy, require_contains,
 };
 
 use std::ffi::OsStr;
@@ -14,6 +14,110 @@ mod publication_tests;
 /// Unfiltered event header required by the canonical continuous-integration workflow.
 const CI_TRIGGER_HEADER: &str =
     "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n";
+
+/// Required guarded recovery and dispatch markers.
+const PUBLICATION_RECOVERY_REQUIREMENTS: &[PolicyRequirement] = &[
+    (
+        "if: github.ref == 'refs/heads/main'",
+        "publication recovery must reject non-main dispatches",
+    ),
+    (
+        "ref: refs/tags/${{ inputs.release_ref }}",
+        "publication recovery must check out a fully qualified release tag",
+    ),
+    (
+        r#"release_commit="$(git rev-parse "refs/tags/$RELEASE_REF^{commit}")""#,
+        "publication recovery must peel the release tag to one immutable commit",
+    ),
+    (
+        "release_target=\"$(gh api --jq '.target_commitish'",
+        "publication recovery must compare the tag commit with the GitHub release target",
+    ),
+    (
+        "--bin check-native-release-assets -- \"$version\"",
+        "publication recovery must verify complete native assets before dispatch",
+    ),
+    (
+        "needs: gate",
+        "the actions-write dispatch job must depend on the credential-free release gate",
+    ),
+    (
+        "actions: write # Dispatch and monitor the dedicated trusted-publisher workflows.",
+        "publication recovery must scope workflow dispatch permission to its dispatch job",
+    ),
+    (
+        "gh workflow run \"$workflow\"",
+        "publication recovery must directly dispatch trusted-publisher workflows",
+    ),
+    (
+        "--ref \"$RELEASE_REF\"",
+        "publication recovery must execute each publisher from the immutable release tag",
+    ),
+    (
+        "--commit \"$RELEASE_COMMIT\"",
+        "publication recovery must discover publisher runs by the immutable release commit",
+    ),
+    (
+        "dispatch_publisher() {",
+        "publication recovery must retry transient workflow dispatch failures",
+    ),
+    (
+        "workflows=(publish-crates.yml publish-npm.yml publish-pypi.yml)",
+        "publication recovery must dispatch every public registry publisher",
+    ),
+    (
+        "if ! gh run watch \"$run_id\"",
+        "publication recovery must observe every publisher without fail-fast abandonment",
+    ),
+    (
+        "publisher_failed=false",
+        "publication recovery must aggregate publisher conclusions",
+    ),
+];
+
+/// Required top-level trusted-publisher identity markers.
+const REGISTRY_PUBLISHER_REQUIREMENTS: &[PolicyRequirement] = &[
+    (
+        "workflow_dispatch:",
+        "registry publisher must support guarded manual recovery",
+    ),
+    (
+        "[ \"$GITHUB_REF\" != \"refs/tags/$release_ref\" ]",
+        "registry publisher must fail when the dispatch ref is not the release tag",
+    ),
+    (
+        "[ \"$GITHUB_SHA\" != \"$INPUT_RELEASE_COMMIT\" ]",
+        "registry publisher must fail when the dispatch commit is not the release commit",
+    ),
+    (
+        "release_commit:",
+        "registry publisher must require an immutable release commit input",
+    ),
+    (
+        "orchestration_id:",
+        "registry publisher must require a unique orchestration identifier",
+    ),
+    (
+        "ref: ${{ inputs.release_commit }}",
+        "publication must check out the exact resolved release commit",
+    ),
+    (
+        r#"release_commit="$(git rev-parse "refs/tags/$release_ref^{commit}")""#,
+        "publication must peel the release tag to one immutable commit",
+    ),
+    (
+        "release_target=\"$(gh api --jq '.target_commitish'",
+        "publication must compare the tag commit with the GitHub release target",
+    ),
+    (
+        "--bin check-native-release-assets -- \"$version\"",
+        "publication must verify the complete native release before registry access",
+    ),
+    (
+        "[[ ! \"$INPUT_RELEASE_COMMIT\" =~ ^[0-9a-f]{40}$ ]]",
+        "publication must validate the immutable commit input",
+    ),
+];
 
 impl WorkflowPolicy for HostedActionsCheck {
     fn check_checkout_credentials(&self, workflow: &Workflow, findings: &mut Vec<String>) {
@@ -80,46 +184,21 @@ impl WorkflowPolicy for HostedActionsCheck {
                 workflow.path.display()
             ));
         }
+        require_workflow_requirements(workflow, PUBLICATION_RECOVERY_REQUIREMENTS, findings);
+    }
+
+    fn check_registry_preflight_retry(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        if !is_registry_publisher(workflow) {
+            return;
+        }
         for (needle, message) in [
             (
-                "if: github.ref == 'refs/heads/main'",
-                "publication recovery must reject non-main dispatches",
+                "for delay in 0 5 10 20 30 60; do",
+                "registry preflight must retry on a bounded schedule",
             ),
             (
-                "ref: refs/tags/${{ inputs.release_ref }}",
-                "publication recovery must check out a fully qualified release tag",
-            ),
-            (
-                r#"release_commit="$(git rev-parse "refs/tags/$RELEASE_REF^{commit}")""#,
-                "publication recovery must peel the release tag to one immutable commit",
-            ),
-            (
-                "release_target=\"$(gh api --jq '.target_commitish'",
-                "publication recovery must compare the tag commit with the GitHub release target",
-            ),
-            (
-                "--bin check-native-release-assets -- \"$version\"",
-                "publication recovery must verify complete native assets before dispatch",
-            ),
-            (
-                "needs: gate",
-                "the actions-write dispatch job must depend on the credential-free release gate",
-            ),
-            (
-                "actions: write # Dispatch and monitor the dedicated trusted-publisher workflows.",
-                "publication recovery must scope workflow dispatch permission to its dispatch job",
-            ),
-            (
-                "gh workflow run \"$workflow\"",
-                "publication recovery must directly dispatch trusted-publisher workflows",
-            ),
-            (
-                "workflows=(publish-crates.yml publish-npm.yml publish-pypi.yml)",
-                "publication recovery must dispatch every public registry publisher",
-            ),
-            (
-                "gh run watch \"$run_id\"",
-                "publication recovery must wait for every dispatched publisher",
+                "429|5??)",
+                "registry preflight must classify rate limits and server errors as transient",
             ),
         ] {
             require_contains(
@@ -129,6 +208,23 @@ impl WorkflowPolicy for HostedActionsCheck {
                 findings,
             );
         }
+    }
+
+    fn check_registry_publisher_identity(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        if !is_registry_publisher(workflow) {
+            return;
+        }
+        let forbidden_triggers = ["workflow_call:", "workflow_run:"];
+        for forbidden_trigger in forbidden_triggers
+            .into_iter()
+            .filter(|trigger| return workflow.contents.contains(trigger))
+        {
+            findings.push(format!(
+                "{}: trusted registry publishers must not use {forbidden_trigger}",
+                workflow.path.display(),
+            ));
+        }
+        require_workflow_requirements(workflow, REGISTRY_PUBLISHER_REQUIREMENTS, findings);
     }
 
     fn check_registry_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>) {
@@ -206,105 +302,6 @@ impl WorkflowPolicy for HostedActionsCheck {
         self.check_secret_workflow_dispatch_policy(workflow, findings);
     }
 
-    fn check_registry_preflight_retry(&self, workflow: &Workflow, findings: &mut Vec<String>) {
-        let Some(file_name) = workflow.path.file_name().and_then(OsStr::to_str) else {
-            return;
-        };
-        if !matches!(
-            file_name,
-            "publish-crates.yml" | "publish-npm.yml" | "publish-pypi.yml"
-        ) {
-            return;
-        }
-        for (needle, message) in [
-            (
-                "for delay in 0 5 10 20 30 60; do",
-                "registry preflight must retry on a bounded schedule",
-            ),
-            (
-                "429|5??)",
-                "registry preflight must classify rate limits and server errors as transient",
-            ),
-        ] {
-            require_contains(
-                workflow.contents.as_str(),
-                needle,
-                format!("{}: {message}", workflow.path.display()).as_str(),
-                findings,
-            );
-        }
-    }
-
-    fn check_registry_publisher_identity(&self, workflow: &Workflow, findings: &mut Vec<String>) {
-        let Some(file_name) = workflow.path.file_name().and_then(OsStr::to_str) else {
-            return;
-        };
-        if !matches!(
-            file_name,
-            "publish-crates.yml" | "publish-npm.yml" | "publish-pypi.yml"
-        ) {
-            return;
-        }
-        for forbidden_trigger in ["workflow_call:", "workflow_run:"] {
-            if !workflow.contents.contains(forbidden_trigger) {
-                continue;
-            }
-            findings.push(format!(
-                "{}: trusted registry publishers must not use {forbidden_trigger}",
-                workflow.path.display(),
-            ));
-        }
-        for (needle, message) in [
-            (
-                "workflow_dispatch:",
-                "registry publisher must support guarded manual recovery",
-            ),
-            (
-                "[ \"$GITHUB_REF\" != \"refs/tags/$release_ref\" ]",
-                "registry publisher must fail when the dispatch ref is not the release tag",
-            ),
-            (
-                "[ \"$GITHUB_SHA\" != \"$INPUT_RELEASE_COMMIT\" ]",
-                "registry publisher must fail when the dispatch commit is not the release commit",
-            ),
-            (
-                "release_commit:",
-                "registry publisher must require an immutable release commit input",
-            ),
-            (
-                "orchestration_id:",
-                "registry publisher must require a unique orchestration identifier",
-            ),
-            (
-                "ref: ${{ inputs.release_commit }}",
-                "publication must check out the exact resolved release commit",
-            ),
-            (
-                r#"release_commit="$(git rev-parse "refs/tags/$release_ref^{commit}")""#,
-                "publication must peel the release tag to one immutable commit",
-            ),
-            (
-                "release_target=\"$(gh api --jq '.target_commitish'",
-                "publication must compare the tag commit with the GitHub release target",
-            ),
-            (
-                "--bin check-native-release-assets -- \"$version\"",
-                "publication must verify the complete native release before registry access",
-            ),
-            (
-                "[[ ! \"$INPUT_RELEASE_COMMIT\" =~ ^[0-9a-f]{40}$ ]]",
-                "publication must validate the immutable commit input",
-            ),
-        ] {
-            require_contains(
-                workflow.contents.as_str(),
-                needle,
-                format!("{}: {message}", workflow.path.display()).as_str(),
-                findings,
-            );
-        }
-    }
-
     fn contains_cargo_publish_command(&self, contents: &str) -> bool {
         return contents.lines().any(|line| {
             let trimmed = line.trim();
@@ -323,6 +320,30 @@ impl WorkflowPolicy for HostedActionsCheck {
             return trimmed.contains("uses: actions/cache@")
                 && (trimmed.contains("actions/cache@v6") || trimmed.contains("# v6"));
         });
+    }
+}
+
+/// Return whether one workflow owns a public registry trusted-publisher identity.
+fn is_registry_publisher(workflow: &Workflow) -> bool {
+    return matches!(
+        workflow.path.file_name().and_then(OsStr::to_str),
+        Some("publish-crates.yml" | "publish-npm.yml" | "publish-pypi.yml")
+    );
+}
+
+/// Require every named marker in one workflow.
+fn require_workflow_requirements(
+    workflow: &Workflow,
+    requirements: &[PolicyRequirement],
+    findings: &mut Vec<String>,
+) {
+    for &(needle, message) in requirements {
+        require_contains(
+            workflow.contents.as_str(),
+            needle,
+            format!("{}: {message}", workflow.path.display()).as_str(),
+            findings,
+        );
     }
 }
 
