@@ -178,8 +178,16 @@ const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
         "native publication must dispatch guarded registry recovery after asset publication",
     ),
     (
-        "gh run watch \"$recovery_run_id\"",
-        "native publication must wait for registry recovery to complete",
+        "for delay in 0 2 4 8 15; do",
+        "native publication must retry transient recovery dispatch failures",
+    ),
+    (
+        "if ! gh run watch \"$recovery_run_id\"",
+        "native publication must observe every accepted recovery run",
+    ),
+    (
+        "recovery_failed=false",
+        "native publication must aggregate duplicate recovery conclusions",
     ),
 ];
 

@@ -29,10 +29,28 @@ const REJECTED_WRAPPER_SNIPPETS: &[PolicyRequirement] = &[
     ),
 ];
 
+/// Required permissionless wrapper registry verification markers.
+const WRAPPER_VERIFY_REQUIREMENTS: &[PolicyRequirement] = &[
+    (
+        "needs:\n      - prepare\n      - publish",
+        "package verification must wait for prepare and publish",
+    ),
+    (
+        "needs.publish.result == 'skipped'",
+        "package verification must support already-published recovery",
+    ),
+    (
+        "permissions: {}",
+        "package verification must run without GitHub permissions",
+    ),
+];
+
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0002] = [
+const _: [usize; 0x0004] = [
+    size_of_val(&check_wrapper_verify_isolation),
+    size_of_val(&reject_wrapper_verify_credentials),
     size_of_val(&require_python_release_toolchain),
-    size_of_val(&require_wrapper_verify_isolation),
+    size_of_val(&require_wrapper_verify_contract),
 ];
 
 impl WrapperReleasePolicy for HostedActionsCheck {
@@ -106,12 +124,12 @@ impl WrapperReleasePolicy for HostedActionsCheck {
                 findings,
             );
         }
-        require_wrapper_verify_isolation(workflow, findings);
+        check_wrapper_verify_isolation(workflow, findings);
     }
 }
 
 /// Require wrapper registry verification to run without publication credentials.
-fn require_wrapper_verify_isolation(workflow: &Workflow, findings: &mut Vec<String>) {
+fn check_wrapper_verify_isolation(workflow: &Workflow, findings: &mut Vec<String>) {
     let source = workflow.contents.as_str();
     let Some((prepare_source, publish_and_verify_source)) = source.split_once("\n  publish:\n")
     else {
@@ -130,6 +148,21 @@ fn require_wrapper_verify_isolation(workflow: &Workflow, findings: &mut Vec<Stri
         ));
         return;
     };
+    reject_wrapper_verify_credentials(
+        workflow,
+        (prepare_source, publish_source, verify_source),
+        findings,
+    );
+    require_wrapper_verify_contract(workflow, verify_source, findings);
+}
+
+/// Reject OIDC permission outside the wrapper upload job.
+fn reject_wrapper_verify_credentials(
+    workflow: &Workflow,
+    job_sources: (&str, &str, &str),
+    findings: &mut Vec<String>,
+) {
+    let (prepare_source, publish_source, verify_source) = job_sources;
     if prepare_source.contains("id-token: write") || verify_source.contains("id-token: write") {
         findings.push(format!(
             "{}: only the package upload job may request an OIDC token",
@@ -141,27 +174,6 @@ fn require_wrapper_verify_isolation(workflow: &Workflow, findings: &mut Vec<Stri
             "{}: post-publish registry verification must not retain OIDC permission",
             workflow.path.display()
         ));
-    }
-    for (needle, message) in [
-        (
-            "needs:\n      - prepare\n      - publish",
-            "package verification must wait for prepare and publish",
-        ),
-        (
-            "needs.publish.result == 'skipped'",
-            "package verification must support already-published recovery",
-        ),
-        (
-            "permissions: {}",
-            "package verification must run without GitHub permissions",
-        ),
-    ] {
-        require_contains(
-            verify_source,
-            needle,
-            format!("{}: {message}", workflow.path.display()).as_str(),
-            findings,
-        );
     }
 }
 
@@ -208,11 +220,27 @@ fn require_python_release_toolchain(workflow: &Workflow, findings: &mut Vec<Stri
     );
 }
 
+/// Require the complete permissionless wrapper verification contract.
+fn require_wrapper_verify_contract(
+    workflow: &Workflow,
+    verify_source: &str,
+    findings: &mut Vec<String>,
+) {
+    for &(needle, message) in WRAPPER_VERIFY_REQUIREMENTS {
+        require_contains(
+            verify_source,
+            needle,
+            format!("{}: {message}", workflow.path.display()).as_str(),
+            findings,
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
 
-    use super::{Workflow, require_wrapper_verify_isolation};
+    use super::{Workflow, check_wrapper_verify_isolation};
 
     /// Minimal three-job wrapper release with permissionless verification.
     const ISOLATED_RELEASE: &str = concat!(
@@ -235,7 +263,7 @@ mod tests {
         };
         let mut findings = Vec::new();
 
-        require_wrapper_verify_isolation(&workflow, &mut findings);
+        check_wrapper_verify_isolation(&workflow, &mut findings);
 
         assert!(findings.is_empty(), "permissionless verification must pass");
     }
@@ -256,7 +284,7 @@ mod tests {
         };
         let mut findings = Vec::new();
 
-        require_wrapper_verify_isolation(&workflow, &mut findings);
+        check_wrapper_verify_isolation(&workflow, &mut findings);
 
         assert_eq!(findings.len(), 0x2, "OIDC verification must fail policy");
     }
