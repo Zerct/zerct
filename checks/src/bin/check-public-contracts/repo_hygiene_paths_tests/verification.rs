@@ -50,6 +50,7 @@ fn rejects_forced_generated_local_files() {
         "ARCHIVE.ZIP",
         "bin/tool.exe",
         "docs/.DS_Store",
+        "docs/fonts/example.woff2",
         "debug.log",
         "DEBUG.LOG",
         "package.crate",
