@@ -8,8 +8,28 @@ import os
 import pathlib
 import tempfile
 import unittest
+from typing import TYPE_CHECKING
 
 from tovuk import cli
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+
+def require(*, condition: bool, label: str) -> None:
+    """Require one test invariant without Python optimization semantics."""
+    if not condition:
+        raise AssertionError(label)
+
+
+def require_runtime_error(operation: Callable[[], object], label: str) -> None:
+    """Require one launcher policy operation to fail closed."""
+    try:
+        operation()
+    except RuntimeError:
+        return
+    message = f"expected RuntimeError: {label}"
+    raise AssertionError(message)
 
 
 class _Response(io.BytesIO):
@@ -32,7 +52,7 @@ class DownloadPolicyTests(unittest.TestCase):
             "https://objects.githubusercontent.com/asset",
             "https://release-assets.githubusercontent.com/asset",
         ):
-            cli._require_trusted_download_url(value)
+            cli.require_trusted_download_url(value)
 
     def test_rejects_untrusted_download_urls(self) -> None:
         """Non-HTTPS, credentialed, ported, and unknown hosts are rejected."""
@@ -42,8 +62,10 @@ class DownloadPolicyTests(unittest.TestCase):
             "https://user:secret@github.com/asset",
             "https://github.com:8443/asset",
         ):
-            with self.assertRaises(RuntimeError, msg=value):
-                cli._require_trusted_download_url(value)
+            require_runtime_error(
+                lambda value=value: cli.require_trusted_download_url(value),
+                value,
+            )
 
     def test_rejects_oversized_or_invalid_content_length(self) -> None:
         """Malformed or oversized response bodies fail closed."""
@@ -52,20 +74,28 @@ class DownloadPolicyTests(unittest.TestCase):
             _Response(b"small", "6"),
             _Response(b"too large"),
         ):
-            with self.assertRaises(RuntimeError):
-                cli._read_limited(
+            require_runtime_error(
+                lambda response=response: cli.read_limited(
                     response,
                     response.headers.get("Content-Length"),
                     5,
                     "test payload",
-                )
+                ),
+                "invalid or oversized response",
+            )
 
     def test_accepts_payload_within_bound(self) -> None:
         """A response exactly at the configured bound is accepted."""
         response = _Response(b"small", "5")
-        self.assertEqual(
-            cli._read_limited(response, response.headers.get("Content-Length"), 5, "test payload"),
-            b"small",
+        require(
+            condition=cli.read_limited(
+                response,
+                response.headers.get("Content-Length"),
+                5,
+                "test payload",
+            )
+            == b"small",
+            label="bounded payload must be unchanged",
         )
 
 
@@ -77,14 +107,23 @@ class CachePolicyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             binary = pathlib.Path(directory) / "tovuk"
             binary.write_bytes(b"trusted binary")
-            self.assertFalse(cli._cached_binary_is_valid(binary))
+            require(
+                condition=not cli.cached_binary_is_valid(binary),
+                label="missing checksum must invalidate cache",
+            )
 
             digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-            cli._checksum_path(binary).write_text(f"{digest}\n", encoding="utf-8")
-            self.assertTrue(cli._cached_binary_is_valid(binary))
+            cli.checksum_path(binary).write_text(f"{digest}\n", encoding="utf-8")
+            require(
+                condition=cli.cached_binary_is_valid(binary),
+                label="matching checksum must validate cache",
+            )
 
             binary.write_bytes(b"tampered binary")
-            self.assertFalse(cli._cached_binary_is_valid(binary))
+            require(
+                condition=not cli.cached_binary_is_valid(binary),
+                label="tampering must invalidate cache",
+            )
 
     @unittest.skipIf(os.name == "nt", "Windows symlink creation requires elevated privileges")
     def test_checksum_write_replaces_symlink_without_following_it(self) -> None:
@@ -95,15 +134,24 @@ class CachePolicyTests(unittest.TestCase):
             binary.write_bytes(b"trusted binary")
             victim = root / "victim"
             victim.write_text("unchanged\n", encoding="utf-8")
-            checksum_path = cli._checksum_path(binary)
-            checksum_path.symlink_to(victim)
+            sidecar = cli.checksum_path(binary)
+            sidecar.symlink_to(victim)
 
             digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-            cli._write_checksum_sidecar(binary, digest)
+            cli.write_checksum_sidecar(binary, digest)
 
-            self.assertFalse(checksum_path.is_symlink())
-            self.assertEqual(checksum_path.read_text(encoding="utf-8"), f"{digest}\n")
-            self.assertEqual(victim.read_text(encoding="utf-8"), "unchanged\n")
+            require(
+                condition=not sidecar.is_symlink(),
+                label="checksum sidecar must replace the symlink",
+            )
+            require(
+                condition=sidecar.read_text(encoding="utf-8") == f"{digest}\n",
+                label="checksum sidecar must contain the digest",
+            )
+            require(
+                condition=victim.read_text(encoding="utf-8") == "unchanged\n",
+                label="checksum publication must not alter the symlink target",
+            )
 
 
 if __name__ == "__main__":

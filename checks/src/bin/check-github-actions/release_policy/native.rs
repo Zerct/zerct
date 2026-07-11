@@ -108,8 +108,12 @@ const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
         "manual reruns must resume by uploading only missing checksum assets",
     ),
     (
+        "--bin check-native-release-assets -- \"${RELEASE_TAG#v}\" 0 --allow-draft",
+        "the central publisher must verify the exact draft asset set before publication",
+    ),
+    (
         "--bin check-native-release-assets -- \"${RELEASE_TAG#v}\"",
-        "the central publisher must verify the complete remote native release before publication",
+        "the central publisher must verify the complete remote native release",
     ),
     (
         "cmp -- \"$RUNNER_TEMP/$asset_name.built\" \"native-artifact/$asset_name\"",

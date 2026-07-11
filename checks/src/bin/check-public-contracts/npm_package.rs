@@ -65,6 +65,8 @@ const _: [usize; 0x000a] = [
 pub(super) struct NpmPackagePaths {
     /// Contract data stored in `install`.
     install: PathBuf,
+    /// Contract data stored in `install_policy`.
+    install_policy: PathBuf,
     /// Contract data stored in `launcher`.
     launcher: PathBuf,
     /// Contract data stored in `package_dir`.
@@ -83,10 +85,12 @@ impl NpmPackagePaths {
         let repo_root = check_try!(must_abs("."));
         let package_dir = Path::new(repo_root.as_str()).join("packages").join("tovuk");
         let install = package_dir.join("install.mjs");
+        let install_policy = package_dir.join("install-policy.mjs");
         let launcher = package_dir.join("bin").join("tovuk.mjs");
         let package_json = package_dir.join("package.json");
         return Ok(Self {
             install,
+            install_policy,
             launcher,
             package_dir,
             package_json,
@@ -172,7 +176,10 @@ pub(super) fn check_cli_package_contract() -> CheckResult {
         &required_files
     ));
     check_try!(require_package_scripts(&package_json, &required_scripts));
-    check_try!(require_install_source(paths.install.as_path()));
+    check_try!(require_install_source(
+        paths.install.as_path(),
+        paths.install_policy.as_path()
+    ));
     check_try!(require_executable_bin(paths.launcher.as_path()));
     check_try!(require_runtime_mjs_set(&paths));
     check_try!(write_line(
@@ -201,11 +208,13 @@ pub(super) fn require_executable_bin(bin_path: &Path) -> CheckResult {
 /// # Errors
 ///
 /// Returns an error when the contract requirement cannot be verified.
-pub(super) fn require_install_source(install_path: &Path) -> CheckResult {
+pub(super) fn require_install_source(install_path: &Path, policy_path: &Path) -> CheckResult {
     let install_source = check_try!(read_text(install_path));
+    let policy_source = check_try!(read_text(policy_path));
+    let installer_source = format!("{install_source}\n{policy_source}");
     return require_snippets(
-        install_source.as_str(),
-        "install.mjs",
+        installer_source.as_str(),
+        "npm installer modules",
         &[
             "https://github.com/tovuk/tovuk/releases/download",
             ".sha256",
@@ -281,7 +290,7 @@ pub(super) fn require_published_files(
     return Ok(());
 }
 
-/// Require exactly the launcher plus installer as published runtime MJS sources.
+/// Require exactly the launcher plus installer modules as published runtime MJS sources.
 ///
 /// # Errors
 ///
@@ -305,11 +314,14 @@ fn require_runtime_mjs_set(paths: &NpmPackagePaths) -> CheckResult {
         }
     }
     runtime_sources.sort();
-    if runtime_sources == [paths.launcher.clone()] && paths.install.is_file() {
+    if runtime_sources == [paths.launcher.clone()]
+        && paths.install.is_file()
+        && paths.install_policy.is_file()
+    {
         return Ok(());
     }
     return Err(
-        "npm package must publish exactly install.mjs and bin/tovuk.mjs as runtime MJS sources"
+        "npm package must publish exactly install.mjs, install-policy.mjs, and bin/tovuk.mjs as runtime MJS sources"
             .to_owned(),
     );
 }
@@ -317,7 +329,9 @@ fn require_runtime_mjs_set(paths: &NpmPackagePaths) -> CheckResult {
 /// Contract implementation for `required_files`.
 pub(super) fn required_files() -> Vec<String> {
     return vec![
+        "LICENSE".to_owned(),
         "bin".to_owned(),
+        "install-policy.mjs".to_owned(),
         "install.mjs".to_owned(),
         "native-release-targets.json".to_owned(),
         "README.md".to_owned(),
@@ -337,12 +351,12 @@ pub(super) fn required_package_scripts() -> BTreeMap<String, String> {
         ),
         (
             "format:check".to_owned(),
-            "npx --yes prettier@3.9.5 --check install.mjs bin/tovuk.mjs tests/wrapper.test.mjs"
+            "npx --yes prettier@3.9.5 --check install.mjs install-policy.mjs bin/tovuk.mjs tests/wrapper.test.mjs"
                 .to_owned(),
         ),
         (
             "lint".to_owned(),
-            "npx --yes oxlint@1.73.0 --config ../../.oxlintrc.json --deny-warnings --report-unused-disable-directives install.mjs bin/tovuk.mjs tests/wrapper.test.mjs"
+            "npx --yes oxlint@1.73.0 --config ../../.oxlintrc.json --deny-warnings --report-unused-disable-directives install.mjs install-policy.mjs bin/tovuk.mjs tests/wrapper.test.mjs"
                 .to_owned(),
         ),
         ("pack:dry".to_owned(), "npm pack --dry-run".to_owned()),

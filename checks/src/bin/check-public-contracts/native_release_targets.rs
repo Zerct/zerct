@@ -1,3 +1,7 @@
+/// Standalone release-tool checksum workflow policy.
+#[path = "native_release_targets/quality_tools.rs"]
+mod quality_tools;
+
 use alloc::collections::BTreeSet;
 
 use crate::helpers::{
@@ -5,10 +9,12 @@ use crate::helpers::{
     require_snippets, write_line,
 };
 
+use quality_tools::require_quality_tool_checksum_contract;
+
 use serde::Deserialize;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000f] = [
+const _: [usize; 0x0010] = [
     size_of_val(&require_manifest_unique_value),
     size_of_val(&read_manifest),
     size_of_val(&reject_legacy_workflow_contract),
@@ -16,6 +22,7 @@ const _: [usize; 0x000f] = [
     size_of_val(&require_manifest_shape),
     size_of_val(&require_npm_installer_contract),
     size_of_val(&require_python_installer_contract),
+    size_of_val(&require_quality_tool_checksum_contract),
     size_of_val(&require_release_tool_contract),
     size_of_val(&require_release_gate_contract),
     size_of_val(&require_sync_binary_contract),
@@ -84,6 +91,7 @@ pub(super) fn check() -> CheckResult {
     check_try!(require_release_gate_contract());
     check_try!(require_npm_installer_contract());
     check_try!(require_python_installer_contract());
+    check_try!(require_quality_tool_checksum_contract());
     check_try!(write_line(
         OutputChannel::Regular,
         "Checked native release target contracts.",
@@ -306,8 +314,11 @@ pub(super) fn require_release_gate_contract() -> CheckResult {
             "target.asset_ext",
             "verify_asset_checksums",
             "gh release download",
+            "isDraft",
+            "isPrerelease",
             "Sha256::new()",
             "checksum mismatch",
+            "unexpected_assets",
         ],
     ));
     if source.contains("endswith(\".exe\")") {
@@ -464,6 +475,8 @@ pub(super) fn require_workflow_contract() -> CheckResult {
             "actions/upload-artifact@",
             "merge-multiple: true",
             "--bin native-release-tool -- prepare-release native-artifact native-release-targets.json crates/tovuk/Cargo.toml",
+            "--bin native-release-tool -- verify-sha256",
+            "--bin check-native-release-assets -- \"${RELEASE_TAG#v}\" 0 --allow-draft",
             "upload+=(\"native-artifact/$asset_name.sha256\")",
             "--draft=false --latest",
             "gh_version=\"2.96.0\"",

@@ -3,9 +3,12 @@ use crate::helpers::{
     read_package_json, read_text, require_contains, require_contains_all, write_line,
 };
 
+use serde_json::{Value, from_str};
+
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0006] = [
+const _: [usize; 0x0007] = [
     size_of_val(&check),
+    size_of_val(&npm_package_lock_versions),
     size_of_val(&print_canonical_version),
     size_of_val(&synchronized_version),
     size_of_val(&synchronized_version_require_packages),
@@ -24,6 +27,40 @@ pub(super) fn check() -> CheckResult {
         OutputChannel::Regular,
         "Checked package version consistency.",
     );
+}
+
+/// Read the two version copies required by npm's lockfile format.
+///
+/// # Errors
+///
+/// Returns an error when the lockfile is invalid or either version is absent
+/// or not a string.
+fn npm_package_lock_versions(source: &str) -> CheckResult<[String; 0x0002]> {
+    let document = check_try!(
+        from_str::<Value>(source)
+            .map_err(|error| return format!("parse npm package lock: {error}"))
+    );
+    let lock_version = check_try!(
+        document
+            .get("version")
+            .and_then(Value::as_str)
+            .ok_or_else(|| return "npm package lock version must be a string".to_owned())
+    );
+    let root_package = check_try!(
+        document
+            .get("packages")
+            .and_then(|packages| return packages.get(""))
+            .ok_or_else(|| return "npm package lock packages[\"\"] must exist".to_owned())
+    );
+    let root_version = check_try!(
+        root_package
+            .get("version")
+            .and_then(Value::as_str)
+            .ok_or_else(|| {
+                return "npm package lock packages[\"\"] version must be a string".to_owned();
+            })
+    );
+    return Ok([lock_version.to_owned(), root_version.to_owned()]);
 }
 
 /// Print the canonical version after enforcing cross-package synchronization.
@@ -67,8 +104,12 @@ fn synchronized_version_require_packages(canonical: &str, npm_version: &str) -> 
     let pyproject = check_try!(read_text("packages/tovuk-py/pyproject.toml"));
     let py_init = check_try!(read_text("packages/tovuk-py/src/tovuk/__init__.py"));
     let cargo_lock = check_try!(read_text("crates/tovuk/Cargo.lock"));
+    let npm_lock = check_try!(read_text("packages/tovuk/package-lock.json"));
+    let [lock_version, root_version] = check_try!(npm_package_lock_versions(npm_lock.as_str()));
     for (label, version) in [
         ("npm package", npm_version.to_owned()),
+        ("npm package lock", lock_version),
+        ("npm package lock root package", root_version),
         (
             "PyPI project",
             check_try!(extract_line_quoted_value(
@@ -148,3 +189,7 @@ fn synchronized_version_require_tag(canonical: &str) -> CheckResult {
         "Homebrew formula version tag",
     );
 }
+
+#[cfg(test)]
+#[path = "package_versions_tests/verification.rs"]
+mod tests;

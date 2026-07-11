@@ -9,7 +9,9 @@ const EMPTY_SIZE = 0
 const { download, fetchText, parseChecksum, verifySha256 } = installPolicy
 const packageRoot = import.meta.dirname
 const manifest = JSON.parse(await readFile(join(packageRoot, 'package.json'), 'utf8'))
-const nativeTargets = JSON.parse(await readFile(join(packageRoot, 'native-release-targets.json'), 'utf8')).targets
+const nativeTargets = JSON.parse(
+    await readFile(join(packageRoot, 'native-release-targets.json'), 'utf8'),
+).targets
 
 const main = async () => {
     await mkdir(dirname(binaryPath), { recursive: true })
@@ -63,7 +65,10 @@ const installFromRelease = async () => {
         await download(url, tempPath)
         await promoteDownload(tempPath, checksumUrl, asset)
     } catch (error) {
-        throw new Error(`Could not install native Tovuk binary from ${url}: ${errorMessage(error)}`, { cause: error })
+        throw new Error(
+            `Could not install native Tovuk binary from ${url}: ${errorMessage(error)}`,
+            { cause: error },
+        )
     } finally {
         await rm(tempDir, { force: true, recursive: true })
     }
@@ -72,7 +77,9 @@ const installFromRelease = async () => {
 const nativeTarget = () => {
     const operatingSystem = platform()
     const processor = arch()
-    const target = nativeTargets.find((item) => item.node.arch === processor && item.node.platform === operatingSystem)
+    const target = nativeTargets.find(
+        (item) => item.node.arch === processor && item.node.platform === operatingSystem,
+    )
     if (target?.libc === 'glibc' && linuxLibc() !== 'glibc') {
         throw new Error(
             `Unsupported Tovuk native target: ${operatingSystem}/${processor} requires glibc Linux. Alpine/musl Linux is not supported by the published native binaries yet.`,

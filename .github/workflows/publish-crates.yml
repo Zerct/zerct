@@ -11,15 +11,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
-    name: publish tovuk to crates.io
+  prepare:
+    name: prepare crates.io package
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    environment: crates
     permissions:
       contents: read
-      id-token: write # Required for crates.io Trusted Publishing.
+    outputs:
+      exists: ${{ steps.version.outputs.exists }}
+      version: ${{ steps.version.outputs.version }}
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
       RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
@@ -34,7 +35,7 @@ jobs:
             ${{ env.CARGO_HOME }}/registry
             ${{ env.CARGO_HOME }}/git
             crates/tovuk/target
-          key: crates-publish-${{ runner.os }}-${{ hashFiles('crates/tovuk/Cargo.lock', 'rust-toolchain.toml') }}
+          key: crates-prepare-${{ runner.os }}-${{ hashFiles('crates/tovuk/Cargo.lock', 'rust-toolchain.toml') }}
       - name: Verify pinned Rust toolchain
         run: |
           rustup show active-toolchain
@@ -71,19 +72,53 @@ jobs:
       - if: steps.version.outputs.exists == 'false'
         run: cargo package --locked
         working-directory: crates/tovuk
+
+  publish:
+    name: publish tovuk to crates.io
+    needs: prepare
+    if: needs.prepare.outputs.exists == 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: crates
+    permissions:
+      contents: read
+      id-token: write # Required for crates.io Trusted Publishing.
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Verify pinned Rust toolchain
+        env:
+          CARGO_HOME: ${{ runner.temp }}/cargo-home
+          RUSTUP_HOME: ${{ runner.temp }}/rustup-home
+        run: |
+          rustup show active-toolchain
+          rustc --version --verbose
       - name: Authenticate with crates.io trusted publishing
         id: crates_io_auth
-        if: steps.version.outputs.exists == 'false'
         uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
-      - if: steps.version.outputs.exists == 'false'
-        run: cargo publish --locked
+      - name: Publish the package without re-executing package code
+        run: cargo publish --locked --no-verify
         working-directory: crates/tovuk
         env:
+          CARGO_HOME: ${{ runner.temp }}/cargo-home
           CARGO_REGISTRY_TOKEN: ${{ steps.crates_io_auth.outputs.token }}
+          RUSTUP_HOME: ${{ runner.temp }}/rustup-home
+
+  verify:
+    name: verify crates.io package
+    needs:
+      - prepare
+      - publish
+    if: ${{ always() && needs.prepare.result == 'success' && (needs.publish.result == 'success' || needs.publish.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions: {}
+    steps:
       - name: Verify crates.io package
-        if: steps.version.outputs.exists == 'false'
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           for delay in 0 10 10 15 15 20 20 30 30 30; do
             if [ "$delay" != 0 ]; then

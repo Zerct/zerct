@@ -30,7 +30,11 @@ const assertDownloadSize = (response, maximumBytes = MAX_BINARY_BYTES) => {
         return
     }
     const contentLength = Number(rawContentLength)
-    if (!Number.isSafeInteger(contentLength) || contentLength <= EMPTY_SIZE || contentLength > maximumBytes) {
+    if (
+        !Number.isSafeInteger(contentLength) ||
+        contentLength <= EMPTY_SIZE ||
+        contentLength > maximumBytes
+    ) {
         throw new Error(`native binary must contain between 1 and ${maximumBytes} bytes`)
     }
 }
@@ -170,7 +174,9 @@ const assertChecksumAsset = (nameParts, asset) => {
 const verifySha256 = async (path, expectedSha256) => {
     const actualDigest = await sha256File(path)
     if (actualDigest !== expectedSha256) {
-        throw new Error(`native binary checksum mismatch: expected ${expectedSha256}, got ${actualDigest}`)
+        throw new Error(
+            `native binary checksum mismatch: expected ${expectedSha256}, got ${actualDigest}`,
+        )
     }
 }
 

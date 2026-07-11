@@ -42,13 +42,10 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["ALL"]
-# Ruff's formatter owns comma/string layout, and the project intentionally uses
-# stdlib unittest. S606 is intrinsic to a package whose only job is to exec the
-# verified native binary.
-ignore = ["COM812", "D203", "D213", "ISC001", "PT", "S606"]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["SLF001"]
+# D203/D211 and D212/D213 are mutually exclusive; use D211 and D212. Ruff's
+# formatter owns COM812 and ISC001. S606 is intrinsic to a launcher whose only
+# runtime job is to exec the verified binary.
+ignore = ["COM812", "D203", "D213", "ISC001", "S606"]
 
 [tool.ruff.format]
 docstring-code-format = true

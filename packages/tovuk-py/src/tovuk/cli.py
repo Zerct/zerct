@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
 from . import __version__
 
+__all__ = ["main"]
+
 REPOSITORY = "https://github.com/tovuk/tovuk"
 MAX_BINARY_BYTES = 100 * 1024 * 1024
 MAX_CHECKSUM_BYTES = 4096
@@ -35,7 +37,7 @@ ALLOWED_DOWNLOAD_HOSTS = {
     "release-assets.githubusercontent.com",
 }
 NATIVE_TARGETS = json.loads(
-    pathlib.Path(__file__).with_name("native_release_targets.json").read_text(encoding="utf-8")
+    pathlib.Path(__file__).with_name("native_release_targets.json").read_text(encoding="utf-8"),
 )["targets"]
 
 
@@ -48,7 +50,7 @@ class _ManualRedirectHandler(urllib.request.HTTPErrorProcessor):
         response: http.client.HTTPResponse,
     ) -> http.client.HTTPResponse:
         """Return an HTTP response without following or converting redirects."""
-        _require_trusted_download_url(request.full_url)
+        require_trusted_download_url(request.full_url)
         return response
 
     https_response = http_response
@@ -119,10 +121,10 @@ def _native_binary() -> pathlib.Path:
 
     binary = _cache_dir() / __version__ / target_triple / binary_name
     if binary.is_file():
-        if _cached_binary_is_valid(binary):
+        if cached_binary_is_valid(binary):
             return binary
         binary.unlink(missing_ok=True)
-        _checksum_path(binary).unlink(missing_ok=True)
+        checksum_path(binary).unlink(missing_ok=True)
 
     binary.parent.mkdir(parents=True, exist_ok=True)
     _download_release_binary(target, binary)
@@ -174,7 +176,7 @@ def _download_release_binary(target: dict[str, object], destination: pathlib.Pat
     try:
         expected_sha256 = _release_checksum(checksum_url, asset)
         with _open_trusted_url(url) as response:
-            contents = _read_limited(
+            contents = read_limited(
                 response,
                 response.headers.get("Content-Length"),
                 MAX_BINARY_BYTES,
@@ -192,18 +194,18 @@ def _download_release_binary(target: dict[str, object], destination: pathlib.Pat
         raise RuntimeError(message) from error
 
 
-def _cached_binary_is_valid(binary: pathlib.Path) -> bool:
+def cached_binary_is_valid(binary: pathlib.Path) -> bool:
     if binary.is_symlink() or not binary.is_file():
         return False
     binary_size = binary.stat().st_size
     if binary_size == 0 or binary_size > MAX_BINARY_BYTES:
         return False
-    checksum_path = _checksum_path(binary)
-    if checksum_path.is_symlink() or not checksum_path.is_file():
+    sidecar = checksum_path(binary)
+    if sidecar.is_symlink() or not sidecar.is_file():
         return False
-    if checksum_path.stat().st_size > MAX_CHECKSUM_SIDECAR_BYTES:
+    if sidecar.stat().st_size > MAX_CHECKSUM_SIDECAR_BYTES:
         return False
-    expected_sha256 = checksum_path.read_text(encoding="utf-8").strip().lower()
+    expected_sha256 = sidecar.read_text(encoding="utf-8").strip().lower()
     if len(expected_sha256) != SHA256_HEX_LENGTH or any(
         character not in "0123456789abcdef" for character in expected_sha256
     ):
@@ -228,40 +230,40 @@ def _write_cached_binary(destination: pathlib.Path, contents: bytes, expected_sh
             temp_path = pathlib.Path(temp_file.name)
         _mark_executable(temp_path)
         temp_path.replace(destination)
-        _write_checksum_sidecar(destination, expected_sha256)
+        write_checksum_sidecar(destination, expected_sha256)
     finally:
         if temp_path is not None and temp_path.exists():
             temp_path.unlink()
 
 
-def _write_checksum_sidecar(binary: pathlib.Path, expected_sha256: str) -> None:
-    checksum_path = _checksum_path(binary)
+def write_checksum_sidecar(binary: pathlib.Path, expected_sha256: str) -> None:
+    sidecar = checksum_path(binary)
     temp_path: pathlib.Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
             "w",
-            dir=checksum_path.parent,
+            dir=sidecar.parent,
             encoding="utf-8",
-            prefix=f".{checksum_path.name}.",
+            prefix=f".{sidecar.name}.",
             delete=False,
         ) as temp_file:
             temp_file.write(f"{expected_sha256}\n")
             temp_file.flush()
             os.fsync(temp_file.fileno())
             temp_path = pathlib.Path(temp_file.name)
-        temp_path.replace(checksum_path)
+        temp_path.replace(sidecar)
     finally:
         if temp_path is not None and temp_path.exists():
             temp_path.unlink()
 
 
-def _checksum_path(binary: pathlib.Path) -> pathlib.Path:
+def checksum_path(binary: pathlib.Path) -> pathlib.Path:
     return binary.with_name(f"{binary.name}.sha256")
 
 
 def _release_checksum(url: str, asset: str) -> str:
     with _open_trusted_url(url) as response:
-        text = _read_limited(
+        text = read_limited(
             response,
             response.headers.get("Content-Length"),
             MAX_CHECKSUM_BYTES,
@@ -289,7 +291,7 @@ def _release_checksum(url: str, asset: str) -> str:
 def _open_trusted_url(url: str) -> http.client.HTTPResponse:
     current_url = url
     for _redirect_count in range(MAX_REDIRECTS + 1):
-        _require_trusted_download_url(current_url)
+        require_trusted_download_url(current_url)
         response = DOWNLOAD_OPENER.open(current_url, timeout=30)
         status = response.status
         if HTTP_REDIRECT_START <= status < HTTP_REDIRECT_END:
@@ -304,13 +306,13 @@ def _open_trusted_url(url: str) -> http.client.HTTPResponse:
             response.close()
             message = f"download from {current_url} returned HTTP {status}"
             raise RuntimeError(message)
-        _require_trusted_download_url(response.geturl())
+        require_trusted_download_url(response.geturl())
         return response
     message = f"too many redirects while downloading {url}"
     raise RuntimeError(message)
 
 
-def _require_trusted_download_url(value: str) -> None:
+def require_trusted_download_url(value: str) -> None:
     parsed = urllib.parse.urlsplit(value)
     try:
         port = parsed.port
@@ -328,7 +330,7 @@ def _require_trusted_download_url(value: str) -> None:
         raise RuntimeError(message)
 
 
-def _read_limited(
+def read_limited(
     response: _ReadableResponse,
     raw_length: str | None,
     maximum_bytes: int,

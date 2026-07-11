@@ -52,7 +52,7 @@ trait AssignFlagValue {
 struct AssignedFlagValue {
     /// Destination option selected by the flag name.
     action: FlagAction,
-    /// Output format active while reporting validation errors.
+    /// Output format active while emitting validation errors.
     output_format: OutputFormat,
     /// Original flag name used in diagnostics.
     source: String,

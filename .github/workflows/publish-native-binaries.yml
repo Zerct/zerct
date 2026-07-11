@@ -130,7 +130,8 @@ jobs:
             --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
             "https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-linux-x86_64.tar.gz" \
             -o "$RUNNER_TEMP/cmake.tar.gz"
-          printf '%s  %s\n' "$cmake_sha256" "$RUNNER_TEMP/cmake.tar.gz" | shasum -a 256 -c -
+          cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- verify-sha256 "$RUNNER_TEMP/cmake.tar.gz" "$cmake_sha256"
           tar -xzf "$RUNNER_TEMP/cmake.tar.gz" --strip-components=1 -C "$cmake_root"
           echo "$cmake_root/bin" >> "$GITHUB_PATH"
           export PATH="$cmake_root/bin:$PATH"
@@ -143,7 +144,8 @@ jobs:
             --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
             "https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux.zip" \
             -o "$RUNNER_TEMP/ninja.zip"
-          printf '%s  %s\n' "$ninja_sha256" "$RUNNER_TEMP/ninja.zip" | shasum -a 256 -c -
+          cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- verify-sha256 "$RUNNER_TEMP/ninja.zip" "$ninja_sha256"
           unzip -q "$RUNNER_TEMP/ninja.zip" -d "$ninja_root"
           chmod +x "$ninja_root/ninja"
           echo "$ninja_root" >> "$GITHUB_PATH"
@@ -163,7 +165,8 @@ jobs:
             --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
             "https://ziglang.org/download/$zig_version/zig-x86_64-linux-$zig_version.tar.xz" \
             -o "$RUNNER_TEMP/zig.tar.xz"
-          printf '%s  %s\n' "$zig_sha256" "$RUNNER_TEMP/zig.tar.xz" | shasum -a 256 -c -
+          cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- verify-sha256 "$RUNNER_TEMP/zig.tar.xz" "$zig_sha256"
           tar -xJf "$RUNNER_TEMP/zig.tar.xz" --strip-components=1 -C "$zig_root"
           echo "$zig_root" >> "$GITHUB_PATH"
           export PATH="$zig_root:$PATH"
@@ -248,7 +251,8 @@ jobs:
             --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
             "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_linux_amd64.tar.gz" \
             -o "$RUNNER_TEMP/gh.tar.gz"
-          printf '%s  %s\n' "$gh_sha256" "$RUNNER_TEMP/gh.tar.gz" | shasum -a 256 -c -
+          cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- verify-sha256 "$RUNNER_TEMP/gh.tar.gz" "$gh_sha256"
           tar -xzf "$RUNNER_TEMP/gh.tar.gz" --strip-components=1 -C "$gh_root"
           echo "$gh_root/bin" >> "$GITHUB_PATH"
           "$gh_root/bin/gh" --version
@@ -340,11 +344,9 @@ jobs:
           RELEASE_TAG: ${{ steps.metadata.outputs.tag }}
         run: |
           set -euo pipefail
-          created=false
           if [ "$RELEASE_EXISTS" = "false" ]; then
             gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "$RELEASE_TAG" \
               --notes "Native Tovuk CLI release $RELEASE_TAG" --target "$GITHUB_SHA" --draft
-            created=true
           fi
 
           upload=()
@@ -379,10 +381,10 @@ jobs:
             gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" "${upload[@]}"
           fi
           cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin check-native-release-assets -- "${RELEASE_TAG#v}" 0 --allow-draft
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
             --bin check-native-release-assets -- "${RELEASE_TAG#v}"
-          if [ "$created" = "true" ]; then
-            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
-          fi
 
   publish-npm:
     name: publish npm package
