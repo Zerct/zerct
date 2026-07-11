@@ -1,17 +1,18 @@
 use std::process::{Command, Stdio};
 
-pub(crate) fn open_url(url: &str) {
+/// Opens a public URL with the platform's default browser when possible.
+pub(in crate::cli) fn open_url(url: &str) {
     let mut command = if cfg!(target_os = "macos") {
         let mut command = Command::new("open");
-        command.arg(url);
+        let _command = command.arg(url);
         command
     } else if cfg!(windows) {
         let mut command = Command::new("cmd");
-        command.args(["/C", "start", "", url]);
+        let _command = command.args(["/C", "start", "", url]);
         command
     } else {
         let mut command = Command::new("xdg-open");
-        command.arg(url);
+        let _command = command.arg(url);
         command
     };
     let _ignore = command

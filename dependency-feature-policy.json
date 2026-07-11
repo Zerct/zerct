@@ -1,0 +1,55 @@
+{
+  "packages": [
+    {
+      "manifest": "checks/Cargo.toml",
+      "targets": [
+        {
+          "sha256": "77aa84175e53c3a0d78a91afe7361ca718cba4f4d3768b18fdec01af57c7894e",
+          "triple": "aarch64-apple-darwin"
+        },
+        {
+          "sha256": "119f471fc39480815987dbc8ed5967a431041b2e66540a77f9b280778a132f94",
+          "triple": "aarch64-unknown-linux-gnu"
+        },
+        {
+          "sha256": "721b2da43433cad4a3899281da41b378865d6d2c55b0c14a5ce56a0ff53f475f",
+          "triple": "x86_64-apple-darwin"
+        },
+        {
+          "sha256": "0f60140764606de62208c3f1e47579ac4ac14e6b071edac7c2cdcdbf562d2012",
+          "triple": "x86_64-pc-windows-msvc"
+        },
+        {
+          "sha256": "63286178e514711379f1d83e3fa3260f5ecd8b463f419eed55b96afe6f6f1c25",
+          "triple": "x86_64-unknown-linux-gnu"
+        }
+      ]
+    },
+    {
+      "manifest": "crates/tovuk/Cargo.toml",
+      "targets": [
+        {
+          "sha256": "a5c6eca713b39b17ab59c851d94a0f465be5503607c6e0ff160040d8daf76d5d",
+          "triple": "aarch64-apple-darwin"
+        },
+        {
+          "sha256": "2a3dc942b131e17afb02db6e62712db2a7ec52e10730e52f2f7910ad33ae0858",
+          "triple": "aarch64-unknown-linux-gnu"
+        },
+        {
+          "sha256": "d334a576efd12ae810760ab840c284a8d3b911ebbfa0464a46f43557acf33c30",
+          "triple": "x86_64-apple-darwin"
+        },
+        {
+          "sha256": "eeee5cd453db4376610e86c8dd500283b65c5bb0e5cbbcdaa2b0a1ea1a01e988",
+          "triple": "x86_64-pc-windows-msvc"
+        },
+        {
+          "sha256": "abcf0911479a53b6416aaadb37188a3ca663454b576c7492c4d400b2953761a0",
+          "triple": "x86_64-unknown-linux-gnu"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 2
+}

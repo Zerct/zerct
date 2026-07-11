@@ -11,7 +11,7 @@ secrets, or other customer infrastructure.
 ## Install
 
 ```sh
-cargo install tovuk
+cargo install --locked tovuk
 npm install -g tovuk
 pipx install tovuk
 brew tap tovuk/tovuk https://github.com/tovuk/tovuk
@@ -95,9 +95,9 @@ GET /v1/login/device/{device_code}
 GET /v1/account
 GET /v1/account/overview
 GET /v1/account/activity
-GET /v1/scrapers
-GET /v1/scrapers/health
-GET /v1/scrapers/{scraper}
+GET /v1/data-sources
+GET /v1/data-sources/health
+GET /v1/data-sources/{data_source}
 GET /v1/requests
 POST /v1/requests
 GET /v1/requests/{request_id}
@@ -114,9 +114,12 @@ POST /v1/support/tickets/{ticket_id}/resolve
 ## Development
 
 ```sh
+git config core.hooksPath .githooks
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-pre-commit --
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ```
 
-The full check builds the native CLI, runs Rust tests and strict Clippy, checks
-package wrappers, validates docs and OpenAPI, and confirms retired deploy and
-resource commands remain unavailable.
+The pre-commit hook runs the fast mechanically enforced policy. The pre-push
+hook runs the full check: release builds and tests, maximum Rust and Clippy
+policy, rustdoc, dependency and advisory review, package launchers, GitHub
+Actions security, docs, OpenAPI, and public-boundary checks.

@@ -9,14 +9,16 @@
   "files": [
     "bin",
     "install.mjs",
+    "install-policy.mjs",
     "native-release-targets.json",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"
   },
   "engines": {
-    "node": ">=18.17"
+    "node": ">=22.22.3"
   },
   "keywords": [
     "tovuk",
@@ -37,11 +39,14 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "node install.mjs",
-    "precheck": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets --",
-    "check": "npm run check:policy && npm run runtime && npm run pack:dry",
+    "precheck": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets -- --check",
+    "check": "npm run check:policy && npm run format:check && npm run lint && npm test && npm run runtime && npm run pack:dry",
     "check:policy": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin check-public-contracts -- npm-cli-package",
+    "format:check": "npx --yes prettier@3.9.5 --check install.mjs install-policy.mjs bin/tovuk.mjs tests/wrapper.test.mjs",
+    "lint": "npx --yes oxlint@1.73.0 --config ../../.oxlintrc.json --deny-warnings --report-unused-disable-directives install.mjs install-policy.mjs bin/tovuk.mjs tests/wrapper.test.mjs",
     "runtime": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin check-public-contracts -- npm-native-runtime",
-    "prepack": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets --",
+    "test": "node --test tests/wrapper.test.mjs",
+    "prepack": "cargo run --locked --quiet --manifest-path ../../checks/Cargo.toml --bin sync-native-release-targets -- --check",
     "pack:dry": "npm pack --dry-run"
   }
 }

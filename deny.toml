@@ -1,9 +1,19 @@
 [graph]
-targets = [{ triple = "x86_64-unknown-linux-gnu" }]
+targets = [
+  { triple = "aarch64-apple-darwin" },
+  { triple = "aarch64-unknown-linux-gnu" },
+  { triple = "x86_64-apple-darwin" },
+  { triple = "x86_64-pc-windows-msvc" },
+  { triple = "x86_64-unknown-linux-gnu" },
+]
 all-features = true
 
 [advisories]
 ignore = []
+unmaintained = "all"
+unsound = "all"
+unused-ignored-advisory = "deny"
+yanked = "deny"
 
 [licenses]
 allow = [
@@ -17,17 +27,24 @@ allow = [
   "Unlicense",
 ]
 confidence-threshold = 0.8
+include-dev = true
 
 [bans]
 multiple-versions = "deny"
+multiple-versions-include-dev = true
 wildcards = "deny"
 highlight = "all"
 workspace-default-features = "deny"
-external-default-features = "allow"
+external-default-features = "deny"
 allow = []
-deny = []
+deny = [{ crate = "openssl", reason = "Use rustls for public network TLS." }]
 skip = []
 skip-tree = []
+
+# The Rust dependency-policy checker derives reviewed feature allowances from
+# this repository's locked, target-specific public graphs and writes temporary
+# cargo-deny configurations. Feature drift must match the tracked fingerprints
+# before cargo-deny runs; this base file intentionally contains no graph copy.
 
 [sources]
 unknown-registry = "deny"

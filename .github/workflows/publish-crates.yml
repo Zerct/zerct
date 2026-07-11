@@ -1,16 +1,7 @@
 name: Publish crates.io package
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/publish-crates.yml"
-      - "checks/**"
-      - "crates/tovuk/**"
-      - "Formula/tovuk.rb"
-      - "packages/tovuk/**"
-      - "packages/tovuk-py/**"
+  workflow_call:
 
 permissions:
   contents: read
@@ -22,22 +13,32 @@ concurrency:
 jobs:
   publish:
     name: publish tovuk to crates.io
-    if: ${{ github.actor == 'kriptoburak' && ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'push' && github.ref == 'refs/heads/main')) }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment: crates
     permissions:
       contents: read
-      id-token: write
+      id-token: write # Required for crates.io Trusted Publishing.
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo-home
       RUSTUP_HOME: ${{ github.workspace }}/.rustup-home
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
           ref: ${{ github.sha }}
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+            crates/tovuk/target
+          key: crates-publish-${{ runner.os }}-${{ hashFiles('crates/tovuk/Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Verify pinned Rust toolchain
+        run: |
+          rustup show active-toolchain
+          rustc --version --verbose
       - name: Add Cargo tools to PATH
         shell: bash
         run: echo "${CARGO_HOME}/bin" >> "$GITHUB_PATH"
@@ -46,48 +47,34 @@ jobs:
       - name: Check registry version
         id: version
         run: |
-          version="$(awk -F '"' '/^version = / { print $2; exit }' crates/tovuk/Cargo.toml)"
+          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- public-version)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-          status="$(curl -sS -o /tmp/tovuk-crate.json -w "%{http_code}" \
+          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$RUNNER_TEMP/tovuk-crate.json" -w "%{http_code}" \
             -H "Accept: application/json" \
             -H "User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)" \
             "https://crates.io/api/v1/crates/tovuk/$version")"
           if [ "$status" = "200" ]; then
-            if [ "$GITHUB_EVENT_NAME" = "push" ]; then
-              echo "::error::tovuk@$version already exists on crates.io. Bump every public package version before pushing CLI changes."
-              exit 1
-            fi
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "::notice::tovuk@$version already exists on crates.io; skipping publish."
           elif [ "$status" = "404" ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
             echo "Unexpected crates.io status: $status" >&2
-            cat /tmp/tovuk-crate.json >&2
+            cat "$RUNNER_TEMP/tovuk-crate.json" >&2
             exit 1
           fi
       - if: steps.version.outputs.exists == 'false'
         run: |
           cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
           cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
-      - uses: actions/cache@v6
-        if: steps.version.outputs.exists == 'false'
-        with:
-          path: |
-            ~/.cargo/git
-            ~/.cargo/registry
-            crates/tovuk/target
-          key: ${{ runner.os }}-cargo-tovuk-crates-${{ hashFiles('crates/tovuk/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-tovuk-crates-
       - if: steps.version.outputs.exists == 'false'
         run: cargo package --locked
         working-directory: crates/tovuk
       - name: Authenticate with crates.io trusted publishing
         id: crates_io_auth
         if: steps.version.outputs.exists == 'false'
-        uses: rust-lang/crates-io-auth-action@v1
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
       - if: steps.version.outputs.exists == 'false'
         run: cargo publish --locked
         working-directory: crates/tovuk
@@ -95,20 +82,25 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ steps.crates_io_auth.outputs.token }}
       - name: Verify crates.io package
         if: steps.version.outputs.exists == 'false'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          version="${{ steps.version.outputs.version }}"
           for delay in 0 10 10 15 15 20 20 30 30 30; do
             if [ "$delay" != 0 ]; then
               sleep "$delay"
             fi
-            status="$(curl -sS -o /tmp/tovuk-crate.json -w "%{http_code}" \
+            if ! status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$RUNNER_TEMP/tovuk-crate.json" -w "%{http_code}" \
               -H "Accept: application/json" \
               -H "User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)" \
-              "https://crates.io/api/v1/crates/tovuk/$version")"
+              "https://crates.io/api/v1/crates/tovuk/$VERSION")"; then
+              continue
+            fi
             if [ "$status" = "200" ]; then
               exit 0
             fi
           done
-          cat /tmp/tovuk-crate.json >&2 || true
-          echo "tovuk@$version was not visible on crates.io after publish" >&2
+          if [ -f "$RUNNER_TEMP/tovuk-crate.json" ]; then
+            cat "$RUNNER_TEMP/tovuk-crate.json" >&2
+          fi
+          echo "tovuk@$VERSION was not visible on crates.io after publish" >&2
           exit 1

@@ -3,6 +3,21 @@ title: "Changelog"
 description: "Product changes for the public Tovuk scraper API and native CLI."
 ---
 
+## July 2026
+
+- Strengthened the native Rust CLI and repository checks with a pinned
+  toolchain, maximum compiler and Clippy policy, strict documentation checks,
+  and target-specific dependency review.
+- Hardened npm and PyPI native launchers with bounded downloads, trusted
+  redirect validation, checksum enforcement, tamper-resistant caches, and
+  focused security tests.
+- Made native releases reproducible across Linux, macOS, and Windows with a
+  Rust-generated build matrix, Rust-generated checksum sidecars, immutable
+  Actions, and resumable asset publication.
+- Tightened the public OpenAPI contract with explicit collection and string
+  bounds while keeping private implementation and service topology out of
+  status responses and documentation.
+
 ## June 2026
 
 - Focused the public CLI on scraper API workflows: login, account, pricing,

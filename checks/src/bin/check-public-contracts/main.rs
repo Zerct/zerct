@@ -1,94 +1,196 @@
 //! Public repository contract checks for Tovuk packages and docs.
 
-mod agent_guidance;
-mod cli_contract;
-mod docs;
-mod docs_api_contract;
-mod docs_navigation;
-mod docs_sources;
-mod helpers;
-mod helpers_io;
-mod helpers_public_copy;
-mod html_visible_copy;
-mod mintlify;
-mod mintlify_fetch;
-mod native_release_targets;
-mod npm;
-mod npm_package;
-mod npm_runtime;
-mod package_versions;
-mod repo_hygiene;
-mod repo_hygiene_git;
-mod repo_hygiene_paths;
-mod repo_hygiene_required;
-mod repo_hygiene_text;
-mod retired_contracts;
-mod runtime_cli;
-mod script_contracts;
-mod support_contract;
-mod types;
+/// Propagate an absent contract value without the question-mark operator.
+macro_rules! check_some {
+    ($option:expr) => {
+        match $option {
+            Some(value) => value,
+            None => return None,
+        }
+    };
+}
+
+/// Propagate a failed public contract check without the question-mark operator.
+macro_rules! check_try {
+    ($result:expr) => {
+        match $result {
+            Ok(value) => value,
+            Err(error) => return Err(error.into()),
+        }
+    };
+}
+
+/// Public contract checks for agent guidance.
+pub mod agent_guidance;
+
+extern crate alloc;
+
+/// Public contract checks for cli contract.
+#[path = "cli_contract_module.rs"]
+pub mod cli_contract;
+
+/// Public contract checks for docs.
+pub mod docs;
+
+/// Public contract checks for docs api contract.
+#[path = "docs_api_contract_module.rs"]
+pub mod docs_api_contract;
+
+/// Public contract checks for docs navigation.
+pub mod docs_navigation;
+
+/// Public contract checks for docs sources.
+pub mod docs_sources;
+
+/// Public contract checks for helpers.
+pub mod helpers;
+
+/// Public contract checks for helpers io.
+pub mod helpers_io;
+
+/// Public contract checks for helpers public copy.
+pub mod helpers_public_copy;
+
+/// Public contract checks for html visible copy.
+pub mod html_visible_copy;
+
+/// Public contract checks for mintlify.
+#[path = "mintlify_module.rs"]
+pub mod mintlify;
+
+/// Public contract checks for mintlify fetch.
+pub mod mintlify_fetch;
+
+/// Public contract checks for native release targets.
+pub mod native_release_targets;
+
+/// Public contract checks for npm.
+pub mod npm;
+
+/// Public contract checks for npm package.
+pub mod npm_package;
+
+/// Public contract checks for npm runtime.
+pub mod npm_runtime;
+
+/// Public contract checks for package versions.
+pub mod package_versions;
+
+/// Public contract checks for repo hygiene.
+pub mod repo_hygiene;
+
+/// Public contract checks for repo hygiene git.
+pub mod repo_hygiene_git;
+
+/// Public contract checks for repo hygiene paths.
+pub mod repo_hygiene_paths;
+
+/// Public contract checks for repo hygiene required.
+pub mod repo_hygiene_required;
+
+/// Public contract checks for repo hygiene text.
+pub mod repo_hygiene_text;
+
+/// Public contract checks for retired contracts.
+pub mod retired_contracts;
+
+/// Public contract checks for runtime cli.
+pub mod runtime_cli;
+
+/// Public contract checks for script contracts.
+pub mod script_contracts;
+
+/// Public contract checks for support contract.
+pub mod support_contract;
+
+/// Public contract checks for types.
+pub mod types;
+
+use flate2 as _;
+
+use helpers::{CheckResult, OutputChannel, find_repo_root, write_line};
+
+use sha2 as _;
 
 use std::{env, process::ExitCode};
 
-use helpers::{CheckResult, find_repo_root, read_package_json};
+use tar as _;
+
+use tovuk_public_checks as _;
+
+/// Usage displayed when no public contract group is selected.
+const CONTRACT_CHECK_USAGE: &str =
+    "usage: cargo run --manifest-path checks/Cargo.toml --bin check-public-contracts -- <check>";
+
+/// Compile-time references preserve the named helper boundaries.
+const _: [usize; 0x0001] = [size_of_val(&run)];
 
 fn main() -> ExitCode {
     match run() {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(()) => return ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("{error}");
-            ExitCode::FAILURE
+            drop(write_line(OutputChannel::Diagnostic, error.as_str()));
+            return ExitCode::FAILURE;
         }
     }
 }
 
-fn run() -> CheckResult {
-    let mut args = env::args().skip(1);
-    let Some(check) = args.next() else {
-        return Err(
-            "usage: cargo run --manifest-path checks/Cargo.toml --bin check-public-contracts -- <check>"
-                .to_owned(),
-        );
-    };
+/// Read one required checker argument.
+///
+/// # Errors
+///
+/// Returns an error when the argument is missing.
+fn next_argument(args: &mut impl Iterator<Item = String>, label: &str) -> CheckResult<String> {
+    return args.next().ok_or_else(|| format!("{label} is required"));
+}
 
-    let repo_root = find_repo_root()?;
-    env::set_current_dir(repo_root.as_str()).map_err(|error| format!("cd {repo_root}: {error}"))?;
+/// Contract implementation for `run`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+#[inline]
+pub fn run() -> CheckResult {
+    let mut args = env::args().skip(0x0001);
+    let check = check_try!(
+        args.next()
+            .ok_or_else(|| return CONTRACT_CHECK_USAGE.to_owned())
+    );
+
+    let repo_root = check_try!(find_repo_root());
+    check_try!(
+        env::set_current_dir(repo_root.as_str())
+            .map_err(|error| format!("cd {repo_root}: {error}"))
+    );
 
     match check.as_str() {
-        "repo-hygiene" => repo_hygiene::check(),
-        "native-release-targets" => native_release_targets::check(),
-        "package-versions" => package_versions::check(),
-        "cli-contract" => cli_contract::check(),
-        "docs" => docs::check(),
-        "openapi-path" => docs::print_openapi_path(),
-        "npm-cli-package" => npm::check_cli_package(),
-        "npm-native-runtime" => npm::check_native_runtime(),
+        "repo-hygiene" => return repo_hygiene::check(),
+        "native-release-targets" => return native_release_targets::check(),
+        "package-versions" => return package_versions::check(),
+        "public-version" => return package_versions::print_canonical_version(),
+        "cli-contract" => return cli_contract::check(),
+        "docs" => return docs::check(),
+        "openapi-path" => return docs::print_openapi_path(),
+        "npm-cli-package" => return npm::check_cli_package(),
+        "npm-native-runtime" => return npm::check_native_runtime(),
         "runtime-cli" => {
-            let Some(native_cli) = args.next() else {
-                return Err("runtime-cli requires the native CLI path".to_owned());
-            };
-            let Some(python_bin) = args.next() else {
-                return Err("runtime-cli requires the Python interpreter path".to_owned());
-            };
-            runtime_cli::check(native_cli.as_str(), python_bin.as_str())
+            let native_cli = check_try!(next_argument(&mut args, "runtime-cli native CLI path"));
+            let python_bin = check_try!(next_argument(
+                &mut args,
+                "runtime-cli Python interpreter path",
+            ));
+            return runtime_cli::check(native_cli.as_str(), python_bin.as_str());
         }
         "mintlify-agent-readiness" => {
             let target = args
                 .next()
-                .unwrap_or_else(|| "https://docs.tovuk.com".to_owned());
-            mintlify::check_agent_readiness(target.as_str())
+                .unwrap_or_else(|| return "https://docs.tovuk.com".to_owned());
+            return mintlify::check_agent_readiness(target.as_str());
         }
         "mintlify-score" => {
-            let Some(path) = args.next() else {
-                return Err("mintlify-score requires a score JSON path".to_owned());
-            };
-            mintlify::check_score(path.as_str())
+            let path = check_try!(next_argument(&mut args, "mintlify-score JSON path"));
+            return mintlify::check_score(path.as_str());
         }
-        "npm-version" => {
-            let package = read_package_json("packages/tovuk/package.json")?;
-            println!("{}", package.version);
-            Ok(())
-        }
-        other => Err(format!("unknown check {other:?}")),
+        other => return Err(format!("unknown check {other:?}")),
     }
 }

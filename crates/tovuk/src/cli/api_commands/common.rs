@@ -4,62 +4,68 @@ use super::super::{
     utils::encode_component,
 };
 
-pub(crate) fn command_arg(
-    cli: &CliOptions,
-    code: &str,
-    message: &str,
-    instruction: &str,
-) -> Result<String> {
-    required_arg(cli, 1, code, message, instruction)
+/// Stable code, message, and recovery instruction for a missing argument.
+pub(super) type ArgumentError = (&'static str, &'static str, &'static str);
+
+/// Returns the first command argument.
+///
+/// # Errors
+///
+/// Returns the supplied validation error when the argument is absent.
+pub(super) fn command_arg(cli: &CliOptions, error: ArgumentError) -> Result<String> {
+    return required_arg(cli, 0b1, error);
 }
 
-pub(crate) fn required_arg(
-    cli: &CliOptions,
-    index: usize,
-    code: &str,
-    message: &str,
-    instruction: &str,
-) -> Result<String> {
-    cli.args
-        .get(index)
-        .cloned()
-        .filter(|value| !value.is_empty())
-        .ok_or_else(|| agent_error(code, message, instruction, cli.output.json))
-}
-
-pub(crate) fn joined_args(cli: &CliOptions, start_index: usize) -> String {
-    cli.args
+/// Joins trimmed non-empty positional arguments from `start_index` onward.
+pub(super) fn joined_args(cli: &CliOptions, start_index: usize) -> String {
+    return cli
+        .args()
         .iter()
         .skip(start_index)
         .map(String::as_str)
         .map(str::trim)
-        .filter(|value| !value.is_empty())
+        .filter(|value| return !value.is_empty())
         .collect::<Vec<_>>()
-        .join(" ")
+        .join(" ");
 }
 
-pub(crate) fn optional_trimmed_value(value: &str) -> Option<String> {
+/// Returns a trimmed owned value when the input is non-empty.
+pub(super) fn optional_trimmed_value(value: &str) -> Option<String> {
     let trimmed = value.trim();
     if trimmed.is_empty() {
-        None
-    } else {
-        Some(trimmed.to_owned())
+        return None;
     }
+    return Some(trimmed.to_owned());
 }
 
-pub(crate) fn page_query(cli: &CliOptions) -> String {
+/// Builds an encoded pagination query string from parsed options.
+pub(super) fn page_query(cli: &CliOptions) -> String {
     let mut params = Vec::new();
-    if !cli.limit.is_empty() {
-        params.push(format!("limit={}", encode_component(&cli.limit)));
+    if !cli.limit().is_empty() {
+        params.push(format!("limit={}", encode_component(cli.limit())));
     }
-    if !cli.cursor.is_empty() {
-        params.push(format!("cursor={}", encode_component(&cli.cursor)));
+    if !cli.cursor().is_empty() {
+        params.push(format!("cursor={}", encode_component(cli.cursor())));
     }
     if params.is_empty() {
-        String::new()
-    } else {
-        format!("?{}", params.join("&"))
+        return String::new();
     }
+    return format!("?{}", params.join("&"));
+}
+
+/// Returns a required non-empty positional argument.
+///
+/// # Errors
+///
+/// Returns the supplied validation error when the argument is absent or empty.
+pub(super) fn required_arg(cli: &CliOptions, index: usize, error: ArgumentError) -> Result<String> {
+    let (code, message, instruction) = error;
+    return cli
+        .args()
+        .get(index)
+        .cloned()
+        .filter(|value| return !value.is_empty())
+        .ok_or_else(|| return agent_error(code, message, instruction, cli.output_format()));
 }
 
 #[cfg(test)]

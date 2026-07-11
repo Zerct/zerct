@@ -1,76 +1,111 @@
 #!/usr/bin/env node
-import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { access } from 'node:fs/promises'
+import { join } from 'node:path'
+import { once } from 'node:events'
+import { spawn } from 'node:child_process'
 
-const binDir = dirname(fileURLToPath(import.meta.url))
-const nativeBinary = join(binDir, process.platform === 'win32' ? 'tovuk-native.exe' : 'tovuk-native')
+const FAILURE_EXIT_CODE = 1
+const PROCESS_ARGUMENT_OFFSET = 2
+const NEXT_ARGUMENT_OFFSET = 1
+const JSON_INDENT_SPACES = 2
+const binDir = import.meta.dirname
 
-if (!existsSync(nativeBinary)) {
-  printMissingNativeBinary()
-  process.exit(1)
-}
-
-const result = spawnSync(nativeBinary, process.argv.slice(2), {
-  stdio: 'inherit',
-  windowsHide: false,
-})
-
-if (result.error) {
-  printLaunchError(result.error)
-  process.exit(1)
-}
-
-if (result.signal) {
-  process.kill(process.pid, result.signal)
-}
-
-process.exit(result.status ?? 1)
-
-function printMissingNativeBinary() {
-  if (jsonOutputRequested()) {
-    console.error(JSON.stringify({
-      code: 'native_binary_unavailable',
-      message: 'Tovuk native binary was not installed.',
-      agent_instruction: 'Reinstall with npm scripts enabled, install from GitHub Releases, Homebrew, Cargo, or rerun with TOVUK_NATIVE_BINARY pointing to a supported native binary.',
-      docs_url: 'https://docs.tovuk.com/reference/packages',
-      checkout_url: null,
-    }, null, 2))
-    return
-  }
-
-  console.error('Tovuk native binary was not installed. Reinstall with npm scripts enabled, or install from https://github.com/tovuk/tovuk/releases.')
-}
-
-function printLaunchError(error) {
-  if (jsonOutputRequested()) {
-    console.error(JSON.stringify({
-      code: 'native_binary_launch_failed',
-      message: `Tovuk native binary could not start: ${error.message}`,
-      agent_instruction: 'Reinstall the Tovuk npm package, or install with Homebrew, Cargo, or GitHub Releases.',
-      docs_url: 'https://docs.tovuk.com/reference/packages',
-      checkout_url: null,
-    }, null, 2))
-    return
-  }
-
-  console.error(`Tovuk native binary could not start: ${error.message}`)
-}
-
-function jsonOutputRequested() {
-  if (/^json$/i.test(process.env.TOVUK_OUTPUT ?? '')) {
-    return true
-  }
-  const args = process.argv.slice(2)
-  for (let index = 0; index < args.length; index += 1) {
-    const arg = args[index]
-    if (arg === '--json' || /^--output=json$/i.test(arg)) {
-      return true
+const main = async () => {
+    if (!(await nativeBinaryExists())) {
+        printMissingNativeBinary()
+        return FAILURE_EXIT_CODE
     }
-    if (arg === '--output' && /^json$/i.test(args[index + 1] ?? '')) {
-      return true
+    try {
+        return await runNativeBinary()
+    } catch (error) {
+        printLaunchError(error)
+        return FAILURE_EXIT_CODE
     }
-  }
-  return false
 }
+
+const nativeBinaryName = () => {
+    if (process.platform === 'win32') {
+        return 'tovuk-native.exe'
+    }
+    return 'tovuk-native'
+}
+
+const nativeBinary = join(binDir, nativeBinaryName())
+
+const nativeBinaryExists = async () => {
+    try {
+        await access(nativeBinary)
+        return true
+    } catch {
+        return false
+    }
+}
+
+const runNativeBinary = async () => {
+    const child = spawn(nativeBinary, process.argv.slice(PROCESS_ARGUMENT_OFFSET), {
+        stdio: 'inherit',
+        windowsHide: false,
+    })
+    const [code, signal] = await once(child, 'exit')
+    if (signal) {
+        process.kill(process.pid, signal)
+    }
+    return code ?? FAILURE_EXIT_CODE
+}
+
+const writeJsonError = (details) => {
+    process.stderr.write(`${JSON.stringify(details, null, JSON_INDENT_SPACES)}\n`)
+}
+
+const printMissingNativeBinary = () => {
+    if (jsonOutputRequested()) {
+        writeJsonError({
+            agent_instruction:
+                'Reinstall with npm scripts enabled, install from GitHub Releases, Homebrew, Cargo, or rerun with TOVUK_NATIVE_BINARY pointing to a supported native binary.',
+            checkout_url: null,
+            code: 'native_binary_unavailable',
+            docs_url: 'https://docs.tovuk.com/reference/packages',
+            message: 'Tovuk native binary was not installed.',
+        })
+        return
+    }
+    process.stderr.write(
+        'Tovuk native binary was not installed. Reinstall with npm scripts enabled, or install from https://github.com/tovuk/tovuk/releases.\n',
+    )
+}
+
+const printLaunchError = (error) => {
+    let message = String(error)
+    if (error instanceof Error) {
+        ;({ message } = error)
+    }
+    if (jsonOutputRequested()) {
+        writeJsonError({
+            agent_instruction: 'Reinstall the Tovuk npm package, or install with Homebrew, Cargo, or GitHub Releases.',
+            checkout_url: null,
+            code: 'native_binary_launch_failed',
+            docs_url: 'https://docs.tovuk.com/reference/packages',
+            message: `Tovuk native binary could not start: ${message}`,
+        })
+        return
+    }
+    process.stderr.write(`Tovuk native binary could not start: ${message}\n`)
+}
+
+const jsonOutputRequested = () => {
+    if (/^json$/iu.test(process.env.TOVUK_OUTPUT ?? '')) {
+        return true
+    }
+    const args = process.argv.slice(PROCESS_ARGUMENT_OFFSET)
+    for (const [index, argument] of args.entries()) {
+        if (argument === '--json' || /^--output=json$/iu.test(argument)) {
+            return true
+        }
+        if (argument === '--output' && /^json$/iu.test(args[index + NEXT_ARGUMENT_OFFSET] ?? '')) {
+            return true
+        }
+    }
+    return false
+}
+
+process.exitCode = await main()

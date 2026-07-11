@@ -1,4 +1,5 @@
-pub(crate) const RETIRED_CLI_COMMANDS: &[&str] = &[
+/// Contract value named `RETIRED_CLI_COMMANDS`.
+pub(super) const RETIRED_CLI_COMMANDS: &[&str] = &[
     "new",
     "check",
     "dev",
@@ -37,7 +38,8 @@ pub(crate) const RETIRED_CLI_COMMANDS: &[&str] = &[
     "account update",
 ];
 
-pub(crate) const RETIRED_HELP_COMMANDS: &[&str] = &[
+/// Contract value named `RETIRED_HELP_COMMANDS`.
+pub(super) const RETIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk deploy",
     "tovuk service",
     "tovuk storage",
@@ -46,29 +48,8 @@ pub(crate) const RETIRED_HELP_COMMANDS: &[&str] = &[
     "tovuk account update",
 ];
 
-pub(crate) const RETIRED_PUBLIC_COMMANDS: &[&str] = &[
-    "tovuk new",
-    "tovuk check",
-    "tovuk dev",
-    "tovuk deploy",
-    "tovuk service",
-    "tovuk logs",
-    "tovuk sqlite",
-    "tovuk kv",
-    "tovuk queue",
-    "tovuk cron",
-    "tovuk state",
-    "tovuk binding",
-    "tovuk limits",
-    "tovuk env",
-    "tovuk secrets",
-    "tovuk domains",
-    "tovuk storage",
-    "tovuk nodes",
-    "tovuk account update",
-];
-
-pub(crate) const RETIRED_OPENAPI_CONTRACTS: &[&str] = &[
+/// Contract value named `RETIRED_OPENAPI_CONTRACTS`.
+pub(super) const RETIRED_OPENAPI_CONTRACTS: &[&str] = &[
     r#""/v1/apps""#,
     r#""/v1/deploy""#,
     r#""/v1/deploys""#,
@@ -102,5 +83,29 @@ pub(crate) const RETIRED_OPENAPI_CONTRACTS: &[&str] = &[
     "TovukConfig",
 ];
 
-pub(crate) const RETIRED_PUBLIC_DOCS_WORDING: &[&str] =
+/// Contract value named `RETIRED_PUBLIC_COMMANDS`.
+pub(super) const RETIRED_PUBLIC_COMMANDS: &[&str] = &[
+    "tovuk new",
+    "tovuk check",
+    "tovuk dev",
+    "tovuk deploy",
+    "tovuk service",
+    "tovuk logs",
+    "tovuk sqlite",
+    "tovuk kv",
+    "tovuk queue",
+    "tovuk cron",
+    "tovuk state",
+    "tovuk binding",
+    "tovuk limits",
+    "tovuk env",
+    "tovuk secrets",
+    "tovuk domains",
+    "tovuk storage",
+    "tovuk nodes",
+    "tovuk account update",
+];
+
+/// Contract value named `RETIRED_PUBLIC_DOCS_WORDING`.
+pub(super) const RETIRED_PUBLIC_DOCS_WORDING: &[&str] =
     &["tovuk.toml", "full-stack", "static frontend", "tovukcloud"];

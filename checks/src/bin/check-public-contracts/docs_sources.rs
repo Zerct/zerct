@@ -1,105 +1,135 @@
-use std::path::{Path, PathBuf};
-
-use serde_json::Value;
-
 use crate::{
     helpers::{
-        CheckResult, read_json, read_sorted_texts_recursive, read_text,
+        CheckResult, read_json, read_sorted_texts_recursive, read_text, read_text_corpus,
         reject_forbidden_public_copy_terms,
     },
     types::DocsJson,
 };
 
+use serde_json::Value;
+
+use std::path::{Path, PathBuf};
+
+/// Non-MDX public copy included in leakage and positioning scans.
+const PUBLIC_COPY_PATHS: &[&str] = &[
+    "README.md",
+    "docs/openapi.json",
+    "docs/docs.json",
+    "docs/llms.txt",
+    "docs/skill.md",
+    "crates/tovuk/README.md",
+    "packages/tovuk/README.md",
+    "packages/tovuk/package.json",
+    "packages/tovuk-py/README.md",
+    "packages/tovuk-py/pyproject.toml",
+    "skills/tovuk/SKILL.md",
+];
+
+/// Compile-time references preserve the named helper boundaries.
+const _: [usize; 0x0003] = [
+    size_of_val(&DocsSources::load),
+    size_of_val(&openapi_config_path),
+    size_of_val(&read_navigation_pages),
+];
+
 #[derive(Debug)]
-pub(crate) struct DocsSources {
-    pub(crate) nav_pages: String,
-    pub(crate) openapi: String,
-    pub(crate) readme: String,
-    pub(crate) pricing: String,
-    pub(crate) scrapers: String,
-    pub(crate) agents: String,
-    pub(crate) packages: String,
-    pub(crate) llms: String,
-    pub(crate) skill: String,
-    pub(crate) packaged_skill: String,
-    pub(crate) status: String,
-    pub(crate) support: String,
-    pub(crate) public_copy: String,
+/// Contract representation for `DocsSources`.
+pub(super) struct DocsSources {
+    /// Contract data stored in `agents`.
+    pub agents: String,
+    /// Contract data stored in `llms`.
+    pub llms: String,
+    /// Contract data stored in `nav_pages`.
+    pub nav_pages: String,
+    /// Contract data stored in `openapi`.
+    pub openapi: String,
+    /// Contract data stored in `packaged_skill`.
+    pub packaged_skill: String,
+    /// Contract data stored in `packages`.
+    pub packages: String,
+    /// Contract data stored in `pricing`.
+    pub pricing: String,
+    /// Contract data stored in `public_copy`.
+    pub public_copy: String,
+    /// Contract data stored in `readme`.
+    pub readme: String,
+    /// Contract data stored in `scrapers`.
+    pub scrapers: String,
+    /// Contract data stored in `skill`.
+    pub skill: String,
+    /// Contract data stored in `status`.
+    pub status: String,
+    /// Contract data stored in `support`.
+    pub support: String,
 }
 
 impl DocsSources {
-    pub(crate) fn load(pages: &[String]) -> CheckResult<Self> {
-        let openapi = read_text("docs/openapi.json")?;
-        let readme = read_text("README.md")?;
-        let pricing = read_text("docs/pricing.mdx")?;
-        let scrapers = read_text("docs/scrapers.mdx")?;
-        let agents = read_text("docs/agents.mdx")?;
-        let packages = read_text("docs/reference/packages.mdx")?;
-        let llms = read_text("docs/llms.txt")?;
-        let skill = read_text("docs/skill.md")?;
-        let packaged_skill = read_text("skills/tovuk/SKILL.md")?;
-        let docs_json_source = read_text("docs/docs.json")?;
-        let all_mdx_docs = read_sorted_texts_recursive("docs", ".mdx")?.join("\n");
-        let cargo_readme = read_text("crates/tovuk/README.md")?;
-        let npm_readme = read_text("packages/tovuk/README.md")?;
-        let npm_package = read_text("packages/tovuk/package.json")?;
-        let python_readme = read_text("packages/tovuk-py/README.md")?;
-        let python_project = read_text("packages/tovuk-py/pyproject.toml")?;
+    /// Contract implementation for `load`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the contract requirement cannot be verified.
+    pub(super) fn load(pages: &[String]) -> CheckResult<Self> {
         let public_copy = [
-            readme.as_str(),
-            openapi.as_str(),
-            docs_json_source.as_str(),
-            llms.as_str(),
-            skill.as_str(),
-            all_mdx_docs.as_str(),
-            cargo_readme.as_str(),
-            npm_readme.as_str(),
-            npm_package.as_str(),
-            python_readme.as_str(),
-            python_project.as_str(),
-            packaged_skill.as_str(),
+            check_try!(read_text_corpus(PUBLIC_COPY_PATHS)),
+            check_try!(read_sorted_texts_recursive("docs", ".mdx")).join("\n"),
         ]
         .join("\n");
-        reject_forbidden_public_copy_terms("public docs and package copy", public_copy.as_str())?;
-        Ok(Self {
+        check_try!(reject_forbidden_public_copy_terms(
+            "public docs and package copy",
+            public_copy.as_str()
+        ));
+        return Ok(Self {
+            agents: check_try!(read_text("docs/agents.mdx")),
+            llms: check_try!(read_text("docs/llms.txt")),
             nav_pages: pages.join("\n"),
-            openapi,
-            readme,
-            pricing,
-            scrapers,
-            agents,
-            packages,
-            llms,
-            skill,
-            packaged_skill,
-            status: read_text("docs/status.mdx")?,
-            support: read_text("docs/support.mdx")?,
+            openapi: check_try!(read_text("docs/openapi.json")),
+            packaged_skill: check_try!(read_text("skills/tovuk/SKILL.md")),
+            packages: check_try!(read_text("docs/reference/packages.mdx")),
+            pricing: check_try!(read_text("docs/pricing.mdx")),
             public_copy,
-        })
+            readme: check_try!(read_text("README.md")),
+            scrapers: check_try!(read_text("docs/scrapers.mdx")),
+            skill: check_try!(read_text("docs/skill.md")),
+            status: check_try!(read_text("docs/status.mdx")),
+            support: check_try!(read_text("docs/support.mdx")),
+        });
     }
 }
 
-pub(crate) fn read_navigation_pages() -> CheckResult<Vec<String>> {
-    let docs: DocsJson = read_json("docs/docs.json")?;
-    let mut pages = Vec::new();
-    for tab in docs.navigation.tabs {
-        for group in tab.groups {
-            for page in group.pages {
-                let Value::String(page_name) = page else {
-                    return Err("docs navigation page entries must be strings".to_owned());
-                };
-                pages.push(page_name);
-            }
-        }
-    }
-    Ok(pages)
-}
-
-pub(crate) fn openapi_config_path() -> CheckResult<PathBuf> {
-    let docs: DocsJson = read_json("docs/docs.json")?;
+/// Contract implementation for `openapi_config_path`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn openapi_config_path() -> CheckResult<PathBuf> {
+    let docs: DocsJson = check_try!(read_json("docs/docs.json"));
     let openapi = docs.api.openapi.trim();
     if openapi.is_empty() {
         return Err("docs/docs.json must set api.openapi".to_owned());
     }
-    Ok(Path::new("docs").join(openapi))
+    return Ok(Path::new("docs").join(openapi));
+}
+
+/// Contract implementation for `read_navigation_pages`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn read_navigation_pages() -> CheckResult<Vec<String>> {
+    let docs: DocsJson = check_try!(read_json("docs/docs.json"));
+    let mut pages = Vec::new();
+    let navigation_pages = docs
+        .navigation
+        .tabs
+        .into_iter()
+        .flat_map(|tab| return tab.groups)
+        .flat_map(|group| return group.pages);
+    for page in navigation_pages {
+        let Value::String(page_name) = page else {
+            return Err("docs navigation page entries must be strings".to_owned());
+        };
+        pages.push(page_name);
+    }
+    return Ok(pages);
 }

@@ -1,12 +1,7 @@
 name: Publish PyPI package
 
 on:
-  workflow_dispatch:
-  workflow_run:
-    workflows:
-      - Publish native binaries
-    types:
-      - completed
+  workflow_call:
 
 permissions:
   contents: read
@@ -18,7 +13,7 @@ concurrency:
 jobs:
   prepare:
     name: prepare PyPI package
-    if: ${{ (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
@@ -27,60 +22,53 @@ jobs:
       exists: ${{ steps.version.outputs.exists }}
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-          package-manager-cache: false
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Sync generated native target manifests
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin sync-native-release-targets --
-      - name: Check public release version contract
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
-      - uses: actions/cache@v6
+          ref: ${{ github.sha }}
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: |
-            ~/.cargo/git
             ~/.cargo/registry
+            ~/.cargo/git
+            checks/target
             crates/tovuk/target
-          key: ${{ runner.os }}-cargo-tovuk-pypi-${{ hashFiles('crates/tovuk/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-tovuk-pypi-
-      - name: Verify unscoped PyPI project name
+          key: pypi-prepare-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          enable-cache: false
+          version: "0.11.28"
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: "24.18.0"
+          package-manager-cache: false
+      - name: Verify pinned Rust toolchain
         run: |
-          python3 - <<'PY'
-          import tomllib
-
-          name = tomllib.load(open("packages/tovuk-py/pyproject.toml", "rb"))["project"]["name"]
-          if name != "tovuk":
-              raise SystemExit(f'PyPI project name must stay unscoped "tovuk", got {name!r}')
-          PY
+          rustup show active-toolchain
+          rustc --version --verbose
+      - name: Sync generated native target manifests
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin sync-native-release-targets -- --check
+      - name: Check public release version contract
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
       - name: Check registry version
         id: version
         run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import tomllib
-          import os
-          import urllib.error
-          import urllib.request
-
-          version = tomllib.load(open("packages/tovuk-py/pyproject.toml", "rb"))["project"]["version"]
-          print(f"version={version}")
-          try:
-              urllib.request.urlopen(f"https://pypi.org/pypi/tovuk/{version}/json", timeout=10).close()
-          except urllib.error.HTTPError as error:
-              if error.code == 404:
-                  print("exists=false")
-              else:
-                  raise
-          else:
-              if os.environ.get("GITHUB_EVENT_NAME") == "push":
-                  raise SystemExit(f"tovuk {version} already exists on PyPI. Bump every public package version before pushing CLI changes.")
-              print("exists=true")
-          PY
+          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- public-version)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$RUNNER_TEMP/tovuk-pypi.json" -w '%{http_code}' \
+            -H 'Accept: application/json' \
+            -H 'User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)' \
+            "https://pypi.org/pypi/tovuk/$version/json")"
+          if [ "$status" = "200" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::tovuk $version already exists on PyPI; skipping publish."
+          elif [ "$status" = "404" ]; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Unexpected PyPI status: $status" >&2
+            cat "$RUNNER_TEMP/tovuk-pypi.json" >&2
+            exit 1
+          fi
       - if: steps.version.outputs.exists == 'false'
         run: |
           cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
@@ -89,6 +77,15 @@ jobs:
         run: cargo build --locked --release --manifest-path crates/tovuk/Cargo.toml
       - if: steps.version.outputs.exists == 'false'
         run: |
+          uvx --from ruff==0.15.21 ruff format --check packages/tovuk-py
+          uvx --from ruff==0.15.21 ruff check packages/tovuk-py
+          uvx --from ty==0.0.58 ty check \
+            --project packages/tovuk-py \
+            --extra-search-path packages/tovuk-py/src \
+            --error-on-warning \
+            packages/tovuk-py/src packages/tovuk-py/tests
+          PYTHONPATH=packages/tovuk-py/src \
+            python3 -m unittest discover -s packages/tovuk-py/tests
           python3 -m compileall -q packages/tovuk-py/src
           PYTHONPATH=packages/tovuk-py/src python3 -m tovuk --help >/tmp/tovuk-help.txt
           grep -q 'tovuk support create' /tmp/tovuk-help.txt
@@ -96,23 +93,22 @@ jobs:
           TOVUK_NATIVE_BINARY: ${{ github.workspace }}/crates/tovuk/target/release/tovuk
       - name: Verify native release assets
         if: steps.version.outputs.exists == 'false'
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-native-release-assets -- "${{ steps.version.outputs.version }}"
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-native-release-assets -- "$VERSION"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/setup-python@v6
+          VERSION: ${{ steps.version.outputs.version }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         if: steps.version.outputs.exists == 'false'
         with:
-          python-version: "3.13"
-          cache: pip
-          cache-dependency-path: packages/tovuk-py/pyproject.toml
+          python-version: "3.14.6"
       - if: steps.version.outputs.exists == 'false'
-        run: python -m pip install --upgrade build==1.4.4
+        run: python -m pip install --upgrade build==1.5.1
       - if: steps.version.outputs.exists == 'false'
         run: |
           rm -rf dist
           python -m build
         working-directory: packages/tovuk-py
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: steps.version.outputs.exists == 'false'
         with:
           name: tovuk-pypi-dist
@@ -128,53 +124,32 @@ jobs:
     environment: pypi
     permissions:
       contents: read
-      id-token: write
+      id-token: write # Required for PyPI trusted publishing.
     steps:
-      - name: Select PyPI publish auth
-        id: publish_auth
-        run: |
-          if [ -n "${PYPI_API_TOKEN:-}" ]; then
-            echo "method=token" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ "${PYPI_TRUSTED_PUBLISHING_ENABLED:-}" = "true" ]; then
-            echo "method=trusted" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "::error::PyPI publish auth is not configured. Set PYPI_API_TOKEN or enable trusted publishing for project tovuk with owner tovuk, repository tovuk, workflow publish-pypi.yml, environment pypi."
-          exit 1
-        env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-          PYPI_TRUSTED_PUBLISHING_ENABLED: ${{ vars.PYPI_TRUSTED_PUBLISHING_ENABLED }}
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
         with:
           name: tovuk-pypi-dist
           path: pypi-dist
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.publish_auth.outputs.method == 'trusted'
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           packages-dir: pypi-dist
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        if: steps.publish_auth.outputs.method == 'token'
-        with:
-          packages-dir: pypi-dist
-          password: ${{ secrets.PYPI_API_TOKEN }}
       - name: Verify PyPI package
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          python3 - <<'PY'
-          import time
-          import urllib.request
-
-          version = "${{ needs.prepare.outputs.version }}"
-          for delay in [0, 10, 10, 15, 15, 20, 20, 30, 30, 30]:
-              if delay:
-                  time.sleep(delay)
-              try:
-                  urllib.request.urlopen(f"https://pypi.org/pypi/tovuk/{version}/json", timeout=10).close()
-                  raise SystemExit(0)
-              except Exception:
-                  pass
-          raise SystemExit(f"tovuk {version} was not visible on PyPI after publish")
-          PY
+          for delay in 0 10 10 15 15 20 20 30 30 30; do
+            if [ "$delay" != 0 ]; then
+              sleep "$delay"
+            fi
+            if status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$RUNNER_TEMP/tovuk-pypi.json" -w '%{http_code}' \
+              -H 'Accept: application/json' \
+              -H 'User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)' \
+              "https://pypi.org/pypi/tovuk/$VERSION/json")" && [ "$status" = "200" ]; then
+              exit 0
+            fi
+          done
+          if [ -f "$RUNNER_TEMP/tovuk-pypi.json" ]; then
+            cat "$RUNNER_TEMP/tovuk-pypi.json" >&2
+          fi
+          echo "tovuk $VERSION was not visible on PyPI after publish" >&2
+          exit 1

@@ -1,74 +1,118 @@
-use crate::github_actions_policy::{Workflow, reject_lines, require_contains};
+//! Language wrapper release workflow policy.
 
-pub(super) fn check_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
-    check_base(workflow, findings);
-    for (needle, message) in [
-        (
-            "needs: prepare",
-            "package publish credentials must be isolated to a post-prepare job",
-        ),
-        (
-            "actions/upload-artifact@v6",
-            "package publish prepare jobs must upload verified artifacts",
-        ),
-        (
-            "actions/download-artifact@v6",
-            "package publish jobs must publish downloaded verified artifacts",
-        ),
-    ] {
+use crate::{HostedActionsCheck, Workflow, WrapperReleasePolicy, reject_lines, require_contains};
+
+/// Compile-time references preserve the named helper boundary.
+const _: [usize; 0x0001] = [size_of_val(&require_python_release_toolchain)];
+
+impl WrapperReleasePolicy for HostedActionsCheck {
+    fn check_wrapper_release_assets(&self, workflow: &Workflow, findings: &mut Vec<String>) {
         require_contains(
             workflow.contents.as_str(),
-            needle,
-            format!("{}: {message}", workflow.path.display()).as_str(),
+            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-native-release-assets --",
+            format!(
+                "{}: package publish must verify native release assets before publishing wrappers",
+                workflow.path.display()
+            )
+            .as_str(),
             findings,
         );
     }
-}
 
-pub(super) fn check_native_release_assets(workflow: &Workflow, findings: &mut Vec<String>) {
-    require_contains(
-        workflow.contents.as_str(),
-        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-native-release-assets --",
-        format!(
-            "{}: package publish must verify native release assets before publishing wrappers",
-            workflow.path.display()
-        )
-        .as_str(),
-        findings,
-    );
-}
+    fn check_wrapper_release_base(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        reject_lines(
+            workflow,
+            "method=skip",
+            "package publish workflows must fail closed instead of silently skipping publish auth",
+            findings,
+        );
+        for (needle, message) in [
+            (
+                "workflow_call:",
+                "package publish must be reusable from the native release workflow",
+            ),
+            (
+                "github.ref == 'refs/heads/main'",
+                "package publish must be restricted to the main ref",
+            ),
+        ] {
+            require_contains(
+                workflow.contents.as_str(),
+                needle,
+                format!("{}: {message}", workflow.path.display()).as_str(),
+                findings,
+            );
+        }
+        reject_lines(
+            workflow,
+            "workflow_run:",
+            "package publish must use workflow_call instead of workflow_run",
+            findings,
+        );
+        reject_lines(
+            workflow,
+            "workflow_dispatch:",
+            "package publication must not bypass the orchestrated native release gate",
+            findings,
+        );
+        reject_lines(
+            workflow,
+            "github.actor ==",
+            "package publishing must use public environment and branch protections instead of a private actor allowlist",
+            findings,
+        );
+    }
 
-fn check_base(workflow: &Workflow, findings: &mut Vec<String>) {
-    reject_lines(
-        workflow,
-        "method=skip",
-        "package publish workflows must fail closed instead of silently skipping publish auth",
-        findings,
-    );
+    fn check_wrapper_release_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        self.check_wrapper_release_base(workflow, findings);
+        if workflow.path.ends_with("publish-pypi.yml") {
+            require_python_release_toolchain(workflow, findings);
+        }
+        for (needle, message) in [
+            (
+                "needs: prepare",
+                "package publish credentials must be isolated to a post-prepare job",
+            ),
+            (
+                "actions/upload-artifact@",
+                "package publish prepare jobs must upload verified artifacts",
+            ),
+            (
+                "actions/download-artifact@",
+                "package publish jobs must publish downloaded verified artifacts",
+            ),
+        ] {
+            require_contains(
+                workflow.contents.as_str(),
+                needle,
+                format!("{}: {message}", workflow.path.display()).as_str(),
+                findings,
+            );
+        }
+    }
+}
+/// Require the pinned Python build and validation toolchain.
+fn require_python_release_toolchain(workflow: &Workflow, findings: &mut Vec<String>) {
     for (needle, message) in [
         (
-            "workflow_run:",
-            "package publish must wait for native binary workflow completion",
+            "python-version: \"3.14.6\"",
+            "PyPI packaging must use the pinned Python release version",
         ),
         (
-            "Publish native binaries",
-            "package publish must depend on the native binary workflow",
+            "build==1.5.1",
+            "PyPI packaging must use the pinned build frontend",
         ),
         (
-            "github.event.workflow_run.conclusion == 'success'",
-            "package publish must reject failed native binary workflow runs",
+            "ruff==0.15.21",
+            "PyPI packaging must run the pinned Ruff quality gate",
         ),
         (
-            "github.event.workflow_run.event == 'push'",
-            "package publish must only trust native binary workflow_run events created by main pushes",
+            "ty==0.0.58",
+            "PyPI packaging must run the pinned strict type checker",
         ),
         (
-            "github.event.workflow_run.head_branch == 'main'",
-            "package publish must only trust native binary workflow_run events from main",
-        ),
-        (
-            "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'",
-            "manual package publishes must be restricted to the main ref",
+            "python3 -m unittest discover -s packages/tovuk-py/tests",
+            "PyPI packaging must run the Python unit-test suite",
         ),
     ] {
         require_contains(

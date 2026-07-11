@@ -3,7 +3,7 @@
 Native Rust CLI for the Tovuk public-data scraper API.
 
 ```sh
-cargo install tovuk
+cargo install --locked tovuk
 tovuk login --json
 tovuk account show --json
 tovuk api-key list --json
