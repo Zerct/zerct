@@ -19,7 +19,7 @@ const CRATE_PUBLISH_JOB: &str = "    name: publish tovuk to crates.io
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          ref: ${{ github.sha }}
+          ref: ${{ inputs.release_ref || github.sha }}
       - name: Verify pinned Rust toolchain
         env:
           CARGO_HOME: ${{ runner.temp }}/cargo-home

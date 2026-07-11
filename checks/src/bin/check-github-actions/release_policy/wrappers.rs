@@ -55,6 +55,10 @@ impl WrapperReleasePolicy for HostedActionsCheck {
                 "github.ref == 'refs/heads/main'",
                 "package publish must be restricted to the main ref",
             ),
+            (
+                "ref: ${{ inputs.release_ref || github.sha }}",
+                "package publish recovery must build the exact native release ref",
+            ),
         ] {
             require_contains(
                 workflow.contents.as_str(),

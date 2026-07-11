@@ -1,0 +1,90 @@
+name: Recover public package publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Exact existing release tag, such as v0.1.116
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recovery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: verify existing native release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      release_ref: ${{ steps.release.outputs.release_ref }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.release_ref }}
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            checks/target
+          key: publication-recovery-${{ runner.os }}-${{ hashFiles('checks/Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Verify pinned Rust toolchain
+        run: |
+          rustup show active-toolchain
+          rustc --version --verbose
+      - name: Verify exact existing native release
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_REF: ${{ inputs.release_ref }}
+        run: |
+          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-public-contracts -- public-version)"
+          if [ "$RELEASE_REF" != "v$version" ]; then
+            echo "Release ref $RELEASE_REF does not match public version v$version" >&2
+            exit 1
+          fi
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-public-contracts -- package-versions
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-native-release-assets -- "$version"
+          printf 'release_ref=%s\n' "$RELEASE_REF" >> "$GITHUB_OUTPUT"
+
+  publish-npm:
+    name: recover npm package
+    needs: gate
+    permissions:
+      contents: read
+      id-token: write # Required for npm trusted publishing.
+    uses: ./.github/workflows/publish-npm.yml
+    with:
+      release_ref: ${{ needs.gate.outputs.release_ref }}
+
+  publish-crates:
+    name: recover crates.io package
+    needs: gate
+    permissions:
+      contents: read
+      id-token: write # Required for crates.io trusted publishing.
+    uses: ./.github/workflows/publish-crates.yml
+    with:
+      release_ref: ${{ needs.gate.outputs.release_ref }}
+
+  publish-pypi:
+    name: recover PyPI package
+    needs: gate
+    permissions:
+      contents: read
+      id-token: write # Required for PyPI trusted publishing.
+    uses: ./.github/workflows/publish-pypi.yml
+    with:
+      release_ref: ${{ needs.gate.outputs.release_ref }}

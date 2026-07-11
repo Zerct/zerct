@@ -64,6 +64,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     ".github/workflows/publish-native-binaries.yml",
     ".github/workflows/publish-npm.yml",
     ".github/workflows/publish-pypi.yml",
+    ".github/workflows/recover-publication.yml",
     "native-release-targets.json",
     ".gitignore",
     ".github/actionlint.yaml",

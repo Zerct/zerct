@@ -338,6 +338,9 @@ trait WorkflowPolicy {
     /// Require GitHub-hosted Cargo jobs to use the approved cache action.
     fn check_github_hosted_cargo_cache(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
+    /// Require publication recovery to verify one exact existing native release.
+    fn check_publication_recovery_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>);
+
     /// Require reusable release workflows to avoid caller concurrency groups.
     fn check_reusable_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
