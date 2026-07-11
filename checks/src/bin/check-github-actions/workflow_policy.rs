@@ -1,6 +1,13 @@
 //! Per-workflow security and release policy checks.
 
-use super::{HostedActionsCheck, ReleasePolicy as _, Workflow, WorkflowPolicy, require_contains};
+use super::{
+    HostedActionsCheck, PathFilters as _, ReleasePolicy as _, Workflow, WorkflowPolicy,
+    require_contains,
+};
+
+/// Unfiltered event header required by the canonical continuous-integration workflow.
+const CI_TRIGGER_HEADER: &str =
+    "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n";
 
 impl WorkflowPolicy for HostedActionsCheck {
     fn check_checkout_credentials(&self, workflow: &Workflow, findings: &mut Vec<String>) {
@@ -9,6 +16,25 @@ impl WorkflowPolicy for HostedActionsCheck {
         {
             findings.push(format!(
                 "{}: checkout must set persist-credentials: false",
+                workflow.path.display()
+            ));
+        }
+    }
+
+    fn check_ci_trigger_coverage(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        if !workflow.path.ends_with("ci.yml") {
+            return;
+        }
+        require_contains(
+            workflow.contents.as_str(),
+            CI_TRIGGER_HEADER,
+            "ci.yml must run on workflow_dispatch, every pull request, and every main push",
+            findings,
+        );
+        let filters = self.workflow_path_filters(workflow.contents.as_str());
+        if !filters.is_empty() {
+            findings.push(format!(
+                "{}: CI must run for every pull request and main push; remove paths and paths-ignore filters",
                 workflow.path.display()
             ));
         }
@@ -82,6 +108,7 @@ impl WorkflowPolicy for HostedActionsCheck {
             .as_str(),
             findings,
         );
+        self.check_ci_trigger_coverage(workflow, findings);
         self.check_checkout_credentials(workflow, findings);
         self.check_github_hosted_cargo_cache(workflow, findings);
         self.check_public_package_release_order(workflow, findings);
@@ -107,5 +134,57 @@ impl WorkflowPolicy for HostedActionsCheck {
             return trimmed.contains("uses: actions/cache@")
                 && (trimmed.contains("actions/cache@v5") || trimmed.contains("# v5"));
         });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::{HostedActionsCheck, Workflow, WorkflowPolicy as _};
+
+    /// Verify that unfiltered continuous-integration triggers are accepted.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the full trigger coverage contract emits a finding.
+    #[test]
+    fn ci_trigger_coverage_accepts_unfiltered_events() {
+        let workflow = Workflow {
+            contents:
+                "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n"
+                    .to_owned(),
+            path: PathBuf::from(".github/workflows/ci.yml"),
+        };
+        let mut findings = Vec::new();
+
+        HostedActionsCheck.check_ci_trigger_coverage(&workflow, &mut findings);
+
+        assert!(
+            findings.is_empty(),
+            "unfiltered CI events must cover every public change"
+        );
+    }
+
+    /// Verify that a continuous-integration path filter is rejected.
+    ///
+    /// # Panics
+    ///
+    /// Panics when a filtered CI trigger is not reported.
+    #[test]
+    fn ci_trigger_coverage_rejects_path_filters() {
+        let workflow = Workflow {
+            contents: "on:\n  pull_request:\n    paths:\n      - crates/**\n".to_owned(),
+            path: PathBuf::from(".github/workflows/ci.yml"),
+        };
+        let mut findings = Vec::new();
+
+        HostedActionsCheck.check_ci_trigger_coverage(&workflow, &mut findings);
+
+        assert_eq!(
+            findings.len(),
+            0x2,
+            "CI path filters must not be able to bypass repository checks"
+        );
     }
 }

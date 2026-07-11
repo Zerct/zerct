@@ -1,13 +1,31 @@
 //! Native binary release workflow policy.
 
+use alloc::collections::BTreeSet;
+
 use crate::{
     DocsReadinessBehavior, DocsReadinessStep, DocsReadinessTracker, HostedActionsCheck,
-    NativeReleasePolicy, PolicyRequirement, Workflow, reject_lines, require_contains,
+    NativeReleasePolicy, PathFilters as _, PolicyRequirement, Workflow, reject_lines,
+    require_contains,
 };
 
 /// Required documentation deployment and synchronization command.
 const DOCS_DEPLOY_COMMAND: &str =
     "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --";
+
+/// Binary-affecting paths that must trigger the native release workflow.
+const NATIVE_RELEASE_PATH_FILTERS: &[&str] = &[
+    ".cargo/config.toml",
+    "native-release-targets.json",
+    "crates/tovuk/.cargo/config.toml",
+    "crates/tovuk/Cargo.toml",
+    "crates/tovuk/Cargo.lock",
+    "crates/tovuk/src/**",
+    "rust-toolchain.toml",
+];
+
+/// Event and branch header that must own the native release path filters.
+const NATIVE_RELEASE_TRIGGER_HEADER: &str =
+    "on:\n  workflow_dispatch:\n  push:\n    branches:\n      - main\n    paths:\n";
 
 /// Native release workflow snippets that are forbidden.
 const REJECTED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
@@ -147,6 +165,31 @@ impl NativeReleasePolicy for HostedActionsCheck {
         }
     }
 
+    fn check_native_release_path_filter_contract(
+        &self,
+        workflow: &Workflow,
+        findings: &mut Vec<String>,
+    ) {
+        require_contains(
+            workflow.contents.as_str(),
+            NATIVE_RELEASE_TRIGGER_HEADER,
+            "publish-native-binaries.yml must use path filters on main pushes while retaining manual recovery",
+            findings,
+        );
+        let actual = self.workflow_path_filters(workflow.contents.as_str());
+        let actual_filters = actual.iter().map(String::as_str).collect::<BTreeSet<_>>();
+        let required_filters = NATIVE_RELEASE_PATH_FILTERS
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>();
+        if actual.len() != NATIVE_RELEASE_PATH_FILTERS.len() || actual_filters != required_filters {
+            let workflow_path = workflow.path.display();
+            findings.push(format!(
+                "{workflow_path}: native release push paths must be exactly {NATIVE_RELEASE_PATH_FILTERS:?}; found {actual:?}"
+            ));
+        }
+    }
+
     fn check_native_release_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>) {
         for &(needle, message) in REQUIRED_NATIVE_RELEASE_SNIPPETS {
             require_contains(workflow.contents.as_str(), needle, message, findings);
@@ -154,6 +197,7 @@ impl NativeReleasePolicy for HostedActionsCheck {
         for &(needle, message) in REJECTED_NATIVE_RELEASE_SNIPPETS {
             reject_lines(workflow, needle, message, findings);
         }
+        self.check_native_release_path_filter_contract(workflow, findings);
         self.check_blocking_docs_readiness_gate(workflow, findings);
     }
 
@@ -212,8 +256,11 @@ impl NativeReleasePolicy for HostedActionsCheck {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::{
         DocsReadinessBehavior, DocsReadinessStep, HostedActionsCheck, NativeReleasePolicy as _,
+        Workflow,
     };
 
     /// Verify that the blocking Mintlify synchronization step is accepted.
@@ -273,5 +320,67 @@ jobs:
             }),
             "continue-on-error should mark the readiness step as non-blocking"
         );
+    }
+
+    /// Verify that the exact binary-affecting release trigger set is accepted.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the native release path contract emits a finding.
+    #[test]
+    fn native_release_paths_accept_exact_contract() {
+        let workflow = native_workflow(
+            r#"      - ".cargo/config.toml"
+      - "native-release-targets.json"
+      - "crates/tovuk/.cargo/config.toml"
+      - "crates/tovuk/Cargo.toml"
+      - "crates/tovuk/Cargo.lock"
+      - "crates/tovuk/src/**"
+      - "rust-toolchain.toml""#,
+        );
+        let mut findings = Vec::new();
+
+        HostedActionsCheck.check_native_release_path_filter_contract(&workflow, &mut findings);
+
+        assert!(
+            findings.is_empty(),
+            "the complete native release trigger contract must be accepted"
+        );
+    }
+
+    /// Verify that omitting a binary-affecting release trigger is rejected.
+    ///
+    /// # Panics
+    ///
+    /// Panics when an incomplete native release path contract is accepted.
+    #[test]
+    fn native_release_paths_reject_incomplete_contract() {
+        let workflow = native_workflow(
+            r#"      - ".cargo/config.toml"
+      - "native-release-targets.json"
+      - "crates/tovuk/Cargo.toml"
+      - "crates/tovuk/Cargo.lock"
+      - "crates/tovuk/src/**"
+      - "rust-toolchain.toml""#,
+        );
+        let mut findings = Vec::new();
+
+        HostedActionsCheck.check_native_release_path_filter_contract(&workflow, &mut findings);
+
+        assert_eq!(
+            findings.len(),
+            0x1,
+            "an incomplete native release trigger must be rejected"
+        );
+    }
+
+    /// Build a native-release workflow fixture with the selected path list.
+    fn native_workflow(paths: &str) -> Workflow {
+        return Workflow {
+            contents: format!(
+                "on:\n  workflow_dispatch:\n  push:\n    branches:\n      - main\n    paths:\n{paths}\n"
+            ),
+            path: PathBuf::from(".github/workflows/publish-native-binaries.yml"),
+        };
     }
 }

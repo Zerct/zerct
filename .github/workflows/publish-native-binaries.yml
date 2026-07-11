@@ -8,11 +8,11 @@ on:
     paths:
       - ".cargo/config.toml"
       - "native-release-targets.json"
+      - "crates/tovuk/.cargo/config.toml"
       - "crates/tovuk/Cargo.toml"
       - "crates/tovuk/Cargo.lock"
       - "crates/tovuk/src/**"
       - "rust-toolchain.toml"
-      - "vendor/**"
 
 permissions:
   contents: read

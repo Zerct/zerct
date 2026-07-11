@@ -2,12 +2,14 @@ use core::time::Duration;
 
 use crate::helpers::{CheckResult, env_int};
 
-use reqwest::{StatusCode, blocking::Client};
+use http::StatusCode;
 
 use std::{io::Read, thread::sleep};
 
+use tovuk_public_checks::http_transport::Client;
+
 /// Largest accepted public documentation response.
-const MAX_PUBLIC_DOC_BYTES: u64 = 0x800_000;
+const MAX_PUBLIC_DOC_BYTES: usize = 0x800_000;
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0009] = [
@@ -92,7 +94,7 @@ struct ResponseConstraints {
     /// Declared response size when supplied by the server.
     content_length: Option<u64>,
     /// Maximum accepted body size.
-    maximum: u64,
+    maximum: usize,
     /// Public endpoint path used in diagnostics.
     path: String,
     /// HTTP response status.
@@ -124,9 +126,15 @@ fn bounded_response_text(
 ///
 /// Returns an error when the declared response exceeds the ceiling.
 fn bounded_validate_declared_length(constraints: &ResponseConstraints) -> FetchResult<()> {
+    let maximum = check_try!(u64::try_from(constraints.maximum).map_err(|error| {
+        return FetchError {
+            message: format!("convert public docs response limit: {error}"),
+            status: Some(constraints.status),
+        };
+    }));
     if constraints
         .content_length
-        .is_some_and(|length| return length > constraints.maximum)
+        .is_some_and(|length| return length > maximum)
     {
         return Err(bounded_validate_response_limit_error(constraints));
     }
@@ -148,26 +156,29 @@ fn bounded_validate_read_body(
             status: Some(constraints.status),
         };
     }));
-    let mut bytes = Vec::new();
-    let read_count = check_try!(response.take(read_limit).read_to_end(&mut bytes).map_err(
-        |error| return FetchError {
-            message: error.to_string(),
+    let read_limit_u64 = check_try!(u64::try_from(read_limit).map_err(|error| {
+        return FetchError {
+            message: format!("convert public docs response limit: {error}"),
             status: Some(constraints.status),
-        }
-    ));
+        };
+    }));
+    let mut bytes = Vec::new();
+    let read_count = check_try!(
+        response
+            .take(read_limit_u64)
+            .read_to_end(&mut bytes)
+            .map_err(|error| return FetchError {
+                message: error.to_string(),
+                status: Some(constraints.status),
+            })
+    );
     if read_count != bytes.len() {
         return Err(FetchError {
             message: format!("{} changed while its response was read", constraints.path),
             status: Some(constraints.status),
         });
     }
-    let byte_count = check_try!(u64::try_from(bytes.len()).map_err(|error| {
-        return FetchError {
-            message: format!("measure {} response: {error}", constraints.path),
-            status: Some(constraints.status),
-        };
-    }));
-    if byte_count > constraints.maximum {
+    if bytes.len() > constraints.maximum {
         return Err(bounded_validate_response_limit_error(constraints));
     }
     return Ok(bytes);
@@ -254,14 +265,15 @@ pub(super) fn request_text(
     headers: &RequestHeaders,
 ) -> Result<String, FetchError> {
     let url = format!("{}{path}", context.base_url());
-    let mut request = context.client.get(url);
-    for (name, value) in headers.iter().copied() {
-        request = request.header(name, value);
-    }
-    let mut response = check_try!(request.send().map_err(|error| return FetchError {
-        message: error.to_string(),
-        status: None,
-    }));
+    let response = check_try!(
+        context
+            .client
+            .get(url.as_str(), headers, MAX_PUBLIC_DOC_BYTES)
+            .map_err(|error| return FetchError {
+                message: error,
+                status: None,
+            })
+    );
     let status = response.status();
     if !status.is_success() {
         return Err(FetchError {
@@ -270,8 +282,9 @@ pub(super) fn request_text(
         });
     }
     let content_length = response.content_length();
+    let mut body = response.body();
     return bounded_response_text(
-        &mut response,
+        &mut body,
         &ResponseConstraints {
             content_length,
             maximum: MAX_PUBLIC_DOC_BYTES,

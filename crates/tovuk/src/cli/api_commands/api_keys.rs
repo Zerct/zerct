@@ -8,7 +8,7 @@ use super::{
     common::{command_arg, joined_args},
     generic::{print_authenticated, print_authenticated_mutation},
 };
-use reqwest::Method;
+use hyper::Method;
 #[cfg(test)]
 use serde_json::Value;
 use serde_json::json;

@@ -7,7 +7,7 @@ use super::{
     common::page_query,
     http::{ApiRequestContent, api_request},
 };
-use reqwest::Method;
+use hyper::Method;
 use serde_json::Value;
 
 #[derive(Clone, Copy, Debug)]

@@ -4,7 +4,21 @@ use core::fmt::Display;
 
 use flate2 as _;
 
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
+use url as _;
 
 use serde as _;
 

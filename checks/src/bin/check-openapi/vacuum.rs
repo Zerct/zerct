@@ -1,8 +1,10 @@
 //! Vacuum binary installation and lint execution.
 
+#[path = "vacuum_download.rs"]
+mod download;
+
 use core::fmt::Write as _;
 use flate2::read::GzDecoder;
-use reqwest::blocking::get;
 use sha2::{Digest as _, Sha256};
 use std::{
     env,
@@ -16,14 +18,15 @@ use std::{
 use tar::{Archive, Unpacked};
 use tovuk_public_checks::check_support::CheckResult;
 
+use download::download_asset;
+
 /// Pinned Vacuum release used by public checks.
 const DEFAULT_VACUUM_VERSION: &str = "0.26.6";
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x12] = [
+const _: [usize; 0x11] = [
     size_of_val(&VacuumHost::current),
     size_of_val(&create_temporary_directory),
-    size_of_val(&download_asset),
     size_of_val(&extract_archive_binary),
     size_of_val(&extract_vacuum),
     size_of_val(&finish_temporary_extraction),
@@ -115,24 +118,6 @@ fn create_temporary_directory(install_directory: &Path) -> CheckResult<PathBuf> 
             .map_err(|error| return format!("create {}: {error}", temporary_directory.display()))
     );
     return Ok(temporary_directory);
-}
-
-/// Download a Vacuum release archive.
-///
-/// # Errors
-///
-/// Returns an error when the request fails, its status is unsuccessful, or its
-/// response body cannot be read.
-fn download_asset(url: &str) -> CheckResult<Vec<u8>> {
-    let response = check_try!(get(url).map_err(|error| return format!("download {url}: {error}")));
-    let status = response.status();
-    if !status.is_success() {
-        return Err(format!("download {url} failed with status {status}"));
-    }
-    return response
-        .bytes()
-        .map(|bytes| return bytes.to_vec())
-        .map_err(|error| return format!("read {url} response body: {error}"));
 }
 
 /// Extract and install the Vacuum executable from a verified archive.

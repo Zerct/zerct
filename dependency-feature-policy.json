@@ -4,23 +4,23 @@
       "manifest": "checks/Cargo.toml",
       "targets": [
         {
-          "sha256": "77aa84175e53c3a0d78a91afe7361ca718cba4f4d3768b18fdec01af57c7894e",
+          "sha256": "a1c229ca3c0332c1f54825977518efd398ebbe7246b5e8217412037d7573bd98",
           "triple": "aarch64-apple-darwin"
         },
         {
-          "sha256": "119f471fc39480815987dbc8ed5967a431041b2e66540a77f9b280778a132f94",
+          "sha256": "a4ca51fdc75300f948bda2dcf055c76f7480c509d4ad4e16b21af0ecf6cf517b",
           "triple": "aarch64-unknown-linux-gnu"
         },
         {
-          "sha256": "721b2da43433cad4a3899281da41b378865d6d2c55b0c14a5ce56a0ff53f475f",
+          "sha256": "1e6aba1e478474ca0a091b068218eaaf1857105d0695b61f57804245dceaf8f9",
           "triple": "x86_64-apple-darwin"
         },
         {
-          "sha256": "0f60140764606de62208c3f1e47579ac4ac14e6b071edac7c2cdcdbf562d2012",
+          "sha256": "7cb720f62a8580cdb29a7528202482f911f0b2fe76fa4cd7ad541274a3ae1916",
           "triple": "x86_64-pc-windows-msvc"
         },
         {
-          "sha256": "63286178e514711379f1d83e3fa3260f5ecd8b463f419eed55b96afe6f6f1c25",
+          "sha256": "34912151361de2583876735588d257e1511cc307dd9e6bdf835623208e31d69f",
           "triple": "x86_64-unknown-linux-gnu"
         }
       ]
@@ -29,23 +29,23 @@
       "manifest": "crates/tovuk/Cargo.toml",
       "targets": [
         {
-          "sha256": "2d99cd07a58047c5c174bd721c8dea87557ae253775aa305037bfad01ca841cc",
+          "sha256": "7f395574f34dce0955d27e3aec0491f956195dc32fc39372fd686bf537c0f4ea",
           "triple": "aarch64-apple-darwin"
         },
         {
-          "sha256": "ceee2a05b10fbfad1f513176e5b4989016555230ff89e0c8f6af5ddf47aeb538",
+          "sha256": "5a035eaee3dbca8f084ef68071c256e3621f3ad1d92be8d24f739299545864c6",
           "triple": "aarch64-unknown-linux-gnu"
         },
         {
-          "sha256": "559d08321b8f2e02197abe0d9132b85cf06a35614e933d741ed036b376cd2074",
+          "sha256": "7f395574f34dce0955d27e3aec0491f956195dc32fc39372fd686bf537c0f4ea",
           "triple": "x86_64-apple-darwin"
         },
         {
-          "sha256": "406abf81fe62594848bd5f5a0e4ade454bb77194003cd67d8c1a36e9b596eb19",
+          "sha256": "e6c707312f4f2ce3da98fbe1ba11e33e879b455db283336b5579816d4783201c",
           "triple": "x86_64-pc-windows-msvc"
         },
         {
-          "sha256": "2c8b50437d9b994bfee59a9f9aa705b2465872aba6a145658052dc5830546c58",
+          "sha256": "5a035eaee3dbca8f084ef68071c256e3621f3ad1d92be8d24f739299545864c6",
           "triple": "x86_64-unknown-linux-gnu"
         }
       ]

@@ -20,7 +20,7 @@ use super::{
     utils::{encode_component, open_url, optional_string_field, progress},
 };
 use core::time::Duration;
-use reqwest::Method;
+use hyper::Method;
 use serde_json::Value;
 use std::{thread, time::Instant};
 

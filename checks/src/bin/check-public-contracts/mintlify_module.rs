@@ -16,9 +16,22 @@ use crate::helpers::{CheckResult, OutputChannel, env_int, number_field, read_jso
 
 use crate::mintlify_fetch::{FetchContext, normalize_target_url, retry_delay};
 
-use reqwest::blocking::Client;
-
 use serde_json::Value;
+
+use tovuk_public_checks::http_transport::Client;
+
+/// Maximum duration allowed to establish a docs connection.
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(0x0a);
+
+/// Safe redirect ceiling for public documentation requests.
+const REDIRECT_LIMIT: u8 = 0x05;
+
+/// Total duration allowed for one docs request and its redirects.
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(0x14);
+
+/// Public identifier sent with agent-readiness requests.
+const USER_AGENT: &str =
+    "Tovuk public documentation readiness check (https://github.com/tovuk/tovuk)";
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0002] = [
@@ -37,9 +50,7 @@ pub(super) fn check_agent_readiness(target: &str) -> CheckResult {
     let context = FetchContext::new(
         base_url,
         check_try!(
-            Client::builder()
-                .timeout(Duration::from_secs(20))
-                .build()
+            Client::build(CONNECT_TIMEOUT, REQUEST_TIMEOUT, REDIRECT_LIMIT, USER_AGENT)
                 .map_err(|error| format!("build HTTP client: {error}"))
         ),
         retries,

@@ -1,6 +1,6 @@
 //! Release availability request and response verification.
 
-use reqwest::StatusCode;
+use http::StatusCode;
 
 use super::{REGISTRIES, classify_status, parse_version_argument, registry_endpoint};
 

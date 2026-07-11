@@ -11,12 +11,12 @@ runs:
         tool_root="$RUNNER_TEMP/tovuk-quality-tools"
         mkdir -p "$tool_root"
         cargo install --locked --root "$tool_root" \
-          cargo-audit@0.22.1 \
-          cargo-deny@0.19.5 \
+          cargo-audit@0.22.2 \
+          cargo-deny@0.20.2 \
           cargo-machete@0.9.2 \
           taplo-cli@0.10.0 \
-          typos-cli@1.44.0 \
-          zizmor@1.25.2
+          typos-cli@1.48.0 \
+          zizmor@1.26.1
         for binary in cargo-audit cargo-deny cargo-machete taplo typos zizmor; do
           sudo install -m 0755 "$tool_root/bin/$binary" "/usr/local/bin/$binary"
         done

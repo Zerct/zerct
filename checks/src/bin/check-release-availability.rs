@@ -18,7 +18,17 @@ use core::time::Duration;
 
 use flate2 as _;
 
-use reqwest::{StatusCode, blocking::Client, header::ACCEPT, redirect::Policy as RedirectPolicy};
+use http::{StatusCode, header::ACCEPT};
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
 
 use serde as _;
 
@@ -34,10 +44,17 @@ use std::{
 
 use tar as _;
 
-use tovuk_public_checks::check_support::CheckResult;
+use tokio as _;
+
+use tovuk_public_checks::{check_support::CheckResult, http_transport::Client as TransportClient};
+
+use url as _;
 
 /// Maximum time allowed to establish one registry connection.
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(0x0a);
+
+/// Largest accepted package-registry metadata response.
+const MAXIMUM_REGISTRY_BODY_BYTES: usize = 0x0002_0000;
 
 /// Public package registries that must not contain the candidate version.
 const REGISTRIES: &[Registry] = &[
@@ -94,14 +111,8 @@ struct Registry {
 /// # Errors
 ///
 /// Returns an error when the bounded client cannot be constructed.
-fn build_client() -> CheckResult<Client> {
-    return Client::builder()
-        .connect_timeout(CONNECT_TIMEOUT)
-        .https_only(true)
-        .redirect(RedirectPolicy::none())
-        .timeout(REQUEST_TIMEOUT)
-        .user_agent(USER_AGENT)
-        .build()
+fn build_client() -> CheckResult<TransportClient> {
+    return TransportClient::build(CONNECT_TIMEOUT, REQUEST_TIMEOUT, 0x00, USER_AGENT)
         .map_err(|error| return format!("build release availability HTTP client: {error}"));
 }
 
@@ -111,13 +122,15 @@ fn build_client() -> CheckResult<Client> {
 ///
 /// Returns an error on network failure, a published version, or any response
 /// other than HTTP 404.
-fn check_registry(client: &Client, registry: Registry, version: &str) -> CheckResult {
+fn check_registry(client: &TransportClient, registry: Registry, version: &str) -> CheckResult {
     let endpoint = registry_endpoint(registry, version);
     let response = check_try!(
         client
-            .get(endpoint.as_str())
-            .header(ACCEPT, "application/json")
-            .send()
+            .get(
+                endpoint.as_str(),
+                &[(ACCEPT.as_str(), "application/json")],
+                MAXIMUM_REGISTRY_BODY_BYTES,
+            )
             .map_err(|error| return format!(
                 "query {} release availability: {error}",
                 registry.name

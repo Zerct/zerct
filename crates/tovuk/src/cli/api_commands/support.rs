@@ -13,7 +13,7 @@ use super::{
     common::{command_arg, joined_args, optional_trimmed_value},
     generic::{print_authenticated_mutation, print_paged_authenticated},
 };
-use reqwest::Method;
+use hyper::Method;
 use serde::Serialize;
 use serde_json::{Value, to_value};
 

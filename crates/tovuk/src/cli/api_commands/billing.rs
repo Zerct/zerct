@@ -13,7 +13,7 @@ use super::super::{
 };
 use super::common::joined_args;
 use super::http::{ApiRequestContent, api_request};
-use reqwest::Method;
+use hyper::Method;
 use serde_json::{Value, json};
 
 #[derive(Debug)]

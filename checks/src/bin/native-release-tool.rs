@@ -17,7 +17,20 @@ pub mod release_artifacts;
 
 use core::str::from_utf8;
 use flate2 as _;
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::{from_slice, to_string};
@@ -31,6 +44,7 @@ use std::{
 };
 use tar as _;
 use tovuk_public_checks as _;
+use url as _;
 
 use checksum::{verify_sha256, write_sha256};
 use release_artifacts::{ReleaseArtifactOperations as _, ReleaseArtifacts};

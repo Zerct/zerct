@@ -1,5 +1,8 @@
 //! Verify locked, target-specific dependency graphs and reviewed features.
 
+#[path = "check_dependency_policy/active.rs"]
+pub mod active;
+
 extern crate alloc;
 
 #[path = "check_dependency_policy/deny.rs"]
@@ -11,15 +14,32 @@ pub mod graph;
 #[path = "check_dependency_policy/policy.rs"]
 pub mod policy;
 
+#[path = "check_dependency_policy/tree.rs"]
+pub mod tree;
+
 use alloc::collections::{BTreeMap, BTreeSet};
 
 use flate2 as _;
 
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
+use url as _;
 
 use serde::{Deserialize, Serialize};
 
-use serde_json as _;
+use serde_json::Value;
 
 use sha2 as _;
 
@@ -57,6 +77,18 @@ const TARGETS: &[&str] = &[
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0002] = [size_of_val(&generate_requested), size_of_val(&run)];
 
+/// One pruned metadata document and its cargo-deny serialization.
+#[derive(Debug)]
+struct ActiveMetadata {
+    /// Parsed metadata used for canonical fingerprints and features.
+    metadata: MetadataSnapshot,
+    /// Exact pruned JSON supplied to cargo-deny.
+    serialized: Vec<u8>,
+}
+
+/// Features explicitly declared by one package manifest.
+type DeclaredFeatures = BTreeMap<String, Vec<String>>;
+
 /// Tracked dependency feature policy document.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -73,23 +105,56 @@ type EnabledFeatures = BTreeSet<String>;
 /// Exact external crate features enabled across public targets.
 type FeatureUnion = BTreeMap<String, EnabledFeatures>;
 
+/// Locked metadata and every exact target snapshot for one manifest.
+#[derive(Debug)]
+struct LoadedSnapshots {
+    /// Unpruned all-feature metadata covering every locked package.
+    locked_metadata_json: Vec<u8>,
+    /// Exact active metadata for every shipped target.
+    snapshots: Vec<TargetSnapshot>,
+}
+
 /// One manifest and every loaded target snapshot.
 #[derive(Debug)]
 struct ManifestSnapshots {
+    /// Unpruned all-feature metadata covering every locked package.
+    locked_metadata_json: Vec<u8>,
     /// Governed repository-relative manifest.
     manifest: String,
     /// Locked metadata for every public target.
     snapshots: Vec<TargetSnapshot>,
 }
 
+/// One dependency declaration retained from Cargo package metadata.
+#[derive(Debug, Deserialize, Serialize)]
+struct MetadataDependency {
+    /// Features requested on the dependency.
+    features: Vec<String>,
+    /// Dependency package name before an optional rename.
+    name: String,
+    /// Remaining dependency declaration metadata preserved for cargo-deny.
+    #[serde(flatten)]
+    other: BTreeMap<String, Value>,
+    /// Local dependency name when renamed.
+    rename: Option<String>,
+}
+
 /// Cargo package identity needed for graph normalization.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct MetadataPackage {
+    /// Features explicitly declared by the package manifest.
+    #[serde(rename = "features")]
+    declared_features: DeclaredFeatures,
+    /// Dependency declarations used to reconstruct named feature requests.
+    dependencies: Vec<MetadataDependency>,
     /// Cargo package identifier.
     #[serde(rename = "id")]
     identifier: String,
     /// Package name.
     name: String,
+    /// Remaining Cargo package metadata preserved for cargo-deny.
+    #[serde(flatten)]
+    other: BTreeMap<String, Value>,
     /// Package source, absent for workspace packages.
     source: Option<String>,
     /// Package version.
@@ -97,15 +162,23 @@ struct MetadataPackage {
 }
 
 /// Cargo dependency graph metadata.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct MetadataResolve {
     /// Resolved package nodes.
     nodes: Vec<ResolveNode>,
+    /// Remaining Cargo resolution metadata preserved for cargo-deny.
+    #[serde(flatten)]
+    other: BTreeMap<String, Value>,
+    /// Root package selected by the governed manifest.
+    root: Option<String>,
 }
 
 /// Cargo metadata projection used by dependency policy.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct MetadataSnapshot {
+    /// Remaining top-level Cargo metadata preserved for cargo-deny.
+    #[serde(flatten)]
+    other: BTreeMap<String, Value>,
     /// All packages available to the resolved graph.
     packages: Vec<MetadataPackage>,
     /// Target-filtered resolved graph.
@@ -128,16 +201,35 @@ struct PackagePolicy {
 /// Loaded target snapshots for all governed manifests.
 type RepositorySnapshots = [ManifestSnapshots];
 
+/// Detailed Cargo dependency edge retained for cargo-deny.
+#[derive(Debug, Deserialize, Serialize)]
+struct ResolveDependency {
+    /// Dependency name used by resolved feature references.
+    name: String,
+    /// Remaining dependency-edge metadata preserved for cargo-deny.
+    #[serde(flatten)]
+    other: BTreeMap<String, Value>,
+    /// Resolved package identifier at the edge destination.
+    #[serde(rename = "pkg")]
+    package_identifier: String,
+}
+
 /// One package node from Cargo's resolved graph.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct ResolveNode {
     /// Resolved dependency package identifiers.
     dependencies: Vec<String>,
+    /// Detailed resolved dependency edges.
+    #[serde(rename = "deps")]
+    dependency_details: Vec<ResolveDependency>,
     /// Enabled features for this package and target.
     features: Vec<String>,
     /// Cargo package identifier.
     #[serde(rename = "id")]
     identifier: String,
+    /// Remaining Cargo node metadata preserved for cargo-deny.
+    #[serde(flatten)]
+    other: BTreeMap<String, Value>,
 }
 
 /// Tracked fingerprint for one target triple.
@@ -157,6 +249,8 @@ struct TargetSnapshot {
     fingerprint: String,
     /// Parsed Cargo metadata.
     metadata: MetadataSnapshot,
+    /// Pruned target-specific Cargo metadata supplied to cargo-deny.
+    metadata_json: Vec<u8>,
     /// Target triple used to resolve metadata.
     triple: String,
 }
@@ -198,42 +292,45 @@ fn main() -> ExitCode {
 ///
 /// Returns an error when arguments, fingerprints, metadata, or cargo-deny fail.
 fn run() -> CheckResult {
-    let generate = check_try!(generate_requested());
     let repository = check_try!(repo_root());
     let path = tool_path();
-    let mut all_snapshots = Vec::new();
-    for manifest in MANIFESTS {
-        all_snapshots.push(ManifestSnapshots {
-            manifest: (*manifest).to_owned(),
-            snapshots: check_try!(graph::load_snapshots(
+    let snapshots = check_try!(
+        MANIFESTS
+            .iter()
+            .map(|manifest| -> CheckResult<ManifestSnapshots> {
+                let loaded = check_try!(graph::load_snapshots(
+                    repository.as_path(),
+                    path.as_os_str(),
+                    manifest
+                ));
+                return Ok(ManifestSnapshots {
+                    locked_metadata_json: loaded.locked_metadata_json,
+                    manifest: (*manifest).to_owned(),
+                    snapshots: loaded.snapshots,
+                });
+            })
+            .collect::<CheckResult<Vec<_>>>()
+    );
+    let generated_policy = if check_try!(generate_requested()) {
+        Some(policy::policy_from_snapshots(&snapshots))
+    } else {
+        let tracked = check_try!(policy::read_policy(repository.as_path()));
+        check_try!(policy::check_policy_shape(&tracked));
+        check_try!(policy::require_fingerprints(&tracked, &snapshots));
+        None
+    };
+    check_try!(
+        snapshots
+            .iter()
+            .try_for_each(|manifest_snapshots| return deny::run_cargo_deny(
                 repository.as_path(),
                 path.as_os_str(),
-                manifest
-            )),
-        });
-    }
-    if generate {
-        let generated_policy = policy::policy_from_snapshots(&all_snapshots);
-        check_try!(policy::write_policy(
-            repository.as_path(),
-            &generated_policy
-        ));
-    } else {
-        let tracked_policy = check_try!(policy::read_policy(repository.as_path()));
-        check_try!(policy::check_policy_shape(&tracked_policy));
-        check_try!(policy::require_fingerprints(
-            &tracked_policy,
-            &all_snapshots
-        ));
-    }
-    for manifest_snapshots in &all_snapshots {
-        check_try!(deny::run_cargo_deny(
-            repository.as_path(),
-            path.as_os_str(),
-            manifest_snapshots.manifest.as_str(),
-            &manifest_snapshots.snapshots,
-        ));
-    }
+                manifest_snapshots,
+            ))
+    );
+    check_try!(generated_policy.as_ref().map_or(Ok(()), |generated| {
+        return policy::write_policy(repository.as_path(), generated);
+    }));
     return Ok(());
 }
 

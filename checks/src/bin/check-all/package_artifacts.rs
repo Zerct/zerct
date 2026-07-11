@@ -1,5 +1,9 @@
 //! Build and verify exact public package artifacts in an ignored work area.
 
+/// Standalone Cargo package extraction, compilation, and installation proof.
+#[path = "package_artifacts/cargo_artifact.rs"]
+mod cargo_artifact;
+
 use std::{
     fs::{create_dir_all, remove_dir_all, remove_file, symlink_metadata},
     path::{Path, PathBuf},
@@ -244,6 +248,7 @@ fn run(runner: &Runner) -> CheckResult {
     check_try!(build_npm_package(runner, &paths));
     check_try!(build_python_packages(runner, &paths));
     check_try!(run_artifact_checker(runner, &paths));
+    check_try!(cargo_artifact::run(runner, &paths));
     check_try!(smoke_test_npm(runner, &paths));
     return smoke_test_python(runner, &paths);
 }

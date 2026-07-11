@@ -13,7 +13,7 @@ use super::common::{page_query, required_arg};
 use super::generic::{
     print_authenticated, print_authenticated_mutation, print_paged_authenticated,
 };
-use reqwest::Method;
+use hyper::Method;
 use serde_json::{Value, from_str, json};
 
 #[derive(Clone, Copy, Debug)]

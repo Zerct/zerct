@@ -37,7 +37,10 @@ highlight = "all"
 workspace-default-features = "deny"
 external-default-features = "deny"
 allow = []
-deny = [{ crate = "openssl", reason = "Use rustls for public network TLS." }]
+deny = [
+  { crate = "openssl", reason = "Use Rustls with AWS-LC for public network TLS." },
+  { crate = "ring", reason = "Use AWS-LC for public TLS cryptography." },
+]
 skip = []
 skip-tree = []
 

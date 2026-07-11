@@ -10,7 +10,3 @@ trim_trailing_whitespace = true
 
 [*.{md,toml,yml,yaml,json}]
 indent_size = 2
-
-[vendor/**]
-insert_final_newline = unset
-trim_trailing_whitespace = unset

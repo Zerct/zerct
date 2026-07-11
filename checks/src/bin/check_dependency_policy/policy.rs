@@ -137,7 +137,7 @@ pub(super) fn render_deny_config(
                 .collect::<CheckResult<Vec<_>>>()
         );
         rendered.push_str(feature_lines.join("").as_str());
-        rendered.push_str("]\nexact = false\n");
+        rendered.push_str("]\nexact = true\n");
     }
     return Ok(rendered);
 }

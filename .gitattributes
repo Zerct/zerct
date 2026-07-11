@@ -1,2 +1,0 @@
-# Preserve upstream cryptographic source and generated assembly byte-for-byte.
-vendor/** -whitespace linguist-vendored

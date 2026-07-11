@@ -7,10 +7,9 @@ use super::{
     args::CliOptions,
     auth::LoginCommand,
     constants::VERSION,
-    errors::{CliError, Result, agent_error, internal_error, write_stdout_line},
+    errors::{CliError, Result, agent_error, write_stdout_line},
     help::help_text,
 };
-use rustls::crypto::{CryptoProvider, aws_lc_rs::default_provider};
 use std::{env, process::ExitCode};
 
 impl From<CliError> for ExitCode {
@@ -29,14 +28,6 @@ impl TryFrom<RuntimeExecution> for ExitCode {
     #[inline]
     fn try_from(value: RuntimeExecution) -> Result<Self> {
         let RuntimeExecution = value;
-        if CryptoProvider::get_default().is_none()
-            && default_provider().install_default().is_err()
-            && CryptoProvider::get_default().is_none()
-        {
-            return Err(internal_error(
-                "Tovuk could not initialize its TLS cryptography provider.",
-            ));
-        }
         let argv = env::args().skip(0b1).collect::<Vec<_>>();
         let cli = result_or_return!(CliOptions::try_from(argv.as_slice()));
         if cli.help_requested() {
