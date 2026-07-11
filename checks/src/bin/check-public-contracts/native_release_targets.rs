@@ -1,6 +1,9 @@
 /// Standalone release-tool checksum workflow policy.
 #[path = "native_release_targets/quality_tools.rs"]
 mod quality_tools;
+/// Strict Zig linker proxy release policy.
+#[path = "native_release_targets/zig_linker_proxy.rs"]
+mod zig_linker_proxy;
 
 use alloc::collections::BTreeSet;
 
@@ -10,11 +13,12 @@ use crate::helpers::{
 };
 
 use quality_tools::require_quality_tool_checksum_contract;
+use zig_linker_proxy::require_zig_linker_proxy_contract;
 
 use serde::Deserialize;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0010] = [
+const _: [usize; 0x0011] = [
     size_of_val(&require_manifest_unique_value),
     size_of_val(&read_manifest),
     size_of_val(&reject_legacy_workflow_contract),
@@ -31,6 +35,7 @@ const _: [usize; 0x0010] = [
     size_of_val(&require_target_shape_libc),
     size_of_val(&require_target_shape_runner),
     size_of_val(&require_workflow_contract),
+    size_of_val(&require_zig_linker_proxy_contract),
 ];
 
 #[derive(Debug, Deserialize)]
@@ -330,7 +335,6 @@ pub(super) fn require_release_gate_contract() -> CheckResult {
 /// Require the platform-neutral Rust release utility contract.
 ///
 /// # Errors
-///
 /// Returns an error when matrix or checksum behavior is absent.
 fn require_release_tool_contract() -> CheckResult {
     let source = check_try!(read_text("checks/src/bin/native-release-tool.rs"));
@@ -352,7 +356,6 @@ fn require_release_tool_contract() -> CheckResult {
 /// Contract implementation for `require_sync_binary_contract`.
 ///
 /// # Errors
-///
 /// Returns an error when the contract requirement cannot be verified.
 pub(super) fn require_sync_binary_contract() -> CheckResult {
     let source = check_try!(read_text("checks/src/bin/sync-native-release-targets.rs"));
@@ -372,7 +375,6 @@ pub(super) fn require_sync_binary_contract() -> CheckResult {
 /// Contract implementation for `require_target_shape`.
 ///
 /// # Errors
-///
 /// Returns an error when the contract requirement cannot be verified.
 pub(super) fn require_target_shape(target: &NativeTarget) -> CheckResult {
     check_try!(require_target_shape_asset(target));
@@ -390,7 +392,6 @@ pub(super) fn require_target_shape(target: &NativeTarget) -> CheckResult {
 /// Require platform-appropriate executable names and extensions.
 ///
 /// # Errors
-///
 /// Returns an error when the executable name or extension is invalid.
 fn require_target_shape_asset(target: &NativeTarget) -> CheckResult {
     match target.triple.contains("windows") {
@@ -413,7 +414,6 @@ fn require_target_shape_asset(target: &NativeTarget) -> CheckResult {
 /// Require an explicit libc contract only for GNU Linux assets.
 ///
 /// # Errors
-///
 /// Returns an error when a target has an invalid libc declaration.
 fn require_target_shape_libc(target: &NativeTarget) -> CheckResult {
     match target.triple.contains("unknown-linux-gnu") {
@@ -436,7 +436,6 @@ fn require_target_shape_libc(target: &NativeTarget) -> CheckResult {
 /// Return the required GitHub-hosted runner for one Rust target.
 ///
 /// # Errors
-///
 /// Returns an error when the target family is unknown.
 fn require_target_shape_runner(triple: &str) -> CheckResult<&'static str> {
     let runner = if triple.contains("unknown-linux") {
@@ -487,9 +486,13 @@ pub(super) fn require_workflow_contract() -> CheckResult {
             "zig_version=\"0.16.0\"",
             "zig-x86_64-linux-$zig_version.tar.xz",
             "cargo install --locked --version 0.23.0 cargo-zigbuild",
+            "--bin zig-linker-proxy",
+            "CARGO_ZIGBUILD_ZIG_PATH: ${{ github.workspace }}/checks/target/release/zig-linker-proxy",
+            "TOVUK_REAL_ZIG_PATH: ${{ runner.temp }}/zig-0.16.0/zig",
             "cargo zigbuild --locked --release",
         ],
     ));
     check_try!(reject_legacy_workflow_contract(source.as_str()));
-    return require_release_tool_contract();
+    check_try!(require_release_tool_contract());
+    return require_zig_linker_proxy_contract();
 }

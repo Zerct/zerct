@@ -15,7 +15,11 @@ const DOCS_DEPLOY_COMMAND: &str =
 /// Binary-affecting paths that must trigger the native release workflow.
 const NATIVE_RELEASE_PATH_FILTERS: &[&str] = &[
     ".cargo/config.toml",
+    ".github/workflows/publish-native-binaries.yml",
     "native-release-targets.json",
+    "checks/Cargo.toml",
+    "checks/Cargo.lock",
+    "checks/src/bin/zig-linker-proxy.rs",
     "crates/tovuk/.cargo/config.toml",
     "crates/tovuk/Cargo.toml",
     "crates/tovuk/Cargo.lock",
@@ -108,6 +112,22 @@ const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
     (
         "runs-on: ${{ matrix.runner }}",
         "native builds must use each tracked GitHub-hosted matrix runner",
+    ),
+    (
+        "cargo build --locked --release --manifest-path checks/Cargo.toml --bin zig-linker-proxy",
+        "Linux ARM64 releases must build the tested Rust Zig linker proxy",
+    ),
+    (
+        "CARGO_ZIGBUILD_ZIG_PATH: ${{ github.workspace }}/checks/target/release/zig-linker-proxy",
+        "cargo-zigbuild must delegate through the tracked Rust Zig linker proxy",
+    ),
+    (
+        "TOVUK_REAL_ZIG_PATH: ${{ runner.temp }}/zig-0.16.0/zig",
+        "the Zig proxy must delegate to the exact pinned Zig executable",
+    ),
+    (
+        "TOVUK_REAL_ZIG_PATH=\"$zig_root/zig\" \"$proxy\" version",
+        "the release workflow must smoke test delegation through the Zig proxy",
     ),
     (
         "actions/upload-artifact@",
@@ -331,7 +351,11 @@ jobs:
     fn native_release_paths_accept_exact_contract() {
         let workflow = native_workflow(
             r#"      - ".cargo/config.toml"
+      - ".github/workflows/publish-native-binaries.yml"
       - "native-release-targets.json"
+      - "checks/Cargo.toml"
+      - "checks/Cargo.lock"
+      - "checks/src/bin/zig-linker-proxy.rs"
       - "crates/tovuk/.cargo/config.toml"
       - "crates/tovuk/Cargo.toml"
       - "crates/tovuk/Cargo.lock"
@@ -357,7 +381,11 @@ jobs:
     fn native_release_paths_reject_incomplete_contract() {
         let workflow = native_workflow(
             r#"      - ".cargo/config.toml"
+      - ".github/workflows/publish-native-binaries.yml"
       - "native-release-targets.json"
+      - "checks/Cargo.toml"
+      - "checks/Cargo.lock"
+      - "checks/src/bin/zig-linker-proxy.rs"
       - "crates/tovuk/Cargo.toml"
       - "crates/tovuk/Cargo.lock"
       - "crates/tovuk/src/**"
