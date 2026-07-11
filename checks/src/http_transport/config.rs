@@ -47,8 +47,8 @@ const _: [usize; 0x09] = [
 /// # Errors
 ///
 /// Returns an error for an invalid, reserved, or duplicate header.
-pub(super) fn build_headers(
-    headers: &RequestHeaders,
+pub(super) fn build_headers<'headers>(
+    headers: &'headers RequestHeaders<'headers>,
     user_agent: &HeaderValue,
 ) -> TransportResult<HeaderMap> {
     let mut result = HeaderMap::new();

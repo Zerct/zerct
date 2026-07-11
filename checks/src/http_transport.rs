@@ -112,10 +112,10 @@ impl Client {
     /// Returns an error for an invalid or unsafe URL, invalid headers, a timeout,
     /// redirect policy failure, transport failure, or oversized response.
     #[inline]
-    pub fn get(
+    pub fn get<'headers>(
         &self,
         url: &str,
-        headers: &RequestHeaders,
+        headers: &'headers RequestHeaders<'headers>,
         maximum_body_bytes: usize,
     ) -> TransportResult<Response> {
         let initial_url = check_try!(parse_request_url(url));
@@ -220,7 +220,7 @@ type RedirectResult = TransportResult<Option<Url>>;
 type RequestBody = Empty<Bytes>;
 
 /// Borrowed HTTP header name and value pairs supplied by one caller.
-pub type RequestHeaders = [(&'static str, &'static str)];
+pub type RequestHeaders<'headers> = [(&'headers str, &'headers str)];
 
 /// Built request operation.
 type RequestResult = TransportResult<Request<RequestBody>>;

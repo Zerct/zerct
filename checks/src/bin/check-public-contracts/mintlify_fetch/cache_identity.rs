@@ -115,7 +115,8 @@ pub(super) fn validate_check_id(check_id: &str) -> CheckResult {
 /// # Errors
 ///
 /// Returns an error when `revision` is not safe for a public query parameter.
-pub(super) fn validate_revision(revision: &str) -> CheckResult {
+#[inline]
+pub(crate) fn validate_revision(revision: &str) -> CheckResult {
     let valid_length = revision.len() == 0x28 || revision.len() == 0x40;
     let valid_characters = revision
         .bytes()
