@@ -9,28 +9,45 @@ use crate::native_release_targets;
 use crate::repo_hygiene_git::{existing_tracked_files, git_lines};
 
 use crate::repo_hygiene_paths::{
-    is_forbidden_tracked_path, is_guarded_source_path, is_public_text_scan_path, path_has_extension,
+    is_forbidden_tracked_path, is_guarded_source_path, is_public_repository_scan_path,
+    is_public_text_scan_path, path_has_extension,
 };
 
-use crate::repo_hygiene_required::{require_ignored_paths, require_tracked_paths};
+use crate::repo_hygiene_required::{
+    require_ignored_paths, require_tracked_paths, require_visible_paths,
+};
 
-use crate::repo_hygiene_text::line_contains_retired_npm_runner_guidance;
+use crate::repo_hygiene_text::{
+    line_contains_private_repository_marker, line_contains_retired_npm_runner_guidance,
+};
 
 use crate::script_contracts;
 
 use std::path::Path;
 
+/// Tracked launchers and hooks that intentionally retain executable mode.
+const ALLOWED_EXECUTABLE_PATHS: &[&str] = &[
+    ".githooks/pre-commit",
+    ".githooks/pre-push",
+    "packages/tovuk/bin/tovuk.mjs",
+    "packages/tovuk/install.mjs",
+];
+
 /// Contract value named `MAX_SOURCE_FILE_LINES`.
 const MAX_SOURCE_FILE_LINES: usize = 500;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000a] = [
+const _: [usize; 0x000e] = [
     size_of_val(&check),
+    size_of_val(&check_repository_contracts),
+    size_of_val(&check_tracked_files),
     size_of_val(&reject_forbidden_line_matches),
     size_of_val(&reject_forbidden_tracked_files),
     size_of_val(&reject_oversized_source_files),
+    size_of_val(&reject_private_repository_markers),
     size_of_val(&reject_retired_npx_guidance),
     size_of_val(&reject_tracked_go_files),
+    size_of_val(&reject_unexpected_git_modes),
     size_of_val(&reject_untracked_files),
     size_of_val(&require_docs_deploy_observability_contract),
     size_of_val(&require_docs_deploy_observability_checker),
@@ -50,22 +67,43 @@ pub(super) fn check() -> CheckResult {
     let tracked_set = tracked_files.iter().cloned().collect::<BTreeSet<_>>();
 
     check_try!(require_tracked_paths(&tracked_set));
-    check_try!(agent_guidance::check_policy(&tracked_files));
-    check_try!(native_release_targets::check());
-    check_try!(script_contracts::check());
-    check_try!(require_docs_deploy_observability_contract());
-    check_try!(reject_retired_npx_guidance(&tracked_files));
-    check_try!(reject_tracked_go_files(&tracked_files));
-    check_try!(reject_oversized_source_files(&tracked_files));
-    check_try!(reject_forbidden_tracked_files(&tracked_files));
+    check_try!(check_repository_contracts(&tracked_files));
+    check_try!(check_tracked_files(&tracked_files));
     check_try!(reject_untracked_files());
     check_try!(require_ignored_paths());
+    check_try!(require_visible_paths());
 
     check_try!(write_line(
         OutputChannel::Regular,
         "Checked public repository hygiene.",
     ));
     return Ok(());
+}
+
+/// Check durable repository instructions and generated public contracts.
+///
+/// # Errors
+///
+/// Returns an error when any repository-level contract differs.
+fn check_repository_contracts(tracked_files: &[String]) -> CheckResult {
+    check_try!(agent_guidance::check_policy(tracked_files));
+    check_try!(native_release_targets::check());
+    check_try!(script_contracts::check());
+    return require_docs_deploy_observability_contract();
+}
+
+/// Check every tracked file and Git index mode against public policy.
+///
+/// # Errors
+///
+/// Returns an error when tracked content or index metadata violates policy.
+fn check_tracked_files(tracked_files: &[String]) -> CheckResult {
+    check_try!(reject_private_repository_markers(tracked_files));
+    check_try!(reject_retired_npx_guidance(tracked_files));
+    check_try!(reject_tracked_go_files(tracked_files));
+    check_try!(reject_oversized_source_files(tracked_files));
+    check_try!(reject_forbidden_tracked_files(tracked_files));
+    return reject_unexpected_git_modes();
 }
 
 /// Contract implementation for `reject_forbidden_line_matches`.
@@ -147,6 +185,20 @@ pub(super) fn reject_oversized_source_files(tracked_files: &[String]) -> CheckRe
     ));
 }
 
+/// Reject developer-local paths and private-engine locations everywhere.
+///
+/// # Errors
+///
+/// Returns an error when a tracked UTF-8 file exposes a private repository marker.
+pub(super) fn reject_private_repository_markers(tracked_files: &[String]) -> CheckResult {
+    return reject_forbidden_line_matches(
+        tracked_files,
+        is_public_repository_scan_path,
+        line_contains_private_repository_marker,
+        "Tracked public files must not expose developer-local or private-engine paths:",
+    );
+}
+
 /// Contract implementation for `reject_retired_npx_guidance`.
 ///
 /// # Errors
@@ -178,6 +230,54 @@ pub(super) fn reject_tracked_go_files(tracked_files: &[String]) -> CheckResult {
     return Err(format!(
         "Tracked Go source is not allowed in the public repo; use Rust-native checks:\n{}",
         go_files.join("\n")
+    ));
+}
+
+/// Reject symlinks, submodules, unmerged entries, and unexpected executables.
+///
+/// # Errors
+///
+/// Returns an error when a tracked index entry has an unapproved Git mode.
+pub(super) fn reject_unexpected_git_modes() -> CheckResult {
+    let mut invalid = Vec::new();
+    for entry in check_try!(git_lines(&["ls-files", "--stage"])) {
+        let (metadata, path) = check_try!(
+            entry
+                .split_once('\t')
+                .ok_or_else(|| return format!("malformed Git index entry: {entry}"))
+        );
+        let mut fields = metadata.split_whitespace();
+        let mode = check_try!(
+            fields
+                .next()
+                .ok_or_else(|| return format!("Git index entry lacks a mode: {entry}"))
+        );
+        let _object = check_try!(
+            fields
+                .next()
+                .ok_or_else(|| return format!("Git index entry lacks an object: {entry}"))
+        );
+        let stage = check_try!(
+            fields
+                .next()
+                .ok_or_else(|| return format!("Git index entry lacks a stage: {entry}"))
+        );
+        if fields.next().is_some() || stage != "0" {
+            invalid.push(format!("{mode} stage {stage} {path}"));
+            continue;
+        }
+        let approved =
+            mode == "100644" || (mode == "100755" && ALLOWED_EXECUTABLE_PATHS.contains(&path));
+        if !approved {
+            invalid.push(format!("{mode} {path}"));
+        }
+    }
+    if invalid.is_empty() {
+        return Ok(());
+    }
+    return Err(format!(
+        "Tracked public files contain symlinks, submodules, or unexpected executable modes:\n{}",
+        invalid.join("\n")
     ));
 }
 

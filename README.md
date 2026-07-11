@@ -70,6 +70,12 @@ Tovuk. Users and AI/API agents can open them through the CLI or by calling
 Ticket responses include `created_by` for account-session versus account-API-key
 attribution.
 
+## Security
+
+Report vulnerabilities privately through the process in
+[SECURITY.md](SECURITY.md). Do not include credentials, customer data, or an
+undisclosed vulnerability in a public issue.
+
 ## Public-Data Boundary
 
 Scraper requests are public data only. They must use public URLs, public search terms, public profile

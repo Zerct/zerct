@@ -2,8 +2,6 @@ use crate::helpers::CheckResult;
 
 use crate::mintlify_fetch::{FetchContext, RequestHeaders, fetch_text_once};
 
-use reqwest::Url;
-
 use serde::Deserialize;
 
 use serde_json::from_str;
@@ -11,6 +9,8 @@ use serde_json::from_str;
 use std::thread::sleep;
 
 use super::copy::reject_retired_public_names;
+
+use url::Url;
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0005] = [

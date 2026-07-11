@@ -1,6 +1,6 @@
 use super::{ResponseConstraints, bounded_response_text};
 
-use reqwest::StatusCode;
+use http::StatusCode;
 
 /// Verify declared and chunked public docs bodies obey the hard ceiling.
 ///

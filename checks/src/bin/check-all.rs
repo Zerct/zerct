@@ -8,7 +8,20 @@ mod package_artifacts;
 mod python_runtime;
 
 use flate2 as _;
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
 use serde as _;
 use serde_json as _;
 use sha2 as _;
@@ -23,6 +36,7 @@ use tovuk_public_checks::check_support::{
     CHECKS_MANIFEST, CheckResult, command as prepare_command, find_command, repo_root, tool_path,
 };
 use tovuk_public_checks::check_try;
+use url as _;
 
 /// Cargo lockfiles audited independently for every public Rust package.
 const CARGO_AUDIT_LOCKFILES: &[&str] = &["checks/Cargo.lock", "crates/tovuk/Cargo.lock"];
@@ -33,6 +47,7 @@ const CARGO_QUALITY_COMMANDS: &[CommandArgs] = &[
     &["fmt", "--check", "--manifest-path", CHECKS_MANIFEST],
     &[
         "check",
+        "--keep-going",
         "--locked",
         "--release",
         "--all-targets",
@@ -42,6 +57,7 @@ const CARGO_QUALITY_COMMANDS: &[CommandArgs] = &[
     ],
     &[
         "check",
+        "--keep-going",
         "--locked",
         "--release",
         "--all-targets",
@@ -51,6 +67,7 @@ const CARGO_QUALITY_COMMANDS: &[CommandArgs] = &[
     ],
     &[
         "test",
+        "--no-fail-fast",
         "--locked",
         "--release",
         "--all-targets",
@@ -60,6 +77,7 @@ const CARGO_QUALITY_COMMANDS: &[CommandArgs] = &[
     ],
     &[
         "test",
+        "--no-fail-fast",
         "--locked",
         "--release",
         "--all-targets",
@@ -174,6 +192,7 @@ const RUFF_FORMAT_ARGS: &[&str] = &[
 
 /// Arguments that make every Clippy invocation enforce the repository policy.
 const STRICT_CLIPPY_ARGS: &[&str] = &[
+    "--keep-going",
     "--locked",
     "--release",
     "--all-targets",
@@ -236,6 +255,7 @@ impl Runner {
             .env_remove("PIP_EXTRA_INDEX_URL")
             .env("PIP_INDEX_URL", "https://pypi.org/simple")
             .env_remove("PIP_TRUSTED_HOST")
+            .env("RUSTDOCFLAGS", "-D warnings")
             .env("TOVUK_NATIVE_BINARY", self.native_cli.as_os_str())
             .env("UV_DEFAULT_INDEX", "https://pypi.org/simple")
             .env_remove("UV_EXTRA_INDEX_URL")
@@ -354,7 +374,7 @@ impl Runner {
             "npm",
             MINTLIFY_COMMANDS,
         ));
-        check_try!(self.run("typos", &["--config", ".typos.toml", "."]));
+        check_try!(self.run("typos", &["--isolated", "."]));
         check_try!(self.run("ruby", &["-c", "Formula/tovuk.rb"]));
         return find_command(self.path.as_os_str(), &["brew"]).map_or(Ok(()), |_| {
             return self.run("brew", &["style", "Formula/tovuk.rb"]);

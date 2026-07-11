@@ -110,11 +110,23 @@ use flate2 as _;
 
 use helpers::{CheckResult, OutputChannel, find_repo_root, write_line};
 
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
 use sha2 as _;
 
 use std::{env, process::ExitCode};
 
 use tar as _;
+
+use tokio as _;
 
 use tovuk_public_checks as _;
 

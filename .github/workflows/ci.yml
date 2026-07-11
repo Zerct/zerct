@@ -3,63 +3,9 @@ name: CI
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - ".github/**"
-      - ".cargo/**"
-      - ".editorconfig"
-      - ".githooks/**"
-      - ".gitattributes"
-      - ".gitignore"
-      - ".oxlintrc.json"
-      - ".prettierrc.json"
-      - ".typos.toml"
-      - ".vacuum.yaml"
-      - "AGENTS.md"
-      - "checks/**"
-      - "clippy.toml"
-      - "dependency-feature-policy.json"
-      - "Formula/**"
-      - "README.md"
-      - "crates/tovuk/**"
-      - "deny.toml"
-      - "deny*.toml"
-      - "docs/**"
-      - "native-release-targets.json"
-      - "packages/**"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
-      - "skills/**"
-      - "vendor/**"
   push:
     branches:
       - main
-    paths:
-      - ".github/**"
-      - ".cargo/**"
-      - ".editorconfig"
-      - ".githooks/**"
-      - ".gitattributes"
-      - ".gitignore"
-      - ".oxlintrc.json"
-      - ".prettierrc.json"
-      - ".typos.toml"
-      - ".vacuum.yaml"
-      - "AGENTS.md"
-      - "checks/**"
-      - "clippy.toml"
-      - "dependency-feature-policy.json"
-      - "Formula/**"
-      - "README.md"
-      - "crates/tovuk/**"
-      - "deny.toml"
-      - "deny*.toml"
-      - "docs/**"
-      - "native-release-targets.json"
-      - "packages/**"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
-      - "skills/**"
-      - "vendor/**"
 
 permissions:
   contents: read

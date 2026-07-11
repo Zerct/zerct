@@ -46,6 +46,10 @@ const CHECK_ALL_SOURCE_REQUIREMENTS: &[PolicyRequirement] = &[
         "Rust check-all must run the pinned Python formatter and linter",
     ),
     (
+        "RUSTDOCFLAGS\", \"-D warnings",
+        "Rust check-all must deny every rustdoc warning",
+    ),
+    (
         "ty==0.0.58",
         "Rust check-all must run the pinned strict Python type checker",
     ),
@@ -81,36 +85,14 @@ const CHECK_ALL_SOURCE_REQUIREMENTS: &[PolicyRequirement] = &[
         "--no-index",
         "Rust check-all must smoke-test built package artifacts without registry access",
     ),
-];
-
-/// CI path filters that must be identical for pull requests and main pushes.
-const CI_PATH_FILTERS: &[&str] = &[
-    ".cargo/**",
-    ".editorconfig",
-    ".gitattributes",
-    ".githooks/**",
-    ".github/**",
-    ".gitignore",
-    ".oxlintrc.json",
-    ".prettierrc.json",
-    ".typos.toml",
-    ".vacuum.yaml",
-    "AGENTS.md",
-    "checks/**",
-    "clippy.toml",
-    "crates/tovuk/**",
-    "dependency-feature-policy.json",
-    "deny.toml",
-    "deny*.toml",
-    "docs/**",
-    "Formula/**",
-    "native-release-targets.json",
-    "packages/**",
-    "README.md",
-    "rust-toolchain.toml",
-    "rustfmt.toml",
-    "skills/**",
-    "vendor/**",
+    (
+        "--keep-going",
+        "Rust check-all must report all independent compiler and Clippy findings",
+    ),
+    (
+        "--no-fail-fast",
+        "Rust check-all must report all independent test failures",
+    ),
 ];
 
 /// npm package requirements that the canonical Rust check delegates to.
@@ -129,9 +111,36 @@ const NPM_CHECK_REQUIREMENTS: &[PolicyRequirement] = &[
     ),
 ];
 
+/// Exact native quality-tool versions installed by continuous integration.
+const QUALITY_TOOL_REQUIREMENTS: &[PolicyRequirement] = &[
+    (
+        "cargo-audit@0.22.2",
+        "quality-tool setup must pin the reviewed cargo-audit release",
+    ),
+    (
+        "cargo-deny@0.20.2",
+        "quality-tool setup must pin the cargo-deny CLI used by policy arguments",
+    ),
+    (
+        "cargo-machete@0.9.2",
+        "quality-tool setup must pin the reviewed cargo-machete release",
+    ),
+    (
+        "taplo-cli@0.10.0",
+        "quality-tool setup must pin the reviewed Taplo release",
+    ),
+    (
+        "typos-cli@1.48.0",
+        "quality-tool setup must pin the reviewed typos release",
+    ),
+    (
+        "zizmor@1.26.1",
+        "quality-tool setup must pin the reviewed zizmor release",
+    ),
+];
+
 /// Compile-time references preserve the named helper boundary.
-const _: [usize; 0x0003] = [
-    size_of_val(&require_ci_path_filter_occurrences),
+const _: [usize; 0x0002] = [
     size_of_val(&require_node_before_check_all),
     size_of_val(&read_check_all_sources),
 ];
@@ -226,6 +235,11 @@ impl GlobalPolicy for HostedActionsCheck {
             read_file_to_string("packages/tovuk/package.json")
                 .map_err(|error| format!("read packages/tovuk/package.json: {error}"))
         );
+        let quality_tools = check_try!(
+            read_file_to_string(".github/actions/setup-quality-tools/action.yml").map_err(
+                |error| format!("read .github/actions/setup-quality-tools/action.yml: {error}")
+            )
+        );
         let workflow_corpus = workflows
             .iter()
             .fold(String::new(), |mut corpus, workflow| {
@@ -246,20 +260,10 @@ impl GlobalPolicy for HostedActionsCheck {
         for &(needle, message) in NPM_CHECK_REQUIREMENTS {
             require_contains(npm_package.as_str(), needle, message, findings);
         }
-        return Ok(());
-    }
-
-    fn require_ci_path_filter_contract(&self, workflows: &[Workflow], findings: &mut Vec<String>) {
-        let Some(ci_workflow) = workflows
-            .iter()
-            .find(|workflow| return workflow.path.ends_with("ci.yml"))
-        else {
-            findings.push("missing .github/workflows/ci.yml".to_owned());
-            return;
-        };
-        for path in CI_PATH_FILTERS {
-            require_ci_path_filter_occurrences(ci_workflow, path, findings);
+        for &(needle, message) in QUALITY_TOOL_REQUIREMENTS {
+            require_contains(quality_tools.as_str(), needle, message, findings);
         }
+        return Ok(());
     }
 
     fn run_actionlint(&self, findings: &mut Vec<String>) {
@@ -293,18 +297,6 @@ fn read_check_all_sources() -> CheckResult<String> {
         corpus.push('\n');
     }
     return Ok(corpus);
-}
-
-/// Require one CI path filter in both the pull-request and push lists.
-fn require_ci_path_filter_occurrences(workflow: &Workflow, path: &str, findings: &mut Vec<String>) {
-    let filter = format!("- \"{path}\"");
-    let occurrences = workflow.contents.matches(filter.as_str()).count();
-    if occurrences != 0x2 {
-        findings.push(format!(
-            "{}: CI pull-request and push path filters must each include {path}; found {occurrences} copies",
-            workflow.path.display()
-        ));
-    }
 }
 
 /// Require a pinned Node runtime before every full repository check.

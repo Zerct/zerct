@@ -1,7 +1,20 @@
 //! Fast, tracked pre-commit verification for the public repository.
 
 use flate2 as _;
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
 use serde as _;
 use serde_json as _;
 use sha2 as _;
@@ -12,6 +25,7 @@ use std::{
     process::{Command, ExitCode},
 };
 use tar as _;
+use url as _;
 
 use tovuk_public_checks::check_support::{
     CHECKS_MANIFEST, CheckResult, command as prepare_command, repo_root, tool_path,

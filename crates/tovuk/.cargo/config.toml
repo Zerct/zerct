@@ -1,0 +1,3 @@
+# Keep C and Rust objects compatible with the CLI's oldest supported macOS.
+[env]
+MACOSX_DEPLOYMENT_TARGET = { value = "11.0", force = true }

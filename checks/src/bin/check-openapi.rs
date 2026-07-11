@@ -14,7 +14,20 @@ macro_rules! check_try {
 #[path = "check-openapi/vacuum.rs"]
 pub mod vacuum;
 
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
 use serde::Deserialize;
 use serde_json::{self as _, from_str};
 use std::{
@@ -26,6 +39,7 @@ use std::{
 use tovuk_public_checks::check_support::{
     CheckResult, display_path, git_tracked_files, repo_root, tool_path,
 };
+use url as _;
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x7] = [

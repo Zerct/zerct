@@ -37,7 +37,20 @@ mod workflow_policy;
 
 use alloc::collections::BTreeSet;
 use flate2 as _;
-use reqwest as _;
+use http as _;
+
+use http_body_util as _;
+
+use hyper as _;
+
+use hyper_rustls as _;
+
+use hyper_util as _;
+
+use rustls as _;
+
+use tokio as _;
+
 use serde as _;
 use serde_json as _;
 use sha2 as _;
@@ -49,6 +62,7 @@ use std::{
 };
 use tar as _;
 use tovuk_public_checks as _;
+use url as _;
 
 /// Actions maintained by Blacksmith that are forbidden in public workflows.
 const BLACKSMITH_ACTIONS: &[&str] = &[
@@ -154,9 +168,6 @@ trait GlobalPolicy {
         findings: &mut Vec<String>,
     ) -> CheckResult;
 
-    /// Require the continuous-integration workflow to cover policy inputs.
-    fn require_ci_path_filter_contract(&self, workflows: &[Workflow], findings: &mut Vec<String>);
-
     /// Run the native workflow linter and record failures.
     fn run_actionlint(&self, findings: &mut Vec<String>);
 }
@@ -177,7 +188,6 @@ impl Check for HostedActionsCheck {
             self.check_workflow(workflow, &mut findings);
             self.check_workflow_path_filters(workflow, &tracked_files, &mut findings);
         }
-        self.require_ci_path_filter_contract(workflows.as_slice(), &mut findings);
         self.run_actionlint(&mut findings);
 
         if findings.is_empty() {
@@ -197,6 +207,13 @@ impl Check for HostedActionsCheck {
 trait NativeReleasePolicy {
     /// Require live documentation readiness to block native publication.
     fn check_blocking_docs_readiness_gate(&self, workflow: &Workflow, findings: &mut Vec<String>);
+
+    /// Require the exact binary-affecting push trigger paths for native releases.
+    fn check_native_release_path_filter_contract(
+        &self,
+        workflow: &Workflow,
+        findings: &mut Vec<String>,
+    );
 
     /// Apply all native binary release workflow requirements.
     fn check_native_release_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>);
@@ -311,6 +328,9 @@ struct Workflow {
 trait WorkflowPolicy {
     /// Require checkout steps to discard persisted credentials.
     fn check_checkout_credentials(&self, workflow: &Workflow, findings: &mut Vec<String>);
+
+    /// Require continuous integration to run for every pull request and main push.
+    fn check_ci_trigger_coverage(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
     /// Require the documentation deploy workflow to protect secret-bearing runs.
     fn check_docs_deploy_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>);

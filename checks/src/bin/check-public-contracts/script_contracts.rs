@@ -50,7 +50,7 @@ pub(super) fn require_rust_native_check_commands() -> CheckResult {
             "Rust check-all must run TOML style through the Rust checker binary",
         ),
         (
-            "self.run(\"typos\", &[\"--config\", \".typos.toml\", \".\"])",
+            "self.run(\"typos\", &[\"--isolated\", \".\"])",
             "Rust check-all must call the Rust-native typos checker directly",
         ),
     ] {

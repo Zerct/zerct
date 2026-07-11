@@ -32,6 +32,8 @@ this discovery policy in nested files.
 - Reject private implementation details in docs, examples, generated files,
   tests, configuration, commit messages, and release artifacts, not only in
   production code.
+- Route vulnerability reports through `SECURITY.md`. Do not publish an
+  undisclosed report, credential, or customer data in an issue or fixture.
 - Do not copy files or dependency policy from a private repository wholesale.
   Public configuration must be derived from this repository's own manifests,
   lockfiles, release targets, and public contracts.
@@ -43,9 +45,8 @@ this discovery policy in nested files.
   local-only and must never be published.
 - `packages/tovuk` and `packages/tovuk-py` install or launch the same native
   binary. Keep `TOVUK_NATIVE_BINARY` support.
-- `vendor/ring-0.17.14` is public third-party source with only the compatibility
-  changes documented in `TOVUK-PATCH.md`. Do not add product code, reformat the
-  tree, or apply project prose rules to cryptographic source and assembly.
+- Do not vendor third-party crates. Published Cargo artifacts must resolve from
+  crates.io and build from their own contents without repository-only patches.
 - The npm package must have zero runtime and development dependencies. Its MJS
   files are packaging adapters only; product logic belongs in Rust.
 - Prefer Rust for validation, parsing, generation, checksums, release policy,
@@ -94,6 +95,8 @@ this discovery policy in nested files.
   renaming internal Rust identifiers.
 - Do not discard unrelated worktree changes. Generated synchronization may
   update tracked files, so inspect the diff before and after every full gate.
+- Keep `.gitignore` precise. Ignore known outputs and secrets, but keep
+  source-like `build`, `dist`, and SDK paths visible to Git and contract tests.
 
 ## Verification
 

@@ -4,31 +4,54 @@ use crate::{helpers::CheckResult, repo_hygiene_git::git_status_success};
 
 use std::path::Path;
 
-/// Contract value named `CHECK_GITHUB_ACTIONS_CHECKER_DIR`.
-const CHECK_GITHUB_ACTIONS_CHECKER_DIR: &str = "checks/src/bin/check-github-actions/";
-
-/// Contract value named `PUBLIC_CONTRACT_CHECKER_DIR`.
-const PUBLIC_CONTRACT_CHECKER_DIR: &str = "checks/src/bin/check-public-contracts/";
+/// Every Rust source module in the public checker crate is pinned below.
+const CHECKS_SOURCE_DIR: &str = "checks/src/";
 
 /// Contract value named `REQUIRED_IGNORED_PATHS`.
 const REQUIRED_IGNORED_PATHS: &[&str] = &[
+    ".aws/credentials",
+    ".cargo-home/registry/index",
     ".env",
     ".env.local",
+    ".git-credentials",
     ".npmrc",
     ".pypirc",
+    ".ssh/id_ed25519",
     ".tovuk/example",
+    ".terraform/terraform.tfstate",
+    "config.jks",
+    "config.key",
+    "config.keystore",
+    "config.p12",
+    "config.p8",
+    "config.pem",
+    "config.pfx",
+    "config.secret",
+    "crates/tovuk/.cargo/credentials",
+    "crates/tovuk/.cargo/credentials.toml",
     "crates/tovuk/target/example",
+    "debug.sqlite3",
     "docs/.mintlify/example",
+    "example.auto.tfvars",
+    "example.tfstate.backup",
+    "example.tfvars",
+    "example.tfvars.json",
+    "nested/.pypirc",
     "node_modules/example",
+    "package.crate",
+    "package.zip",
+    "packages/tovuk-py/build/example",
+    "packages/tovuk-py/dist/example",
+    "packages/tovuk/.cache/example",
     "packages/tovuk/dist/example",
     "packages/tovuk/node_modules/example",
+    "vendor/example/Cargo.toml",
 ];
 
 /// Contract value named `REQUIRED_TRACKED_PATHS`.
 const REQUIRED_TRACKED_PATHS: &[&str] = &[
     ".cargo/config.toml",
     ".editorconfig",
-    ".gitattributes",
     ".githooks/pre-commit",
     ".githooks/pre-push",
     ".github/actions/setup-quality-tools/action.yml",
@@ -46,16 +69,18 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     ".github/actionlint.yaml",
     ".oxlintrc.json",
     ".prettierrc.json",
-    ".typos.toml",
     ".vacuum.yaml",
     "AGENTS.md",
     "README.md",
+    "SECURITY.md",
     "checks/Cargo.lock",
     "checks/Cargo.toml",
     "checks/src/bin/check-dependency-policy.rs",
+    "checks/src/bin/check_dependency_policy/active.rs",
     "checks/src/bin/check_dependency_policy/deny.rs",
     "checks/src/bin/check_dependency_policy/graph.rs",
     "checks/src/bin/check_dependency_policy/policy.rs",
+    "checks/src/bin/check_dependency_policy/tree.rs",
     "checks/src/bin/check_dependency_policy_tests/verification.rs",
     "checks/src/bin/check-native-release-assets.rs",
     "checks/src/bin/check-native-release-assets/checksum.rs",
@@ -81,6 +106,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-github-actions/workflow_policy.rs",
     "checks/src/bin/check-openapi.rs",
     "checks/src/bin/check-openapi/vacuum.rs",
+    "checks/src/bin/check-openapi/vacuum_download.rs",
     "checks/src/bin/check-package-artifacts.rs",
     "checks/src/bin/check-package-artifacts/archive.rs",
     "checks/src/bin/check-package-artifacts/cargo_package.rs",
@@ -149,9 +175,13 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-public-contracts/script_contracts.rs",
     "checks/src/bin/check-public-contracts/support_contract.rs",
     "checks/src/bin/check-public-contracts/types.rs",
+    "crates/tovuk/.cargo/config.toml",
     "crates/tovuk/Cargo.lock",
     "crates/tovuk/Cargo.toml",
     "crates/tovuk/LICENSE",
+    "crates/tovuk/src/cli/api_commands/http/transport.rs",
+    "crates/tovuk/src/cli/api_commands/http/url_policy.rs",
+    "crates/tovuk/src/cli/api_commands/http_tests/server.rs",
     "crates/tovuk/src/main.rs",
     "docs/docs.json",
     "docs/openapi.json",
@@ -168,16 +198,38 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "packages/tovuk-py/LICENSE",
     "packages/tovuk-py/src/tovuk/native_release_targets.json",
     "checks/src/bin/check-all.rs",
+    "checks/src/bin/check-all/package_artifacts/cargo_artifact.rs",
     "checks/src/bin/check-all/package_artifacts.rs",
+    "checks/src/bin/check-all/python_runtime.rs",
+    "checks/src/http_transport.rs",
+    "checks/src/http_transport/config.rs",
+    "checks/src/http_transport/redirect.rs",
+    "checks/src/http_transport/response.rs",
+    "checks/src/http_transport_tests/verification.rs",
     "rust-toolchain.toml",
     "rustfmt.toml",
     "skills/tovuk/SKILL.md",
 ];
 
+/// Source-like paths that broad ignore patterns must never conceal.
+const REQUIRED_VISIBLE_PATHS: &[&str] = &[
+    ".env.example",
+    "Cargo.lock",
+    "SECURITY.md",
+    "crates/tovuk/.cargo/config.toml",
+    "crates/tovuk/src/build/module.rs",
+    "crates/tovuk/src/dist/schema.rs",
+    "docs/build/guide.mdx",
+    "docs/sdks/rust.mdx",
+    "packages/tovuk/.npmrc",
+    "sdks/rust/src/lib.rs",
+];
+
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0002] = [
+const _: [usize; 0x0003] = [
     size_of_val(&require_ignored_paths),
     size_of_val(&require_tracked_paths),
+    size_of_val(&require_visible_paths),
 ];
 
 /// Contract implementation for `require_ignored_paths`.
@@ -188,9 +240,14 @@ const _: [usize; 0x0002] = [
 pub(super) fn require_ignored_paths() -> CheckResult {
     for path in REQUIRED_IGNORED_PATHS {
         check_try!(
-            check_try!(git_status_success(&["check-ignore", "-q", path]))
-                .then_some(())
-                .ok_or_else(|| format!("{path} must be ignored"))
+            check_try!(git_status_success(&[
+                "check-ignore",
+                "-q",
+                "--no-index",
+                path
+            ]))
+            .then_some(())
+            .ok_or_else(|| format!("{path} must be ignored"))
         );
     }
     return Ok(());
@@ -218,16 +275,10 @@ pub(super) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
         ));
     }
 
-    let pinned_checker_dirs = [
-        CHECK_GITHUB_ACTIONS_CHECKER_DIR,
-        PUBLIC_CONTRACT_CHECKER_DIR,
-    ];
     let unpinned_checker_modules = tracked_set
         .iter()
         .filter(|path| {
-            return pinned_checker_dirs
-                .iter()
-                .any(|checker_dir| return path.starts_with(checker_dir))
+            return path.starts_with(CHECKS_SOURCE_DIR)
                 && Path::new(path)
                     .extension()
                     .is_some_and(|extension| return extension.eq_ignore_ascii_case("rs"))
@@ -237,10 +288,29 @@ pub(super) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
         .collect::<Vec<_>>();
     if !unpinned_checker_modules.is_empty() {
         return Err(format!(
-            "These public contract checker modules must be added to REQUIRED_TRACKED_PATHS:\n{}",
+            "These public checker modules must be added to REQUIRED_TRACKED_PATHS:\n{}",
             unpinned_checker_modules.join("\n")
         ));
     }
 
+    return Ok(());
+}
+
+/// Require source-like paths to remain visible to Git.
+///
+/// # Errors
+///
+/// Returns an error when a broad ignore rule conceals a source-like path.
+pub(super) fn require_visible_paths() -> CheckResult {
+    for path in REQUIRED_VISIBLE_PATHS {
+        if check_try!(git_status_success(&[
+            "check-ignore",
+            "-q",
+            "--no-index",
+            path,
+        ])) {
+            return Err(format!("{path} must not be ignored"));
+        }
+    }
     return Ok(());
 }
