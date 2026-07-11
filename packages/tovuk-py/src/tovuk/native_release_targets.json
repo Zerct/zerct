@@ -1,0 +1,61 @@
+{
+  "targets": [
+    {
+      "asset_ext": "",
+      "binary": "tovuk",
+      "libc": "glibc",
+      "node": { "arch": "x64", "platform": "linux" },
+      "python": [
+        { "machine": "amd64", "system": "linux" },
+        { "machine": "x86_64", "system": "linux" }
+      ],
+      "runner": "ubuntu-24.04",
+      "triple": "x86_64-unknown-linux-gnu"
+    },
+    {
+      "asset_ext": "",
+      "binary": "tovuk",
+      "libc": "glibc",
+      "node": { "arch": "arm64", "platform": "linux" },
+      "python": [
+        { "machine": "aarch64", "system": "linux" },
+        { "machine": "arm64", "system": "linux" }
+      ],
+      "runner": "ubuntu-24.04",
+      "triple": "aarch64-unknown-linux-gnu"
+    },
+    {
+      "asset_ext": "",
+      "binary": "tovuk",
+      "node": { "arch": "arm64", "platform": "darwin" },
+      "python": [
+        { "machine": "aarch64", "system": "darwin" },
+        { "machine": "arm64", "system": "darwin" }
+      ],
+      "runner": "macos-15",
+      "triple": "aarch64-apple-darwin"
+    },
+    {
+      "asset_ext": "",
+      "binary": "tovuk",
+      "node": { "arch": "x64", "platform": "darwin" },
+      "python": [
+        { "machine": "amd64", "system": "darwin" },
+        { "machine": "x86_64", "system": "darwin" }
+      ],
+      "runner": "macos-15-intel",
+      "triple": "x86_64-apple-darwin"
+    },
+    {
+      "asset_ext": ".exe",
+      "binary": "tovuk.exe",
+      "node": { "arch": "x64", "platform": "win32" },
+      "python": [
+        { "machine": "amd64", "system": "windows" },
+        { "machine": "x86_64", "system": "windows" }
+      ],
+      "runner": "windows-2025",
+      "triple": "x86_64-pc-windows-msvc"
+    }
+  ]
+}

@@ -112,7 +112,7 @@ pub(super) trait TokenKeychain {
     /// Reads a non-empty stored session token.
     fn read(self) -> Option<String>;
 
-    /// Writes a session token, reporting whether secure storage succeeded.
+    /// Writes a session token and indicates whether secure storage succeeded.
     fn write(self, token: &str) -> bool;
 }
 

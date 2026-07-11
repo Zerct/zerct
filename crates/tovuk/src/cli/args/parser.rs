@@ -146,7 +146,7 @@ impl TryFrom<&[String]> for CliOptions {
 
 /// Describes when one value-bearing flag is valid.
 struct FlagPolicy {
-    /// Predicate reporting whether the flag was supplied.
+    /// Predicate that returns whether the flag was supplied.
     is_used: FlagUsagePredicate,
     /// Public spelling of the flag.
     name: &'static str,

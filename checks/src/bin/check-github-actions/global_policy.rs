@@ -10,6 +10,30 @@ use super::{
 /// Full-check source requirements enforced for every local and CI run.
 const CHECK_ALL_SOURCE_REQUIREMENTS: &[PolicyRequirement] = &[
     (
+        "actionlint",
+        "Rust check-all must run the GitHub Actions syntax checker",
+    ),
+    (
+        "CARGO_AUDIT_LOCKFILES",
+        "Rust check-all must audit every public Cargo lockfile",
+    ),
+    (
+        "cargo-machete",
+        "Rust check-all must reject unused Rust dependencies",
+    ),
+    (
+        "check-dependency-policy",
+        "Rust check-all must run the Rust dependency policy checker",
+    ),
+    (
+        "check-package-artifacts",
+        "Rust check-all must validate exact publishable package archives",
+    ),
+    (
+        "check-openapi",
+        "Rust check-all must validate the public OpenAPI contract",
+    ),
+    (
         "check-prose-style\", &[\"--self-test\"]",
         "Rust check-all must run the prose style checker self-test",
     ),
@@ -29,6 +53,60 @@ const CHECK_ALL_SOURCE_REQUIREMENTS: &[PolicyRequirement] = &[
         "packages/tovuk-py/tests",
         "Rust check-all must run the Python unit-test suite",
     ),
+    (
+        "build==1.5.1",
+        "Rust check-all must build Python artifacts with the pinned frontend",
+    ),
+    (
+        "mint@4.2.578",
+        "Rust check-all must run the pinned Mintlify documentation gates",
+    ),
+    (
+        "MINTLIFY_TELEMETRY_DISABLED",
+        "Rust check-all must disable Mintlify telemetry",
+    ),
+    (
+        "--package=node@24.18.0",
+        "Rust check-all must run Mintlify with the pinned supported Node runtime",
+    ),
+    (
+        "zizmor",
+        "Rust check-all must run the GitHub Actions security checker",
+    ),
+    (
+        "--no-index",
+        "Rust check-all must smoke-test built package artifacts without registry access",
+    ),
+];
+
+/// CI path filters that must be identical for pull requests and main pushes.
+const CI_PATH_FILTERS: &[&str] = &[
+    ".cargo/**",
+    ".editorconfig",
+    ".gitattributes",
+    ".githooks/**",
+    ".github/**",
+    ".gitignore",
+    ".oxlintrc.json",
+    ".prettierrc.json",
+    ".typos.toml",
+    ".vacuum.yaml",
+    "AGENTS.md",
+    "checks/**",
+    "clippy.toml",
+    "crates/tovuk/**",
+    "dependency-feature-policy.json",
+    "deny.toml",
+    "deny*.toml",
+    "docs/**",
+    "Formula/**",
+    "native-release-targets.json",
+    "packages/**",
+    "README.md",
+    "rust-toolchain.toml",
+    "rustfmt.toml",
+    "skills/**",
+    "vendor/**",
 ];
 
 /// npm package requirements that the canonical Rust check delegates to.
@@ -48,7 +126,11 @@ const NPM_CHECK_REQUIREMENTS: &[PolicyRequirement] = &[
 ];
 
 /// Compile-time references preserve the named helper boundary.
-const _: [usize; 0x0001] = [size_of_val(&require_node_before_check_all)];
+const _: [usize; 0x0003] = [
+    size_of_val(&require_ci_path_filter_occurrences),
+    size_of_val(&require_node_before_check_all),
+    size_of_val(&read_check_all_sources),
+];
 
 impl GlobalPolicy for HostedActionsCheck {
     fn line_uses_blacksmith(&self, line: &str) -> bool {
@@ -135,10 +217,7 @@ impl GlobalPolicy for HostedActionsCheck {
         workflows: &[Workflow],
         findings: &mut Vec<String>,
     ) -> CheckResult {
-        let check_all = check_try!(
-            read_file_to_string("checks/src/bin/check-all.rs")
-                .map_err(|error| format!("read checks/src/bin/check-all.rs: {error}"))
-        );
+        let check_all = check_try!(read_check_all_sources());
         let npm_package = check_try!(
             read_file_to_string("packages/tovuk/package.json")
                 .map_err(|error| format!("read packages/tovuk/package.json: {error}"))
@@ -174,33 +253,16 @@ impl GlobalPolicy for HostedActionsCheck {
             findings.push("missing .github/workflows/ci.yml".to_owned());
             return;
         };
-        for path in [
-            ".gitignore",
-            ".oxlintrc.json",
-            ".prettierrc.json",
-            ".typos.toml",
-            ".vacuum.yaml",
-            "AGENTS.md",
-            "checks/**",
-            "crates/tovuk/**",
-            "deny.toml",
-            "native-release-targets.json",
-        ] {
-            require_contains(
-                ci_workflow.contents.as_str(),
-                format!("- \"{path}\"").as_str(),
-                format!(
-                    "{}: CI path filters must include {path}",
-                    ci_workflow.path.display()
-                )
-                .as_str(),
-                findings,
-            );
+        for path in CI_PATH_FILTERS {
+            require_ci_path_filter_occurrences(ci_workflow, path, findings);
         }
     }
 
     fn run_actionlint(&self, findings: &mut Vec<String>) {
-        match Command::new("actionlint").arg("-color").status() {
+        match Command::new("actionlint")
+            .args(["-config-file", ".github/actionlint.yaml", "-color"])
+            .status()
+        {
             Ok(status) if status.success() => {}
             Ok(status) => findings.push(format!("actionlint failed with status {status}")),
             Err(error) => findings.push(format!(
@@ -209,6 +271,38 @@ impl GlobalPolicy for HostedActionsCheck {
         }
     }
 }
+/// Read the root runner and its isolated package artifact implementation.
+///
+/// # Errors
+///
+/// Returns an error when either canonical source cannot be read.
+fn read_check_all_sources() -> CheckResult<String> {
+    let mut corpus = String::new();
+    for path in [
+        "checks/src/bin/check-all.rs",
+        "checks/src/bin/check-all/package_artifacts.rs",
+    ] {
+        let source = check_try!(
+            read_file_to_string(path).map_err(|error| return format!("read {path}: {error}"))
+        );
+        corpus.push_str(source.as_str());
+        corpus.push('\n');
+    }
+    return Ok(corpus);
+}
+
+/// Require one CI path filter in both the pull-request and push lists.
+fn require_ci_path_filter_occurrences(workflow: &Workflow, path: &str, findings: &mut Vec<String>) {
+    let filter = format!("- \"{path}\"");
+    let occurrences = workflow.contents.matches(filter.as_str()).count();
+    if occurrences != 0x2 {
+        findings.push(format!(
+            "{}: CI pull-request and push path filters must each include {path}; found {occurrences} copies",
+            workflow.path.display()
+        ));
+    }
+}
+
 /// Require a pinned Node runtime before every full repository check.
 fn require_node_before_check_all(workflows: &[Workflow], findings: &mut Vec<String>) {
     let check_command =

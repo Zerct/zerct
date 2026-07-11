@@ -89,6 +89,6 @@ jobs:
       - name: Check GitHub Actions policy
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-github-actions --
       - name: Lint GitHub Actions
-        run: actionlint -color
+        run: actionlint -config-file .github/actionlint.yaml -color
       - name: Run full repository check
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --

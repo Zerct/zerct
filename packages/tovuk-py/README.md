@@ -53,4 +53,5 @@ Homebrew uses the main public repository tap:
 ```sh
 brew tap tovuk/tovuk https://github.com/tovuk/tovuk
 brew install tovuk
+cargo install --locked tovuk
 ```

@@ -35,9 +35,9 @@ runs:
           --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
           https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
           --output "$actionlint_archive"
-        printf '%s  %s\n' \
-          8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 \
-          "$actionlint_archive" | sha256sum --check --strict
+        cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+          --bin native-release-tool -- verify-sha256 "$actionlint_archive" \
+          8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
         tar -xzf "$actionlint_archive" -C "$bin_dir" actionlint
 
         shellcheck_archive="$archive_dir/shellcheck.tar.gz"
@@ -45,9 +45,9 @@ runs:
           --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
           https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.gz \
           --output "$shellcheck_archive"
-        printf '%s  %s\n' \
-          b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6 \
-          "$shellcheck_archive" | sha256sum --check --strict
+        cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+          --bin native-release-tool -- verify-sha256 "$shellcheck_archive" \
+          b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6
         tar -xzf "$shellcheck_archive" --strip-components=1 -C "$bin_dir" \
           shellcheck-v0.11.0/shellcheck
 
@@ -56,9 +56,9 @@ runs:
           --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
           https://github.com/mvdan/sh/releases/download/v3.13.1/shfmt_v3.13.1_linux_amd64 \
           --output "$shfmt_binary"
-        printf '%s  %s\n' \
-          fb096c5d1ac6beabbdbaa2874d025badb03ee07929f0c9ff67563ce8c75398b1 \
-          "$shfmt_binary" | sha256sum --check --strict
+        cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+          --bin native-release-tool -- verify-sha256 "$shfmt_binary" \
+          fb096c5d1ac6beabbdbaa2874d025badb03ee07929f0c9ff67563ce8c75398b1
         chmod 0755 "$bin_dir/actionlint" "$bin_dir/shellcheck" "$shfmt_binary"
         for binary in actionlint shellcheck shfmt; do
           sudo install -m 0755 "$bin_dir/$binary" "/usr/local/bin/$binary"

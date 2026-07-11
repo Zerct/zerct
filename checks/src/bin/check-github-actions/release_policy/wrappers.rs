@@ -1,6 +1,29 @@
 //! Language wrapper release workflow policy.
 
-use crate::{HostedActionsCheck, Workflow, WrapperReleasePolicy, reject_lines, require_contains};
+use crate::{
+    HostedActionsCheck, PolicyRequirement, Workflow, WrapperReleasePolicy, reject_lines,
+    require_contains,
+};
+
+/// Wrapper workflow snippets rejected by the orchestrated release contract.
+const REJECTED_WRAPPER_SNIPPETS: &[PolicyRequirement] = &[
+    (
+        "method=skip",
+        "package publish workflows must fail closed instead of silently skipping publish auth",
+    ),
+    (
+        "workflow_run:",
+        "package publish must use workflow_call instead of workflow_run",
+    ),
+    (
+        "workflow_dispatch:",
+        "package publication must not bypass the orchestrated native release gate",
+    ),
+    (
+        "github.actor ==",
+        "package publishing must use public environment and branch protections instead of a private actor allowlist",
+    ),
+];
 
 /// Compile-time references preserve the named helper boundary.
 const _: [usize; 0x0001] = [size_of_val(&require_python_release_toolchain)];
@@ -20,12 +43,9 @@ impl WrapperReleasePolicy for HostedActionsCheck {
     }
 
     fn check_wrapper_release_base(&self, workflow: &Workflow, findings: &mut Vec<String>) {
-        reject_lines(
-            workflow,
-            "method=skip",
-            "package publish workflows must fail closed instead of silently skipping publish auth",
-            findings,
-        );
+        for &(needle, message) in REJECTED_WRAPPER_SNIPPETS {
+            reject_lines(workflow, needle, message, findings);
+        }
         for (needle, message) in [
             (
                 "workflow_call:",
@@ -43,24 +63,6 @@ impl WrapperReleasePolicy for HostedActionsCheck {
                 findings,
             );
         }
-        reject_lines(
-            workflow,
-            "workflow_run:",
-            "package publish must use workflow_call instead of workflow_run",
-            findings,
-        );
-        reject_lines(
-            workflow,
-            "workflow_dispatch:",
-            "package publication must not bypass the orchestrated native release gate",
-            findings,
-        );
-        reject_lines(
-            workflow,
-            "github.actor ==",
-            "package publishing must use public environment and branch protections instead of a private actor allowlist",
-            findings,
-        );
     }
 
     fn check_wrapper_release_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>) {
@@ -103,6 +105,10 @@ fn require_python_release_toolchain(workflow: &Workflow, findings: &mut Vec<Stri
             "PyPI packaging must use the pinned build frontend",
         ),
         (
+            "pyproject-build --installer uv",
+            "PyPI packaging must build artifacts through pinned Rust-based uv isolation",
+        ),
+        (
             "ruff==0.15.21",
             "PyPI packaging must run the pinned Ruff quality gate",
         ),
@@ -122,4 +128,10 @@ fn require_python_release_toolchain(workflow: &Workflow, findings: &mut Vec<Stri
             findings,
         );
     }
+    reject_lines(
+        workflow,
+        "python -m pip install",
+        "PyPI packaging must not bootstrap release tooling through mutable pip state",
+        findings,
+    );
 }
