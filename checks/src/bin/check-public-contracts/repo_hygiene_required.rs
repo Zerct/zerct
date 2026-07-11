@@ -4,9 +4,6 @@ use crate::{helpers::CheckResult, repo_hygiene_git::git_status_success};
 
 use std::path::Path;
 
-/// Every Rust source module in the public checker crate is pinned below.
-const CHECKS_SOURCE_DIR: &str = "checks/src/";
-
 /// Contract value named `REQUIRED_IGNORED_PATHS`.
 const REQUIRED_IGNORED_PATHS: &[&str] = &[
     ".aws/credentials",
@@ -29,9 +26,12 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
     "config.secret",
     "crates/tovuk/.cargo/credentials",
     "crates/tovuk/.cargo/credentials.toml",
+    "crates/tovuk/coverage/index.html",
     "crates/tovuk/target/example",
+    "crates/tovuk/vendor/example/Cargo.toml",
     "debug.sqlite3",
     "docs/.mintlify/example",
+    "docs/README.md",
     "example.auto.tfvars",
     "example.tfstate.backup",
     "example.tfvars",
@@ -42,6 +42,7 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
     "package.zip",
     "packages/tovuk-py/build/example",
     "packages/tovuk-py/dist/example",
+    "packages/tovuk-py/src/tovuk.egg-info/PKG-INFO",
     "packages/tovuk/.cache/example",
     "packages/tovuk/dist/example",
     "packages/tovuk/node_modules/example",
@@ -52,6 +53,7 @@ const REQUIRED_IGNORED_PATHS: &[&str] = &[
 const REQUIRED_TRACKED_PATHS: &[&str] = &[
     ".cargo/config.toml",
     ".editorconfig",
+    ".gitattributes",
     ".githooks/pre-commit",
     ".githooks/pre-push",
     ".github/actions/setup-quality-tools/action.yml",
@@ -177,6 +179,8 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-public-contracts/repo_hygiene_paths_tests/verification.rs",
     "checks/src/bin/check-public-contracts/repo_hygiene_required.rs",
     "checks/src/bin/check-public-contracts/repo_hygiene_text.rs",
+    "checks/src/bin/check-public-contracts/repo_hygiene_text_tests/verification.rs",
+    "checks/src/bin/check-public-contracts/repo_hygiene_tracked.rs",
     "checks/src/bin/check-public-contracts/retired_contracts.rs",
     "checks/src/bin/check-public-contracts/runtime_cli.rs",
     "checks/src/bin/check-public-contracts/script_contracts.rs",
@@ -186,9 +190,50 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "crates/tovuk/Cargo.lock",
     "crates/tovuk/Cargo.toml",
     "crates/tovuk/LICENSE",
+    "crates/tovuk/src/cli/api_commands/account.rs",
+    "crates/tovuk/src/cli/api_commands/account_tests.rs",
+    "crates/tovuk/src/cli/api_commands/api_keys.rs",
+    "crates/tovuk/src/cli/api_commands/api_keys_tests.rs",
+    "crates/tovuk/src/cli/api_commands/billing.rs",
+    "crates/tovuk/src/cli/api_commands/billing_tests.rs",
+    "crates/tovuk/src/cli/api_commands/common.rs",
+    "crates/tovuk/src/cli/api_commands/common_tests.rs",
+    "crates/tovuk/src/cli/api_commands/generic.rs",
+    "crates/tovuk/src/cli/api_commands/http.rs",
     "crates/tovuk/src/cli/api_commands/http/transport.rs",
     "crates/tovuk/src/cli/api_commands/http/url_policy.rs",
+    "crates/tovuk/src/cli/api_commands/http_tests.rs",
     "crates/tovuk/src/cli/api_commands/http_tests/server.rs",
+    "crates/tovuk/src/cli/api_commands/module_root.rs",
+    "crates/tovuk/src/cli/api_commands/scrapers.rs",
+    "crates/tovuk/src/cli/api_commands/scrapers_tests.rs",
+    "crates/tovuk/src/cli/api_commands/support.rs",
+    "crates/tovuk/src/cli/api_commands/support_tests.rs",
+    "crates/tovuk/src/cli/args/flags.rs",
+    "crates/tovuk/src/cli/args/module_root.rs",
+    "crates/tovuk/src/cli/args/parser.rs",
+    "crates/tovuk/src/cli/args/parser_tests.rs",
+    "crates/tovuk/src/cli/args/values.rs",
+    "crates/tovuk/src/cli/auth/auth_tests.rs",
+    "crates/tovuk/src/cli/auth/keychain.rs",
+    "crates/tovuk/src/cli/auth/module_root.rs",
+    "crates/tovuk/src/cli/auth/output.rs",
+    "crates/tovuk/src/cli/auth/output_tests.rs",
+    "crates/tovuk/src/cli/auth/payload.rs",
+    "crates/tovuk/src/cli/auth/payload_tests.rs",
+    "crates/tovuk/src/cli/auth/token_store.rs",
+    "crates/tovuk/src/cli/auth/token_store_tests.rs",
+    "crates/tovuk/src/cli/constants.rs",
+    "crates/tovuk/src/cli/errors.rs",
+    "crates/tovuk/src/cli/help.rs",
+    "crates/tovuk/src/cli/module_root.rs",
+    "crates/tovuk/src/cli/runtime.rs",
+    "crates/tovuk/src/cli/utils/browser.rs",
+    "crates/tovuk/src/cli/utils/fields.rs",
+    "crates/tovuk/src/cli/utils/module_root.rs",
+    "crates/tovuk/src/cli/utils/output.rs",
+    "crates/tovuk/src/cli/utils/output_tests.rs",
+    "crates/tovuk/src/cli/utils/url.rs",
     "crates/tovuk/src/main.rs",
     "docs/.mintignore",
     "docs/docs.json",
@@ -232,6 +277,9 @@ const REQUIRED_VISIBLE_PATHS: &[&str] = &[
     "packages/tovuk/.npmrc",
     "sdks/rust/src/lib.rs",
 ];
+
+/// Rust source trees whose tracked modules require explicit public review.
+const REVIEWED_RUST_SOURCE_DIRS: &[&str] = &["checks/src/", "crates/tovuk/src/"];
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0003] = [
@@ -283,10 +331,12 @@ pub(super) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
         ));
     }
 
-    let unpinned_checker_modules = tracked_set
+    let unpinned_rust_modules = tracked_set
         .iter()
         .filter(|path| {
-            return path.starts_with(CHECKS_SOURCE_DIR)
+            return REVIEWED_RUST_SOURCE_DIRS
+                .iter()
+                .any(|source_dir| return path.starts_with(source_dir))
                 && Path::new(path)
                     .extension()
                     .is_some_and(|extension| return extension.eq_ignore_ascii_case("rs"))
@@ -294,10 +344,10 @@ pub(super) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
         })
         .cloned()
         .collect::<Vec<_>>();
-    if !unpinned_checker_modules.is_empty() {
+    if !unpinned_rust_modules.is_empty() {
         return Err(format!(
-            "These public checker modules must be added to REQUIRED_TRACKED_PATHS:\n{}",
-            unpinned_checker_modules.join("\n")
+            "These public Rust modules must be added to REQUIRED_TRACKED_PATHS:\n{}",
+            unpinned_rust_modules.join("\n")
         ));
     }
 

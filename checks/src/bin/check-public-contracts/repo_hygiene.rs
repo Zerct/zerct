@@ -21,6 +21,11 @@ use crate::repo_hygiene_text::{
     line_contains_private_repository_marker, line_contains_retired_npm_runner_guidance,
 };
 
+use crate::repo_hygiene_tracked::{
+    reject_invalid_tracked_text_files, reject_tracked_secret_signatures,
+    reject_unapproved_public_surface_paths,
+};
+
 use crate::script_contracts;
 
 use std::path::Path;
@@ -37,7 +42,7 @@ const ALLOWED_EXECUTABLE_PATHS: &[&str] = &[
 const MAX_SOURCE_FILE_LINES: usize = 500;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0010] = [
+const _: [usize; 0x0011] = [
     size_of_val(&check),
     size_of_val(&check_repository_contracts),
     size_of_val(&check_tracked_files),
@@ -54,6 +59,7 @@ const _: [usize; 0x0010] = [
     size_of_val(&require_docs_deploy_observability_contract),
     size_of_val(&require_docs_deploy_observability_checker),
     size_of_val(&require_docs_deploy_observability_gated_api),
+    size_of_val(&require_repository_attributes),
 ];
 
 /// Predicate used by tracked-text hygiene scans.
@@ -91,7 +97,8 @@ fn check_repository_contracts(tracked_files: &[String]) -> CheckResult {
     check_try!(agent_guidance::check_policy(tracked_files));
     check_try!(native_release_targets::check());
     check_try!(script_contracts::check());
-    return require_docs_deploy_observability_contract();
+    check_try!(require_docs_deploy_observability_contract());
+    return require_repository_attributes();
 }
 
 /// Check every tracked file and Git index mode against public policy.
@@ -100,11 +107,14 @@ fn check_repository_contracts(tracked_files: &[String]) -> CheckResult {
 ///
 /// Returns an error when tracked content or index metadata violates policy.
 fn check_tracked_files(tracked_files: &[String]) -> CheckResult {
+    check_try!(reject_forbidden_tracked_files(tracked_files));
+    check_try!(reject_unapproved_public_surface_paths(tracked_files));
+    check_try!(reject_invalid_tracked_text_files(tracked_files));
+    check_try!(reject_tracked_secret_signatures(tracked_files));
     check_try!(reject_private_repository_markers(tracked_files));
     check_try!(reject_retired_npx_guidance(tracked_files));
     check_try!(reject_tracked_go_files(tracked_files));
     check_try!(reject_oversized_source_files(tracked_files));
-    check_try!(reject_forbidden_tracked_files(tracked_files));
     return reject_unexpected_git_modes();
 }
 
@@ -446,4 +456,16 @@ fn require_docs_deploy_observability_gated_api(checker: &str, workflow: &str) ->
         }
     }
     return Ok(());
+}
+
+/// Require deterministic Git line-ending normalization for public text.
+///
+/// # Errors
+///
+/// Returns an error when repository attributes do not force LF text checkouts.
+fn require_repository_attributes() -> CheckResult {
+    let attributes = check_try!(read_text(".gitattributes"));
+    return (attributes == "* text=auto eol=lf\n")
+        .then_some(())
+        .ok_or_else(|| return ".gitattributes must contain only * text=auto eol=lf".to_owned());
 }

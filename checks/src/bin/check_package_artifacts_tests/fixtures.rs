@@ -352,7 +352,6 @@ fn write_sdist(path: &Path, version: &str) -> CheckResult {
         format!("[project]\nname = \"tovuk\"\nversion = \"{version}\"\nlicense = \"MIT\"\n");
     let init = format!("__version__ = \"{version}\"\n");
     let entries = vec![
-        text_entry(format!("{root}/.gitignore").as_str(), "dist/\n"),
         text_entry(format!("{root}/LICENSE").as_str(), LICENSE),
         text_entry(format!("{root}/PKG-INFO").as_str(), metadata.as_str()),
         text_entry(format!("{root}/README.md").as_str(), "# Tovuk\n"),
@@ -445,7 +444,7 @@ fn write_wheel(path: &Path, version: &str) -> CheckResult {
         text_entry(format!("{information}/RECORD").as_str(), record.as_str()),
         text_entry(
             format!("{information}/WHEEL").as_str(),
-            "Wheel-Version: 1.0\nGenerator: hatchling 1.31.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
+            "Wheel-Version: 1.0\nGenerator: uv 0.11.28\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
         ),
         text_entry(
             format!("{information}/entry_points.txt").as_str(),

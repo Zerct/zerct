@@ -1,6 +1,26 @@
 use crate::repo_hygiene_text::line_contains_private_repository_marker;
 
-use super::is_forbidden_tracked_path;
+use super::{is_allowed_public_surface_path, is_forbidden_tracked_path};
+
+/// Verify reviewed root files and product directories remain on the public surface.
+///
+/// # Panics
+///
+/// Panics when an established public path is rejected.
+#[test]
+fn allows_public_repository_surface_paths() {
+    for path in [
+        ".gitattributes",
+        "AGENTS.md",
+        "checks/src/lib.rs",
+        "crates/tovuk/src/main.rs",
+        "docs/index.mdx",
+        "packages/tovuk/package.json",
+        "skills/tovuk/SKILL.md",
+    ] {
+        assert!(is_allowed_public_surface_path(path), "{path}");
+    }
+}
 
 /// Verify public source and package-control paths remain eligible for tracking.
 ///
@@ -51,6 +71,8 @@ fn rejects_forced_generated_local_files() {
         "bin/tool.exe",
         "docs/.DS_Store",
         "docs/fonts/example.woff2",
+        "nested/coverage/index.html",
+        "nested/python/example.egg-info/PKG-INFO",
         "debug.log",
         "DEBUG.LOG",
         "package.crate",
@@ -59,6 +81,7 @@ fn rejects_forced_generated_local_files() {
         "packages/tovuk/dist/tovuk",
         "target/libexample.dylib",
         "target/object.o",
+        "crates/tovuk/vendor/example/src/lib.rs",
         "vendor/example/src/lib.rs",
     ] {
         assert!(is_forbidden_tracked_path(path), "{path}");
@@ -78,6 +101,7 @@ fn rejects_forced_local_agent_guidance() {
         "CLAUDE.md",
         "GEMINI.md",
         "PUBLISHING.md",
+        "docs/README.md",
         "npm-support-request.md",
     ] {
         assert!(is_forbidden_tracked_path(path), "{path}");
@@ -126,5 +150,22 @@ fn rejects_private_repository_paths() {
             line_contains_private_repository_marker(source.as_str()),
             "{source}"
         );
+    }
+}
+
+/// Verify unreviewed root files and top-level directories cannot expand the public surface.
+///
+/// # Panics
+///
+/// Panics when an arbitrary report or implementation tree is accepted.
+#[test]
+fn rejects_unapproved_public_surface_paths() {
+    for path in [
+        "AUDIT_NOTES.md",
+        "examples/private-shape/README.md",
+        "internal/config.json",
+        "scripts/release.sh",
+    ] {
+        assert!(!is_allowed_public_surface_path(path), "{path}");
     }
 }

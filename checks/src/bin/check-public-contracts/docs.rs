@@ -1,6 +1,9 @@
 use crate::{
     docs_api_contract::require_support_pricing_and_openapi,
-    docs_navigation::{require_navigation_contract, require_navigation_pages_exist},
+    docs_navigation::{
+        require_navigation_contract, require_navigation_is_exhaustive,
+        require_navigation_pages_exist,
+    },
     docs_sources::{DocsSources, openapi_config_path, read_navigation_pages},
     helpers::{
         CheckResult, OutputChannel, read_json, read_text, reject_contains, require_contains,
@@ -57,6 +60,7 @@ const _: [usize; 0x0009] = [
 pub(super) fn check() -> CheckResult {
     let pages = check_try!(read_navigation_pages());
     check_try!(require_navigation_pages_exist(&pages));
+    check_try!(require_navigation_is_exhaustive(&pages));
     check_try!(require_mintlify_exclusions());
     let sources = check_try!(DocsSources::load(&pages));
     check_try!(require_navigation_contract(&sources));

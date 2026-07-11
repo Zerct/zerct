@@ -1,7 +1,7 @@
 # Rust and Cargo.
 target/
 .cargo-home/
-/vendor/
+vendor/
 **/.cargo/credentials
 **/.cargo/credentials.toml
 
@@ -40,7 +40,7 @@ __pycache__/
 .coverage
 coverage.xml
 htmlcov/
-/coverage/
+coverage/
 .hypothesis/
 *.profraw
 *.profdata

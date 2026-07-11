@@ -10,7 +10,7 @@ use std::{
 
 use super::{
     CHECKS_MANIFEST, CheckResult, command, display_path, find_command, git_tracked_files,
-    repo_root, run_status, tool_path,
+    reject_secret_signatures, repo_root, run_status, tool_path,
 };
 
 /// Paths created for the command-precedence regression test.
@@ -172,6 +172,24 @@ fn repository_helpers_verify_repeatability() -> CheckResult {
         return Err("find_command returned an unreadable path".to_owned());
     }
     return Ok(());
+}
+
+/// Verify shared public-byte scanning rejects reconstructed credentials without false positives.
+///
+/// # Errors
+///
+/// Returns an error when a credential is accepted or ordinary text is rejected.
+#[test]
+fn secret_signature_scanning_rejects_credentials() -> CheckResult {
+    check_try!(reject_secret_signatures(
+        "ordinary fixture",
+        b"public documentation without credentials\n",
+    ));
+    let token = ["gh", "p_examplecredential"].concat();
+    return reject_secret_signatures("secret fixture", token.as_bytes())
+        .is_err()
+        .then_some(())
+        .ok_or_else(|| return "shared secret scanner accepted a credential".to_owned());
 }
 
 /// Create one regular command-candidate fixture file.
