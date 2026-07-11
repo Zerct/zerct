@@ -28,6 +28,12 @@ pub(super) struct DocsJson {
     pub api: DocsApi,
     /// Contract data stored in `navigation`.
     pub navigation: DocsNavigation,
+    #[serde(default)]
+    /// Contract data stored in `redirects`.
+    pub redirects: Vec<DocsRedirect>,
+    #[serde(default)]
+    /// Contract data stored in `seo`.
+    pub seo: DocsSeo,
 }
 
 #[derive(Debug, Deserialize)]
@@ -36,6 +42,25 @@ pub(super) struct DocsNavigation {
     #[serde(default)]
     /// Contract data stored in `tabs`.
     pub tabs: Vec<DocsTab>,
+}
+
+#[derive(Debug, Deserialize)]
+/// Contract representation for `DocsRedirect`.
+pub(super) struct DocsRedirect {
+    #[serde(default)]
+    /// Contract data stored in `destination`.
+    pub destination: String,
+    #[serde(default)]
+    /// Contract data stored in `source`.
+    pub source: String,
+}
+
+#[derive(Debug, Default, Deserialize)]
+/// Contract representation for `DocsSeo`.
+pub(super) struct DocsSeo {
+    #[serde(default)]
+    /// Contract data stored in `indexing`.
+    pub indexing: String,
 }
 
 #[derive(Debug, Deserialize)]

@@ -123,8 +123,14 @@
   "metadata": {
     "timestamp": true
   },
+  "redirects": [
+    {
+      "source": "/fonts/PROVENANCE",
+      "destination": "/changelog"
+    }
+  ],
   "seo": {
-    "indexing": "all",
+    "indexing": "navigable",
     "metatags": {
       "canonical": "https://docs.tovuk.com"
     }
