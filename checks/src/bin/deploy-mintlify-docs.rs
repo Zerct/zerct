@@ -64,7 +64,7 @@ const DEFAULT_DOCS_PUBLIC_URL: &str = "https://docs.tovuk.com";
 const DEFAULT_SYNC_WAIT_SECONDS: &str = "30";
 
 /// Largest accepted initial Mintlify propagation wait.
-const MAX_SYNC_WAIT_SECONDS: u64 = 0x012c;
+const MAX_SYNC_WAIT_SECONDS: u64 = 0x0078;
 
 const _: [usize; 0x6] = [
     size_of_val(&configure_docs_cache_identity),

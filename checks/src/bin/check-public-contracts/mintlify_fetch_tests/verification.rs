@@ -1,9 +1,15 @@
 use super::{
-    DocsCacheIdentity, ResponseConstraints, bounded_response_text, render_cache_path,
-    validate_check_id, validate_revision,
+    DocsCacheIdentity, FetchContext, FetchPolicy, ResponseConstraints, bounded_response_text,
+    fetch_text_once, render_cache_path, validate_check_id, validate_revision,
 };
 
+use core::time::Duration;
+
 use http::StatusCode;
+
+use std::time::Instant;
+
+use tovuk_public_checks::http_transport::Client;
 
 /// Verify declared and chunked public docs bodies obey the hard ceiling.
 ///
@@ -40,6 +46,31 @@ fn enforces_declared_and_streamed_response_limits() {
     assert!(
         chunked_error.is_err(),
         "an oversized chunked body must fail at the streaming ceiling"
+    );
+}
+
+/// Verify no request can begin after the shared public readiness deadline.
+///
+/// # Panics
+///
+/// Panics when an expired readiness context reaches the network.
+#[test]
+fn rejects_requests_after_shared_deadline() {
+    let client_result = Client::build(
+        Duration::from_secs(0x01),
+        Duration::from_secs(0x01),
+        0x01,
+        "Tovuk deadline verification",
+    );
+    assert!(client_result.is_ok(), "the bounded client must build");
+    let Some(client) = client_result.ok() else {
+        return;
+    };
+    let policy = FetchPolicy::new(0, Duration::ZERO, None, Instant::now());
+    let context = FetchContext::new("https://docs.tovuk.com".to_owned(), client, policy);
+    assert_eq!(
+        fetch_text_once(&context, "/", &[]),
+        Err("public docs readiness exceeded its shared wall-clock deadline".to_owned())
     );
 }
 

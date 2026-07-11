@@ -61,10 +61,10 @@ pub(super) fn check_mcp_discovery(context: &FetchContext) -> CheckResult {
 /// # Errors
 ///
 /// Returns an error when the contract requirement cannot be verified.
-fn fetch_and_validate(
+fn fetch_and_validate<'headers>(
     context: &FetchContext,
     path: &str,
-    headers: &RequestHeaders,
+    headers: &'headers RequestHeaders<'headers>,
     validate: McpValidator,
 ) -> CheckResult<String> {
     let text = check_try!(fetch_text_once(context, path, headers));

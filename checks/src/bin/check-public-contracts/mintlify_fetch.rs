@@ -73,9 +73,9 @@ impl FetchContext {
             .is_some_and(|next_attempt| return next_attempt < self.policy.deadline);
     }
 
-    /// Return the exact deployment revision expected from the hosting provider.
+    /// Return the current commit revision used to resolve the deployed docs ancestor.
     #[inline]
-    pub(super) fn deployment_revision(&self) -> Option<&str> {
+    pub(super) fn commit_revision(&self) -> Option<&str> {
         return self.policy.cache_identity.as_ref().map(AsRef::as_ref);
     }
 
@@ -171,7 +171,7 @@ impl FetchPolicy {
 type FetchResult<T> = Result<T, FetchError>;
 
 /// HTTP request headers used by Mintlify checks.
-pub(super) type RequestHeaders = [(&'static str, &'static str)];
+pub(super) type RequestHeaders<'headers> = [(&'headers str, &'headers str)];
 
 /// Limits and diagnostics associated with one response body.
 #[derive(Debug)]
@@ -280,10 +280,10 @@ fn bounded_validate_response_limit_error(constraints: &ResponseConstraints) -> F
 /// # Errors
 ///
 /// Returns an error when the contract requirement cannot be verified.
-pub(super) fn fetch_text(
+pub(super) fn fetch_text<'headers>(
     context: &FetchContext,
     path: &str,
-    headers: &RequestHeaders,
+    headers: &'headers RequestHeaders<'headers>,
 ) -> CheckResult<String> {
     return fetch_text_once(context, path, headers);
 }
@@ -293,11 +293,11 @@ pub(super) fn fetch_text(
 /// # Errors
 ///
 /// Returns an error when the request fails or its response violates the bounded body contract.
-pub(super) fn fetch_text_from_base(
+pub(super) fn fetch_text_from_base<'headers>(
     context: &FetchContext,
     base_url: &str,
     path: &str,
-    headers: &RequestHeaders,
+    headers: &'headers RequestHeaders<'headers>,
 ) -> CheckResult<String> {
     let url = format!("{base_url}{path}");
     return request_url(context, url.as_str(), path, headers).map_err(|error| return error.message);
@@ -308,10 +308,10 @@ pub(super) fn fetch_text_from_base(
 /// # Errors
 ///
 /// Returns an error when the request fails or its response violates the bounded body contract.
-pub(super) fn fetch_text_once(
+pub(super) fn fetch_text_once<'headers>(
     context: &FetchContext,
     path: &str,
-    headers: &RequestHeaders,
+    headers: &'headers RequestHeaders<'headers>,
 ) -> CheckResult<String> {
     return request_text(context, path, headers).map_err(|error| return error.message);
 }
@@ -331,10 +331,10 @@ pub(super) fn normalize_target_url(target: &str) -> String {
 /// # Errors
 ///
 /// Returns an error when the contract requirement cannot be verified.
-pub(super) fn request_text(
+pub(super) fn request_text<'headers>(
     context: &FetchContext,
     path: &str,
-    headers: &RequestHeaders,
+    headers: &'headers RequestHeaders<'headers>,
 ) -> Result<String, FetchError> {
     let request_path =
         render_cache_path(path, context.cache_identity(), context.readiness_attempt());
@@ -347,11 +347,11 @@ pub(super) fn request_text(
 /// # Errors
 ///
 /// Returns an error when the request fails or its response violates the bounded body contract.
-fn request_url(
+fn request_url<'headers>(
     context: &FetchContext,
     url: &str,
     path: &str,
-    headers: &RequestHeaders,
+    headers: &'headers RequestHeaders<'headers>,
 ) -> Result<String, FetchError> {
     check_try!(context.require_request_time());
     let response = check_try!(
@@ -368,7 +368,7 @@ fn request_url(
     }
     let content_length = response.content_length();
     let mut body = response.body();
-    return bounded_response_text(
+    let text = check_try!(bounded_response_text(
         &mut body,
         &ResponseConstraints {
             content_length,
@@ -376,7 +376,9 @@ fn request_url(
             path: path.to_owned(),
             status,
         },
-    );
+    ));
+    check_try!(context.require_request_time());
+    return Ok(text);
 }
 
 /// Contract implementation for `retry_delay`.

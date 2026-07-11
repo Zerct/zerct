@@ -313,6 +313,12 @@ fn require_docs_cache_identity_workflows() -> CheckResult {
         let workflow = check_try!(read_text(path));
         check_try!(require_contains(
             workflow.as_str(),
+            "GITHUB_TOKEN: ${{ github.token }}",
+            format!("{path} must authenticate deployment reads with the ephemeral workflow token")
+                .as_str(),
+        ));
+        check_try!(require_contains(
+            workflow.as_str(),
             "TOVUK_DOCS_CHECK_ID: ${{ github.run_id }}-${{ github.run_attempt }}",
             format!("{path} must use the unique workflow run as its docs cache identity").as_str(),
         ));
@@ -320,6 +326,11 @@ fn require_docs_cache_identity_workflows() -> CheckResult {
             workflow.as_str(),
             "TOVUK_DOCS_REVISION: ${{ github.sha }}",
             format!("{path} must use the immutable deployment revision in docs checks").as_str(),
+        ));
+        check_try!(require_contains(
+            workflow.as_str(),
+            "deployments: read",
+            format!("{path} must grant read-only deployment metadata access").as_str(),
         ));
     }
     return Ok(());
