@@ -58,7 +58,7 @@ impl WorkflowPolicy for HostedActionsCheck {
             && !self.uses_current_cache_action(workflow.contents.as_str())
         {
             findings.push(format!(
-                "{}: GitHub-hosted Rust jobs must use the current actions/cache@v5",
+                "{}: GitHub-hosted Rust jobs must use the current actions/cache@v6",
                 workflow.path.display()
             ));
         }
@@ -132,7 +132,7 @@ impl WorkflowPolicy for HostedActionsCheck {
         return contents.lines().any(|line| {
             let trimmed = line.trim();
             return trimmed.contains("uses: actions/cache@")
-                && (trimmed.contains("actions/cache@v5") || trimmed.contains("# v5"));
+                && (trimmed.contains("actions/cache@v6") || trimmed.contains("# v6"));
         });
     }
 }
@@ -185,6 +185,38 @@ mod tests {
             findings.len(),
             0x2,
             "CI path filters must not be able to bypass repository checks"
+        );
+    }
+
+    /// Verify that the current cache major is recognized from a pinned action.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the cache v6 marker is not accepted.
+    #[test]
+    fn current_cache_action_accepts_v6_pin() {
+        let contents =
+            "      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0\n";
+
+        assert!(
+            HostedActionsCheck.uses_current_cache_action(contents),
+            "the exact cache v6 pin must satisfy the current-major contract"
+        );
+    }
+
+    /// Verify that the former cache major no longer satisfies policy.
+    ///
+    /// # Panics
+    ///
+    /// Panics when a cache v5 marker is still accepted.
+    #[test]
+    fn current_cache_action_rejects_v5_pin() {
+        let contents =
+            "      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4\n";
+
+        assert!(
+            !HostedActionsCheck.uses_current_cache_action(contents),
+            "cache v5 must be treated as retired after the v6 release"
         );
     }
 }

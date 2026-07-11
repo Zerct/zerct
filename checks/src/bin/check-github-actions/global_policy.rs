@@ -199,13 +199,13 @@ impl GlobalPolicy for HostedActionsCheck {
             })
             .next()
             .unwrap_or_default();
-        let retired_pin = ["# v0", "# v1", "# v2", "# v3", "# v4"]
+        let retired_pin = ["# v0", "# v1", "# v2", "# v3", "# v4", "# v5"]
             .iter()
             .any(|marker| return line.trim_end().ends_with(marker));
         if retired_pin
             || matches!(
                 stable_major,
-                "main" | "master" | "v0" | "v1" | "v2" | "v3" | "v4"
+                "main" | "master" | "v0" | "v1" | "v2" | "v3" | "v4" | "v5"
             )
         {
             findings.push(format!(

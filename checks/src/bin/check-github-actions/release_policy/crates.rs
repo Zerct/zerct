@@ -16,7 +16,7 @@ const CRATE_PUBLISH_JOB: &str = "    name: publish tovuk to crates.io
       contents: read
       id-token: write # Required for crates.io Trusted Publishing.
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
           ref: ${{ github.sha }}
