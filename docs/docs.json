@@ -18,24 +18,6 @@
     "default": "dark",
     "strict": false
   },
-  "fonts": {
-    "family": "Geist",
-    "source": "/fonts/Geist.woff2",
-    "format": "woff2",
-    "weight": 450,
-    "heading": {
-      "family": "Geist",
-      "source": "/fonts/Geist.woff2",
-      "format": "woff2",
-      "weight": 650
-    },
-    "body": {
-      "family": "Geist",
-      "source": "/fonts/Geist.woff2",
-      "format": "woff2",
-      "weight": 450
-    }
-  },
   "icons": {
     "library": "lucide"
   },
