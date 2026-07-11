@@ -9,7 +9,7 @@ use hyper_util::{
     rt::TokioExecutor,
 };
 
-use rustls::crypto::aws_lc_rs::default_provider;
+use rustls::crypto::ring::default_provider;
 
 use tokio::runtime::{Builder as RuntimeBuilder, Runtime as TokioRuntime};
 

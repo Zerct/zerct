@@ -1,4 +1,4 @@
-//! Bounded synchronous HTTP over Hyper and Rustls with AWS-LC.
+//! Bounded synchronous HTTP over Hyper and Rustls with Ring.
 
 #[path = "http_transport/config.rs"]
 mod config;
@@ -104,7 +104,7 @@ impl Client {
     /// Fetch one response body through the configured deadline and byte ceiling.
     ///
     /// Plaintext HTTP is accepted only for literal loopback addresses and
-    /// `localhost`. HTTPS uses native roots, AWS-LC, and Rustls hostname
+    /// `localhost`. HTTPS uses native roots, Ring, and Rustls hostname
     /// verification.
     ///
     /// # Errors
@@ -259,7 +259,7 @@ impl Response {
     }
 }
 
-/// Hyper client whose connections are authenticated by Rustls with AWS-LC.
+/// Hyper client whose connections are authenticated by Rustls with Ring.
 type SecureClient = HyperClient<HttpsConnector<HttpConnector>, RequestBody>;
 
 /// Result returned by shared HTTP transport operations.

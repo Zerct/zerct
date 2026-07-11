@@ -298,10 +298,10 @@ hyper = { version = "1.10.1", default-features = false, features = [
   "http2",
 ] }
 hyper-rustls = { version = "0.27.9", default-features = false, features = [
-  "aws-lc-rs",
   "http1",
   "http2",
   "native-tokio",
+  "ring",
   "tls12",
 ] }
 hyper-util = { version = "0.1.20", default-features = false, features = [
@@ -311,7 +311,7 @@ hyper-util = { version = "0.1.20", default-features = false, features = [
   "tokio",
 ] }
 rustls = { version = "0.23.41", default-features = false, features = [
-  "aws-lc-rs",
+  "ring",
   "std",
   "tls12",
 ] }

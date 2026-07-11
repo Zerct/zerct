@@ -16,16 +16,7 @@ unused-ignored-advisory = "deny"
 yanked = "deny"
 
 [licenses]
-allow = [
-  "Apache-2.0",
-  "BSD-3-Clause",
-  "CC0-1.0",
-  "ISC",
-  "MIT",
-  "MIT-0",
-  "Unicode-3.0",
-  "Unlicense",
-]
+allow = ["Apache-2.0", "BSD-3-Clause", "ISC", "MIT", "Unicode-3.0", "Unlicense"]
 confidence-threshold = 0.8
 include-dev = true
 
@@ -38,8 +29,8 @@ workspace-default-features = "deny"
 external-default-features = "deny"
 allow = []
 deny = [
-  { crate = "openssl", reason = "Use Rustls with AWS-LC for public network TLS." },
-  { crate = "ring", reason = "Use AWS-LC for public TLS cryptography." },
+  { crate = "aws-lc-rs", reason = "Use Rustls with Ring for portable public TLS." },
+  { crate = "openssl", reason = "Use Rustls with Ring for public network TLS." },
 ]
 skip = []
 skip-tree = []

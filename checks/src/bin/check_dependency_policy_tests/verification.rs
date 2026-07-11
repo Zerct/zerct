@@ -424,12 +424,13 @@ fn rendered_feature_policy_is_exact() -> CheckResult {
         BTreeSet::from(["std".to_owned()]),
     )]);
     let rendered = check_try!(render_deny_config(repository.as_path(), &features));
-    let ring_ban = "{ crate = \"ring\", reason = \"Use AWS-LC for public TLS cryptography.\" }";
+    let aws_lc_ban =
+        "{ crate = \"aws-lc-rs\", reason = \"Use Rustls with Ring for portable public TLS.\" }";
     let exact_features = rendered.contains("exact = true") && !rendered.contains("exact = false");
-    if exact_features && rendered.contains(ring_ban) {
+    if exact_features && rendered.contains(aws_lc_ban) {
         return Ok(());
     }
-    return Err("feature policy must be exact and require the active AWS-LC provider".to_owned());
+    return Err("feature policy must be exact and require the active Ring provider".to_owned());
 }
 
 /// Require an exact ordered sequence of string values.
