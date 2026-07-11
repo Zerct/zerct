@@ -338,11 +338,17 @@ trait WorkflowPolicy {
     /// Require GitHub-hosted Cargo jobs to use the approved cache action.
     fn check_github_hosted_cargo_cache(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
-    /// Require publication recovery to verify one exact existing native release.
+    /// Require publication recovery to verify and dispatch one immutable release.
     fn check_publication_recovery_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
-    /// Require reusable release workflows to avoid caller concurrency groups.
-    fn check_reusable_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>);
+    /// Require registry preflight requests to retry bounded transient failures.
+    fn check_registry_preflight_retry(&self, workflow: &Workflow, findings: &mut Vec<String>);
+
+    /// Require each registry publisher to execute as its own trusted identity.
+    fn check_registry_publisher_identity(&self, workflow: &Workflow, findings: &mut Vec<String>);
+
+    /// Require registry release workflows to use distinct concurrency groups.
+    fn check_registry_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
     /// Require manually dispatched secret-bearing workflows to target main.
     fn check_secret_workflow_dispatch_policy(

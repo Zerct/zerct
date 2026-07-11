@@ -242,6 +242,8 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: write # Required to create the release and upload assets.
+    outputs:
+      release_ref: ${{ steps.metadata.outputs.tag }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -400,26 +402,89 @@ jobs:
           cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
             --bin check-native-release-assets -- "${RELEASE_TAG#v}"
 
-  publish-npm:
-    name: publish npm package
+  publish-packages:
+    name: publish registry packages
     needs: publish-native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
     permissions:
+      actions: write # Dispatch and monitor the credential-isolated recovery workflow.
       contents: read
-      id-token: write # Required for npm trusted publishing.
-    uses: ./.github/workflows/publish-npm.yml
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_REF: ${{ needs.publish-native.outputs.release_ref }}
+    steps:
+      - name: Install pinned GitHub CLI
+        shell: bash
+        run: |
+          gh_version="2.96.0"
+          gh_root="$RUNNER_TEMP/gh-$gh_version"
+          mkdir -p "$gh_root"
+          gh_sha256="83d5c2ccad5498f58bf6368acb1ab32588cf43ab3a4b1c301bf36328b1c8bd60"
+          curl --proto '=https' --tlsv1.2 --fail --show-error --location \
+            --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
+            "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_linux_amd64.tar.gz" \
+            -o "$RUNNER_TEMP/gh.tar.gz"
+          printf '%s  %s\n' "$gh_sha256" "$RUNNER_TEMP/gh.tar.gz" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/gh.tar.gz" --strip-components=1 -C "$gh_root"
+          echo "$gh_root/bin" >> "$GITHUB_PATH"
+          "$gh_root/bin/gh" --version
+      - name: Dispatch and wait for package recovery
+        shell: bash
+        run: |
+          request_id="$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          title="Recover public packages $RELEASE_REF via $request_id"
+          dispatch_succeeded=false
+          for delay in 0 2 4 8 15; do
+            if [ "$delay" != 0 ]; then
+              sleep "$delay"
+            fi
+            if gh workflow run recover-publication.yml --repo "$GITHUB_REPOSITORY" --ref main \
+              -f "release_ref=$RELEASE_REF" -f "request_id=$request_id"; then
+              dispatch_succeeded=true
+              break
+            fi
+          done
+          if [ "$dispatch_succeeded" = "false" ]; then
+            echo "Recovery dispatch response remained unsuccessful; checking for an accepted run." >&2
+          fi
 
-  publish-crates:
-    name: publish crates.io package
-    needs: publish-native
-    permissions:
-      contents: read
-      id-token: write # Required for crates.io trusted publishing.
-    uses: ./.github/workflows/publish-crates.yml
-
-  publish-pypi:
-    name: publish PyPI package
-    needs: publish-native
-    permissions:
-      contents: read
-      id-token: write # Required for PyPI trusted publishing.
-    uses: ./.github/workflows/publish-pypi.yml
+          recovery_run_ids=()
+          for delay in 1 2 4 8 15 30; do
+            sleep "$delay"
+            if ! candidate_run_ids="$(gh run list --repo "$GITHUB_REPOSITORY" \
+              --workflow recover-publication.yml --event workflow_dispatch --branch main --limit 20 \
+              --json databaseId,displayTitle \
+              --jq ".[] | select(.displayTitle == \"$title\") | .databaseId")"; then
+              continue
+            fi
+            recovery_run_ids=()
+            while IFS= read -r candidate_run_id; do
+              if [ -z "$candidate_run_id" ]; then
+                continue
+              fi
+              if [[ ! "$candidate_run_id" =~ ^[0-9]+$ ]]; then
+                echo "Invalid recovery run identifier: $candidate_run_id" >&2
+                exit 1
+              fi
+              recovery_run_ids+=("$candidate_run_id")
+            done <<< "$candidate_run_ids"
+            if [ "${#recovery_run_ids[@]}" -gt 0 ]; then
+              break
+            fi
+          done
+          if [ "${#recovery_run_ids[@]}" -eq 0 ]; then
+            echo "Unable to locate dispatched package recovery workflow" >&2
+            exit 1
+          fi
+          recovery_failed=false
+          for recovery_run_id in "${recovery_run_ids[@]}"; do
+            if ! gh run watch "$recovery_run_id" --repo "$GITHUB_REPOSITORY" \
+              --exit-status --interval 10; then
+              recovery_failed=true
+            fi
+          done
+          if [ "$recovery_failed" = "true" ]; then
+            echo "At least one package recovery workflow failed" >&2
+            exit 1
+          fi

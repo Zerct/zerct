@@ -1,36 +1,45 @@
 name: Publish PyPI package
+run-name: Publish PyPI ${{ inputs.release_ref }} via ${{ inputs.orchestration_id }}
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       release_ref:
-        description: Exact release ref checked out during publication recovery
-        required: false
+        description: Exact existing release tag, such as v0.1.117
+        required: true
+        type: string
+      release_commit:
+        description: Exact 40-hex commit resolved from the release tag
+        required: true
+        type: string
+      orchestration_id:
+        description: Unique numeric recovery run and attempt identifier
+        required: true
         type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: pypi-${{ github.ref }}
+  group: pypi-publication
   cancel-in-progress: false
 
 jobs:
   prepare:
     name: prepare PyPI package
-    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
       contents: read
     outputs:
       exists: ${{ steps.version.outputs.exists }}
-      version: ${{ steps.version.outputs.version }}
+      release_commit: ${{ steps.release.outputs.release_commit }}
+      version: ${{ steps.release.outputs.version }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          ref: ${{ inputs.release_ref || github.sha }}
+          ref: ${{ inputs.release_commit }}
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -53,20 +62,82 @@ jobs:
           rustc --version --verbose
       - name: Sync generated native target manifests
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin sync-native-release-targets -- --check
-      - name: Check public release version contract
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
+      - name: Resolve exact native release source
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          INPUT_RELEASE_REF: ${{ inputs.release_ref }}
+          INPUT_RELEASE_COMMIT: ${{ inputs.release_commit }}
+          ORCHESTRATION_ID: ${{ inputs.orchestration_id }}
+        run: |
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
+          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-public-contracts -- public-version)"
+          release_ref="$INPUT_RELEASE_REF"
+          if [ "$release_ref" != "v$version" ]; then
+            echo "Release ref $release_ref does not match public version v$version" >&2
+            exit 1
+          fi
+          if [ "$GITHUB_REF" != "refs/tags/$release_ref" ] || \
+            [ "$GITHUB_SHA" != "$INPUT_RELEASE_COMMIT" ]; then
+            echo "Workflow ref or commit does not match the requested release" >&2
+            exit 1
+          fi
+          if [[ ! "$INPUT_RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]] || \
+            [[ ! "$ORCHESTRATION_ID" =~ ^[0-9]+-[0-9]+$ ]]; then
+            echo "Release commit or orchestration identifier is invalid" >&2
+            exit 1
+          fi
+          git fetch --no-tags origin "refs/tags/$release_ref:refs/tags/$release_ref"
+          release_commit="$(git rev-parse "refs/tags/$release_ref^{commit}")"
+          checkout_commit="$(git rev-parse HEAD)"
+          if [ "$release_commit" != "$INPUT_RELEASE_COMMIT" ] || \
+            [ "$checkout_commit" != "$release_commit" ]; then
+            echo "Release tag $release_ref did not resolve to the checked-out commit" >&2
+            exit 1
+          fi
+          release_target="$(gh api --jq '.target_commitish' \
+            "repos/$GITHUB_REPOSITORY/releases/tags/$release_ref")"
+          if [ "$release_target" != "$release_commit" ]; then
+            echo "Release target $release_target does not match tag commit $release_commit" >&2
+            exit 1
+          fi
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-native-release-assets -- "$version"
+          printf 'release_commit=%s\nversion=%s\n' "$release_commit" "$version" >> "$GITHUB_OUTPUT"
       - name: Check registry version
         id: version
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
         run: |
-          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- public-version)"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          status="$(curl -sS --connect-timeout 10 --max-time 30 -o "$RUNNER_TEMP/tovuk-pypi.json" -w '%{http_code}' \
-            -H 'Accept: application/json' \
-            -H 'User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)' \
-            "https://pypi.org/pypi/tovuk/$version/json")"
+          status=""
+          for delay in 0 5 10 20 30 60; do
+            if [ "$delay" != 0 ]; then
+              sleep "$delay"
+            fi
+            if ! candidate_status="$(curl -sS --connect-timeout 10 --max-time 30 \
+              -o "$RUNNER_TEMP/tovuk-pypi.json" -w '%{http_code}' \
+              -H 'Accept: application/json' \
+              -H 'User-Agent: Tovuk publish workflow (https://github.com/tovuk/tovuk)' \
+              "https://pypi.org/pypi/tovuk/$VERSION/json")"; then
+              continue
+            fi
+            status="$candidate_status"
+            case "$status" in
+              200|404)
+                break
+                ;;
+              429|5??)
+                continue
+                ;;
+              *)
+                break
+                ;;
+            esac
+          done
           if [ "$status" = "200" ]; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::tovuk $version already exists on PyPI; skipping publish."
+            echo "::notice::tovuk $VERSION already exists on PyPI; skipping publish."
           elif [ "$status" = "404" ]; then
             echo "exists=false" >> "$GITHUB_OUTPUT"
           else
@@ -140,6 +211,17 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # release/v1
         with:
           packages-dir: pypi-dist
+
+  verify:
+    name: verify PyPI package
+    needs:
+      - prepare
+      - publish
+    if: ${{ always() && needs.prepare.result == 'success' && (needs.publish.result == 'success' || needs.publish.result == 'skipped') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions: {}
+    steps:
       - name: Verify PyPI package
         env:
           VERSION: ${{ needs.prepare.outputs.version }}

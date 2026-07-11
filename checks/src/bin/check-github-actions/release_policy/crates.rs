@@ -19,7 +19,7 @@ const CRATE_PUBLISH_JOB: &str = "    name: publish tovuk to crates.io
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          ref: ${{ inputs.release_ref || github.sha }}
+          ref: ${{ needs.prepare.outputs.release_commit }}
       - name: Verify pinned Rust toolchain
         env:
           CARGO_HOME: ${{ runner.temp }}/cargo-home
@@ -100,12 +100,12 @@ impl CrateReleasePolicy for HostedActionsCheck {
         );
         for (needle, message) in [
             (
-                "workflow_call:",
-                "crates.io publication must be reusable from the native release workflow",
+                "workflow_dispatch:",
+                "crates.io publication must expose its guarded top-level dispatch entrypoint",
             ),
             (
-                "github.ref == 'refs/heads/main'",
-                "crates.io publication must be restricted to the main ref",
+                "[ \"$GITHUB_REF\" != \"refs/tags/$release_ref\" ]",
+                "crates.io publication must fail outside the exact release tag",
             ),
         ] {
             require_contains(
@@ -119,12 +119,6 @@ impl CrateReleasePolicy for HostedActionsCheck {
             workflow,
             "github.actor ==",
             "crates.io publication must use public environment and branch protections instead of a private actor allowlist",
-            findings,
-        );
-        reject_lines(
-            workflow,
-            "workflow_dispatch:",
-            "crates.io publication must not bypass the orchestrated native release gate",
             findings,
         );
         self.reject_crate_release_triggers(workflow, findings);
@@ -175,7 +169,13 @@ impl CrateReleasePolicy for HostedActionsCheck {
         reject_lines(
             workflow,
             "workflow_run:",
-            "crates.io publication must use workflow_call instead of workflow_run",
+            "crates.io Trusted Publishing rejects workflow_run events",
+            findings,
+        );
+        reject_lines(
+            workflow,
+            "workflow_call:",
+            "crates.io Trusted Publishing must execute as the configured top-level workflow",
             findings,
         );
     }

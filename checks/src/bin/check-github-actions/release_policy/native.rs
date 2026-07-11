@@ -54,6 +54,10 @@ const REJECTED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
         "native publishing must use repository protections instead of a private actor gate",
     ),
     (
+        "uses: ./.github/workflows/publish-",
+        "native publishing must dispatch top-level trusted-publisher workflows through recovery",
+    ),
+    (
         "2>/dev/null",
         "native release API failures must not be hidden as missing state",
     ),
@@ -164,6 +168,18 @@ const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
     (
         "--draft=false --latest",
         "a newly created draft must become public only after full asset verification",
+    ),
+    (
+        "actions: write # Dispatch and monitor the credential-isolated recovery workflow.",
+        "native publication must isolate workflow-dispatch permission after asset publication",
+    ),
+    (
+        "gh workflow run recover-publication.yml",
+        "native publication must dispatch guarded registry recovery after asset publication",
+    ),
+    (
+        "gh run watch \"$recovery_run_id\"",
+        "native publication must wait for registry recovery to complete",
     ),
 ];
 

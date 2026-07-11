@@ -14,6 +14,8 @@ description: "Product changes for the public Tovuk scraper API and native CLI."
 - Made native releases reproducible across Linux, macOS, and Windows with a
   Rust-generated build matrix, Rust-generated checksum sidecars, immutable
   Actions, and resumable asset publication.
+- Bound npm, PyPI, and crates.io publication to their dedicated trusted
+  workflow identities and one verified release tag and commit.
 - Tightened the public OpenAPI contract with explicit collection and string
   bounds while keeping private implementation and service topology out of
   status responses and documentation.

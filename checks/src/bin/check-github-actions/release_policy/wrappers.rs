@@ -12,12 +12,16 @@ const REJECTED_WRAPPER_SNIPPETS: &[PolicyRequirement] = &[
         "package publish workflows must fail closed instead of silently skipping publish auth",
     ),
     (
-        "workflow_run:",
-        "package publish must use workflow_call instead of workflow_run",
+        "workflow_call:",
+        "trusted package publishers must execute as top-level workflows",
     ),
     (
-        "workflow_dispatch:",
-        "package publication must not bypass the orchestrated native release gate",
+        "workflow_run:",
+        "trusted package publishers must be dispatched directly instead of using workflow_run",
+    ),
+    (
+        "push:",
+        "package publication must not run directly from an unverified source push",
     ),
     (
         "github.actor ==",
@@ -25,8 +29,11 @@ const REJECTED_WRAPPER_SNIPPETS: &[PolicyRequirement] = &[
     ),
 ];
 
-/// Compile-time references preserve the named helper boundary.
-const _: [usize; 0x0001] = [size_of_val(&require_python_release_toolchain)];
+/// Compile-time references preserve the named helper boundaries.
+const _: [usize; 0x0002] = [
+    size_of_val(&require_python_release_toolchain),
+    size_of_val(&require_wrapper_verify_isolation),
+];
 
 impl WrapperReleasePolicy for HostedActionsCheck {
     fn check_wrapper_release_assets(&self, workflow: &Workflow, findings: &mut Vec<String>) {
@@ -48,16 +55,20 @@ impl WrapperReleasePolicy for HostedActionsCheck {
         }
         for (needle, message) in [
             (
-                "workflow_call:",
-                "package publish must be reusable from the native release workflow",
+                "workflow_dispatch:",
+                "package publish must expose only its guarded top-level dispatch entrypoint",
             ),
             (
-                "github.ref == 'refs/heads/main'",
-                "package publish must be restricted to the main ref",
+                "[ \"$GITHUB_REF\" != \"refs/tags/$release_ref\" ]",
+                "package publish must fail outside the exact release tag",
             ),
             (
-                "ref: ${{ inputs.release_ref || github.sha }}",
-                "package publish recovery must build the exact native release ref",
+                "ref: ${{ inputs.release_commit }}",
+                "package publish must build the resolved native release commit",
+            ),
+            (
+                "release_target=\"$(gh api --jq '.target_commitish'",
+                "package publish must bind its source to the GitHub release target",
             ),
         ] {
             require_contains(
@@ -95,8 +106,65 @@ impl WrapperReleasePolicy for HostedActionsCheck {
                 findings,
             );
         }
+        require_wrapper_verify_isolation(workflow, findings);
     }
 }
+
+/// Require wrapper registry verification to run without publication credentials.
+fn require_wrapper_verify_isolation(workflow: &Workflow, findings: &mut Vec<String>) {
+    let source = workflow.contents.as_str();
+    let Some((prepare_source, publish_and_verify_source)) = source.split_once("\n  publish:\n")
+    else {
+        findings.push(format!(
+            "{}: package release must use prepare, publish, and verify jobs",
+            workflow.path.display()
+        ));
+        return;
+    };
+    let Some((publish_source, verify_source)) =
+        publish_and_verify_source.split_once("\n  verify:\n")
+    else {
+        findings.push(format!(
+            "{}: package release is missing its permissionless verification job",
+            workflow.path.display()
+        ));
+        return;
+    };
+    if prepare_source.contains("id-token: write") || verify_source.contains("id-token: write") {
+        findings.push(format!(
+            "{}: only the package upload job may request an OIDC token",
+            workflow.path.display()
+        ));
+    }
+    if publish_source.contains("name: Verify ") {
+        findings.push(format!(
+            "{}: post-publish registry verification must not retain OIDC permission",
+            workflow.path.display()
+        ));
+    }
+    for (needle, message) in [
+        (
+            "needs:\n      - prepare\n      - publish",
+            "package verification must wait for prepare and publish",
+        ),
+        (
+            "needs.publish.result == 'skipped'",
+            "package verification must support already-published recovery",
+        ),
+        (
+            "permissions: {}",
+            "package verification must run without GitHub permissions",
+        ),
+    ] {
+        require_contains(
+            verify_source,
+            needle,
+            format!("{}: {message}", workflow.path.display()).as_str(),
+            findings,
+        );
+    }
+}
+
 /// Require the pinned Python build and validation toolchain.
 fn require_python_release_toolchain(workflow: &Workflow, findings: &mut Vec<String>) {
     for (needle, message) in [
@@ -138,4 +206,58 @@ fn require_python_release_toolchain(workflow: &Workflow, findings: &mut Vec<Stri
         "PyPI packaging must not bootstrap release tooling through mutable pip state",
         findings,
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::{Workflow, require_wrapper_verify_isolation};
+
+    /// Minimal three-job wrapper release with permissionless verification.
+    const ISOLATED_RELEASE: &str = concat!(
+        "jobs:\n  prepare:\n    permissions:\n      contents: read\n",
+        "\n  publish:\n    permissions:\n      id-token: write\n",
+        "\n  verify:\n    needs:\n      - prepare\n      - publish\n",
+        "    if: needs.publish.result == 'skipped'\n    permissions: {}\n",
+    );
+
+    /// Verify that permissionless post-publish verification is accepted.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the isolated three-job contract emits a finding.
+    #[test]
+    fn wrapper_verify_isolation_accepts_permissionless_job() {
+        let workflow = Workflow {
+            contents: ISOLATED_RELEASE.to_owned(),
+            path: PathBuf::from(".github/workflows/publish-npm.yml"),
+        };
+        let mut findings = Vec::new();
+
+        require_wrapper_verify_isolation(&workflow, &mut findings);
+
+        assert!(findings.is_empty(), "permissionless verification must pass");
+    }
+
+    /// Verify that verification cannot retain the publication OIDC permission.
+    ///
+    /// # Panics
+    ///
+    /// Panics when an OIDC-capable verification job is accepted.
+    #[test]
+    fn wrapper_verify_isolation_rejects_oidc_permission() {
+        let workflow = Workflow {
+            contents: ISOLATED_RELEASE.replace(
+                "    permissions: {}",
+                "    permissions:\n      id-token: write",
+            ),
+            path: PathBuf::from(".github/workflows/publish-pypi.yml"),
+        };
+        let mut findings = Vec::new();
+
+        require_wrapper_verify_isolation(&workflow, &mut findings);
+
+        assert_eq!(findings.len(), 0x2, "OIDC verification must fail policy");
+    }
 }
