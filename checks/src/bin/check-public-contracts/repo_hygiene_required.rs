@@ -155,8 +155,6 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "crates/tovuk/src/main.rs",
     "docs/docs.json",
     "docs/openapi.json",
-    "docs/fonts/OFL-1.1.txt",
-    "docs/fonts/PROVENANCE.md",
     "clippy.toml",
     "deny.toml",
     "dependency-feature-policy.json",
