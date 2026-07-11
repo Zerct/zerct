@@ -65,6 +65,9 @@ jobs:
             --bin check-release-availability -- "$version"
       - name: Wait for Mintlify docs synchronization and public readiness
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --
+        env:
+          TOVUK_DOCS_CHECK_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          TOVUK_DOCS_REVISION: ${{ github.sha }}
       - name: Run full repository check
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 

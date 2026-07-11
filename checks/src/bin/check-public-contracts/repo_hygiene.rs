@@ -37,7 +37,7 @@ const ALLOWED_EXECUTABLE_PATHS: &[&str] = &[
 const MAX_SOURCE_FILE_LINES: usize = 500;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000e] = [
+const _: [usize; 0x0010] = [
     size_of_val(&check),
     size_of_val(&check_repository_contracts),
     size_of_val(&check_tracked_files),
@@ -49,6 +49,8 @@ const _: [usize; 0x000e] = [
     size_of_val(&reject_tracked_go_files),
     size_of_val(&reject_unexpected_git_modes),
     size_of_val(&reject_untracked_files),
+    size_of_val(&require_docs_cache_identity_workflows),
+    size_of_val(&require_docs_deploy_dependency_paths),
     size_of_val(&require_docs_deploy_observability_contract),
     size_of_val(&require_docs_deploy_observability_checker),
     size_of_val(&require_docs_deploy_observability_gated_api),
@@ -297,6 +299,52 @@ pub(super) fn reject_untracked_files() -> CheckResult {
     ));
 }
 
+/// Require every public readiness workflow to use a unique immutable cache identity.
+///
+/// # Errors
+///
+/// Returns an error when any workflow omits the revision or workflow-run identity.
+fn require_docs_cache_identity_workflows() -> CheckResult {
+    for path in [
+        ".github/workflows/docs-deploy.yml",
+        ".github/workflows/docs-score.yml",
+        ".github/workflows/publish-native-binaries.yml",
+    ] {
+        let workflow = check_try!(read_text(path));
+        check_try!(require_contains(
+            workflow.as_str(),
+            "TOVUK_DOCS_CHECK_ID: ${{ github.run_id }}-${{ github.run_attempt }}",
+            format!("{path} must use the unique workflow run as its docs cache identity").as_str(),
+        ));
+        check_try!(require_contains(
+            workflow.as_str(),
+            "TOVUK_DOCS_REVISION: ${{ github.sha }}",
+            format!("{path} must use the immutable deployment revision in docs checks").as_str(),
+        ));
+    }
+    return Ok(());
+}
+
+/// Require docs synchronization when its Rust implementation or build inputs change.
+///
+/// # Errors
+///
+/// Returns an error when the workflow omits an implementation dependency path.
+fn require_docs_deploy_dependency_paths(workflow: &str) -> CheckResult {
+    for snippet in [
+        "      - \".cargo/config.toml\"",
+        "      - \"checks/**\"",
+        "      - \"rust-toolchain.toml\"",
+    ] {
+        check_try!(require_contains(
+            workflow,
+            snippet,
+            "Mintlify docs sync workflow must run when its Rust implementation changes",
+        ));
+    }
+    return Ok(());
+}
+
 /// Require the Rust docs deploy checker to expose all readiness controls.
 ///
 /// # Errors
@@ -319,6 +367,14 @@ fn require_docs_deploy_observability_checker(checker: &str) -> CheckResult {
         (
             "TOVUK_DOCS_GITHUB_APP_SYNC_WAIT_SECONDS",
             "Mintlify docs script must expose a bounded GitHub App sync wait",
+        ),
+        (
+            "TOVUK_DOCS_CHECK_ID",
+            "Mintlify docs script must use the unique workflow-run cache identity",
+        ),
+        (
+            "TOVUK_DOCS_REVISION",
+            "Mintlify docs script must use the immutable deployment revision for readiness checks",
         ),
         (
             "const DEFAULT_DOCS_PUBLIC_URL: &str = \"https://docs.tovuk.com\";",
@@ -354,6 +410,8 @@ pub(super) fn require_docs_deploy_observability_contract() -> CheckResult {
         "Check Mintlify GitHub App sync",
         "Mintlify docs workflow must describe the GitHub App sync boundary",
     ));
+    check_try!(require_docs_cache_identity_workflows());
+    check_try!(require_docs_deploy_dependency_paths(workflow.as_str()));
     check_try!(require_docs_deploy_observability_checker(checker.as_str()));
     return require_docs_deploy_observability_gated_api(checker.as_str(), workflow.as_str());
 }

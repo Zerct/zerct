@@ -1,40 +1,56 @@
+/// Validated CDN cache identity for exact documentation deployments.
+#[path = "mintlify_fetch/cache_identity.rs"]
+pub mod request_cache;
+
 use core::time::Duration;
 
 use crate::helpers::{CheckResult, env_int};
 
+use request_cache::{Identity as DocsCacheIdentity, render_cache_path};
+
+pub(super) use request_cache::read_identity as docs_cache_identity;
+
+#[cfg(test)]
+use request_cache::{validate_check_id, validate_revision};
+
 use http::StatusCode;
 
-use std::{io::Read, thread::sleep};
+use std::{io::Read, time::Instant};
 
 use tovuk_public_checks::http_transport::Client;
 
 /// Largest accepted public documentation response.
 const MAX_PUBLIC_DOC_BYTES: usize = 0x800_000;
 
+/// Largest accepted delay between full public readiness attempts.
+const MAX_RETRY_DELAY_MS: i64 = 0x7530;
+
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0009] = [
+const _: [usize; 0x000b] = [
     size_of_val(&FetchContext::new),
+    size_of_val(&FetchPolicy::new),
     size_of_val(&bounded_validate_declared_length),
     size_of_val(&bounded_validate_read_body),
     size_of_val(&bounded_response_text),
+    size_of_val(&fetch_text_from_base),
     size_of_val(&fetch_text_once),
-    size_of_val(&is_retryable_fetch_error),
     size_of_val(&normalize_target_url),
     size_of_val(&request_text),
+    size_of_val(&request_url),
     size_of_val(&retry_delay),
 ];
 
 /// Shared bounded HTTP client and retry configuration for public docs checks.
 #[derive(Debug)]
 pub(super) struct FetchContext {
+    /// Zero-based full readiness attempt used to avoid stale cached results.
+    attempt: i64,
     /// Normalized public docs base URL.
     base_url: String,
     /// Bounded blocking HTTP client.
     client: Client,
-    /// Maximum number of retry attempts.
-    retries: i64,
-    /// Delay between retryable requests.
-    retry_delay: Duration,
+    /// Retry, propagation, and revision controls.
+    policy: FetchPolicy,
 }
 
 impl FetchContext {
@@ -44,32 +60,72 @@ impl FetchContext {
         return self.base_url.as_str();
     }
 
+    /// Return the validated cache identity used to bypass stale CDN objects.
+    #[inline]
+    const fn cache_identity(&self) -> Option<&DocsCacheIdentity> {
+        return self.policy.cache_identity.as_ref();
+    }
+
+    /// Return whether another delayed readiness attempt fits before the deadline.
+    pub(super) fn can_retry_after_delay(&self) -> bool {
+        return Instant::now()
+            .checked_add(self.retry_delay())
+            .is_some_and(|next_attempt| return next_attempt < self.policy.deadline);
+    }
+
+    /// Return the exact deployment revision expected from the hosting provider.
+    #[inline]
+    pub(super) fn deployment_revision(&self) -> Option<&str> {
+        return self.policy.cache_identity.as_ref().map(AsRef::as_ref);
+    }
+
     /// Construct a bounded public documentation fetch context.
     #[inline]
-    pub(super) const fn new(
-        base_url: String,
-        client: Client,
-        retries: i64,
-        retry_delay: Duration,
-    ) -> Self {
+    pub(super) const fn new(base_url: String, client: Client, policy: FetchPolicy) -> Self {
         return Self {
+            attempt: 0,
             base_url,
             client,
-            retries,
-            retry_delay,
+            policy,
         };
+    }
+
+    /// Return the zero-based full readiness attempt.
+    #[inline]
+    pub(super) const fn readiness_attempt(&self) -> i64 {
+        return self.attempt;
+    }
+
+    /// Reject a new network request after the shared readiness deadline.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error after the shared public readiness deadline expires.
+    fn require_request_time(&self) -> FetchResult<()> {
+        if Instant::now() < self.policy.deadline {
+            return Ok(());
+        }
+        return Err(FetchError {
+            message: "public docs readiness exceeded its shared wall-clock deadline".to_owned(),
+        });
     }
 
     /// Return the configured retry count.
     #[inline]
     pub(super) const fn retries(&self) -> i64 {
-        return self.retries;
+        return self.policy.retries;
     }
 
     /// Return the delay between retryable requests.
     #[inline]
     pub(super) const fn retry_delay(&self) -> Duration {
-        return self.retry_delay;
+        return self.policy.retry_delay;
+    }
+
+    /// Set the zero-based full readiness attempt before a contract pass.
+    #[inline]
+    pub(super) const fn set_readiness_attempt(&mut self, attempt: i64) {
+        self.attempt = attempt;
     }
 }
 
@@ -78,8 +134,37 @@ impl FetchContext {
 pub(super) struct FetchError {
     /// Contract data stored in `message`.
     message: String,
-    /// Contract data stored in `status`.
-    status: Option<StatusCode>,
+}
+
+/// Retry, propagation, and immutable revision controls for public docs checks.
+#[derive(Debug)]
+pub(super) struct FetchPolicy {
+    /// Validated deployment and workflow-run cache identity.
+    cache_identity: Option<DocsCacheIdentity>,
+    /// Shared wall-clock deadline for every readiness attempt and request.
+    deadline: Instant,
+    /// Maximum number of full readiness retry attempts.
+    retries: i64,
+    /// Delay between full readiness attempts.
+    retry_delay: Duration,
+}
+
+impl FetchPolicy {
+    /// Construct a public documentation fetch policy.
+    #[inline]
+    pub(super) const fn new(
+        retries: i64,
+        retry_delay: Duration,
+        cache_identity: Option<DocsCacheIdentity>,
+        deadline: Instant,
+    ) -> Self {
+        return Self {
+            cache_identity,
+            deadline,
+            retries,
+            retry_delay,
+        };
+    }
 }
 
 /// Result returned by bounded public documentation fetch helpers.
@@ -97,7 +182,7 @@ struct ResponseConstraints {
     maximum: usize,
     /// Public endpoint path used in diagnostics.
     path: String,
-    /// HTTP response status.
+    /// HTTP response status used in bounded-body diagnostics.
     status: StatusCode,
 }
 
@@ -115,7 +200,6 @@ fn bounded_response_text(
     return String::from_utf8(bytes).map_err(|error| {
         return FetchError {
             message: format!("{} is not UTF-8: {error}", constraints.path),
-            status: Some(constraints.status),
         };
     });
 }
@@ -129,7 +213,6 @@ fn bounded_validate_declared_length(constraints: &ResponseConstraints) -> FetchR
     let maximum = check_try!(u64::try_from(constraints.maximum).map_err(|error| {
         return FetchError {
             message: format!("convert public docs response limit: {error}"),
-            status: Some(constraints.status),
         };
     }));
     if constraints
@@ -153,13 +236,11 @@ fn bounded_validate_read_body(
     let read_limit = check_try!(constraints.maximum.checked_add(0x0001).ok_or_else(|| {
         return FetchError {
             message: "public docs response limit overflow".to_owned(),
-            status: Some(constraints.status),
         };
     }));
     let read_limit_u64 = check_try!(u64::try_from(read_limit).map_err(|error| {
         return FetchError {
             message: format!("convert public docs response limit: {error}"),
-            status: Some(constraints.status),
         };
     }));
     let mut bytes = Vec::new();
@@ -169,13 +250,11 @@ fn bounded_validate_read_body(
             .read_to_end(&mut bytes)
             .map_err(|error| return FetchError {
                 message: error.to_string(),
-                status: Some(constraints.status),
             })
     );
     if read_count != bytes.len() {
         return Err(FetchError {
             message: format!("{} changed while its response was read", constraints.path),
-            status: Some(constraints.status),
         });
     }
     if bytes.len() > constraints.maximum {
@@ -188,10 +267,11 @@ fn bounded_validate_read_body(
 fn bounded_validate_response_limit_error(constraints: &ResponseConstraints) -> FetchError {
     return FetchError {
         message: format!(
-            "{} exceeds the {}-byte public docs limit",
-            constraints.path, constraints.maximum
+            "{} returned HTTP {} and exceeds the {}-byte public docs limit",
+            constraints.path,
+            constraints.status.as_u16(),
+            constraints.maximum
         ),
-        status: Some(constraints.status),
     };
 }
 
@@ -205,23 +285,22 @@ pub(super) fn fetch_text(
     path: &str,
     headers: &RequestHeaders,
 ) -> CheckResult<String> {
-    let mut last_error = FetchError {
-        message: "request was not attempted".to_owned(),
-        status: None,
-    };
-    for attempt in 0..=context.retries() {
-        let error = match request_text(context, path, headers) {
-            Ok(text) => return Ok(text),
-            Err(error) => error,
-        };
-        let should_retry = attempt < context.retries() && is_retryable_fetch_error(&error);
-        last_error = error;
-        if !should_retry {
-            break;
-        }
-        sleep(context.retry_delay());
-    }
-    return Err(last_error.message);
+    return fetch_text_once(context, path, headers);
+}
+
+/// Fetch one bounded response from a separately validated public base URL.
+///
+/// # Errors
+///
+/// Returns an error when the request fails or its response violates the bounded body contract.
+pub(super) fn fetch_text_from_base(
+    context: &FetchContext,
+    base_url: &str,
+    path: &str,
+    headers: &RequestHeaders,
+) -> CheckResult<String> {
+    let url = format!("{base_url}{path}");
+    return request_url(context, url.as_str(), path, headers).map_err(|error| return error.message);
 }
 
 /// Fetch one public documentation response without applying retries.
@@ -235,13 +314,6 @@ pub(super) fn fetch_text_once(
     headers: &RequestHeaders,
 ) -> CheckResult<String> {
     return request_text(context, path, headers).map_err(|error| return error.message);
-}
-
-/// Contract implementation for `is_retryable_fetch_error`.
-pub(super) fn is_retryable_fetch_error(error: &FetchError) -> bool {
-    return error.status.is_none_or(|status| {
-        return status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error();
-    });
 }
 
 /// Contract implementation for `normalize_target_url`.
@@ -264,21 +336,34 @@ pub(super) fn request_text(
     path: &str,
     headers: &RequestHeaders,
 ) -> Result<String, FetchError> {
-    let url = format!("{}{path}", context.base_url());
+    let request_path =
+        render_cache_path(path, context.cache_identity(), context.readiness_attempt());
+    let url = format!("{}{request_path}", context.base_url());
+    return request_url(context, url.as_str(), path, headers);
+}
+
+/// Fetch one bounded URL through the shared deadline and transport policy.
+///
+/// # Errors
+///
+/// Returns an error when the request fails or its response violates the bounded body contract.
+fn request_url(
+    context: &FetchContext,
+    url: &str,
+    path: &str,
+    headers: &RequestHeaders,
+) -> Result<String, FetchError> {
+    check_try!(context.require_request_time());
     let response = check_try!(
         context
             .client
-            .get(url.as_str(), headers, MAX_PUBLIC_DOC_BYTES)
-            .map_err(|error| return FetchError {
-                message: error,
-                status: None,
-            })
+            .get(url, headers, MAX_PUBLIC_DOC_BYTES)
+            .map_err(|error| return FetchError { message: error })
     );
     let status = response.status();
     if !status.is_success() {
         return Err(FetchError {
             message: format!("{path} returned {}", status.as_u16()),
-            status: Some(status),
         });
     }
     let content_length = response.content_length();
@@ -301,12 +386,18 @@ pub(super) fn request_text(
 /// Returns an error when the contract requirement cannot be verified.
 pub(super) fn retry_delay() -> CheckResult<Duration> {
     let retry_delay_ms = check_try!(env_int("TOVUK_DOCS_CHECK_RETRY_DELAY_MS", 5_000));
+    if !(0..=MAX_RETRY_DELAY_MS).contains(&retry_delay_ms) {
+        return Err(format!(
+            "TOVUK_DOCS_CHECK_RETRY_DELAY_MS must be between 0 and {MAX_RETRY_DELAY_MS}."
+        ));
+    }
     return Ok(Duration::from_millis(check_try!(
         u64::try_from(retry_delay_ms).map_err(|error| {
             return format!("TOVUK_DOCS_CHECK_RETRY_DELAY_MS must be non-negative: {error}");
         })
     )));
 }
+
 #[cfg(test)]
 #[path = "mintlify_fetch_tests/verification.rs"]
 mod tests;

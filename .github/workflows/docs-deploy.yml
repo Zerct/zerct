@@ -5,8 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "docs/**"
+      - ".cargo/config.toml"
       - ".github/workflows/docs-deploy.yml"
+      - "checks/**"
+      - "docs/**"
+      - "rust-toolchain.toml"
   workflow_dispatch:
 
 permissions:
@@ -28,3 +31,6 @@ jobs:
           persist-credentials: false
       - name: Check Mintlify GitHub App sync
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --
+        env:
+          TOVUK_DOCS_CHECK_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          TOVUK_DOCS_REVISION: ${{ github.sha }}
