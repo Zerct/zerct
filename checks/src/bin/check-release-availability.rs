@@ -40,6 +40,7 @@ use std::{
     env,
     io::{Result as InputOutputResult, Write as _, stderr, stdout},
     process::ExitCode,
+    thread::sleep,
 };
 
 use tar as _;
@@ -75,6 +76,14 @@ const REGISTRIES: &[Registry] = &[
     },
 ];
 
+/// Delays before the four allowed retries of a transient registry failure.
+const REGISTRY_RETRY_DELAYS: [Duration; 0x4] = [
+    Duration::from_secs(0x1),
+    Duration::from_secs(0x2),
+    Duration::from_secs(0x4),
+    Duration::from_secs(0x8),
+];
+
 /// Maximum total duration of one registry request.
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(0x1e);
 
@@ -85,11 +94,13 @@ const USER_AGENT: &str = "Tovuk public release availability check (https://githu
 const VERSION_LENGTH_LIMIT: usize = 0x40;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x7] = [
+const _: [usize; 0x9] = [
     size_of_val(&build_client),
     size_of_val(&check_registry),
     size_of_val(&classify_status),
+    size_of_val(&is_retryable_status),
     size_of_val(&parse_version_argument),
+    size_of_val(&query_registry_with_retries),
     size_of_val(&registry_endpoint),
     size_of_val(&run),
     size_of_val(&validate_version),
@@ -124,19 +135,12 @@ fn build_client() -> CheckResult<TransportClient> {
 /// other than HTTP 404.
 fn check_registry(client: &TransportClient, registry: Registry, version: &str) -> CheckResult {
     let endpoint = registry_endpoint(registry, version);
-    let response = check_try!(
-        client
-            .get(
-                endpoint.as_str(),
-                &[(ACCEPT.as_str(), "application/json")],
-                MAXIMUM_REGISTRY_BODY_BYTES,
-            )
-            .map_err(|error| return format!(
-                "query {} release availability: {error}",
-                registry.name
-            ))
-    );
-    return classify_status(registry, version, response.status());
+    let status = check_try!(query_registry_with_retries(
+        client,
+        registry,
+        endpoint.as_str(),
+    ));
+    return classify_status(registry, version, status);
 }
 
 /// Classify the only two accepted registry responses.
@@ -159,6 +163,11 @@ fn classify_status(registry: Registry, version: &str, status: StatusCode) -> Che
         "{} returned unexpected HTTP status {status} for tovuk version {version}",
         registry.name
     ));
+}
+
+/// Return whether one response may represent a transient registry failure.
+fn is_retryable_status(status: StatusCode) -> bool {
+    return status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error();
 }
 
 /// Execute the availability check and report failures on standard error.
@@ -190,6 +199,46 @@ fn parse_version_argument(arguments: &[String]) -> CheckResult<String> {
     }
     check_try!(validate_version(version));
     return Ok(version.clone());
+}
+
+/// Query one registry with a finite exponential retry schedule.
+///
+/// # Errors
+///
+/// Returns an error after transport retries are exhausted. HTTP status
+/// classification remains the caller's fail-closed responsibility.
+fn query_registry_with_retries(
+    client: &TransportClient,
+    registry: Registry,
+    endpoint: &str,
+) -> CheckResult<StatusCode> {
+    for retry_delay in REGISTRY_RETRY_DELAYS {
+        match client.get(
+            endpoint,
+            &[(ACCEPT.as_str(), "application/json")],
+            MAXIMUM_REGISTRY_BODY_BYTES,
+        ) {
+            Ok(response) if !is_retryable_status(response.status()) => {
+                return Ok(response.status());
+            }
+            Ok(response) => drop(response),
+            Err(error) => drop(error),
+        }
+        sleep(retry_delay);
+    }
+    return client
+        .get(
+            endpoint,
+            &[(ACCEPT.as_str(), "application/json")],
+            MAXIMUM_REGISTRY_BODY_BYTES,
+        )
+        .map(|response| return response.status())
+        .map_err(|error| {
+            return format!(
+                "query {} release availability after bounded retries: {error}",
+                registry.name
+            );
+        });
 }
 
 /// Build one exact public package metadata endpoint.

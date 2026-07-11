@@ -2,7 +2,10 @@
 
 use http::StatusCode;
 
-use super::{REGISTRIES, classify_status, parse_version_argument, registry_endpoint};
+use super::{
+    REGISTRIES, REGISTRY_RETRY_DELAYS, classify_status, is_retryable_status,
+    parse_version_argument, registry_endpoint,
+};
 
 /// Verify that only HTTP 404 represents an unpublished version.
 ///
@@ -85,6 +88,60 @@ fn require_error<Value>(result: Result<Value, String>, expected: &str) -> Result
     };
     if !message.contains(expected) {
         return Err(format!("unexpected availability error: {message}"));
+    }
+    return Ok(());
+}
+
+/// Verify the retry schedule stays finite and strictly increasing.
+///
+/// # Errors
+///
+/// Returns an error when retry timing becomes empty, unbounded, or ambiguous.
+#[test]
+fn retry_schedule_is_bounded() -> Result<(), String> {
+    if REGISTRY_RETRY_DELAYS.len() != 0x4 {
+        return Err("release availability must use exactly four retries".to_owned());
+    }
+    for adjacent in REGISTRY_RETRY_DELAYS.windows(0x2) {
+        let &[earlier, later] = adjacent else {
+            return Err("retry schedule window must contain two delays".to_owned());
+        };
+        if earlier >= later {
+            return Err("retry delays must be strictly increasing".to_owned());
+        }
+    }
+    return Ok(());
+}
+
+/// Verify that retries are limited to transport-like HTTP failures.
+///
+/// # Errors
+///
+/// Returns an error when a terminal release status is retryable or a transient
+/// status is not.
+#[test]
+fn retry_status_policy_is_fail_closed() -> Result<(), String> {
+    for terminal in [
+        StatusCode::OK,
+        StatusCode::BAD_REQUEST,
+        StatusCode::UNAUTHORIZED,
+        StatusCode::FORBIDDEN,
+        StatusCode::NOT_FOUND,
+    ] {
+        if is_retryable_status(terminal) {
+            return Err(format!("terminal status must not be retried: {terminal}"));
+        }
+    }
+    for transient in [
+        StatusCode::TOO_MANY_REQUESTS,
+        StatusCode::INTERNAL_SERVER_ERROR,
+        StatusCode::BAD_GATEWAY,
+        StatusCode::SERVICE_UNAVAILABLE,
+        StatusCode::GATEWAY_TIMEOUT,
+    ] {
+        if !is_retryable_status(transient) {
+            return Err(format!("transient status must be retried: {transient}"));
+        }
     }
     return Ok(());
 }
