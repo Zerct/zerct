@@ -2,6 +2,7 @@
 [env]
 MACOSX_DEPLOYMENT_TARGET = { value = "11.0", force = true }
 
-# A standalone executable does not need an MSVC import library.
+# Use Rust's bundled silent COFF linker for the standalone Windows executable.
 [target.x86_64-pc-windows-msvc]
-rustflags = ["-C", "link-arg=/NOIMPLIB"]
+linker = "rust-lld"
+rustflags = ["-C", "linker-flavor=lld-link", "-C", "link-arg=/NOIMPLIB"]
