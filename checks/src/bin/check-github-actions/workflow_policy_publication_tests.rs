@@ -10,7 +10,6 @@ const TRUSTED_PUBLISHER_SOURCE: &str = r#"workflow_dispatch:
 [ "$GITHUB_SHA" != "$INPUT_RELEASE_COMMIT" ]
 release_commit:
 orchestration_id:
-ref: ${{ inputs.release_commit }}
 release_commit="$(git rev-parse "refs/tags/$release_ref^{commit}")"
 release_target="$(gh api --jq '.target_commitish'
 --bin check-native-release-assets -- "$version"
@@ -90,5 +89,27 @@ fn registry_publisher_identity_rejects_indirect_triggers() {
         findings.len(),
         0x2,
         "both unsupported publisher identities must be rejected"
+    );
+}
+
+/// Verify that workflow inputs cannot select checkout refs.
+///
+/// # Panics
+///
+/// Panics when an input-derived checkout ref is accepted.
+#[test]
+fn registry_publisher_identity_rejects_untrusted_checkout_ref() {
+    let workflow = Workflow {
+        contents: format!("{TRUSTED_PUBLISHER_SOURCE}ref: ${{{{ inputs.release_commit }}}}\n"),
+        path: PathBuf::from(".github/workflows/publish-crates.yml"),
+    };
+    let mut findings = Vec::new();
+
+    HostedActionsCheck.check_registry_publisher_identity(&workflow, &mut findings);
+
+    assert_eq!(
+        findings.len(),
+        0x1,
+        "input-derived checkout refs must fail policy"
     );
 }

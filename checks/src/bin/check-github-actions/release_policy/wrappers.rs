@@ -81,10 +81,6 @@ impl WrapperReleasePolicy for HostedActionsCheck {
                 "package publish must fail outside the exact release tag",
             ),
             (
-                "ref: ${{ inputs.release_commit }}",
-                "package publish must build the resolved native release commit",
-            ),
-            (
                 "release_target=\"$(gh api --jq '.target_commitish'",
                 "package publish must bind its source to the GitHub release target",
             ),

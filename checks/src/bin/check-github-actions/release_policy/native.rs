@@ -178,6 +178,14 @@ const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
         "native publication must dispatch guarded registry recovery after asset publication",
     ),
     (
+        "--ref \"$RELEASE_REF\"",
+        "native publication must execute recovery from the immutable release tag",
+    ),
+    (
+        "--commit \"$RELEASE_COMMIT\"",
+        "native publication must discover recovery by the immutable release commit",
+    ),
+    (
         "for delay in 0 2 4 8 15; do",
         "native publication must retry transient recovery dispatch failures",
     ),
