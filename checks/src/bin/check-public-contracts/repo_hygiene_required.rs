@@ -107,6 +107,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-github-actions/release_policy/native.rs",
     "checks/src/bin/check-github-actions/release_policy/wrappers.rs",
     "checks/src/bin/check-github-actions/workflow_policy.rs",
+    "checks/src/bin/check-github-actions/workflow_policy_publication_tests.rs",
     "checks/src/bin/check-openapi.rs",
     "checks/src/bin/check-openapi/vacuum.rs",
     "checks/src/bin/check-openapi/vacuum_download.rs",

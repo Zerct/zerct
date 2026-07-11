@@ -7,6 +7,10 @@ use super::{
 
 use std::ffi::OsStr;
 
+#[cfg(test)]
+#[path = "workflow_policy_publication_tests.rs"]
+mod publication_tests;
+
 /// Unfiltered event header required by the canonical continuous-integration workflow.
 const CI_TRIGGER_HEADER: &str =
     "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n";
@@ -70,30 +74,52 @@ impl WorkflowPolicy for HostedActionsCheck {
         if !workflow.path.ends_with("recover-publication.yml") {
             return;
         }
+        if workflow.contents.contains("id-token: write") {
+            findings.push(format!(
+                "{}: recovery orchestration must never receive registry OIDC permission",
+                workflow.path.display()
+            ));
+        }
         for (needle, message) in [
             (
                 "if: github.ref == 'refs/heads/main'",
                 "publication recovery must reject non-main dispatches",
             ),
             (
-                "ref: ${{ inputs.release_ref }}",
-                "publication recovery must check out the requested immutable release ref",
+                "ref: refs/tags/${{ inputs.release_ref }}",
+                "publication recovery must check out a fully qualified release tag",
+            ),
+            (
+                r#"release_commit="$(git rev-parse "refs/tags/$RELEASE_REF^{commit}")""#,
+                "publication recovery must peel the release tag to one immutable commit",
+            ),
+            (
+                "release_target=\"$(gh api --jq '.target_commitish'",
+                "publication recovery must compare the tag commit with the GitHub release target",
             ),
             (
                 "--bin check-native-release-assets -- \"$version\"",
-                "publication recovery must verify the complete native release before registry calls",
+                "publication recovery must verify complete native assets before dispatch",
             ),
             (
-                "uses: ./.github/workflows/publish-crates.yml",
-                "publication recovery must invoke the crates.io publisher",
+                "needs: gate",
+                "the actions-write dispatch job must depend on the credential-free release gate",
             ),
             (
-                "uses: ./.github/workflows/publish-npm.yml",
-                "publication recovery must invoke the npm publisher",
+                "actions: write # Dispatch and monitor the dedicated trusted-publisher workflows.",
+                "publication recovery must scope workflow dispatch permission to its dispatch job",
             ),
             (
-                "uses: ./.github/workflows/publish-pypi.yml",
-                "publication recovery must invoke the PyPI publisher",
+                "gh workflow run \"$workflow\"",
+                "publication recovery must directly dispatch trusted-publisher workflows",
+            ),
+            (
+                "workflows=(publish-crates.yml publish-npm.yml publish-pypi.yml)",
+                "publication recovery must dispatch every public registry publisher",
+            ),
+            (
+                "gh run watch \"$run_id\"",
+                "publication recovery must wait for every dispatched publisher",
             ),
         ] {
             require_contains(
@@ -105,18 +131,18 @@ impl WorkflowPolicy for HostedActionsCheck {
         }
     }
 
-    fn check_reusable_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+    fn check_registry_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>) {
         let required_group = match workflow.path.file_name().and_then(OsStr::to_str) {
-            Some("publish-crates.yml") => "  group: crates-${{ github.ref }}",
-            Some("publish-npm.yml") => "  group: npm-${{ github.ref }}",
-            Some("publish-pypi.yml") => "  group: pypi-${{ github.ref }}",
+            Some("publish-crates.yml") => "  group: crates-publication",
+            Some("publish-npm.yml") => "  group: npm-publication",
+            Some("publish-pypi.yml") => "  group: pypi-publication",
             None | Some(_) => return,
         };
         require_contains(
             workflow.contents.as_str(),
             required_group,
             format!(
-                "{}: reusable release concurrency must be registry-scoped to avoid caller deadlocks",
+                "{}: registry release concurrency must be registry-scoped",
                 workflow.path.display()
             )
             .as_str(),
@@ -172,10 +198,111 @@ impl WorkflowPolicy for HostedActionsCheck {
         self.check_checkout_credentials(workflow, findings);
         self.check_github_hosted_cargo_cache(workflow, findings);
         self.check_publication_recovery_workflow(workflow, findings);
-        self.check_reusable_workflow_concurrency(workflow, findings);
+        self.check_registry_preflight_retry(workflow, findings);
+        self.check_registry_publisher_identity(workflow, findings);
+        self.check_registry_workflow_concurrency(workflow, findings);
         self.check_public_package_release_order(workflow, findings);
         self.check_docs_deploy_workflow(workflow, findings);
         self.check_secret_workflow_dispatch_policy(workflow, findings);
+    }
+
+    fn check_registry_preflight_retry(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        let Some(file_name) = workflow.path.file_name().and_then(OsStr::to_str) else {
+            return;
+        };
+        if !matches!(
+            file_name,
+            "publish-crates.yml" | "publish-npm.yml" | "publish-pypi.yml"
+        ) {
+            return;
+        }
+        for (needle, message) in [
+            (
+                "for delay in 0 5 10 20 30 60; do",
+                "registry preflight must retry on a bounded schedule",
+            ),
+            (
+                "429|5??)",
+                "registry preflight must classify rate limits and server errors as transient",
+            ),
+        ] {
+            require_contains(
+                workflow.contents.as_str(),
+                needle,
+                format!("{}: {message}", workflow.path.display()).as_str(),
+                findings,
+            );
+        }
+    }
+
+    fn check_registry_publisher_identity(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        let Some(file_name) = workflow.path.file_name().and_then(OsStr::to_str) else {
+            return;
+        };
+        if !matches!(
+            file_name,
+            "publish-crates.yml" | "publish-npm.yml" | "publish-pypi.yml"
+        ) {
+            return;
+        }
+        for forbidden_trigger in ["workflow_call:", "workflow_run:"] {
+            if !workflow.contents.contains(forbidden_trigger) {
+                continue;
+            }
+            findings.push(format!(
+                "{}: trusted registry publishers must not use {forbidden_trigger}",
+                workflow.path.display(),
+            ));
+        }
+        for (needle, message) in [
+            (
+                "workflow_dispatch:",
+                "registry publisher must support guarded manual recovery",
+            ),
+            (
+                "[ \"$GITHUB_REF\" != \"refs/tags/$release_ref\" ]",
+                "registry publisher must fail when the dispatch ref is not the release tag",
+            ),
+            (
+                "[ \"$GITHUB_SHA\" != \"$INPUT_RELEASE_COMMIT\" ]",
+                "registry publisher must fail when the dispatch commit is not the release commit",
+            ),
+            (
+                "release_commit:",
+                "registry publisher must require an immutable release commit input",
+            ),
+            (
+                "orchestration_id:",
+                "registry publisher must require a unique orchestration identifier",
+            ),
+            (
+                "ref: ${{ inputs.release_commit }}",
+                "publication must check out the exact resolved release commit",
+            ),
+            (
+                r#"release_commit="$(git rev-parse "refs/tags/$release_ref^{commit}")""#,
+                "publication must peel the release tag to one immutable commit",
+            ),
+            (
+                "release_target=\"$(gh api --jq '.target_commitish'",
+                "publication must compare the tag commit with the GitHub release target",
+            ),
+            (
+                "--bin check-native-release-assets -- \"$version\"",
+                "publication must verify the complete native release before registry access",
+            ),
+            (
+                "[[ ! \"$INPUT_RELEASE_COMMIT\" =~ ^[0-9a-f]{40}$ ]]",
+                "publication must validate the immutable commit input",
+            ),
+        ] {
+            require_contains(
+                workflow.contents.as_str(),
+                needle,
+                format!("{}: {message}", workflow.path.display()).as_str(),
+                findings,
+            );
+        }
     }
 
     fn contains_cargo_publish_command(&self, contents: &str) -> bool {
@@ -282,34 +409,34 @@ mod tests {
         );
     }
 
-    /// Verify that one reusable publisher accepts its registry-scoped group.
+    /// Verify that one publisher accepts its registry-scoped group.
     ///
     /// # Panics
     ///
     /// Panics when the non-colliding group emits a finding.
     #[test]
-    fn reusable_workflow_concurrency_accepts_unique_group() {
+    fn registry_workflow_concurrency_accepts_scoped_group() {
         let workflow = Workflow {
-            contents: "concurrency:\n  group: crates-${{ github.ref }}\n".to_owned(),
+            contents: "concurrency:\n  group: crates-publication\n".to_owned(),
             path: PathBuf::from(".github/workflows/publish-crates.yml"),
         };
         let mut findings = Vec::new();
 
-        HostedActionsCheck.check_reusable_workflow_concurrency(&workflow, &mut findings);
+        HostedActionsCheck.check_registry_workflow_concurrency(&workflow, &mut findings);
 
         assert!(
             findings.is_empty(),
-            "registry-scoped concurrency must not collide with the caller"
+            "registry-scoped concurrency must be accepted"
         );
     }
 
-    /// Verify that a reusable publisher rejects the caller-derived group.
+    /// Verify that one publisher rejects a non-registry group.
     ///
     /// # Panics
     ///
     /// Panics when the colliding group is not reported.
     #[test]
-    fn reusable_workflow_concurrency_rejects_caller_group() {
+    fn registry_workflow_concurrency_rejects_unscoped_group() {
         let workflow = Workflow {
             contents: "concurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n"
                 .to_owned(),
@@ -317,12 +444,12 @@ mod tests {
         };
         let mut findings = Vec::new();
 
-        HostedActionsCheck.check_reusable_workflow_concurrency(&workflow, &mut findings);
+        HostedActionsCheck.check_registry_workflow_concurrency(&workflow, &mut findings);
 
         assert_eq!(
             findings.len(),
             0x1,
-            "caller-derived concurrency must be rejected for reusable publishers"
+            "non-registry concurrency must be rejected for publishers"
         );
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "tovuk",
-  "version": "0.1.116",
+  "version": "0.1.117",
   "description": "Use Tovuk scraper APIs from a native CLI.",
   "type": "module",
   "bin": {
