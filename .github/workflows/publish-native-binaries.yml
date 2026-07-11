@@ -412,6 +412,7 @@ jobs:
       contents: read
     env:
       GH_TOKEN: ${{ github.token }}
+      RELEASE_COMMIT: ${{ github.sha }}
       RELEASE_REF: ${{ needs.publish-native.outputs.release_ref }}
     steps:
       - name: Install pinned GitHub CLI
@@ -439,7 +440,7 @@ jobs:
             if [ "$delay" != 0 ]; then
               sleep "$delay"
             fi
-            if gh workflow run recover-publication.yml --repo "$GITHUB_REPOSITORY" --ref main \
+            if gh workflow run recover-publication.yml --repo "$GITHUB_REPOSITORY" --ref "$RELEASE_REF" \
               -f "release_ref=$RELEASE_REF" -f "request_id=$request_id"; then
               dispatch_succeeded=true
               break
@@ -453,7 +454,8 @@ jobs:
           for delay in 1 2 4 8 15 30; do
             sleep "$delay"
             if ! candidate_run_ids="$(gh run list --repo "$GITHUB_REPOSITORY" \
-              --workflow recover-publication.yml --event workflow_dispatch --branch main --limit 20 \
+              --workflow recover-publication.yml --event workflow_dispatch \
+              --commit "$RELEASE_COMMIT" --limit 20 \
               --json databaseId,displayTitle \
               --jq ".[] | select(.displayTitle == \"$title\") | .databaseId")"; then
               continue

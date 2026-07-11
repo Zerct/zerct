@@ -24,7 +24,6 @@ concurrency:
 jobs:
   gate:
     name: verify existing native release
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -36,7 +35,6 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-          ref: refs/tags/${{ inputs.release_ref }}
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -61,6 +59,10 @@ jobs:
             echo "Release ref $RELEASE_REF does not match public version v$version" >&2
             exit 1
           fi
+          if [ "$GITHUB_REF" != "refs/tags/$RELEASE_REF" ]; then
+            echo "Recovery must execute from the requested release tag" >&2
+            exit 1
+          fi
           if [[ ! "$REQUEST_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]; then
             echo "Recovery request identifier is invalid" >&2
             exit 1
@@ -68,7 +70,8 @@ jobs:
           release_commit="$(git rev-parse "refs/tags/$RELEASE_REF^{commit}")"
           checkout_commit="$(git rev-parse HEAD)"
           if [[ ! "$release_commit" =~ ^[0-9a-f]{40}$ ]] || \
-            [ "$checkout_commit" != "$release_commit" ]; then
+            [ "$checkout_commit" != "$release_commit" ] || \
+            [ "$GITHUB_SHA" != "$release_commit" ]; then
             echo "Release tag $RELEASE_REF did not resolve to the checked-out commit" >&2
             exit 1
           fi

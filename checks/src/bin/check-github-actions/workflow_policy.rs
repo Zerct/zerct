@@ -18,12 +18,12 @@ const CI_TRIGGER_HEADER: &str =
 /// Required guarded recovery and dispatch markers.
 const PUBLICATION_RECOVERY_REQUIREMENTS: &[PolicyRequirement] = &[
     (
-        "if: github.ref == 'refs/heads/main'",
-        "publication recovery must reject non-main dispatches",
+        "[ \"$GITHUB_REF\" != \"refs/tags/$RELEASE_REF\" ]",
+        "publication recovery must fail outside the requested release tag",
     ),
     (
-        "ref: refs/tags/${{ inputs.release_ref }}",
-        "publication recovery must check out a fully qualified release tag",
+        "[ \"$GITHUB_SHA\" != \"$release_commit\" ]",
+        "publication recovery must bind the event commit to the release tag",
     ),
     (
         r#"release_commit="$(git rev-parse "refs/tags/$RELEASE_REF^{commit}")""#,
@@ -96,10 +96,6 @@ const REGISTRY_PUBLISHER_REQUIREMENTS: &[PolicyRequirement] = &[
     (
         "orchestration_id:",
         "registry publisher must require a unique orchestration identifier",
-    ),
-    (
-        "ref: ${{ inputs.release_commit }}",
-        "publication must check out the exact resolved release commit",
     ),
     (
         r#"release_commit="$(git rev-parse "refs/tags/$release_ref^{commit}")""#,
@@ -184,6 +180,7 @@ impl WorkflowPolicy for HostedActionsCheck {
                 workflow.path.display()
             ));
         }
+        reject_untrusted_checkout_refs(workflow, findings);
         require_workflow_requirements(workflow, PUBLICATION_RECOVERY_REQUIREMENTS, findings);
     }
 
@@ -224,6 +221,7 @@ impl WorkflowPolicy for HostedActionsCheck {
                 workflow.path.display(),
             ));
         }
+        reject_untrusted_checkout_refs(workflow, findings);
         require_workflow_requirements(workflow, REGISTRY_PUBLISHER_REQUIREMENTS, findings);
     }
 
@@ -329,6 +327,23 @@ fn is_registry_publisher(workflow: &Workflow) -> bool {
         workflow.path.file_name().and_then(OsStr::to_str),
         Some("publish-crates.yml" | "publish-npm.yml" | "publish-pypi.yml")
     );
+}
+
+/// Reject workflow-input-derived checkout refs before any source executes.
+fn reject_untrusted_checkout_refs(workflow: &Workflow, findings: &mut Vec<String>) {
+    for forbidden_ref in [
+        "ref: refs/tags/${{ inputs.release_ref }}",
+        "ref: ${{ inputs.release_commit }}",
+        "ref: ${{ needs.prepare.outputs.release_commit }}",
+    ]
+    .into_iter()
+    .filter(|candidate| return workflow.contents.contains(candidate))
+    {
+        findings.push(format!(
+            "{}: checkout ref must come from the immutable workflow event, not {forbidden_ref}",
+            workflow.path.display()
+        ));
+    }
 }
 
 /// Require every named marker in one workflow.
