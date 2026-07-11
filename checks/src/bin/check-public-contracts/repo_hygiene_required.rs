@@ -186,6 +186,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "crates/tovuk/src/cli/api_commands/http/url_policy.rs",
     "crates/tovuk/src/cli/api_commands/http_tests/server.rs",
     "crates/tovuk/src/main.rs",
+    "docs/.mintignore",
     "docs/docs.json",
     "docs/openapi.json",
     "clippy.toml",

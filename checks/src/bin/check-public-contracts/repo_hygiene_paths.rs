@@ -126,6 +126,7 @@ pub(super) fn is_forbidden_tracked_path(path: &str) -> bool {
         .unwrap_or_default();
     return path.starts_with("vendor/")
         || path.starts_with("coverage/")
+        || path.starts_with("docs/fonts/")
         || path.starts_with("docs/output/")
         || path.starts_with("output/")
         || path.starts_with("packages/tovuk/dist/")

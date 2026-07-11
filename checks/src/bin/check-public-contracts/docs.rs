@@ -3,7 +3,8 @@ use crate::{
     docs_navigation::{require_navigation_contract, require_navigation_pages_exist},
     docs_sources::{DocsSources, openapi_config_path, read_navigation_pages},
     helpers::{
-        CheckResult, OutputChannel, reject_contains, require_contains, require_results, write_line,
+        CheckResult, OutputChannel, read_text, reject_contains, require_contains, require_results,
+        write_line,
     },
     retired_contracts::{
         RETIRED_OPENAPI_CONTRACTS, RETIRED_PUBLIC_COMMANDS, RETIRED_PUBLIC_DOCS_WORDING,
@@ -35,11 +36,12 @@ const OPENAPI_ECOMMERCE_PROPERTIES: &[&str] = &[
 ];
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0008] = [
+const _: [usize; 0x0009] = [
     size_of_val(&check),
     size_of_val(&print_openapi_path),
     size_of_val(&reject_retired_docs_contracts),
     size_of_val(&require_ecommerce_output_fields),
+    size_of_val(&require_mintlify_exclusions),
     size_of_val(&require_output_fields_in_openapi),
     size_of_val(&require_scraper_examples),
     size_of_val(&require_scraper_examples_in_sources),
@@ -54,6 +56,7 @@ const _: [usize; 0x0008] = [
 pub(super) fn check() -> CheckResult {
     let pages = check_try!(read_navigation_pages());
     check_try!(require_navigation_pages_exist(&pages));
+    check_try!(require_mintlify_exclusions());
     let sources = check_try!(DocsSources::load(&pages));
     check_try!(require_navigation_contract(&sources));
     check_try!(require_scraper_examples(&sources));
@@ -115,6 +118,19 @@ pub(super) fn reject_retired_docs_contracts(sources: &DocsSources) -> CheckResul
 /// Returns an error when the contract requirement cannot be verified.
 pub(super) fn require_ecommerce_output_fields(sources: &DocsSources) -> CheckResult {
     return require_output_fields_in_openapi(sources);
+}
+
+/// Require durable exclusion of retired documentation font assets.
+///
+/// # Errors
+///
+/// Returns an error when Mintlify can ingest the retired font subtree again.
+fn require_mintlify_exclusions() -> CheckResult {
+    let exclusions = check_try!(read_text("docs/.mintignore"));
+    if !exclusions.lines().any(|line| return line == "fonts/") {
+        return Err("docs/.mintignore must exclude the retired fonts/ subtree".to_owned());
+    }
+    return Ok(());
 }
 
 /// Require ecommerce output schemas in the public `OpenAPI` document.
