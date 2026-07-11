@@ -19,19 +19,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24"
+          node-version: "24.18.0"
           package-manager-cache: false
-      - uses: actions/cache@v6
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-mintlify-4.2.578
-          restore-keys: |
-            ${{ runner.os }}-npm-mintlify-
       - name: Check prose style
         run: |
           cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style -- --self-test
@@ -46,8 +40,11 @@ jobs:
             exit 0
           fi
 
+          umask 077
           mkdir -p "$HOME/.config/mintlify"
-          printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$HOME/.config/mintlify/config.json"
+          mintlify_config="$HOME/.config/mintlify/config.json"
+          trap 'rm -f "$mintlify_config"' EXIT
+          printf '%s' "$MINTLIFY_CLI_CONFIG_JSON" > "$mintlify_config"
           npx --yes mint@4.2.578 score https://docs.tovuk.com --format json > mint-score.json
           cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-score mint-score.json
         env:

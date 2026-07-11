@@ -43,7 +43,7 @@
         { "machine": "amd64", "system": "darwin" },
         { "machine": "x86_64", "system": "darwin" }
       ],
-      "runner": "macos-15",
+      "runner": "macos-15-intel",
       "triple": "x86_64-apple-darwin"
     },
     {

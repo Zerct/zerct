@@ -1,7 +1,11 @@
 //! Native Tovuk command line interface.
 
-mod cli;
+/// Native Tovuk command-line implementation.
+#[path = "cli/module_root.rs"]
+pub mod cli;
 
-fn main() -> std::process::ExitCode {
-    cli::entrypoint()
+use std::process::ExitCode;
+
+fn main() -> ExitCode {
+    return cli::Run::run(cli::Application);
 }

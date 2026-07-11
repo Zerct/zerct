@@ -1,0 +1,150 @@
+absolute-paths-allowed-crates = []
+absolute-paths-max-segments = 1
+accept-comment-above-attributes = false
+accept-comment-above-statement = false
+allow-comparison-to-zero = false
+allow-dbg-in-tests = false
+allow-exact-repetitions = false
+allow-expect-in-consts = false
+allow-expect-in-tests = false
+allow-indexing-slicing-in-tests = false
+allow-large-stack-frames-in-tests = false
+allow-mixed-uninlined-format-args = false
+allow-one-hash-in-raw-strings = false
+allow-panic-in-tests = false
+allow-print-in-tests = false
+allow-private-module-inception = false
+allow-renamed-params-for = []
+allow-unwrap-in-consts = false
+allow-unwrap-in-tests = false
+allow-unwrap-types = []
+allow-useless-vec-in-tests = false
+allowed-dotfiles = []
+allowed-duplicate-crates = []
+allowed-idents-below-min-chars = []
+allowed-prefixes = []
+allowed-scripts = ["Latin"]
+allowed-wildcard-imports = []
+arithmetic-side-effects-allowed = []
+arithmetic-side-effects-allowed-binary = []
+arithmetic-side-effects-allowed-unary = []
+array-size-threshold = 4096
+avoid-breaking-exported-api = false
+check-inconsistent-struct-field-initializers = true
+check-incompatible-msrv-in-tests = true
+check-private-items = true
+cognitive-complexity-threshold = 8
+const-literal-digits-threshold = 30
+doc-valid-idents = []
+enable-raw-pointer-heuristic-for-send = true
+enforce-iter-loop-reborrow = true
+enum-variant-name-threshold = 1
+enum-variant-size-threshold = 64
+excessive-nesting-threshold = 3
+future-size-threshold = 4096
+ignore-interior-mutability = []
+inherent-impl-lint-scope = "crate"
+large-error-ignored = []
+large-error-threshold = 64
+lint-commented-code = true
+literal-representation-threshold = 0
+matches-for-let-else = "AllTypes"
+max-fn-params-bools = 0
+max-include-file-size = 262144
+max-struct-bools = 0
+max-suggested-slice-pattern-length = 16
+max-trait-bounds = 1
+min-ident-chars-threshold = 2
+missing-docs-allow-unused = false
+missing-docs-in-crate-items = false
+module-item-order-groupings = [
+  [
+    "macros",
+    [
+      "macro",
+    ],
+  ],
+  [
+    "modules",
+    [
+      "extern_crate",
+      "mod",
+      "foreign_mod",
+    ],
+  ],
+  [
+    "use",
+    [
+      "use",
+    ],
+  ],
+  [
+    "global_asm",
+    [
+      "global_asm",
+    ],
+  ],
+  [
+    "UPPER_SNAKE_CASE",
+    [
+      "static",
+      "const",
+    ],
+  ],
+  [
+    "PascalCase",
+    [
+      "ty_alias",
+      "enum",
+      "struct",
+      "union",
+      "trait",
+      "trait_alias",
+      "impl",
+    ],
+  ],
+  [
+    "lower_snake_case",
+    [
+      "fn",
+    ],
+  ],
+]
+module-items-ordered-within-groupings = "all"
+msrv = "1.97.0"
+pass-by-value-size-limit = 128
+pub-underscore-fields-behavior = "AllPubFields"
+recursive-self-in-type-definitions = true
+semicolon-inside-block-ignore-singleline = false
+semicolon-outside-block-ignore-multiline = false
+single-char-binding-names-threshold = 0
+source-item-ordering = ["enum", "impl", "module", "struct", "trait"]
+stack-size-threshold = 65536
+standard-macro-braces = [
+  { name = "assert", brace = "(" },
+  { name = "assert_eq", brace = "(" },
+  { name = "assert_ne", brace = "(" },
+  { name = "eprintln", brace = "(" },
+  { name = "format", brace = "(" },
+  { name = "matches", brace = "(" },
+  { name = "panic", brace = "(" },
+  { name = "println", brace = "(" },
+  { name = "vec", brace = "[" },
+  { name = "write", brace = "(" },
+  { name = "writeln", brace = "(" },
+]
+struct-field-name-threshold = 1
+suppress-restriction-lint-in-const = false
+too-large-for-stack = 4096
+too-many-arguments-threshold = 4
+too-many-lines-threshold = 40
+trait-assoc-item-kinds-order = ["const", "type", "fn"]
+trivial-copy-size-limit = 64
+type-complexity-threshold = 75
+unnecessary-box-size = 4096
+unreadable-literal-lint-fractions = true
+upper-case-acronyms-aggressive = true
+vec-box-size-threshold = 16384
+verbose-bit-mask-threshold = 0
+warn-on-all-wildcard-imports = true
+warn-unsafe-macro-metavars-in-private-macros = true

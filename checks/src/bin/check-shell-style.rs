@@ -1,85 +1,98 @@
 //! Shell style verification for the public repository.
 
+/// Propagate a failed shell check without the question-mark operator.
+macro_rules! check_try {
+    ($result:expr) => {
+        match $result {
+            Ok(value) => value,
+            Err(error) => return Err(error.into()),
+        }
+    };
+}
+
+use flate2 as _;
+
+use reqwest as _;
+
+use serde as _;
+
+use serde_json as _;
+
+use sha2 as _;
+
 use std::{
     ffi::OsStr,
-    fs,
+    fs::read_dir,
+    io::{Write as _, stderr},
     path::{Path, PathBuf},
     process::ExitCode,
 };
 
+use tar as _;
+
 use tovuk_public_checks::check_support::{CheckResult, command, repo_root, tool_path};
 
-fn main() -> ExitCode {
-    match run() {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(error) => {
-            eprintln!("{error}");
-            ExitCode::FAILURE
-        }
-    }
+/// Shell hooks which are executable repository entrypoints.
+const SHELL_HOOKS: &[&str] = &[".githooks/pre-commit", ".githooks/pre-push"];
+
+const _: [usize; 0x3] = [
+    size_of_val(&collect_shell_entrypoints),
+    size_of_val(&collect_shell_sources),
+    size_of_val(&run),
+];
+
+/// One shell tool invocation.
+#[derive(Clone, Copy, Debug)]
+struct ShellTool {
+    /// Arguments placed before repository paths.
+    fixed_args: &'static [&'static str],
+    /// Executable name.
+    program: &'static str,
 }
 
-fn run() -> CheckResult {
-    let repo_root = repo_root()?;
-    let path = tool_path();
-    let shell_sources = collect_shell_sources(repo_root.as_path())?;
-    let shell_entrypoints = collect_shell_entrypoints(repo_root.as_path())?;
-    if shell_sources.is_empty() {
-        return Ok(());
-    }
-
-    run_shell_tool(
-        repo_root.as_path(),
-        path.as_os_str(),
-        "bash",
-        &["-n"],
-        shell_sources.as_slice(),
-    )?;
-    if !shell_entrypoints.is_empty() {
-        run_shell_tool(
-            repo_root.as_path(),
-            path.as_os_str(),
-            "shellcheck",
-            &["-x"],
-            shell_entrypoints.as_slice(),
-        )?;
-    }
-    run_shell_tool(
-        repo_root.as_path(),
-        path.as_os_str(),
-        "shfmt",
-        &["-i", "2", "-ci", "-d"],
-        shell_sources.as_slice(),
-    )
-}
-
-fn collect_shell_sources(repo_root: &Path) -> CheckResult<Vec<PathBuf>> {
-    let mut sources = collect_shell_files(repo_root, Path::new("scripts"))?;
-    sources.extend(collect_shell_files(repo_root, Path::new("scripts/lib"))?);
-    sources.sort();
-    sources.dedup();
-    Ok(sources)
-}
-
+/// Contract implementation for `collect_shell_entrypoints`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
 fn collect_shell_entrypoints(repo_root: &Path) -> CheckResult<Vec<PathBuf>> {
-    collect_shell_files(repo_root, Path::new("scripts"))
+    let mut entrypoints = check_try!(collect_shell_files(repo_root, Path::new("scripts")));
+    entrypoints.extend(
+        SHELL_HOOKS
+            .iter()
+            .map(PathBuf::from)
+            .filter(|hook| return repo_root.join(hook).is_file()),
+    );
+    entrypoints.sort();
+    return Ok(entrypoints);
 }
 
+/// Contract implementation for `collect_shell_files`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
 fn collect_shell_files(repo_root: &Path, relative_dir: &Path) -> CheckResult<Vec<PathBuf>> {
     let absolute_dir = repo_root.join(relative_dir);
     let mut files = Vec::new();
     if !absolute_dir.is_dir() {
         return Ok(files);
     }
-    let entries = fs::read_dir(absolute_dir.as_path())
-        .map_err(|error| format!("read {}: {error}", relative_dir.display()))?;
-    for entry in entries {
-        let entry =
-            entry.map_err(|error| format!("read entry in {}: {error}", relative_dir.display()))?;
-        if !entry
-            .file_type()
-            .map_err(|error| format!("read file type for {}: {error}", entry.path().display()))?
-            .is_file()
+    let entries = check_try!(
+        read_dir(absolute_dir.as_path())
+            .map_err(|error| format!("read {}: {error}", relative_dir.display()))
+    );
+    for entry_result in entries {
+        let entry = check_try!(
+            entry_result
+                .map_err(|error| format!("read entry in {}: {error}", relative_dir.display()))
+        );
+        if !check_try!(
+            entry
+                .file_type()
+                .map_err(|error| format!("read file type for {}: {error}", entry.path().display()))
+        )
+        .is_file()
         {
             continue;
         }
@@ -88,23 +101,106 @@ fn collect_shell_files(repo_root: &Path, relative_dir: &Path) -> CheckResult<Vec
         }
     }
     files.sort();
-    Ok(files)
+    return Ok(files);
 }
 
+/// Contract implementation for `collect_shell_sources`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+fn collect_shell_sources(repo_root: &Path) -> CheckResult<Vec<PathBuf>> {
+    let mut sources = check_try!(collect_shell_files(repo_root, Path::new("scripts")));
+    sources.extend(check_try!(collect_shell_files(
+        repo_root,
+        Path::new("scripts/lib")
+    )));
+    sources.extend(
+        SHELL_HOOKS
+            .iter()
+            .map(PathBuf::from)
+            .filter(|hook| return repo_root.join(hook).is_file()),
+    );
+    sources.sort();
+    sources.dedup();
+    return Ok(sources);
+}
+
+fn main() -> ExitCode {
+    match run() {
+        Ok(()) => return ExitCode::SUCCESS,
+        Err(error) => {
+            let _write_result = writeln!(stderr().lock(), "{error}");
+            return ExitCode::FAILURE;
+        }
+    }
+}
+
+/// Contract implementation for `run`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+fn run() -> CheckResult {
+    let repo_root = check_try!(repo_root());
+    let path = tool_path();
+    let shell_sources = check_try!(collect_shell_sources(repo_root.as_path()));
+    let shell_entrypoints = check_try!(collect_shell_entrypoints(repo_root.as_path()));
+    if shell_sources.is_empty() {
+        return Ok(());
+    }
+
+    check_try!(run_shell_tool(
+        repo_root.as_path(),
+        path.as_os_str(),
+        ShellTool {
+            fixed_args: &["-n"],
+            program: "bash",
+        },
+        shell_sources.as_slice(),
+    ));
+    if !shell_entrypoints.is_empty() {
+        check_try!(run_shell_tool(
+            repo_root.as_path(),
+            path.as_os_str(),
+            ShellTool {
+                fixed_args: &["-x"],
+                program: "shellcheck",
+            },
+            shell_entrypoints.as_slice(),
+        ));
+    }
+    return run_shell_tool(
+        repo_root.as_path(),
+        path.as_os_str(),
+        ShellTool {
+            fixed_args: &["-i", "2", "-ci", "-d"],
+            program: "shfmt",
+        },
+        shell_sources.as_slice(),
+    );
+}
+
+/// Contract implementation for `run_shell_tool`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
 fn run_shell_tool(
     repo_root: &Path,
     path: &OsStr,
-    program: &str,
-    fixed_args: &[&str],
+    tool: ShellTool,
     files: &[PathBuf],
 ) -> CheckResult {
-    let status = command(repo_root, path, program)
-        .args(fixed_args)
-        .args(files)
-        .status()
-        .map_err(|error| format!("run {program}: {error}"))?;
-    status
+    let status = check_try!(
+        command(repo_root, path, tool.program)
+            .args(tool.fixed_args)
+            .args(files)
+            .status()
+            .map_err(|error| format!("run {}: {error}", tool.program))
+    );
+    return status
         .success()
         .then_some(())
-        .ok_or_else(|| format!("{program} failed with status {status}"))
+        .ok_or_else(|| format!("{} failed with status {status}", tool.program));
 }

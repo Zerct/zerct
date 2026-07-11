@@ -1,112 +1,126 @@
-# Tovuk Public Repo Agent Guide
+# Tovuk Public Repository Guide
 
-This repository is the public package and documentation surface for Tovuk. Tovuk
-is a paid scraping API service: users authenticate with API keys, create scraper
-requests, and read stored public-data results. Do not reintroduce customer
-website deploys, backends, databases, workers, object storage buckets, queues,
-cron jobs, custom domains, secrets, runtime services, or other cloud-service
-products.
+This repository is the public distribution and documentation surface for Tovuk:
+the native Rust CLI, thin npm and PyPI launchers, Homebrew formula, public API
+contract, Mintlify docs, and public agent skill. Keep private runtime,
+infrastructure, and customer-service implementation out of this repository.
 
-Keep this file compact and durable. Codex loads project instructions from the
-repo root down to the current directory. In each directory, Codex uses at most
-one instruction file: `AGENTS.override.md` before `AGENTS.md`. The default
-combined project guidance cap is `project_doc_max_bytes` 32 KiB. Put
-directory-specific rules in a closer `AGENTS.md` if a subtree needs different
-commands or ownership. More deeply nested files override this one. When
-editing agent instructions, follow the OpenAI Codex guidance: first remove
-stale or duplicated guidance, then add rules only for Tovuk-specific
-invariants, commands, or verification gates that remain true across coding-tool
-upgrades.
+## Codex Instructions
 
-Do not delegate implementation, final judgment, verification, or reporting to
-subagents. If the user explicitly requests a skill workflow that uses review
-subagents, use them only for discovery and independent critique inside the
-current Codex thread; they must not create user-owned chats, standalone
-automation runs, or separate persistent workstreams. The current Codex thread
-still owns the edits, checks, and final report.
+Codex loads project instructions from the repo root down to the current
+directory. In each directory, `AGENTS.override.md` takes precedence over
+`AGENTS.md`, and Codex uses at most one instruction file there. A closer
+`AGENTS.md` should contain only durable rules for its subtree and overrides
+broader guidance. The default combined `project_doc_max_bytes` limit is 32
+KiB; keep each file compact and remove stale or duplicated guidance.
 
-Work locally and commit coherent increments. Push to main or master only after
-50 local commits and only when the current user or automation instruction
-includes that batched-push rule, unless the user explicitly asks earlier.
-Deploy only when the active user or automation instruction explicitly includes
-deployment.
+Add nested guidance only when a subtree has genuinely different ownership,
+commands, or invariants. State its scope in the first six lines. Do not repeat
+this discovery policy in nested files.
 
-## Product Boundary
+## Public Boundary
 
-- Public CLI commands are limited to login, account, pricing, scraper, request,
-  usage, billing, and support workflows.
-- Public docs, package READMEs, examples, OpenAPI, generated artifacts, tests,
-  and skills must describe scraper APIs only.
-- Scraper inputs must be public URLs, public handles, public search terms, or
-  public identifiers. Never ask users to provide cookies, passwords, account
-  tokens, private session data, private repository credentials, proxy URLs, or
-  private account content through the public API or CLI.
-- There is no free scraper tier. Creating scraper requests requires paid
-  billing. Plans are account-level and balance-first. Read the current plan
-  catalog from the engine `Plan::pricing()` source before editing plan copy.
-  The public CLI must consume `GET /v1/pricing`; public docs and contract checks
-  are consumers, not pricing authorities. Do not add another public pricing
-  table or static JSON catalog.
-- Billing is per successful stored scraper result. Keep pricing exact and
-  synchronized across docs, OpenAPI examples, package READMEs, CLI help, and
-  contract checks.
-- Support escalation must be possible through both
+- Public features are limited to login, account, API keys, pricing, scraper
+  discovery, scraper requests and results, usage, billing, and support.
+- Never add private services, databases, workers, queues, storage, cron jobs,
+  domains, hostnames, secrets, credentials, proxy configuration, deployment
+  topology, internal endpoints, private repository paths, or private product
+  implementation.
+- Public scraper inputs are public URLs, handles, search terms, place IDs, or
+  other public identifiers. Never request cookies, passwords, session data,
+  account tokens, private repository credentials, or private content.
+- Reject private implementation details in docs, examples, generated files,
+  tests, configuration, commit messages, and release artifacts, not only in
+  production code.
+- Do not copy files or dependency policy from a private repository wholesale.
+  Public configuration must be derived from this repository's own manifests,
+  lockfiles, release targets, and public contracts.
+
+## Source Of Truth
+
+- The native CLI lives in `crates/tovuk`.
+- Repository policy and verification live in `checks`; this crate is
+  local-only and must never be published.
+- `packages/tovuk` and `packages/tovuk-py` install or launch the same native
+  binary. Keep `TOVUK_NATIVE_BINARY` support.
+- `vendor/ring-0.17.14` is public third-party source with only the compatibility
+  changes documented in `TOVUK-PATCH.md`. Do not add product code, reformat the
+  tree, or apply project prose rules to cryptographic source and assembly.
+- The npm package must have zero runtime and development dependencies. Its MJS
+  files are packaging adapters only; product logic belongs in Rust.
+- Prefer Rust for validation, parsing, generation, checksums, release policy,
+  and workflow logic. Python, JavaScript, Ruby, YAML, and shell are allowed only
+  where their package manager or host interface requires them.
+- This repository has no TanStack application. Do not add or copy a website
+  during CLI, SDK, docs, or strictness work.
+- Keep Cargo, npm, PyPI, Python module, Homebrew, native target, and CLI version
+  metadata synchronized.
+- `GET /v1/pricing` is the public pricing authority. Docs, OpenAPI, examples,
+  package READMEs, CLI output, and contract checks are consumers; do not create
+  an independent price catalog.
+
+## API And Documentation
+
+- Update `docs/openapi.json` for every public API change.
+- Add each user-facing Mintlify page to `docs/docs.json`.
+- Keep public routes, examples, limits, scraper names, billing semantics, and
+  support behavior synchronized across docs, OpenAPI, packages, CLI help, and
+  Rust contract checks.
+- Prefer direct CLI commands and HTTP endpoints over dashboard-first wording.
+- Keep tracked prose ASCII-only unless an existing external name requires
+  otherwise. Do not use Unicode em dashes.
+- Preserve the support path through both
   `tovuk support create "Subject" "Details" --json` and
-  `POST /v1/support/tickets` with command output, request id when available,
-  and the first actionable error line.
+  `POST /v1/support/tickets`.
 
-## Rust-Native Boundary
+## Engineering Rules
 
-- The native CLI source of truth is `crates/tovuk`.
-- Local repository policy and docs checks live in `checks`; this crate is
-  local-only and must not be published as a user package.
-- `packages/tovuk` ships the native Tovuk binary through npm and must not add
-  runtime JavaScript dependencies.
-- `packages/tovuk-py` launches or downloads the same native Tovuk binary and
-  must keep `TOVUK_NATIVE_BINARY` override support.
-- JavaScript and TypeScript are allowed only for static documentation/frontend
-  assets. Do not add API routes, SSR handlers, middleware, Node/Bun/Deno
-  servers, or TypeScript runtime commands.
-- Prefer Rust-native verification. Add a Go-native check only when it is
-  stable, stricter than the Rust-native alternatives for a real quality gap,
-  and does not add runtime surface or package dependencies.
-- Keep Cargo, npm, PyPI, and Homebrew package versions synchronized whenever
-  the native CLI changes.
-- `Formula/tovuk.rb` is the Homebrew formula for the main `tovuk/tovuk`
-  repository.
+- Rust 1.97.0, rustfmt, rustc, rustdoc, Clippy, and dependency policy are pinned
+  repository requirements.
+- Do not add lint suppressions, raise thresholds, disable checks, downgrade
+  warnings, or use dirty-package shortcuts. Fix findings structurally.
+- The npm launcher deliberately disables only `unicorn/no-null`: its public
+  agent-error JSON must emit explicit `null` fields, while `undefined` would
+  silently remove those fields. Oxlint's blanket `restriction` category is not
+  enabled because it contains browser-only and mutually exclusive Node bans;
+  all applicable correctness, suspicious, performance, style, pedantic, and
+  nursery categories are errors. Do not add another JavaScript rule exception.
+- Do not use `unwrap`, `expect`, panic paths, ignored results, unsafe code,
+  unchecked indexing, implicit numeric conversions, or unreviewed dependency
+  features.
+- Keep functions and files within the configured complexity and size limits.
+  Split by domain responsibility rather than moving code mechanically.
+- Preserve external JSON, CLI, API, package, and file-format contracts when
+  renaming internal Rust identifiers.
+- Do not discard unrelated worktree changes. Generated synchronization may
+  update tracked files, so inspect the diff before and after every full gate.
 
-## API And Docs
+## Verification
 
-- Update `docs/openapi.json` for every public API surface.
-- OpenAPI must satisfy `cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-openapi --` with a 100 score.
-- Update README files when commands, packages, pricing, limits, API behavior, or
-  supported scraper surfaces change.
-- Mintlify navigation lives in `docs/docs.json`; add every user-facing page
-  there so search, sitemap, assistant context, and MCP search can discover it.
-- Avoid dashboard-first language. Prefer concrete CLI commands and API
-  endpoints.
-- Keep prose ASCII-only unless the surrounding file already uses another
-  character set.
-- Do not use Unicode em dashes in tracked text.
-
-## Checks
-
-Run narrow checks while editing, then run the full suite before handoff when
-practical:
+Run narrow checks while editing. Before commit, run:
 
 ```sh
-cargo fmt --check --manifest-path crates/tovuk/Cargo.toml
-cargo fmt --check --manifest-path checks/Cargo.toml
-cargo clippy --locked --release --manifest-path crates/tovuk/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
-cargo clippy --locked --release --manifest-path checks/Cargo.toml --all-targets --all-features -- -D warnings -D clippy::all -D clippy::pedantic
-npm --prefix packages/tovuk run check
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- cli-contract
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- docs
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-prose-style --
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-shell-style --
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-toml-style --
-cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-openapi --
-ruby -c Formula/tovuk.rb
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-pre-commit --
+```
+
+Before push or handoff, run the complete local and CI-equivalent gate:
+
+```sh
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ```
+
+The full gate must cover formatting, release checks, tests, maximum Clippy,
+rustdoc with warnings denied, dependency feature fingerprints, cargo-deny,
+cargo-audit, cargo-machete, package/runtime checks, Actions policy, docs,
+OpenAPI, prose, TOML, JavaScript adapter syntax, Python, Ruby/Homebrew, and
+public-leakage checks. Do not report a failing or skipped gate as passing.
+
+## Release And Deployment
+
+- Deployment for this repository means public CLI/package release and Mintlify
+  docs synchronization. There is no public website deployment here.
+- Release only a coherent synchronized version. Verify that the version is not
+  already published before pushing a release-triggering change.
+- Push or publish only when the active user instruction authorizes it.
+- After push, monitor all CI, native asset, crates.io, npm, PyPI, Homebrew, and
+  Mintlify workflows. Treat remote verification as part of completion.

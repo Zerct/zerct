@@ -1,3 +1,5 @@
 extends: [[vacuum:oas, all]]
 rules:
+  # Public response contracts intentionally mix established camelCase and
+  # snake_case fields. Exact serialized names are enforced by Rust contracts.
   camel-case-properties: false

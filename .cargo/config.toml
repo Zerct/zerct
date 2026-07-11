@@ -1,0 +1,27 @@
+[registries.crates-io]
+protocol = "sparse"
+
+# Cargo locks optional dependency metadata even when the corresponding TLS
+# provider is inactive. This narrow public patch keeps that metadata on the
+# repository's single getrandom/windows-sys generation without altering the
+# published CLI manifest.
+[patch.crates-io]
+ring = { path = "vendor/ring-0.17.14" }
+
+[build]
+warnings = "deny"
+
+[future-incompat-report]
+frequency = "always"
+
+[net]
+retry = 5
+
+[resolver]
+incompatible-rust-versions = "fallback"
+
+[http]
+timeout = 120
+
+[env]
+MACOSX_DEPLOYMENT_TARGET = { value = "11.0", force = true }

@@ -1,151 +1,273 @@
-use crate::github_actions_policy::{Workflow, require_contains};
+//! Native binary release workflow policy.
 
-const READINESS_COMMAND: &str = "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com";
+use crate::{
+    DocsReadinessBehavior, DocsReadinessStep, DocsReadinessTracker, HostedActionsCheck,
+    NativeReleasePolicy, PolicyRequirement, Workflow, reject_lines, require_contains,
+};
 
-pub(super) fn check_publish_workflow(workflow: &Workflow, findings: &mut Vec<String>) {
-    for (needle, message) in [
-        (
-            "github.ref == 'refs/heads/main'",
-            "publish-native-binaries.yml must reject workflow_dispatch release uploads from non-main refs",
-        ),
-        (
-            "native-release-targets.json",
-            "publish-native-binaries.yml must read the native target matrix from native-release-targets.json",
-        ),
-        (
-            "fromJSON(needs.native-targets.outputs.matrix)",
-            "publish-native-binaries.yml must build the native matrix generated from native-release-targets.json",
-        ),
-        (
-            "needs: [native-targets, release-gate]",
-            "publish-native-binaries.yml must not upload native release assets before the release gate passes",
-        ),
-        (
-            "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --",
-            "publish-native-binaries.yml release gate must run the full public repository check before publishing assets",
-        ),
-        (
-            "matrix.asset_ext",
-            "publish-native-binaries.yml must name assets with explicit manifest asset extensions",
-        ),
-        (
-            ".sha256",
-            "publish-native-binaries.yml must publish SHA-256 checksum assets for native binaries",
-        ),
-    ] {
-        require_contains(workflow.contents.as_str(), needle, message, findings);
-    }
-    check_blocking_docs_readiness_gate(workflow, findings);
-}
+/// Required documentation deployment and synchronization command.
+const DOCS_DEPLOY_COMMAND: &str =
+    "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --";
 
-fn check_blocking_docs_readiness_gate(workflow: &Workflow, findings: &mut Vec<String>) {
-    match docs_readiness_step(workflow.contents.as_str()) {
-        Some(DocsReadinessStep {
-            start_line,
-            continues_on_error: true,
-        }) => findings.push(format!(
-            "{}:{start_line}: live docs agent readiness must be a blocking release gate",
-            workflow.path.display()
-        )),
-        Some(_) => {}
-        None => findings.push(
-            "publish-native-binaries.yml release gate must verify live docs agent readiness before publishing assets"
-                .to_owned(),
-        ),
-    }
-}
+/// Native release workflow snippets that are forbidden.
+const REJECTED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
+    (
+        "def build_strategy",
+        "inline Python matrix generation is forbidden; use native-release-tool",
+    ),
+    (
+        "node - <<'NODE'",
+        "inline Node checksum generation is forbidden; use native-release-tool",
+    ),
+    (
+        "steps.release.outputs",
+        "platform build jobs must not own release state",
+    ),
+    (
+        "status.env",
+        "native release state must not use mutable status.env handoffs",
+    ),
+    (
+        "github.actor ==",
+        "native publishing must use repository protections instead of a private actor gate",
+    ),
+    (
+        "2>/dev/null",
+        "native release API failures must not be hidden as missing state",
+    ),
+    (
+        "|| true",
+        "native release state probes must fail closed on unexpected errors",
+    ),
+];
 
-struct DocsReadinessStep {
-    start_line: usize,
-    continues_on_error: bool,
-}
+/// Native release workflow snippets required by the public publication contract.
+const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
+    (
+        "github.ref == 'refs/heads/main'",
+        "publish-native-binaries.yml must reject workflow_dispatch release uploads from non-main refs",
+    ),
+    (
+        "native-release-targets.json",
+        "publish-native-binaries.yml must read the native target matrix from native-release-targets.json",
+    ),
+    (
+        "fromJSON(needs.native-targets.outputs.matrix)",
+        "publish-native-binaries.yml must build the native matrix generated from native-release-targets.json",
+    ),
+    (
+        "needs: [native-targets, release-gate]",
+        "publish-native-binaries.yml must not upload native release assets before the release gate passes",
+    ),
+    (
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --",
+        "publish-native-binaries.yml release gate must run the full public repository check before publishing assets",
+    ),
+    (
+        "--bin check-release-availability -- \"$version\"",
+        "push releases must prove every registry version is unpublished before mutating GitHub state",
+    ),
+    (
+        "--bin native-release-tool -- matrix native-release-targets.json crates/tovuk/Cargo.toml",
+        "publish-native-binaries.yml must generate its release matrix with the tracked Rust utility",
+    ),
+    (
+        "matrix.asset_name",
+        "publish-native-binaries.yml must use the Rust-generated release asset name",
+    ),
+    (
+        "--bin native-release-tool -- tag crates/tovuk/Cargo.toml",
+        "publish-native-binaries.yml must derive its release tag with the tracked Rust utility",
+    ),
+    (
+        "--bin native-release-tool -- prepare-release native-artifact native-release-targets.json crates/tovuk/Cargo.toml",
+        "publish-native-binaries.yml must validate the exact artifact set and generate checksums with Rust",
+    ),
+    (
+        "needs: [native-targets, release-gate, build]",
+        "native release state and uploads must run on the GitHub-hosted upload job after builds",
+    ),
+    (
+        "runs-on: ${{ matrix.runner }}",
+        "native builds must use each tracked GitHub-hosted matrix runner",
+    ),
+    (
+        "actions/upload-artifact@",
+        "platform build jobs must hand immutable artifacts to the upload jobs",
+    ),
+    (
+        "merge-multiple: true",
+        "the central native publisher must merge every immutable matrix artifact",
+    ),
+    (
+        "[ \"$GITHUB_EVENT_NAME\" = \"push\" ]",
+        "push reruns must fail closed when an exact release asset already exists",
+    ),
+    (
+        "upload+=(\"native-artifact/$asset_name.sha256\")",
+        "manual reruns must resume by uploading only missing checksum assets",
+    ),
+    (
+        "--bin check-native-release-assets -- \"${RELEASE_TAG#v}\"",
+        "the central publisher must verify the complete remote native release before publication",
+    ),
+    (
+        "cmp -- \"$RUNNER_TEMP/$asset_name.built\" \"native-artifact/$asset_name\"",
+        "checksum recovery must prove an existing asset matches the rebuilt immutable artifact",
+    ),
+    (
+        "gh release create \"$RELEASE_TAG\"",
+        "one central job must create the native release",
+    ),
+    (
+        "--draft=false --latest",
+        "a newly created draft must become public only after full asset verification",
+    ),
+];
 
-fn docs_readiness_step(contents: &str) -> Option<DocsReadinessStep> {
-    let mut step_start_line = None;
-    let mut step_has_command = false;
-    let mut step_continues_on_error = false;
-
-    for (line_index, line) in contents.lines().enumerate() {
-        if line.trim_start().starts_with("- name:") {
-            if step_has_command {
-                return Some(DocsReadinessStep {
-                    start_line: step_start_line.unwrap_or(line_index + 1),
-                    continues_on_error: step_continues_on_error,
-                });
-            }
-            step_start_line = Some(line_index + 1);
-            step_has_command = false;
-            step_continues_on_error = false;
+impl NativeReleasePolicy for HostedActionsCheck {
+    fn check_blocking_docs_readiness_gate(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        match self.docs_readiness_step(workflow.contents.as_str()) {
+            Some(DocsReadinessStep {
+                behavior: DocsReadinessBehavior::ContinuesOnError,
+                start_line,
+            }) => findings.push(format!(
+                "{}:{start_line}: Mintlify synchronization must be a blocking release gate",
+                workflow.path.display()
+            )),
+            Some(_) => {}
+            None => findings.push(
+                "publish-native-binaries.yml release gate must deploy docs and wait for Mintlify synchronization before publishing assets"
+                    .to_owned(),
+            ),
         }
-
-        if step_start_line.is_some() {
-            step_has_command |= line.contains(READINESS_COMMAND);
-            step_continues_on_error |= line.trim_start().starts_with("continue-on-error:");
-        }
     }
 
-    step_has_command.then(|| DocsReadinessStep {
-        start_line: step_start_line.unwrap_or(1),
-        continues_on_error: step_continues_on_error,
-    })
+    fn check_native_release_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        for &(needle, message) in REQUIRED_NATIVE_RELEASE_SNIPPETS {
+            require_contains(workflow.contents.as_str(), needle, message, findings);
+        }
+        for &(needle, message) in REJECTED_NATIVE_RELEASE_SNIPPETS {
+            reject_lines(workflow, needle, message, findings);
+        }
+        self.check_blocking_docs_readiness_gate(workflow, findings);
+    }
+
+    fn docs_readiness_step(&self, contents: &str) -> Option<DocsReadinessStep> {
+        let mut tracker = DocsReadinessTracker {
+            behavior: DocsReadinessBehavior::Blocking,
+            command_seen: None,
+            start_line: None,
+        };
+        let completed_step = contents.lines().enumerate().find_map(|indexed_line| {
+            return self.process_docs_readiness_line(indexed_line, &mut tracker);
+        });
+        if completed_step.is_some() {
+            return completed_step;
+        }
+        if tracker.command_seen.is_none() {
+            return None;
+        }
+        return Some(DocsReadinessStep {
+            behavior: tracker.behavior,
+            start_line: tracker.start_line.unwrap_or(0x1),
+        });
+    }
+
+    fn process_docs_readiness_line(
+        &self,
+        indexed_line: (usize, &str),
+        tracker: &mut DocsReadinessTracker,
+    ) -> Option<DocsReadinessStep> {
+        let (line_index, line) = indexed_line;
+        let fallback_line = line_index.saturating_add(0x1);
+        let starts_step = line.trim_start().starts_with("- name:");
+        if starts_step && tracker.command_seen.is_some() {
+            return Some(DocsReadinessStep {
+                behavior: tracker.behavior,
+                start_line: tracker.start_line.unwrap_or(fallback_line),
+            });
+        }
+        if starts_step {
+            tracker.behavior = DocsReadinessBehavior::Blocking;
+            tracker.command_seen = None;
+            tracker.start_line = Some(fallback_line);
+        }
+        if tracker.start_line.is_none() {
+            return None;
+        }
+        if line.contains(DOCS_DEPLOY_COMMAND) {
+            tracker.command_seen = Some(());
+        }
+        if line.trim_start().starts_with("continue-on-error:") {
+            tracker.behavior = DocsReadinessBehavior::ContinuesOnError;
+        }
+        return None;
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::docs_readiness_step;
+    use super::{
+        DocsReadinessBehavior, DocsReadinessStep, HostedActionsCheck, NativeReleasePolicy as _,
+    };
 
+    /// Verify that the blocking Mintlify synchronization step is accepted.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the blocking synchronization step is not parsed correctly.
     #[test]
-    fn docs_readiness_step_detects_non_blocking_gate() -> Result<(), String> {
-        let step = docs_readiness_step(
-            r"
+    fn docs_readiness_step_accepts_blocking_gate() {
+        let step = HostedActionsCheck.docs_readiness_step(
+            "
 jobs:
   release-gate:
     steps:
-      - name: Check public agent readiness
-        continue-on-error: true
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
+      - name: Deploy docs and wait for sync
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --
       - name: Run full repository check
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ",
-        )
-        .ok_or_else(|| "readiness step missing".to_owned())?;
+        );
 
-        if !step.continues_on_error {
-            return Err("readiness step should continue on error".to_owned());
-        }
-        if step.start_line != 5 {
-            return Err(format!(
-                "unexpected readiness step line {}",
-                step.start_line
-            ));
-        }
-        Ok(())
+        assert_eq!(
+            step,
+            Some(DocsReadinessStep {
+                behavior: DocsReadinessBehavior::Blocking,
+                start_line: 0x5,
+            }),
+            "the live readiness command should be found as a blocking step"
+        );
     }
 
+    /// Verify that a non-blocking Mintlify synchronization step is rejected.
+    ///
+    /// # Panics
+    ///
+    /// Panics when continue-on-error is not detected on the synchronization step.
     #[test]
-    fn docs_readiness_step_accepts_blocking_gate() -> Result<(), String> {
-        let step = docs_readiness_step(
-            r"
+    fn docs_readiness_step_detects_non_blocking_gate() {
+        let step = HostedActionsCheck.docs_readiness_step(
+            "
 jobs:
   release-gate:
     steps:
-      - name: Check public agent readiness
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
+      - name: Deploy docs and wait for sync
+        continue-on-error: true
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --
       - name: Run full repository check
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ",
-        )
-        .ok_or_else(|| "readiness step missing".to_owned())?;
+        );
 
-        if step.continues_on_error {
-            return Err("readiness step should block release".to_owned());
-        }
-        if step.start_line != 5 {
-            return Err(format!(
-                "unexpected readiness step line {}",
-                step.start_line
-            ));
-        }
-        Ok(())
+        assert_eq!(
+            step,
+            Some(DocsReadinessStep {
+                behavior: DocsReadinessBehavior::ContinuesOnError,
+                start_line: 0x5,
+            }),
+            "continue-on-error should mark the readiness step as non-blocking"
+        );
     }
 }

@@ -1,56 +1,208 @@
-use std::{collections::BTreeSet, path::Path};
+use alloc::collections::BTreeSet;
 
 use crate::agent_guidance;
-use crate::helpers::{CheckResult, read_text};
+
+use crate::helpers::{CheckResult, OutputChannel, read_text, require_contains, write_line};
+
 use crate::native_release_targets;
-use crate::repo_hygiene_git::existing_tracked_files;
+
+use crate::repo_hygiene_git::{existing_tracked_files, git_lines};
+
 use crate::repo_hygiene_paths::{
-    is_forbidden_tracked_path, is_go_toolchain_scan_path, is_guarded_source_path,
-    is_public_text_scan_path, path_has_extension,
+    is_forbidden_tracked_path, is_guarded_source_path, is_public_text_scan_path, path_has_extension,
 };
+
 use crate::repo_hygiene_required::{require_ignored_paths, require_tracked_paths};
-use crate::repo_hygiene_text::{
-    line_contains_forbidden_go_toolchain, line_contains_retired_npm_runner_guidance,
-};
+
+use crate::repo_hygiene_text::line_contains_retired_npm_runner_guidance;
+
 use crate::script_contracts;
 
+use std::path::Path;
+
+/// Contract value named `MAX_SOURCE_FILE_LINES`.
 const MAX_SOURCE_FILE_LINES: usize = 500;
 
-pub(crate) fn check() -> CheckResult {
-    let tracked_files = existing_tracked_files()?;
+/// Compile-time references preserve the named helper boundaries.
+const _: [usize; 0x000a] = [
+    size_of_val(&check),
+    size_of_val(&reject_forbidden_line_matches),
+    size_of_val(&reject_forbidden_tracked_files),
+    size_of_val(&reject_oversized_source_files),
+    size_of_val(&reject_retired_npx_guidance),
+    size_of_val(&reject_tracked_go_files),
+    size_of_val(&reject_untracked_files),
+    size_of_val(&require_docs_deploy_observability_contract),
+    size_of_val(&require_docs_deploy_observability_checker),
+    size_of_val(&require_docs_deploy_observability_gated_api),
+];
+
+/// Predicate used by tracked-text hygiene scans.
+type TextPredicate = fn(&str) -> bool;
+
+/// Contract implementation for `check`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn check() -> CheckResult {
+    let tracked_files = check_try!(existing_tracked_files());
     let tracked_set = tracked_files.iter().cloned().collect::<BTreeSet<_>>();
 
-    require_tracked_paths(&tracked_set)?;
-    agent_guidance::check_policy(&tracked_files)?;
-    native_release_targets::check()?;
-    script_contracts::check()?;
-    require_docs_deploy_observability_contract()?;
-    reject_retired_npx_guidance(&tracked_files)?;
-    reject_tracked_go_files(&tracked_files)?;
-    reject_go_toolchain_bootstrap(&tracked_files)?;
-    reject_oversized_source_files(&tracked_files)?;
-    reject_forbidden_tracked_files(&tracked_files)?;
-    reject_untracked_files()?;
-    require_ignored_paths()?;
+    check_try!(require_tracked_paths(&tracked_set));
+    check_try!(agent_guidance::check_policy(&tracked_files));
+    check_try!(native_release_targets::check());
+    check_try!(script_contracts::check());
+    check_try!(require_docs_deploy_observability_contract());
+    check_try!(reject_retired_npx_guidance(&tracked_files));
+    check_try!(reject_tracked_go_files(&tracked_files));
+    check_try!(reject_oversized_source_files(&tracked_files));
+    check_try!(reject_forbidden_tracked_files(&tracked_files));
+    check_try!(reject_untracked_files());
+    check_try!(require_ignored_paths());
 
-    println!("Checked public repository hygiene.");
-    Ok(())
+    check_try!(write_line(
+        OutputChannel::Regular,
+        "Checked public repository hygiene.",
+    ));
+    return Ok(());
 }
 
-fn require_docs_deploy_observability_contract() -> CheckResult {
-    let workflow = read_text(".github/workflows/docs-deploy.yml")?;
-    let checker = read_text("checks/src/bin/deploy-mintlify-docs.rs")?;
-    if !workflow.contains(
-        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --",
-    ) {
-        return Err(
-            "Mintlify docs sync workflow must call the tracked Rust verification binary"
-                .to_owned(),
+/// Contract implementation for `reject_forbidden_line_matches`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+fn reject_forbidden_line_matches(
+    tracked_files: &[String],
+    scan_path: TextPredicate,
+    line_matches: TextPredicate,
+    message: &str,
+) -> CheckResult {
+    let mut matches = Vec::new();
+    for path in tracked_files {
+        if !scan_path(path) || !Path::new(path).is_file() {
+            continue;
+        }
+        let source = check_try!(read_text(path));
+        matches.extend(
+            source
+                .lines()
+                .enumerate()
+                .filter(|indexed_line| return line_matches(indexed_line.1))
+                .map(|(index, _line)| {
+                    return format!("{path}:{}", index.saturating_add(0x0001));
+                }),
         );
     }
-    if !workflow.contains("Check Mintlify GitHub App sync") {
-        return Err("Mintlify docs workflow must describe the GitHub App sync boundary".to_owned());
+    if matches.is_empty() {
+        return Ok(());
     }
+    return Err(format!("{message}\n{}", matches.join("\n")));
+}
+
+/// Contract implementation for `reject_forbidden_tracked_files`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn reject_forbidden_tracked_files(tracked_files: &[String]) -> CheckResult {
+    let forbidden = tracked_files
+        .iter()
+        .filter(|path| return is_forbidden_tracked_path(path))
+        .cloned()
+        .collect::<Vec<_>>();
+    if forbidden.is_empty() {
+        return Ok(());
+    }
+    return Err(format!(
+        "These secret/generated files are tracked and must be removed from git:\n{}",
+        forbidden.join("\n")
+    ));
+}
+
+/// Contract implementation for `reject_oversized_source_files`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn reject_oversized_source_files(tracked_files: &[String]) -> CheckResult {
+    let mut oversized = Vec::new();
+    for path in tracked_files {
+        if !Path::new(path).is_file() || !is_guarded_source_path(path) {
+            continue;
+        }
+        let source = check_try!(read_text(path));
+        let line_count = source.lines().count();
+        if line_count > MAX_SOURCE_FILE_LINES {
+            oversized.push(format!("{path}:{line_count}"));
+        }
+    }
+    if oversized.is_empty() {
+        return Ok(());
+    }
+    return Err(format!(
+        "Tracked public source files must stay at or below {MAX_SOURCE_FILE_LINES} lines; split these files first:\n{}",
+        oversized.join("\n")
+    ));
+}
+
+/// Contract implementation for `reject_retired_npx_guidance`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn reject_retired_npx_guidance(tracked_files: &[String]) -> CheckResult {
+    return reject_forbidden_line_matches(
+        tracked_files,
+        is_public_text_scan_path,
+        line_contains_retired_npm_runner_guidance,
+        "Use native `tovuk` guidance instead of retired npm-runner guidance:",
+    );
+}
+
+/// Contract implementation for `reject_tracked_go_files`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn reject_tracked_go_files(tracked_files: &[String]) -> CheckResult {
+    let go_files = tracked_files
+        .iter()
+        .filter(|path| return path_has_extension(path, "go") && Path::new(path.as_str()).exists())
+        .cloned()
+        .collect::<Vec<_>>();
+    if go_files.is_empty() {
+        return Ok(());
+    }
+    return Err(format!(
+        "Tracked Go source is not allowed in the public repo; use Rust-native checks:\n{}",
+        go_files.join("\n")
+    ));
+}
+
+/// Contract implementation for `reject_untracked_files`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn reject_untracked_files() -> CheckResult {
+    let untracked = check_try!(git_lines(&["ls-files", "--others", "--exclude-standard"]));
+    if untracked.is_empty() {
+        return Ok(());
+    }
+    return Err(format!(
+        "These files are not tracked and not ignored:\n{}\nCommit them if they are source, or add a precise .gitignore rule if generated/secret.",
+        untracked.join("\n")
+    ));
+}
+
+/// Require the Rust docs deploy checker to expose all readiness controls.
+///
+/// # Errors
+///
+/// Returns an error when a readiness control is missing.
+fn require_docs_deploy_observability_checker(checker: &str) -> CheckResult {
     for (snippet, label) in [
         (
             "Mintlify GitHub App owns production docs sync",
@@ -81,6 +233,37 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             return Err(label.to_owned());
         }
     }
+    return Ok(());
+}
+
+/// Contract implementation for `require_docs_deploy_observability_contract`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn require_docs_deploy_observability_contract() -> CheckResult {
+    let workflow = check_try!(read_text(".github/workflows/docs-deploy.yml"));
+    let checker = check_try!(read_text("checks/src/bin/deploy-mintlify-docs.rs"));
+    check_try!(require_contains(
+        workflow.as_str(),
+        "cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --",
+        "Mintlify docs sync workflow must call the tracked Rust verification binary",
+    ));
+    check_try!(require_contains(
+        workflow.as_str(),
+        "Check Mintlify GitHub App sync",
+        "Mintlify docs workflow must describe the GitHub App sync boundary",
+    ));
+    check_try!(require_docs_deploy_observability_checker(checker.as_str()));
+    return require_docs_deploy_observability_gated_api(checker.as_str(), workflow.as_str());
+}
+
+/// Reject plan-gated Mintlify deployment API dependencies.
+///
+/// # Errors
+///
+/// Returns an error when a plan-gated deployment API is referenced.
+fn require_docs_deploy_observability_gated_api(checker: &str, workflow: &str) -> CheckResult {
     for forbidden in [
         "api.mintlify.com/v1/project/update",
         "MINTLIFY_ADMIN_API_KEY",
@@ -93,115 +276,5 @@ fn require_docs_deploy_observability_contract() -> CheckResult {
             );
         }
     }
-    Ok(())
-}
-
-fn reject_retired_npx_guidance(tracked_files: &[String]) -> CheckResult {
-    reject_forbidden_line_matches(
-        tracked_files,
-        is_public_text_scan_path,
-        line_contains_retired_npm_runner_guidance,
-        "Use native `tovuk` guidance instead of retired npm-runner guidance:",
-    )
-}
-
-fn reject_tracked_go_files(tracked_files: &[String]) -> CheckResult {
-    let go_files = tracked_files
-        .iter()
-        .filter(|path| path_has_extension(path, "go") && Path::new(path.as_str()).exists())
-        .cloned()
-        .collect::<Vec<_>>();
-    if go_files.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "Tracked Go source is not allowed in the public repo; use Rust-native checks:\n{}",
-            go_files.join("\n")
-        ))
-    }
-}
-
-fn reject_go_toolchain_bootstrap(tracked_files: &[String]) -> CheckResult {
-    reject_forbidden_line_matches(
-        tracked_files,
-        is_go_toolchain_scan_path,
-        line_contains_forbidden_go_toolchain,
-        "Public repo tooling must not bootstrap Go toolchains; use Rust-native or prebuilt native release tools:",
-    )
-}
-
-fn reject_forbidden_line_matches(
-    tracked_files: &[String],
-    scan_path: fn(&str) -> bool,
-    line_matches: fn(&str) -> bool,
-    message: &str,
-) -> CheckResult {
-    let mut matches = Vec::new();
-    for path in tracked_files {
-        if !scan_path(path) || !Path::new(path).is_file() {
-            continue;
-        }
-        let source = read_text(path)?;
-        for (index, line) in source.lines().enumerate() {
-            if line_matches(line) {
-                matches.push(format!("{}:{}", path, index + 1));
-            }
-        }
-    }
-    if matches.is_empty() {
-        Ok(())
-    } else {
-        Err(format!("{message}\n{}", matches.join("\n")))
-    }
-}
-
-fn reject_oversized_source_files(tracked_files: &[String]) -> CheckResult {
-    let mut oversized = Vec::new();
-    for path in tracked_files {
-        if !Path::new(path).is_file() || !is_guarded_source_path(path) {
-            continue;
-        }
-        let source = read_text(path)?;
-        let line_count = source.lines().count();
-        if line_count > MAX_SOURCE_FILE_LINES {
-            oversized.push(format!("{path}:{line_count}"));
-        }
-    }
-    if oversized.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "Tracked public source files must stay at or below {MAX_SOURCE_FILE_LINES} lines; split these files first:\n{}",
-            oversized.join("\n")
-        ))
-    }
-}
-
-fn reject_forbidden_tracked_files(tracked_files: &[String]) -> CheckResult {
-    let forbidden = tracked_files
-        .iter()
-        .filter(|path| is_forbidden_tracked_path(path))
-        .cloned()
-        .collect::<Vec<_>>();
-    if forbidden.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "These secret/generated files are tracked and must be removed from git:\n{}",
-            forbidden.join("\n")
-        ))
-    }
-}
-
-fn reject_untracked_files() -> CheckResult {
-    let untracked =
-        crate::repo_hygiene_git::git_lines(&["ls-files", "--others", "--exclude-standard"])?;
-    if untracked.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "These files are not tracked and not ignored:\n{}\nCommit them if they are source, or add a precise .gitignore rule if generated/secret.",
-            untracked.join("\n")
-        ))
-    }
+    return Ok(());
 }

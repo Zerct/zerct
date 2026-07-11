@@ -90,6 +90,6 @@ docs/README.md
 sdks/
 
 # Package-local native target manifests are generated from the root source of
-# truth by scripts/sync-native-release-targets.sh before package checks/builds.
+# truth by the Rust sync-native-release-targets binary before package checks.
 packages/tovuk/native-release-targets.json
 packages/tovuk-py/src/tovuk/native_release_targets.json

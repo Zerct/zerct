@@ -1,59 +1,93 @@
 use super::{
+    ExecuteCommand,
     api_commands::{
-        account_command, api_key_command, billing_command, pricing, print_authenticated,
-        request_command, scraper_command, support_command,
+        AccountCommand, ApiKeyCommand, BillingCommand, PricingCommand, RequestCommand,
+        ScraperCommand, SupportCommand, print_authenticated,
     },
-    args::parse_args,
-    auth::login,
+    args::CliOptions,
+    auth::LoginCommand,
     constants::VERSION,
-    errors::{Result, agent_error},
+    errors::{CliError, Result, agent_error, internal_error, write_stdout_line},
     help::help_text,
 };
+use rustls::crypto::{CryptoProvider, aws_lc_rs::default_provider};
 use std::{env, process::ExitCode};
 
-pub(crate) fn runtime_entrypoint() -> ExitCode {
-    match run() {
-        Ok(code) => code,
-        Err(error) => {
-            error.print();
-            ExitCode::from(error.exit_code())
+impl From<CliError> for ExitCode {
+    #[inline]
+    fn from(value: CliError) -> Self {
+        if value.print().is_err() {
+            return Self::FAILURE;
+        }
+        return Self::from(value.exit_code());
+    }
+}
+
+impl TryFrom<RuntimeExecution> for ExitCode {
+    type Error = CliError;
+
+    #[inline]
+    fn try_from(value: RuntimeExecution) -> Result<Self> {
+        let RuntimeExecution = value;
+        if CryptoProvider::get_default().is_none()
+            && default_provider().install_default().is_err()
+            && CryptoProvider::get_default().is_none()
+        {
+            return Err(internal_error(
+                "Tovuk could not initialize its TLS cryptography provider.",
+            ));
+        }
+        let argv = env::args().skip(0b1).collect::<Vec<_>>();
+        let cli = result_or_return!(CliOptions::try_from(argv.as_slice()));
+        if cli.help_requested() {
+            result_or_return!(write_stdout_line(&help_text()));
+            return Ok(Self::SUCCESS);
+        }
+        if cli.version_requested() {
+            result_or_return!(write_stdout_line(VERSION));
+            return Ok(Self::SUCCESS);
+        }
+        result_or_return!(match cli.command() {
+            "help" => write_stdout_line(&help_text()),
+            "login" => ExecuteCommand::execute(LoginCommand, &cli),
+            "pricing" => ExecuteCommand::execute(PricingCommand, &cli),
+            "scraper" => ExecuteCommand::execute(ScraperCommand, &cli),
+            "request" => ExecuteCommand::execute(RequestCommand, &cli),
+            "account" => ExecuteCommand::execute(AccountCommand, &cli),
+            "api-key" => ExecuteCommand::execute(ApiKeyCommand, &cli),
+            "usage" => print_authenticated(&cli, "/v1/usage"),
+            "billing" => ExecuteCommand::execute(BillingCommand, &cli),
+            "support" => ExecuteCommand::execute(SupportCommand, &cli),
+            _ => Err(agent_error(
+                "unknown_command",
+                "Unknown Tovuk command.",
+                "Run `tovuk --help` and retry with a supported command.",
+                cli.output_format(),
+            )),
+        });
+        return Ok(Self::SUCCESS);
+    }
+}
+
+/// Runs the CLI process and converts failures into exit statuses.
+pub(super) trait RunRuntime {
+    /// Executes the runtime and returns its process exit status.
+    fn run(self) -> ExitCode;
+}
+
+#[derive(Clone, Copy, Debug)]
+/// Runtime action exposed to the crate entrypoint.
+pub(super) struct Runtime;
+
+impl RunRuntime for Runtime {
+    fn run(self) -> ExitCode {
+        match ExitCode::try_from(RuntimeExecution) {
+            Ok(code) => return code,
+            Err(error) => return ExitCode::from(error),
         }
     }
 }
 
-pub(crate) fn run() -> Result<ExitCode> {
-    let argv = env::args().skip(1).collect::<Vec<_>>();
-    let cli = parse_args(&argv)?;
-    if cli.output.help {
-        println!("{}", help_text());
-        return Ok(ExitCode::SUCCESS);
-    }
-    if cli.output.version {
-        println!("{VERSION}");
-        return Ok(ExitCode::SUCCESS);
-    }
-
-    match cli.command.as_str() {
-        "help" => {
-            println!("{}", help_text());
-            Ok(())
-        }
-        "login" => login(&cli),
-        "pricing" => pricing(&cli),
-        "scraper" => scraper_command(&cli),
-        "request" => request_command(&cli),
-        "account" => account_command(&cli),
-        "api-key" => api_key_command(&cli),
-        "usage" => print_authenticated(&cli, "/v1/usage"),
-        "billing" => billing_command(&cli),
-        "support" => support_command(&cli),
-        _ => Err(agent_error(
-            "unknown_command",
-            "Unknown Tovuk command.",
-            "Run `tovuk --help` and retry with a supported command.",
-            cli.output.json,
-        )),
-    }?;
-
-    Ok(ExitCode::SUCCESS)
-}
+#[derive(Clone, Copy, Debug)]
+/// Internal runtime execution marker.
+struct RuntimeExecution;
