@@ -6,8 +6,6 @@ use serde::Deserialize;
 
 use serde_json::from_str;
 
-use std::thread::sleep;
-
 use super::copy::reject_retired_public_names;
 
 use url::Url;
@@ -15,7 +13,7 @@ use url::Url;
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0005] = [
     size_of_val(&check_mcp_discovery),
-    size_of_val(&fetch_text_until_valid),
+    size_of_val(&fetch_and_validate),
     size_of_val(&reject_retired_public_names_in_mcp_discovery),
     size_of_val(&require_mcp_urls_on_base_host),
     size_of_val(&validate_mcp_discovery),
@@ -49,7 +47,7 @@ type McpValidator = fn(&FetchContext, &str) -> CheckResult;
 ///
 /// Returns an error when the contract requirement cannot be verified.
 pub(super) fn check_mcp_discovery(context: &FetchContext) -> CheckResult {
-    drop(check_try!(fetch_text_until_valid(
+    drop(check_try!(fetch_and_validate(
         context,
         "/.well-known/mcp",
         &[],
@@ -58,31 +56,20 @@ pub(super) fn check_mcp_discovery(context: &FetchContext) -> CheckResult {
     return Ok(());
 }
 
-/// Contract implementation for `fetch_text_until_valid`.
+/// Fetch and validate one MCP discovery response.
 ///
 /// # Errors
 ///
 /// Returns an error when the contract requirement cannot be verified.
-pub(super) fn fetch_text_until_valid(
+fn fetch_and_validate(
     context: &FetchContext,
     path: &str,
     headers: &RequestHeaders,
     validate: McpValidator,
 ) -> CheckResult<String> {
-    let mut last_error = "request was not attempted".to_owned();
-    for attempt in 0..=context.retries() {
-        match fetch_text_once(context, path, headers) {
-            Ok(text) => match validate(context, text.as_str()) {
-                Ok(()) => return Ok(text),
-                Err(error) => last_error = error,
-            },
-            Err(error) => last_error = error,
-        }
-        if attempt < context.retries() {
-            sleep(context.retry_delay());
-        }
-    }
-    return Err(last_error);
+    let text = check_try!(fetch_text_once(context, path, headers));
+    check_try!(validate(context, text.as_str()));
+    return Ok(text);
 }
 
 /// Contract implementation for `reject_retired_public_names_in_mcp_discovery`.
