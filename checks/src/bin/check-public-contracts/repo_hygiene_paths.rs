@@ -1,8 +1,42 @@
 use std::{ffi::OsStr, path::Path};
 
+/// Reviewed files allowed directly at the public repository root.
+const ALLOWED_ROOT_FILES: &[&str] = &[
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+    ".oxlintrc.json",
+    ".prettierrc.json",
+    ".vacuum.yaml",
+    "AGENTS.md",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
+    "clippy.toml",
+    "deny.toml",
+    "dependency-feature-policy.json",
+    "native-release-targets.json",
+    "rust-toolchain.toml",
+    "rustfmt.toml",
+];
+
+/// Reviewed top-level directories allowed on the public Git surface.
+const ALLOWED_TOP_LEVEL_DIRECTORIES: &[&str] = &[
+    ".cargo",
+    ".githooks",
+    ".github",
+    "Formula",
+    "checks",
+    "crates",
+    "docs",
+    "packages",
+    "skills",
+];
+
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000a] = [
+const _: [usize; 0x000b] = [
     size_of_val(&has_forbidden_artifact_extension),
+    size_of_val(&is_allowed_public_surface_path),
     size_of_val(&is_checked_text_path),
     size_of_val(&is_forbidden_directory_component),
     size_of_val(&is_forbidden_tracked_path),
@@ -56,6 +90,23 @@ fn has_forbidden_artifact_extension(file_name: &str) -> bool {
     );
 }
 
+/// Return whether a tracked path belongs to the reviewed public repository surface.
+pub(super) fn is_allowed_public_surface_path(path: &str) -> bool {
+    let mut components = path.split('/');
+    let Some(root) = components.next() else {
+        return false;
+    };
+    if root.is_empty() {
+        return false;
+    }
+    let nested = components.next().is_some();
+    return if nested {
+        ALLOWED_TOP_LEVEL_DIRECTORIES.contains(&root)
+    } else {
+        ALLOWED_ROOT_FILES.contains(&root)
+    };
+}
+
 /// Contract implementation for `is_checked_text_path`.
 fn is_checked_text_path(path: &str) -> bool {
     return matches!(
@@ -84,8 +135,9 @@ fn is_checked_text_path(path: &str) -> bool {
 
 /// Return whether a path component belongs only to local or generated state.
 fn is_forbidden_directory_component(component: &str) -> bool {
+    let lower = component.to_ascii_lowercase();
     return matches!(
-        component,
+        lower.as_str(),
         ".agents"
             | ".aws"
             | ".cache"
@@ -109,13 +161,16 @@ fn is_forbidden_directory_component(component: &str) -> bool {
             | ".vscode"
             | ".windsurf"
             | "__pycache__"
+            | "coverage"
             | "htmlcov"
             | "node_modules"
             | "pip-wheel-metadata"
             | "browser automation-report"
             | "target"
             | "test-results"
-    ) || component.starts_with(".aider");
+            | "vendor"
+    ) || lower.starts_with(".aider")
+        || lower.ends_with(".egg-info");
 }
 
 /// Contract implementation for `is_forbidden_tracked_path`.
@@ -124,8 +179,7 @@ pub(super) fn is_forbidden_tracked_path(path: &str) -> bool {
         .file_name()
         .and_then(OsStr::to_str)
         .unwrap_or_default();
-    return path.starts_with("vendor/")
-        || path.starts_with("coverage/")
+    return path == "docs/README.md"
         || path.starts_with("docs/fonts/")
         || path.starts_with("docs/output/")
         || path.starts_with("output/")

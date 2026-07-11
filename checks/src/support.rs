@@ -1,5 +1,7 @@
 //! Shared helpers for public repository check binaries.
 
+use core::str::from_utf8;
+
 use std::{
     env,
     ffi::{OsStr, OsString},
@@ -11,8 +13,40 @@ use std::{
 /// Cargo manifest path for the local checks crate.
 pub const CHECKS_MANIFEST: &str = "checks/Cargo.toml";
 
+/// Split secret markers reconstructed only while scanning public bytes.
+const SECRET_SIGNATURE_PARTS: &[SecretSignatureParts] = &[
+    SecretSignatureParts::new("-----BEGIN DSA PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("-----BEGIN EC PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("-----BEGIN OPENSSH PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("-----BEGIN PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("-----BEGIN RSA PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("gh", "o_"),
+    SecretSignatureParts::new("gh", "p_"),
+    SecretSignatureParts::new("gh", "r_"),
+    SecretSignatureParts::new("gh", "s_"),
+    SecretSignatureParts::new("gh", "u_"),
+    SecretSignatureParts::new("github_", "pat_"),
+    SecretSignatureParts::new("sk_", "live_"),
+    SecretSignatureParts::new("xo", "xb-"),
+];
+
 /// Common result type for public repository checks.
 pub type CheckResult<T = ()> = Result<T, String>;
+
+/// Two source-safe fragments of one recognized credential marker.
+struct SecretSignatureParts {
+    /// Leading marker fragment.
+    prefix: &'static str,
+    /// Trailing marker fragment.
+    suffix: &'static str,
+}
+
+impl SecretSignatureParts {
+    /// Construct one split credential marker.
+    const fn new(prefix: &'static str, suffix: &'static str) -> Self {
+        return Self { prefix, suffix };
+    }
+}
 
 /// Create a command rooted at `cwd` with the caller's executable search path.
 #[inline]
@@ -76,6 +110,27 @@ pub fn git_tracked_files(repository: &Path) -> CheckResult<Vec<String>> {
         .lines()
         .map(ToOwned::to_owned)
         .collect());
+}
+
+/// Reject recognized private-key and credential signatures in public bytes.
+///
+/// # Errors
+///
+/// Returns an error when UTF-8 input contains a known secret signature.
+#[inline]
+pub fn reject_secret_signatures(label: &str, contents: &[u8]) -> CheckResult {
+    let Ok(text) = from_utf8(contents) else {
+        return Ok(());
+    };
+    for parts in SECRET_SIGNATURE_PARTS {
+        let signature = format!("{}{}", parts.prefix, parts.suffix);
+        if text.contains(signature.as_str()) {
+            return Err(format!(
+                "{label} contains forbidden secret signature {signature}"
+            ));
+        }
+    }
+    return Ok(());
 }
 
 /// Return the current Git repository root.

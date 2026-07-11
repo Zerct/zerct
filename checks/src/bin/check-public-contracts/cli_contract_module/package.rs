@@ -180,7 +180,7 @@ fn require_package_policy_python(sources: &ContractSources) -> CheckResult {
         sources.python_project.as_str(),
         &[
             (
-                r#"requires = ["hatchling==1.31.0"]"#,
+                r#"requires = ["uv_build==0.11.28"]"#,
                 "pinned PyPI build backend",
             ),
             (r#"requires-python = ">=3.11""#, "PyPI Python floor"),

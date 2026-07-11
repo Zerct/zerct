@@ -151,6 +151,7 @@ fn require_wheel_contract(contents: &[u8]) -> CheckResult {
             .map_err(|error| return format!("wheel WHEEL metadata is not UTF-8: {error}"))
     );
     for required in [
+        "Generator: uv 0.11.28",
         "Wheel-Version: 1.0",
         "Root-Is-Purelib: true",
         "Tag: py3-none-any",
@@ -159,13 +160,7 @@ fn require_wheel_contract(contents: &[u8]) -> CheckResult {
             return Err(format!("wheel WHEEL metadata is missing {required}"));
         }
     }
-    return text
-        .lines()
-        .any(|line| return line.starts_with("Generator: hatchling "))
-        .then_some(())
-        .ok_or_else(|| {
-            return "wheel WHEEL metadata must name its pinned Hatchling generator".to_owned();
-        });
+    return Ok(());
 }
 
 /// Require generated wheel metadata, entry points, and record consistency.
@@ -204,7 +199,6 @@ fn require_wheel_metadata(
 /// Return the exact Python source-distribution regular-file set.
 fn sdist_files(root: &str) -> Vec<String> {
     return [
-        ".gitignore",
         "LICENSE",
         "PKG-INFO",
         "README.md",

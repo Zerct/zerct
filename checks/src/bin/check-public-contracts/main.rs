@@ -91,6 +91,9 @@ pub mod repo_hygiene_required;
 /// Public contract checks for repo hygiene text.
 pub mod repo_hygiene_text;
 
+/// Public contract checks for reviewed tracked files.
+pub mod repo_hygiene_tracked;
+
 /// Public contract checks for retired contracts.
 pub mod retired_contracts;
 

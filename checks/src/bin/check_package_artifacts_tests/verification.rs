@@ -12,6 +12,7 @@ use super::{
         VERSION, artifact_request, symlink_entry, test_directory, text_entry, write_npm, write_tar,
         write_zip,
     },
+    policy::reject_sensitive_path,
     run,
     zip_archive::read_zip,
 };
@@ -149,6 +150,10 @@ fn rejects_path_cargo_lock_package() -> CheckResult {
 /// Returns an error when fixture I/O fails or an unsafe member is accepted.
 #[test]
 fn rejects_symlink_and_sensitive_members() -> CheckResult {
+    check_try!(require_error(
+        reject_sensitive_path("package/.gitignore"),
+        "forbidden",
+    ));
     let directory = check_try!(test_directory("sensitive"));
     let symlink = directory.join("symlink.whl");
     check_try!(write_zip(
