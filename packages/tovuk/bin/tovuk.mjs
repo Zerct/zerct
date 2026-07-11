@@ -81,7 +81,8 @@ const printLaunchError = (error) => {
     }
     if (jsonOutputRequested()) {
         writeJsonError({
-            agent_instruction: 'Reinstall the Tovuk npm package, or install with Homebrew, Cargo, or GitHub Releases.',
+            agent_instruction:
+                'Reinstall the Tovuk npm package, or install with Homebrew, Cargo, or GitHub Releases.',
             checkout_url: null,
             code: 'native_binary_launch_failed',
             docs_url: 'https://docs.tovuk.com/reference/packages',

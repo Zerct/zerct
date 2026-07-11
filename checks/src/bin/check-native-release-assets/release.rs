@@ -4,9 +4,7 @@ use alloc::collections::BTreeSet;
 
 use core::time::Duration;
 
-use serde::Deserialize;
-
-use serde_json::from_slice;
+use serde_json::{Value, from_slice};
 
 use std::{
     ffi::OsString,
@@ -19,15 +17,22 @@ use std::{
 
 use tovuk_public_checks::check_support::{CheckResult, command, tool_path};
 
-use super::checksum::verify_asset_checksum;
+use super::{DraftPolicy, ReleaseVerification, checksum::verify_asset_checksum};
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0009] = [
+const _: [usize; 0x0010] = [
     size_of_val(&create_temporary_directory),
     size_of_val(&download_release_asset),
+    size_of_val(&expected_asset_names),
     size_of_val(&finish_temporary_check),
     size_of_val(&missing_assets),
+    size_of_val(&parse_release_assets),
+    size_of_val(&parse_release_view),
     size_of_val(&release_asset_names),
+    size_of_val(&release_flag),
+    size_of_val(&release_view),
+    size_of_val(&unexpected_assets),
+    size_of_val(&validate_release_state),
     size_of_val(&verify_asset_checksums),
     size_of_val(&verify_downloaded_assets),
     size_of_val(&wait_for_release),
@@ -35,7 +40,7 @@ const _: [usize; 0x0009] = [
 ];
 
 /// One release asset returned by the `GitHub` API.
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 struct ReleaseAsset {
     /// Published asset name.
     name: String,
@@ -46,6 +51,8 @@ struct ReleaseAsset {
 struct ReleaseCheck {
     /// Latest instant at which polling may continue.
     deadline: Instant,
+    /// Visibility accepted by the remote release check.
+    draft_policy: DraftPolicy,
     /// Trusted executable search path.
     path: OsString,
     /// Public repository root.
@@ -56,11 +63,24 @@ struct ReleaseCheck {
     tag: String,
 }
 
+/// Boolean release state represented without Boolean-bearing policy structs.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ReleaseFlag {
+    /// The queried release flag is false.
+    Disabled,
+    /// The queried release flag is true.
+    Enabled,
+}
+
 /// `GitHub` release response fields used by this check.
-#[derive(Debug, Deserialize)]
+#[derive(Debug)]
 struct ReleaseView {
     /// Assets currently attached to the release.
     assets: Vec<ReleaseAsset>,
+    /// Whether the release is still private as a draft.
+    is_draft: ReleaseFlag,
+    /// Whether the release is marked as a prerelease.
+    is_prerelease: ReleaseFlag,
 }
 
 /// Create an isolated native release download directory.
@@ -127,6 +147,14 @@ fn download_release_asset(
         .ok_or_else(|| return format!("gh release download {asset} failed with status {status}"));
 }
 
+/// Return the exact native asset and checksum-sidecar set required for release.
+fn expected_asset_names(required_assets: &[String]) -> BTreeSet<String> {
+    return required_assets
+        .iter()
+        .flat_map(|asset| return [asset.clone(), format!("{asset}.sha256")])
+        .collect();
+}
+
 /// Combine a verification result with mandatory temporary-directory cleanup.
 ///
 /// # Errors
@@ -153,37 +181,132 @@ fn finish_temporary_check(
 
 /// Return required release assets absent from the published release.
 fn missing_assets(required_assets: &[String], release_assets: &BTreeSet<String>) -> Vec<String> {
-    return required_assets
-        .iter()
-        .flat_map(|asset| return [asset.clone(), format!("{asset}.sha256")])
+    return expected_asset_names(required_assets)
+        .into_iter()
         .filter(|asset| return !release_assets.contains(asset))
         .collect();
 }
 
-/// Read published asset names for one `GitHub` release.
+/// Parse the exact release asset name list from a `GitHub` JSON response.
+///
+/// # Errors
+///
+/// Returns an error when the assets field or an asset name is absent or invalid.
+fn parse_release_assets(document: &Value, tag: &str) -> CheckResult<Vec<ReleaseAsset>> {
+    let values = check_try!(
+        document
+            .get("assets")
+            .and_then(Value::as_array)
+            .ok_or_else(|| return format!("gh release view {tag} assets must be an array"))
+    );
+    let mut assets = Vec::with_capacity(values.len());
+    for value in values {
+        let name = check_try!(
+            value
+                .get("name")
+                .and_then(Value::as_str)
+                .filter(|name| return !name.is_empty())
+                .ok_or_else(|| return format!("gh release view {tag} asset name is invalid"))
+        );
+        assets.push(ReleaseAsset {
+            name: name.to_owned(),
+        });
+    }
+    return Ok(assets);
+}
+
+/// Parse the bounded release state used by native asset verification.
+///
+/// # Errors
+///
+/// Returns an error when the response is malformed or lacks required fields.
+fn parse_release_view(source: &[u8], tag: &str) -> CheckResult<ReleaseView> {
+    let document = check_try!(
+        from_slice::<Value>(source)
+            .map_err(|error| return format!("parse gh release view {tag}: {error}"))
+    );
+    return Ok(ReleaseView {
+        assets: check_try!(parse_release_assets(&document, tag)),
+        is_draft: check_try!(release_flag(&document, "isDraft", tag)),
+        is_prerelease: check_try!(release_flag(&document, "isPrerelease", tag)),
+    });
+}
+
+/// Convert release assets into an exact ordered name set.
+fn release_asset_names(release: &ReleaseView) -> BTreeSet<String> {
+    return release
+        .assets
+        .iter()
+        .map(|asset| return asset.name.clone())
+        .collect();
+}
+
+/// Parse one required `GitHub` Boolean release field into an explicit flag.
+///
+/// # Errors
+///
+/// Returns an error when the field is absent or not Boolean.
+fn release_flag(document: &Value, field: &str, tag: &str) -> CheckResult<ReleaseFlag> {
+    return match document.get(field).and_then(Value::as_bool) {
+        Some(false) => Ok(ReleaseFlag::Disabled),
+        Some(true) => Ok(ReleaseFlag::Enabled),
+        None => Err(format!(
+            "gh release view {tag} field {field} must be Boolean"
+        )),
+    };
+}
+
+/// Read release state and published asset names for one `GitHub` release.
 ///
 /// # Errors
 ///
 /// Returns an error when `GitHub` CLI cannot run or its JSON response is invalid.
-fn release_asset_names(check: &ReleaseCheck) -> CheckResult<BTreeSet<String>> {
+fn release_view(check: &ReleaseCheck) -> CheckResult<ReleaseView> {
     let output = check_try!(
         command(check.repo_root.as_path(), check.path.as_os_str(), "gh")
-            .args(["release", "view", check.tag.as_str(), "--json", "assets"])
+            .args([
+                "release",
+                "view",
+                check.tag.as_str(),
+                "--json",
+                "assets,isDraft,isPrerelease",
+            ])
             .output()
             .map_err(|error| return format!("run gh release view {}: {error}", check.tag))
     );
     if !output.status.success() {
-        return Ok(BTreeSet::new());
+        return Err(format!(
+            "gh release view {} failed with status {}",
+            check.tag, output.status
+        ));
     }
-    let release = check_try!(
-        from_slice::<ReleaseView>(&output.stdout)
-            .map_err(|error| return format!("parse gh release view {}: {error}", check.tag))
-    );
-    return Ok(release
-        .assets
-        .into_iter()
-        .map(|asset| return asset.name)
-        .collect());
+    return parse_release_view(&output.stdout, check.tag.as_str());
+}
+
+/// Return release assets outside the exact public native asset contract.
+fn unexpected_assets(required_assets: &[String], release_assets: &BTreeSet<String>) -> Vec<String> {
+    let expected = expected_asset_names(required_assets);
+    return release_assets
+        .iter()
+        .filter(|asset| return !expected.contains(*asset))
+        .cloned()
+        .collect();
+}
+
+/// Require a non-prerelease and reject drafts outside prepublication verification.
+///
+/// # Errors
+///
+/// Returns an error for prereleases or a draft outside the prepublication gate.
+fn validate_release_state(check: &ReleaseCheck, release: &ReleaseView) -> CheckResult {
+    if release.is_prerelease == ReleaseFlag::Enabled {
+        return Err(format!("{} must not be a prerelease", check.tag));
+    }
+    if release.is_draft == ReleaseFlag::Disabled || matches!(check.draft_policy, DraftPolicy::Allow)
+    {
+        return Ok(());
+    }
+    return Err(format!("{} must be a published release", check.tag));
 }
 
 /// Verify all native assets in a disposable download directory.
@@ -230,28 +353,34 @@ fn verify_downloaded_assets(check: &ReleaseCheck, temporary_path: &Path) -> Chec
 ///
 /// Returns an error when `GitHub` queries or verification fail, or the deadline
 /// expires while assets are missing.
-pub(super) fn wait_for_release(
-    repo_root: PathBuf,
-    required_assets: Vec<String>,
-    tag: String,
-    wait_duration: Duration,
-) -> CheckResult {
+pub(super) fn wait_for_release(verification: ReleaseVerification) -> CheckResult {
     let deadline = check_try!(
         Instant::now()
-            .checked_add(wait_duration)
+            .checked_add(verification.wait_duration)
             .ok_or_else(|| return "release wait deadline overflow".to_owned())
     );
     let check = ReleaseCheck {
         deadline,
+        draft_policy: verification.draft_policy,
         path: tool_path(),
-        repo_root,
-        required_assets,
-        tag,
+        repo_root: verification.repo_root,
+        required_assets: verification.required_assets,
+        tag: verification.tag,
     };
     loop {
-        let release_assets = check_try!(release_asset_names(&check));
+        let release = check_try!(release_view(&check));
+        let release_assets = release_asset_names(&release);
+        let unexpected = unexpected_assets(&check.required_assets, &release_assets);
+        if !unexpected.is_empty() {
+            return Err(format!(
+                "Unexpected native Tovuk release assets for {}:\n{}",
+                check.tag,
+                unexpected.join("\n")
+            ));
+        }
         let missing = missing_assets(&check.required_assets, &release_assets);
         if missing.is_empty() {
+            check_try!(validate_release_state(&check, &release));
             check_try!(verify_asset_checksums(&check));
             check_try!(write_success(check.tag.as_str()));
             return Ok(());

@@ -40,7 +40,7 @@ use std::{
     env,
     fs::read_to_string,
     io::{Result as InputOutputResult, Write as _, stderr},
-    path::Path,
+    path::{Path, PathBuf},
     process::ExitCode,
 };
 
@@ -56,6 +56,15 @@ const _: [usize; 0x0005] = [
     size_of_val(&required_assets),
     size_of_val(&run),
 ];
+
+/// Visibility accepted while verifying one release asset set.
+#[derive(Clone, Copy, Debug)]
+enum DraftPolicy {
+    /// Accept a draft during the atomic prepublication check.
+    Allow,
+    /// Require the final public release state.
+    RequirePublished,
+}
 
 /// Root native release target manifest.
 #[derive(Debug, Deserialize)]
@@ -76,10 +85,27 @@ struct NativeTarget {
 /// Parsed command request.
 #[derive(Debug)]
 struct ReleaseRequest {
+    /// Visibility accepted by the remote release check.
+    draft_policy: DraftPolicy,
     /// Crate version whose release assets must exist.
     version: String,
     /// Maximum polling duration.
     wait_seconds: u64,
+}
+
+/// Complete remote release verification input.
+#[derive(Debug)]
+struct ReleaseVerification {
+    /// Visibility accepted by the remote release check.
+    draft_policy: DraftPolicy,
+    /// Public repository root.
+    repo_root: PathBuf,
+    /// Exact native assets without checksum suffixes.
+    required_assets: Vec<String>,
+    /// Release tag derived from the synchronized package version.
+    tag: String,
+    /// Maximum time spent waiting for uploaded assets.
+    wait_duration: Duration,
 }
 
 /// Execute the release check and report command errors on standard error.
@@ -104,8 +130,11 @@ fn main() -> InputOutputResult<ExitCode> {
 /// cannot be read.
 fn parse_request(repository: &Path) -> CheckResult<ReleaseRequest> {
     let arguments = env::args().skip(0x1).collect::<Vec<_>>();
-    if arguments.len() > 0x2 {
-        return Err("usage: check-native-release-assets [version] [wait_seconds]".to_owned());
+    if arguments.len() > 0x3 {
+        return Err(
+            "usage: check-native-release-assets [version] [wait_seconds] [--allow-draft]"
+                .to_owned(),
+        );
     }
     let version = match arguments.first().map(String::as_str) {
         None | Some("") => check_try!(read_crate_version(repository)),
@@ -116,7 +145,18 @@ fn parse_request(repository: &Path) -> CheckResult<ReleaseRequest> {
             .get(0x1)
             .map_or(Ok(u64::MIN), |value| return parse_wait_seconds(value))
     );
+    let draft_policy = match arguments.get(0x2).map(String::as_str) {
+        None => DraftPolicy::RequirePublished,
+        Some("--allow-draft") => DraftPolicy::Allow,
+        Some(_) => {
+            return Err(
+                "usage: check-native-release-assets [version] [wait_seconds] [--allow-draft]"
+                    .to_owned(),
+            );
+        }
+    };
     return Ok(ReleaseRequest {
+        draft_policy,
         version,
         wait_seconds,
     });
@@ -197,10 +237,11 @@ fn run() -> CheckResult {
         repository.as_path(),
         request.version.as_str(),
     ));
-    return release::wait_for_release(
-        repository,
+    return release::wait_for_release(ReleaseVerification {
+        draft_policy: request.draft_policy,
+        repo_root: repository,
         required_assets,
-        format!("v{}", request.version),
-        Duration::from_secs(request.wait_seconds),
-    );
+        tag: format!("v{}", request.version),
+        wait_duration: Duration::from_secs(request.wait_seconds),
+    });
 }

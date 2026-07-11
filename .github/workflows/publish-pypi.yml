@@ -102,17 +102,19 @@ jobs:
         with:
           python-version: "3.14.6"
       - if: steps.version.outputs.exists == 'false'
-        run: python -m pip install --upgrade build==1.5.1
-      - if: steps.version.outputs.exists == 'false'
         run: |
-          rm -rf dist
-          python -m build
+          uvx --no-config --default-index https://pypi.org/simple \
+            --python 3.14.6 --no-python-downloads --from build==1.5.1 \
+            pyproject-build --installer uv --outdir "$RUNNER_TEMP/pypi-dist" .
         working-directory: packages/tovuk-py
+        env:
+          PIP_INDEX_URL: https://pypi.org/simple
+          UV_DEFAULT_INDEX: https://pypi.org/simple
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: steps.version.outputs.exists == 'false'
         with:
           name: tovuk-pypi-dist
-          path: packages/tovuk-py/dist
+          path: ${{ runner.temp }}/pypi-dist
           if-no-files-found: error
 
   publish:
