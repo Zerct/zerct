@@ -5,6 +5,8 @@ use super::{
     require_contains,
 };
 
+use std::ffi::OsStr;
+
 /// Unfiltered event header required by the canonical continuous-integration workflow.
 const CI_TRIGGER_HEADER: &str =
     "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n";
@@ -64,6 +66,25 @@ impl WorkflowPolicy for HostedActionsCheck {
         }
     }
 
+    fn check_reusable_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        let required_group = match workflow.path.file_name().and_then(OsStr::to_str) {
+            Some("publish-crates.yml") => "  group: crates-${{ github.ref }}",
+            Some("publish-npm.yml") => "  group: npm-${{ github.ref }}",
+            Some("publish-pypi.yml") => "  group: pypi-${{ github.ref }}",
+            None | Some(_) => return,
+        };
+        require_contains(
+            workflow.contents.as_str(),
+            required_group,
+            format!(
+                "{}: reusable release concurrency must be registry-scoped to avoid caller deadlocks",
+                workflow.path.display()
+            )
+            .as_str(),
+            findings,
+        );
+    }
+
     fn check_secret_workflow_dispatch_policy(
         &self,
         workflow: &Workflow,
@@ -111,6 +132,7 @@ impl WorkflowPolicy for HostedActionsCheck {
         self.check_ci_trigger_coverage(workflow, findings);
         self.check_checkout_credentials(workflow, findings);
         self.check_github_hosted_cargo_cache(workflow, findings);
+        self.check_reusable_workflow_concurrency(workflow, findings);
         self.check_public_package_release_order(workflow, findings);
         self.check_docs_deploy_workflow(workflow, findings);
         self.check_secret_workflow_dispatch_policy(workflow, findings);
@@ -217,6 +239,50 @@ mod tests {
         assert!(
             !HostedActionsCheck.uses_current_cache_action(contents),
             "cache v5 must be treated as retired after the v6 release"
+        );
+    }
+
+    /// Verify that one reusable publisher accepts its registry-scoped group.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the non-colliding group emits a finding.
+    #[test]
+    fn reusable_workflow_concurrency_accepts_unique_group() {
+        let workflow = Workflow {
+            contents: "concurrency:\n  group: crates-${{ github.ref }}\n".to_owned(),
+            path: PathBuf::from(".github/workflows/publish-crates.yml"),
+        };
+        let mut findings = Vec::new();
+
+        HostedActionsCheck.check_reusable_workflow_concurrency(&workflow, &mut findings);
+
+        assert!(
+            findings.is_empty(),
+            "registry-scoped concurrency must not collide with the caller"
+        );
+    }
+
+    /// Verify that a reusable publisher rejects the caller-derived group.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the colliding group is not reported.
+    #[test]
+    fn reusable_workflow_concurrency_rejects_caller_group() {
+        let workflow = Workflow {
+            contents: "concurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n"
+                .to_owned(),
+            path: PathBuf::from(".github/workflows/publish-crates.yml"),
+        };
+        let mut findings = Vec::new();
+
+        HostedActionsCheck.check_reusable_workflow_concurrency(&workflow, &mut findings);
+
+        assert_eq!(
+            findings.len(),
+            0x1,
+            "caller-derived concurrency must be rejected for reusable publishers"
         );
     }
 }
