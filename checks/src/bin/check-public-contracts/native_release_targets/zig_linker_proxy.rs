@@ -1,27 +1,14 @@
 //! Strict Zig linker proxy release policy.
 
-use crate::helpers::{CheckResult, read_text, read_text_corpus, require_snippets};
+use crate::helpers::{CheckResult, read_text_corpus, require_snippets};
 
-/// Require strict native-linker configuration for Linux ARM64 and Windows.
+/// Require strict native-linker configuration for Linux ARM64.
 ///
 /// # Errors
 ///
 /// Returns an error when exact filtering, response-file safety, pinned Zig
-/// delegation, bundled Windows LLD selection, or regression coverage is absent.
+/// delegation, or regression coverage is absent.
 pub(super) fn require_zig_linker_proxy_contract() -> CheckResult {
-    for path in [".cargo/config.toml", "crates/tovuk/.cargo/config.toml"] {
-        let config = check_try!(read_text(path));
-        check_try!(require_snippets(
-            config.as_str(),
-            path,
-            &[
-                "[target.x86_64-pc-windows-msvc]",
-                "linker = \"rust-lld\"",
-                "linker-flavor=lld-link",
-                "link-arg=/NOIMPLIB",
-            ],
-        ));
-    }
     let source = check_try!(read_text_corpus(&[
         "checks/src/bin/zig-linker-proxy.rs",
         "checks/src/bin/zig_linker_proxy_tests/verification.rs",

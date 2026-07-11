@@ -23,7 +23,7 @@ use hyper_util::{
     rt::TokioExecutor,
 };
 
-use rustls::crypto::aws_lc_rs::default_provider;
+use rustls::crypto::ring::default_provider;
 
 use tokio::runtime::{Builder as RuntimeBuilder, Runtime};
 
@@ -109,7 +109,7 @@ pub(super) fn build_runtime() -> TransportResult<Runtime> {
 ///
 /// # Errors
 ///
-/// Returns an error when native roots or the AWS-LC-backed client cannot be built.
+/// Returns an error when native roots or the Ring-backed client cannot be built.
 pub(super) fn build_secure_client(connect_timeout: Duration) -> TransportResult<SecureClient> {
     let provider = default_provider();
     let tls_builder = check_try!(
