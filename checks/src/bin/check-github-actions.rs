@@ -338,6 +338,9 @@ trait WorkflowPolicy {
     /// Require GitHub-hosted Cargo jobs to use the approved cache action.
     fn check_github_hosted_cargo_cache(&self, workflow: &Workflow, findings: &mut Vec<String>);
 
+    /// Require reusable release workflows to avoid caller concurrency groups.
+    fn check_reusable_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>);
+
     /// Require manually dispatched secret-bearing workflows to target main.
     fn check_secret_workflow_dispatch_policy(
         &self,
