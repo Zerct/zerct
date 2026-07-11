@@ -7,6 +7,10 @@ use super::{
     reject_lines, reject_matching_lines, require_contains,
 };
 
+#[cfg(test)]
+#[path = "global_policy_tests.rs"]
+mod tests;
+
 /// Full-check source requirements enforced for every local and CI run.
 const CHECK_ALL_SOURCE_REQUIREMENTS: &[PolicyRequirement] = &[
     (
@@ -140,7 +144,8 @@ const QUALITY_TOOL_REQUIREMENTS: &[PolicyRequirement] = &[
 ];
 
 /// Compile-time references preserve the named helper boundary.
-const _: [usize; 0x0002] = [
+const _: [usize; 0x0003] = [
+    size_of_val(&reject_dangerous_triggers),
     size_of_val(&require_node_before_check_all),
     size_of_val(&read_check_all_sources),
 ];
@@ -162,12 +167,7 @@ impl GlobalPolicy for HostedActionsCheck {
             );
             self.reject_retired_cache_action(workflow, findings);
             self.reject_useblacksmith(workflow, findings);
-            reject_lines(
-                workflow,
-                "pull_request_target:",
-                "pull_request_target is forbidden for this public repository",
-                findings,
-            );
+            reject_dangerous_triggers(workflow, findings);
             reject_lines(
                 workflow,
                 "self-hosted",
@@ -297,6 +297,22 @@ fn read_check_all_sources() -> CheckResult<String> {
         corpus.push('\n');
     }
     return Ok(corpus);
+}
+
+/// Reject target-context and chained privileged triggers in every workflow.
+fn reject_dangerous_triggers(workflow: &Workflow, findings: &mut Vec<String>) {
+    reject_lines(
+        workflow,
+        "pull_request_target",
+        "pull_request_target is forbidden; use a read-only pull_request ruleset workflow",
+        findings,
+    );
+    reject_lines(
+        workflow,
+        "workflow_run",
+        "workflow_run is forbidden; use direct or reusable workflow composition",
+        findings,
+    );
 }
 
 /// Require a pinned Node runtime before every full repository check.

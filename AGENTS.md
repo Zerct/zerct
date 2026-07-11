@@ -97,6 +97,9 @@ this discovery policy in nested files.
   update tracked files, so inspect the diff before and after every full gate.
 - Keep `.gitignore` precise. Ignore known outputs and secrets, but keep
   source-like `build`, `dist`, and SDK paths visible to Git and contract tests.
+- After staging an intentional file addition or removal, regenerate
+  `public-tree.json` with the Rust `sync-public-tree-policy --write` command,
+  inspect it, and stage the generated policy. Never edit its digest manually.
 
 ## Verification
 

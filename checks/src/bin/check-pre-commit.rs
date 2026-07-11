@@ -59,7 +59,7 @@ const CARGO_COMMANDS: &[CommandArgs] = &[
 /// Rust-native policy checks kept in the fast local gate.
 const CHECK_BIN_COMMANDS: &[CheckBinCommand] = &[
     ("sync-native-release-targets", &["--check"]),
-    ("check-public-contracts", &["repo-hygiene"]),
+    ("check-public-contracts", &["repo-hygiene", "index"]),
     ("check-github-actions", &[]),
     ("check-prose-style", &["--self-test"]),
     ("check-prose-style", &[]),

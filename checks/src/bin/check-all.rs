@@ -473,7 +473,7 @@ impl Runner {
     /// Returns an error when generated files or hygiene checks fail.
     fn verify_generated_manifests(&self) -> CheckResult {
         check_try!(self.run_check_bin("sync-native-release-targets", &["--check"]));
-        return self.run_public_contracts(&["repo-hygiene"]);
+        return self.run_public_contracts(&["repo-hygiene", "head"]);
     }
 }
 

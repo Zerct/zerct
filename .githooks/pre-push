@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+export GIT_NO_REPLACE_OBJECTS=1
+
 repository_root="$(git rev-parse --show-toplevel)"
 cd "$repository_root"
+
+push_location="${2:?pre-push push location is required}"
+cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- push-snapshot "$push_location"
 exec cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
