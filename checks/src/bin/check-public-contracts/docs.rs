@@ -3,12 +3,13 @@ use crate::{
     docs_navigation::{require_navigation_contract, require_navigation_pages_exist},
     docs_sources::{DocsSources, openapi_config_path, read_navigation_pages},
     helpers::{
-        CheckResult, OutputChannel, read_text, reject_contains, require_contains, require_results,
-        write_line,
+        CheckResult, OutputChannel, read_json, read_text, reject_contains, require_contains,
+        require_results, write_line,
     },
     retired_contracts::{
         RETIRED_OPENAPI_CONTRACTS, RETIRED_PUBLIC_COMMANDS, RETIRED_PUBLIC_DOCS_WORDING,
     },
+    types::DocsJson,
 };
 
 /// Ecommerce output fields required by every public scraper-facing surface.
@@ -129,6 +130,15 @@ fn require_mintlify_exclusions() -> CheckResult {
     let exclusions = check_try!(read_text("docs/.mintignore"));
     if !exclusions.lines().any(|line| return line == "fonts/") {
         return Err("docs/.mintignore must exclude the retired fonts/ subtree".to_owned());
+    }
+    let docs: DocsJson = check_try!(read_json("docs/docs.json"));
+    if docs.seo.indexing != "navigable" {
+        return Err("docs SEO indexing must be limited to navigable pages".to_owned());
+    }
+    if !docs.redirects.iter().any(|redirect| {
+        return redirect.source == "/fonts/PROVENANCE" && redirect.destination == "/changelog";
+    }) {
+        return Err("the retired font page must redirect to /changelog".to_owned());
     }
     return Ok(());
 }
