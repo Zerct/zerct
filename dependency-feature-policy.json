@@ -29,23 +29,23 @@
       "manifest": "crates/tovuk/Cargo.toml",
       "targets": [
         {
-          "sha256": "a5c6eca713b39b17ab59c851d94a0f465be5503607c6e0ff160040d8daf76d5d",
+          "sha256": "2d99cd07a58047c5c174bd721c8dea87557ae253775aa305037bfad01ca841cc",
           "triple": "aarch64-apple-darwin"
         },
         {
-          "sha256": "2a3dc942b131e17afb02db6e62712db2a7ec52e10730e52f2f7910ad33ae0858",
+          "sha256": "ceee2a05b10fbfad1f513176e5b4989016555230ff89e0c8f6af5ddf47aeb538",
           "triple": "aarch64-unknown-linux-gnu"
         },
         {
-          "sha256": "d334a576efd12ae810760ab840c284a8d3b911ebbfa0464a46f43557acf33c30",
+          "sha256": "559d08321b8f2e02197abe0d9132b85cf06a35614e933d741ed036b376cd2074",
           "triple": "x86_64-apple-darwin"
         },
         {
-          "sha256": "eeee5cd453db4376610e86c8dd500283b65c5bb0e5cbbcdaa2b0a1ea1a01e988",
+          "sha256": "406abf81fe62594848bd5f5a0e4ade454bb77194003cd67d8c1a36e9b596eb19",
           "triple": "x86_64-pc-windows-msvc"
         },
         {
-          "sha256": "abcf0911479a53b6416aaadb37188a3ca663454b576c7492c4d400b2953761a0",
+          "sha256": "2c8b50437d9b994bfee59a9f9aa705b2465872aba6a145658052dc5830546c58",
           "triple": "x86_64-unknown-linux-gnu"
         }
       ]
