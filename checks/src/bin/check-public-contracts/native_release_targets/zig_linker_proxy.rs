@@ -7,8 +7,7 @@ use crate::helpers::{CheckResult, read_text, read_text_corpus, require_snippets}
 /// # Errors
 ///
 /// Returns an error when exact filtering, response-file safety, pinned Zig
-/// delegation, Windows import-library prevention, or regression coverage is
-/// absent.
+/// delegation, bundled Windows LLD selection, or regression coverage is absent.
 pub(super) fn require_zig_linker_proxy_contract() -> CheckResult {
     for path in [".cargo/config.toml", "crates/tovuk/.cargo/config.toml"] {
         let config = check_try!(read_text(path));
@@ -17,7 +16,9 @@ pub(super) fn require_zig_linker_proxy_contract() -> CheckResult {
             path,
             &[
                 "[target.x86_64-pc-windows-msvc]",
-                "rustflags = [\"-C\", \"link-arg=/NOIMPLIB\"]",
+                "linker = \"rust-lld\"",
+                "linker-flavor=lld-link",
+                "link-arg=/NOIMPLIB",
             ],
         ));
     }
