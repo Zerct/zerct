@@ -3,6 +3,9 @@
 /// Publishable package archive builds, validation, and smoke tests.
 #[path = "check-all/package_artifacts.rs"]
 mod package_artifacts;
+/// Compatible Python interpreter discovery and validation.
+#[path = "check-all/python_runtime.rs"]
+mod python_runtime;
 
 use flate2 as _;
 use reqwest as _;
@@ -230,7 +233,14 @@ impl Runner {
         let _: &mut Command = prepared
             .args(args)
             .env("MINTLIFY_TELEMETRY_DISABLED", "1")
-            .env("TOVUK_NATIVE_BINARY", self.native_cli.as_os_str());
+            .env_remove("PIP_EXTRA_INDEX_URL")
+            .env("PIP_INDEX_URL", "https://pypi.org/simple")
+            .env_remove("PIP_TRUSTED_HOST")
+            .env("TOVUK_NATIVE_BINARY", self.native_cli.as_os_str())
+            .env("UV_DEFAULT_INDEX", "https://pypi.org/simple")
+            .env_remove("UV_EXTRA_INDEX_URL")
+            .env_remove("UV_INDEX")
+            .env("UV_NO_CACHE", "1");
         return prepared;
     }
 
@@ -402,14 +412,17 @@ impl Runner {
     ///
     /// Returns the first failed Python quality gate.
     fn run_python_quality_gates(&self) -> CheckResult {
+        let python_bin = check_try!(self.python_bin.to_str().ok_or_else(|| {
+            return "selected Python executable path must be valid UTF-8".to_owned();
+        }));
         let status = check_try!(
-            self.command(self.repo_root.as_path(), "python3", PYTHON_TEST_ARGS)
+            self.command(self.repo_root.as_path(), python_bin, PYTHON_TEST_ARGS)
                 .env("PYTHONPATH", "packages/tovuk-py/src")
                 .status()
-                .map_err(|error| return format!("run python3: {error}"))
+                .map_err(|error| return format!("run selected Python: {error}"))
         );
         if !status.success() {
-            return Err(format!("python3 failed with status {status}"));
+            return Err(format!("selected Python failed with status {status}"));
         }
         check_try!(self.run("uvx", RUFF_FORMAT_ARGS));
         check_try!(self.run("uvx", RUFF_CHECK_ARGS));
@@ -448,13 +461,7 @@ fn main() -> ExitCode {
     let result = (|| -> CheckResult {
         let repository = check_try!(repo_root());
         let path = tool_path();
-        let python_bin = check_try!(find_command(path.as_os_str(), &["python3.11", "python3"]));
-        let runner = Runner {
-            native_cli: repository.join("crates/tovuk/target/release/tovuk"),
-            path,
-            python_bin,
-            repo_root: repository,
-        };
+        let runner = check_try!(Runner::try_from((repository, path)));
         check_try!(runner.verify_generated_manifests());
         check_try!(runner.run_cargo_quality_gates());
         check_try!(runner.run_check_bin("check-dependency-policy", &[]));

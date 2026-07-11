@@ -66,6 +66,10 @@ const CHECK_ALL_SOURCE_REQUIREMENTS: &[PolicyRequirement] = &[
         "Rust check-all must disable Mintlify telemetry",
     ),
     (
+        "UV_NO_CACHE",
+        "Rust check-all must isolate Python tools from mutable user cache state",
+    ),
+    (
         "--package=node@24.18.0",
         "Rust check-all must run Mintlify with the pinned supported Node runtime",
     ),

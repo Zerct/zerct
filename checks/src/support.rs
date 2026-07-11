@@ -42,11 +42,10 @@ pub fn display_path(path: &Path) -> String {
 /// supplied PATH.
 #[inline]
 pub fn find_command(path: &OsStr, candidates: &[&str]) -> CheckResult<PathBuf> {
-    let executable = env::split_paths(path)
-        .flat_map(|directory| {
-            return candidates
-                .iter()
-                .map(move |candidate| return directory.join(candidate));
+    let executable = candidates
+        .iter()
+        .flat_map(|candidate| {
+            return env::split_paths(path).map(move |directory| return directory.join(candidate));
         })
         .find(|candidate| {
             return filesystem_metadata(candidate).is_ok_and(|metadata| return metadata.is_file());
