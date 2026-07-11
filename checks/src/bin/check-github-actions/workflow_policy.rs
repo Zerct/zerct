@@ -66,6 +66,45 @@ impl WorkflowPolicy for HostedActionsCheck {
         }
     }
 
+    fn check_publication_recovery_workflow(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        if !workflow.path.ends_with("recover-publication.yml") {
+            return;
+        }
+        for (needle, message) in [
+            (
+                "if: github.ref == 'refs/heads/main'",
+                "publication recovery must reject non-main dispatches",
+            ),
+            (
+                "ref: ${{ inputs.release_ref }}",
+                "publication recovery must check out the requested immutable release ref",
+            ),
+            (
+                "--bin check-native-release-assets -- \"$version\"",
+                "publication recovery must verify the complete native release before registry calls",
+            ),
+            (
+                "uses: ./.github/workflows/publish-crates.yml",
+                "publication recovery must invoke the crates.io publisher",
+            ),
+            (
+                "uses: ./.github/workflows/publish-npm.yml",
+                "publication recovery must invoke the npm publisher",
+            ),
+            (
+                "uses: ./.github/workflows/publish-pypi.yml",
+                "publication recovery must invoke the PyPI publisher",
+            ),
+        ] {
+            require_contains(
+                workflow.contents.as_str(),
+                needle,
+                format!("{}: {message}", workflow.path.display()).as_str(),
+                findings,
+            );
+        }
+    }
+
     fn check_reusable_workflow_concurrency(&self, workflow: &Workflow, findings: &mut Vec<String>) {
         let required_group = match workflow.path.file_name().and_then(OsStr::to_str) {
             Some("publish-crates.yml") => "  group: crates-${{ github.ref }}",
@@ -132,6 +171,7 @@ impl WorkflowPolicy for HostedActionsCheck {
         self.check_ci_trigger_coverage(workflow, findings);
         self.check_checkout_credentials(workflow, findings);
         self.check_github_hosted_cargo_cache(workflow, findings);
+        self.check_publication_recovery_workflow(workflow, findings);
         self.check_reusable_workflow_concurrency(workflow, findings);
         self.check_public_package_release_order(workflow, findings);
         self.check_docs_deploy_workflow(workflow, findings);
