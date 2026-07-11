@@ -18,3 +18,7 @@ timeout = 120
 
 [env]
 MACOSX_DEPLOYMENT_TARGET = { value = "11.0", force = true }
+
+# A standalone executable does not need an MSVC import library.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "link-arg=/NOIMPLIB"]
