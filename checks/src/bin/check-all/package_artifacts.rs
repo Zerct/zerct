@@ -114,12 +114,6 @@ fn build_python_packages(runner: &Runner, paths: &ArtifactPaths) -> CheckResult 
                     "packages/tovuk-py",
                 ],
             )
-            .env_remove("PIP_EXTRA_INDEX_URL")
-            .env("PIP_INDEX_URL", "https://pypi.org/simple")
-            .env_remove("PIP_TRUSTED_HOST")
-            .env("UV_DEFAULT_INDEX", "https://pypi.org/simple")
-            .env_remove("UV_EXTRA_INDEX_URL")
-            .env_remove("UV_INDEX")
             .status()
             .map_err(|error| return format!("run pinned Python package build: {error}"))
     );
@@ -292,11 +286,10 @@ fn smoke_test_npm(runner: &Runner, paths: &ArtifactPaths) -> CheckResult {
             npm_archive.as_str(),
         ],
     ));
-    let launcher = check_try!(path_string(
-        install_root
-            .join("node_modules/tovuk/bin/tovuk.mjs")
-            .as_path(),
-    ));
+    let package_root = install_root.join("node_modules/tovuk");
+    let installer = check_try!(path_string(package_root.join("install.mjs").as_path()));
+    check_try!(runner.status_in(runner.repo_root.as_path(), "node", &[installer.as_str()],));
+    let launcher = check_try!(path_string(package_root.join("bin/tovuk.mjs").as_path()));
     let actual = check_try!(command_output(
         runner,
         runner.repo_root.as_path(),
