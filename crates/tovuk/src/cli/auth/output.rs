@@ -1,87 +1,122 @@
-use serde_json::Value;
+#[cfg(test)]
+#[path = "output_tests.rs"]
+/// Authentication output tests.
+mod tests;
+
+use serde_json::{Value, to_string};
 
 use crate::cli::{
     args::CliOptions,
-    errors::{Result, internal_error, print_json},
-    utils::{optional_string_field, progress},
+    errors::{Result, internal_error, print_json, write_stderr_line, write_stdout_line},
+    utils::progress,
 };
 
-use super::payload::{login_started_payload, login_success_payload};
+use super::{
+    LoginStarted,
+    payload::{LoginStartedPayload, LoginSuccessPayload},
+};
 
-pub(super) fn logged_in_message(session: &Value) -> String {
-    optional_string_field(session, "email").map_or_else(
-        || "logged in".to_owned(),
-        |email| format!("logged in as {email}"),
-    )
-}
+#[derive(Debug)]
+/// Serialized login event destined for standard error.
+struct JsonEvent(Value);
 
-pub(super) fn print_login_started(
-    cli: &CliOptions,
-    start: &Value,
-    login_url: &str,
-    user_code: Option<&str>,
-    expires_seconds: u64,
-    interval_seconds: u64,
-) -> Result<()> {
-    if cli.output.json {
-        print_json_event(&login_started_payload(
-            start,
-            login_url,
-            user_code,
-            expires_seconds,
-            interval_seconds,
-        ))?;
+impl PrintAuthOutput for JsonEvent {
+    fn print(self) -> Result<()> {
+        let source = result_or_return!(
+            to_string(&self.0).map_err(|error| return internal_error(error.to_string()))
+        );
+        result_or_return!(
+            write_stderr_line(&source).map_err(|error| return internal_error(error.to_string()))
+        );
         return Ok(());
     }
-    progress(cli, "opened browser login");
-    progress(cli, &login_wait_message(user_code));
-    Ok(())
 }
 
+#[derive(Debug)]
+/// Human-readable successful login message.
+pub(super) struct LoggedInMessage(String);
+
+impl From<&Value> for LoggedInMessage {
+    fn from(value: &Value) -> Self {
+        return Self(value.get("email").and_then(Value::as_str).map_or_else(
+            || return "logged in".to_owned(),
+            |email| format!("logged in as {email}"),
+        ));
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+/// Login-start output action.
+pub(super) struct LoginStartedOutput;
+
+impl PrintLoginStarted for LoginStartedOutput {
+    fn print(self, cli: &CliOptions, login: &LoginStarted) -> Result<()> {
+        if cli.is_json() {
+            let payload = Value::from(LoginStartedPayload::from(login));
+            return PrintAuthOutput::print(JsonEvent(payload));
+        }
+        result_or_return!(progress(cli, "opened browser login"));
+        let message = LoginWaitMessage::from(login.user_code.as_deref());
+        result_or_return!(progress(cli, message.0.as_str()));
+        return Ok(());
+    }
+}
+
+#[derive(Debug)]
+/// Human-readable pending login message.
+struct LoginWaitMessage(String);
+
+impl From<Option<&str>> for LoginWaitMessage {
+    fn from(value: Option<&str>) -> Self {
+        return Self(value.map_or_else(
+            || return "waiting for browser login".to_owned(),
+            |code| format!("waiting for browser login code {code}"),
+        ));
+    }
+}
+
+/// Prints an authentication event on its designated stream.
+pub(super) trait PrintAuthOutput {
+    /// Prints the event.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when serialization or output writing fails.
+    fn print(self) -> Result<()>;
+}
+
+/// Prints the appropriate login-start output for the selected format.
+pub(super) trait PrintLoginStarted {
+    /// Prints login-start state for a text or JSON client.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when progress or JSON event output fails.
+    fn print(self, cli: &CliOptions, login: &LoginStarted) -> Result<()>;
+}
+
+impl From<LoggedInMessage> for String {
+    #[inline]
+    fn from(value: LoggedInMessage) -> Self {
+        return value.0;
+    }
+}
+
+/// Prints successful login or token-save output.
+///
+/// # Errors
+///
+/// Returns an error when JSON serialization or output writing fails.
 pub(super) fn print_login_success(
     cli: &CliOptions,
     status: &str,
     email: Option<&str>,
 ) -> Result<()> {
-    if cli.output.json {
-        return print_json(&login_success_payload(status, email));
+    if cli.is_json() {
+        return print_json(&Value::from(LoginSuccessPayload::from((status, email))));
     }
     if status == "saved" {
-        println!("saved Tovuk session token");
-        return Ok(());
+        return write_stdout_line("saved Tovuk session token");
     }
-    Ok(())
-}
-
-fn login_wait_message(user_code: Option<&str>) -> String {
-    user_code.map_or_else(
-        || "waiting for browser login".to_owned(),
-        |code| format!("waiting for browser login code {code}"),
-    )
-}
-
-fn print_json_event(value: &Value) -> Result<()> {
-    let source = serde_json::to_string(value).map_err(|error| internal_error(error.to_string()))?;
-    eprintln!("{source}");
-    Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use serde_json::json;
-
-    use super::logged_in_message;
-
-    #[test]
-    fn logged_in_message_uses_email_when_present() {
-        assert_eq!(
-            logged_in_message(&json!({"email": "ada@example.com"})),
-            "logged in as ada@example.com"
-        );
-    }
-
-    #[test]
-    fn logged_in_message_does_not_invent_user_when_email_is_missing() {
-        assert_eq!(logged_in_message(&json!({})), "logged in");
-    }
+    return Ok(());
 }

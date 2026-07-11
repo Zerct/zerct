@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+repository_root="$(git rev-parse --show-toplevel)"
+cd "$repository_root"
+exec cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --

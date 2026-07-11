@@ -1,3 +1,6 @@
+[files]
+extend-exclude = ["vendor/**"]
+
 [default.extend-words]
 tovuk = "tovuk"
 WOMENS = "WOMENS"

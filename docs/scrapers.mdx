@@ -35,6 +35,14 @@ tovuk scraper list --json
 | `alibaba` | record | `$1.50` |
 | `temu` | record | `$1.60` |
 | `etsy` | record | `$1.20` |
+| `apple-app-store` | record | `$1.40` |
+| `google-play-store` | record | `$1.40` |
+| `trendyol` | record | `$1.40` |
+| `hepsiburada` | record | `$1.40` |
+| `youtube` | record | `$1.40` |
+| `zillow` | record | `$1.50` |
+| `indeed` | record | `$1.20` |
+| `trustpilot` | record | `$1` |
 | `linkedin` | record | `$0.90` |
 | `tiktok` | record | `$1.70` |
 | `instagram` | record | `$0.80` |
@@ -73,6 +81,14 @@ tovuk request create amazon '{"operation":"search","query":"mechanical keyboard"
 tovuk request create alibaba '{"operation":"search","query":"stainless bottle","limit":25,"includeSupplierVerification":true}' --json
 tovuk request create temu '{"operation":"search","query":"desk lamp","limit":25,"includeSalesData":true}' --json
 tovuk request create etsy '{"operation":"search","query":"linen wall art","limit":25,"includeShopDetails":true}' --json
+tovuk request create apple-app-store '{"appIds":["6448311069"],"country":"us","includeAppInfo":true,"limit":1}' --json
+tovuk request create google-play-store '{"appIds":["com.openai.chatgpt"],"country":"us","lang":"en","includeAppInfo":true,"limit":1}' --json
+tovuk request create youtube '{"operation":"search","query":"open source database tutorial","country":"US","language":"en-US","limit":10}' --json
+tovuk request create zillow '{"operation":"search","query":"Austin TX","includePhotos":true,"limit":10}' --json
+tovuk request create indeed '{"operation":"search","query":"rust engineer","location":"Remote","includeCompanyInfo":true,"limit":10}' --json
+tovuk request create trustpilot '{"operation":"search","query":"openai","includeReviews":true,"limit":10}' --json
+tovuk request create trendyol '{"operation":"search","query":"kablosuz kulaklik","countryCode":"TR","currency":"TRY","limit":10}' --json
+tovuk request create hepsiburada '{"operation":"search","query":"kablosuz kulaklik","countryCode":"TR","currency":"TRY","limit":10}' --json
 tovuk request create tiktok '{"operation":"search","query":"rust programming","outputFields":["id","desc","author.uniqueId","stats.playCount"],"limit":30}' --json
 tovuk request create tiktok '{"operation":"sound","soundUrls":["https://www.tiktok.com/music/original-sound-1234567890"],"limit":30}' --json
 tovuk request create instagram '{"username":"instagram","operation":"profile","limit":50}' --json
@@ -87,16 +103,15 @@ tovuk request cancel <request_id> --json
 Use `--limit <n>` on `tovuk request create` to add or override `input.limit`.
 Use `--limit <n>` and `--cursor <cursor>` on `tovuk request list` and
 `tovuk request results` to page through Requests and stored Records.
-Use `tovuk scraper health --json` before heavy scraping to inspect managed
-reader, signing worker, and Webshare proxy readiness without sending private
-account material.
+Use `tovuk scraper health --json` before heavy scraping to inspect public
+data-source readiness without sending private account material.
 
 ## API
 
 ```http
-GET /v1/scrapers
-GET /v1/scrapers/health
-GET /v1/scrapers/{scraper}
+GET /v1/data-sources
+GET /v1/data-sources/health
+GET /v1/data-sources/{data_source}
 POST /v1/requests
 GET /v1/requests
 GET /v1/requests/{request_id}
@@ -131,8 +146,8 @@ Create an X Request:
 ```
 
 X also accepts a public `x.com` or `twitter.com` post/profile URL, `username`,
-`userId`, or `tweetId`. Tovuk stores canonical public input fields and runs X
-reads through managed infrastructure.
+`userId`, or `tweetId`. Tovuk stores canonical public input fields and manages
+public-data retrieval.
 
 Create a GitHub Request:
 
@@ -252,9 +267,17 @@ examples above:
 | `alibaba` | search terms, product URLs, supplier URLs, category URLs, RFQ targets, reverse-image inputs, MOQ and price-tier options | `search`, `product`, `supplier`, `category`, `rfq`, `reverse-image`, `price-tiers` |
 | `temu` | search terms, product URLs, listing URLs, category URLs, review options, ad-library targets, sold-count and variant flags | `search`, `product`, `listings`, `category`, `reviews`, `ad-library`, `price-tracker` |
 | `etsy` | search terms, listing URLs, shop URLs, review targets, keyword-research options, seller-intelligence and customer-photo flags | `search`, `listing`, `shop`, `reviews`, `keywords`, `seller-intel`, `customer-photos` |
+| `apple-app-store` | app IDs, app URLs, search terms, country, language, chart/category, reviews, developer, version, rating, screenshot, and app-store optimization flags | `search`, `app`, `reviews`, `rankings`, `developer`, `keywords` |
+| `google-play-store` | package names, app URLs, search terms, country, language, category/chart, reviews, developer, permissions, data-safety, rating, install, screenshot, and app-store optimization flags | `search`, `app`, `reviews`, `rankings`, `developer`, `keywords`, `permissions`, `data-safety` |
+| `youtube` | search queries, start URLs, video IDs, channel URLs or handles, playlist IDs, comments, transcript languages, country, language, shorts, trending, download-intent, and public email flags | `search`, `video`, `channel`, `playlist`, `comments`, `transcript`, `shorts`, `trending`, `download`, `email` |
+| `zillow` | search URLs, address, ZIP or city queries, property URLs, sale/rent/sold mode, price, beds, baths, foreclosure, agent, photo, and market options | `search`, `property`, `rentals`, `sales`, `sold`, `agents`, `foreclosures`, `photos`, `markets` |
+| `indeed` | query, location, country, radius, job URLs, company URLs, salary filters, job type, posted date, remote, and duplicate policy | `search`, `job`, `company`, `salaries`, `resume` |
+| `trustpilot` | business URLs or domains, category URLs, review filters, stars, date range, language, country, reply, reviewer, and sentiment-style flags | `search`, `business`, `reviews`, `categories`, `reviewer` |
+| `trendyol` | search terms, product URLs, seller URLs, category URLs, review mode, price filters, seller intelligence, Turkey locale, and public contact flags | `search`, `product`, `listings`, `reviews`, `seller`, `emails` |
+| `hepsiburada` | search terms, product URLs, category URLs, merchant URLs, review mode, barcode/search hints, Turkey locale, and marketplace filters | `search`, `product`, `listings`, `reviews`, `merchant` |
 
-Tovuk runs Google Maps and ecommerce reads through managed Webshare egress and
-stores visible public records only.
+Tovuk accepts public inputs for Google Maps, ecommerce, app-store, video,
+real-estate, jobs, and review reads, and stores visible public records only.
 
 Ecommerce operation inputs may use common Apify-style aliases such as
 `best_sellers`, `adLibrary`, `Vendor`, `seller-intelligence`, `postalCode`, or
@@ -309,8 +332,7 @@ want compact Records with only selected top-level JSON fields. Operations includ
 `user`, `user-posts`, `user-comments`, `user-overview`, `popular`, and `all`.
 For direct post or comment requests, `commentSort` aliases `sort` and supports
 public Reddit comment ordering.
-Tovuk stores canonical public input fields and runs reads through managed
-Webshare egress.
+Tovuk stores canonical public input fields and manages public-data retrieval.
 
 Create a LinkedIn Post Search Request:
 
@@ -415,8 +437,7 @@ Create an Instagram Request:
 Instagram accepts public profile URLs, post URLs, reel URLs, hashtag URLs,
 `username`, `shortcode`, `mediaId`, `hashtag`, `query`, and operations
 `profile`, `post`, `reel`, `comments`, `hashtag`, and `search`. Tovuk stores
-canonical public input fields and runs reads through Tovuk-managed reader
-accounts.
+canonical public input fields and manages public-data retrieval.
 
 Every Request stores its public input, status, estimated cost when `limit` is
 known, final cost, `resultsUrl`, and `agentInstruction`.
@@ -429,7 +450,7 @@ public repository names, public place ids, and public company or domain inputs
 only.
 
 For X Requests, never send login cookies, account credentials, session tokens,
-or proxy URLs. Tovuk manages X read accounts and Webshare egress internally.
+or proxy URLs. Send only public X targets and public search filters.
 
 For GitHub Requests, never send GitHub tokens, personal access tokens, private
 repository URLs, git credentials, cookies, session tokens, or proxy URLs.
@@ -439,25 +460,22 @@ lists, cookies, Google account credentials, session tokens, or proxy URLs.
 
 For ecommerce Requests, never send marketplace account cookies, buyer or seller
 account credentials, order history, private cart data, session tokens, or proxy
-URLs. Tovuk manages Webshare egress internally and only accepts public Amazon,
-Alibaba, Temu, and Etsy targets.
+URLs. Send only public marketplace targets.
 
 For Reddit Requests, never send Reddit cookies, account credentials, session
-tokens, private community content, or proxy URLs. Tovuk manages Webshare egress
-internally and only accepts public Reddit targets, public community profile
-targets, and public search filters.
+tokens, private community content, or proxy URLs. Send only public Reddit
+targets, public community profiles, and public search filters.
 
 For LinkedIn Requests, never send LinkedIn cookies, account credentials,
 session tokens, private profile content, mailbox credentials, OTP codes, or
-proxy URLs. Tovuk manages reader sessions internally and only accepts public
-LinkedIn targets and public search filters.
+proxy URLs. Send only public LinkedIn targets and public search filters.
 
 For Instagram Requests, never send Instagram cookies, account credentials,
-session tokens, private profile content, or proxy URLs. Tovuk manages reader
-accounts internally and only accepts public Instagram targets.
+session tokens, private profile content, or proxy URLs. Send only public
+Instagram targets.
 
 ## Prices
 
-`GET /v1/scrapers` returns `priceEvents` in USD micro-units. `1,000,000` means
+`GET /v1/data-sources` returns `priceEvents` in USD micro-units. `1,000,000` means
 `$1.00`. Prices are per public Record unit, such as `place`, `post`, `review`,
 `page`, or `record`.

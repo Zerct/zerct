@@ -1,6 +1,7 @@
 use super::super::{
+    ExecuteCommand,
     args::CliOptions,
-    errors::{Result, agent_error},
+    errors::{CliError, Result, agent_error},
     utils::encode_component,
 };
 use super::{
@@ -8,57 +9,84 @@ use super::{
     generic::{print_authenticated, print_authenticated_mutation},
 };
 use reqwest::Method;
-use serde_json::{Value, json};
+#[cfg(test)]
+use serde_json::Value;
+use serde_json::json;
 
-pub(crate) fn api_key_command(cli: &CliOptions) -> Result<()> {
-    match cli.args.first().map_or("list", String::as_str) {
-        "list" => print_authenticated(cli, "/v1/account/api-keys"),
-        "create" => api_key_create(cli),
-        "revoke" => api_key_revoke(cli),
-        _ => Err(agent_error(
-            "unknown_command",
-            "Unknown API key command.",
-            "Use `tovuk api-key list --json`, `tovuk api-key create \"Production scraper\" --json`, or `tovuk api-key revoke <api_key_id> --json`.",
-            cli.output.json,
-        )),
+/// Validation error used when an API key identifier is absent.
+const API_KEY_ID_ERROR: super::common::ArgumentError = (
+    "invalid_api_key",
+    "API key id is required.",
+    "Use `tovuk api-key revoke <api_key_id> --json` with an id from `tovuk api-key list --json`.",
+);
+
+#[derive(Clone, Copy, Debug)]
+/// Top-level API key command action.
+pub(in crate::cli) struct ApiKeyCommand;
+
+impl ExecuteCommand for ApiKeyCommand {
+    fn execute(self, cli: &CliOptions) -> Result<()> {
+        match cli.args().first().map_or("list", String::as_str) {
+            "list" => return print_authenticated(cli, "/v1/account/api-keys"),
+            "create" => {
+                let name = result_or_return!(ApiKeyName::try_from(cli));
+                return print_authenticated_mutation(
+                    cli,
+                    Method::POST,
+                    "/v1/account/api-keys",
+                    Some(json!({ "name": name.0 })),
+                );
+            }
+            "revoke" => {
+                let key_id = result_or_return!(command_arg(cli, API_KEY_ID_ERROR));
+                return print_authenticated_mutation(
+                    cli,
+                    Method::DELETE,
+                    &format!("/v1/account/api-keys/{}", encode_component(&key_id)),
+                    None,
+                );
+            }
+            _ => {
+                return Err(agent_error(
+                    "unknown_command",
+                    "Unknown API key command.",
+                    "Use `tovuk api-key list --json`, `tovuk api-key create \"Production scraper\" --json`, or `tovuk api-key revoke <api_key_id> --json`.",
+                    cli.output_format(),
+                ));
+            }
+        }
     }
 }
 
-fn api_key_create(cli: &CliOptions) -> Result<()> {
-    print_authenticated_mutation(
-        cli,
-        Method::POST,
-        "/v1/account/api-keys",
-        Some(api_key_create_body(cli)?),
-    )
+#[derive(Debug)]
+/// Validated non-empty API key name.
+struct ApiKeyName(String);
+
+impl TryFrom<&CliOptions> for ApiKeyName {
+    type Error = CliError;
+
+    fn try_from(value: &CliOptions) -> Result<Self> {
+        let name = joined_args(value, 0b1);
+        if name.is_empty() {
+            return Err(agent_error(
+                "invalid_api_key_name",
+                "API key name is required.",
+                "Use `tovuk api-key create \"Production scraper\" --json` with a short name for the script or environment.",
+                value.output_format(),
+            ));
+        }
+        return Ok(Self(name));
+    }
 }
 
+#[cfg(test)]
+/// Builds the API-key creation body used by contract tests.
+///
+/// # Errors
+///
+/// Returns an error when the test options do not contain a valid API-key name.
 fn api_key_create_body(cli: &CliOptions) -> Result<Value> {
-    let name = joined_args(cli, 1);
-    if name.is_empty() {
-        return Err(agent_error(
-            "invalid_api_key_name",
-            "API key name is required.",
-            "Use `tovuk api-key create \"Production scraper\" --json` with a short name for the script or environment.",
-            cli.output.json,
-        ));
-    }
-    Ok(json!({ "name": name }))
-}
-
-fn api_key_revoke(cli: &CliOptions) -> Result<()> {
-    let key_id = command_arg(
-        cli,
-        "invalid_api_key",
-        "API key id is required.",
-        "Use `tovuk api-key revoke <api_key_id> --json` with an id from `tovuk api-key list --json`.",
-    )?;
-    print_authenticated_mutation(
-        cli,
-        Method::DELETE,
-        &format!("/v1/account/api-keys/{}", encode_component(&key_id)),
-        None,
-    )
+    return ApiKeyName::try_from(cli).map(|name| return json!({ "name": name.0 }));
 }
 
 #[cfg(test)]

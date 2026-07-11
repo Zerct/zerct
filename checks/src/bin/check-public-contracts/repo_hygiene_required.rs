@@ -1,8 +1,40 @@
-use std::{collections::BTreeSet, path::Path};
+use alloc::collections::BTreeSet;
 
 use crate::{helpers::CheckResult, repo_hygiene_git::git_status_success};
 
+use std::path::Path;
+
+/// Contract value named `CHECK_GITHUB_ACTIONS_CHECKER_DIR`.
+const CHECK_GITHUB_ACTIONS_CHECKER_DIR: &str = "checks/src/bin/check-github-actions/";
+
+/// Contract value named `PUBLIC_CONTRACT_CHECKER_DIR`.
+const PUBLIC_CONTRACT_CHECKER_DIR: &str = "checks/src/bin/check-public-contracts/";
+
+/// Contract value named `REQUIRED_IGNORED_PATHS`.
+const REQUIRED_IGNORED_PATHS: &[&str] = &[
+    ".env",
+    ".env.local",
+    ".npmrc",
+    ".pypirc",
+    ".tovuk/example",
+    "crates/tovuk/target/example",
+    "docs/.mintlify/example",
+    "node_modules/example",
+    "packages/tovuk/dist/example",
+    "packages/tovuk/node_modules/example",
+    "packages/tovuk/native-release-targets.json",
+    "packages/tovuk-py/src/tovuk/native_release_targets.json",
+];
+
+/// Contract value named `REQUIRED_TRACKED_PATHS`.
 const REQUIRED_TRACKED_PATHS: &[&str] = &[
+    ".cargo/config.toml",
+    ".editorconfig",
+    ".gitattributes",
+    ".githooks/pre-commit",
+    ".githooks/pre-push",
+    ".github/actions/setup-quality-tools/action.yml",
+    ".github/dependabot.yml",
     ".github/workflows/ci.yml",
     ".github/workflows/docs-deploy.yml",
     ".github/workflows/docs-score.yml",
@@ -14,13 +46,30 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "native-release-targets.json",
     ".gitignore",
     ".github/actionlint.yaml",
+    ".oxlintrc.json",
+    ".prettierrc.json",
     ".typos.toml",
     ".vacuum.yaml",
     "AGENTS.md",
     "README.md",
     "checks/Cargo.lock",
     "checks/Cargo.toml",
+    "checks/src/bin/check-dependency-policy.rs",
+    "checks/src/bin/check_dependency_policy/deny.rs",
+    "checks/src/bin/check_dependency_policy/graph.rs",
+    "checks/src/bin/check_dependency_policy/policy.rs",
+    "checks/src/bin/check_dependency_policy_tests/verification.rs",
     "checks/src/bin/check-native-release-assets.rs",
+    "checks/src/bin/check-native-release-assets/checksum.rs",
+    "checks/src/bin/check-native-release-assets/release.rs",
+    "checks/src/bin/check_native_release_assets_tests/verification.rs",
+    "checks/src/bin/check-pre-commit.rs",
+    "checks/src/bin/check-release-availability.rs",
+    "checks/src/bin/check_release_availability_tests/verification.rs",
+    "checks/src/bin/native-release-tool.rs",
+    "checks/src/bin/native_release_tool/checksum.rs",
+    "checks/src/bin/native_release_tool/release_artifacts.rs",
+    "checks/src/bin/native_release_tool_tests/verification.rs",
     "checks/src/bin/deploy-mintlify-docs.rs",
     "checks/src/bin/check-github-actions.rs",
     "checks/src/bin/check-github-actions/global_policy.rs",
@@ -38,37 +87,40 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-shell-style.rs",
     "checks/src/bin/check-toml-style.rs",
     "checks/src/bin/sync-native-release-targets.rs",
-    "checks/src/check_support.rs",
+    "checks/src/support.rs",
+    "checks/src/support/verification.rs",
     "checks/src/lib.rs",
     "checks/src/bin/check-public-contracts/agent_guidance.rs",
-    "checks/src/bin/check-public-contracts/cli_contract.rs",
-    "checks/src/bin/check-public-contracts/cli_contract/package.rs",
-    "checks/src/bin/check-public-contracts/cli_contract/retired.rs",
+    "checks/src/bin/check-public-contracts/cli_contract_module.rs",
+    "checks/src/bin/check-public-contracts/cli_contract_module/package.rs",
+    "checks/src/bin/check-public-contracts/cli_contract_module/retired.rs",
     "checks/src/bin/check-public-contracts/docs.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/account_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/billing_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/login_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/openapi.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/openapi/examples.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/openapi/operations.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/openapi/schemas.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/paths_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/pricing_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/scraper_contract.rs",
-    "checks/src/bin/check-public-contracts/docs_api_contract/status_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/account_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/billing_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/login_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/openapi_module.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/openapi_module/examples.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/openapi_module/operations.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/openapi_module/schemas.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/paths_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/pricing_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/scraper_contract.rs",
+    "checks/src/bin/check-public-contracts/docs_api_contract_module/status_contract.rs",
     "checks/src/bin/check-public-contracts/docs_navigation.rs",
     "checks/src/bin/check-public-contracts/docs_sources.rs",
     "checks/src/bin/check-public-contracts/helpers.rs",
     "checks/src/bin/check-public-contracts/helpers_io.rs",
     "checks/src/bin/check-public-contracts/helpers_public_copy.rs",
     "checks/src/bin/check-public-contracts/html_visible_copy.rs",
+    "checks/src/bin/check-public-contracts/html_visible_copy_tests/verification.rs",
     "checks/src/bin/check-public-contracts/main.rs",
-    "checks/src/bin/check-public-contracts/mintlify.rs",
-    "checks/src/bin/check-public-contracts/mintlify/copy.rs",
-    "checks/src/bin/check-public-contracts/mintlify/mcp.rs",
-    "checks/src/bin/check-public-contracts/mintlify/pages.rs",
+    "checks/src/bin/check-public-contracts/mintlify_module.rs",
+    "checks/src/bin/check-public-contracts/mintlify_module/copy.rs",
+    "checks/src/bin/check-public-contracts/mintlify_module/mcp.rs",
+    "checks/src/bin/check-public-contracts/mintlify_module/pages.rs",
     "checks/src/bin/check-public-contracts/mintlify_fetch.rs",
+    "checks/src/bin/check-public-contracts/mintlify_fetch_tests/verification.rs",
     "checks/src/bin/check-public-contracts/native_release_targets.rs",
     "checks/src/bin/check-public-contracts/npm.rs",
     "checks/src/bin/check-public-contracts/npm_package.rs",
@@ -77,6 +129,7 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-public-contracts/repo_hygiene.rs",
     "checks/src/bin/check-public-contracts/repo_hygiene_git.rs",
     "checks/src/bin/check-public-contracts/repo_hygiene_paths.rs",
+    "checks/src/bin/check-public-contracts/repo_hygiene_paths_tests/verification.rs",
     "checks/src/bin/check-public-contracts/repo_hygiene_required.rs",
     "checks/src/bin/check-public-contracts/repo_hygiene_text.rs",
     "checks/src/bin/check-public-contracts/retired_contracts.rs",
@@ -86,36 +139,56 @@ const REQUIRED_TRACKED_PATHS: &[&str] = &[
     "checks/src/bin/check-public-contracts/types.rs",
     "crates/tovuk/Cargo.lock",
     "crates/tovuk/Cargo.toml",
+    "crates/tovuk/LICENSE",
     "crates/tovuk/src/main.rs",
     "docs/docs.json",
     "docs/openapi.json",
+    "docs/fonts/OFL-1.1.txt",
+    "docs/fonts/PROVENANCE.md",
+    "clippy.toml",
     "deny.toml",
+    "dependency-feature-policy.json",
     "Formula/tovuk.rb",
     "packages/tovuk/package.json",
+    "packages/tovuk/LICENSE",
+    "packages/tovuk/install-policy.mjs",
+    "packages/tovuk/tests/wrapper.test.mjs",
     "packages/tovuk-py/pyproject.toml",
+    "packages/tovuk-py/LICENSE",
     "checks/src/bin/check-all.rs",
+    "rust-toolchain.toml",
+    "rustfmt.toml",
     "skills/tovuk/SKILL.md",
 ];
-const CHECK_GITHUB_ACTIONS_CHECKER_DIR: &str = "checks/src/bin/check-github-actions/";
-const PUBLIC_CONTRACT_CHECKER_DIR: &str = "checks/src/bin/check-public-contracts/";
 
-const REQUIRED_IGNORED_PATHS: &[&str] = &[
-    ".env",
-    ".env.local",
-    ".npmrc",
-    ".pypirc",
-    ".tovuk/example",
-    "crates/tovuk/target/example",
-    "docs/.mintlify/example",
-    "packages/tovuk/.fallow/cache.bin",
-    "node_modules/example",
-    "packages/tovuk/dist/example",
-    "packages/tovuk/node_modules/example",
-    "packages/tovuk/native-release-targets.json",
-    "packages/tovuk-py/src/tovuk/native_release_targets.json",
+/// Compile-time references preserve the named helper boundaries.
+const _: [usize; 0x0002] = [
+    size_of_val(&require_ignored_paths),
+    size_of_val(&require_tracked_paths),
 ];
 
-pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {
+/// Contract implementation for `require_ignored_paths`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn require_ignored_paths() -> CheckResult {
+    for path in REQUIRED_IGNORED_PATHS {
+        check_try!(
+            check_try!(git_status_success(&["check-ignore", "-q", path]))
+                .then_some(())
+                .ok_or_else(|| format!("{path} must be ignored"))
+        );
+    }
+    return Ok(());
+}
+
+/// Contract implementation for `require_tracked_paths`.
+///
+/// # Errors
+///
+/// Returns an error when the contract requirement cannot be verified.
+pub(super) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResult {
     let required_set = REQUIRED_TRACKED_PATHS
         .iter()
         .copied()
@@ -123,7 +196,7 @@ pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
     let missing = REQUIRED_TRACKED_PATHS
         .iter()
         .copied()
-        .filter(|path| !tracked_set.contains(*path))
+        .filter(|path| return !tracked_set.contains(*path))
         .collect::<Vec<_>>();
     if !missing.is_empty() {
         return Err(format!(
@@ -139,13 +212,13 @@ pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
     let unpinned_checker_modules = tracked_set
         .iter()
         .filter(|path| {
-            pinned_checker_dirs
+            return pinned_checker_dirs
                 .iter()
-                .any(|checker_dir| path.starts_with(checker_dir))
+                .any(|checker_dir| return path.starts_with(checker_dir))
                 && Path::new(path)
                     .extension()
-                    .is_some_and(|extension| extension.eq_ignore_ascii_case("rs"))
-                && !required_set.contains(path.as_str())
+                    .is_some_and(|extension| return extension.eq_ignore_ascii_case("rs"))
+                && !required_set.contains(path.as_str());
         })
         .cloned()
         .collect::<Vec<_>>();
@@ -156,14 +229,5 @@ pub(crate) fn require_tracked_paths(tracked_set: &BTreeSet<String>) -> CheckResu
         ));
     }
 
-    Ok(())
-}
-
-pub(crate) fn require_ignored_paths() -> CheckResult {
-    for path in REQUIRED_IGNORED_PATHS {
-        git_status_success(&["check-ignore", "-q", path])?
-            .then_some(())
-            .ok_or_else(|| format!("{path} must be ignored"))?;
-    }
-    Ok(())
+    return Ok(());
 }

@@ -1,0 +1,35 @@
+{
+  "plugins": ["import", "node", "oxc", "promise", "typescript", "unicorn"],
+  "categories": {
+    "correctness": "error",
+    "nursery": "error",
+    "pedantic": "error",
+    "perf": "error",
+    "style": "error",
+    "suspicious": "error"
+  },
+  "env": {
+    "builtin": true,
+    "node": true
+  },
+  "rules": {
+    "import/no-nodejs-modules": [
+      "error",
+      {
+        "allow": [
+          "node:assert/strict",
+          "node:child_process",
+          "node:crypto",
+          "node:events",
+          "node:fs",
+          "node:fs/promises",
+          "node:os",
+          "node:path",
+          "node:test",
+          "node:util"
+        ]
+      }
+    ],
+    "unicorn/no-null": "off"
+  }
+}

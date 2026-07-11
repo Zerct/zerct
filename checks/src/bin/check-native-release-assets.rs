@@ -1,87 +1,149 @@
 //! Verify native release assets and checksums before wrapper publishes.
 
-use std::{
-    collections::BTreeSet,
-    env, fs,
-    path::{Path, PathBuf},
-    process::{self, ExitCode},
-    thread,
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
-};
+/// Propagate a failed release check without the question-mark operator.
+macro_rules! check_try {
+    ($result:expr) => {
+        match $result {
+            Ok(value) => value,
+            Err(error) => return Err(error.into()),
+        }
+    };
+}
+
+extern crate alloc;
+
+/// Bounded native-asset and checksum verification.
+#[path = "check-native-release-assets/checksum.rs"]
+pub mod checksum;
+/// `GitHub` release polling, download, and cleanup operations.
+#[path = "check-native-release-assets/release.rs"]
+pub mod release;
+/// Bounded native release asset verification tests.
+#[cfg(test)]
+#[path = "check_native_release_assets_tests/verification.rs"]
+mod tests;
+
+#[cfg(test)]
+use checksum::{MAX_CHECKSUM_BYTES, MAX_NATIVE_ASSET_BYTES, read_limited_text, sha256_file};
+
+use core::time::Duration;
+
+use flate2 as _;
+
+use reqwest as _;
 
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
-use tovuk_public_checks::check_support::{CheckResult, command, repo_root, tool_path};
 
-fn main() -> ExitCode {
-    match run() {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(error) => {
-            eprintln!("{error}");
-            ExitCode::FAILURE
-        }
-    }
-}
+use serde_json::from_str;
 
-fn run() -> CheckResult {
-    let repo_root = repo_root()?;
-    let path = tool_path();
-    let args = env::args().skip(1).collect::<Vec<_>>();
-    if args.len() > 2 {
-        return Err("usage: check-native-release-assets [version] [wait_seconds]".to_owned());
-    }
-    let version = match args.first().map(String::as_str) {
-        None | Some("") => read_crate_version(repo_root.as_path())?,
-        Some(value) => value.to_owned(),
-    };
-    let wait_seconds = args
-        .get(1)
-        .map_or(Ok(0), |value| parse_wait_seconds(value.as_str()))?;
-    let required_assets = required_assets(repo_root.as_path(), version.as_str())?;
-    let tag = format!("v{version}");
-    let deadline = Instant::now() + Duration::from_secs(wait_seconds);
+use std::{
+    env,
+    fs::read_to_string,
+    io::{Result as InputOutputResult, Write as _, stderr},
+    path::Path,
+    process::ExitCode,
+};
 
-    loop {
-        let release_assets =
-            release_asset_names(repo_root.as_path(), path.as_os_str(), tag.as_str())?;
-        let missing = missing_assets(&required_assets, &release_assets);
-        if missing.is_empty() {
-            verify_asset_checksums(
-                repo_root.as_path(),
-                path.as_os_str(),
-                tag.as_str(),
-                &required_assets,
-            )?;
-            println!("All native Tovuk release assets exist and match checksums for {tag}.");
-            return Ok(());
-        }
+use tar as _;
 
-        if Instant::now() >= deadline {
-            return Err(format!(
-                "Missing native Tovuk release assets for {tag}:\n{}",
-                missing.join("\n")
-            ));
-        }
+use tovuk_public_checks::check_support::{CheckResult, repo_root};
 
-        thread::sleep(Duration::from_secs(20));
-    }
-}
+/// Compile-time references preserve the named helper boundaries.
+const _: [usize; 0x0005] = [
+    size_of_val(&parse_request),
+    size_of_val(&parse_wait_seconds),
+    size_of_val(&read_crate_version),
+    size_of_val(&required_assets),
+    size_of_val(&run),
+];
 
-#[derive(Deserialize)]
+/// Root native release target manifest.
+#[derive(Debug, Deserialize)]
 struct NativeReleaseTargets {
+    /// Tracked native release targets.
     targets: Vec<NativeTarget>,
 }
 
-#[derive(Deserialize)]
+/// Native target fields needed to derive release asset names.
+#[derive(Debug, Deserialize)]
 struct NativeTarget {
+    /// Platform-specific asset suffix.
     asset_ext: String,
+    /// Canonical Rust target triple.
     triple: String,
 }
 
-fn read_crate_version(repo_root: &Path) -> CheckResult<String> {
-    let manifest_path = repo_root.join("crates").join("tovuk").join("Cargo.toml");
-    let source = fs::read_to_string(manifest_path.as_path())
-        .map_err(|error| format!("read {}: {error}", manifest_path.display()))?;
+/// Parsed command request.
+#[derive(Debug)]
+struct ReleaseRequest {
+    /// Crate version whose release assets must exist.
+    version: String,
+    /// Maximum polling duration.
+    wait_seconds: u64,
+}
+
+/// Execute the release check and report command errors on standard error.
+///
+/// # Errors
+///
+/// Returns an error when a command failure cannot be written to standard error.
+fn main() -> InputOutputResult<ExitCode> {
+    match run() {
+        Ok(()) => return Ok(ExitCode::SUCCESS),
+        Err(error) => {
+            return writeln!(stderr().lock(), "{error}").map(|()| return ExitCode::FAILURE);
+        }
+    }
+}
+
+/// Parse the optional version and wait duration command arguments.
+///
+/// # Errors
+///
+/// Returns an error when arguments are invalid or the default crate version
+/// cannot be read.
+fn parse_request(repository: &Path) -> CheckResult<ReleaseRequest> {
+    let arguments = env::args().skip(0x1).collect::<Vec<_>>();
+    if arguments.len() > 0x2 {
+        return Err("usage: check-native-release-assets [version] [wait_seconds]".to_owned());
+    }
+    let version = match arguments.first().map(String::as_str) {
+        None | Some("") => check_try!(read_crate_version(repository)),
+        Some(value) => value.to_owned(),
+    };
+    let wait_seconds = check_try!(
+        arguments
+            .get(0x1)
+            .map_or(Ok(u64::MIN), |value| return parse_wait_seconds(value))
+    );
+    return Ok(ReleaseRequest {
+        version,
+        wait_seconds,
+    });
+}
+
+/// Parse a wait duration in seconds.
+///
+/// # Errors
+///
+/// Returns an error when the value is not an unsigned integer.
+fn parse_wait_seconds(value: &str) -> CheckResult<u64> {
+    return value
+        .parse::<u64>()
+        .map_err(|error| return format!("wait_seconds must be an unsigned integer: {error}"));
+}
+
+/// Read the native crate version from its manifest.
+///
+/// # Errors
+///
+/// Returns an error when the manifest cannot be read or has no explicit version.
+fn read_crate_version(repository: &Path) -> CheckResult<String> {
+    let manifest_path = repository.join("crates").join("tovuk").join("Cargo.toml");
+    let source = check_try!(
+        read_to_string(manifest_path.as_path())
+            .map_err(|error| return format!("read {}: {error}", manifest_path.display()))
+    );
     for line in source.lines() {
         let trimmed = line.trim();
         let Some(raw_version) = trimmed.strip_prefix("version = ") else {
@@ -92,208 +154,53 @@ fn read_crate_version(repo_root: &Path) -> CheckResult<String> {
             return Ok(version.to_owned());
         }
     }
-    Err(format!(
+    return Err(format!(
         "{} must contain a version",
         manifest_path.display()
-    ))
+    ));
 }
 
-fn parse_wait_seconds(value: &str) -> CheckResult<u64> {
-    value
-        .parse::<u64>()
-        .map_err(|error| format!("wait_seconds must be an unsigned integer: {error}"))
-}
-
-fn required_assets(repo_root: &Path, version: &str) -> CheckResult<Vec<String>> {
-    let manifest_path = repo_root.join("native-release-targets.json");
-    let source = fs::read_to_string(manifest_path.as_path())
-        .map_err(|error| format!("read {}: {error}", manifest_path.display()))?;
-    let manifest = serde_json::from_str::<NativeReleaseTargets>(source.as_str())
-        .map_err(|error| format!("parse {}: {error}", manifest_path.display()))?;
+/// Derive exact native release asset names from the tracked target manifest.
+///
+/// # Errors
+///
+/// Returns an error when the manifest cannot be read or parsed.
+fn required_assets(repository: &Path, version: &str) -> CheckResult<Vec<String>> {
+    let manifest_path = repository.join("native-release-targets.json");
+    let source = check_try!(
+        read_to_string(manifest_path.as_path())
+            .map_err(|error| return format!("read {}: {error}", manifest_path.display()))
+    );
+    let manifest = check_try!(
+        from_str::<NativeReleaseTargets>(source.as_str())
+            .map_err(|error| return format!("parse {}: {error}", manifest_path.display()))
+    );
     let mut assets = manifest
         .targets
         .into_iter()
-        .map(|target| format!("tovuk-{version}-{}{}", target.triple, target.asset_ext))
+        .map(|target| return format!("tovuk-{version}-{}{}", target.triple, target.asset_ext))
         .collect::<Vec<_>>();
     assets.sort();
-    Ok(assets)
+    return Ok(assets);
 }
 
-#[derive(Deserialize)]
-struct ReleaseView {
-    assets: Vec<ReleaseAsset>,
-}
-
-#[derive(Deserialize)]
-struct ReleaseAsset {
-    name: String,
-}
-
-fn release_asset_names(
-    repo_root: &Path,
-    path: &std::ffi::OsStr,
-    tag: &str,
-) -> CheckResult<BTreeSet<String>> {
-    let output = command(repo_root, path, "gh")
-        .args(["release", "view", tag, "--json", "assets"])
-        .output()
-        .map_err(|error| format!("run gh release view {tag}: {error}"))?;
-    if !output.status.success() {
-        return Ok(BTreeSet::new());
-    }
-    let release = serde_json::from_slice::<ReleaseView>(&output.stdout)
-        .map_err(|error| format!("parse gh release view {tag}: {error}"))?;
-    Ok(release.assets.into_iter().map(|asset| asset.name).collect())
-}
-
-fn missing_assets(required_assets: &[String], release_assets: &BTreeSet<String>) -> Vec<String> {
-    required_assets
-        .iter()
-        .flat_map(|asset| [asset.clone(), format!("{asset}.sha256")])
-        .filter(|asset| !release_assets.contains(asset))
-        .collect()
-}
-
-fn verify_asset_checksums(
-    repo_root: &Path,
-    path: &std::ffi::OsStr,
-    tag: &str,
-    required_assets: &[String],
-) -> CheckResult {
-    let temp_dir = TempDir::new(repo_root.join("target").as_path())?;
-    for asset in required_assets {
-        download_release_asset(repo_root, path, tag, asset, temp_dir.path())?;
-        let checksum_asset = format!("{asset}.sha256");
-        download_release_asset(
-            repo_root,
-            path,
-            tag,
-            checksum_asset.as_str(),
-            temp_dir.path(),
-        )?;
-        verify_asset_checksum(
-            temp_dir.path().join(asset).as_path(),
-            temp_dir.path().join(checksum_asset).as_path(),
-            asset,
-        )?;
-    }
-    Ok(())
-}
-
-fn download_release_asset(
-    repo_root: &Path,
-    path: &std::ffi::OsStr,
-    tag: &str,
-    asset: &str,
-    download_dir: &Path,
-) -> CheckResult {
-    let status = command(repo_root, path, "gh")
-        .args([
-            "release",
-            "download",
-            tag,
-            "--dir",
-            download_dir
-                .to_str()
-                .ok_or_else(|| format!("{} must be UTF-8", download_dir.display()))?,
-            "--clobber",
-            "--pattern",
-            asset,
-        ])
-        .status()
-        .map_err(|error| format!("download {asset}: {error}"))?;
-    status
-        .success()
-        .then_some(())
-        .ok_or_else(|| format!("gh release download {asset} failed with status {status}"))
-}
-
-fn verify_asset_checksum(asset_path: &Path, checksum_path: &Path, asset_name: &str) -> CheckResult {
-    let checksum_source = fs::read_to_string(checksum_path)
-        .map_err(|error| format!("read {}: {error}", checksum_path.display()))?;
-    let line = checksum_source
-        .lines()
-        .map(str::trim)
-        .find(|line| !line.is_empty())
-        .ok_or_else(|| format!("{asset_name}.sha256 is empty"))?;
-    let parts = line.split_whitespace().collect::<Vec<_>>();
-    let Some(digest) = parts.first().map(|part| part.to_ascii_lowercase()) else {
-        return Err(format!("{asset_name}.sha256 is empty"));
-    };
-    if digest.len() != 64
-        || !digest
-            .chars()
-            .all(|character| character.is_ascii_hexdigit())
-    {
-        return Err(format!(
-            "{asset_name}.sha256 does not contain a SHA-256 digest"
-        ));
-    }
-    if parts.len() > 1 {
-        let listed_asset = Path::new(parts[1..].join(" ").trim_start_matches('*'))
-            .file_name()
-            .and_then(|name| name.to_str())
-            .unwrap_or_default()
-            .to_owned();
-        if listed_asset != asset_name {
-            return Err(format!(
-                "{asset_name}.sha256 names {listed_asset}, expected {asset_name}"
-            ));
-        }
-    }
-
-    let asset_bytes =
-        fs::read(asset_path).map_err(|error| format!("read {}: {error}", asset_path.display()))?;
-    let actual = sha256_hex(asset_bytes.as_slice());
-    if actual == digest {
-        Ok(())
-    } else {
-        Err(format!(
-            "{asset_name} checksum mismatch: expected {digest}, got {actual}"
-        ))
-    }
-}
-
-fn sha256_hex(bytes: &[u8]) -> String {
-    const HEX: &[u8; 16] = b"0123456789abcdef";
-    let digest = Sha256::digest(bytes);
-    let digest_bytes: &[u8] = digest.as_ref();
-    let mut encoded = String::with_capacity(digest_bytes.len() * 2);
-    for byte in digest_bytes {
-        encoded.push(char::from(HEX[usize::from(byte >> 4)]));
-        encoded.push(char::from(HEX[usize::from(byte & 0x0f)]));
-    }
-    encoded
-}
-
-struct TempDir {
-    path: PathBuf,
-}
-
-impl TempDir {
-    fn new(parent: &Path) -> CheckResult<Self> {
-        fs::create_dir_all(parent)
-            .map_err(|error| format!("create {}: {error}", parent.display()))?;
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|error| format!("system time before Unix epoch: {error}"))?
-            .as_nanos();
-        let path = parent.join(format!(
-            "native-release-assets-{}-{timestamp}",
-            process::id()
-        ));
-        fs::create_dir(path.as_path())
-            .map_err(|error| format!("create {}: {error}", path.display()))?;
-        Ok(Self { path })
-    }
-
-    fn path(&self) -> &Path {
-        self.path.as_path()
-    }
-}
-
-impl Drop for TempDir {
-    fn drop(&mut self) {
-        let _ = fs::remove_dir_all(self.path.as_path());
-    }
+/// Build the release context and verify its assets.
+///
+/// # Errors
+///
+/// Returns an error when repository discovery, argument parsing, deadline
+/// calculation, release polling, or asset verification fails.
+fn run() -> CheckResult {
+    let repository = check_try!(repo_root());
+    let request = check_try!(parse_request(repository.as_path()));
+    let required_assets = check_try!(required_assets(
+        repository.as_path(),
+        request.version.as_str(),
+    ));
+    return release::wait_for_release(
+        repository,
+        required_assets,
+        format!("v{}", request.version),
+        Duration::from_secs(request.wait_seconds),
+    );
 }

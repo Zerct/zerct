@@ -285,14 +285,14 @@
         }
       }
     },
-    "/v1/scrapers": {
+    "/v1/data-sources": {
       "get": {
         "tags": [
           "Scrapers"
         ],
-        "summary": "List scrapers",
-        "description": "Lists available public-data Scrapers and their price events.",
-        "operationId": "listScrapers",
+        "summary": "List data sources",
+        "description": "Lists available public-data sources and their price events.",
+        "operationId": "listDataSources",
         "responses": {
           "200": {
             "$ref": "#/components/responses/ScrapersLoaded"
@@ -339,14 +339,14 @@
         }
       }
     },
-    "/v1/scrapers/health": {
+    "/v1/data-sources/health": {
       "get": {
         "tags": [
           "Scrapers"
         ],
-        "summary": "Check scraper runtime health",
-        "description": "Returns runtime readiness for managed public-data Scrapers.",
-        "operationId": "getScraperRuntimeHealth",
+        "summary": "Check data-source runtime health",
+        "description": "Returns runtime readiness for managed public-data sources.",
+        "operationId": "getDataSourceRuntimeHealth",
         "responses": {
           "200": {
             "$ref": "#/components/responses/ScraperRuntimeHealthLoaded"
@@ -366,19 +366,19 @@
         }
       }
     },
-    "/v1/scrapers/{scraper}": {
+    "/v1/data-sources/{data_source}": {
       "get": {
         "tags": [
           "Scrapers"
         ],
-        "summary": "Get scraper details",
-        "description": "Returns metadata, pricing, examples, and public input guidance for one Scraper.",
-        "operationId": "getScraperDetails",
+        "summary": "Get data-source details",
+        "description": "Returns metadata, pricing, examples, and public input guidance for one data source.",
+        "operationId": "getDataSourceDetails",
         "parameters": [
           {
-            "name": "scraper",
+            "name": "data_source",
             "in": "path",
-            "description": "Stable Scraper id.",
+            "description": "Stable data-source id.",
             "required": true,
             "schema": {
               "type": "string",
@@ -996,7 +996,8 @@
             "schema": {
               "type": "string",
               "pattern": "^[a-z0-9_]{3,64}$",
-              "example": "api_key_a1b2c3d4e5f6"
+              "example": "api_key_a1b2c3d4e5f6",
+              "maxLength": 64
             }
           }
         ],
@@ -1101,20 +1102,15 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "control_plane_postgres",
+                      "name": "api",
                       "ok": true,
                       "message": "reachable",
                       "latency_ms": 12,
                       "latency_us": 12500,
-                      "details": {
-                        "pool_max_connections": 6,
-                        "pool_open_connections": 4,
-                        "pool_idle_connections": 2,
-                        "pool_busy_connections": 2
-                      }
+                      "details": {}
                     },
                     {
-                      "name": "redis",
+                      "name": "data_sources",
                       "ok": true,
                       "message": "reachable",
                       "latency_ms": 3,
@@ -1178,20 +1174,15 @@
                   "api_version": "v1",
                   "checks": [
                     {
-                      "name": "control_plane_postgres",
+                      "name": "api",
                       "ok": false,
                       "message": "timed_out",
                       "latency_ms": 3000,
                       "latency_us": 3000000,
-                      "details": {
-                        "pool_max_connections": 6,
-                        "pool_open_connections": 6,
-                        "pool_idle_connections": 0,
-                        "pool_busy_connections": 6
-                      }
+                      "details": {}
                     },
                     {
-                      "name": "redis",
+                      "name": "data_sources",
                       "ok": false,
                       "message": "timed_out",
                       "latency_ms": 3000,
@@ -2042,7 +2033,7 @@
                     ]
                   },
                   "runtimeHealth": {
-                    "type": "linkedinManagedReaderHealth",
+                    "type": "dataSourceHealth",
                     "status": "ready"
                   },
                   "nextActions": [
@@ -3291,6 +3282,7 @@
             "examples": [
               "bad_request"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$"
           },
           "message": {
@@ -3298,6 +3290,7 @@
             "examples": [
               "Invalid request."
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$"
           },
           "agent_instruction": {
@@ -3305,6 +3298,7 @@
             "examples": [
               "Fix the request and retry."
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$"
           },
           "docs_url": {
@@ -3312,7 +3306,8 @@
             "format": "uri",
             "examples": [
               "https://docs.tovuk.com"
-            ]
+            ],
+            "maxLength": 2048
           },
           "checkout_url": {
             "type": [
@@ -3320,6 +3315,7 @@
               "null"
             ],
             "format": "uri",
+            "maxLength": 2048,
             "example": "https://example.com"
           }
         },
@@ -3347,6 +3343,7 @@
             "examples": [
               "tovuk-api"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$"
           }
         },
@@ -3368,6 +3365,7 @@
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
           },
@@ -3378,6 +3376,7 @@
           "message": {
             "type": "string",
             "description": "Dependency probe result: reachable, unavailable, or timed_out.",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "reachable"
           },
@@ -3398,38 +3397,9 @@
           },
           "details": {
             "type": "object",
-            "description": "Optional non-secret dependency diagnostics. The control_plane_postgres check reports SQLx pool capacity so agents can distinguish database latency from pool saturation.",
+            "description": "Optional public diagnostic metadata without service topology or provider configuration.",
             "additionalProperties": false,
-            "properties": {
-              "pool_max_connections": {
-                "type": "integer",
-                "format": "int32",
-                "minimum": 0,
-                "maximum": 100000,
-                "example": 6
-              },
-              "pool_open_connections": {
-                "type": "integer",
-                "format": "int32",
-                "minimum": 0,
-                "maximum": 100000,
-                "example": 4
-              },
-              "pool_idle_connections": {
-                "type": "integer",
-                "format": "int32",
-                "minimum": 0,
-                "maximum": 100000,
-                "example": 2
-              },
-              "pool_busy_connections": {
-                "type": "integer",
-                "format": "int32",
-                "minimum": 0,
-                "maximum": 100000,
-                "example": 2
-              }
-            }
+            "maxProperties": 0
           }
         },
         "example": {
@@ -3438,12 +3408,7 @@
           "message": "reachable",
           "latency_ms": 12,
           "latency_us": 12500,
-          "details": {
-            "pool_max_connections": 6,
-            "pool_open_connections": 4,
-            "pool_idle_connections": 2,
-            "pool_busy_connections": 2
-          }
+          "details": {}
         }
       },
       "StatusResponse": {
@@ -3465,16 +3430,19 @@
           },
           "service": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tovuk-api"
           },
           "name": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
           },
           "api_version": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
           },
@@ -3483,17 +3451,20 @@
             "items": {
               "$ref": "#/components/schemas/StatusCheck"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "agent_instruction": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
           },
           "docs_url": {
             "type": "string",
             "format": "uri",
-            "example": "https://example.com"
+            "example": "https://example.com",
+            "maxLength": 2048
           }
         },
         "example": {
@@ -3521,22 +3492,26 @@
           "loginUrl": {
             "type": "string",
             "format": "uri",
-            "example": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            "example": "https://tovuk.com/login?device_code=zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "maxLength": 2048
           },
           "verificationUri": {
             "type": "string",
             "format": "uri",
-            "example": "https://tovuk.com/login"
+            "example": "https://tovuk.com/login",
+            "maxLength": 2048
           },
           "deviceCode": {
             "type": "string",
             "pattern": "^[\\s\\S]{1,8192}$",
-            "example": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            "example": "zdev_0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            "maxLength": 8192
           },
           "userCode": {
             "type": "string",
             "pattern": "^[\\s\\S]{1,128}$",
-            "example": "TOVUK-123"
+            "example": "TOVUK-123",
+            "maxLength": 128
           },
           "intervalSeconds": {
             "type": "integer",
@@ -3596,6 +3571,7 @@
               "string",
               "null"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "acct_0123456789abcdef"
           },
@@ -3605,6 +3581,7 @@
               "null"
             ],
             "format": "email",
+            "maxLength": 320,
             "example": "builder@example.com"
           },
           "provider": {
@@ -3624,6 +3601,7 @@
               "string",
               "null"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "example"
           },
@@ -3633,6 +3611,7 @@
               "null"
             ],
             "format": "date-time",
+            "maxLength": 64,
             "example": "2026-06-23T12:00:00Z"
           }
         },
@@ -3659,13 +3638,15 @@
         "properties": {
           "accountId": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "acct_123"
           },
           "email": {
             "type": "string",
             "format": "email",
-            "example": "user@example.com"
+            "example": "user@example.com",
+            "maxLength": 320
           },
           "provider": {
             "type": "string",
@@ -3732,13 +3713,15 @@
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "Run `tovuk request results <request-id> --json` to fetch stored results."
             },
             "example": [
               "Run `tovuk request results <request-id> --json` to fetch stored results.",
               "Run `tovuk scraper list --json` before creating another paid scraper request."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -3838,11 +3821,13 @@
         "properties": {
           "product": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tiktok"
           },
           "meter": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "scraper_result_records"
           },
@@ -3872,11 +3857,13 @@
           },
           "usageUnit": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "result"
           },
           "billingUnit": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "result"
           },
@@ -3906,11 +3893,13 @@
           },
           "estimateBasis": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "stored_scrape_requests"
           },
           "rounding": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "actual_scraper_cost"
           }
@@ -3961,6 +3950,7 @@
         "properties": {
           "currency": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "USD"
           },
@@ -4114,19 +4104,22 @@
                 "estimateBasis": "stored_scrape_requests",
                 "rounding": "actual_scraper_cost"
               }
-            ]
+            ],
+            "maxItems": 1000
           },
           "nextActions": {
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "Run `tovuk scraper list --json` before creating another paid scraper request."
             },
             "example": [
               "plus scraper usage is within monthly balance. Bonus balance is spent before paid plan balance.",
               "Fetch saved results or create another public-data scraper request when you need fresh data."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -4325,7 +4318,8 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "example": "https://billing.stripe.com/session/example"
+            "example": "https://billing.stripe.com/session/example",
+            "maxLength": 2048
           },
           "reason": {
             "type": "string",
@@ -4368,11 +4362,13 @@
         "properties": {
           "name": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tiktok_records"
           },
           "unit": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "record"
           },
@@ -4468,15 +4464,18 @@
           "scraper": {
             "type": "string",
             "pattern": "^[a-z0-9-]{1,64}$",
-            "example": "tiktok"
+            "example": "tiktok",
+            "maxLength": 64
           },
           "priceEvent": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tiktok_record"
           },
           "unit": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "record"
           },
@@ -4548,13 +4547,15 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PricingPlan"
-            }
+            },
+            "maxItems": 1000
           },
           "scraperPrices": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PricingScraperPrice"
-            }
+            },
+            "maxItems": 1000
           },
           "topUp": {
             "$ref": "#/components/schemas/PricingTopUpPolicy"
@@ -4563,9 +4564,11 @@
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "Use `tovuk scraper list --json` and `tovuk scraper show <scraper> --json` to choose a public-data scraper."
-            }
+            },
+            "maxItems": 1000
           }
         },
         "example": {
@@ -4639,6 +4642,54 @@
               "usdMicrosPerResult": 1200
             },
             {
+              "scraper": "apple-app-store",
+              "priceEvent": "apple_app_store_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1400
+            },
+            {
+              "scraper": "google-play-store",
+              "priceEvent": "google_play_store_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1400
+            },
+            {
+              "scraper": "trendyol",
+              "priceEvent": "trendyol_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1400
+            },
+            {
+              "scraper": "hepsiburada",
+              "priceEvent": "hepsiburada_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1400
+            },
+            {
+              "scraper": "youtube",
+              "priceEvent": "youtube_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1400
+            },
+            {
+              "scraper": "zillow",
+              "priceEvent": "zillow_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1500
+            },
+            {
+              "scraper": "indeed",
+              "priceEvent": "indeed_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1200
+            },
+            {
+              "scraper": "trustpilot",
+              "priceEvent": "trustpilot_record",
+              "unit": "record",
+              "usdMicrosPerResult": 1000
+            },
+            {
               "scraper": "tiktok",
               "priceEvent": "tiktok_record",
               "unit": "record",
@@ -4682,21 +4733,25 @@
         "properties": {
           "id": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tiktok"
           },
           "name": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "TikTok Scraper"
           },
           "category": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "social"
           },
           "description": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "Scrape public TikTok data."
           },
@@ -4706,7 +4761,8 @@
               "type": "object",
               "properties": {
                 "operation": {
-                  "type": "string"
+                  "type": "string",
+                  "maxLength": 8192
                 }
               }
             },
@@ -4717,7 +4773,8 @@
             "items": {
               "$ref": "#/components/schemas/ScraperPriceEvent"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "outputSchema": {
             "type": "object",
@@ -4744,20 +4801,26 @@
                 "tags": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "keywords": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "customerPhotoUrls": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "questionCount": {
                   "type": [
@@ -4769,7 +4832,8 @@
                   "type": "array",
                   "items": {
                     "type": "object"
-                  }
+                  },
+                  "maxItems": 1000
                 },
                 "minimumOrderQuantity": {
                   "type": [
@@ -4786,8 +4850,10 @@
                 "requestedFeatures": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "featureCoverage": {
                   "type": "array",
@@ -4797,7 +4863,8 @@
                     "properties": {
                       "feature": {
                         "type": "string",
-                        "example": "includeReviews"
+                        "example": "includeReviews",
+                        "maxLength": 8192
                       },
                       "status": {
                         "type": "string",
@@ -4813,16 +4880,19 @@
                       "fields": {
                         "type": "array",
                         "items": {
-                          "type": "string"
+                          "type": "string",
+                          "maxLength": 8192
                         },
                         "example": [
                           "reviewCount",
                           "reviewSamples"
-                        ]
+                        ],
+                        "maxItems": 1000
                       },
                       "message": {
                         "type": "string",
-                        "example": "Review count or review samples were extracted."
+                        "example": "Review count or review samples were extracted.",
+                        "maxLength": 8192
                       }
                     },
                     "required": [
@@ -4831,7 +4901,8 @@
                       "fields",
                       "message"
                     ]
-                  }
+                  },
+                  "maxItems": 1000
                 }
               }
             },
@@ -4842,7 +4913,7 @@
           "id": "amazon",
           "name": "Amazon Scraper",
           "category": "Ecommerce",
-          "description": "Scrape public Amazon records through managed Webshare egress.",
+          "description": "Scrape public Amazon records from public inputs.",
           "inputSchema": {
             "type": "object",
             "properties": {
@@ -4861,7 +4932,8 @@
                 ]
               },
               "query": {
-                "type": "string"
+                "type": "string",
+                "maxLength": 8192
               },
               "includeReviews": {
                 "type": "boolean"
@@ -4890,20 +4962,26 @@
               "tags": {
                 "type": "array",
                 "items": {
-                  "type": "string"
-                }
+                  "type": "string",
+                  "maxLength": 8192
+                },
+                "maxItems": 1000
               },
               "keywords": {
                 "type": "array",
                 "items": {
-                  "type": "string"
-                }
+                  "type": "string",
+                  "maxLength": 8192
+                },
+                "maxItems": 1000
               },
               "customerPhotoUrls": {
                 "type": "array",
                 "items": {
-                  "type": "string"
-                }
+                  "type": "string",
+                  "maxLength": 8192
+                },
+                "maxItems": 1000
               },
               "questionCount": {
                 "type": [
@@ -4915,7 +4993,8 @@
                 "type": "array",
                 "items": {
                   "type": "object"
-                }
+                },
+                "maxItems": 1000
               },
               "minimumOrderQuantity": {
                 "type": [
@@ -4932,8 +5011,10 @@
               "requestedFeatures": {
                 "type": "array",
                 "items": {
-                  "type": "string"
-                }
+                  "type": "string",
+                  "maxLength": 8192
+                },
+                "maxItems": 1000
               },
               "featureCoverage": {
                 "type": "array",
@@ -4943,7 +5024,8 @@
                   "properties": {
                     "feature": {
                       "type": "string",
-                      "example": "includeReviews"
+                      "example": "includeReviews",
+                      "maxLength": 8192
                     },
                     "status": {
                       "type": "string",
@@ -4959,16 +5041,19 @@
                     "fields": {
                       "type": "array",
                       "items": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 8192
                       },
                       "example": [
                         "reviewCount",
                         "reviewSamples"
-                      ]
+                      ],
+                      "maxItems": 1000
                     },
                     "message": {
                       "type": "string",
-                      "example": "Review count or review samples were extracted."
+                      "example": "Review count or review samples were extracted.",
+                      "maxLength": 8192
                     }
                   },
                   "required": [
@@ -4977,7 +5062,8 @@
                     "fields",
                     "message"
                   ]
-                }
+                },
+                "maxItems": 1000
               }
             }
           },
@@ -5003,18 +5089,21 @@
             "items": {
               "$ref": "#/components/schemas/ScraperSummary"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "nextActions": {
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "next action"
             },
             "example": [
               "Use `tovuk scraper list --json` to choose a scraper."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -5037,21 +5126,25 @@
         "properties": {
           "id": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tiktok"
           },
           "name": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "TikTok Scraper"
           },
           "category": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "social"
           },
           "status": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "ready"
           },
@@ -5088,18 +5181,21 @@
             "items": {
               "$ref": "#/components/schemas/ScraperRuntimeHealthEntry"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "nextActions": {
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "next action"
             },
             "example": [
               "Use `tovuk scraper health --json` before debugging scraper readiness."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -5123,7 +5219,7 @@
           "runtimeHealth": {
             "type": "object",
             "example": {
-              "type": "linkedinManagedReaderHealth",
+              "type": "dataSourceHealth",
               "status": "ready"
             },
             "maxProperties": 100
@@ -5132,12 +5228,14 @@
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "next action"
             },
             "example": [
               "Use `tovuk request create linkedin <input-json> --json` to create scraper work."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -5145,7 +5243,7 @@
             "id": "amazon",
             "name": "Amazon Scraper",
             "category": "Ecommerce",
-            "description": "Scrape public Amazon records through managed Webshare egress.",
+            "description": "Scrape public Amazon records from public inputs.",
             "inputSchema": {
               "type": "object",
               "properties": {
@@ -5164,7 +5262,8 @@
                   ]
                 },
                 "query": {
-                  "type": "string"
+                  "type": "string",
+                  "maxLength": 8192
                 },
                 "includeReviews": {
                   "type": "boolean"
@@ -5193,20 +5292,26 @@
                 "tags": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "keywords": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "customerPhotoUrls": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "questionCount": {
                   "type": [
@@ -5218,7 +5323,8 @@
                   "type": "array",
                   "items": {
                     "type": "object"
-                  }
+                  },
+                  "maxItems": 1000
                 },
                 "minimumOrderQuantity": {
                   "type": [
@@ -5235,8 +5341,10 @@
                 "requestedFeatures": {
                   "type": "array",
                   "items": {
-                    "type": "string"
-                  }
+                    "type": "string",
+                    "maxLength": 8192
+                  },
+                  "maxItems": 1000
                 },
                 "featureCoverage": {
                   "type": "array",
@@ -5246,7 +5354,8 @@
                     "properties": {
                       "feature": {
                         "type": "string",
-                        "example": "includeReviews"
+                        "example": "includeReviews",
+                        "maxLength": 8192
                       },
                       "status": {
                         "type": "string",
@@ -5262,16 +5371,19 @@
                       "fields": {
                         "type": "array",
                         "items": {
-                          "type": "string"
+                          "type": "string",
+                          "maxLength": 8192
                         },
                         "example": [
                           "reviewCount",
                           "reviewSamples"
-                        ]
+                        ],
+                        "maxItems": 1000
                       },
                       "message": {
                         "type": "string",
-                        "example": "Review count or review samples were extracted."
+                        "example": "Review count or review samples were extracted.",
+                        "maxLength": 8192
                       }
                     },
                     "required": [
@@ -5280,7 +5392,8 @@
                       "fields",
                       "message"
                     ]
-                  }
+                  },
+                  "maxItems": 1000
                 }
               }
             },
@@ -5293,10 +5406,8 @@
             ]
           },
           "runtimeHealth": {
-            "type": "amazonManagedProxyHealth",
-            "status": "ready",
-            "proxyConfigured": true,
-            "localDirectEgressAllowed": false
+            "type": "dataSourceHealth",
+            "status": "ready"
           },
           "nextActions": [
             "Use `tovuk request create amazon <input-json> --json` to create scraper work."
@@ -5315,7 +5426,8 @@
           "scraper": {
             "type": "string",
             "pattern": "^[a-z0-9-]{1,64}$",
-            "example": "github"
+            "example": "github",
+            "maxLength": 64
           },
           "input": {
             "type": "object",
@@ -5353,11 +5465,13 @@
         "properties": {
           "id": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "request_123"
           },
           "scraper": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tiktok"
           },
@@ -5407,6 +5521,7 @@
           },
           "resultsUrl": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "/v1/requests/request_123/results"
           },
@@ -5415,23 +5530,27 @@
               "string",
               "null"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": null
           },
           "agentInstruction": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "Fetch results with `tovuk request results request_123 --json`."
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:00:00Z"
+            "example": "2026-06-23T12:00:00Z",
+            "maxLength": 64
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:00:30Z"
+            "example": "2026-06-23T12:00:30Z",
+            "maxLength": 64
           }
         },
         "example": {
@@ -5468,12 +5587,14 @@
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "next action"
             },
             "example": [
               "Use `tovuk request results request_123 --json` after the request succeeds."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -5514,13 +5635,15 @@
             "items": {
               "$ref": "#/components/schemas/ScrapeRequest"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "nextCursor": {
             "type": [
               "string",
               "null"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": null
           },
@@ -5528,12 +5651,14 @@
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "next action"
             },
             "example": [
               "Use `nextCursor` with `tovuk request list --cursor <nextCursor> --json` when another page exists."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -5575,6 +5700,7 @@
         "properties": {
           "requestId": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "request_123"
           },
@@ -5595,6 +5721,7 @@
           },
           "agentInstruction": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "Request canceled. Create a new scraper request when ready."
           }
@@ -5641,7 +5768,8 @@
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:00:30Z"
+            "example": "2026-06-23T12:00:30Z",
+            "maxLength": 64
           }
         },
         "example": {
@@ -5672,13 +5800,15 @@
             "items": {
               "$ref": "#/components/schemas/ScrapeRecord"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "nextCursor": {
             "type": [
               "string",
               "null"
             ],
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": null
           },
@@ -5686,12 +5816,14 @@
             "type": "array",
             "items": {
               "type": "string",
+              "maxLength": 8192,
               "pattern": "^[\\s\\S]{0,8192}$",
               "example": "next action"
             },
             "example": [
               "Use `nextCursor` with `tovuk request results request_123 --cursor <nextCursor> --json` when another page exists."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -5777,7 +5909,8 @@
           "id": {
             "type": "string",
             "pattern": "^ticket_[a-f0-9]{20}$",
-            "example": "ticket_0123456789abcdef0123"
+            "example": "ticket_0123456789abcdef0123",
+            "maxLength": 8192
           },
           "created_by": {
             "$ref": "#/components/schemas/SupportTicketCreatedBy"
@@ -5840,18 +5973,21 @@
           },
           "agent_instruction": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "Continue with tovuk request diagnostics."
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:00:00Z"
+            "example": "2026-06-23T12:00:00Z",
+            "maxLength": 64
           },
           "updated_at": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:10:00Z"
+            "example": "2026-06-23T12:10:00Z",
+            "maxLength": 64
           }
         },
         "example": {
@@ -6013,6 +6149,7 @@
           },
           "next_command": {
             "type": "string",
+            "maxLength": 8192,
             "pattern": "^[\\s\\S]{0,8192}$",
             "example": "tovuk support list --json"
           }
@@ -6055,7 +6192,8 @@
             "items": {
               "$ref": "#/components/schemas/SupportTicket"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "rate_limit": {
             "$ref": "#/components/schemas/SupportTicketRateLimit"
@@ -6088,7 +6226,8 @@
           "id": {
             "type": "string",
             "pattern": "^[a-z0-9_]{3,64}$",
-            "example": "api_key_a1b2c3d4e5f6"
+            "example": "api_key_a1b2c3d4e5f6",
+            "maxLength": 64
           },
           "name": {
             "type": "string",
@@ -6107,7 +6246,8 @@
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "example": "2026-06-23T12:00:00Z"
+            "example": "2026-06-23T12:00:00Z",
+            "maxLength": 64
           },
           "lastUsedAt": {
             "type": [
@@ -6115,6 +6255,7 @@
               "null"
             ],
             "format": "date-time",
+            "maxLength": 64,
             "example": null
           },
           "revokedAt": {
@@ -6123,6 +6264,7 @@
               "null"
             ],
             "format": "date-time",
+            "maxLength": 64,
             "example": null
           },
           "currentDayRequestCount": {
@@ -6164,7 +6306,8 @@
             "items": {
               "$ref": "#/components/schemas/AccountApiKeySummary"
             },
-            "example": []
+            "example": [],
+            "maxItems": 1000
           },
           "nextActions": {
             "type": "array",
@@ -6179,7 +6322,8 @@
               "This list shows all active API keys and the 20 most recently revoked keys.",
               "Revoke keys you no longer use.",
               "Set `TOVUK_TOKEN` before running scraper requests or support commands from the CLI."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -6239,7 +6383,8 @@
             "type": "string",
             "minLength": 20,
             "example": "tovuk_key_example_token_shown_once",
-            "pattern": "^[A-Za-z0-9_]{20,256}$"
+            "pattern": "^[A-Za-z0-9_]{20,256}$",
+            "maxLength": 256
           },
           "nextActions": {
             "type": "array",
@@ -6251,7 +6396,8 @@
             },
             "example": [
               "Save this key now. Tovuk will not show it again."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -6297,7 +6443,8 @@
             },
             "example": [
               "Remove this key from scripts and saved settings."
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {
@@ -6467,7 +6614,8 @@
             "maxProperties": 500,
             "propertyNames": {
               "type": "string",
-              "pattern": "^[a-z0-9._-]{1,128}$"
+              "pattern": "^[a-z0-9._-]{1,128}$",
+              "maxLength": 128
             },
             "patternProperties": {
               "^[a-z0-9._-]{1,128}$": {
@@ -6486,7 +6634,8 @@
             "maxProperties": 500,
             "propertyNames": {
               "type": "string",
-              "pattern": "^[a-z0-9._-]{1,128}$"
+              "pattern": "^[a-z0-9._-]{1,128}$",
+              "maxLength": 128
             },
             "patternProperties": {
               "^[a-z0-9._-]{1,128}$": {
@@ -6505,7 +6654,8 @@
             "maxProperties": 500,
             "propertyNames": {
               "type": "string",
-              "pattern": "^[a-z0-9._-]{1,128}$"
+              "pattern": "^[a-z0-9._-]{1,128}$",
+              "maxLength": 128
             },
             "patternProperties": {
               "^[a-z0-9._-]{1,128}$": {
@@ -6524,7 +6674,8 @@
             "maxProperties": 500,
             "propertyNames": {
               "type": "string",
-              "pattern": "^[a-z0-9._-]{1,128}$"
+              "pattern": "^[a-z0-9._-]{1,128}$",
+              "maxLength": 128
             },
             "patternProperties": {
               "^[a-z0-9._-]{1,128}$": {
@@ -6543,7 +6694,8 @@
             "maxProperties": 500,
             "propertyNames": {
               "type": "string",
-              "pattern": "^[a-z0-9._-]{1,128}$"
+              "pattern": "^[a-z0-9._-]{1,128}$",
+              "maxLength": 128
             },
             "patternProperties": {
               "^[a-z0-9._-]{1,128}$": {
@@ -6562,7 +6714,8 @@
             "maxProperties": 500,
             "propertyNames": {
               "type": "string",
-              "pattern": "^[a-z0-9._-]{1,128}$"
+              "pattern": "^[a-z0-9._-]{1,128}$",
+              "maxLength": 128
             },
             "patternProperties": {
               "^[a-z0-9._-]{1,128}$": {
@@ -6657,7 +6810,8 @@
                   "paidOveragesEnabled": false
                 }
               }
-            ]
+            ],
+            "maxItems": 1000
           },
           "billingEstimate": {
             "$ref": "#/components/schemas/UsageCostEstimate"
@@ -6678,7 +6832,8 @@
                 "currentDayRequestCount": 0,
                 "currentMonthRequestCount": 0
               }
-            ]
+            ],
+            "maxItems": 1000
           }
         },
         "example": {

@@ -6,10 +6,13 @@ on:
     branches:
       - main
     paths:
+      - ".cargo/config.toml"
       - "native-release-targets.json"
       - "crates/tovuk/Cargo.toml"
       - "crates/tovuk/Cargo.lock"
       - "crates/tovuk/src/**"
+      - "rust-toolchain.toml"
+      - "vendor/**"
 
 permissions:
   contents: read
@@ -21,88 +24,70 @@ concurrency:
 jobs:
   release-gate:
     name: release gate
-    if: ${{ github.ref == 'refs/heads/main' && github.actor == 'kriptoburak' }}
-    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
-    timeout-minutes: 45
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
     permissions:
       contents: read
     steps:
-      - name: Checkout trusted commit without third-party actions
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            checks/target
+            crates/tovuk/target
+          key: release-gate-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', 'rust-toolchain.toml') }}
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          enable-cache: false
+          version: "0.11.28"
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: "24.18.0"
+          package-manager-cache: false
+      - uses: ./.github/actions/setup-quality-tools
+      - name: Check public release version contract
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
+      - name: Require an unpublished version before release mutation
+        if: github.event_name == 'push'
         run: |
-          set -euo pipefail
-          git init --initial-branch=main .
-          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
-          auth="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
-          git -c "http.${GITHUB_SERVER_URL}/.extraheader=AUTHORIZATION: basic ${auth}" \
-            fetch --depth=1 origin "${GITHUB_SHA}"
-          git checkout --detach FETCH_HEAD
-      - name: Check public agent readiness
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- mintlify-agent-readiness https://docs.tovuk.com
+          version="$(cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-public-contracts -- public-version)"
+          cargo run --locked --quiet --manifest-path checks/Cargo.toml \
+            --bin check-release-availability -- "$version"
+      - name: Wait for Mintlify docs synchronization and public readiness
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin deploy-mintlify-docs --
       - name: Run full repository check
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 
   native-targets:
     name: read native release targets
     if: ${{ github.ref == 'refs/heads/main' }}
-    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
       - name: Read native release target matrix
         id: matrix
         shell: bash
         run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-
-          def runner_for(triple):
-              if triple.endswith("apple-darwin"):
-                  return {"arch": "ARM64", "os": "macOS"}
-              return {"arch": "x64", "os": "linux"}
-
-          def build_strategy(triple):
-              if triple == "aarch64-unknown-linux-gnu":
-                  return "cargo-zigbuild"
-              if triple.endswith("windows-msvc"):
-                  return "cargo-xwin"
-              return "cargo"
-
-          def build_target(triple):
-              if triple == "aarch64-unknown-linux-gnu":
-                  return f"{triple}.2.17"
-              return triple
-
-          with open("native-release-targets.json", encoding="utf-8") as handle:
-              targets = json.load(handle)["targets"]
-
-          matrix = {
-              "include": [
-                  {
-                      "asset_ext": target["asset_ext"],
-                      "binary": target["binary"],
-                      "build_strategy": build_strategy(target["triple"]),
-                      "build_target": build_target(target["triple"]),
-                      "runner": target["runner"],
-                      "runner_arch": runner_for(target["triple"])["arch"],
-                      "runner_os": runner_for(target["triple"])["os"],
-                      "target": target["triple"],
-                  }
-                  for target in targets
-              ]
-          }
-          print(f"matrix={json.dumps(matrix, separators=(',', ':'))}")
-          PY
+          matrix="$(cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- matrix native-release-targets.json crates/tovuk/Cargo.toml)"
+          printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
 
   build:
     name: build ${{ matrix.target }}
     needs: [native-targets, release-gate]
     if: ${{ github.ref == 'refs/heads/main' }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: read
     env:
@@ -111,55 +96,58 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
-    runs-on: [self-hosted, tovuk, "${{ matrix.runner_os }}", "${{ matrix.runner_arch }}", public-trusted-ci]
+    runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
-          targets: ${{ matrix.target }}
+          path: |
+            ${{ env.CARGO_HOME }}/registry
+            ${{ env.CARGO_HOME }}/git
+            crates/tovuk/target
+          key: native-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('crates/tovuk/Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Install pinned Rust release target
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          rustup show active-toolchain
+          rustup target add "$TARGET"
       - name: Add Cargo tools to PATH
         shell: bash
         run: echo "${CARGO_HOME}/bin" >> "$GITHUB_PATH"
-      - name: Check public release version contract
-        shell: bash
-        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
       - name: Install CMake and Ninja for cross builds
-        if: matrix.build_strategy == 'cargo-zigbuild' || matrix.build_strategy == 'cargo-xwin'
+        if: matrix.build_strategy == 'cargo-zigbuild'
         shell: bash
         run: |
           cmake_version="4.3.3"
           cmake_root="$RUNNER_TEMP/cmake-$cmake_version"
-          if ! command -v cmake >/dev/null 2>&1; then
-            mkdir -p "$cmake_root"
-            curl -fsSL \
-              "https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-linux-x86_64.tar.gz" \
-              -o "$RUNNER_TEMP/cmake.tar.gz"
-            tar -xzf "$RUNNER_TEMP/cmake.tar.gz" --strip-components=1 -C "$cmake_root"
-            echo "$cmake_root/bin" >> "$GITHUB_PATH"
-            export PATH="$cmake_root/bin:$PATH"
-          fi
+          mkdir -p "$cmake_root"
+          cmake_sha256="927b2368a946c37269c3a66225ab00544e756459cdd0b5d0da438694fb9ff802"
+          curl --proto '=https' --tlsv1.2 --fail --show-error --location \
+            --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
+            "https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-linux-x86_64.tar.gz" \
+            -o "$RUNNER_TEMP/cmake.tar.gz"
+          printf '%s  %s\n' "$cmake_sha256" "$RUNNER_TEMP/cmake.tar.gz" | shasum -a 256 -c -
+          tar -xzf "$RUNNER_TEMP/cmake.tar.gz" --strip-components=1 -C "$cmake_root"
+          echo "$cmake_root/bin" >> "$GITHUB_PATH"
+          export PATH="$cmake_root/bin:$PATH"
 
           ninja_version="1.13.2"
           ninja_root="$RUNNER_TEMP/ninja-$ninja_version"
-          if ! command -v ninja >/dev/null 2>&1; then
-            mkdir -p "$ninja_root"
-            curl -fsSL \
-              "https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux.zip" \
-              -o "$RUNNER_TEMP/ninja.zip"
-            python3 - "$RUNNER_TEMP/ninja.zip" "$ninja_root" <<'PY'
-          import sys
-          import zipfile
-
-          archive, destination = sys.argv[1:]
-          with zipfile.ZipFile(archive) as handle:
-              handle.extractall(destination)
-          PY
-            chmod +x "$ninja_root/ninja"
-            echo "$ninja_root" >> "$GITHUB_PATH"
-            export PATH="$ninja_root:$PATH"
-          fi
+          mkdir -p "$ninja_root"
+          ninja_sha256="5749cbc4e668273514150a80e387a957f933c6ed3f5f11e03fb30955e2bbead6"
+          curl --proto '=https' --tlsv1.2 --fail --show-error --location \
+            --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
+            "https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux.zip" \
+            -o "$RUNNER_TEMP/ninja.zip"
+          printf '%s  %s\n' "$ninja_sha256" "$RUNNER_TEMP/ninja.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/ninja.zip" -d "$ninja_root"
+          chmod +x "$ninja_root/ninja"
+          echo "$ninja_root" >> "$GITHUB_PATH"
+          export PATH="$ninja_root:$PATH"
 
           cmake --version
           ninja --version
@@ -169,262 +157,253 @@ jobs:
         run: |
           zig_version="0.16.0"
           zig_root="$RUNNER_TEMP/zig-$zig_version"
-          if [ ! -x "$zig_root/zig" ]; then
-            mkdir -p "$zig_root"
-            curl -fsSL \
-              "https://ziglang.org/download/$zig_version/zig-x86_64-linux-$zig_version.tar.xz" \
-              -o "$RUNNER_TEMP/zig.tar.xz"
-            tar -xJf "$RUNNER_TEMP/zig.tar.xz" --strip-components=1 -C "$zig_root"
-          fi
+          mkdir -p "$zig_root"
+          zig_sha256="70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00"
+          curl --proto '=https' --tlsv1.2 --fail --show-error --location \
+            --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
+            "https://ziglang.org/download/$zig_version/zig-x86_64-linux-$zig_version.tar.xz" \
+            -o "$RUNNER_TEMP/zig.tar.xz"
+          printf '%s  %s\n' "$zig_sha256" "$RUNNER_TEMP/zig.tar.xz" | shasum -a 256 -c -
+          tar -xJf "$RUNNER_TEMP/zig.tar.xz" --strip-components=1 -C "$zig_root"
           echo "$zig_root" >> "$GITHUB_PATH"
           export PATH="$zig_root:$PATH"
-          cargo install --locked cargo-zigbuild
+          cargo install --locked --version 0.23.0 cargo-zigbuild
           zig version
           cargo zigbuild --help >/dev/null
-      - name: Install Windows MSVC cross toolchain
-        if: matrix.build_strategy == 'cargo-xwin'
-        shell: bash
-        run: |
-          llvm_version="22.1.8"
-          llvm_root="$RUNNER_TEMP/llvm-$llvm_version"
-          if [ ! -x "$llvm_root/bin/clang" ]; then
-            mkdir -p "$llvm_root"
-            curl -fsSL \
-              "https://github.com/llvm/llvm-project/releases/download/llvmorg-$llvm_version/LLVM-$llvm_version-Linux-X64.tar.xz" \
-              -o "$RUNNER_TEMP/llvm.tar.xz"
-            tar -xJf "$RUNNER_TEMP/llvm.tar.xz" --strip-components=1 -C "$llvm_root"
-          fi
-          echo "$llvm_root/bin" >> "$GITHUB_PATH"
-          export PATH="$llvm_root/bin:$PATH"
-          rustup component add llvm-tools
-          cargo install --locked cargo-xwin
-          clang --version
-          cmake --version
-          ninja --version
-          cargo xwin --version
-      - uses: actions/cache@v6
-        continue-on-error: true
-        with:
-          path: |
-            ${{ env.CARGO_HOME }}/git
-            ${{ env.CARGO_HOME }}/registry
-          key: ${{ runner.os }}-${{ matrix.target }}-cargo-registry-${{ hashFiles('crates/tovuk/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.target }}-cargo-registry-
-      - name: Read version
-        id: version
-        shell: bash
-        run: |
-          version="$(awk -F '"' '/^version = / { print $2; exit }' crates/tovuk/Cargo.toml)"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-      - name: Name release asset
-        id: asset
-        shell: bash
-        run: |
-          asset="tovuk-${{ steps.version.outputs.version }}-${{ matrix.target }}${{ matrix.asset_ext }}"
-          echo "name=$asset" >> "$GITHUB_OUTPUT"
-      - name: Add GitHub CLI to PATH
-        shell: bash
-        run: |
-          if command -v gh >/dev/null 2>&1; then
-            gh --version
-            exit 0
-          fi
-
-          gh_version="2.96.0"
-          gh_root="$RUNNER_TEMP/gh-$gh_version"
-          mkdir -p "$gh_root"
-
-          case "$(uname -s)-$(uname -m)" in
-            Linux-x86_64)
-              curl -fsSL \
-                "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_linux_amd64.tar.gz" \
-                -o "$RUNNER_TEMP/gh.tar.gz"
-              tar -xzf "$RUNNER_TEMP/gh.tar.gz" --strip-components=1 -C "$gh_root"
-              ;;
-            Darwin-arm64)
-              curl -fsSL \
-                "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_macOS_arm64.zip" \
-                -o "$RUNNER_TEMP/gh.zip"
-              python3 - "$RUNNER_TEMP/gh.zip" "$gh_root" <<'PY'
-          import sys
-          import zipfile
-
-          archive, destination = sys.argv[1:]
-          with zipfile.ZipFile(archive) as handle:
-              handle.extractall(destination)
-          PY
-              ;;
-            *)
-              echo "::error::No rootless GitHub CLI installer configured for $(uname -s)-$(uname -m)."
-              exit 1
-              ;;
-          esac
-
-          echo "$gh_root/bin" >> "$GITHUB_PATH"
-          "$gh_root/bin/gh" --version
-      - name: Check release asset
-        id: release
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          tag="v${{ steps.version.outputs.version }}"
-          exists=false
-          asset_exists=false
-          checksum_exists=false
-          if gh release view "$tag" >/dev/null 2>&1; then
-            exists=true
-            assets="$(gh release view "$tag" --json assets --jq '.assets[].name')"
-            if grep -Fx "${{ steps.asset.outputs.name }}" <<<"$assets" >/dev/null; then
-              asset_exists=true
-            fi
-            if grep -Fx "${{ steps.asset.outputs.name }}.sha256" <<<"$assets" >/dev/null; then
-              checksum_exists=true
-            fi
-            if [ "$asset_exists" = "true" ]; then
-              if [ "$GITHUB_EVENT_NAME" = "push" ]; then
-                echo "::error::${{ steps.asset.outputs.name }} already exists on $tag. Bump every public package version before pushing CLI changes."
-                exit 1
-              fi
-              echo "::notice::${{ steps.asset.outputs.name }} already exists on $tag."
-            else
-              echo "::notice::$tag exists, building missing asset ${{ steps.asset.outputs.name }}."
-            fi
-          fi
-          {
-            printf 'tag=%s\n' "$tag"
-            printf 'exists=%s\n' "$exists"
-            printf 'asset_exists=%s\n' "$asset_exists"
-            printf 'checksum_exists=%s\n' "$checksum_exists"
-          } >> "$GITHUB_OUTPUT"
       - name: Build
-        if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo'
+        if: matrix.build_strategy == 'cargo'
         shell: bash
-        run: cargo build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
-      - name: Build Windows MSVC
-        if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo-xwin'
-        shell: bash
-        run: cargo xwin build --locked --release --target "${{ matrix.target }}" --manifest-path crates/tovuk/Cargo.toml
+        env:
+          TARGET: ${{ matrix.target }}
+        run: cargo build --locked --release --target "$TARGET" --manifest-path crates/tovuk/Cargo.toml
       - name: Build Linux ARM64
-        if: steps.release.outputs.asset_exists == 'false' && matrix.build_strategy == 'cargo-zigbuild'
+        if: matrix.build_strategy == 'cargo-zigbuild'
         shell: bash
-        run: cargo zigbuild --locked --release --target "${{ matrix.build_target }}" --manifest-path crates/tovuk/Cargo.toml
+        env:
+          BUILD_TARGET: ${{ matrix.build_target }}
+        run: cargo zigbuild --locked --release --target "$BUILD_TARGET" --manifest-path crates/tovuk/Cargo.toml
       - name: Prepare asset
-        if: steps.release.outputs.asset_exists == 'false'
         shell: bash
+        env:
+          ASSET_NAME: ${{ matrix.asset_name }}
+          BINARY: ${{ matrix.binary }}
+          BUILD_TARGET: ${{ matrix.build_target }}
+          TARGET: ${{ matrix.target }}
         run: |
-          binary_path="crates/tovuk/target/${{ matrix.target }}/release/${{ matrix.binary }}"
-          if [ ! -f "$binary_path" ] && [ "${{ matrix.build_target }}" != "${{ matrix.target }}" ]; then
-            binary_path="crates/tovuk/target/${{ matrix.build_target }}/release/${{ matrix.binary }}"
+          binary_path="crates/tovuk/target/$TARGET/release/$BINARY"
+          if [ ! -f "$binary_path" ] && [ "$BUILD_TARGET" != "$TARGET" ]; then
+            binary_path="crates/tovuk/target/$BUILD_TARGET/release/$BINARY"
           fi
-          cp "$binary_path" "${{ steps.asset.outputs.name }}"
-          chmod +x "${{ steps.asset.outputs.name }}" || true
-      - name: Download existing asset for checksum
-        if: steps.release.outputs.asset_exists == 'true' && steps.release.outputs.checksum_exists == 'false'
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release download "${{ steps.release.outputs.tag }}" --pattern "${{ steps.asset.outputs.name }}" --clobber
-      - name: Prepare checksum
-        if: steps.release.outputs.asset_exists == 'false' || steps.release.outputs.checksum_exists == 'false'
-        shell: bash
-        env:
-          ASSET: ${{ steps.asset.outputs.name }}
-        run: |
-          node - <<'NODE'
-          const { createHash } = require('node:crypto')
-          const { readFileSync, writeFileSync } = require('node:fs')
-          const asset = process.env.ASSET
-          const digest = createHash('sha256').update(readFileSync(asset)).digest('hex')
-          writeFileSync(`${asset}.sha256`, `${digest}  ${asset}\n`, 'utf8')
-          NODE
+          cp "$binary_path" "$ASSET_NAME"
+          chmod +x "$ASSET_NAME"
       - name: Prepare release artifact bundle
         shell: bash
+        env:
+          ASSET_NAME: ${{ matrix.asset_name }}
         run: |
           mkdir -p native-artifact
-          {
-            printf 'tag=%s\n' "${{ steps.release.outputs.tag }}"
-            printf 'asset_name=%s\n' "${{ steps.asset.outputs.name }}"
-            printf 'asset_exists=%s\n' "${{ steps.release.outputs.asset_exists }}"
-            printf 'checksum_exists=%s\n' "${{ steps.release.outputs.checksum_exists }}"
-          } > native-artifact/status.env
-          if [ -f "${{ steps.asset.outputs.name }}" ]; then
-            cp "${{ steps.asset.outputs.name }}" native-artifact/
-          fi
-          if [ -f "${{ steps.asset.outputs.name }}.sha256" ]; then
-            cp "${{ steps.asset.outputs.name }}.sha256" native-artifact/
-          fi
-      - uses: actions/upload-artifact@v6
+          cp "$ASSET_NAME" native-artifact/
+      - name: Smoke test host-native CLI
+        if: matrix.build_strategy == 'cargo'
+        shell: bash
+        env:
+          BINARY: ${{ matrix.binary }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          "crates/tovuk/target/$TARGET/release/$BINARY" --version
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: native-${{ matrix.target }}
           path: native-artifact
           if-no-files-found: error
 
-  upload:
-    name: upload ${{ matrix.target }}
+  publish-native:
+    name: publish native release
     needs: [native-targets, release-gate, build]
     if: ${{ github.ref == 'refs/heads/main' }}
-    runs-on: [self-hosted, tovuk, linux, x64, public-trusted-ci]
-    timeout-minutes: 10
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     permissions:
-      actions: read
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.native-targets.outputs.matrix) }}
+      contents: write # Required to create the release and upload assets.
     steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            checks/target
+          key: native-publish-${{ runner.os }}-${{ hashFiles('checks/Cargo.lock', 'rust-toolchain.toml') }}
       - name: Add GitHub CLI to PATH
         shell: bash
         run: |
-          if command -v gh >/dev/null 2>&1; then
-            gh --version
-            exit 0
-          fi
-
           gh_version="2.96.0"
           gh_root="$RUNNER_TEMP/gh-$gh_version"
           mkdir -p "$gh_root"
-          curl -fsSL \
+          gh_sha256="83d5c2ccad5498f58bf6368acb1ab32588cf43ab3a4b1c301bf36328b1c8bd60"
+          curl --proto '=https' --tlsv1.2 --fail --show-error --location \
+            --retry 5 --retry-all-errors --connect-timeout 20 --max-time 300 \
             "https://github.com/cli/cli/releases/download/v$gh_version/gh_${gh_version}_linux_amd64.tar.gz" \
             -o "$RUNNER_TEMP/gh.tar.gz"
+          printf '%s  %s\n' "$gh_sha256" "$RUNNER_TEMP/gh.tar.gz" | shasum -a 256 -c -
           tar -xzf "$RUNNER_TEMP/gh.tar.gz" --strip-components=1 -C "$gh_root"
           echo "$gh_root/bin" >> "$GITHUB_PATH"
           "$gh_root/bin/gh" --version
-      - name: Download build artifact
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          pattern: native-*
+          merge-multiple: true
+          path: native-artifact
+      - name: Verify synchronized public package versions
+        run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- package-versions
+      - name: Prepare exact native asset set and checksums
+        run: cargo run --locked --quiet --release --manifest-path checks/Cargo.toml --bin native-release-tool -- prepare-release native-artifact native-release-targets.json crates/tovuk/Cargo.toml
+      - name: Read release tag
+        id: metadata
+        run: |
+          tag="$(cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- tag crates/tovuk/Cargo.toml)"
+          printf 'tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
+      - name: Check immutable release state
+        id: release_state
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "native-${{ matrix.target }}" --dir native-artifact
-      - name: Upload release assets
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.metadata.outputs.tag }}
         run: |
           set -euo pipefail
-          # shellcheck disable=SC1091
-          . native-artifact/status.env
+          api_optional() {
+            local endpoint="$1"
+            local output="$2"
+            local error_file="$3"
+            if gh api "$endpoint" >"$output" 2>"$error_file"; then
+              return 0
+            fi
+            if grep -Fq '(HTTP 404)' "$error_file"; then
+              : >"$output"
+              return 4
+            fi
+            cat "$error_file" >&2
+            return 1
+          }
 
-          if [ "$asset_exists" = "true" ] && [ "$checksum_exists" = "true" ]; then
-            echo "$asset_name and checksum already exist on $tag."
-            exit 0
+          tag_exists=false
+          if api_optional "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" \
+            "$RUNNER_TEMP/tag.json" "$RUNNER_TEMP/tag-error.txt"; then
+            tag_exists=true
+            tag_ref="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" \
+              --jq '.object.type + " " + .object.sha')"
+            read -r tag_type tag_target <<<"$tag_ref"
+            if [ "$tag_type" = "tag" ]; then
+              tag_target="$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$tag_target" --jq '.object.sha')"
+            fi
+            if [ "$tag_target" != "$GITHUB_SHA" ]; then
+              echo "::error::$RELEASE_TAG points to $tag_target, expected triggering commit $GITHUB_SHA."
+              exit 1
+            fi
+          else
+            tag_status="$?"
+            if [ "$tag_status" -ne 4 ]; then
+              exit "$tag_status"
+            fi
           fi
 
-          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" --notes "Native Tovuk CLI release $tag" \
-              || gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null
+          release_exists=false
+          if api_optional "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" \
+            "$RUNNER_TEMP/release.json" "$RUNNER_TEMP/release-error.txt"; then
+            release_exists=true
+            gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" \
+              --jq '.assets[].name' >"$RUNNER_TEMP/remote-assets.txt"
+          else
+            release_status="$?"
+            if [ "$release_status" -ne 4 ]; then
+              exit "$release_status"
+            fi
+            : >"$RUNNER_TEMP/remote-assets.txt"
           fi
-
-          if [ "$asset_exists" = "false" ]; then
-            gh release upload "$tag" --repo "$GITHUB_REPOSITORY" "native-artifact/$asset_name" "native-artifact/$asset_name.sha256"
-          elif [ "$checksum_exists" = "false" ]; then
-            gh release upload "$tag" --repo "$GITHUB_REPOSITORY" "native-artifact/$asset_name.sha256"
+          if [ "$release_exists" = "true" ] && [ "$tag_exists" = "false" ]; then
+            echo "::error::$RELEASE_TAG has a release without an immutable tag."
+            exit 1
           fi
-      - name: Verify release asset
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && \
+            { [ "$release_exists" = "true" ] || [ "$tag_exists" = "true" ]; }; then
+            echo "::error::$RELEASE_TAG already exists. Bump every public package version before pushing CLI changes."
+            exit 1
+          fi
+          printf 'release_exists=%s\n' "$release_exists" >> "$GITHUB_OUTPUT"
+      - name: Create or resume one atomic native release
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_EXISTS: ${{ steps.release_state.outputs.release_exists }}
+          RELEASE_TAG: ${{ steps.metadata.outputs.tag }}
         run: |
           set -euo pipefail
-          # shellcheck disable=SC1091
-          . native-artifact/status.env
-          assets="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
-          grep -Fx "$asset_name" <<<"$assets"
-          grep -Fx "$asset_name.sha256" <<<"$assets"
+          created=false
+          if [ "$RELEASE_EXISTS" = "false" ]; then
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "$RELEASE_TAG" \
+              --notes "Native Tovuk CLI release $RELEASE_TAG" --target "$GITHUB_SHA" --draft
+            created=true
+          fi
+
+          upload=()
+          while IFS= read -r asset_name; do
+            asset_exists=false
+            checksum_exists=false
+            if grep -Fx "$asset_name" "$RUNNER_TEMP/remote-assets.txt" >/dev/null; then
+              asset_exists=true
+            fi
+            if grep -Fx "$asset_name.sha256" "$RUNNER_TEMP/remote-assets.txt" >/dev/null; then
+              checksum_exists=true
+            fi
+            if [ "$asset_exists" = "false" ] && [ "$checksum_exists" = "true" ]; then
+              echo "::error::$RELEASE_TAG has orphan checksum $asset_name.sha256."
+              exit 1
+            fi
+            if [ "$asset_exists" = "false" ]; then
+              upload+=("native-artifact/$asset_name" "native-artifact/$asset_name.sha256")
+            elif [ "$checksum_exists" = "false" ]; then
+              cp "native-artifact/$asset_name" "$RUNNER_TEMP/$asset_name.built"
+              gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+                --pattern "$asset_name" --dir native-artifact --clobber
+              cmp -- "$RUNNER_TEMP/$asset_name.built" "native-artifact/$asset_name"
+              cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+                --bin native-release-tool -- write-sha256 "native-artifact/$asset_name"
+              upload+=("native-artifact/$asset_name.sha256")
+            fi
+          done < <(cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin native-release-tool -- asset-names native-release-targets.json crates/tovuk/Cargo.toml)
+
+          if [ "${#upload[@]}" -gt 0 ]; then
+            gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" "${upload[@]}"
+          fi
+          cargo run --locked --quiet --release --manifest-path checks/Cargo.toml \
+            --bin check-native-release-assets -- "${RELEASE_TAG#v}"
+          if [ "$created" = "true" ]; then
+            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          fi
+
+  publish-npm:
+    name: publish npm package
+    needs: publish-native
+    permissions:
+      contents: read
+      id-token: write # Required for npm trusted publishing.
+    uses: ./.github/workflows/publish-npm.yml
+
+  publish-crates:
+    name: publish crates.io package
+    needs: publish-native
+    permissions:
+      contents: read
+      id-token: write # Required for crates.io trusted publishing.
+    uses: ./.github/workflows/publish-crates.yml
+
+  publish-pypi:
+    name: publish PyPI package
+    needs: publish-native
+    permissions:
+      contents: read
+      id-token: write # Required for PyPI trusted publishing.
+    uses: ./.github/workflows/publish-pypi.yml

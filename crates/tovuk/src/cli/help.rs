@@ -1,5 +1,6 @@
 use super::constants::VERSION;
 
+/// Public command usage and automation contract.
 const HELP_BODY: &str = r#"
 Usage:
   tovuk login [--token <token>] [--json|--output json]
@@ -25,8 +26,9 @@ Usage:
 
 Agent contract:
   - Set TOVUK_OUTPUT=json once for agent sessions, or pass --json per command. Success output is JSON for API commands.
-  - Use tovuk scraper list --json to choose a public-data scraper, tovuk scraper health --json to inspect managed reader and proxy readiness, tovuk request create <scraper> '<json>' --json to create paid scraper work, tovuk request show <request_id> --json to poll status, and tovuk request results <request_id> --json to fetch stored records.
+  - Use tovuk scraper list --json to choose a public-data scraper, tovuk scraper health --json to inspect data-source availability, tovuk request create <scraper> '<json>' --json to create paid scraper work, tovuk request show <request_id> --json to poll status, and tovuk request results <request_id> --json to fetch stored records.
   - Scraper requests must use public URLs, public search terms, public profile handles, or public place ids only. Do not send cookies, passwords, account tokens, private session data, proxy URLs, or private account content.
+  - Public API JSON responses are limited to 100 MiB. Narrow large requests with --limit and --cursor when a response reaches this ceiling.
   - Use tovuk pricing --json and tovuk usage --json before high-count scraper requests. Inspect priceEvents[].usdMicros, billingEstimate.lineItems, and account balance before creating large jobs.
   - Use tovuk api-key create "Production scraper" --json for scripts, save the returned token immediately, and revoke old keys with tovuk api-key revoke <api_key_id> --json.
   - When a plan limit blocks work, choose a plan and run tovuk billing checkout plus --json, tovuk billing checkout pro --json, or tovuk billing checkout max --json, then show the returned URL to the human. When balance is exhausted, run tovuk billing checkout --top-up-usd-cents 2000 --json or reduce the request limit.
@@ -36,6 +38,7 @@ Agent contract:
   - This public CLI does not deploy websites, backends, databases, workers, storage buckets, queues, cron jobs, custom domains, secrets, or any other customer cloud resource.
 "#;
 
-pub(crate) fn help_text() -> String {
-    format!("Tovuk {VERSION}\n{HELP_BODY}")
+/// Returns versioned public CLI help text.
+pub(super) fn help_text() -> String {
+    return format!("Tovuk {VERSION}\n{HELP_BODY}");
 }
