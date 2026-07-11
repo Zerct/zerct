@@ -20,12 +20,6 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
-/// Applies owner-only permissions to session paths.
-trait ApplyPrivatePermissions {
-    /// Applies this permission profile to `path` where supported.
-    fn apply(self, path: &Path);
-}
-
 impl From<StoredToken> for Option<String> {
     #[inline]
     fn from(value: StoredToken) -> Self {
@@ -37,25 +31,6 @@ impl From<PrivateTempPath> for PathBuf {
     #[inline]
     fn from(value: PrivateTempPath) -> Self {
         return value.0;
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-/// Path permission update awaiting application.
-struct PrivatePath(PrivatePathKind);
-
-impl ApplyPrivatePermissions for PrivatePath {
-    fn apply(self, path: &Path) {
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt as _;
-            let mode = match self.0 {
-                PrivatePathKind::Directory => 0o700,
-                PrivatePathKind::File => 0o600,
-            };
-            let _permission_result =
-                file_system::set_permissions(path, file_system::Permissions::from_mode(mode));
-        }
     }
 }
 
@@ -172,7 +147,7 @@ impl<'input> TryFrom<TokenFileWrite<'input>> for WrittenTokenFile {
                 file_system::create_dir_all(parent)
                     .map_err(|error| return internal_error(error.to_string()))
             );
-            ApplyPrivatePermissions::apply(PrivatePath(PrivatePathKind::Directory), parent);
+            apply_private_permissions(parent, PrivatePathKind::Directory);
         }
         let temp_path = PathBuf::from(PrivateTempPath::from(value.path));
         let contents = format!("{}\n", value.token);
@@ -189,10 +164,27 @@ impl<'input> TryFrom<TokenFileWrite<'input>> for WrittenTokenFile {
                 return internal_error(error.to_string());
             })
         );
-        ApplyPrivatePermissions::apply(PrivatePath(PrivatePathKind::File), value.path);
+        apply_private_permissions(value.path, PrivatePathKind::File);
         return Ok(Self);
     }
 }
+
+/// Applies owner-only permissions to `path` on Unix platforms.
+#[cfg(unix)]
+fn apply_private_permissions(path: &Path, kind: PrivatePathKind) {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    let mode = match kind {
+        PrivatePathKind::Directory => 0o700,
+        PrivatePathKind::File => 0o600,
+    };
+    let _permission_result =
+        file_system::set_permissions(path, file_system::Permissions::from_mode(mode));
+}
+
+/// Leaves path permissions to the platform's secure file defaults on non-Unix systems.
+#[cfg(not(unix))]
+fn apply_private_permissions(_: &Path, _: PrivatePathKind) {}
 
 /// Returns the best available user home directory.
 fn home_dir() -> PathBuf {

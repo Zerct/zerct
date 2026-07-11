@@ -7,7 +7,11 @@ on:
       - main
     paths:
       - ".cargo/config.toml"
+      - ".github/workflows/publish-native-binaries.yml"
       - "native-release-targets.json"
+      - "checks/Cargo.toml"
+      - "checks/Cargo.lock"
+      - "checks/src/bin/zig-linker-proxy.rs"
       - "crates/tovuk/.cargo/config.toml"
       - "crates/tovuk/Cargo.toml"
       - "crates/tovuk/Cargo.lock"
@@ -171,6 +175,9 @@ jobs:
           echo "$zig_root" >> "$GITHUB_PATH"
           export PATH="$zig_root:$PATH"
           cargo install --locked --version 0.23.0 cargo-zigbuild
+          cargo build --locked --release --manifest-path checks/Cargo.toml --bin zig-linker-proxy
+          proxy="$GITHUB_WORKSPACE/checks/target/release/zig-linker-proxy"
+          TOVUK_REAL_ZIG_PATH="$zig_root/zig" "$proxy" version
           zig version
           cargo zigbuild --help >/dev/null
       - name: Build
@@ -184,6 +191,8 @@ jobs:
         shell: bash
         env:
           BUILD_TARGET: ${{ matrix.build_target }}
+          CARGO_ZIGBUILD_ZIG_PATH: ${{ github.workspace }}/checks/target/release/zig-linker-proxy
+          TOVUK_REAL_ZIG_PATH: ${{ runner.temp }}/zig-0.16.0/zig
         run: cargo zigbuild --locked --release --target "$BUILD_TARGET" --manifest-path crates/tovuk/Cargo.toml
       - name: Prepare asset
         shell: bash
