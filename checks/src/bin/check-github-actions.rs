@@ -22,6 +22,8 @@ macro_rules! check_try {
 
 extern crate alloc;
 
+#[path = "check-github-actions/ci_policy.rs"]
+mod ci_policy;
 #[path = "check-github-actions/policy.rs"]
 mod github_actions_policy;
 #[path = "check-github-actions/global_policy.rs"]
@@ -88,6 +90,12 @@ trait Check {
 
 /// Result returned by `GitHub` Actions policy operations.
 type CheckResult<Value = ()> = Result<Value, String>;
+
+/// Continuous-integration history-boundary policy operations.
+trait CiPolicy {
+    /// Require full history and exact trusted event identities in the CI gate.
+    fn require_ci_history_gate(&self, workflow: &Workflow, findings: &mut Vec<String>);
+}
 
 /// Crates.io release policy operations.
 trait CrateReleasePolicy {

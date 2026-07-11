@@ -1,8 +1,8 @@
 //! Per-workflow security and release policy checks.
 
 use super::{
-    HostedActionsCheck, PathFilters as _, PolicyRequirement, ReleasePolicy as _, Workflow,
-    WorkflowPolicy, require_contains,
+    CiPolicy as _, HostedActionsCheck, PathFilters as _, PolicyRequirement, ReleasePolicy as _,
+    Workflow, WorkflowPolicy, require_contains,
 };
 
 use std::ffi::OsStr;
@@ -12,8 +12,7 @@ use std::ffi::OsStr;
 mod publication_tests;
 
 /// Unfiltered event header required by the canonical continuous-integration workflow.
-const CI_TRIGGER_HEADER: &str =
-    "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n";
+const CI_TRIGGER_HEADER: &str = "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n";
 
 /// Required guarded recovery and dispatch markers.
 const PUBLICATION_RECOVERY_REQUIREMENTS: &[PolicyRequirement] = &[
@@ -134,13 +133,13 @@ impl WorkflowPolicy for HostedActionsCheck {
         require_contains(
             workflow.contents.as_str(),
             CI_TRIGGER_HEADER,
-            "ci.yml must run on workflow_dispatch, every pull request, and every main push",
+            "ci.yml must run on workflow_dispatch, every pull request, and every branch or tag push",
             findings,
         );
         let filters = self.workflow_path_filters(workflow.contents.as_str());
         if !filters.is_empty() {
             findings.push(format!(
-                "{}: CI must run for every pull request and main push; remove paths and paths-ignore filters",
+                "{}: CI must run for every pull request and branch or tag push; remove paths and paths-ignore filters",
                 workflow.path.display()
             ));
         }
@@ -160,6 +159,9 @@ impl WorkflowPolicy for HostedActionsCheck {
     }
 
     fn check_github_hosted_cargo_cache(&self, workflow: &Workflow, findings: &mut Vec<String>) {
+        if workflow.path.ends_with("trusted-history.yml") {
+            return;
+        }
         if self.contains_cargo_publish_command(workflow.contents.as_str())
             && !self.uses_current_cache_action(workflow.contents.as_str())
         {
@@ -289,6 +291,7 @@ impl WorkflowPolicy for HostedActionsCheck {
             findings,
         );
         self.check_ci_trigger_coverage(workflow, findings);
+        self.require_ci_history_gate(workflow, findings);
         self.check_checkout_credentials(workflow, findings);
         self.check_github_hosted_cargo_cache(workflow, findings);
         self.check_publication_recovery_workflow(workflow, findings);
@@ -376,9 +379,7 @@ mod tests {
     #[test]
     fn ci_trigger_coverage_accepts_unfiltered_events() {
         let workflow = Workflow {
-            contents:
-                "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n    branches:\n      - main\n"
-                    .to_owned(),
+            contents: "on:\n  workflow_dispatch:\n  pull_request:\n  push:\n".to_owned(),
             path: PathBuf::from(".github/workflows/ci.yml"),
         };
         let mut findings = Vec::new();

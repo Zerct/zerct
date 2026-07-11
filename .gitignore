@@ -61,7 +61,7 @@ test-results/
 .env.*
 !.env.example
 .envrc
-/.npmrc
+.npmrc
 .pypirc
 .netrc
 .git-credentials

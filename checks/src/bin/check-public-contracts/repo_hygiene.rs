@@ -6,7 +6,7 @@ use crate::helpers::{CheckResult, OutputChannel, read_text, require_contains, wr
 
 use crate::native_release_targets;
 
-use crate::repo_hygiene_git::{existing_tracked_files, git_lines};
+use crate::repo_hygiene_git::{existing_tracked_files, git_lines, require_snapshot_alignment};
 
 use crate::repo_hygiene_paths::{
     is_forbidden_tracked_path, is_guarded_source_path, is_public_repository_scan_path,
@@ -39,7 +39,7 @@ const ALLOWED_EXECUTABLE_PATHS: &[&str] = &[
 ];
 
 /// Contract value named `MAX_SOURCE_FILE_LINES`.
-const MAX_SOURCE_FILE_LINES: usize = 500;
+pub(super) const MAX_SOURCE_FILE_LINES: usize = 500;
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0011] = [
@@ -70,7 +70,8 @@ type TextPredicate = fn(&str) -> bool;
 /// # Errors
 ///
 /// Returns an error when the contract requirement cannot be verified.
-pub(super) fn check() -> CheckResult {
+pub(super) fn check(snapshot: &str) -> CheckResult {
+    check_try!(require_snapshot_alignment(snapshot));
     let tracked_files = check_try!(existing_tracked_files());
     let tracked_set = tracked_files.iter().cloned().collect::<BTreeSet<_>>();
 

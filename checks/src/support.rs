@@ -17,23 +17,130 @@ pub const CHECKS_MANIFEST: &str = "checks/Cargo.toml";
 const SECRET_SIGNATURE_PARTS: &[SecretSignatureParts] = &[
     SecretSignatureParts::new("-----BEGIN DSA PRIVATE ", "KEY-----"),
     SecretSignatureParts::new("-----BEGIN EC PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("-----BEGIN ENCRYPTED PRIVATE ", "KEY-----"),
     SecretSignatureParts::new("-----BEGIN OPENSSH PRIVATE ", "KEY-----"),
+    SecretSignatureParts::new("-----BEGIN PGP PRIVATE ", "KEY BLOCK-----"),
     SecretSignatureParts::new("-----BEGIN PRIVATE ", "KEY-----"),
     SecretSignatureParts::new("-----BEGIN RSA PRIVATE ", "KEY-----"),
-    SecretSignatureParts::new("gh", "o_"),
-    SecretSignatureParts::new("gh", "p_"),
-    SecretSignatureParts::new("gh", "r_"),
-    SecretSignatureParts::new("gh", "s_"),
-    SecretSignatureParts::new("gh", "u_"),
-    SecretSignatureParts::new("github_", "pat_"),
-    SecretSignatureParts::new("sk_", "live_"),
-    SecretSignatureParts::new("xo", "xb-"),
+];
+
+/// Provider-specific credential patterns reconstructed only while scanning.
+const SECRET_TOKEN_PATTERNS: &[SecretTokenPattern] = &[
+    SecretTokenPattern {
+        body_length: 0x0024,
+        extras: b"",
+        name: "GitHub OAuth access token",
+        prefix: SecretSignatureParts::new("gh", "o_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0024,
+        extras: b"",
+        name: "GitHub personal access token",
+        prefix: SecretSignatureParts::new("gh", "p_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x004c,
+        extras: b"",
+        name: "GitHub refresh token",
+        prefix: SecretSignatureParts::new("gh", "r_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0024,
+        extras: b"_.-",
+        name: "GitHub installation access token",
+        prefix: SecretSignatureParts::new("gh", "s_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0024,
+        extras: b"",
+        name: "GitHub user access token",
+        prefix: SecretSignatureParts::new("gh", "u_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0052,
+        extras: b"",
+        name: "GitHub fine-grained personal access token",
+        prefix: SecretSignatureParts::new("github_", "pat_"),
+        required_hyphens: 0x0000,
+        separator: b"_",
+        separator_offset: 0x0016,
+    },
+    SecretTokenPattern {
+        body_length: 0x0024,
+        extras: b"",
+        name: "npm access token",
+        prefix: SecretSignatureParts::new("npm", "_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0055,
+        extras: b"-_",
+        name: "PyPI API token",
+        prefix: SecretSignatureParts::new("pypi", "-"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0018,
+        extras: b"-",
+        name: "Slack bot token",
+        prefix: SecretSignatureParts::new("xo", "xb-"),
+        required_hyphens: 0x0001,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0018,
+        extras: b"-",
+        name: "Slack user token",
+        prefix: SecretSignatureParts::new("xo", "xp-"),
+        required_hyphens: 0x0001,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0018,
+        extras: b"",
+        name: "Stripe live secret key",
+        prefix: SecretSignatureParts::new("sk_", "live_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
+    SecretTokenPattern {
+        body_length: 0x0018,
+        extras: b"",
+        name: "Stripe live restricted key",
+        prefix: SecretSignatureParts::new("rk_", "live_"),
+        required_hyphens: 0x0000,
+        separator: b"",
+        separator_offset: 0x0000,
+    },
 ];
 
 /// Common result type for public repository checks.
 pub type CheckResult<T = ()> = Result<T, String>;
 
 /// Two source-safe fragments of one recognized credential marker.
+#[derive(Clone, Copy, Debug)]
 struct SecretSignatureParts {
     /// Leading marker fragment.
     prefix: &'static str,
@@ -42,9 +149,88 @@ struct SecretSignatureParts {
 }
 
 impl SecretSignatureParts {
+    /// Return whether raw bytes contain this exact ASCII signature.
+    fn is_match(self, contents: &[u8]) -> bool {
+        let signature = self.signature();
+        return contents
+            .windows(signature.len())
+            .any(|candidate| return candidate == signature.as_bytes());
+    }
+
     /// Construct one split credential marker.
     const fn new(prefix: &'static str, suffix: &'static str) -> Self {
         return Self { prefix, suffix };
+    }
+
+    /// Reconstruct this signature only at scan time.
+    fn signature(self) -> String {
+        return format!("{}{}", self.prefix, self.suffix);
+    }
+}
+
+/// One provider token's prefix, alphabet, length, and shape constraints.
+#[derive(Clone, Copy, Debug)]
+struct SecretTokenPattern {
+    /// Number of bytes sufficient to identify the credential body.
+    body_length: usize,
+    /// Additional non-alphanumeric bytes accepted in the token body.
+    extras: &'static [u8],
+    /// Provider token name used in diagnostics.
+    name: &'static str,
+    /// Split prefix kept source-safe inside the scanner itself.
+    prefix: SecretSignatureParts,
+    /// Minimum internal hyphens required by the provider's shape.
+    required_hyphens: usize,
+    /// Fixed separator required between the body segments.
+    separator: &'static [u8],
+    /// Byte offset where the fixed separator begins.
+    separator_offset: usize,
+}
+
+impl SecretTokenPattern {
+    /// Return whether one byte belongs to this provider's token body.
+    fn accepts(self, byte: u8) -> bool {
+        return byte.is_ascii_alphanumeric() || self.extras.contains(&byte);
+    }
+
+    /// Return whether raw bytes contain this complete provider-token pattern.
+    fn is_match(self, contents: &[u8]) -> bool {
+        let signature = self.prefix.signature();
+        return contents
+            .windows(signature.len())
+            .enumerate()
+            .any(|(start, candidate)| {
+                return candidate == signature.as_bytes()
+                    && self.matches_at(contents, start, signature.len());
+            });
+    }
+
+    /// Return whether the credential body is valid after one matching prefix.
+    fn matches_at(self, contents: &[u8], start: usize, prefix_length: usize) -> bool {
+        let body_start = start.saturating_add(prefix_length);
+        return contents
+            .get(body_start..)
+            .is_some_and(|body| return self.matches_body(body));
+    }
+
+    /// Return whether bytes begin with this provider's identifying body shape.
+    fn matches_body(self, contents: &[u8]) -> bool {
+        let Some(body) = contents.get(..self.body_length) else {
+            return false;
+        };
+        let Some((leading, separator_and_trailing)) = body.split_at_checked(self.separator_offset)
+        else {
+            return false;
+        };
+        let Some(trailing) = separator_and_trailing.strip_prefix(self.separator) else {
+            return false;
+        };
+        let hyphens = body.iter().filter(|byte| return **byte == b'-').count();
+        return leading
+            .iter()
+            .chain(trailing)
+            .all(|byte| return self.accepts(*byte))
+            && hyphens >= self.required_hyphens;
     }
 }
 
@@ -98,7 +284,7 @@ pub fn find_command(path: &OsStr, candidates: &[&str]) -> CheckResult<PathBuf> {
 pub fn git_tracked_files(repository: &Path) -> CheckResult<Vec<String>> {
     let output = check_try!(
         Command::new("git")
-            .args(["ls-files"])
+            .args(["ls-files", "--cached", "-z", "--full-name", "--"])
             .current_dir(repository)
             .output()
             .map_err(|error| return format!("run git ls-files: {error}"))
@@ -106,27 +292,45 @@ pub fn git_tracked_files(repository: &Path) -> CheckResult<Vec<String>> {
     if !output.status.success() {
         return Err(format!("git ls-files failed with status {}", output.status));
     }
-    return Ok(String::from_utf8_lossy(&output.stdout)
-        .lines()
-        .map(ToOwned::to_owned)
-        .collect());
+    if output.stdout.is_empty() {
+        return Ok(Vec::new());
+    }
+    let records = check_try!(
+        output
+            .stdout
+            .strip_suffix(b"\0")
+            .ok_or_else(|| return "git ls-files returned unterminated output".to_owned())
+    );
+    return records
+        .split(|byte| return *byte == 0x00)
+        .map(|path| {
+            return from_utf8(path)
+                .map(str::to_owned)
+                .map_err(|error| return format!("git ls-files returned non-UTF-8 path: {error}"));
+        })
+        .collect();
 }
 
 /// Reject recognized private-key and credential signatures in public bytes.
 ///
 /// # Errors
 ///
-/// Returns an error when UTF-8 input contains a known secret signature.
+/// Returns an error when input contains a known ASCII secret signature.
 #[inline]
 pub fn reject_secret_signatures(label: &str, contents: &[u8]) -> CheckResult {
-    let Ok(text) = from_utf8(contents) else {
-        return Ok(());
-    };
     for parts in SECRET_SIGNATURE_PARTS {
-        let signature = format!("{}{}", parts.prefix, parts.suffix);
-        if text.contains(signature.as_str()) {
+        if parts.is_match(contents) {
+            let signature = parts.signature();
             return Err(format!(
                 "{label} contains forbidden secret signature {signature}"
+            ));
+        }
+    }
+    for pattern in SECRET_TOKEN_PATTERNS {
+        if pattern.is_match(contents) {
+            return Err(format!(
+                "{label} contains a forbidden {} signature",
+                pattern.name
             ));
         }
     }

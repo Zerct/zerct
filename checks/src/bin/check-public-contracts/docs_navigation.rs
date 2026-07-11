@@ -1,14 +1,12 @@
 use crate::{
     docs_sources::DocsSources,
     helpers::{CheckResult, file_exists, reject_contains, require_contains},
+    repo_hygiene_git::git_lines,
 };
 
 use alloc::collections::BTreeSet;
 
-use std::{
-    fs::read_dir,
-    path::{Path, PathBuf},
-};
+use std::path::Path;
 
 /// Public pages required in Mintlify navigation.
 const ACTIVE_NAVIGATION_PAGES: &[&str] = &[
@@ -46,64 +44,25 @@ const RETIRED_NAVIGATION_PAGES: &[&str] = &[
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0005] = [
-    size_of_val(&collect_mdx_pages),
     size_of_val(&docs_page_name),
     size_of_val(&require_navigation_contract),
     size_of_val(&require_navigation_is_exhaustive),
     size_of_val(&require_navigation_pages_exist),
+    size_of_val(&tracked_mdx_pages),
 ];
-
-/// Collect every repository-relative Mintlify page below one directory.
-///
-/// # Errors
-///
-/// Returns an error when the docs tree cannot be read or a page path is not UTF-8.
-fn collect_mdx_pages(directory: &Path, pages: &mut BTreeSet<String>) -> CheckResult {
-    let entries =
-        check_try!(read_dir(directory).map_err(|error| return format!(
-            "read docs directory {}: {error}",
-            directory.display()
-        )));
-    for entry_result in entries {
-        let entry =
-            check_try!(entry_result.map_err(|error| return format!(
-                "read entry under {}: {error}",
-                directory.display()
-            )));
-        let path = entry.path();
-        let file_type = check_try!(
-            entry
-                .file_type()
-                .map_err(|error| return format!("read file type for {}: {error}", path.display()))
-        );
-        if file_type.is_dir() {
-            check_try!(collect_mdx_pages(path.as_path(), pages));
-            continue;
-        }
-        if path
-            .extension()
-            .and_then(|extension| return extension.to_str())
-            != Some("mdx")
-        {
-            continue;
-        }
-        let page = check_try!(docs_page_name(path.as_path()));
-        let _inserted = pages.insert(page);
-    }
-    return Ok(());
-}
 
 /// Convert one docs-relative MDX path into its navigation page identifier.
 ///
 /// # Errors
 ///
 /// Returns an error when the path is outside `docs` or contains a non-UTF-8 component.
-fn docs_page_name(path: &Path) -> CheckResult<String> {
+fn docs_page_name(path: &str) -> CheckResult<String> {
     let relative = check_try!(
-        path.strip_prefix("docs")
-            .map_err(|error| return format!("resolve docs page {}: {error}", path.display()))
+        Path::new(path)
+            .strip_prefix("docs")
+            .map_err(|error| return format!("resolve docs page {path}: {error}"))
     );
-    let page_path = PathBuf::from(relative).with_extension("");
+    let page_path = relative.with_extension("");
     let mut components = Vec::new();
     for component in page_path.components() {
         let Some(value) = component.as_os_str().to_str() else {
@@ -151,8 +110,7 @@ pub(super) fn require_navigation_is_exhaustive(pages: &[String]) -> CheckResult 
         .filter(|page| return !page.starts_with("http://") && !page.starts_with("https://"))
         .cloned()
         .collect::<BTreeSet<_>>();
-    let mut present = BTreeSet::new();
-    check_try!(collect_mdx_pages(Path::new("docs"), &mut present));
+    let present = check_try!(tracked_mdx_pages());
     if navigated == present {
         return Ok(());
     }
@@ -188,4 +146,21 @@ pub(super) fn require_navigation_pages_exist(pages: &[String]) -> CheckResult {
         "Missing Mintlify pages:\n{}",
         missing_pages.join("\n")
     ));
+}
+
+/// Return the exact tracked Mintlify MDX page identifiers from the Git index.
+///
+/// # Errors
+///
+/// Returns an error when Git cannot list pages or a tracked page path is invalid.
+fn tracked_mdx_pages() -> CheckResult<BTreeSet<String>> {
+    return check_try!(git_lines(&[
+        "ls-files",
+        "--",
+        ":(glob)docs/*.mdx",
+        ":(glob)docs/**/*.mdx",
+    ]))
+    .iter()
+    .map(|path| return docs_page_name(path.as_str()))
+    .collect();
 }

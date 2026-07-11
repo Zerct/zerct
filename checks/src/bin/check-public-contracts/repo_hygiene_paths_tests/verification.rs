@@ -1,6 +1,10 @@
 use crate::repo_hygiene_text::line_contains_private_repository_marker;
 
-use super::{is_allowed_public_surface_path, is_forbidden_tracked_path};
+use alloc::collections::BTreeSet;
+
+use super::{
+    is_allowed_public_surface_path, is_forbidden_tracked_path, validate_portable_public_paths,
+};
 
 /// Verify reviewed root files and product directories remain on the public surface.
 ///
@@ -34,7 +38,6 @@ fn allows_public_source_paths() {
         "crates/tovuk/src/build/module.rs",
         "crates/tovuk/src/dist/schema.rs",
         "docs/sdks/rust.mdx",
-        "packages/tovuk/.npmrc",
         "sdks/rust/src/lib.rs",
     ] {
         assert!(!is_forbidden_tracked_path(path), "{path}");
@@ -119,13 +122,17 @@ fn rejects_forced_sensitive_and_local_paths() {
         ".aws/credentials",
         ".cargo/credentials.toml",
         ".envrc",
+        ".ENV",
         ".git-credentials",
         ".npmrc",
+        ".NPMRC",
         ".pypirc",
         ".ssh/config",
         ".terraform/providers.lock",
         ".vscode/settings.json",
         "crates/tovuk/.cargo/credentials",
+        "crates/tovuk/.CARGO/CREDENTIALS.TOML",
+        "docs/.npmrc",
         "example.tfstate.backup",
         "example.tfvars.json",
         "packages/tovuk/node_modules/tovuk/index.js",
@@ -168,4 +175,25 @@ fn rejects_unapproved_public_surface_paths() {
     ] {
         assert!(!is_allowed_public_surface_path(path), "{path}");
     }
+}
+
+/// Verify public paths remain portable across case-insensitive and Windows filesystems.
+///
+/// # Panics
+///
+/// Panics when an unsafe path set is accepted.
+#[test]
+fn rejects_unportable_public_paths() {
+    for path in [
+        "docs/CON.mdx",
+        "docs/bad-name.",
+        "docs/bad-name ",
+        "docs/caf\u{00e9}.mdx",
+        "docs/nested\\file.mdx",
+    ] {
+        let paths = BTreeSet::from([path.to_owned()]);
+        assert!(validate_portable_public_paths(&paths).is_err(), "{path}");
+    }
+    let collision = BTreeSet::from(["docs/Example.mdx".to_owned(), "docs/example.mdx".to_owned()]);
+    assert!(validate_portable_public_paths(&collision).is_err());
 }
