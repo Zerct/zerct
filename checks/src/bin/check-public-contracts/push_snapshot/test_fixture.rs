@@ -27,7 +27,6 @@ mod test_helpers;
 use std::{
     fs::{copy, create_dir_all, metadata, read, write},
     path::{Path, PathBuf},
-    process::Command,
 };
 
 use crate::{helpers::CheckResult, repo_hygiene_required::reviewed_tracked_paths};
@@ -259,9 +258,8 @@ fn create_unavailable_remote_commit(fixture: &PushFixture) -> CheckResult<Unavai
 /// Returns an error when Git fails or returns non-UTF-8 output.
 fn git_text(repository: &Path, args: &[&str]) -> CheckResult<String> {
     let output = check_try!(
-        Command::new("git")
+        super::git_command(repository)
             .args(args)
-            .current_dir(repository)
             .output()
             .map_err(|error| return format!("run fixture git {}: {error}", args.join(" ")),)
     );

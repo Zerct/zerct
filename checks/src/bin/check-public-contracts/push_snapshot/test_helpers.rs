@@ -2,11 +2,7 @@
 
 use alloc::collections::BTreeSet;
 
-use std::{
-    fs::{remove_dir_all, write},
-    path::Path,
-    process::Command,
-};
+use std::{fs::write, path::Path};
 
 use crate::{
     helpers::CheckResult,
@@ -102,9 +98,8 @@ fn create_malformed_tree_commit(fixture: &PushFixture) -> CheckResult<String> {
 /// Returns an error when Git cannot start or exits unsuccessfully.
 fn git_bytes(repository: &Path, args: &[&str]) -> CheckResult<Vec<u8>> {
     let output = check_try!(
-        Command::new("git")
+        super::super::git_command(repository)
             .args(args)
-            .current_dir(repository)
             .output()
             .map_err(|error| return format!("run fixture git {}: {error}", args.join(" ")),)
     );
@@ -249,8 +244,7 @@ pub(super) fn record(local_ref: &str, local: &str, remote_ref: &str, remote: &st
 ///
 /// Returns an error when fixture cleanup fails.
 pub(super) fn remove_fixture(fixture: &PushFixture) -> CheckResult {
-    return remove_dir_all(fixture.root.as_path())
-        .map_err(|error| return format!("clear fixture: {error}"));
+    return super::fixture_root::cleanup_fixture_root(fixture.root.as_path(), "fixture");
 }
 
 /// Require one proposed push to be rejected.
@@ -272,9 +266,8 @@ pub(super) fn require_rejected(result: &CheckResult, label: &str) -> CheckResult
 /// Returns an error when Git cannot start or exits unsuccessfully.
 pub(super) fn run_git(repository: &Path, args: &[&str]) -> CheckResult {
     let status = check_try!(
-        Command::new("git")
+        super::super::git_command(repository)
             .args(args)
-            .current_dir(repository)
             .env("GIT_AUTHOR_EMAIL", "tovuk-test@example.invalid")
             .env("GIT_AUTHOR_NAME", "Tovuk Test")
             .env("GIT_COMMITTER_EMAIL", "tovuk-test@example.invalid")

@@ -6,12 +6,9 @@ use crate::helpers::CheckResult;
 
 use core::{iter::once, str::from_utf8};
 
-use std::{path::Path, process::Command};
+use std::path::Path;
 
 use super::{ObjectKind, PushUpdate, TreeEntry, is_zero_object};
-
-/// Git environment switch that exposes stored objects instead of replacement refs.
-const GIT_NO_REPLACE_OBJECTS: &str = "GIT_NO_REPLACE_OBJECTS";
 
 /// Compile-time references preserve the named helper boundaries.
 const _: [usize; 0x0015] = [
@@ -107,10 +104,8 @@ pub(super) fn advertised_remote_objects(
 /// Returns an error when Git cannot start or exits unsuccessfully.
 pub(super) fn git_output(repository: &Path, args: &[&str], label: &str) -> CheckResult<Vec<u8>> {
     let output = check_try!(
-        Command::new("git")
+        super::git_command(repository)
             .args(args)
-            .current_dir(repository)
-            .env(GIT_NO_REPLACE_OBJECTS, "1")
             .output()
             .map_err(|error| return format!("run {label}: {error}"))
     );
@@ -162,10 +157,8 @@ pub(super) fn newly_reachable_objects(
 pub(super) fn object_exists(repository: &Path, object: &str) -> CheckResult<bool> {
     let peeled = format!("{object}^{{object}}");
     let output = check_try!(
-        Command::new("git")
+        super::git_command(repository)
             .args(["cat-file", "-e", peeled.as_str()])
-            .current_dir(repository)
-            .env(GIT_NO_REPLACE_OBJECTS, "1")
             .output()
             .map_err(|error| return format!("run git cat-file -e: {error}"))
     );
