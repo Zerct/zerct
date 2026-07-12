@@ -11,9 +11,9 @@ const _: [usize; 0x0007] = [
     size_of_val(&npm_package_lock_versions),
     size_of_val(&print_canonical_version),
     size_of_val(&synchronized_version),
+    size_of_val(&synchronized_version_require_homebrew),
     size_of_val(&synchronized_version_require_packages),
     size_of_val(&synchronized_version_require_runtime),
-    size_of_val(&synchronized_version_require_tag),
 ];
 
 /// Contract implementation for `check`.
@@ -86,13 +86,44 @@ fn synchronized_version() -> CheckResult<String> {
         "Cargo.toml version",
     ));
     let npm_package = check_try!(read_package_json("packages/tovuk/package.json"));
+    check_try!(synchronized_version_require_homebrew(canonical.as_str()));
     check_try!(synchronized_version_require_packages(
         canonical.as_str(),
         npm_package.version.as_str(),
     ));
     check_try!(synchronized_version_require_runtime());
-    check_try!(synchronized_version_require_tag(canonical.as_str()));
     return Ok(canonical);
+}
+
+/// Require every Homebrew native asset URL to match the canonical version.
+///
+/// # Errors
+///
+/// Returns an error when Homebrew version or release asset metadata differs.
+fn synchronized_version_require_homebrew(canonical: &str) -> CheckResult {
+    let formula = check_try!(read_text("Formula/tovuk.rb"));
+    for (target, label) in [
+        ("aarch64-apple-darwin", "Homebrew macOS ARM release asset"),
+        ("x86_64-apple-darwin", "Homebrew macOS Intel release asset"),
+        (
+            "aarch64-unknown-linux-gnu",
+            "Homebrew Linux ARM release asset",
+        ),
+        (
+            "x86_64-unknown-linux-gnu",
+            "Homebrew Linux Intel release asset",
+        ),
+    ] {
+        check_try!(require_contains(
+            formula.as_str(),
+            format!(
+                "https://github.com/tovuk/tovuk/releases/download/v{canonical}/tovuk-{canonical}-{target}"
+            )
+            .as_str(),
+            label,
+        ));
+    }
+    return Ok(());
 }
 
 /// Require every duplicated registry version to match Cargo metadata.
@@ -173,20 +204,6 @@ fn synchronized_version_require_runtime() -> CheckResult {
         cargo_constants.as_str(),
         "const VERSION: &str = env!(\"CARGO_PKG_VERSION\");",
         "Cargo CLI version must derive from CARGO_PKG_VERSION",
-    );
-}
-
-/// Require the Homebrew tag to match the canonical Cargo version.
-///
-/// # Errors
-///
-/// Returns an error when the Homebrew tag differs.
-fn synchronized_version_require_tag(canonical: &str) -> CheckResult {
-    let formula = check_try!(read_text("Formula/tovuk.rb"));
-    return require_contains(
-        formula.as_str(),
-        format!("tag: \"v{canonical}\"").as_str(),
-        "Homebrew formula version tag",
     );
 }
 

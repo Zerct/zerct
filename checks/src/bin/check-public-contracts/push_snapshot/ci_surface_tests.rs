@@ -102,6 +102,35 @@ fn verify_ci_snapshot_accepts_created_branch_from_main() -> CheckResult {
     return remove_fixture(&fixture);
 }
 
+/// Verify later movement of the synthetic merge ref cannot change an event.
+///
+/// # Errors
+///
+/// Returns an error when fixture setup or immutable event scanning fails.
+#[test]
+fn verify_ci_snapshot_accepts_pull_reference_movement() -> CheckResult {
+    let fixture = check_try!(create_fixture("ci-moved-pull-ref"));
+    check_try!(append_safe_readme(fixture.repository.as_path()));
+    let head = check_try!(git_text(
+        fixture.repository.as_path(),
+        &["rev-parse", "HEAD"]
+    ));
+    let merge = check_try!(build_pull_merge(&fixture, head.as_str(), "safe merge"));
+    let event = check_try!(safe_pull_environment(
+        &fixture,
+        head.as_str(),
+        merge.as_str(),
+    ));
+    let replacement = format!("+{}", fixture.baseline);
+    check_try!(publish_ref(
+        &fixture,
+        replacement.as_str(),
+        "refs/pull/1/merge",
+    ));
+    check_try!(check_environment_in(fixture.repository.as_path(), &event));
+    return remove_fixture(&fixture);
+}
+
 /// Verify trusted pull history permits a new file inside a public namespace.
 ///
 /// # Errors
