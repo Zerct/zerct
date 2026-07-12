@@ -3,10 +3,11 @@ use crate::helpers::{
 };
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0008] = [
+const _: [usize; 0x0009] = [
     size_of_val(&check),
     size_of_val(&require_ci_snapshot_contract),
     size_of_val(&require_pre_push_contract),
+    size_of_val(&require_private_history_contract),
     size_of_val(&require_public_tree_sync_contract),
     size_of_val(&require_rust_native_check_commands),
     size_of_val(&require_shell_style_contract),
@@ -22,6 +23,7 @@ const _: [usize; 0x0008] = [
 pub(super) fn check() -> CheckResult {
     check_try!(require_ci_snapshot_contract());
     check_try!(require_pre_push_contract());
+    check_try!(require_private_history_contract());
     check_try!(require_public_tree_sync_contract());
     check_try!(require_rust_native_check_commands());
     check_try!(require_vacuum_installer_contract());
@@ -65,6 +67,28 @@ fn require_pre_push_contract() -> CheckResult {
         source.as_str(),
         "#!/bin/sh\nset -eu\n\nexport GIT_NO_REPLACE_OBJECTS=1\n\nrepository_root=\"$(git rev-parse --show-toplevel)\"\ncd \"$repository_root\"\n\npush_location=\"${2:?pre-push push location is required}\"\ncargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-public-contracts -- push-snapshot \"$push_location\"\nexec cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --\n",
         "pre-push must pass Git's exact standard input to the Rust object scanner before the canonical full gate",
+    );
+}
+
+/// Require reachable-history leakage scanning to remain Rust-native and argument-closed.
+///
+/// # Errors
+///
+/// Returns an error when the dedicated history route can accept parameters or disappears.
+fn require_private_history_contract() -> CheckResult {
+    let source = check_try!(read_text("checks/src/bin/check-public-contracts/main.rs"));
+    return require_contains_all(
+        source.as_str(),
+        &[
+            (
+                "\"private-history\" => return run_private_history(&mut args)",
+                "Rust public contracts must expose reachable-history private-term scanning",
+            ),
+            (
+                "return Err(\"private-history accepts no arguments\".to_owned());",
+                "reachable-history scanning must reject positional arguments",
+            ),
+        ],
     );
 }
 

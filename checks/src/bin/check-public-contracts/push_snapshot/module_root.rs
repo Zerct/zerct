@@ -11,7 +11,10 @@ mod tree;
 
 use alloc::collections::BTreeSet;
 
-use crate::helpers::{CheckResult, OutputChannel, write_line};
+use crate::{
+    helpers::{CheckResult, OutputChannel, write_line},
+    repo_hygiene_text::reject_private_implementation_terms,
+};
 
 use std::{
     io::{Read as _, stdin},
@@ -95,10 +98,11 @@ struct TreeEntry {
 }
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000c] = [
+const _: [usize; 0x000d] = [
     size_of_val(&check),
     size_of_val(&check_ci),
     size_of_val(&check_input_in),
+    size_of_val(&check_private_history),
     size_of_val(&exclusions_for_update),
     size_of_val(&git_command),
     size_of_val(&inspect_update),
@@ -158,6 +162,41 @@ fn check_input_in(repository: &Path, push_location: &str, input: &str) -> CheckR
         "Checked every object reachable through the proposed push.",
     ));
     return Ok(());
+}
+
+/// Scan private-term fingerprints across every object reachable from any local ref.
+///
+/// # Errors
+///
+/// Returns an error when history is incomplete, Git objects are unreadable, or
+/// any reachable object exposes a private implementation term.
+pub(super) fn check_private_history() -> CheckResult {
+    let repository = Path::new(".");
+    check_try!(graph::require_integrity(repository));
+    let objects = check_try!(git::git_text(
+        repository,
+        &["rev-list", "--objects", "--all", "--no-object-names"],
+        "git rev-list all refs",
+    ))
+    .lines()
+    .map(str::to_owned)
+    .collect::<BTreeSet<_>>();
+    for object in &objects {
+        let kind = check_try!(git::object_kind(repository, object.as_str()));
+        let contents = check_try!(git::read_object(repository, object.as_str(), kind));
+        check_try!(reject_private_implementation_terms(
+            format!("reachable Git {kind:?} {object}").as_str(),
+            contents.as_slice(),
+        ));
+    }
+    return write_line(
+        OutputChannel::Regular,
+        format!(
+            "Checked {} objects reachable from all local refs for private implementation terms.",
+            objects.len()
+        )
+        .as_str(),
+    );
 }
 
 /// Select the exact remote graph excluded from one update scan.

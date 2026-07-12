@@ -115,6 +115,9 @@ Before push or handoff, run the complete local and CI-equivalent gate:
 cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-all --
 ```
 
+After any history rewrite or leakage purge, scan every locally reachable Git
+object with `check-public-contracts -- private-history` before publication.
+
 The full gate must cover formatting, release checks, tests, maximum Clippy,
 rustdoc with warnings denied, dependency feature fingerprints, cargo-deny,
 cargo-audit, cargo-machete, package/runtime checks, Actions policy, docs,

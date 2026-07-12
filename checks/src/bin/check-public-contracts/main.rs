@@ -147,9 +147,10 @@ const CONTRACT_CHECK_USAGE: &str =
     "usage: cargo run --manifest-path checks/Cargo.toml --bin check-public-contracts -- <check>";
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0006] = [
+const _: [usize; 0x0007] = [
     size_of_val(&run),
     size_of_val(&run_ci_snapshot),
+    size_of_val(&run_private_history),
     size_of_val(&run_push_snapshot),
     size_of_val(&run_repo_hygiene),
     size_of_val(&run_runtime_cli),
@@ -203,6 +204,7 @@ pub fn run() -> CheckResult {
         "sync-public-tree-policy" => return run_sync_public_tree_policy(&mut args),
         "native-release-targets" => return native_release_targets::check(),
         "package-versions" => return package_versions::check(),
+        "private-history" => return run_private_history(&mut args),
         "public-version" => return package_versions::print_canonical_version(),
         "push-snapshot" => return run_push_snapshot(&mut args),
         "cli-contract" => return cli_contract::check(),
@@ -235,6 +237,18 @@ fn run_ci_snapshot(args: &mut ContractArguments) -> CheckResult {
         return Err("ci-snapshot accepts no arguments".to_owned());
     }
     return push_snapshot::check_ci();
+}
+
+/// Run reachable-history private-term policy without positional parameters.
+///
+/// # Errors
+///
+/// Returns an error when an unexpected parameter or reachable object is invalid.
+fn run_private_history(args: &mut ContractArguments) -> CheckResult {
+    if args.next().is_some() {
+        return Err("private-history accepts no arguments".to_owned());
+    }
+    return push_snapshot::check_private_history();
 }
 
 /// Run pushed-object policy against the pre-push hook's standard input.
