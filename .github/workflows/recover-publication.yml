@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       release_ref:
-        description: Exact existing release tag, such as v0.1.117
+        description: Exact existing release tag, such as v0.1.118
         required: true
         type: string
       request_id:

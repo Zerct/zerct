@@ -5,27 +5,27 @@ class Tovuk < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-aarch64-apple-darwin",
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.118/tovuk-0.1.118-aarch64-apple-darwin",
           using: :nounzip
-      sha256 "d3ce54ac228d5baa2e7acb8dd199961d2381861fde1b8ec8b61cf696785c5fc5"
+      sha256 "e59c4e827b1b036e401e48d3b252e3e48ec40779525c19a2ef241cb216549d1b"
     end
     on_intel do
-      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-x86_64-apple-darwin",
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.118/tovuk-0.1.118-x86_64-apple-darwin",
           using: :nounzip
-      sha256 "2ffa983a09b510be623841aa7dc49f6e4609c110c46e296f302846cb86563ade"
+      sha256 "05754d5b2c37287bd221be8ff0712678a19fe6c2b36e47e52a3bf96aea61ca9c"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-aarch64-unknown-linux-gnu",
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.118/tovuk-0.1.118-aarch64-unknown-linux-gnu",
           using: :nounzip
-      sha256 "9d4340ffca9ddbec0cad557dcfd3840d9b434b3a67298c15833aeae26bfc18b6"
+      sha256 "ea10bd416effb6a229a718f9ff7bcd8f409e51b2293207dcc2400613ec34a9bc"
     end
     on_intel do
-      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-x86_64-unknown-linux-gnu",
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.118/tovuk-0.1.118-x86_64-unknown-linux-gnu",
           using: :nounzip
-      sha256 "94c57312e8dcf8dd073c54ad3d914d69b7d39dd86fa0da9318681ad4787005be"
+      sha256 "eea5e48528b1f82489b1089d34839f766709fe56e406902df9177b05566eb2e5"
     end
   end
 

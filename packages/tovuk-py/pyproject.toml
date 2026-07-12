@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "tovuk"
-version = "0.1.117"
+version = "0.1.118"
 description = "Use Tovuk scraper APIs from a native CLI."
 readme = "README.md"
 requires-python = ">=3.11"
