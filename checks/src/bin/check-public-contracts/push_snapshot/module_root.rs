@@ -7,14 +7,12 @@ mod git;
 mod graph;
 mod policy;
 mod policy_paths;
+mod private_history;
 mod tree;
 
 use alloc::collections::BTreeSet;
 
-use crate::{
-    helpers::{CheckResult, OutputChannel, write_line},
-    repo_hygiene_text::reject_private_implementation_terms,
-};
+use crate::helpers::{CheckResult, OutputChannel, write_line};
 
 use std::{
     io::{Read as _, stdin},
@@ -171,32 +169,7 @@ fn check_input_in(repository: &Path, push_location: &str, input: &str) -> CheckR
 /// Returns an error when history is incomplete, Git objects are unreadable, or
 /// any reachable object exposes a private implementation term.
 pub(super) fn check_private_history() -> CheckResult {
-    let repository = Path::new(".");
-    check_try!(graph::require_integrity(repository));
-    let objects = check_try!(git::git_text(
-        repository,
-        &["rev-list", "--objects", "--all", "--no-object-names"],
-        "git rev-list all refs",
-    ))
-    .lines()
-    .map(str::to_owned)
-    .collect::<BTreeSet<_>>();
-    for object in &objects {
-        let kind = check_try!(git::object_kind(repository, object.as_str()));
-        let contents = check_try!(git::read_object(repository, object.as_str(), kind));
-        check_try!(reject_private_implementation_terms(
-            format!("reachable Git {kind:?} {object}").as_str(),
-            contents.as_slice(),
-        ));
-    }
-    return write_line(
-        OutputChannel::Regular,
-        format!(
-            "Checked {} objects reachable from all local refs for private implementation terms.",
-            objects.len()
-        )
-        .as_str(),
-    );
+    return private_history::check();
 }
 
 /// Select the exact remote graph excluded from one update scan.
