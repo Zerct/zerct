@@ -53,7 +53,7 @@ pub(super) fn build_pull_merge(
     check_try!(publish_ref(fixture, merge.as_str(), "refs/pull/1/merge"));
     check_try!(run_git(
         fixture.repository.as_path(),
-        &["switch", "--quiet", "--detach", fixture.baseline.as_str()],
+        &["switch", "--quiet", "--detach", merge.as_str()],
     ));
     return Ok(merge);
 }

@@ -7,9 +7,10 @@ use crate::helpers_public_copy::RETIRED_PUBLIC_ORG_SCOPE;
 use super::ContractSources;
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0007] = [
+const _: [usize; 0x0008] = [
     size_of_val(&reject_retired_packaging),
     size_of_val(&require_package_policy_homebrew),
+    size_of_val(&require_package_policy_homebrew_counts),
     size_of_val(&require_install_guides),
     size_of_val(&require_package_policy_local_overrides),
     size_of_val(&require_package_metadata),
@@ -99,22 +100,62 @@ pub(super) fn require_package_metadata(sources: &ContractSources) -> CheckResult
     return require_package_policy_python(sources);
 }
 
-/// Require the Homebrew formula to build the native Rust package.
+/// Require the Homebrew formula to install checksummed native release assets.
 ///
 /// # Errors
 ///
-/// Returns an error when the Homebrew build contract is missing.
+/// Returns an error when the Homebrew native asset contract is missing.
 fn require_package_policy_homebrew(sources: &ContractSources) -> CheckResult {
+    let formula = sources.homebrew_formula.as_str();
     check_try!(require_contains_all(
-        sources.homebrew_formula.as_str(),
+        formula,
         &[
+            ("on_macos do", "Homebrew macOS asset policy"),
+            ("on_linux do", "Homebrew Linux asset policy"),
+            ("on_arm do", "Homebrew ARM asset policy"),
+            ("on_intel do", "Homebrew Intel asset policy"),
+            ("using: :nounzip", "Homebrew native binary download policy"),
+            ("releases/download/v", "Homebrew release asset URL"),
+            ("aarch64-apple-darwin", "Homebrew macOS ARM asset"),
+            ("x86_64-apple-darwin", "Homebrew macOS Intel asset"),
+            ("aarch64-unknown-linux-gnu", "Homebrew Linux ARM asset",),
+            ("x86_64-unknown-linux-gnu", "Homebrew Linux Intel asset",),
             (
-                r#"depends_on "rust" => :build"#,
-                "Homebrew builds native Rust CLI",
+                r#"bin.install "tovuk-#{version}-#{architecture}-#{platform}" => "tovuk""#,
+                "Homebrew native binary install",
             ),
-            ("crates/tovuk", "Homebrew installs Rust crate path"),
         ],
     ));
+    check_try!(reject_contains_any(
+        formula,
+        &[
+            (r#"depends_on "rust""#, "Homebrew Rust build dependency"),
+            (r#"system "cargo""#, "Homebrew source compilation"),
+            ("crates/tovuk", "Homebrew source crate path"),
+            ("tovuk.git", "Homebrew Git source checkout"),
+        ],
+    ));
+    return require_package_policy_homebrew_counts(formula);
+}
+
+/// Require the exact number of Homebrew release URLs and checksums.
+///
+/// # Errors
+///
+/// Returns an error when any repeated native asset field is incomplete.
+fn require_package_policy_homebrew_counts(formula: &str) -> CheckResult {
+    for (needle, expected, label) in [
+        ("releases/download/v", 0x0004, "release asset URL"),
+        ("using: :nounzip", 0x0004, "native download strategy"),
+        ("sha256 ", 0x0004, "release asset checksum"),
+    ] {
+        let actual = formula.matches(needle).count();
+        if actual != expected {
+            return Err(format!(
+                "Homebrew formula must contain exactly {expected} {label} entries, found {actual}"
+            ));
+        }
+    }
     return Ok(());
 }
 
