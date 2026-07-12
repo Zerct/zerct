@@ -12,6 +12,9 @@ mod ci_surface_tests;
 #[path = "ci_tests.rs"]
 mod ci_tests;
 
+#[path = "fixture_root.rs"]
+mod fixture_root;
+
 #[path = "graph_tests.rs"]
 mod graph_tests;
 
@@ -22,16 +25,16 @@ mod history_rewrite_tests;
 mod test_helpers;
 
 use std::{
-    env::temp_dir,
-    fs::{copy, create_dir_all, metadata, read, remove_dir_all, write},
+    fs::{copy, create_dir_all, metadata, read, write},
     path::{Path, PathBuf},
-    process::{Command, id as process_id},
+    process::Command,
 };
 
 use crate::{helpers::CheckResult, repo_hygiene_required::reviewed_tracked_paths};
 
 use super::check_input_in;
 
+use fixture_root::allocate_fixture_root;
 use test_helpers::{
     initialize_public_history, record, remove_fixture, require_rejected, run_git,
     synchronize_fixture_public_tree, verify_noncommit_target, verify_safe_branch,
@@ -189,17 +192,7 @@ fn copy_public_tree(destination: &Path) -> CheckResult {
 ///
 /// Returns an error when fixture setup or baseline publication fails.
 fn create_fixture(label: &str) -> CheckResult<PushFixture> {
-    let root = temp_dir().join(format!("tovuk-push-snapshot-{}-{label}", process_id()));
-    if check_try!(
-        root.try_exists()
-            .map_err(|error| return format!("inspect fixture: {error}"))
-    ) {
-        check_try!(
-            remove_dir_all(root.as_path())
-                .map_err(|error| return format!("clear fixture: {error}"))
-        );
-    }
-    check_try!(create_dir_all(root.as_path()).map_err(|error| format!("create fixture: {error}")));
+    let root = check_try!(allocate_fixture_root(label));
     let repository = root.join("work");
     check_try!(initialize_repositories(
         root.as_path(),
