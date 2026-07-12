@@ -31,7 +31,7 @@ const ALLOWED_EXECUTABLE_PATHS: &[&str] = &[
 ];
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000a] = [
+const _: [usize; 0x000c] = [
     size_of_val(&reject_forbidden_content),
     size_of_val(&require_object_size),
     size_of_val(&scan_commit_tree),
@@ -39,6 +39,8 @@ const _: [usize; 0x000a] = [
     size_of_val(&scan_text_object),
     size_of_val(&scan_tree_entry),
     size_of_val(&scan_tree_object),
+    size_of_val(&validate_commit_header),
+    size_of_val(&validate_commit_text),
     size_of_val(&validate_source_policy),
     size_of_val(&PathPolicy::current),
     size_of_val(&PathPolicy::historical),
@@ -136,7 +138,15 @@ fn scan_text_object(
 ) -> CheckResult {
     let contents = check_try!(git::read_object(repository, object, kind));
     let label = format!("{category} {object}");
-    check_try!(validate_tracked_text(label.as_str(), contents.as_slice()));
+    match kind {
+        ObjectKind::Blob | ObjectKind::Tag => {
+            check_try!(validate_tracked_text(label.as_str(), contents.as_slice()));
+        }
+        ObjectKind::Commit => {
+            check_try!(validate_commit_text(label.as_str(), contents.as_slice()));
+        }
+        ObjectKind::Tree => return Err("a Git tree cannot be scanned as text".to_owned()),
+    }
     return reject_forbidden_content(label.as_str(), contents.as_slice());
 }
 
@@ -190,6 +200,68 @@ fn scan_tree_object(repository: &Path, object: &str) -> CheckResult {
     return tree::validate_raw_tree(repository, object, contents.as_slice());
 }
 
+/// Validate canonical whitespace in a raw commit header.
+///
+/// Git stores each continuation line with one leading space. An empty line in
+/// a multiline signature is therefore encoded as exactly one space; that byte
+/// is structural rather than trailing message whitespace.
+///
+/// # Errors
+///
+/// Returns an error when a header starts with an orphan continuation or when a
+/// primary or nonempty continuation line has trailing horizontal whitespace.
+fn validate_commit_header(label: &str, header: &str) -> CheckResult {
+    let mut has_primary = false;
+    for line in header.lines() {
+        let continuation = line.starts_with(' ');
+        if continuation && !has_primary {
+            return Err(format!("{label} starts with an orphan header continuation"));
+        }
+        let trailing = line
+            .as_bytes()
+            .last()
+            .is_some_and(|byte| return matches!(byte, b' ' | b'\t'));
+        if trailing && line != " " {
+            return Err(format!("{label} header contains trailing whitespace"));
+        }
+        has_primary |= !continuation;
+    }
+    if !has_primary {
+        return Err(format!("{label} has no primary header"));
+    }
+    return Ok(());
+}
+
+/// Validate one raw Git commit without misclassifying signature framing.
+///
+/// # Errors
+///
+/// Returns an error for binary, non-UTF-8, CRLF, unterminated, malformed-header,
+/// or message-trailing-whitespace content.
+fn validate_commit_text(label: &str, contents: &[u8]) -> CheckResult {
+    if contents.contains(&0x00) {
+        return Err(format!("{label} contains a NUL byte"));
+    }
+    let source = check_try!(
+        from_utf8(contents).map_err(|error| return format!("{label} is not UTF-8: {error}"))
+    );
+    if source.contains('\r') {
+        return Err(format!(
+            "{label} contains a carriage return; Git text must use LF"
+        ));
+    }
+    if !contents.ends_with(b"\n") {
+        return Err(format!("{label} does not end with LF"));
+    }
+    let (header, message) = check_try!(
+        source
+            .split_once("\n\n")
+            .ok_or_else(|| return format!("{label} has no header terminator"))
+    );
+    check_try!(validate_commit_header(label, header));
+    return validate_tracked_text(format!("{label} message").as_str(), message.as_bytes());
+}
+
 /// Enforce the source-line ceiling and reject Go source additions.
 ///
 /// # Errors
@@ -217,3 +289,7 @@ fn validate_source_policy(path: &str, contents: &[u8]) -> CheckResult {
     }
     return Ok(());
 }
+
+#[cfg(test)]
+#[path = "policy_tests/object_text.rs"]
+mod tests;

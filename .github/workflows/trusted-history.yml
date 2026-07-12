@@ -28,6 +28,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
           ref: ${{ github.workflow_sha }}
+      - name: Check out exact event history
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          path: .tovuk-event
+          persist-credentials: false
+          ref: ${{ github.sha }}
       - name: Build event history checker
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/tovuk-trusted-history
@@ -38,14 +45,15 @@ jobs:
           TOVUK_CI_EVENT_REF: ${{ github.ref }}
           TOVUK_CI_EVENT_REF_TYPE: ${{ github.ref_type }}
           TOVUK_CI_EVENT_SHA: ${{ github.sha }}
-          TOVUK_CI_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          TOVUK_CI_PULL_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          TOVUK_CI_PULL_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-          TOVUK_CI_PULL_NUMBER: ${{ github.event.pull_request.number }}
-          TOVUK_CI_PUSH_AFTER_SHA: ${{ github.event.after }}
-          TOVUK_CI_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          TOVUK_CI_PUSH_CREATED: ${{ github.event.created }}
-          TOVUK_CI_PUSH_DELETED: ${{ github.event.deleted }}
-          TOVUK_CI_PUSH_FORCED: ${{ github.event.forced }}
+          TOVUK_CI_PULL_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+          TOVUK_CI_PULL_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || '' }}
+          TOVUK_CI_PULL_MERGE_SHA: ${{ github.event_name == 'pull_request' && github.sha || '' }}
+          TOVUK_CI_PULL_NUMBER: ${{ github.event_name == 'pull_request' && format('{0}', github.event.pull_request.number) || '' }}
+          TOVUK_CI_PUSH_AFTER_SHA: ${{ github.event_name == 'push' && github.event.after || '' }}
+          TOVUK_CI_PUSH_BEFORE_SHA: ${{ github.event_name == 'push' && github.event.before || '' }}
+          TOVUK_CI_PUSH_CREATED: ${{ github.event_name == 'push' && format('{0}', github.event.created) || '' }}
+          TOVUK_CI_PUSH_DELETED: ${{ github.event_name == 'push' && format('{0}', github.event.deleted) || '' }}
+          TOVUK_CI_PUSH_FORCED: ${{ github.event_name == 'push' && format('{0}', github.event.forced) || '' }}
           TOVUK_CI_WORKFLOW_SHA: ${{ github.workflow_sha }}
+        working-directory: .tovuk-event
         run: '"$RUNNER_TEMP/tovuk-trusted-history/debug/check-public-contracts" ci-snapshot'

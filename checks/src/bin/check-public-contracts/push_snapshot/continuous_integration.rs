@@ -113,7 +113,7 @@ pub(super) fn check_environment_in(repository: &Path, environment: &CiEnvironmen
     ));
     check_try!(git::require_head_object(
         repository,
-        environment.workflow_sha.as_str(),
+        environment.event_sha.as_str(),
     ));
     return match environment.event.as_str() {
         "pull_request" => check_pull_request(repository, environment, object_width),
@@ -133,14 +133,6 @@ fn check_pull_request(
     object_width: usize,
 ) -> CheckResult {
     check_try!(require_pull_envelope(repository, environment, object_width));
-    let merge_reference = check_try!(ci_git::pull_merge_reference(environment.number.as_str()));
-    let fetched_merge = check_try!(ci_git::fetch_exact_ref(
-        repository,
-        merge_reference.as_str()
-    ));
-    if fetched_merge != environment.merge {
-        return Err("fetched pull merge differs from the event merge commit".to_owned());
-    }
     check_try!(require_commit(
         repository,
         environment.head.as_str(),
