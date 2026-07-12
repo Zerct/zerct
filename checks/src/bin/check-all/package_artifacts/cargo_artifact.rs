@@ -15,8 +15,8 @@ use tovuk_public_checks::check_try;
 
 use super::{ArtifactPaths, Runner, command_output, path_string, verify_version_output};
 
-/// Exact repository Rust toolchain selector used outside the worktree.
-const RUST_TOOLCHAIN_ARGUMENT: &str = "+1.97.0";
+/// Exact repository Rust toolchain selected outside the worktree.
+const RUST_TOOLCHAIN_NAME: &str = "1.97.0";
 
 /// Compile-time references preserve the standalone Cargo gate boundaries.
 const _: [usize; 0x000d] = [
@@ -75,7 +75,6 @@ fn cargo_check(runner: &Runner, sandbox: &CargoSandbox) -> CheckResult {
         runner,
         sandbox,
         &[
-            RUST_TOOLCHAIN_ARGUMENT,
             "--config",
             config.as_str(),
             "check",
@@ -102,7 +101,6 @@ fn cargo_install(runner: &Runner, sandbox: &CargoSandbox) -> CheckResult {
         runner,
         sandbox,
         &[
-            RUST_TOOLCHAIN_ARGUMENT,
             "--config",
             config.as_str(),
             "install",
@@ -131,6 +129,7 @@ fn cargo_status(runner: &Runner, sandbox: &CargoSandbox, args: &[&str]) -> Check
             .env("CARGO_HOME", sandbox.home.as_os_str())
             .env("CARGO_NET_OFFLINE", "true")
             .env("CARGO_TARGET_DIR", sandbox.target.as_os_str())
+            .env("RUSTUP_TOOLCHAIN", RUST_TOOLCHAIN_NAME)
             .env_remove("CARGO_BUILD_TARGET")
             .env_remove("CARGO_ENCODED_RUSTFLAGS")
             .env_remove("RUSTC_WORKSPACE_WRAPPER")
@@ -340,7 +339,6 @@ fn vendor_dependencies(runner: &Runner, sandbox: &CargoSandbox) -> CheckResult {
     let manifest = check_try!(path_string(sandbox.source.join("Cargo.toml").as_path()));
     let vendor = check_try!(path_string(sandbox.vendor.as_path()));
     let args = [
-        RUST_TOOLCHAIN_ARGUMENT,
         "--config",
         config.as_str(),
         "vendor",
@@ -356,6 +354,7 @@ fn vendor_dependencies(runner: &Runner, sandbox: &CargoSandbox) -> CheckResult {
         runner
             .command(sandbox.process_directory.as_path(), "cargo", &args)
             .env("CARGO_NET_OFFLINE", "true")
+            .env("RUSTUP_TOOLCHAIN", RUST_TOOLCHAIN_NAME)
             .env_remove("CARGO_TARGET_DIR")
             .status()
             .map_err(|error| return format!("vendor standalone Cargo dependencies: {error}"))
