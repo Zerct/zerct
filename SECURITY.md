@@ -25,20 +25,21 @@ be reported through the same private channel.
 
 ## CI Trust Boundary
 
-The repository ruleset must bind the `pull_request` history audit to an exact
-reviewed workflow commit. The audit has read-only permissions, checks out only
-that workflow source, and treats pull-request objects as data. Ordinary
-pull-request and push runs are defense in depth because their workflow source
-can come from the event commit. Release-tag rules must restrict creation to the
-reviewed release automation. Local pre-push checks remain mandatory; no
-ordinary event workflow is described as an exhaustive enforcement boundary.
+The repository-scoped organization ruleset must bind the `pull_request`
+history audit to an exact reviewed workflow commit. The audit has read-only
+permissions, checks out only that workflow source, and treats pull-request
+objects as data. Ordinary pull-request and push runs are defense in depth
+because their workflow source can come from the event commit. Release-tag rules
+must restrict creation to the reviewed release automation. Local pre-push
+checks remain mandatory; no ordinary event workflow is described as an
+exhaustive enforcement boundary.
 
 Enforcement-core updates use a two-phase pin rotation, never a bypass. Push and
-review the candidate commit, pin the repository ruleset workflow to that
-exact SHA, require its pull-request audit to pass, merge the reviewed bytes,
-then rotate the pin to the resulting main commit. The audit accepts only the
-complete base core or the complete pinned-authority core, so partial or third
-variants fail closed.
+review the candidate commit, pin the repository-scoped organization ruleset
+workflow to that exact SHA, require its pull-request audit to pass, merge the
+reviewed bytes, then rotate the pin to the resulting main commit. The audit
+accepts only the complete base core or the complete pinned-authority core, so
+partial or third variants fail closed.
 
 Coordinate public disclosure through the private report so users have a
 reasonable opportunity to update.

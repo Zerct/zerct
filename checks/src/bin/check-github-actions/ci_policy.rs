@@ -5,7 +5,7 @@ use super::{CiPolicy, HostedActionsCheck, Workflow};
 /// Complete reviewed pull-request audit and push defense-in-depth workflow.
 const TRUSTED_HISTORY_WORKFLOW: &str = r#"name: Ref history audit
 
-# The repository ruleset pins this workflow and checker source by exact commit.
+# The repository-scoped organization ruleset pins this workflow and checker source.
 # Ordinary pull-request and push runs remain read-only defense in depth.
 
 on:
