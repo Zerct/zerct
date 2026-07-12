@@ -107,7 +107,10 @@ fn created_ref_boundary(
     ));
     return Ok(CreatedBoundary {
         exclusions: BTreeSet::from([main.clone()]),
-        path_policy: policy::PathPolicy::public_surface(main.as_str()),
+        path_policy: policy::PathPolicy::public_surface(
+            main.as_str(),
+            environment.workflow_sha.as_str(),
+        ),
     });
 }
 
@@ -278,7 +281,10 @@ fn updated_path_policy(
                 repository,
                 environment.before.as_str(),
             )) {
-                policy::PathPolicy::public_surface(environment.before.as_str())
+                policy::PathPolicy::public_surface(
+                    environment.before.as_str(),
+                    environment.workflow_sha.as_str(),
+                )
             } else {
                 check_try!(policy_paths::require_current_tip(
                     repository,

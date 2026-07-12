@@ -308,7 +308,10 @@ fn path_policy_for_update(
     ));
     let current_base = check_try!(policy_paths::commit_has_manifest(repository, base));
     if fast_forward && current_base {
-        return Ok(policy::PathPolicy::public_surface(base));
+        return Ok(policy::PathPolicy::public_surface(
+            base,
+            update.local_object.as_str(),
+        ));
     }
     check_try!(policy_paths::require_current_tip(
         repository,

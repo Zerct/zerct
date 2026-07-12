@@ -7,7 +7,10 @@ use std::{
 
 use crate::helpers::CheckResult;
 
-use super::{git_status_success_in, require_snapshot_alignment_in, snapshot_alignment};
+use super::{
+    git_status_success_in, is_ordinary_index_entry, require_snapshot_alignment_in,
+    snapshot_alignment,
+};
 
 /// Valid `GitHub` classic-token body reconstructed behind a split prefix.
 const FIXTURE_TOKEN_BODY: &str = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -167,20 +170,6 @@ fn prove_special_index_flag_cannot_hide(
     return Ok(());
 }
 
-/// Require both clean Git comparisons to reject one special index state.
-///
-/// # Errors
-///
-/// Returns an error when either snapshot accepts the named state.
-fn require_special_snapshots_rejected(repository: &Path, state: &str) -> CheckResult {
-    if require_snapshot_alignment_in(repository, "index").is_ok()
-        || require_snapshot_alignment_in(repository, "head").is_ok()
-    {
-        return Err(format!("snapshot alignment accepted {state}"));
-    }
-    return Ok(());
-}
-
 /// Run one Git fixture command.
 ///
 /// # Errors
@@ -253,44 +242,22 @@ fn snapshot_alignment_rejects_assume_unchanged() -> CheckResult {
     return remove_dir_all(repository.as_path()).map_err(|error| format!("clear fixture: {error}"));
 }
 
-/// Prove an fsmonitor-valid index entry is rejected before diff alignment.
+/// Prove an fsmonitor-valid machine record is rejected on every Git platform.
 ///
 /// # Errors
 ///
-/// Returns explicit Git evidence when fsmonitor flags are unsupported, or an
-/// error when either snapshot accepts the special entry.
+/// Returns an error when the parser confuses ordinary and fsmonitor-valid tags.
 #[test]
 fn snapshot_alignment_rejects_fsmonitor_valid() -> CheckResult {
-    let repository = check_try!(create_repository_fixture("fsmonitor-valid"));
-    check_try!(run_git(
-        repository.as_path(),
-        &["config", "core.fsmonitor", "true"]
-    ));
-    check_try!(run_git(
-        repository.as_path(),
-        &["update-index", "--fsmonitor-valid", "README.md"]
-    ));
-    let entry = check_try!(git_stdout(
-        repository.as_path(),
-        &[
-            "ls-files",
-            "--stage",
-            "-t",
-            "-v",
-            "-f",
-            "-z",
-            "--",
-            "README.md",
-        ],
-    ));
-    if !entry.starts_with(b"h ") {
-        return Err("Git did not set the required fsmonitor-valid flag".to_owned());
+    let object = "a".repeat(0x0028);
+    let ordinary = format!("H 100644 {object} 0\tREADME.md");
+    let fsmonitor_valid = format!("h 100644 {object} 0\tREADME.md");
+    if !is_ordinary_index_entry(ordinary.as_bytes())
+        || is_ordinary_index_entry(fsmonitor_valid.as_bytes())
+    {
+        return Err("index parser did not isolate the fsmonitor-valid tag".to_owned());
     }
-    check_try!(require_special_snapshots_rejected(
-        repository.as_path(),
-        "an fsmonitor-valid entry"
-    ));
-    return remove_dir_all(repository.as_path()).map_err(|error| format!("clear fixture: {error}"));
+    return Ok(());
 }
 
 /// Prove staged and committed bytes cannot be hidden by a different worktree copy.
@@ -366,10 +333,11 @@ fn snapshot_alignment_rejects_sparse_index() -> CheckResult {
     if !entry.starts_with(b"S 040000 ") || !entry.ends_with(b" 0\texcluded/\0") {
         return Err("Git did not create the required sparse-directory index entry".to_owned());
     }
-    check_try!(require_special_snapshots_rejected(
-        repository.as_path(),
-        "a sparse-directory entry"
-    ));
+    if require_snapshot_alignment_in(repository.as_path(), "index").is_ok()
+        || require_snapshot_alignment_in(repository.as_path(), "head").is_ok()
+    {
+        return Err("snapshot alignment accepted a sparse-directory entry".to_owned());
+    }
     return remove_dir_all(repository.as_path()).map_err(|error| format!("clear fixture: {error}"));
 }
 

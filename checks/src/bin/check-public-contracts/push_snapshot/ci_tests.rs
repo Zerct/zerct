@@ -10,13 +10,14 @@ use super::super::{
 };
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0007] = [
+const _: [usize; 0x0008] = [
     size_of_val(&build_pull_merge),
     size_of_val(&construct_environment),
     size_of_val(&ensure_ci_rejected),
     size_of_val(&merge_topic),
     size_of_val(&publish_ref),
     size_of_val(&safe_pull_environment),
+    size_of_val(&safe_pull_environment_with_workflow),
     size_of_val(&safe_push_environment),
 ];
 
@@ -164,10 +165,24 @@ pub(super) fn safe_pull_environment(
     head: &str,
     merge: &str,
 ) -> CheckResult<CiEnvironment> {
+    return safe_pull_environment_with_workflow(fixture, head, merge, fixture.baseline.as_str());
+}
+
+/// Build a pull-request event bound to one exact workflow authority.
+///
+/// # Errors
+///
+/// Returns an error when the fixture environment cannot be constructed.
+pub(super) fn safe_pull_environment_with_workflow(
+    fixture: &PushFixture,
+    head: &str,
+    merge: &str,
+    workflow_sha: &str,
+) -> CheckResult<CiEnvironment> {
     return construct_environment(&[
         "pull_request",
         merge,
-        fixture.baseline.as_str(),
+        workflow_sha,
         "refs/pull/1/merge",
         "branch",
         "",
