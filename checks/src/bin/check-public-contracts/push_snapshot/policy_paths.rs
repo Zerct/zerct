@@ -144,8 +144,17 @@ struct CoreAuthority {
     base_paths: BTreeSet<String>,
 }
 
+/// Whether a scanned commit must satisfy the current source-layout policy.
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+enum CurrentLayoutRequirement {
+    /// Preserve legacy layout while scanning every historical byte.
+    OptionalLegacy,
+    /// Require active source-line and executable-mode policy.
+    Required,
+}
+
 /// Whether every scanned commit must carry the current tree policy.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum ManifestRequirement {
     /// Permit pre-policy commits only during a fully scanned history rewrite.
     OptionalLegacy,
@@ -154,8 +163,10 @@ enum ManifestRequirement {
 }
 
 /// Commit-tree policy selected by the enforcement boundary.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub(super) struct PathPolicy {
+    /// Current layout is mandatory only for active-policy commits.
+    current_layout_requirement: CurrentLayoutRequirement,
     /// Current commits require a policy; sanitized legacy history may predate it.
     manifest_requirement: ManifestRequirement,
     /// Trusted base for path additions and the existing enforcement core.
@@ -168,6 +179,7 @@ impl PathPolicy {
     /// Build policy for a current commit graph with mandatory tree manifests.
     pub(super) const fn current() -> Self {
         return Self {
+            current_layout_requirement: CurrentLayoutRequirement::Required,
             manifest_requirement: ManifestRequirement::Required,
             public_surface_base: None,
             security_core_authority: None,
@@ -177,6 +189,7 @@ impl PathPolicy {
     /// Build strict generic policy for a fully scanned legacy rewrite.
     pub(super) const fn historical() -> Self {
         return Self {
+            current_layout_requirement: CurrentLayoutRequirement::OptionalLegacy,
             manifest_requirement: ManifestRequirement::OptionalLegacy,
             public_surface_base: None,
             security_core_authority: None,
@@ -186,10 +199,19 @@ impl PathPolicy {
     /// Build current policy relative to a base and exact reviewed core authority.
     pub(super) fn public_surface(base: &str, authority: &str) -> Self {
         return Self {
+            current_layout_requirement: CurrentLayoutRequirement::Required,
             manifest_requirement: ManifestRequirement::Required,
             public_surface_base: Some(base.to_owned()),
             security_core_authority: Some(authority.to_owned()),
         };
+    }
+
+    /// Return whether this boundary requires active source-layout policy.
+    pub(super) const fn requires_current_layout(&self) -> bool {
+        return matches!(
+            self.current_layout_requirement,
+            CurrentLayoutRequirement::Required
+        );
     }
 }
 

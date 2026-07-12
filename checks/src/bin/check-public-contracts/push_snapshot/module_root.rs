@@ -152,8 +152,14 @@ fn check_input_in(repository: &Path, push_location: &str, input: &str) -> CheckR
     check_try!(graph::require_integrity(repository));
     let object_id_length = check_try!(git::object_id_length(repository));
     let updates = check_try!(parse_input(input, object_id_length));
+    let mut scan_state = policy::ScanState::default();
     for update in &updates {
-        check_try!(inspect_update(repository, push_location, update));
+        check_try!(inspect_update(
+            repository,
+            push_location,
+            update,
+            &mut scan_state,
+        ));
     }
     check_try!(write_line(
         OutputChannel::Regular,
@@ -218,7 +224,12 @@ fn git_command(repository: &Path) -> Command {
 /// # Errors
 ///
 /// Returns an error when the ref state or newly reachable objects are invalid.
-fn inspect_update(repository: &Path, push_location: &str, update: &PushUpdate) -> CheckResult {
+fn inspect_update(
+    repository: &Path,
+    push_location: &str,
+    update: &PushUpdate,
+    scan_state: &mut policy::ScanState,
+) -> CheckResult {
     check_try!(git::require_valid_refs(repository, update));
     let actual_remote = check_try!(git::advertised_exact_remote_object(
         repository,
@@ -249,7 +260,7 @@ fn inspect_update(repository: &Path, push_location: &str, update: &PushUpdate) -
         update.local_object.as_str(),
         &excluded,
     ));
-    return policy::scan_objects(repository, &objects, &path_policy);
+    return policy::scan_objects_with_state(repository, &objects, &path_policy, scan_state);
 }
 
 /// Return whether an object field represents Git's all-zero sentinel.

@@ -31,12 +31,28 @@ const ALLOWED_EXECUTABLE_PATHS: &[&str] = &[
     "packages/tovuk/install.mjs",
 ];
 
+/// Successful scans shared across all ref updates in one proposed push.
+#[derive(Debug, Default, Eq, PartialEq)]
+pub(super) struct ScanState {
+    /// Blob paths already checked under the layout facet that affects them.
+    entries: BTreeSet<ScannedTreeEntry>,
+    /// Objects already checked under the exact policy that governed their tree.
+    objects: BTreeSet<ScannedObject>,
+}
+
+/// Exact object and path-policy identity already checked during one invocation.
+type ScannedObject = (PathPolicy, String);
+
+/// One tree-entry identity already checked under one layout policy.
+type ScannedTreeEntry = (bool, String, String, String, String);
+
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000c] = [
+const _: [usize; 0x000d] = [
     size_of_val(&reject_forbidden_content),
     size_of_val(&require_object_size),
     size_of_val(&scan_commit_tree),
     size_of_val(&scan_objects),
+    size_of_val(&scan_objects_with_state),
     size_of_val(&scan_text_object),
     size_of_val(&scan_tree_entry),
     size_of_val(&scan_tree_object),
@@ -87,7 +103,12 @@ fn require_object_size(repository: &Path, object: &str) -> CheckResult {
 /// # Errors
 ///
 /// Returns an error when a commit tree differs from reviewed public policy.
-fn scan_commit_tree(repository: &Path, commit: &str, path_policy: &PathPolicy) -> CheckResult {
+fn scan_commit_tree(
+    repository: &Path,
+    commit: &str,
+    path_policy: &PathPolicy,
+    state: &mut ScanState,
+) -> CheckResult {
     let entries = check_try!(git::tree_entries(repository, commit));
     check_try!(policy_paths::validate_commit_paths(
         repository,
@@ -96,7 +117,16 @@ fn scan_commit_tree(repository: &Path, commit: &str, path_policy: &PathPolicy) -
         path_policy,
     ));
     for entry in &entries {
-        check_try!(scan_tree_entry(repository, commit, entry));
+        let identity = (
+            path_policy.requires_current_layout(),
+            entry.mode.clone(),
+            entry.kind.clone(),
+            entry.object.clone(),
+            entry.path.clone(),
+        );
+        if state.entries.insert(identity) {
+            check_try!(scan_tree_entry(repository, commit, entry, path_policy));
+        }
     }
     return Ok(());
 }
@@ -111,17 +141,39 @@ pub(super) fn scan_objects(
     objects: &BTreeSet<String>,
     path_policy: &PathPolicy,
 ) -> CheckResult {
+    return scan_objects_with_state(repository, objects, path_policy, &mut ScanState::default());
+}
+
+/// Scan objects while reusing successful work across all refs in one push.
+///
+/// # Errors
+///
+/// Returns an error when any reachable object violates public policy.
+pub(super) fn scan_objects_with_state(
+    repository: &Path,
+    objects: &BTreeSet<String>,
+    path_policy: &PathPolicy,
+    state: &mut ScanState,
+) -> CheckResult {
     for object in objects {
+        let identity = (path_policy.clone(), object.clone());
+        if state.objects.contains(&identity) {
+            continue;
+        }
         check_try!(require_object_size(repository, object));
         let kind = check_try!(git::object_kind(repository, object));
         match kind {
             ObjectKind::Blob => check_try!(scan_text_object(repository, object, kind, "Git blob")),
             ObjectKind::Commit => {
                 check_try!(scan_text_object(repository, object, kind, "Git commit"));
-                check_try!(scan_commit_tree(repository, object, path_policy));
+                check_try!(scan_commit_tree(repository, object, path_policy, state,));
             }
             ObjectKind::Tag => check_try!(scan_text_object(repository, object, kind, "Git tag")),
             ObjectKind::Tree => check_try!(scan_tree_object(repository, object)),
+        }
+        let inserted = state.objects.insert(identity);
+        if !inserted {
+            return Err(format!("Git object {object} was cached concurrently"));
         }
     }
     return Ok(());
@@ -157,15 +209,23 @@ fn scan_text_object(
 /// # Errors
 ///
 /// Returns an error when path, mode, kind, or bytes violate public policy.
-fn scan_tree_entry(repository: &Path, commit: &str, entry: &TreeEntry) -> CheckResult {
+fn scan_tree_entry(
+    repository: &Path,
+    commit: &str,
+    entry: &TreeEntry,
+    path_policy: &PathPolicy,
+) -> CheckResult {
     if entry.kind != "blob" || is_forbidden_tracked_path(entry.path.as_str()) {
         return Err(format!(
             "commit {commit} contains forbidden tree entry {} {}",
             entry.kind, entry.path
         ));
     }
+    let require_current_layout = path_policy.requires_current_layout();
     let approved_mode = entry.mode == "100644"
-        || (entry.mode == "100755" && ALLOWED_EXECUTABLE_PATHS.contains(&entry.path.as_str()));
+        || (entry.mode == "100755"
+            && (!require_current_layout
+                || ALLOWED_EXECUTABLE_PATHS.contains(&entry.path.as_str())));
     if !approved_mode {
         return Err(format!(
             "commit {commit} contains unapproved mode {} for {}",
@@ -184,6 +244,7 @@ fn scan_tree_entry(repository: &Path, commit: &str, entry: &TreeEntry) -> CheckR
     check_try!(validate_source_policy(
         entry.path.as_str(),
         contents.as_slice(),
+        path_policy,
     ));
     return reject_forbidden_content(entry.path.as_str(), contents.as_slice());
 }
@@ -282,7 +343,7 @@ fn validate_commit_text(label: &str, contents: &[u8]) -> CheckResult {
 /// # Errors
 ///
 /// Returns an error when public source exceeds policy or uses Go.
-fn validate_source_policy(path: &str, contents: &[u8]) -> CheckResult {
+fn validate_source_policy(path: &str, contents: &[u8], path_policy: &PathPolicy) -> CheckResult {
     let extension = Path::new(path)
         .extension()
         .and_then(|value| return value.to_str())
@@ -290,7 +351,7 @@ fn validate_source_policy(path: &str, contents: &[u8]) -> CheckResult {
     if extension.eq_ignore_ascii_case("go") {
         return Err(format!("public surface must not contain Go source: {path}"));
     }
-    if !is_guarded_source_path(path) {
+    if !path_policy.requires_current_layout() || !is_guarded_source_path(path) {
         return Ok(());
     }
     let source = check_try!(

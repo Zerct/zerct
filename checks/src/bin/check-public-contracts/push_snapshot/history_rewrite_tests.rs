@@ -16,6 +16,10 @@ use super::super::continuous_integration::check_environment_in;
 /// Legacy root content selected by one rewrite fixture.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum LegacyContents {
+    /// Canonical public prose stored as a historical executable.
+    Executable,
+    /// Canonical public prose above the active source-line ceiling.
+    LargeSource,
     /// Canonical harmless public prose.
     Safe,
     /// Reconstructed provider credential signature.
@@ -73,6 +77,8 @@ fn commit_legacy_root(fixture: &PushFixture, contents: LegacyContents) -> CheckR
         &["rm", "-r", "--quiet", "--ignore-unmatch", "--", "."]
     ));
     let legacy = match contents {
+        LegacyContents::Executable => "Sanitized executable legacy snapshot.\n".to_owned(),
+        LegacyContents::LargeSource => "Sanitized public legacy line.\n".repeat(0x0200),
         LegacyContents::Safe => "Sanitized public legacy snapshot.\n".to_owned(),
         LegacyContents::Secret => {
             format!("{}{}\n", ["gh", "p_"].concat(), "aB3".repeat(0x000c))
@@ -86,6 +92,12 @@ fn commit_legacy_root(fixture: &PushFixture, contents: LegacyContents) -> CheckR
         fixture.repository.as_path(),
         &["add", "--", "README.md"]
     ));
+    if contents == LegacyContents::Executable {
+        check_try!(run_git(
+            fixture.repository.as_path(),
+            &["update-index", "--chmod=+x", "--", "README.md"]
+        ));
+    }
     check_try!(commit_fixture(
         fixture.repository.as_path(),
         "sanitized legacy root",
@@ -139,6 +151,58 @@ fn verify_ci_snapshot_accepts_sanitized_multi_era_rewrite() -> CheckResult {
 fn verify_pre_push_accepts_sanitized_multi_era_rewrite() -> CheckResult {
     let fixture = check_try!(create_fixture("sanitized-rewrite"));
     let target = check_try!(build_rewritten_history(&fixture, LegacyContents::Safe));
+    let input = record(
+        "refs/heads/main",
+        target.as_str(),
+        "refs/heads/main",
+        fixture.baseline.as_str(),
+    );
+    check_try!(check_input_in(
+        fixture.repository.as_path(),
+        PUSH_LOCATION,
+        input.as_str(),
+    ));
+    return remove_fixture(&fixture);
+}
+
+/// Verify complete rewrites preserve regular legacy executable modes.
+///
+/// # Errors
+///
+/// Returns an error when a legacy executable bypasses or blocks full scanning.
+#[test]
+fn verify_pre_push_accepts_scanned_legacy_executable_mode() -> CheckResult {
+    let fixture = check_try!(create_fixture("legacy-executable-rewrite"));
+    let target = check_try!(build_rewritten_history(
+        &fixture,
+        LegacyContents::Executable,
+    ));
+    let input = record(
+        "refs/heads/main",
+        target.as_str(),
+        "refs/heads/main",
+        fixture.baseline.as_str(),
+    );
+    check_try!(check_input_in(
+        fixture.repository.as_path(),
+        PUSH_LOCATION,
+        input.as_str(),
+    ));
+    return remove_fixture(&fixture);
+}
+
+/// Verify complete rewrites can preserve scanned pre-policy source layout.
+///
+/// # Errors
+///
+/// Returns an error when legacy source debt bypasses or blocks full scanning.
+#[test]
+fn verify_pre_push_accepts_scanned_legacy_source_over_line_ceiling() -> CheckResult {
+    let fixture = check_try!(create_fixture("large-legacy-source-rewrite"));
+    let target = check_try!(build_rewritten_history(
+        &fixture,
+        LegacyContents::LargeSource,
+    ));
     let input = record(
         "refs/heads/main",
         target.as_str(),
