@@ -275,6 +275,10 @@ pub(super) fn run_git(repository: &Path, args: &[&str]) -> CheckResult {
         Command::new("git")
             .args(args)
             .current_dir(repository)
+            .env("GIT_AUTHOR_EMAIL", "tovuk-test@example.invalid")
+            .env("GIT_AUTHOR_NAME", "Tovuk Test")
+            .env("GIT_COMMITTER_EMAIL", "tovuk-test@example.invalid")
+            .env("GIT_COMMITTER_NAME", "Tovuk Test")
             .status()
             .map_err(|error| return format!("run fixture git {}: {error}", args.join(" ")),)
     );

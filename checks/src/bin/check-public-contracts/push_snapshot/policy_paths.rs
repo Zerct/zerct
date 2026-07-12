@@ -25,6 +25,45 @@ struct CommitTree {
 }
 
 impl CommitTree {
+    /// Require every path to remain inside the complete public repository surface.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when a tree path belongs outside the public surface.
+    fn require_allowed_paths(&self) -> CheckResult {
+        let unapproved = self
+            .paths
+            .iter()
+            .find(|path| return !is_allowed_public_surface_path(path));
+        return unapproved.map_or(Ok(()), |path| {
+            return Err(format!(
+                "commit {} contains unapproved public surface path {path}",
+                self.commit
+            ));
+        });
+    }
+
+    /// Require additions to be product files or exact authority-core paths.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when one path is introduced outside either boundary.
+    fn require_introduced_paths(&self, core: &CoreAuthority) -> CheckResult {
+        let introduced = self.paths.iter().find(|path| {
+            let authority_core_path =
+                is_security_core_path(path) && core.authority_paths.contains(path.as_str());
+            return !core.base_paths.contains(path.as_str())
+                && !is_approved_new_path(path)
+                && !authority_core_path;
+        });
+        return introduced.map_or(Ok(()), |path| {
+            return Err(format!(
+                "commit {} introduces path outside approved product prefixes: {path}",
+                self.commit
+            ));
+        });
+    }
+
     /// Validate the data-only tree manifest when present or required.
     ///
     /// # Errors
@@ -56,44 +95,53 @@ impl CommitTree {
             .map_err(|error| return format!("commit {}: {error}", self.commit));
     }
 
-    /// Preserve core identities and narrowly bound paths introduced after base.
+    /// Bind core identities to the base or authority and narrow new paths.
     ///
     /// # Errors
     ///
     /// Returns an error when core or product-surface policy changes.
-    fn validate_public_surface(&self, base: &str) -> CheckResult {
+    fn validate_public_surface(&self, base: &str, authority: &str) -> CheckResult {
         let base_entries = check_try!(git::tree_entries(self.repository.as_path(), base));
-        check_try!(require_immutable_core(
-            base,
+        let authority_entries =
+            check_try!(git::tree_entries(self.repository.as_path(), authority,));
+        let core = CoreAuthority {
+            authority: authority.to_owned(),
+            authority_core: core_entries(authority_entries.as_slice()),
+            authority_paths: authority_entries
+                .iter()
+                .map(|entry| return entry.path.clone())
+                .collect(),
+            base: base.to_owned(),
+            base_core: core_entries(base_entries.as_slice()),
+            base_paths: base_entries
+                .iter()
+                .map(|entry| return entry.path.clone())
+                .collect(),
+        };
+        check_try!(require_authorized_core(
             self.commit.as_str(),
-            &base_entries,
+            &core,
             self.entries.as_slice(),
         ));
-        let base_paths = base_entries
-            .iter()
-            .map(|entry| return entry.path.as_str())
-            .collect::<BTreeSet<_>>();
-        let unapproved = self
-            .paths
-            .iter()
-            .find(|path| return !is_allowed_public_surface_path(path));
-        if let Some(path) = unapproved {
-            return Err(format!(
-                "commit {} contains unapproved public surface path {path}",
-                self.commit
-            ));
-        }
-        let introduced = self.paths.iter().find(|path| {
-            return !base_paths.contains(path.as_str()) && !is_approved_new_path(path);
-        });
-        if let Some(path) = introduced {
-            return Err(format!(
-                "commit {} introduces path outside approved product prefixes: {path}",
-                self.commit
-            ));
-        }
-        return Ok(());
+        check_try!(self.require_allowed_paths());
+        return self.require_introduced_paths(&core);
     }
+}
+
+/// Exact base and reviewed-authority trees for one core transition.
+struct CoreAuthority {
+    /// Reviewed authority object identity.
+    authority: String,
+    /// Exact enforcement-core map from the reviewed authority.
+    authority_core: BTreeMap<String, String>,
+    /// Complete path set from the reviewed authority.
+    authority_paths: BTreeSet<String>,
+    /// Pull-request base object identity.
+    base: String,
+    /// Exact enforcement-core map from the pull-request base.
+    base_core: BTreeMap<String, String>,
+    /// Complete path set from the pull-request base.
+    base_paths: BTreeSet<String>,
 }
 
 /// Whether every scanned commit must carry the current tree policy.
@@ -110,8 +158,10 @@ enum ManifestRequirement {
 pub(super) struct PathPolicy {
     /// Current commits require a policy; sanitized legacy history may predate it.
     manifest_requirement: ManifestRequirement,
-    /// Trusted base whose enforcement core must remain byte-identical.
+    /// Trusted base for path additions and the existing enforcement core.
     public_surface_base: Option<String>,
+    /// Reviewed commit whose complete enforcement core may replace the base core.
+    security_core_authority: Option<String>,
 }
 
 impl PathPolicy {
@@ -120,6 +170,7 @@ impl PathPolicy {
         return Self {
             manifest_requirement: ManifestRequirement::Required,
             public_surface_base: None,
+            security_core_authority: None,
         };
     }
 
@@ -128,14 +179,16 @@ impl PathPolicy {
         return Self {
             manifest_requirement: ManifestRequirement::OptionalLegacy,
             public_surface_base: None,
+            security_core_authority: None,
         };
     }
 
-    /// Build current policy relative to one immutable trusted base commit.
-    pub(super) fn public_surface(base: &str) -> Self {
+    /// Build current policy relative to a base and exact reviewed core authority.
+    pub(super) fn public_surface(base: &str, authority: &str) -> Self {
         return Self {
             manifest_requirement: ManifestRequirement::Required,
             public_surface_base: Some(base.to_owned()),
+            security_core_authority: Some(authority.to_owned()),
         };
     }
 }
@@ -150,8 +203,8 @@ const _: [usize; 0x000b] = [
     size_of_val(&core_entries),
     size_of_val(&is_approved_new_path),
     size_of_val(&is_security_core_path),
+    size_of_val(&require_authorized_core),
     size_of_val(&require_current_tip),
-    size_of_val(&require_immutable_core),
     size_of_val(&validate_commit_paths),
 ];
 
@@ -225,7 +278,7 @@ fn is_approved_new_path(path: &str) -> bool {
         || path == "docs/.mintignore";
 }
 
-/// Return whether a path can change future enforcement and must remain immutable.
+/// Return whether a path can change future enforcement and needs exact authority.
 fn is_security_core_path(path: &str) -> bool {
     const CORE_ROOTS: &[&str] = &[
         ".editorconfig",
@@ -249,6 +302,26 @@ fn is_security_core_path(path: &str) -> bool {
         || path == "crates/tovuk/Cargo.toml";
 }
 
+/// Require every security-core path to match the base or exact reviewed authority.
+///
+/// # Errors
+///
+/// Returns an error for a deletion, addition, rename, mode, or content change.
+fn require_authorized_core(
+    commit: &str,
+    core: &CoreAuthority,
+    entries: &[TreeEntry],
+) -> CheckResult {
+    let actual_core = core_entries(entries);
+    if actual_core != core.base_core && actual_core != core.authority_core {
+        return Err(format!(
+            "commit {commit} security core matches neither base {} nor authority {}",
+            core.base, core.authority,
+        ));
+    }
+    return Ok(());
+}
+
 /// Require one current tip to carry a valid exact tree manifest.
 ///
 /// # Errors
@@ -257,25 +330,6 @@ fn is_security_core_path(path: &str) -> bool {
 pub(super) fn require_current_tip(repository: &Path, commit: &str) -> CheckResult {
     let entries = check_try!(git::tree_entries(repository, commit));
     return validate_commit_paths(repository, commit, &entries, &PathPolicy::current());
-}
-
-/// Require every security-core path to match base mode and object.
-///
-/// # Errors
-///
-/// Returns an error for a deletion, addition, rename, mode, or content change.
-fn require_immutable_core(
-    base: &str,
-    commit: &str,
-    base_entries: &[TreeEntry],
-    entries: &[TreeEntry],
-) -> CheckResult {
-    if core_entries(base_entries) != core_entries(entries) {
-        return Err(format!(
-            "commit {commit} changes immutable security core from base {base}"
-        ));
-    }
-    return Ok(());
 }
 
 /// Validate one commit's portable paths, manifest, and optional trusted base.
@@ -297,8 +351,17 @@ pub(super) fn validate_commit_paths(
         paths,
         repository: repository.to_path_buf(),
     };
-    if let Some(base) = path_policy.public_surface_base.as_deref() {
-        check_try!(tree.validate_public_surface(base));
+    match (
+        path_policy.public_surface_base.as_deref(),
+        path_policy.security_core_authority.as_deref(),
+    ) {
+        (Some(base), Some(authority)) => {
+            check_try!(tree.validate_public_surface(base, authority));
+        }
+        (None, None) => {}
+        (Some(_), None) | (None, Some(_)) => {
+            return Err("public-surface policy has an incomplete core authority".to_owned());
+        }
     }
     return tree.require_tree_manifest(path_policy.manifest_requirement);
 }

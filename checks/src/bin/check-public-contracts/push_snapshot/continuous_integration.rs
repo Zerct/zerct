@@ -376,7 +376,10 @@ fn scan_pull_delta(repository: &Path, environment: &CiEnvironment) -> CheckResul
     check_try!(policy::scan_objects(
         repository,
         &objects,
-        &policy::PathPolicy::public_surface(environment.base.as_str()),
+        &policy::PathPolicy::public_surface(
+            environment.base.as_str(),
+            environment.workflow_sha.as_str(),
+        ),
     ));
     return write_line(
         OutputChannel::Regular,

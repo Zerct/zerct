@@ -33,5 +33,12 @@ can come from the event commit. Release-tag rules must restrict creation to the
 reviewed release automation. Local pre-push checks remain mandatory; no
 ordinary event workflow is described as an exhaustive enforcement boundary.
 
+Enforcement-core updates use a two-phase pin rotation, never a bypass. Push and
+review the candidate commit, pin the organization ruleset workflow to that
+exact SHA, require its pull-request audit to pass, merge the reviewed bytes,
+then rotate the pin to the resulting main commit. The audit accepts only the
+complete base core or the complete pinned-authority core, so partial or third
+variants fail closed.
+
 Coordinate public disclosure through the private report so users have a
 reasonable opportunity to update.

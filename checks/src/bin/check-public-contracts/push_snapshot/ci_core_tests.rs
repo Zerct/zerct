@@ -1,4 +1,4 @@
-//! Pull-request immutable-core and narrow-path regressions.
+//! Pull-request pinned-core and narrow-path regressions.
 
 use std::{
     fs::{create_dir_all, read, write},
@@ -12,7 +12,7 @@ use super::{
     synchronize_fixture_public_tree,
 };
 
-use super::ci_tests::{build_pull_merge, ensure_ci_rejected, safe_pull_environment};
+use super::ci_tests::{build_pull_merge, ensure_ci_rejected, safe_pull_environment_with_workflow};
 
 use super::super::continuous_integration::check_environment_in;
 
@@ -26,11 +26,13 @@ enum StageMode {
 }
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x0004] = [
+const _: [usize; 0x0006] = [
     size_of_val(&add_path),
+    size_of_val(&modify_core),
     size_of_val(&reject_added_path),
     size_of_val(&reject_core_modification),
     size_of_val(&scan_pull),
+    size_of_val(&scan_pull_with_workflow),
 ];
 
 /// Add and commit one candidate pull-request path.
@@ -58,6 +60,32 @@ fn add_path(fixture: &PushFixture, relative: &str, contents: &str, mode: StageMo
     return commit_fixture(fixture.repository.as_path(), "adversarial pull path");
 }
 
+/// Commit one exact enforcement-core modification and return its authority SHA.
+///
+/// # Errors
+///
+/// Returns an error when the core file cannot be read, changed, staged, or committed.
+fn modify_core(fixture: &PushFixture, relative: &str) -> CheckResult<String> {
+    let mut contents = check_try!(
+        read(fixture.repository.join(relative))
+            .map_err(|error| format!("read enforcement core file: {error}"))
+    );
+    contents.extend_from_slice(b"\n");
+    check_try!(
+        write(fixture.repository.join(relative), contents)
+            .map_err(|error| format!("write enforcement core file: {error}"))
+    );
+    check_try!(run_git(
+        fixture.repository.as_path(),
+        &["add", "--", relative]
+    ));
+    check_try!(commit_fixture(
+        fixture.repository.as_path(),
+        "modify enforcement core",
+    ));
+    return git_text(fixture.repository.as_path(), &["rev-parse", "HEAD"]);
+}
+
 /// Add one path and require the pull history scanner to reject it.
 ///
 /// # Errors
@@ -78,33 +106,17 @@ fn reject_added_path(
     return remove_fixture(&fixture);
 }
 
-/// Modify one immutable core file and require pull history rejection.
+/// Modify one core file and require rejection under the unchanged authority.
 ///
 /// # Errors
 ///
 /// Returns an error when fixture setup fails or the modification is accepted.
 fn reject_core_modification(fixture_label: &str, relative: &str) -> CheckResult {
     let fixture = check_try!(create_fixture(fixture_label));
-    let mut contents = check_try!(
-        read(fixture.repository.join(relative))
-            .map_err(|error| format!("read immutable core file: {error}"))
-    );
-    contents.extend_from_slice(b"\n");
-    check_try!(
-        write(fixture.repository.join(relative), contents)
-            .map_err(|error| format!("write immutable core file: {error}"))
-    );
-    check_try!(run_git(
-        fixture.repository.as_path(),
-        &["add", "--", relative]
-    ));
-    check_try!(commit_fixture(
-        fixture.repository.as_path(),
-        "modify immutable core",
-    ));
+    drop(check_try!(modify_core(&fixture, relative)));
     check_try!(ensure_ci_rejected(
         &scan_pull(&fixture),
-        format!("immutable core modification {relative}").as_str(),
+        format!("unpinned core modification {relative}").as_str(),
     ));
     return remove_fixture(&fixture);
 }
@@ -115,6 +127,15 @@ fn reject_core_modification(fixture_label: &str, relative: &str) -> CheckResult 
 ///
 /// Returns an error when merge construction or public-surface scanning fails.
 fn scan_pull(fixture: &PushFixture) -> CheckResult {
+    return scan_pull_with_workflow(fixture, fixture.baseline.as_str());
+}
+
+/// Build and scan a pull merge with one exact checked-out workflow authority.
+///
+/// # Errors
+///
+/// Returns an error when merge construction, checkout, or scanning fails.
+fn scan_pull_with_workflow(fixture: &PushFixture, workflow_sha: &str) -> CheckResult {
     let head = check_try!(git_text(
         fixture.repository.as_path(),
         &["rev-parse", "HEAD"]
@@ -124,12 +145,52 @@ fn scan_pull(fixture: &PushFixture) -> CheckResult {
         head.as_str(),
         "core policy merge"
     ));
-    let event = check_try!(safe_pull_environment(
+    check_try!(run_git(
+        fixture.repository.as_path(),
+        &["switch", "--quiet", "--detach", workflow_sha],
+    ));
+    let event = check_try!(safe_pull_environment_with_workflow(
         fixture,
         head.as_str(),
-        merge.as_str()
+        merge.as_str(),
+        workflow_sha,
     ));
     return check_environment_in(fixture.repository.as_path(), &event);
+}
+
+/// Verify an exact pinned authority may add one coherent enforcement-core path.
+///
+/// # Errors
+///
+/// Returns an error when setup or authority-bound scanning fails.
+#[test]
+fn verify_ci_snapshot_accepts_authorized_core_addition() -> CheckResult {
+    let fixture = check_try!(create_fixture("ci-authorized-core-addition"));
+    check_try!(add_path(
+        &fixture,
+        "checks/src/authorized_policy.rs",
+        "//! Reviewed policy fixture.\n",
+        StageMode::Normal,
+    ));
+    let authority = check_try!(git_text(
+        fixture.repository.as_path(),
+        &["rev-parse", "HEAD"]
+    ));
+    check_try!(scan_pull_with_workflow(&fixture, authority.as_str()));
+    return remove_fixture(&fixture);
+}
+
+/// Verify an exact pinned authority may replace the complete enforcement core.
+///
+/// # Errors
+///
+/// Returns an error when setup or authority-bound scanning fails.
+#[test]
+fn verify_ci_snapshot_accepts_authorized_core_modification() -> CheckResult {
+    let fixture = check_try!(create_fixture("ci-authorized-core-modification"));
+    let authority = check_try!(modify_core(&fixture, "rustfmt.toml"));
+    check_try!(scan_pull_with_workflow(&fixture, authority.as_str()));
+    return remove_fixture(&fixture);
 }
 
 /// Verify an arbitrary new package namespace is rejected.
@@ -147,7 +208,7 @@ fn verify_ci_snapshot_rejects_arbitrary_package() -> CheckResult {
     );
 }
 
-/// Verify crate-local Cargo execution configuration remains immutable.
+/// Verify unpinned crate-local Cargo execution changes are rejected.
 ///
 /// # Errors
 ///
@@ -178,12 +239,12 @@ fn verify_ci_snapshot_rejects_core_deletion() -> CheckResult {
     ));
     check_try!(ensure_ci_rejected(
         &scan_pull(&fixture),
-        "immutable core deletion",
+        "unpinned core deletion",
     ));
     return remove_fixture(&fixture);
 }
 
-/// Verify the dependency-feature fingerprint remains immutable.
+/// Verify an unpinned dependency-feature fingerprint change is rejected.
 ///
 /// # Errors
 ///
@@ -196,7 +257,7 @@ fn verify_ci_snapshot_rejects_core_dependency_policy_change() -> CheckResult {
     );
 }
 
-/// Verify the public crate manifest remains immutable at this boundary.
+/// Verify an unpinned public crate manifest change is rejected.
 ///
 /// # Errors
 ///
@@ -244,7 +305,7 @@ fn verify_ci_snapshot_rejects_core_rename() -> CheckResult {
     ));
     check_try!(ensure_ci_rejected(
         &scan_pull(&fixture),
-        "immutable core rename",
+        "unpinned core rename",
     ));
     return remove_fixture(&fixture);
 }
