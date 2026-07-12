@@ -1,1 +1,5 @@
 config-variables: null
+self-hosted-runner:
+  labels:
+    - tovuk-public-linux-x64
+    - tovuk-public-macos-arm64

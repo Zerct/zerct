@@ -53,7 +53,7 @@ fn matrix_is_compact_and_preserves_tracked_runners() -> Result<(), String> {
     check_try!(
         write(
             manifest_path.as_path(),
-            r#"{"targets":[{"asset_ext":"","binary":"tovuk","runner":"ubuntu-24.04","triple":"x86_64-unknown-linux-gnu"},{"asset_ext":"","binary":"tovuk","runner":"ubuntu-24.04-arm","triple":"aarch64-unknown-linux-gnu"},{"asset_ext":"","binary":"tovuk","runner":"macos-15","triple":"aarch64-apple-darwin"}]}"#,
+            r#"{"targets":[{"asset_ext":"","binary":"tovuk","runner":"tovuk-public-linux-x64","triple":"x86_64-unknown-linux-gnu"},{"asset_ext":"","binary":"tovuk","runner":"tovuk-public-linux-x64","triple":"aarch64-unknown-linux-gnu"},{"asset_ext":"","binary":"tovuk","runner":"tovuk-public-macos-arm64","triple":"aarch64-apple-darwin"}]}"#,
         )
         .map_err(|error| return format!("write fixture: {error}"))
     );
@@ -67,7 +67,7 @@ fn matrix_is_compact_and_preserves_tracked_runners() -> Result<(), String> {
     let manifest = check_try!(read_matrix(manifest_path.as_path()));
     let version = check_try!(read_package_version(crate_manifest_path.as_path()));
     let actual = check_try!(matrix_json(manifest, version.as_str()));
-    let expected = r#"{"include":[{"asset_ext":"","asset_name":"tovuk-1.2.3-x86_64-unknown-linux-gnu","binary":"tovuk","build_strategy":"cargo","build_target":"x86_64-unknown-linux-gnu","release_tag":"v1.2.3","runner":"ubuntu-24.04","target":"x86_64-unknown-linux-gnu"},{"asset_ext":"","asset_name":"tovuk-1.2.3-aarch64-unknown-linux-gnu","binary":"tovuk","build_strategy":"cargo-zigbuild","build_target":"aarch64-unknown-linux-gnu.2.17","release_tag":"v1.2.3","runner":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu"},{"asset_ext":"","asset_name":"tovuk-1.2.3-aarch64-apple-darwin","binary":"tovuk","build_strategy":"cargo","build_target":"aarch64-apple-darwin","release_tag":"v1.2.3","runner":"macos-15","target":"aarch64-apple-darwin"}]}"#;
+    let expected = r#"{"include":[{"asset_ext":"","asset_name":"tovuk-1.2.3-x86_64-unknown-linux-gnu","binary":"tovuk","build_strategy":"cargo","build_target":"x86_64-unknown-linux-gnu","release_tag":"v1.2.3","runner":"tovuk-public-linux-x64","target":"x86_64-unknown-linux-gnu"},{"asset_ext":"","asset_name":"tovuk-1.2.3-aarch64-unknown-linux-gnu","binary":"tovuk","build_strategy":"cargo-zigbuild","build_target":"aarch64-unknown-linux-gnu.2.17","release_tag":"v1.2.3","runner":"tovuk-public-linux-x64","target":"aarch64-unknown-linux-gnu"},{"asset_ext":"","asset_name":"tovuk-1.2.3-aarch64-apple-darwin","binary":"tovuk","build_strategy":"cargo","build_target":"aarch64-apple-darwin","release_tag":"v1.2.3","runner":"tovuk-public-macos-arm64","target":"aarch64-apple-darwin"}]}"#;
     if actual != expected {
         return Err(format!("unexpected matrix: {actual}"));
     }

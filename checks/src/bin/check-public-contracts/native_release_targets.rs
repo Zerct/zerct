@@ -433,17 +433,17 @@ fn require_target_shape_libc(target: &NativeTarget) -> CheckResult {
     }
 }
 
-/// Return the required GitHub-hosted runner for one Rust target.
+/// Return the required trusted or hosted runner for one Rust target.
 ///
 /// # Errors
 /// Returns an error when the target family is unknown.
 fn require_target_shape_runner(triple: &str) -> CheckResult<&'static str> {
     let runner = if triple.contains("unknown-linux") {
-        "ubuntu-24.04"
+        "tovuk-public-linux-x64"
     } else if triple == "x86_64-apple-darwin" {
         "macos-15-intel"
     } else if triple.contains("apple-darwin") {
-        "macos-15"
+        "tovuk-public-macos-arm64"
     } else if triple.contains("windows-msvc") {
         "windows-2025"
     } else {
@@ -452,7 +452,7 @@ fn require_target_shape_runner(triple: &str) -> CheckResult<&'static str> {
     return Ok(runner);
 }
 
-/// Require GitHub-hosted matrix builds and centralized release uploads.
+/// Require exact matrix runners and centralized release uploads.
 ///
 /// # Errors
 ///

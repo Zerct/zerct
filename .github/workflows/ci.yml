@@ -15,7 +15,7 @@ concurrency:
 jobs:
   full-check:
     name: full public repo check
-    runs-on: ubuntu-24.04
+    runs-on: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && 'tovuk-public-linux-x64' || 'ubuntu-24.04' }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -30,6 +30,7 @@ jobs:
           node-version: "24.18.0"
           package-manager-cache: false
       - uses: ./.github/actions/setup-quality-tools
+        if: runner.environment == 'github-hosted'
       - name: Check GitHub Actions policy
         run: cargo run --locked --quiet --manifest-path checks/Cargo.toml --bin check-github-actions --
       - name: Lint GitHub Actions

@@ -128,6 +128,14 @@ public-leakage checks. Do not report a failing or skipped gate as passing.
 
 - Deployment for this repository means public CLI/package release and Mintlify
   docs synchronization. There is no public website deployment here.
+- Public pull requests, non-main refs, and tag-bound registry publisher
+  workflows must use standard hosted runners. Trusted `main` validation and
+  native release work may use only the repository-scoped runner labels enforced
+  by the Rust workflow checker and the organization runner group.
+- Keep npm and PyPI OIDC upload jobs hosted. Do not replace trusted publishing
+  with long-lived registry tokens. Self-host native jobs only for exact owned
+  operating-system and architecture labels; retain hosted jobs for unsupported
+  targets.
 - Release only a coherent synchronized version. Verify that the version is not
   already published before pushing a release-triggering change.
 - Push or publish only when the active user instruction authorizes it.

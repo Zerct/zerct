@@ -9,7 +9,7 @@
         { "machine": "amd64", "system": "linux" },
         { "machine": "x86_64", "system": "linux" }
       ],
-      "runner": "ubuntu-24.04",
+      "runner": "tovuk-public-linux-x64",
       "triple": "x86_64-unknown-linux-gnu"
     },
     {
@@ -21,7 +21,7 @@
         { "machine": "aarch64", "system": "linux" },
         { "machine": "arm64", "system": "linux" }
       ],
-      "runner": "ubuntu-24.04",
+      "runner": "tovuk-public-linux-x64",
       "triple": "aarch64-unknown-linux-gnu"
     },
     {
@@ -32,7 +32,7 @@
         { "machine": "aarch64", "system": "darwin" },
         { "machine": "arm64", "system": "darwin" }
       ],
-      "runner": "macos-15",
+      "runner": "tovuk-public-macos-arm64",
       "triple": "aarch64-apple-darwin"
     },
     {

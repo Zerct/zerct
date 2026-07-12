@@ -111,11 +111,11 @@ const REQUIRED_NATIVE_RELEASE_SNIPPETS: &[PolicyRequirement] = &[
     ),
     (
         "needs: [native-targets, release-gate, build]",
-        "native release state and uploads must run on the GitHub-hosted upload job after builds",
+        "native release state and uploads must run on the centralized upload job after builds",
     ),
     (
         "runs-on: ${{ matrix.runner }}",
-        "native builds must use each tracked GitHub-hosted matrix runner",
+        "native builds must use each exact tracked matrix runner",
     ),
     (
         "cargo build --locked --release --manifest-path checks/Cargo.toml --bin zig-linker-proxy",

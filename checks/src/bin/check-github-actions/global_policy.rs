@@ -143,11 +143,21 @@ const QUALITY_TOOL_REQUIREMENTS: &[PolicyRequirement] = &[
     ),
 ];
 
+/// Exact repository-scoped Linux runner label for trusted `main` jobs.
+const TRUSTED_LINUX_RUNNER_LABEL: &str = "tovuk-public-linux-x64";
+/// Exact repository-scoped macOS ARM runner label used only by the native matrix.
+const TRUSTED_MACOS_ARM_RUNNER_LABEL: &str = "tovuk-public-macos-arm64";
+/// Complete guarded CI assignment that keeps pull requests and non-main refs hosted.
+const TRUSTED_MAIN_RUNNER_ASSIGNMENT: &str = "runs-on: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && 'tovuk-public-linux-x64' || 'ubuntu-24.04' }}";
+
 /// Compile-time references preserve the named helper boundary.
-const _: [usize; 0x0003] = [
+const _: [usize; 0x0006] = [
+    size_of_val(&expected_trusted_linux_assignments),
     size_of_val(&reject_dangerous_triggers),
     size_of_val(&require_node_before_check_all),
+    size_of_val(&require_trusted_runner_routing),
     size_of_val(&read_check_all_sources),
+    size_of_val(&runner_assignment_allowed),
 ];
 
 impl GlobalPolicy for HostedActionsCheck {
@@ -171,9 +181,10 @@ impl GlobalPolicy for HostedActionsCheck {
             reject_lines(
                 workflow,
                 "self-hosted",
-                "private and self-hosted runner labels are forbidden; use GitHub-hosted runners",
+                "broad self-hosted runner labels are forbidden; use one exact repository-scoped runner label",
                 findings,
             );
+            require_trusted_runner_routing(workflow, findings);
         }
     }
 
@@ -279,6 +290,17 @@ impl GlobalPolicy for HostedActionsCheck {
         }
     }
 }
+/// Return the exact trusted Linux assignment count permitted in one workflow.
+fn expected_trusted_linux_assignments(workflow: &Workflow) -> usize {
+    if workflow.path.ends_with("ci.yml") || workflow.path.ends_with("docs-deploy.yml") {
+        return 0x0001;
+    }
+    if workflow.path.ends_with("publish-native-binaries.yml") {
+        return 0x0004;
+    }
+    return 0x0000;
+}
+
 /// Read the root runner and its isolated package artifact implementation.
 ///
 /// # Errors
@@ -335,4 +357,62 @@ fn require_node_before_check_all(workflows: &[Workflow], findings: &mut Vec<Stri
             ));
         }
     }
+}
+
+/// Require every runner assignment to match the closed hosted/trusted policy.
+fn require_trusted_runner_routing(workflow: &Workflow, findings: &mut Vec<String>) {
+    let assignments = workflow
+        .contents
+        .lines()
+        .map(str::trim)
+        .filter(|line| return line.starts_with("runs-on:"))
+        .collect::<Vec<_>>();
+    for assignment in &assignments {
+        if !runner_assignment_allowed(workflow, assignment) {
+            findings.push(format!(
+                "{}: runner assignment {assignment:?} is outside the closed public runner policy",
+                workflow.path.display()
+            ));
+        }
+    }
+    let expected_linux_assignments = expected_trusted_linux_assignments(workflow);
+    let actual_linux_assignments = assignments
+        .iter()
+        .filter(|assignment| return assignment.contains(TRUSTED_LINUX_RUNNER_LABEL))
+        .count();
+    if actual_linux_assignments != expected_linux_assignments {
+        findings.push(format!(
+            "{}: expected {expected_linux_assignments} trusted Linux runner assignments, found {actual_linux_assignments}",
+            workflow.path.display()
+        ));
+    }
+    if assignments
+        .iter()
+        .any(|assignment| return assignment.contains(TRUSTED_MACOS_ARM_RUNNER_LABEL))
+    {
+        findings.push(format!(
+            "{}: the macOS ARM runner must be selected only through the reviewed native matrix",
+            workflow.path.display()
+        ));
+    }
+}
+
+/// Return whether one complete `runs-on` assignment is approved for its workflow.
+fn runner_assignment_allowed(workflow: &Workflow, assignment: &str) -> bool {
+    if assignment == "runs-on: ubuntu-24.04" {
+        return true;
+    }
+    if workflow.path.ends_with("ci.yml") {
+        return assignment == TRUSTED_MAIN_RUNNER_ASSIGNMENT;
+    }
+    if workflow.path.ends_with("docs-deploy.yml") {
+        return assignment == "runs-on: tovuk-public-linux-x64";
+    }
+    if workflow.path.ends_with("publish-native-binaries.yml") {
+        return matches!(
+            assignment,
+            "runs-on: ${{ matrix.runner }}" | "runs-on: tovuk-public-linux-x64"
+        );
+    }
+    return false;
 }

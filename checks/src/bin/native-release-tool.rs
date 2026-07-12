@@ -93,7 +93,7 @@ struct MatrixEntry {
     build_target: String,
     /// Exact release tag for the crate version.
     release_tag: String,
-    /// GitHub-hosted runner tracked by the release manifest.
+    /// Exact runner selector tracked by the release manifest.
     runner: String,
     /// Canonical Rust target used to name release assets.
     target: String,
@@ -113,7 +113,7 @@ struct NativeTarget {
     asset_ext: String,
     /// Binary name produced for the target platform.
     binary: String,
-    /// GitHub-hosted runner for this target.
+    /// Exact runner selector for this target.
     runner: String,
     /// Canonical Rust target triple.
     triple: String,
