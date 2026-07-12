@@ -52,7 +52,7 @@ coverage/
 .mintlify/
 /output/
 /docs/output/
-browser automation-report/
+/*-report/
 test-results/
 .tovuk/
 

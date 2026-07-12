@@ -22,8 +22,8 @@ use crate::repo_hygiene_text::{
 };
 
 use crate::repo_hygiene_tracked::{
-    reject_invalid_tracked_text_files, reject_tracked_secret_signatures,
-    reject_unapproved_public_surface_paths,
+    reject_invalid_tracked_text_files, reject_tracked_private_implementation_terms,
+    reject_tracked_secret_signatures, reject_unapproved_public_surface_paths,
 };
 
 use crate::script_contracts;
@@ -111,6 +111,7 @@ fn check_tracked_files(tracked_files: &[String]) -> CheckResult {
     check_try!(reject_forbidden_tracked_files(tracked_files));
     check_try!(reject_unapproved_public_surface_paths(tracked_files));
     check_try!(reject_invalid_tracked_text_files(tracked_files));
+    check_try!(reject_tracked_private_implementation_terms(tracked_files));
     check_try!(reject_tracked_secret_signatures(tracked_files));
     check_try!(reject_private_repository_markers(tracked_files));
     check_try!(reject_retired_npx_guidance(tracked_files));

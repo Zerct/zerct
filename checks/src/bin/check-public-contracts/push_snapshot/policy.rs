@@ -8,7 +8,8 @@ use crate::{
     repo_hygiene_paths::{is_forbidden_tracked_path, is_guarded_source_path},
     repo_hygiene_text::{
         MAX_TRACKED_TEXT_BYTES, line_contains_private_repository_marker,
-        line_contains_retired_npm_runner_guidance, validate_tracked_text,
+        line_contains_retired_npm_runner_guidance, reject_private_implementation_terms,
+        validate_tracked_text,
     },
 };
 
@@ -52,6 +53,7 @@ const _: [usize; 0x000c] = [
 ///
 /// Returns an error when public bytes contain a forbidden content marker.
 fn reject_forbidden_content(label: &str, contents: &[u8]) -> CheckResult {
+    check_try!(reject_private_implementation_terms(label, contents));
     check_try!(reject_secret_signatures(label, contents));
     let text = check_try!(
         from_utf8(contents).map_err(|error| return format!("{label} is not UTF-8: {error}"))
@@ -193,6 +195,10 @@ fn scan_tree_entry(repository: &Path, commit: &str, entry: &TreeEntry) -> CheckR
 /// Returns an error when a tree is unreadable or contains a secret signature.
 fn scan_tree_object(repository: &Path, object: &str) -> CheckResult {
     let contents = check_try!(git::read_object(repository, object, ObjectKind::Tree));
+    check_try!(reject_private_implementation_terms(
+        format!("Git tree {object}").as_str(),
+        contents.as_slice()
+    ));
     check_try!(reject_secret_signatures(
         format!("Git tree {object}").as_str(),
         contents.as_slice()

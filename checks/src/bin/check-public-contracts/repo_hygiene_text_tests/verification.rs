@@ -1,4 +1,4 @@
-use super::validate_tracked_text;
+use super::{reject_private_implementation_terms, validate_tracked_text};
 
 /// Verify canonical tracked text satisfies every byte-level invariant.
 ///
@@ -11,6 +11,24 @@ fn accepts_canonical_tracked_text() {
         validate_tracked_text("canonical.txt", b"first\nsecond\n"),
         Ok(())
     );
+}
+
+/// Verify ordinary public terminology and binary separators remain accepted.
+///
+/// # Panics
+///
+/// Panics when the private-term fingerprint scan produces a false positive.
+#[test]
+fn accepts_public_repository_terms() {
+    for contents in [
+        b"public browser automation provider".as_slice(),
+        b"\xffpublic-repository\xfe".as_slice(),
+    ] {
+        assert_eq!(
+            reject_private_implementation_terms("public fixture", contents),
+            Ok(()),
+        );
+    }
 }
 
 /// Verify every noncanonical tracked-text class is rejected.

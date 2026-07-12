@@ -177,11 +177,11 @@ fn is_forbidden_directory_component(component: &str) -> bool {
             | "htmlcov"
             | "node_modules"
             | "pip-wheel-metadata"
-            | "browser automation-report"
             | "target"
             | "test-results"
             | "vendor"
     ) || lower.starts_with(".aider")
+        || lower.ends_with("-report")
         || lower.ends_with(".egg-info");
 }
 

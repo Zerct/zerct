@@ -16,10 +16,6 @@ const PUBLIC_COPY_FORBIDDEN_TERMS: &[PublicCopyForbiddenTerm] = &[
     },
     PublicCopyForbiddenTerm {
         matching: TermMatching::Substring,
-        value: "hosting provider",
-    },
-    PublicCopyForbiddenTerm {
-        matching: TermMatching::Substring,
         value: "serverless",
     },
     PublicCopyForbiddenTerm {
