@@ -1,13 +1,38 @@
 class Tovuk < Formula
   desc "Use Tovuk scraper APIs from a native CLI"
   homepage "https://tovuk.com"
-  url "https://github.com/tovuk/tovuk.git", tag: "v0.1.117"
   license "MIT"
 
-  depends_on "rust" => :build
+  on_macos do
+    on_arm do
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-aarch64-apple-darwin",
+          using: :nounzip
+      sha256 "d3ce54ac228d5baa2e7acb8dd199961d2381861fde1b8ec8b61cf696785c5fc5"
+    end
+    on_intel do
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-x86_64-apple-darwin",
+          using: :nounzip
+      sha256 "2ffa983a09b510be623841aa7dc49f6e4609c110c46e296f302846cb86563ade"
+    end
+  end
+
+  on_linux do
+    on_arm do
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-aarch64-unknown-linux-gnu",
+          using: :nounzip
+      sha256 "9d4340ffca9ddbec0cad557dcfd3840d9b434b3a67298c15833aeae26bfc18b6"
+    end
+    on_intel do
+      url "https://github.com/tovuk/tovuk/releases/download/v0.1.117/tovuk-0.1.117-x86_64-unknown-linux-gnu",
+          using: :nounzip
+      sha256 "94c57312e8dcf8dd073c54ad3d914d69b7d39dd86fa0da9318681ad4787005be"
+    end
+  end
 
   def install
-    system "cargo", "install", "--locked", "--path", "crates/tovuk", "--root", prefix
+    architecture = Hardware::CPU.arm? ? "aarch64" : "x86_64"
+    platform = OS.mac? ? "apple-darwin" : "unknown-linux-gnu"
+    bin.install "tovuk-#{version}-#{architecture}-#{platform}" => "tovuk"
   end
 
   test do

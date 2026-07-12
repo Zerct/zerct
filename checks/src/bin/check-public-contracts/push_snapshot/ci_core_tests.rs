@@ -130,7 +130,7 @@ fn scan_pull(fixture: &PushFixture) -> CheckResult {
     return scan_pull_with_workflow(fixture, fixture.baseline.as_str());
 }
 
-/// Build and scan a pull merge with one exact checked-out workflow authority.
+/// Build and scan a pull merge with one exact workflow authority.
 ///
 /// # Errors
 ///
@@ -147,7 +147,7 @@ fn scan_pull_with_workflow(fixture: &PushFixture, workflow_sha: &str) -> CheckRe
     ));
     check_try!(run_git(
         fixture.repository.as_path(),
-        &["switch", "--quiet", "--detach", workflow_sha],
+        &["switch", "--quiet", "--detach", merge.as_str()],
     ));
     let event = check_try!(safe_pull_environment_with_workflow(
         fixture,
