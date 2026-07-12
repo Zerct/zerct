@@ -4,7 +4,7 @@ use crate::helpers::CheckResult;
 
 use core::str::from_utf8;
 
-use std::{path::Path, process::Command};
+use std::path::Path;
 
 use super::{ObjectKind, ci_push::EventFlag, git};
 
@@ -236,15 +236,13 @@ pub(super) fn require_forced_state(repository: &Path, transition: ForcedTransiti
         return Ok(());
     }
     let status = check_try!(
-        Command::new("git")
+        super::git_command(repository)
             .args([
                 "merge-base",
                 "--is-ancestor",
                 before.as_str(),
                 after.as_str(),
             ])
-            .current_dir(repository)
-            .env("GIT_NO_REPLACE_OBJECTS", "1")
             .status()
             .map_err(|error| return format!("run git merge-base --is-ancestor: {error}"))
     );

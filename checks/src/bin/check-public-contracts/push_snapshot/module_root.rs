@@ -16,7 +16,11 @@ use crate::helpers::{CheckResult, OutputChannel, write_line};
 use std::{
     io::{Read as _, stdin},
     path::Path,
+    process::Command,
 };
+
+/// Git environment switch that exposes stored objects instead of replacement refs.
+const GIT_NO_REPLACE_OBJECTS: &str = "GIT_NO_REPLACE_OBJECTS";
 
 /// Exact immutable values that define one supported `GitHub` event.
 #[derive(Debug, Eq, PartialEq)]
@@ -91,11 +95,12 @@ struct TreeEntry {
 }
 
 /// Compile-time references preserve the named helper boundaries.
-const _: [usize; 0x000b] = [
+const _: [usize; 0x000c] = [
     size_of_val(&check),
     size_of_val(&check_ci),
     size_of_val(&check_input_in),
     size_of_val(&exclusions_for_update),
+    size_of_val(&git_command),
     size_of_val(&inspect_update),
     size_of_val(&is_zero_object),
     size_of_val(&parse_input),
@@ -174,6 +179,26 @@ fn exclusions_for_update(
         ));
     }
     return Ok(BTreeSet::from([object.to_owned()]));
+}
+
+/// Build one deterministic Git command with replacement refs and maintenance disabled.
+///
+/// The scanner must inspect stored objects, while its tests own the complete
+/// lifetime of temporary repositories. Disabling implicit maintenance prevents
+/// a detached Git child from mutating a fixture after its command has returned.
+fn git_command(repository: &Path) -> Command {
+    let mut command = Command::new("git");
+    let _: &mut Command = command
+        .current_dir(repository)
+        .env(GIT_NO_REPLACE_OBJECTS, "1")
+        .env("GIT_CONFIG_COUNT", "3")
+        .env("GIT_CONFIG_KEY_0", "maintenance.auto")
+        .env("GIT_CONFIG_VALUE_0", "false")
+        .env("GIT_CONFIG_KEY_1", "gc.auto")
+        .env("GIT_CONFIG_VALUE_1", "0")
+        .env("GIT_CONFIG_KEY_2", "gc.autoDetach")
+        .env("GIT_CONFIG_VALUE_2", "false");
+    return command;
 }
 
 /// Inspect one destination ref against its live remote object.

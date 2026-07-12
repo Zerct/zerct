@@ -6,7 +6,6 @@ use std::{
     fs::symlink_metadata,
     os::unix::fs::FileTypeExt as _,
     path::{Path, PathBuf},
-    process::Command,
 };
 
 use super::git;
@@ -51,10 +50,8 @@ pub(super) fn is_ancestor(
     descendant: &str,
 ) -> CheckResult<bool> {
     let status = check_try!(
-        Command::new("git")
+        super::git_command(repository)
             .args(["merge-base", "--is-ancestor", ancestor, descendant])
-            .current_dir(repository)
-            .env("GIT_NO_REPLACE_OBJECTS", "1")
             .status()
             .map_err(|error| return format!("run git merge-base --is-ancestor: {error}"))
     );
