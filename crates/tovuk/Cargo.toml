@@ -323,7 +323,7 @@ serde_json = { version = "1.0.150", default-features = false, features = [
   "std",
 ] }
 # Keep Ring's locked Windows support coherent until its 0.52 requirement changes.
-tokio = { version = "=1.46.1", default-features = false, features = [
+tokio = { version = "=1.53.0", default-features = false, features = [
   "net",
   "rt",
   "time",
