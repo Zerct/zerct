@@ -326,7 +326,7 @@ sha2 = { version = "0.11.0", default-features = false, features = [
 ] }
 tar = { version = "0.4.46", default-features = false }
 # Keep Ring's locked Windows support coherent until its 0.52 requirement changes.
-tokio = { version = "=1.46.1", default-features = false, features = [
+tokio = { version = "=1.53.1", default-features = false, features = [
   "net",
   "rt",
   "time",
